@@ -49,6 +49,8 @@ function ask(question) {
   });
 }
 
+const DRY_RUN = process.argv.includes('--dry-run') || process.argv.includes('-n');
+
 async function main() {
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
@@ -78,6 +80,17 @@ async function main() {
     console.log('    ' + c.dim + hook.why + c.reset);
   }
   console.log();
+
+  if (DRY_RUN) {
+    console.log(c.yellow + '  --dry-run: showing what would be installed (no changes made)' + c.reset);
+    console.log();
+    for (const [id, hook] of Object.entries(HOOKS)) {
+      console.log('  ' + c.dim + 'would install: ' + join(HOOKS_DIR, id + '.sh') + c.reset);
+    }
+    console.log('  ' + c.dim + 'would update: ' + SETTINGS_PATH + c.reset);
+    console.log();
+    process.exit(0);
+  }
 
   const answer = await ask('  Install all ' + Object.keys(HOOKS).length + ' safety hooks? [Y/n] ');
   if (answer.toLowerCase() === 'n') {
