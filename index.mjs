@@ -50,8 +50,53 @@ function ask(question) {
 }
 
 const DRY_RUN = process.argv.includes('--dry-run') || process.argv.includes('-n');
+const UNINSTALL = process.argv.includes('--uninstall') || process.argv.includes('--remove');
+
+async function uninstall() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --uninstall' + c.reset);
+  console.log();
+
+  let removed = 0;
+  for (const id of Object.keys(HOOKS)) {
+    const hookPath = join(HOOKS_DIR, id + '.sh');
+    if (existsSync(hookPath)) {
+      const { unlinkSync } = await import('fs');
+      unlinkSync(hookPath);
+      console.log('  ' + c.red + 'x' + c.reset + ' Removed ' + c.dim + hookPath + c.reset);
+      removed++;
+    }
+  }
+
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      if (settings.hooks) {
+        for (const trigger of Object.keys(settings.hooks)) {
+          settings.hooks[trigger] = settings.hooks[trigger].filter(e =>
+            !e.hooks || !e.hooks.some(h => {
+              const cmd = h.command || '';
+              return Object.keys(HOOKS).some(id => cmd.includes(id + '.sh'));
+            })
+          );
+          if (settings.hooks[trigger].length === 0) delete settings.hooks[trigger];
+        }
+        if (Object.keys(settings.hooks).length === 0) delete settings.hooks;
+        writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+        console.log('  ' + c.red + 'x' + c.reset + ' Cleaned settings.json');
+      }
+    } catch(e) {}
+  }
+
+  console.log();
+  console.log(c.bold + '  Done.' + c.reset + ' ' + removed + ' hooks removed.');
+  console.log('  ' + c.dim + 'Restart Claude Code to deactivate.' + c.reset);
+  console.log();
+}
 
 async function main() {
+  if (UNINSTALL) return uninstall();
+
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
   console.log(c.dim + '  Make Claude Code safe for autonomous operation' + c.reset);
