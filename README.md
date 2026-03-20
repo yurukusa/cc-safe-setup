@@ -80,6 +80,11 @@ cc-safe-setup gives you 4 essential hooks. For the complete autonomous operation
 
 Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
+## Related
+
+- [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
+- [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
+
 ## License
 
 MIT
