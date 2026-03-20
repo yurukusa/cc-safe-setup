@@ -1,0 +1,14 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: sudo apt-get install -y jq
+      - run: node index.mjs --help
+      - run: node index.mjs --dry-run
+      - run: bash test.sh
