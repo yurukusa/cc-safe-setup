@@ -40,6 +40,11 @@ const HOOKS = {
     why: 'Sessions silently lost all state at tool call 150+ with no warning',
     trigger: 'PostToolUse', matcher: '',
   },
+  'comment-strip': {
+    name: 'Bash Comment Stripper',
+    why: 'Comments in bash commands break permission allowlists (18 reactions on GitHub #29582)',
+    trigger: 'PreToolUse', matcher: 'Bash',
+  },
 };
 
 function ask(question) {
