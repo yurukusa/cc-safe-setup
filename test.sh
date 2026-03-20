@@ -123,6 +123,26 @@ fi
 test_hook "cd-git-allow" '{"tool_input":{"command":"npm install"}}' 0 "non-cd command passes"
 echo ""
 
+# --- context-monitor ---
+echo "context-monitor:"
+extract_hook "context-monitor"
+# context-monitor always exits 0 (never blocks)
+test_hook "context-monitor" '{"tool_input":{"command":"ls"}}' 0 "always exits 0 (non-blocking)"
+echo ""
+
+# --- syntax-check ---
+echo "syntax-check:"
+extract_hook "syntax-check"
+# Create a valid and invalid Python file for testing
+echo "x = 1" > /tmp/test-valid.py
+echo "x = (" > /tmp/test-invalid.py
+# syntax-check always exits 0 (reports errors but doesn't block)
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.py"}}' 0 "valid Python passes silently"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.py"}}' 0 "invalid Python reports but exits 0"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0 "nonexistent file exits 0"
+rm -f /tmp/test-valid.py /tmp/test-invalid.py
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
