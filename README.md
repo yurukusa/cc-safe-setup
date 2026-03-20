@@ -9,7 +9,7 @@
 npx cc-safe-setup
 ```
 
-Installs 4 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
+Installs 6 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
 
 ```
   cc-safe-setup
