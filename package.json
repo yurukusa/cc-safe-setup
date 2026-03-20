@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "One command to make Claude Code safe for autonomous operation. 7 hooks: destructive blocker, branch guard, force-push protection, secret leak prevention, syntax checks, and more.",
   "main": "index.mjs",
   "bin": {
@@ -8,12 +8,25 @@
   },
   "keywords": [
     "claude-code",
+    "claude",
+    "anthropic",
     "ai",
     "safety",
     "hooks",
     "autonomous",
-    "cli"
+    "cli",
+    "pretooluse",
+    "guard",
+    "rm-rf",
+    "git-push",
+    "env",
+    "secrets",
+    "syntax-check",
+    "context-window"
   ],
+  "scripts": {
+    "test": "bash test.sh"
+  },
   "author": "yurukusa",
   "license": "MIT",
   "repository": {
