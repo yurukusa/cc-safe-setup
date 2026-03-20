@@ -50,6 +50,11 @@ const HOOKS = {
     why: 'cd+git compounds spam permission prompts for read-only operations (9 reactions on #32985)',
     trigger: 'PreToolUse', matcher: 'Bash',
   },
+  'secret-guard': {
+    name: 'Secret Leak Prevention',
+    why: 'git add .env accidentally committed API keys to a public repo',
+    trigger: 'PreToolUse', matcher: 'Bash',
+  },
 };
 
 const HELP = process.argv.includes('--help') || process.argv.includes('-h');
@@ -59,18 +64,19 @@ if (HELP) {
   cc-safe-setup — Make Claude Code safe for autonomous operation
 
   Usage:
-    npx cc-safe-setup              Install 6 safety hooks
+    npx cc-safe-setup              Install 7 safety hooks
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
     destructive-guard    Blocks rm -rf, git reset --hard, NFS mount detection
-    branch-guard         Blocks pushes to main/master
+    branch-guard         Blocks pushes to main/master + force-push on all branches
     syntax-check         Validates Python/Shell/JSON/YAML/JS after edits
     context-monitor      Warns when context window is filling up
     comment-strip        Fixes bash comments breaking permissions
     cd-git-allow         Auto-approves read-only cd+git compounds
+    secret-guard         Blocks git add .env and credential files
 
   More: https://github.com/yurukusa/cc-safe-setup
 `);
@@ -149,6 +155,8 @@ async function main() {
   console.log(c.dim + '  Prevents real incidents:' + c.reset);
   console.log(c.red + '  x' + c.reset + ' rm -rf deleting entire user directories (NTFS junction traversal)');
   console.log(c.red + '  x' + c.reset + ' Untested code pushed to main at 3am');
+  console.log(c.red + '  x' + c.reset + ' Force-push rewriting shared branch history');
+  console.log(c.red + '  x' + c.reset + ' API keys committed to public repos via git add .');
   console.log(c.red + '  x' + c.reset + ' Syntax errors cascading through 30+ files');
   console.log(c.red + '  x' + c.reset + ' Sessions losing all context with no warning');
   console.log();
@@ -221,7 +229,7 @@ async function main() {
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
   console.log('  ' + c.dim + 'Verify:' + c.reset + ' ' + c.blue + 'npx cc-health-check' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Full kit (11 hooks + templates + tools):' + c.reset);
+  console.log('  ' + c.dim + 'Full kit (15 hooks + templates + tools):' + c.reset);
   console.log('  https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=npm&utm_medium=cli&utm_campaign=safe-setup');
   console.log();
 }

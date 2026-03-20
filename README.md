@@ -9,7 +9,7 @@
 npx cc-safe-setup
 ```
 
-Installs 6 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
+Installs 7 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
 
 ```
   cc-safe-setup
@@ -18,6 +18,8 @@ Installs 6 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   Prevents real incidents:
   ✗ rm -rf deleting entire user directories (NTFS junction traversal)
   ✗ Untested code pushed to main at 3am
+  ✗ Force-push rewriting shared branch history
+  ✗ API keys committed to public repos via git add .
   ✗ Syntax errors cascading through 30+ files
   ✗ Sessions losing all context with no warning
 
@@ -29,36 +31,30 @@ Installs 6 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   ● Context Window Monitor
   ● Bash Comment Stripper
   ● cd+git Auto-Approver
+  ● Secret Leak Prevention
 
-  Install all 6 safety hooks? [Y/n] Y
+  Install all 7 safety hooks? [Y/n] Y
 
-  ✓ Destructive Command Blocker
-  ✓ Branch Push Protector
-  ✓ Post-Edit Syntax Validator
-  ✓ Context Window Monitor
-  ✓ Bash Comment Stripper
-  ✓ cd+git Auto-Approver
-  ✓ settings.json updated
-
-  Done. 6 safety hooks installed.
+  ✓ Done. 7 safety hooks installed.
 ```
 
 ## Why This Exists
 
-A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another had untested code pushed to main at 3am. Syntax errors cascaded through 30+ files before anyone noticed.
+A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed.
 
 Claude Code ships with no safety hooks by default. This tool fixes that.
 
 ## What Gets Installed
 
-| Hook | Prevents | Trigger |
-|------|----------|---------|
-| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd` | PreToolUse (Bash) |
-| **Branch Guard** | Direct pushes to main/master | PreToolUse (Bash) |
-| **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | PostToolUse (Edit\|Write) |
-| **Context Monitor** | Session state loss from context window overflow | PostToolUse |
-| **Comment Stripper** | Bash comments breaking permission allowlists ([#29582](https://github.com/anthropics/claude-code/issues/29582)) | PreToolUse (Bash) |
-| **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` ([#32985](https://github.com/anthropics/claude-code/issues/32985)) | PreToolUse (Bash) |
+| Hook | Prevents | Related Issues |
+|------|----------|----------------|
+| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) |
+| **Branch Guard** | Pushes to main/master + force-push (`--force`) on all branches | |
+| **Secret Guard** | `git add .env`, credential files, `git add .` with .env present | [#6527](https://github.com/anthropics/claude-code/issues/6527) |
+| **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | |
+| **Context Monitor** | Session state loss from context window overflow (40%→25%→20%→15% warnings) | |
+| **Comment Stripper** | Bash comments breaking permission allowlists | [#29582](https://github.com/anthropics/claude-code/issues/29582) |
+| **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 
 Each hook exists because a real incident happened without it.
 
@@ -72,9 +68,20 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Preview first:** `npx cc-safe-setup --dry-run`
 
-**Uninstall:** `npx cc-safe-setup --uninstall` — removes all 4 hooks and cleans settings.json.
+**Uninstall:** `npx cc-safe-setup --uninstall` — removes all hooks and cleans settings.json.
 
 **Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
+
+## Configuration
+
+| Variable | Hook | Default |
+|----------|------|---------|
+| `CC_ALLOW_DESTRUCTIVE=1` | destructive-guard | `0` (protection on) |
+| `CC_SAFE_DELETE_DIRS` | destructive-guard | `node_modules:dist:build:.cache:__pycache__:coverage` |
+| `CC_PROTECT_BRANCHES` | branch-guard | `main:master` |
+| `CC_ALLOW_FORCE_PUSH=1` | branch-guard | `0` (protection on) |
+| `CC_SECRET_PATTERNS` | secret-guard | `.env:.env.local:credentials:*.pem:*.key` |
+| `CC_CONTEXT_MISSION_FILE` | context-monitor | `$HOME/mission.md` |
 
 ## After Installing
 
@@ -86,9 +93,9 @@ npx cc-health-check
 
 ## Full Kit
 
-cc-safe-setup gives you 4 essential hooks. For the complete autonomous operation toolkit:
+cc-safe-setup gives you 7 essential hooks. For the complete autonomous operation toolkit:
 
-**[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** ($19) — 11 hooks + 6 templates + 3 exclusive tools + install.sh. Production-ready in 15 minutes.
+**[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** — 15 hooks + 6 templates + 3 exclusive tools + install.sh. Production-ready in 15 minutes.
 
 Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
