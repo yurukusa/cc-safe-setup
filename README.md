@@ -12,8 +12,6 @@ npx cc-safe-setup
 
 Installs 7 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
 
-<img src="demo.svg" alt="cc-safe-setup demo" width="600">
-
 ```
   cc-safe-setup
   Make Claude Code safe for autonomous operation
