@@ -27,16 +27,20 @@ Installs 4 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   ● Branch Push Protector
   ● Post-Edit Syntax Validator
   ● Context Window Monitor
+  ● Bash Comment Stripper
+  ● cd+git Auto-Approver
 
-  Install all 4 safety hooks? [Y/n] Y
+  Install all 6 safety hooks? [Y/n] Y
 
   ✓ Destructive Command Blocker
   ✓ Branch Push Protector
   ✓ Post-Edit Syntax Validator
   ✓ Context Window Monitor
+  ✓ Bash Comment Stripper
+  ✓ cd+git Auto-Approver
   ✓ settings.json updated
 
-  Done. 4 safety hooks installed.
+  Done. 6 safety hooks installed.
 ```
 
 ## Why This Exists
@@ -53,6 +57,8 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 | **Branch Guard** | Direct pushes to main/master | PreToolUse (Bash) |
 | **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | PostToolUse (Edit\|Write) |
 | **Context Monitor** | Session state loss from context window overflow | PostToolUse |
+| **Comment Stripper** | Bash comments breaking permission allowlists ([#29582](https://github.com/anthropics/claude-code/issues/29582)) | PreToolUse (Bash) |
+| **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` ([#32985](https://github.com/anthropics/claude-code/issues/32985)) | PreToolUse (Bash) |
 
 Each hook exists because a real incident happened without it.
 
