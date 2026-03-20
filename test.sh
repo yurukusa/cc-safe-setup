@@ -143,6 +143,12 @@ test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0
 rm -f /tmp/test-valid.py /tmp/test-invalid.py
 echo ""
 
+# --- CLI smoke tests ---
+echo "CLI:"
+node "$(dirname "$0")/index.mjs" --help > /dev/null 2>&1 && echo "  PASS: --help exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --help"; FAIL=$((FAIL + 1)); }
+node "$(dirname "$0")/index.mjs" --dry-run > /dev/null 2>&1 && echo "  PASS: --dry-run exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --dry-run"; FAIL=$((FAIL + 1)); }
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
