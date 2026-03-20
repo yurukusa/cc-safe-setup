@@ -64,6 +64,12 @@ Each hook exists because a real incident happened without it.
 
 Safe to run multiple times. Existing settings are preserved. A backup is created if settings.json can't be parsed.
 
+**Preview first:** `npx cc-safe-setup --dry-run`
+
+**Uninstall:** `npx cc-safe-setup --uninstall` — removes all 4 hooks and cleans settings.json.
+
+**Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
+
 ## After Installing
 
 Verify your setup:
