@@ -75,6 +75,19 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
 
+## Before / After
+
+Run `npx cc-health-check` to see the difference:
+
+| | Before | After |
+|---|--------|-------|
+| Safety Guards | 25% | **75%** |
+| Overall Score | 50/100 | **95/100** |
+| Destructive commands | Unprotected | Blocked |
+| Force push | Allowed | Blocked |
+| `.env` in git | Possible | Blocked |
+| Context warnings | None | 4-stage alerts |
+
 ## Configuration
 
 | Variable | Hook | Default |
