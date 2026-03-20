@@ -54,6 +54,16 @@ async function main() {
   console.log(c.bold + '  cc-safe-setup' + c.reset);
   console.log(c.dim + '  Make Claude Code safe for autonomous operation' + c.reset);
   console.log();
+  // Check jq dependency
+  try {
+    const { execSync } = await import('child_process');
+    execSync('which jq', { stdio: 'pipe' });
+  } catch(e) {
+    console.log(c.yellow + '  Warning: jq is not installed. Hooks require jq for JSON parsing.' + c.reset);
+    console.log(c.dim + '  Install: brew install jq (macOS) | apt install jq (Linux)' + c.reset);
+    console.log();
+  }
+
   console.log(c.dim + '  Prevents real incidents:' + c.reset);
   console.log(c.red + '  x' + c.reset + ' rm -rf deleting entire user directories (NTFS junction traversal)');
   console.log(c.red + '  x' + c.reset + ' Untested code pushed to main at 3am');

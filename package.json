@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "One command to make Claude Code safe for autonomous operation. Installs destructive command blockers, branch guards, and syntax checks.",
   "main": "index.mjs",
   "bin": {
