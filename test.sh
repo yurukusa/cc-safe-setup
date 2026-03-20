@@ -46,6 +46,8 @@ test_hook "destructive-guard" '{"tool_input":{"command":"git clean -fd"}}' 2 "gi
 test_hook "destructive-guard" '{"tool_input":{"command":"chmod -R 777 /"}}' 2 "chmod 777 / blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"find / -delete"}}' 2 "find / -delete blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"echo git reset --hard"}}' 0 "git reset in echo not blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"sudo rm -rf /home"}}' 2 "sudo rm -rf blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"sudo apt install jq"}}' 0 "safe sudo command allowed"
 echo ""
 
 # --- branch-guard ---
