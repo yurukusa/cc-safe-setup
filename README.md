@@ -1,5 +1,8 @@
 # cc-safe-setup
 
+[![npm version](https://img.shields.io/npm/v/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
+[![npm downloads](https://img.shields.io/npm/dw/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
+
 **One command to make Claude Code safe for autonomous operation.**
 
 ```bash
