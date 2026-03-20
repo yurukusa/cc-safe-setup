@@ -45,6 +45,11 @@ const HOOKS = {
     why: 'Comments in bash commands break permission allowlists (18 reactions on GitHub #29582)',
     trigger: 'PreToolUse', matcher: 'Bash',
   },
+  'cd-git-allow': {
+    name: 'cd+git Auto-Approver',
+    why: 'cd+git compounds spam permission prompts for read-only operations (9 reactions on #32985)',
+    trigger: 'PreToolUse', matcher: 'Bash',
+  },
 };
 
 function ask(question) {
