@@ -120,6 +120,12 @@ Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/cl
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
 
+## Contributing
+
+Found a false positive? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md). Want a new hook? Open a [feature request](https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md).
+
+If cc-safe-setup saved your project from a destructive command, consider giving it a star — it helps others find this tool.
+
 ## License
 
 MIT
