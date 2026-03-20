@@ -52,6 +52,31 @@ const HOOKS = {
   },
 };
 
+const HELP = process.argv.includes('--help') || process.argv.includes('-h');
+
+if (HELP) {
+  console.log(`
+  cc-safe-setup — Make Claude Code safe for autonomous operation
+
+  Usage:
+    npx cc-safe-setup              Install 6 safety hooks
+    npx cc-safe-setup --dry-run    Preview without installing
+    npx cc-safe-setup --uninstall  Remove all installed hooks
+    npx cc-safe-setup --help       Show this help
+
+  Hooks installed:
+    destructive-guard    Blocks rm -rf, git reset --hard, NFS mount detection
+    branch-guard         Blocks pushes to main/master
+    syntax-check         Validates Python/Shell/JSON/YAML/JS after edits
+    context-monitor      Warns when context window is filling up
+    comment-strip        Fixes bash comments breaking permissions
+    cd-git-allow         Auto-approves read-only cd+git compounds
+
+  More: https://github.com/yurukusa/cc-safe-setup
+`);
+  process.exit(0);
+}
+
 function ask(question) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
