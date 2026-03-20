@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.3] - 2026-03-21
+- Added `.npmignore` to reduce package size (82KB → 42KB)
+- Tests: 39 → 41 (added CLI smoke tests for --help and --dry-run)
+- All 7 hooks now have test coverage
+
 ## [1.1.2] - 2026-03-21
 - Improved npm search discoverability (16 keywords)
 - Added `npm test` script
