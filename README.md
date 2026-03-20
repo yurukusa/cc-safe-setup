@@ -8,6 +8,34 @@ npx cc-safe-setup
 
 Installs 4 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
 
+```
+  cc-safe-setup
+  Make Claude Code safe for autonomous operation
+
+  Prevents real incidents:
+  ✗ rm -rf deleting entire user directories (NTFS junction traversal)
+  ✗ Untested code pushed to main at 3am
+  ✗ Syntax errors cascading through 30+ files
+  ✗ Sessions losing all context with no warning
+
+  Hooks to install:
+
+  ● Destructive Command Blocker
+  ● Branch Push Protector
+  ● Post-Edit Syntax Validator
+  ● Context Window Monitor
+
+  Install all 4 safety hooks? [Y/n] Y
+
+  ✓ Destructive Command Blocker
+  ✓ Branch Push Protector
+  ✓ Post-Edit Syntax Validator
+  ✓ Context Window Monitor
+  ✓ settings.json updated
+
+  Done. 4 safety hooks installed.
+```
+
 ## Why This Exists
 
 A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another had untested code pushed to main at 3am. Syntax errors cascaded through 30+ files before anyone noticed.
