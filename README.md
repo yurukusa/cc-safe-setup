@@ -6,6 +6,8 @@
 
 **One command to make Claude Code safe for autonomous operation.**
 
+Not just a destructive command blocker — 7 hooks covering safety, quality, monitoring, and developer experience.
+
 ```bash
 npx cc-safe-setup
 ```
