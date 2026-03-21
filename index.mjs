@@ -58,6 +58,7 @@ const HOOKS = {
 };
 
 const HELP = process.argv.includes('--help') || process.argv.includes('-h');
+const STATUS = process.argv.includes('--status') || process.argv.includes('-s');
 
 if (HELP) {
   console.log(`
@@ -65,6 +66,7 @@ if (HELP) {
 
   Usage:
     npx cc-safe-setup              Install 7 safety hooks
+    npx cc-safe-setup --status     Check installed hooks
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
     npx cc-safe-setup --help       Show this help
@@ -135,8 +137,48 @@ async function uninstall() {
   console.log();
 }
 
+function status() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --status' + c.reset);
+  console.log();
+
+  let installed = 0;
+  let missing = 0;
+  for (const [id, hook] of Object.entries(HOOKS)) {
+    const hookPath = join(HOOKS_DIR, id + '.sh');
+    if (existsSync(hookPath)) {
+      console.log('  ' + c.green + '✓' + c.reset + ' ' + hook.name + c.dim + ' → ' + hookPath + c.reset);
+      installed++;
+    } else {
+      console.log('  ' + c.red + '✗' + c.reset + ' ' + hook.name + c.dim + ' (not installed)' + c.reset);
+      missing++;
+    }
+  }
+
+  // Check settings.json
+  let settingsOk = false;
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      if (settings.hooks) settingsOk = true;
+    } catch(e) {}
+  }
+  console.log();
+  console.log('  ' + (settingsOk ? c.green + '✓' : c.red + '✗') + c.reset + ' settings.json ' + (settingsOk ? 'has hooks configured' : 'missing hook configuration'));
+
+  console.log();
+  if (missing === 0) {
+    console.log(c.bold + '  All ' + installed + ' hooks installed.' + c.reset);
+  } else {
+    console.log(c.bold + '  ' + installed + '/' + Object.keys(HOOKS).length + ' hooks installed.' + c.reset);
+    console.log('  ' + c.dim + 'Run: npx cc-safe-setup' + c.reset);
+  }
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
+  if (STATUS) return status();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
