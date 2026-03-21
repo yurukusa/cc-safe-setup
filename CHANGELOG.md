@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.4] - 2026-03-22
+- Secret-guard edge case tests: .env.production, id_rsa, .env.local
+- Branch-guard edge case tests: force-with-lease, HEAD:main push
+- Tests: 72 → 76
+- Headless mode limitation note in README (#36071)
+
+## [1.5.3] - 2026-03-22
+- Branch-guard edge case tests: force-with-lease, HEAD:main push
+- Tests: 69 → 72
+
 ## [1.5.2] - 2026-03-22
 - **Expanded `--verify` tests**: 8 → 12 (compound commands, force-push, git reset --hard, sudo)
 - **New example: auto-approve-build.sh** — auto-approve npm/cargo/go/python build/test/lint commands
