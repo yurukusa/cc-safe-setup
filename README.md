@@ -82,6 +82,8 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Note:** Hooks are skipped when Claude Code runs with `--bare` or `--dangerously-skip-permissions`. These modes bypass all safety hooks by design.
 
+**Known limitation:** In headless mode (`-p` / `--print`), hook exit code 2 may not block tool execution ([#36071](https://github.com/anthropics/claude-code/issues/36071)). For CI pipelines, use interactive mode with hooks rather than `-p` mode.
+
 ## Before / After
 
 Run `npx cc-health-check` to see the difference:
