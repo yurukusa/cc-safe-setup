@@ -36,3 +36,7 @@
   - context-monitor (graduated warnings at 40/25/20/15%)
   - comment-strip (bash comments breaking permissions, #29582)
   - cd-git-allow (auto-approve read-only cd+git compounds, #32985)
+
+## [1.2.0] - 2026-03-21
+- **New: `--status` option** — check which hooks are installed and settings.json configuration
+- Tests: 41 → 42
