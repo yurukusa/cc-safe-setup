@@ -140,6 +140,20 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
 
+## FAQ
+
+**Q: I installed hooks but Claude says "Unknown skill: claude-code-hooks:setup"**
+
+cc-safe-setup installs **hooks**, not skills or plugins. Hooks run automatically in the background — you don't invoke them manually. After install + restart, try running a dangerous command; the hook will block it silently.
+
+**Q: `cc-health-check` says to run `cc-safe-setup` but I already did**
+
+cc-safe-setup covers Safety Guards (75-100%) and Monitoring (context-monitor). The other health check dimensions (Code Quality, Recovery, Coordination) require additional CLAUDE.md configuration or manual hook installation from [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks).
+
+**Q: Will hooks slow down Claude Code?**
+
+No. Each hook runs in ~10ms. They only fire on specific events (before tool use, after edits, on stop). No polling, no background processes.
+
 ## Contributing
 
 Found a false positive? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md). Want a new hook? Open a [feature request](https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md).
