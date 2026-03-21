@@ -199,7 +199,16 @@ echo ""
 echo "CLI:"
 node "$(dirname "$0")/index.mjs" --help > /dev/null 2>&1 && echo "  PASS: --help exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --help"; FAIL=$((FAIL + 1)); }
 node "$(dirname "$0")/index.mjs" --dry-run > /dev/null 2>&1 && echo "  PASS: --dry-run exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --dry-run"; FAIL=$((FAIL + 1)); }
-node "$(dirname "$0")/index.mjs" --status > /dev/null 2>&1 && echo "  PASS: --status exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --status"; FAIL=$((FAIL + 1)); }
+# --status exits 0 when hooks installed, 1 when not (CI-friendly)
+STATUS_EXIT=0
+node "$(dirname "$0")/index.mjs" --status > /dev/null 2>&1 || STATUS_EXIT=$?
+if [ "$STATUS_EXIT" -eq 0 ] || [ "$STATUS_EXIT" -eq 1 ]; then
+    echo "  PASS: --status exits $STATUS_EXIT (0=installed, 1=missing)"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: --status (unexpected exit $STATUS_EXIT)"
+    FAIL=$((FAIL + 1))
+fi
 echo ""
 
 # --- Summary ---
