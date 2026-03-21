@@ -71,6 +71,8 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Preview first:** `npx cc-safe-setup --dry-run`
 
+**Check status:** `npx cc-safe-setup --status` — see which hooks are installed.
+
 **Uninstall:** `npx cc-safe-setup --uninstall` — removes all hooks and cleans settings.json.
 
 **Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
