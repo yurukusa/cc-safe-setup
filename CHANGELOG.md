@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.2] - 2026-03-22
+- **Expanded `--verify` tests**: 8 → 12 (compound commands, force-push, git reset --hard, sudo)
+- **New example: auto-approve-build.sh** — auto-approve npm/cargo/go/python build/test/lint commands
+- **New example: edit-guard.sh** — defense-in-depth for Edit/Write deny bypass (#37210)
+- **FAQ section** in README (skills vs hooks confusion, health-check interpretation, performance)
+- Hook count fix in README: 7 → 8
+- COOKBOOK recipe count: 8 → 9
+- Tests: 66 → 69 (api-error-alert coverage)
+
+## [1.5.1] - 2026-03-21
+- npm packaging fix
+
 ## [1.5.0] - 2026-03-21
 - **New hook: API Error Alert** — notifies when sessions die from rate limits, auth failures, or server errors
 - Desktop notification (macOS/Linux/WSL2) + error log
