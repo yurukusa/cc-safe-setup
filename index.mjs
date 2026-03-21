@@ -174,6 +174,9 @@ function status() {
     console.log('  ' + c.dim + 'Run: npx cc-safe-setup' + c.reset);
   }
   console.log();
+
+  // Exit code for CI: 0 = all installed, 1 = missing hooks
+  if (missing > 0) process.exit(1);
 }
 
 async function main() {
