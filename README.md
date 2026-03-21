@@ -77,6 +77,8 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
 
+**Note:** Hooks are skipped when Claude Code runs with `--bare` or `--dangerously-skip-permissions`. These modes bypass all safety hooks by design.
+
 ## Before / After
 
 Run `npx cc-health-check` to see the difference:
