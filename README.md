@@ -131,6 +131,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - **enforce-tests.sh** — Warn when source files change without corresponding test files
 - **notify-waiting.sh** — Desktop notification when Claude Code waits for input (macOS/Linux/WSL2)
 - **edit-guard.sh** — Block Edit/Write to protected files (defense-in-depth for [#37210](https://github.com/anthropics/claude-code/issues/37210))
+- **auto-approve-build.sh** — Auto-approve npm/yarn/cargo/go/python build, test, and lint commands
 
 ## Learn More
 
