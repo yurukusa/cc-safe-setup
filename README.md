@@ -71,7 +71,9 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Preview first:** `npx cc-safe-setup --dry-run`
 
-**Check status:** `npx cc-safe-setup --status` — see which hooks are installed.
+**Check status:** `npx cc-safe-setup --status` — see which hooks are installed (exit code 1 if missing).
+
+**Verify hooks work:** `npx cc-safe-setup --verify` — sends test inputs to each hook and confirms they block/allow correctly.
 
 **Uninstall:** `npx cc-safe-setup --uninstall` — removes all hooks and cleans settings.json.
 
