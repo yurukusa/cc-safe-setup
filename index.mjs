@@ -55,6 +55,11 @@ const HOOKS = {
     why: 'git add .env accidentally committed API keys to a public repo',
     trigger: 'PreToolUse', matcher: 'Bash',
   },
+  'api-error-alert': {
+    name: 'API Error Session Alert',
+    why: 'Autonomous sessions silently died from rate limits with no notification',
+    trigger: 'Stop', matcher: '',
+  },
 };
 
 const HELP = process.argv.includes('--help') || process.argv.includes('-h');
@@ -66,7 +71,7 @@ if (HELP) {
   cc-safe-setup — Make Claude Code safe for autonomous operation
 
   Usage:
-    npx cc-safe-setup              Install 7 safety hooks
+    npx cc-safe-setup              Install 8 safety hooks
     npx cc-safe-setup --status     Check installed hooks
     npx cc-safe-setup --verify     Test each hook with sample inputs
     npx cc-safe-setup --dry-run    Preview without installing
@@ -81,6 +86,7 @@ if (HELP) {
     comment-strip        Fixes bash comments breaking permissions
     cd-git-allow         Auto-approves read-only cd+git compounds
     secret-guard         Blocks git add .env and credential files
+    api-error-alert      Notifies when session stops due to API errors
 
   More: https://github.com/yurukusa/cc-safe-setup
 `);

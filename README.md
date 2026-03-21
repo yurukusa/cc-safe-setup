@@ -6,13 +6,13 @@
 
 **One command to make Claude Code safe for autonomous operation.**
 
-Not just a destructive command blocker — 7 hooks covering safety, quality, monitoring, and developer experience.
+Not just a destructive command blocker — 8 hooks covering safety, quality, monitoring, and developer experience.
 
 ```bash
 npx cc-safe-setup
 ```
 
-Installs 7 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
+Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
 
 ```
   cc-safe-setup
@@ -58,6 +58,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 | **Context Monitor** | Session state loss from context window overflow (40%→25%→20%→15% warnings) | |
 | **Comment Stripper** | Bash comments breaking permission allowlists | [#29582](https://github.com/anthropics/claude-code/issues/29582) |
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
+| **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
 Each hook exists because a real incident happened without it.
 
