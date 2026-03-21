@@ -245,6 +245,12 @@ test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./"}}' 2 "rm -rf
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./node_modules"}}' 0 "rm -rf ./node_modules allowed"
 echo ""
 
+# --- destructive-guard: sudo edge cases ---
+echo "destructive-guard-sudo:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"sudo mkfs.ext4 /dev/sda1"}}' 2 "sudo mkfs blocked"
+echo ""
+
 # --- destructive-guard: WSL2/no-preserve-root ---
 echo "destructive-guard-wsl:"
 extract_hook "destructive-guard"
