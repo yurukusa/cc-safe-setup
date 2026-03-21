@@ -261,6 +261,7 @@ async function main() {
   console.log(c.red + '  x' + c.reset + ' API keys committed to public repos via git add .');
   console.log(c.red + '  x' + c.reset + ' Syntax errors cascading through 30+ files');
   console.log(c.red + '  x' + c.reset + ' Sessions losing all context with no warning');
+  console.log(c.red + '  x' + c.reset + ' git checkout --force discarding uncommitted changes');
   console.log();
 
   console.log(c.bold + '  Hooks to install:' + c.reset);
