@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.0] - 2026-03-21
+- **New hook: API Error Alert** — notifies when sessions die from rate limits, auth failures, or server errors
+- Desktop notification (macOS/Linux/WSL2) + error log
+- 7 → 8 hooks total
+- --verify now tests all 8 hooks (8/8)
+
+## [1.4.1] - 2026-03-21
+- **Fix: compound command detection** — `cd /tmp && git checkout --force` now correctly blocked
+- Tests: 61 → 63
+
+## [1.4.0] - 2026-03-21
+- **New: git checkout/switch --force protection** — blocks `--force`, `-f`, `--discard-changes`
+- **Fix: sudo check was unreachable** — early `exit 0` before Check 6 made sudo protection dead code
+- Tests: 56 → 61
+
 ## [1.3.0] - 2026-03-21
 - **New: `--verify` option** — sends test inputs to each installed hook, confirms block/allow behavior (6 tests)
 - `--status` now returns exit code 1 when hooks are missing (CI-friendly)
