@@ -130,6 +130,14 @@ extract_hook "context-monitor"
 test_hook "context-monitor" '{"tool_input":{"command":"ls"}}' 0 "always exits 0 (non-blocking)"
 echo ""
 
+# --- api-error-alert ---
+echo "api-error-alert:"
+extract_hook "api-error-alert"
+test_hook "api-error-alert" '{"stop_reason":"user"}' 0 "normal stop ignored"
+test_hook "api-error-alert" '{"stop_reason":"normal"}' 0 "normal reason ignored"
+test_hook "api-error-alert" '{}' 0 "empty input handled"
+echo ""
+
 # --- syntax-check ---
 echo "syntax-check:"
 extract_hook "syntax-check"
