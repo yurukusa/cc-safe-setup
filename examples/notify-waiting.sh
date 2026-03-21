@@ -16,10 +16,9 @@
 #   }
 # }
 
-# Linux (notify-send)
-if command -v notify-send &>/dev/null; then
-    notify-send "Claude Code" "Waiting for your input" --urgency=normal
-    exit 0
+# Linux (notify-send) — skip on WSL2 where D-Bus may not be running
+if command -v notify-send &>/dev/null && [ -z "$WSL_DISTRO_NAME" ]; then
+    notify-send "Claude Code" "Waiting for your input" --urgency=normal 2>/dev/null && exit 0
 fi
 
 # macOS (osascript)
