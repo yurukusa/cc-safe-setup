@@ -135,7 +135,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 ## Learn More
 
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
-- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 8 ready-to-use recipes from real GitHub Issues
+- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 9 ready-to-use recipes from real GitHub Issues
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
 
