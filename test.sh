@@ -205,6 +205,14 @@ else
 fi
 echo ""
 
+# --- api-error-alert: Stop hook ---
+echo "api-error-alert:"
+extract_hook "api-error-alert"
+test_hook "api-error-alert" '{"stop_reason":"user"}' 0 "ignores user-initiated stop"
+test_hook "api-error-alert" '{"stop_reason":"end_turn"}' 0 "ignores normal end_turn"
+test_hook "api-error-alert" '{"stop_reason":"tool_use"}' 0 "ignores tool_use stop"
+echo ""
+
 # --- CLI smoke tests ---
 echo "CLI:"
 node "$(dirname "$0")/index.mjs" --help > /dev/null 2>&1 && echo "  PASS: --help exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --help"; FAIL=$((FAIL + 1)); }
@@ -219,6 +227,38 @@ else
     echo "  FAIL: --status (unexpected exit $STATUS_EXIT)"
     FAIL=$((FAIL + 1))
 fi
+echo ""
+
+# --- branch-guard: edge cases ---
+echo "branch-guard-edge:"
+extract_hook "branch-guard"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin develop"}}' 0 "push to develop allowed"
+test_hook "branch-guard" '{"tool_input":{"command":"git push --force-with-lease origin feature"}}' 2 "force-with-lease blocked"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:main"}}' 2 "push HEAD:main blocked"
+echo ""
+
+# --- destructive-guard: current directory ---
+echo "destructive-guard-cwd:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ."}}' 2 "rm -rf . (current dir) blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./"}}' 2 "rm -rf ./ blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./node_modules"}}' 0 "rm -rf ./node_modules allowed"
+echo ""
+
+# --- destructive-guard: WSL2/no-preserve-root ---
+echo "destructive-guard-wsl:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf /mnt/c/Users"}}' 2 "rm -rf /mnt/c/Users blocked (WSL2)"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm --no-preserve-root -rf /"}}' 2 "--no-preserve-root blocked"
+echo ""
+
+# --- secret-guard: edge cases ---
+echo "secret-guard-edge:"
+extract_hook "secret-guard"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.production"}}' 2 "blocks .env.production"
+test_hook "secret-guard" '{"tool_input":{"command":"git add id_rsa"}}' 2 "blocks id_rsa"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.local"}}' 2 "blocks .env.local"
+test_hook "secret-guard" '{"tool_input":{"command":"git add package.json tsconfig.json"}}' 0 "allows config files"
 echo ""
 
 # --- Summary ---
