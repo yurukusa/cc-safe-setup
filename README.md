@@ -121,6 +121,15 @@ cc-safe-setup gives you 7 essential hooks. For the complete autonomous operation
 
 Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
+## Examples
+
+Need custom hooks beyond the 7 built-in ones? See [`examples/`](examples/) for ready-to-use recipes:
+
+- **auto-approve-git-read.sh** — Auto-approve `git status`, `git log`, even with `-C` flags
+- **auto-approve-ssh.sh** — Auto-approve safe SSH commands (`uptime`, `whoami`, etc.)
+- **enforce-tests.sh** — Warn when source files change without corresponding test files
+- **notify-waiting.sh** — Desktop notification when Claude Code waits for input (macOS/Linux/WSL2)
+
 ## Learn More
 
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
