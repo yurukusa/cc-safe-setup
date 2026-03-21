@@ -134,6 +134,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - **notify-waiting.sh** — Desktop notification when Claude Code waits for input (macOS/Linux/WSL2)
 - **edit-guard.sh** — Block Edit/Write to protected files (defense-in-depth for [#37210](https://github.com/anthropics/claude-code/issues/37210))
 - **auto-approve-build.sh** — Auto-approve npm/yarn/cargo/go/python build, test, and lint commands
+- **auto-approve-docker.sh** — Auto-approve docker build, compose, ps, logs, and other safe commands
 
 ## Learn More
 
