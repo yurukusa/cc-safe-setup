@@ -51,3 +51,7 @@
   - comment-strip (bash comments breaking permissions, #29582)
   - cd-git-allow (auto-approve read-only cd+git compounds, #32985)
 
+- **New: git checkout/switch --force protection** — blocks `git checkout --force`, `git switch --force`, `git switch --discard-changes`
+- **Fix: sudo check was unreachable** — early `exit 0` before Check 6 made sudo protection dead code
+- Tests: 56 → 61 (+5 git checkout/switch tests)
+- Inspired by competitor safety-net v0.8.0 git rules
