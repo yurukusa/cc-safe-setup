@@ -10,7 +10,7 @@
 # Usage: Add to settings.json as a PreToolUse hook on "Bash"
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 if [[ -z "$COMMAND" ]]; then
     exit 0

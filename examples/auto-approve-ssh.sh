@@ -10,7 +10,7 @@
 # Customize SAFE_COMMANDS for your use case.
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 if [[ -z "$COMMAND" ]]; then
     exit 0
