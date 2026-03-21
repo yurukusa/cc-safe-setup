@@ -59,6 +59,7 @@ const HOOKS = {
 
 const HELP = process.argv.includes('--help') || process.argv.includes('-h');
 const STATUS = process.argv.includes('--status') || process.argv.includes('-s');
+const VERIFY = process.argv.includes('--verify') || process.argv.includes('-v');
 
 if (HELP) {
   console.log(`
@@ -67,6 +68,7 @@ if (HELP) {
   Usage:
     npx cc-safe-setup              Install 7 safety hooks
     npx cc-safe-setup --status     Check installed hooks
+    npx cc-safe-setup --verify     Test each hook with sample inputs
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
     npx cc-safe-setup --help       Show this help
@@ -179,8 +181,62 @@ function status() {
   if (missing > 0) process.exit(1);
 }
 
+async function verify() {
+  const { execSync } = await import('child_process');
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --verify' + c.reset);
+  console.log(c.dim + '  Testing each hook with sample inputs...' + c.reset);
+  console.log();
+
+  const tests = [
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"rm -rf /"}}', expect: 2, desc: 'blocks rm -rf /' },
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"ls -la"}}', expect: 0, desc: 'allows safe commands' },
+    { hook: 'branch-guard', input: '{"tool_input":{"command":"git push origin main"}}', expect: 2, desc: 'blocks push to main' },
+    { hook: 'branch-guard', input: '{"tool_input":{"command":"git push origin feature"}}', expect: 0, desc: 'allows push to feature' },
+    { hook: 'secret-guard', input: '{"tool_input":{"command":"git add .env"}}', expect: 2, desc: 'blocks git add .env' },
+    { hook: 'secret-guard', input: '{"tool_input":{"command":"git add src/app.js"}}', expect: 0, desc: 'allows git add safe files' },
+  ];
+
+  let pass = 0, fail = 0;
+  for (const t of tests) {
+    const hookPath = join(HOOKS_DIR, t.hook + '.sh');
+    if (!existsSync(hookPath)) {
+      console.log('  ' + c.red + '✗' + c.reset + ' ' + t.hook + ': ' + t.desc + c.dim + ' (not installed)' + c.reset);
+      fail++;
+      continue;
+    }
+    try {
+      execSync(`echo '${t.input}' | bash "${hookPath}"`, { stdio: 'pipe' });
+      if (t.expect === 0) {
+        console.log('  ' + c.green + '✓' + c.reset + ' ' + t.hook + ': ' + t.desc);
+        pass++;
+      } else {
+        console.log('  ' + c.red + '✗' + c.reset + ' ' + t.hook + ': ' + t.desc + ' (should have blocked)');
+        fail++;
+      }
+    } catch(e) {
+      if (e.status === t.expect) {
+        console.log('  ' + c.green + '✓' + c.reset + ' ' + t.hook + ': ' + t.desc);
+        pass++;
+      } else {
+        console.log('  ' + c.red + '✗' + c.reset + ' ' + t.hook + ': ' + t.desc + ' (exit ' + e.status + ', expected ' + t.expect + ')');
+        fail++;
+      }
+    }
+  }
+
+  console.log();
+  console.log(c.bold + '  ' + pass + '/' + (pass + fail) + ' tests passed.' + c.reset);
+  if (fail > 0) {
+    console.log('  ' + c.red + fail + ' failures.' + c.reset + ' Run ' + c.blue + 'npx cc-safe-setup' + c.reset + ' to reinstall.');
+    process.exit(1);
+  }
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
+  if (VERIFY) return verify();
   if (STATUS) return status();
 
   console.log();
