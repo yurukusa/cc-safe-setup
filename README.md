@@ -36,9 +36,9 @@ Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   ● cd+git Auto-Approver
   ● Secret Leak Prevention
 
-  Install all 7 safety hooks? [Y/n] Y
+  Install all 8 safety hooks? [Y/n] Y
 
-  ✓ Done. 7 safety hooks installed.
+  ✓ Done. 8 safety hooks installed.
 ```
 
 ## Why This Exists
