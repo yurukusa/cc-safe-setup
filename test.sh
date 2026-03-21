@@ -143,6 +143,22 @@ test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0
 rm -f /tmp/test-valid.py /tmp/test-invalid.py
 echo ""
 
+# --- Edge case: malformed input ---
+echo "edge-cases:"
+extract_hook "destructive-guard"
+# Empty input should not crash
+echo '' | bash /tmp/test-destructive-guard.sh 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: empty input handled" && PASS=$((PASS + 1)) || { echo "  FAIL: empty input"; FAIL=$((FAIL + 1)); }
+# Malformed JSON should not produce stderr
+STDERR=$(echo 'not json' | bash /tmp/test-destructive-guard.sh 2>&1 >/dev/null)
+if [ -z "$STDERR" ]; then
+    echo "  PASS: malformed JSON silent (no stderr)"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: malformed JSON produced stderr: $STDERR"
+    FAIL=$((FAIL + 1))
+fi
+echo ""
+
 # --- CLI smoke tests ---
 echo "CLI:"
 node "$(dirname "$0")/index.mjs" --help > /dev/null 2>&1 && echo "  PASS: --help exits 0" && PASS=$((PASS + 1)) || { echo "  FAIL: --help"; FAIL=$((FAIL + 1)); }
