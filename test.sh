@@ -177,6 +177,8 @@ test_hook "destructive-guard" '{"tool_input":{"command":"git switch --force feat
 test_hook "destructive-guard" '{"tool_input":{"command":"git switch --discard-changes main"}}' 2 "git switch --discard-changes blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"git checkout main"}}' 0 "git checkout (no force) allowed"
 test_hook "destructive-guard" '{"tool_input":{"command":"git switch feature"}}' 0 "git switch (no force) allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -f main"}}' 2 "git checkout -f (short flag) blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"cd /tmp && git checkout --force main"}}' 2 "compound git checkout --force blocked"
 echo ""
 
 # --- Edge case: malformed input ---
