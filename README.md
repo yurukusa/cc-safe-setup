@@ -116,7 +116,7 @@ npx cc-health-check
 
 ## Full Kit
 
-cc-safe-setup gives you 7 essential hooks. For the complete autonomous operation toolkit:
+cc-safe-setup gives you 8 essential hooks. For the complete autonomous operation toolkit:
 
 **[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** — 16 hooks + 5 templates + 3 exclusive tools + install.sh. Production-ready in 15 minutes.
 
@@ -124,7 +124,7 @@ Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/cl
 
 ## Examples
 
-Need custom hooks beyond the 7 built-in ones? See [`examples/`](examples/) for ready-to-use recipes:
+Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for ready-to-use recipes:
 
 - **auto-approve-git-read.sh** — Auto-approve `git status`, `git log`, even with `-C` flags
 - **auto-approve-ssh.sh** — Auto-approve safe SSH commands (`uptime`, `whoami`, etc.)
