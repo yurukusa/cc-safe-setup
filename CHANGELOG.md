@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.0] - 2026-03-22
+- **Security fix: `rm -rf .` now blocked** — current directory deletion was previously allowed
+- Also blocks `rm -rf ./` (trailing slash variant)
+- `rm -rf ./subdirectory` still allowed (safe subdirectory deletion)
+- Tests: 76 → 79
 ## [1.5.4] - 2026-03-22
 - Secret-guard edge case tests: .env.production, id_rsa, .env.local
 - Branch-guard edge case tests: force-with-lease, HEAD:main push
