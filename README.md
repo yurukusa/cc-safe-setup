@@ -51,7 +51,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 | Hook | Prevents | Related Issues |
 |------|----------|----------------|
-| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) |
+| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, `git checkout --force`, `sudo` + destructive, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) |
 | **Branch Guard** | Pushes to main/master + force-push (`--force`) on all branches | |
 | **Secret Guard** | `git add .env`, credential files, `git add .` with .env present | [#6527](https://github.com/anthropics/claude-code/issues/6527) |
 | **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | |
