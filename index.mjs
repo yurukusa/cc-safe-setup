@@ -330,7 +330,7 @@ async function main() {
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
   console.log('  ' + c.dim + 'Verify:' + c.reset + ' ' + c.blue + 'npx cc-health-check' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Full kit (15 hooks + templates + tools):' + c.reset);
+  console.log('  ' + c.dim + 'Full kit (16 hooks + templates + tools):' + c.reset);
   console.log('  https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=npm&utm_medium=cli&utm_campaign=safe-setup');
   console.log();
 }
