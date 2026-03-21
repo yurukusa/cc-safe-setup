@@ -143,6 +143,32 @@ test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0
 rm -f /tmp/test-valid.py /tmp/test-invalid.py
 echo ""
 
+# --- destructive-guard edge cases ---
+echo "destructive-guard-edge-cases:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf /tmp/build"}}' 0 "rm -rf /tmp subdir allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf dist"}}' 0 "rm -rf dist (safe dir) allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"cat file | xargs rm"}}' 0 "pipe to rm (no -rf) passes"
+test_hook "destructive-guard" '{"tool_input":{"command":"find . -name \"*.pyc\" -delete"}}' 0 "find . -delete (not /) allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"  rm  -rf  /"}}' 2 "extra spaces still blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf /var"}}' 2 "rm -rf /var blocked"
+# git push --force is branch-guard's responsibility, not destructive-guard
+test_hook "destructive-guard" '{"tool_input":{"command":"git push origin feature"}}' 0 "git push (non-destructive) passes"
+echo ""
+
+# --- secret-guard edge cases ---
+echo "secret-guard-edge-cases:"
+extract_hook "secret-guard"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.production"}}' 2 "git add .env.production blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add server.pem"}}' 2 "git add .pem file blocked"
+# git add . / -A only blocked when .env exists in cwd
+touch /tmp/.env-test-sentinel
+(cd /tmp && ln -sf .env-test-sentinel .env && echo '{"tool_input":{"command":"git add ."}}' | bash /tmp/test-secret-guard.sh > /dev/null 2>/dev/null; exit_code=$?; rm -f .env; [ "$exit_code" -eq 2 ] && echo "  PASS: git add . blocked when .env exists" && exit 0 || echo "  FAIL: git add . should block when .env exists" && exit 1) && PASS=$((PASS + 1)) || FAIL=$((FAIL + 1))
+(cd /tmp && ln -sf .env-test-sentinel .env && echo '{"tool_input":{"command":"git add -A"}}' | bash /tmp/test-secret-guard.sh > /dev/null 2>/dev/null; exit_code=$?; rm -f .env; [ "$exit_code" -eq 2 ] && echo "  PASS: git add -A blocked when .env exists" && exit 0 || echo "  FAIL: git add -A should block when .env exists" && exit 1) && PASS=$((PASS + 1)) || FAIL=$((FAIL + 1))
+rm -f /tmp/.env-test-sentinel
+test_hook "secret-guard" '{"tool_input":{"command":"git add src/ tests/"}}' 0 "git add specific dirs allowed"
+echo ""
+
 # --- Edge case: malformed input ---
 echo "edge-cases:"
 extract_hook "destructive-guard"
