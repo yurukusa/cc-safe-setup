@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0] - 2026-03-21
+- **New: `--verify` option** — sends test inputs to each installed hook, confirms block/allow behavior (6 tests)
+- `--status` now returns exit code 1 when hooks are missing (CI-friendly)
+- Tests: 44 → 56 (+12 edge cases for destructive-guard and secret-guard)
+- New edge case tests: `rm -rf /var`, `git add .` with .env, `git add -A`, `.env.production`, `.pem`
+
+## [1.2.1] - 2026-03-21
+- README: updated COOKBOOK recipe count (6 → 8)
+- npm publish with latest README
+
+## [1.2.0] - 2026-03-21
+- **New: `--status` option** — check which hooks are installed and settings.json configuration
+- Tests: 41 → 44
+
 ## [1.1.3] - 2026-03-21
 - Added `.npmignore` to reduce package size (82KB → 42KB)
 - Tests: 39 → 41 (added CLI smoke tests for --help and --dry-run)
@@ -37,6 +51,3 @@
   - comment-strip (bash comments breaking permissions, #29582)
   - cd-git-allow (auto-approve read-only cd+git compounds, #32985)
 
-## [1.2.0] - 2026-03-21
-- **New: `--status` option** — check which hooks are installed and settings.json configuration
-- Tests: 41 → 42
