@@ -169,6 +169,16 @@ rm -f /tmp/.env-test-sentinel
 test_hook "secret-guard" '{"tool_input":{"command":"git add src/ tests/"}}' 0 "git add specific dirs allowed"
 echo ""
 
+# --- destructive-guard: git checkout/switch force ---
+echo "destructive-guard-force:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout --force main"}}' 2 "git checkout --force blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"git switch --force feature"}}' 2 "git switch --force blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"git switch --discard-changes main"}}' 2 "git switch --discard-changes blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout main"}}' 0 "git checkout (no force) allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"git switch feature"}}' 0 "git switch (no force) allowed"
+echo ""
+
 # --- Edge case: malformed input ---
 echo "edge-cases:"
 extract_hook "destructive-guard"
