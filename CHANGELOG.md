@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.8.2] - 2026-03-22
+- **New example: auto-snapshot.sh** — automatic file snapshots before edits for rollback protection
+- **New example: auto-approve-python.sh** — auto-approve pytest, mypy, ruff, black, isort
+- 10 examples total (was 8)
+
 ## [1.8.0] - 2026-03-22
 - **New `--examples` flag** — lists all 8 example hooks with descriptions from the CLI
 - **New example: block-database-wipe.sh** — blocks destructive database commands (Laravel, Django, Rails, raw SQL)
