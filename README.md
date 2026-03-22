@@ -128,7 +128,13 @@ Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/cl
 
 ## Examples
 
-Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for ready-to-use recipes:
+Need custom hooks beyond the 8 built-in ones? Install any example with one command:
+
+```bash
+npx cc-safe-setup --install-example block-database-wipe
+```
+
+Or browse all available examples in [`examples/`](examples/):
 
 - **auto-approve-git-read.sh** — Auto-approve `git status`, `git log`, even with `-C` flags
 - **auto-approve-ssh.sh** — Auto-approve safe SSH commands (`uptime`, `whoami`, etc.)
