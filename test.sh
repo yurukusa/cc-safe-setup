@@ -479,6 +479,27 @@ test_push_guard '{"tool_input":{"command":"git status"}}' 0 "allows non-push com
 test_push_guard '{"tool_input":{"command":"npm test"}}' 0 "allows test command"
 echo ""
 
+# ========== large-file-guard (example) ==========
+echo "large-file-guard.sh (example):"
+LARGE_FILE="$(dirname "$0")/examples/large-file-guard.sh"
+
+test_large_file() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$LARGE_FILE" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_large_file '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "ignores Edit tool"
+test_large_file '{"tool_name":"Write","tool_input":{"file_path":"/nonexistent/path"}}' 0 "handles nonexistent file"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"

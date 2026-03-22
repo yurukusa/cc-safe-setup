@@ -294,6 +294,7 @@ function examples() {
     'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
     'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
     'test-before-push.sh': 'Block git push when tests have not passed',
+    'large-file-guard.sh': 'Warn when Write creates files over 500KB',
   };
 
   console.log();
