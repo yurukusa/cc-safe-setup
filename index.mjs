@@ -183,7 +183,7 @@ function status() {
   const exampleFiles = [
     'allowlist.sh', 'auto-approve-build.sh', 'auto-approve-docker.sh',
     'auto-approve-git-read.sh', 'auto-approve-python.sh', 'auto-approve-ssh.sh',
-    'auto-checkpoint.sh', 'auto-snapshot.sh', 'block-database-wipe.sh', 'commit-message-check.sh', 'env-var-check.sh',
+    'auto-checkpoint.sh', 'auto-snapshot.sh', 'block-database-wipe.sh', 'branch-name-check.sh', 'commit-message-check.sh', 'env-var-check.sh',
     'deploy-guard.sh', 'edit-guard.sh', 'enforce-tests.sh', 'git-config-guard.sh',
     'large-file-guard.sh', 'network-guard.sh', 'notify-waiting.sh',
     'protect-dotfiles.sh', 'scope-guard.sh', 'test-before-push.sh', 'timeout-guard.sh',
