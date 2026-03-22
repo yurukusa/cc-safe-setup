@@ -6,10 +6,10 @@
 #   - Django: flush, sqlflush
 #   - Rails: db:drop, db:reset
 #   - Raw SQL: DROP DATABASE, TRUNCATE
+#   - Prisma: migrate reset, db push --force-reset
 #   - PostgreSQL: dropdb
 #
-# Born from GitHub Issue #37405 (SQLite database wiped)
-# and #37439 (Laravel migrate:fresh on production DB)
+# Born from GitHub Issues #37405, #37439, #34729
 #
 # Usage: Add to settings.json as a PreToolUse hook
 #
@@ -58,6 +58,12 @@ fi
 # Raw SQL destructive commands
 if echo "$COMMAND" | grep -qiE 'DROP\s+(DATABASE|TABLE|SCHEMA)|TRUNCATE\s+TABLE|DELETE\s+FROM\s+\w+\s*;?\s*$'; then
     echo "BLOCKED: Destructive SQL command" >&2
+    exit 2
+fi
+
+# Prisma destructive commands
+if echo "$COMMAND" | grep -qiE 'prisma\s+migrate\s+reset|prisma\s+db\s+push\s+--force-reset'; then
+    echo "BLOCKED: Destructive Prisma database command" >&2
     exit 2
 fi
 

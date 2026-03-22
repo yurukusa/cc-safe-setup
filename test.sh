@@ -334,6 +334,35 @@ test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"echo rm -rf /etc 
 test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"del /s Documents"}}' 2 "blocks del targeting Documents"
 echo ""
 
+# ========== block-database-wipe (example) ==========
+echo "block-database-wipe.sh (example):"
+DB_WIPE="$(dirname "$0")/examples/block-database-wipe.sh"
+
+test_db_wipe() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$DB_WIPE" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_db_wipe '{"tool_input":{"command":"php artisan migrate:fresh"}}' 2 "blocks Laravel migrate:fresh"
+test_db_wipe '{"tool_input":{"command":"php artisan migrate:reset"}}' 2 "blocks Laravel migrate:reset"
+test_db_wipe '{"tool_input":{"command":"python manage.py flush"}}' 2 "blocks Django flush"
+test_db_wipe '{"tool_input":{"command":"rails db:drop"}}' 2 "blocks Rails db:drop"
+test_db_wipe '{"tool_input":{"command":"DROP DATABASE mydb"}}' 2 "blocks raw DROP DATABASE"
+test_db_wipe '{"tool_input":{"command":"dropdb mydb"}}' 2 "blocks PostgreSQL dropdb"
+test_db_wipe '{"tool_input":{"command":"prisma migrate reset"}}' 2 "blocks Prisma migrate reset"
+test_db_wipe '{"tool_input":{"command":"prisma db push --force-reset"}}' 2 "blocks Prisma db push --force-reset"
+test_db_wipe '{"tool_input":{"command":"php artisan migrate"}}' 0 "allows safe Laravel migrate"
+test_db_wipe '{"tool_input":{"command":"prisma migrate deploy"}}' 0 "allows safe Prisma migrate deploy"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
