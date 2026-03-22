@@ -152,6 +152,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **auto-checkpoint.sh** — Auto-commit after every edit for rollback protection ([#34674](https://github.com/anthropics/claude-code/issues/34674))
 - **git-config-guard.sh** — Block `git config --global` modifications without consent ([#37201](https://github.com/anthropics/claude-code/issues/37201))
 - **deploy-guard.sh** — Block deploy commands when uncommitted changes exist ([#37314](https://github.com/anthropics/claude-code/issues/37314))
+- **network-guard.sh** — Warn on suspicious network commands sending file contents ([#37420](https://github.com/anthropics/claude-code/issues/37420))
 
 ## Learn More
 
