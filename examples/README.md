@@ -41,6 +41,7 @@ npx cc-safe-setup --examples
 
 | Hook | Purpose | Issue |
 |------|---------|-------|
+| **branch-name-check.sh** | Warn on non-conventional branch names | |
 | **commit-message-check.sh** | Warn on non-conventional commit messages | |
 | **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
 | **enforce-tests.sh** | Warn when source changes without tests | |

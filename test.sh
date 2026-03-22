@@ -565,6 +565,27 @@ test_timeout '{"tool_input":{"command":"npm start"}}' 0 "warns but allows npm st
 test_timeout '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 echo ""
 
+# ========== branch-name-check (example) ==========
+echo "branch-name-check.sh (example):"
+BRANCH_CHECK="$(dirname "$0")/examples/branch-name-check.sh"
+
+test_branch() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$BRANCH_CHECK" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_branch '{"tool_input":{"command":"git status"}}' 0 "ignores non-branch commands"
+test_branch '{"tool_input":{"command":"git checkout -b feature/my-feature"}}' 0 "allows conventional branch"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"

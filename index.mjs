@@ -297,6 +297,7 @@ function examples() {
       'auto-approve-ssh.sh': 'Auto-approve safe SSH commands (uptime, whoami)',
     },
     'Quality': {
+      'branch-name-check.sh': 'Warn on non-conventional branch names',
       'commit-message-check.sh': 'Warn on non-conventional commit messages',
       'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
       'enforce-tests.sh': 'Warn when source files change without test files',
