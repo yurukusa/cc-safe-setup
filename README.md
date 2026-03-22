@@ -157,6 +157,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **large-file-guard.sh** — Warn when Write tool creates files over 500KB
 - **commit-message-check.sh** — Warn on non-conventional commit messages (feat:, fix:, docs:, etc.)
 - **env-var-check.sh** — Block hardcoded API keys (sk-, ghp_, glpat-) in export commands
+- **timeout-guard.sh** — Warn before long-running commands (npm start, rails s, docker-compose up)
 
 ## Learn More
 
