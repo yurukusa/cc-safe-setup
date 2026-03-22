@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.3] - 2026-03-23
+- **New example: protect-dotfiles.sh** — blocks modifications to ~/.bashrc, ~/.aws/, ~/.ssh/ and chezmoi without diff
+- **New example: allowlist.sh** added to --examples index
+- Born from [#37478](https://github.com/anthropics/claude-code/issues/37478) (environment file destruction)
+- Tests: 90 → 99
+- 12 examples total (was 10)
+
 ## [1.8.2] - 2026-03-22
 - **New example: auto-snapshot.sh** — automatic file snapshots before edits for rollback protection
 - **New example: auto-approve-python.sh** — auto-approve pytest, mypy, ruff, black, isort
