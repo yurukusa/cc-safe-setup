@@ -275,38 +275,50 @@ async function verify() {
 
 function examples() {
   const examplesDir = join(__dirname, 'examples');
-  const EXAMPLE_DESCRIPTIONS = {
-    'auto-approve-build.sh': 'Auto-approve npm/yarn/cargo/go build, test, lint commands',
-    'auto-approve-docker.sh': 'Auto-approve docker build, compose, ps, logs commands',
-    'auto-approve-git-read.sh': 'Auto-approve git status/log/diff even with -C flags',
-    'auto-approve-ssh.sh': 'Auto-approve safe SSH commands (uptime, whoami, etc.)',
-    'block-database-wipe.sh': 'Block destructive DB commands (migrate:fresh, DROP DATABASE)',
-    'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
-    'enforce-tests.sh': 'Warn when source files change without test files',
-    'notify-waiting.sh': 'Desktop notification when Claude waits for input',
-    'auto-approve-python.sh': 'Auto-approve pytest, mypy, ruff, black, isort commands',
-    'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
-    'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
-    'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
-    'scope-guard.sh': 'Block file operations outside project directory',
-    'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
-    'git-config-guard.sh': 'Block git config --global modifications',
-    'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
-    'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
-    'test-before-push.sh': 'Block git push when tests have not passed',
-    'large-file-guard.sh': 'Warn when Write creates files over 500KB',
+  const CATEGORIES = {
+    'Safety Guards': {
+      'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
+      'block-database-wipe.sh': 'Block destructive DB commands (migrate:fresh, DROP DATABASE, Prisma)',
+      'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
+      'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
+      'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
+      'scope-guard.sh': 'Block file operations outside project directory',
+      'test-before-push.sh': 'Block git push when tests have not passed',
+      'git-config-guard.sh': 'Block git config --global modifications',
+    },
+    'Auto-Approve': {
+      'auto-approve-build.sh': 'Auto-approve npm/yarn/cargo/go build, test, lint',
+      'auto-approve-docker.sh': 'Auto-approve docker build, compose, ps, logs',
+      'auto-approve-git-read.sh': 'Auto-approve git status/log/diff even with -C flags',
+      'auto-approve-python.sh': 'Auto-approve pytest, mypy, ruff, black, isort',
+      'auto-approve-ssh.sh': 'Auto-approve safe SSH commands (uptime, whoami)',
+    },
+    'Quality': {
+      'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
+      'enforce-tests.sh': 'Warn when source files change without test files',
+      'large-file-guard.sh': 'Warn when Write creates files over 500KB',
+    },
+    'Recovery': {
+      'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
+      'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
+    },
+    'UX': {
+      'notify-waiting.sh': 'Desktop notification when Claude waits for input',
+    },
   };
 
   console.log();
   console.log(c.bold + '  cc-safe-setup --examples' + c.reset);
-  console.log(c.dim + '  Custom hooks beyond the 8 built-in ones' + c.reset);
+  console.log(c.dim + '  19 hooks beyond the 8 built-in ones' + c.reset);
   console.log();
 
-  for (const [file, desc] of Object.entries(EXAMPLE_DESCRIPTIONS)) {
-    const fullPath = join(examplesDir, file);
-    const exists = existsSync(fullPath);
-    console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
-    console.log('    ' + c.dim + desc + c.reset);
+  for (const [cat, hooks] of Object.entries(CATEGORIES)) {
+    console.log('  ' + c.bold + c.blue + cat + c.reset);
+    for (const [file, desc] of Object.entries(hooks)) {
+      console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
+      console.log('    ' + c.dim + desc + c.reset);
+    }
+    console.log();
   }
 
   console.log();
