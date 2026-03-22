@@ -18,14 +18,14 @@ Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   cc-safe-setup
   Make Claude Code safe for autonomous operation
 
-  Prevents real incidents:
-  ✗ rm -rf deleting entire user directories (NTFS junction traversal)
-  ✗ Remove-Item -Recurse -Force destroying unpushed source code
+  Prevents real incidents (from GitHub Issues):
+  ✗ rm -rf deleted entire user directory via NTFS junction (#36339)
+  ✗ Remove-Item -Recurse -Force destroyed unpushed source (#37331)
+  ✗ Entire Mac filesystem deleted during cleanup (#36233)
   ✗ Untested code pushed to main at 3am
-  ✗ Force-push rewriting shared branch history
+  ✗ Force-push rewrote shared branch history
   ✗ API keys committed to public repos via git add .
   ✗ Syntax errors cascading through 30+ files
-  ✗ Laravel migrate:fresh wiping production database
   ✗ Sessions losing all context with no warning
 
   Hooks to install:
