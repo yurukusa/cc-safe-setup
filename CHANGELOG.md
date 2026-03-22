@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0] - 2026-03-23
+- **Categorized `--examples` output** — 5 categories: Safety Guards, Auto-Approve, Quality, Recovery, UX
+- **New examples: deploy-guard, network-guard, test-before-push, large-file-guard** (4 new)
+- 19 examples total (was 15)
+- Tests: 130 → 138
+
 ## [1.9.4] - 2026-03-23
 - **New example: deploy-guard.sh** — blocks deploy commands when uncommitted changes exist
 - Detects rsync, scp, firebase, vercel, netlify, fly, heroku
