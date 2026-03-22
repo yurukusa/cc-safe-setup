@@ -363,6 +363,30 @@ test_db_wipe '{"tool_input":{"command":"php artisan migrate"}}' 0 "allows safe L
 test_db_wipe '{"tool_input":{"command":"prisma migrate deploy"}}' 0 "allows safe Prisma migrate deploy"
 echo ""
 
+# ========== auto-checkpoint (example) ==========
+echo "auto-checkpoint.sh (example):"
+CHECKPOINT="$(dirname "$0")/examples/auto-checkpoint.sh"
+
+test_checkpoint() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$CHECKPOINT" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+# Non-Edit/Write tools should pass through
+test_checkpoint '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores Bash tool"
+test_checkpoint '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "ignores Read tool"
+# Edit/Write in git repo will try to commit (exit 0 regardless)
+test_checkpoint '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "handles Edit tool"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))

@@ -269,6 +269,7 @@ function examples() {
     'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
     'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
     'scope-guard.sh': 'Block file operations outside project directory',
+    'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
   };
 
   console.log();

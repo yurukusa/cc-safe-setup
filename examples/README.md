@@ -5,6 +5,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 | Hook | Purpose | Related Issue |
 |------|---------|---------------|
 | **allowlist.sh** | Block everything not explicitly approved (inverse model) | [#37471](https://github.com/anthropics/claude-code/issues/37471) |
+| **auto-checkpoint.sh** | Auto-commit after edits for rollback protection | [#34674](https://github.com/anthropics/claude-code/issues/34674) |
 | **auto-approve-build.sh** | Auto-approve npm/yarn/cargo/go build, test, lint | |
 | **auto-approve-docker.sh** | Auto-approve docker build, compose, ps, logs | |
 | **auto-approve-git-read.sh** | Auto-approve `git status/log/diff` even with `-C` flags | [#36900](https://github.com/anthropics/claude-code/issues/36900) |
