@@ -1,7 +1,7 @@
 {
   "name": "cc-safe-setup",
   "version": "1.9.3",
-  "description": "One command to make Claude Code safe for autonomous operation. 8 built-in hooks + 14 installable examples. Destructive blocker, branch guard, database wipe protection, dotfile guard, and more.",
+  "description": "One command to make Claude Code safe for autonomous operation. 8 built-in hooks + 15 installable examples. Destructive blocker, branch guard, database wipe protection, dotfile guard, and more.",
   "main": "index.mjs",
   "bin": {
     "cc-safe-setup": "index.mjs"
