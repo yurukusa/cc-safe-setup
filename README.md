@@ -153,6 +153,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **git-config-guard.sh** — Block `git config --global` modifications without consent ([#37201](https://github.com/anthropics/claude-code/issues/37201))
 - **deploy-guard.sh** — Block deploy commands when uncommitted changes exist ([#37314](https://github.com/anthropics/claude-code/issues/37314))
 - **network-guard.sh** — Warn on suspicious network commands sending file contents ([#37420](https://github.com/anthropics/claude-code/issues/37420))
+- **test-before-push.sh** — Block `git push` when tests haven't been run ([#36970](https://github.com/anthropics/claude-code/issues/36970))
 
 ## Learn More
 
