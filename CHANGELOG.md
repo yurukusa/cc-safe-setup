@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3] - 2026-03-23
+- **New example: git-config-guard.sh** — blocks git config --global modifications without consent
+- Born from [#37201](https://github.com/anthropics/claude-code/issues/37201) (unauthorized git config changes)
+- CLI smoke tests added (--help, --examples, --install-example)
+- Tests: 119 → 126
+- 15 examples total (was 14)
+
 ## [1.9.2] - 2026-03-23
 - **`--status` now detects installed example hooks** — shows which examples are active alongside the 8 built-in hooks
 - CLI incidents list: added PowerShell Remove-Item and Prisma migrate reset
