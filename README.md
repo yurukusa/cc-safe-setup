@@ -139,6 +139,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - **auto-approve-docker.sh** — Auto-approve docker build, compose, ps, logs, and other safe commands
 - **block-database-wipe.sh** — Block destructive database commands: Laravel `migrate:fresh`, Django `flush`, Rails `db:drop`, raw `DROP DATABASE` ([#37405](https://github.com/anthropics/claude-code/issues/37405) [#37439](https://github.com/anthropics/claude-code/issues/37439))
 - **auto-approve-python.sh** — Auto-approve pytest, mypy, ruff, black, isort, flake8, pylint commands
+- **auto-snapshot.sh** — Auto-save file snapshots before edits for rollback protection ([#37386](https://github.com/anthropics/claude-code/issues/37386) [#37457](https://github.com/anthropics/claude-code/issues/37457))
 
 ## Learn More
 

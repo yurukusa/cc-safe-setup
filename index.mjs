@@ -262,6 +262,7 @@ function examples() {
     'enforce-tests.sh': 'Warn when source files change without test files',
     'notify-waiting.sh': 'Desktop notification when Claude waits for input',
     'auto-approve-python.sh': 'Auto-approve pytest, mypy, ruff, black, isort commands',
+    'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
   };
 
   console.log();
