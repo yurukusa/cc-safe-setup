@@ -13,6 +13,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 | **auto-approve-ssh.sh** | Auto-approve safe SSH commands (uptime, whoami) | |
 | **auto-snapshot.sh** | Save file snapshots before edits (rollback protection) | [#37386](https://github.com/anthropics/claude-code/issues/37386) |
 | **block-database-wipe.sh** | Block destructive DB commands (Laravel, Django, Rails) | [#37405](https://github.com/anthropics/claude-code/issues/37405) |
+| **deploy-guard.sh** | Block deploy when uncommitted changes exist | [#37314](https://github.com/anthropics/claude-code/issues/37314) |
 | **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
 | **enforce-tests.sh** | Warn when source changes without test changes | |
 | **git-config-guard.sh** | Block git config --global modifications | [#37201](https://github.com/anthropics/claude-code/issues/37201) |

@@ -410,6 +410,31 @@ test_git_config '{"tool_input":{"command":"git config --local user.email foo@bar
 test_git_config '{"tool_input":{"command":"git config user.name test"}}' 0 "allows git config without scope"
 echo ""
 
+# ========== deploy-guard (example) ==========
+echo "deploy-guard.sh (example):"
+DEPLOY_GUARD="$(dirname "$0")/examples/deploy-guard.sh"
+
+test_deploy() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$DEPLOY_GUARD" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+# Non-deploy commands pass through
+test_deploy '{"tool_input":{"command":"npm start"}}' 0 "allows non-deploy command"
+test_deploy '{"tool_input":{"command":"git push origin feature"}}' 0 "allows git push to feature"
+# Deploy commands in a git repo (will check for dirty files)
+test_deploy '{"tool_input":{"command":"firebase deploy"}}' 0 "firebase deploy passes in clean repo"
+test_deploy '{"tool_input":{"command":"vercel --prod"}}' 0 "vercel passes in clean repo"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"

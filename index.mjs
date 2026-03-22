@@ -184,7 +184,7 @@ function status() {
     'allowlist.sh', 'auto-approve-build.sh', 'auto-approve-docker.sh',
     'auto-approve-git-read.sh', 'auto-approve-python.sh', 'auto-approve-ssh.sh',
     'auto-checkpoint.sh', 'auto-snapshot.sh', 'block-database-wipe.sh',
-    'edit-guard.sh', 'enforce-tests.sh', 'git-config-guard.sh',
+    'deploy-guard.sh', 'edit-guard.sh', 'enforce-tests.sh', 'git-config-guard.sh',
     'notify-waiting.sh', 'protect-dotfiles.sh', 'scope-guard.sh',
   ];
   const installedExamples = exampleFiles.filter(f => existsSync(join(HOOKS_DIR, f)));
@@ -291,6 +291,7 @@ function examples() {
     'scope-guard.sh': 'Block file operations outside project directory',
     'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
     'git-config-guard.sh': 'Block git config --global modifications',
+    'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
   };
 
   console.log();
