@@ -286,6 +286,7 @@ function examples() {
       'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
       'scope-guard.sh': 'Block file operations outside project directory',
       'test-before-push.sh': 'Block git push when tests have not passed',
+      'timeout-guard.sh': 'Warn before long-running commands (servers, watchers)',
       'git-config-guard.sh': 'Block git config --global modifications',
     },
     'Auto-Approve': {

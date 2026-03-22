@@ -543,6 +543,28 @@ test_env_var '{"tool_input":{"command":"export API_KEY=sk-1234567890abcdefghijkl
 test_env_var '{"tool_input":{"command":"npm start"}}' 0 "ignores non-export commands"
 echo ""
 
+# ========== timeout-guard (example) ==========
+echo "timeout-guard.sh (example):"
+TIMEOUT_GUARD="$(dirname "$0")/examples/timeout-guard.sh"
+
+test_timeout() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$TIMEOUT_GUARD" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_timeout '{"tool_input":{"command":"ls -la"}}' 0 "allows non-server command"
+test_timeout '{"tool_input":{"command":"npm start"}}' 0 "warns but allows npm start (exit 0)"
+test_timeout '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"
