@@ -400,6 +400,8 @@ async function main() {
   console.log(c.red + '  x' + c.reset + ' Syntax errors cascading through 30+ files');
   console.log(c.red + '  x' + c.reset + ' Sessions losing all context with no warning');
   console.log(c.red + '  x' + c.reset + ' git checkout --force discarding uncommitted changes');
+  console.log(c.red + '  x' + c.reset + ' Remove-Item -Recurse -Force destroying unpushed source code');
+  console.log(c.red + '  x' + c.reset + ' prisma migrate reset / migrate:fresh wiping databases');
   console.log();
 
   console.log(c.bold + '  Hooks to install:' + c.reset);
