@@ -65,6 +65,7 @@ const HOOKS = {
 const HELP = process.argv.includes('--help') || process.argv.includes('-h');
 const STATUS = process.argv.includes('--status') || process.argv.includes('-s');
 const VERIFY = process.argv.includes('--verify') || process.argv.includes('-v');
+const EXAMPLES = process.argv.includes('--examples') || process.argv.includes('-e');
 
 if (HELP) {
   console.log(`
@@ -76,6 +77,7 @@ if (HELP) {
     npx cc-safe-setup --verify     Test each hook with sample inputs
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
+    npx cc-safe-setup --examples   List available example hooks
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -248,10 +250,42 @@ async function verify() {
   console.log();
 }
 
+function examples() {
+  const examplesDir = join(__dirname, 'examples');
+  const EXAMPLE_DESCRIPTIONS = {
+    'auto-approve-build.sh': 'Auto-approve npm/yarn/cargo/go build, test, lint commands',
+    'auto-approve-docker.sh': 'Auto-approve docker build, compose, ps, logs commands',
+    'auto-approve-git-read.sh': 'Auto-approve git status/log/diff even with -C flags',
+    'auto-approve-ssh.sh': 'Auto-approve safe SSH commands (uptime, whoami, etc.)',
+    'block-database-wipe.sh': 'Block destructive DB commands (migrate:fresh, DROP DATABASE)',
+    'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
+    'enforce-tests.sh': 'Warn when source files change without test files',
+    'notify-waiting.sh': 'Desktop notification when Claude waits for input',
+  };
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --examples' + c.reset);
+  console.log(c.dim + '  Custom hooks beyond the 8 built-in ones' + c.reset);
+  console.log();
+
+  for (const [file, desc] of Object.entries(EXAMPLE_DESCRIPTIONS)) {
+    const fullPath = join(examplesDir, file);
+    const exists = existsSync(fullPath);
+    console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
+    console.log('    ' + c.dim + desc + c.reset);
+  }
+
+  console.log();
+  console.log(c.dim + '  Copy any example to ~/.claude/hooks/ and add to settings.json.' + c.reset);
+  console.log(c.dim + '  Source: ' + c.blue + 'https://github.com/yurukusa/cc-safe-setup/tree/main/examples' + c.reset);
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
   if (VERIFY) return verify();
   if (STATUS) return status();
+  if (EXAMPLES) return examples();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
