@@ -521,6 +521,28 @@ test_commit_msg '{"tool_input":{"command":"npm start"}}' 0 "ignores non-commit c
 test_commit_msg '{"tool_input":{"command":"git status"}}' 0 "ignores git status"
 echo ""
 
+# ========== env-var-check (example) ==========
+echo "env-var-check.sh (example):"
+ENV_CHECK="$(dirname "$0")/examples/env-var-check.sh"
+
+test_env_var() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$ENV_CHECK" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_env_var '{"tool_input":{"command":"export PATH=/usr/bin"}}' 0 "allows safe export"
+test_env_var '{"tool_input":{"command":"export API_KEY=sk-1234567890abcdefghijklmnop"}}' 2 "blocks hardcoded sk- key"
+test_env_var '{"tool_input":{"command":"npm start"}}' 0 "ignores non-export commands"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"

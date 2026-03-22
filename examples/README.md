@@ -19,6 +19,7 @@ npx cc-safe-setup --examples
 | **allowlist.sh** | Block everything not explicitly approved | [#37471](https://github.com/anthropics/claude-code/issues/37471) |
 | **block-database-wipe.sh** | Block migrate:fresh, DROP DATABASE, Prisma reset | [#37405](https://github.com/anthropics/claude-code/issues/37405) |
 | **deploy-guard.sh** | Block deploy with uncommitted changes | [#37314](https://github.com/anthropics/claude-code/issues/37314) |
+| **env-var-check.sh** | Block hardcoded API keys in export commands | |
 | **git-config-guard.sh** | Block git config --global | [#37201](https://github.com/anthropics/claude-code/issues/37201) |
 | **network-guard.sh** | Warn on suspicious network commands | [#37420](https://github.com/anthropics/claude-code/issues/37420) |
 | **protect-dotfiles.sh** | Block changes to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |

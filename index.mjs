@@ -281,6 +281,7 @@ function examples() {
       'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
       'block-database-wipe.sh': 'Block destructive DB commands (migrate:fresh, DROP DATABASE, Prisma)',
       'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
+      'env-var-check.sh': 'Block hardcoded API keys in export commands',
       'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
       'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
       'scope-guard.sh': 'Block file operations outside project directory',
