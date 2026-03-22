@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.8.0] - 2026-03-22
+- **New `--examples` flag** — lists all 8 example hooks with descriptions from the CLI
+- **New example: block-database-wipe.sh** — blocks destructive database commands (Laravel, Django, Rails, raw SQL)
+- Born from [#37405](https://github.com/anthropics/claude-code/issues/37405) and [#37439](https://github.com/anthropics/claude-code/issues/37439)
+
 ## [1.7.2] - 2026-03-22
 - **Fix: echo/printf/cat false positives** — string output commands mentioning PowerShell patterns no longer blocked
 - Tests: 89 → 90
