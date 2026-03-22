@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, copyFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
@@ -66,6 +66,8 @@ const HELP = process.argv.includes('--help') || process.argv.includes('-h');
 const STATUS = process.argv.includes('--status') || process.argv.includes('-s');
 const VERIFY = process.argv.includes('--verify') || process.argv.includes('-v');
 const EXAMPLES = process.argv.includes('--examples') || process.argv.includes('-e');
+const INSTALL_EXAMPLE_IDX = process.argv.findIndex(a => a === '--install-example');
+const INSTALL_EXAMPLE = INSTALL_EXAMPLE_IDX !== -1 ? process.argv[INSTALL_EXAMPLE_IDX + 1] : null;
 
 if (HELP) {
   console.log(`
@@ -78,6 +80,7 @@ if (HELP) {
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
     npx cc-safe-setup --examples   List available example hooks
+    npx cc-safe-setup --install-example <name>  Install a specific example hook
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -286,11 +289,73 @@ function examples() {
   console.log();
 }
 
+async function installExample(name) {
+  const examplesDir = join(__dirname, 'examples');
+  const filename = name.endsWith('.sh') ? name : name + '.sh';
+  const srcPath = join(examplesDir, filename);
+
+  if (!existsSync(srcPath)) {
+    console.log();
+    console.log(c.red + '  Error: example "' + name + '" not found.' + c.reset);
+    console.log(c.dim + '  Run --examples to see available hooks.' + c.reset);
+    console.log();
+    process.exit(1);
+  }
+
+  const destPath = join(HOOKS_DIR, filename);
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  copyFileSync(srcPath, destPath);
+  chmodSync(destPath, 0o755);
+
+  // Parse hook header for matcher and trigger
+  const content = readFileSync(srcPath, 'utf8');
+  let trigger = 'PreToolUse';
+  let matcher = 'Bash';
+
+  // Detect trigger from header comments
+  if (content.includes('PostToolUse')) trigger = 'PostToolUse';
+  if (content.includes('Notification')) trigger = 'Notification';
+  if (content.includes('Stop')) trigger = 'Stop';
+
+  // Detect matcher from header
+  const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);
+  if (matcherMatch) matcher = matcherMatch[1];
+
+  // Update settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
+  }
+  if (!settings.hooks) settings.hooks = {};
+  if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
+
+  const hookEntry = {
+    matcher: matcher,
+    hooks: [{ type: 'command', command: destPath }],
+  };
+
+  // Check if already installed
+  const existing = settings.hooks[trigger].find(h =>
+    h.hooks && h.hooks.some(hh => hh.command && hh.command.includes(filename))
+  );
+  if (!existing) {
+    settings.hooks[trigger].push(hookEntry);
+    writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n');
+  }
+
+  console.log();
+  console.log(c.green + '  ✓' + c.reset + ' Installed ' + c.bold + filename + c.reset);
+  console.log(c.dim + '    → ' + destPath + c.reset);
+  console.log(c.dim + '    → settings.json updated (' + trigger + ', matcher: "' + matcher + '")' + c.reset);
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
   if (VERIFY) return verify();
   if (STATUS) return status();
   if (EXAMPLES) return examples();
+  if (INSTALL_EXAMPLE) return installExample(INSTALL_EXAMPLE);
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);

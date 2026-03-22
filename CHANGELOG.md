@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.0] - 2026-03-23
+- **New `--install-example` flag** — install any example hook with one command
+  - `npx cc-safe-setup --install-example block-database-wipe`
+  - Copies hook to `~/.claude/hooks/`, adds to `settings.json`, makes executable
+  - Auto-detects trigger (PreToolUse/PostToolUse/etc.) and matcher from hook header
+
 ## [1.8.4] - 2026-03-23
 - **New example: scope-guard.sh** — blocks file operations outside project directory (absolute paths, home dir, parent escapes)
 - Born from [#36233](https://github.com/anthropics/claude-code/issues/36233) (entire Mac filesystem deleted)
