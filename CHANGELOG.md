@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.4] - 2026-03-23
+- **New example: deploy-guard.sh** — blocks deploy commands when uncommitted changes exist
+- Detects rsync, scp, firebase, vercel, netlify, fly, heroku
+- Born from [#37314](https://github.com/anthropics/claude-code/issues/37314) (deploy without commit)
+- Tests: 126 → 130
+- 16 examples total (was 15)
+
 ## [1.9.3] - 2026-03-23
 - **New example: git-config-guard.sh** — blocks git config --global modifications without consent
 - Born from [#37201](https://github.com/anthropics/claude-code/issues/37201) (unauthorized git config changes)
