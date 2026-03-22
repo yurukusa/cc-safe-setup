@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.1] - 2026-03-23
+- **New example: auto-checkpoint.sh** — auto-commit after every edit for rollback protection
+- Born from [#34674](https://github.com/anthropics/claude-code/issues/34674) (context compaction reverting uncommitted edits)
+- Tests: 116 → 119
+- 14 examples total (was 13)
+
 ## [1.9.0] - 2026-03-23
 - **New `--install-example` flag** — install any example hook with one command
   - `npx cc-safe-setup --install-example block-database-wipe`
