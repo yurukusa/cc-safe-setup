@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.7.2] - 2026-03-22
+- **Fix: echo/printf/cat false positives** — string output commands mentioning PowerShell patterns no longer blocked
+- Tests: 89 → 90
+
+## [1.7.1] - 2026-03-22
+- **Fix: git commit message false positive** — commit messages containing PowerShell command text no longer blocked
+- Restored git checkout/switch --force check
+- Tests: 88 → 89
+
+## [1.7.0] - 2026-03-22
+- **PowerShell destructive command protection** — blocks `Remove-Item -Recurse -Force`, `rd /s /q`, `del /s /q`
+- Born from [#37331](https://github.com/anthropics/claude-code/issues/37331): Claude ran `Remove-Item -Recurse -Force *` destroying all unpushed source code
+- Tests: 82 → 88
+
+## [1.6.5] - 2026-03-22
+- Security fix: `sudo mkfs` now blocked
+- WSL2: `/mnt` paths now blocked for rm
+- `--no-preserve-root` detection requires `rm` context (prevents false positive on echo)
+- Tests: 79 → 82
+
 ## [1.6.0] - 2026-03-22
 - **Security fix: `rm -rf .` now blocked** — current directory deletion was previously allowed
 - Also blocks `rm -rf ./` (trailing slash variant)
