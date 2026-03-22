@@ -361,6 +361,8 @@ test_db_wipe '{"tool_input":{"command":"prisma migrate reset"}}' 2 "blocks Prism
 test_db_wipe '{"tool_input":{"command":"prisma db push --force-reset"}}' 2 "blocks Prisma db push --force-reset"
 test_db_wipe '{"tool_input":{"command":"php artisan migrate"}}' 0 "allows safe Laravel migrate"
 test_db_wipe '{"tool_input":{"command":"prisma migrate deploy"}}' 0 "allows safe Prisma migrate deploy"
+test_db_wipe '{"tool_input":{"command":"php bin/console doctrine:fixtures:load"}}' 2 "blocks Doctrine fixtures:load"
+test_db_wipe '{"tool_input":{"command":"php bin/console doctrine:fixtures:load --append"}}' 0 "allows Doctrine fixtures:load --append"
 echo ""
 
 # ========== auto-checkpoint (example) ==========

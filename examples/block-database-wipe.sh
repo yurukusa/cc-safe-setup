@@ -61,6 +61,12 @@ if echo "$COMMAND" | grep -qiE 'DROP\s+(DATABASE|TABLE|SCHEMA)|TRUNCATE\s+TABLE|
     exit 2
 fi
 
+# Symfony/Doctrine destructive commands
+if echo "$COMMAND" | grep -qiE 'doctrine:(fixtures:load|schema:drop|database:drop)' && ! echo "$COMMAND" | grep -qE '\-\-append'; then
+    echo "BLOCKED: Destructive Doctrine command (use --append for fixtures:load)" >&2
+    exit 2
+fi
+
 # Prisma destructive commands
 if echo "$COMMAND" | grep -qiE 'prisma\s+migrate\s+reset|prisma\s+db\s+push\s+--force-reset'; then
     echo "BLOCKED: Destructive Prisma database command" >&2
