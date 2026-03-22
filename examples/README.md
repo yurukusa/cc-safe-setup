@@ -15,6 +15,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 | **block-database-wipe.sh** | Block destructive DB commands (Laravel, Django, Rails) | [#37405](https://github.com/anthropics/claude-code/issues/37405) |
 | **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
 | **enforce-tests.sh** | Warn when source changes without test changes | |
+| **git-config-guard.sh** | Block git config --global modifications | [#37201](https://github.com/anthropics/claude-code/issues/37201) |
 | **notify-waiting.sh** | Desktop notification when Claude waits for input | |
 | **protect-dotfiles.sh** | Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |
 | **scope-guard.sh** | Block file operations outside project directory | [#36233](https://github.com/anthropics/claude-code/issues/36233) |

@@ -290,6 +290,7 @@ function examples() {
     'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
     'scope-guard.sh': 'Block file operations outside project directory',
     'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
+    'git-config-guard.sh': 'Block git config --global modifications',
   };
 
   console.log();

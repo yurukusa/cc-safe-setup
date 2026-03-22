@@ -387,6 +387,29 @@ test_checkpoint '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "ig
 test_checkpoint '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "handles Edit tool"
 echo ""
 
+# ========== git-config-guard (example) ==========
+echo "git-config-guard.sh (example):"
+GIT_CONFIG_GUARD="$(dirname "$0")/examples/git-config-guard.sh"
+
+test_git_config() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$GIT_CONFIG_GUARD" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_git_config '{"tool_input":{"command":"git config --global user.email foo@bar.com"}}' 2 "blocks git config --global"
+test_git_config '{"tool_input":{"command":"git config --system core.autocrlf"}}' 2 "blocks git config --system"
+test_git_config '{"tool_input":{"command":"git config --local user.email foo@bar.com"}}' 0 "allows git config --local"
+test_git_config '{"tool_input":{"command":"git config user.name test"}}' 0 "allows git config without scope"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
