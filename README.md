@@ -158,6 +158,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **commit-message-check.sh** — Warn on non-conventional commit messages (feat:, fix:, docs:, etc.)
 - **env-var-check.sh** — Block hardcoded API keys (sk-, ghp_, glpat-) in export commands
 - **timeout-guard.sh** — Warn before long-running commands (npm start, rails s, docker-compose up)
+- **branch-name-check.sh** — Warn on non-conventional branch names (feature/, fix/, etc.)
 
 ## Learn More
 
