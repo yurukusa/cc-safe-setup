@@ -160,6 +160,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **timeout-guard.sh** — Warn before long-running commands (npm start, rails s, docker-compose up)
 - **branch-name-check.sh** — Warn on non-conventional branch names (feature/, fix/, etc.)
 - **todo-check.sh** — Warn when committing files with TODO/FIXME/HACK markers
+- **path-traversal-guard.sh** — Block Edit/Write with `../../` path traversal and system directories
 
 ## Learn More
 
