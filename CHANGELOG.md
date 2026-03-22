@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.9.2] - 2026-03-23
+- **`--status` now detects installed example hooks** — shows which examples are active alongside the 8 built-in hooks
+- CLI incidents list: added PowerShell Remove-Item and Prisma migrate reset
+
 ## [1.9.1] - 2026-03-23
 - **New example: auto-checkpoint.sh** — auto-commit after every edit for rollback protection
 - Born from [#34674](https://github.com/anthropics/claude-code/issues/34674) (context compaction reverting uncommitted edits)
