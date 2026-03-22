@@ -156,6 +156,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **test-before-push.sh** — Block `git push` when tests haven't been run ([#36970](https://github.com/anthropics/claude-code/issues/36970))
 - **large-file-guard.sh** — Warn when Write tool creates files over 500KB
 - **commit-message-check.sh** — Warn on non-conventional commit messages (feat:, fix:, docs:, etc.)
+- **env-var-check.sh** — Block hardcoded API keys (sk-, ghp_, glpat-) in export commands
 
 ## Learn More
 
