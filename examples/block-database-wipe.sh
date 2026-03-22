@@ -6,10 +6,11 @@
 #   - Django: flush, sqlflush
 #   - Rails: db:drop, db:reset
 #   - Raw SQL: DROP DATABASE, TRUNCATE
+#   - Symfony/Doctrine: fixtures:load (without --append), schema:drop, database:drop
 #   - Prisma: migrate reset, db push --force-reset
 #   - PostgreSQL: dropdb
 #
-# Born from GitHub Issues #37405, #37439, #34729
+# Born from GitHub Issues #37405, #37439, #34729, #37574
 #
 # Usage: Add to settings.json as a PreToolUse hook
 #
