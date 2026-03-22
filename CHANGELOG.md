@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.4] - 2026-03-23
+- **New example: scope-guard.sh** — blocks file operations outside project directory (absolute paths, home dir, parent escapes)
+- Born from [#36233](https://github.com/anthropics/claude-code/issues/36233) (entire Mac filesystem deleted)
+- Tests: 99 → 106
+- 13 examples total (was 12)
+
 ## [1.8.3] - 2026-03-23
 - **New example: protect-dotfiles.sh** — blocks modifications to ~/.bashrc, ~/.aws/, ~/.ssh/ and chezmoi without diff
 - **New example: allowlist.sh** added to --examples index

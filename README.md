@@ -142,6 +142,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - **auto-snapshot.sh** — Auto-save file snapshots before edits for rollback protection ([#37386](https://github.com/anthropics/claude-code/issues/37386) [#37457](https://github.com/anthropics/claude-code/issues/37457))
 - **allowlist.sh** — Block everything not explicitly approved — inverse permission model ([#37471](https://github.com/anthropics/claude-code/issues/37471))
 - **protect-dotfiles.sh** — Block modifications to `~/.bashrc`, `~/.aws/`, `~/.ssh/` and chezmoi without diff ([#37478](https://github.com/anthropics/claude-code/issues/37478))
+- **scope-guard.sh** — Block file operations outside project directory — absolute paths, home, parent escapes ([#36233](https://github.com/anthropics/claude-code/issues/36233))
 
 ## Learn More
 
