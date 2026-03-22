@@ -4,6 +4,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 
 | Hook | Purpose | Related Issue |
 |------|---------|---------------|
+| **allowlist.sh** | Block everything not explicitly approved (inverse model) | [#37471](https://github.com/anthropics/claude-code/issues/37471) |
 | **auto-approve-build.sh** | Auto-approve npm/yarn/cargo/go build, test, lint | |
 | **auto-approve-docker.sh** | Auto-approve docker build, compose, ps, logs | |
 | **auto-approve-git-read.sh** | Auto-approve `git status/log/diff` even with `-C` flags | [#36900](https://github.com/anthropics/claude-code/issues/36900) |
@@ -14,6 +15,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 | **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
 | **enforce-tests.sh** | Warn when source changes without test changes | |
 | **notify-waiting.sh** | Desktop notification when Claude waits for input | |
+| **protect-dotfiles.sh** | Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |
 
 ## Quick Start
 

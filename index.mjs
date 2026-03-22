@@ -263,6 +263,8 @@ function examples() {
     'notify-waiting.sh': 'Desktop notification when Claude waits for input',
     'auto-approve-python.sh': 'Auto-approve pytest, mypy, ruff, black, isort commands',
     'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
+    'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
+    'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
   };
 
   console.log();

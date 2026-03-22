@@ -280,6 +280,34 @@ test_hook "secret-guard" '{"tool_input":{"command":"git add .env.local"}}' 2 "bl
 test_hook "secret-guard" '{"tool_input":{"command":"git add package.json tsconfig.json"}}' 0 "allows config files"
 echo ""
 
+# ========== protect-dotfiles (example) ==========
+echo "protect-dotfiles.sh (example):"
+PROTECT_DOTFILES="$(dirname "$0")/examples/protect-dotfiles.sh"
+
+test_example_dotfiles() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$PROTECT_DOTFILES" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_example_dotfiles '{"tool_name":"Write","tool_input":{"file_path":"'"$HOME"'/.bashrc"}}' 2 "blocks Write to ~/.bashrc"
+test_example_dotfiles '{"tool_name":"Edit","tool_input":{"file_path":"'"$HOME"'/.zshrc"}}' 2 "blocks Edit to ~/.zshrc"
+test_example_dotfiles '{"tool_name":"Edit","tool_input":{"file_path":"'"$HOME"'/.aws/credentials"}}' 2 "blocks Edit to ~/.aws/credentials"
+test_example_dotfiles '{"tool_name":"Edit","tool_input":{"file_path":"'"$HOME"'/.ssh/config"}}' 2 "blocks Edit to ~/.ssh/config"
+test_example_dotfiles '{"tool_name":"Edit","tool_input":{"file_path":"'"$HOME"'/projects/foo.py"}}' 0 "allows editing project files"
+test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"chezmoi apply"}}' 2 "blocks chezmoi apply without diff"
+test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"chezmoi diff"}}' 0 "allows chezmoi diff"
+test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"rm -rf .ssh"}}' 2 "blocks rm on .ssh"
+test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"echo .bashrc is important"}}' 0 "allows echo mentioning dotfiles"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
