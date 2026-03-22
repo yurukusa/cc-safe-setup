@@ -179,12 +179,32 @@ function status() {
   console.log();
   console.log('  ' + (settingsOk ? c.green + '✓' : c.red + '✗') + c.reset + ' settings.json ' + (settingsOk ? 'has hooks configured' : 'missing hook configuration'));
 
+  // Check installed examples
+  const exampleFiles = [
+    'allowlist.sh', 'auto-approve-build.sh', 'auto-approve-docker.sh',
+    'auto-approve-git-read.sh', 'auto-approve-python.sh', 'auto-approve-ssh.sh',
+    'auto-checkpoint.sh', 'auto-snapshot.sh', 'block-database-wipe.sh',
+    'edit-guard.sh', 'enforce-tests.sh', 'notify-waiting.sh',
+    'protect-dotfiles.sh', 'scope-guard.sh',
+  ];
+  const installedExamples = exampleFiles.filter(f => existsSync(join(HOOKS_DIR, f)));
+  if (installedExamples.length > 0) {
+    console.log();
+    console.log('  ' + c.bold + 'Example hooks installed:' + c.reset);
+    for (const f of installedExamples) {
+      console.log('  ' + c.green + '✓' + c.reset + ' ' + f);
+    }
+  }
+
   console.log();
   if (missing === 0) {
     console.log(c.bold + '  All ' + installed + ' hooks installed.' + c.reset);
   } else {
     console.log(c.bold + '  ' + installed + '/' + Object.keys(HOOKS).length + ' hooks installed.' + c.reset);
     console.log('  ' + c.dim + 'Run: npx cc-safe-setup' + c.reset);
+  }
+  if (installedExamples.length > 0) {
+    console.log('  ' + c.dim + '+ ' + installedExamples.length + ' example hooks' + c.reset);
   }
   console.log();
 
