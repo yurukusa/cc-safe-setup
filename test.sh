@@ -423,8 +423,11 @@ node "$CLI" --examples > /dev/null 2>&1
 if [ $? -eq 0 ]; then echo "  PASS: --examples exits 0"; PASS=$((PASS + 1)); else echo "  FAIL: --examples"; FAIL=$((FAIL + 1)); fi
 
 # --install-example nonexistent exits 1
-node "$CLI" --install-example nonexistent > /dev/null 2>&1
-if [ $? -eq 1 ]; then echo "  PASS: --install-example nonexistent exits 1"; PASS=$((PASS + 1)); else echo "  FAIL: --install-example nonexistent"; FAIL=$((FAIL + 1)); fi
+node "$CLI" --install-example nonexistent > /dev/null 2>&1 || true
+# The above always exits 1, but set -e would kill us. Use subshell:
+INSTALL_EXIT=0
+node "$CLI" --install-example nonexistent > /dev/null 2>&1 || INSTALL_EXIT=$?
+if [ "$INSTALL_EXIT" -eq 1 ]; then echo "  PASS: --install-example nonexistent exits 1"; PASS=$((PASS + 1)); else echo "  FAIL: --install-example nonexistent (got $INSTALL_EXIT)"; FAIL=$((FAIL + 1)); fi
 echo ""
 
 # --- Summary ---
