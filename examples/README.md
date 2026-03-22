@@ -22,6 +22,7 @@ npx cc-safe-setup --examples
 | **env-var-check.sh** | Block hardcoded API keys in export commands | |
 | **git-config-guard.sh** | Block git config --global | [#37201](https://github.com/anthropics/claude-code/issues/37201) |
 | **network-guard.sh** | Warn on suspicious network commands | [#37420](https://github.com/anthropics/claude-code/issues/37420) |
+| **path-traversal-guard.sh** | Block Edit/Write with ../ path traversal | |
 | **protect-dotfiles.sh** | Block changes to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |
 | **scope-guard.sh** | Block operations outside project directory | [#36233](https://github.com/anthropics/claude-code/issues/36233) |
 | **test-before-push.sh** | Block git push without tests | [#36970](https://github.com/anthropics/claude-code/issues/36970) |

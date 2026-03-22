@@ -283,6 +283,7 @@ function examples() {
       'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
       'env-var-check.sh': 'Block hardcoded API keys in export commands',
       'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
+      'path-traversal-guard.sh': 'Block Edit/Write with path traversal (../../)',
       'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
       'scope-guard.sh': 'Block file operations outside project directory',
       'test-before-push.sh': 'Block git push when tests have not passed',
