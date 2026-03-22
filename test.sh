@@ -410,6 +410,23 @@ test_git_config '{"tool_input":{"command":"git config --local user.email foo@bar
 test_git_config '{"tool_input":{"command":"git config user.name test"}}' 0 "allows git config without scope"
 echo ""
 
+# ========== CLI smoke tests ==========
+echo "CLI smoke tests:"
+CLI="$(dirname "$0")/index.mjs"
+
+# --help exits 0
+node "$CLI" --help > /dev/null 2>&1
+if [ $? -eq 0 ]; then echo "  PASS: --help exits 0"; PASS=$((PASS + 1)); else echo "  FAIL: --help"; FAIL=$((FAIL + 1)); fi
+
+# --examples exits 0
+node "$CLI" --examples > /dev/null 2>&1
+if [ $? -eq 0 ]; then echo "  PASS: --examples exits 0"; PASS=$((PASS + 1)); else echo "  FAIL: --examples"; FAIL=$((FAIL + 1)); fi
+
+# --install-example nonexistent exits 1
+node "$CLI" --install-example nonexistent > /dev/null 2>&1
+if [ $? -eq 1 ]; then echo "  PASS: --install-example nonexistent exits 1"; PASS=$((PASS + 1)); else echo "  FAIL: --install-example nonexistent"; FAIL=$((FAIL + 1)); fi
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
