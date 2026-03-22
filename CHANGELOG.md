@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.4] - 2026-03-23
+- **New examples: deploy-guard, network-guard, test-before-push, large-file-guard, commit-message-check, env-var-check, timeout-guard, branch-name-check** (8 new examples)
+- Tests: 138 → 148
+- 23 examples total (was 19)
+- Safety Guards: 11, Auto-Approve: 5, Quality: 5, Recovery: 2, UX: 1
+
 ## [2.0.0] - 2026-03-23
 - **Categorized `--examples` output** — 5 categories: Safety Guards, Auto-Approve, Quality, Recovery, UX
 - **New examples: deploy-guard, network-guard, test-before-push, large-file-guard** (4 new)
