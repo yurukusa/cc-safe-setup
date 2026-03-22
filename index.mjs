@@ -302,6 +302,7 @@ function examples() {
       'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
       'enforce-tests.sh': 'Warn when source files change without test files',
       'large-file-guard.sh': 'Warn when Write creates files over 500KB',
+      'todo-check.sh': 'Warn when committing files with TODO/FIXME markers',
     },
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',

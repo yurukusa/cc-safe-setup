@@ -46,6 +46,7 @@ npx cc-safe-setup --examples
 | **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
 | **enforce-tests.sh** | Warn when source changes without tests | |
 | **large-file-guard.sh** | Warn when Write creates files >500KB | |
+| **todo-check.sh** | Warn when committing files with TODO/FIXME | |
 
 ## Recovery
 

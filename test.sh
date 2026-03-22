@@ -586,6 +586,27 @@ test_branch '{"tool_input":{"command":"git status"}}' 0 "ignores non-branch comm
 test_branch '{"tool_input":{"command":"git checkout -b feature/my-feature"}}' 0 "allows conventional branch"
 echo ""
 
+# ========== todo-check (example) ==========
+echo "todo-check.sh (example):"
+TODO_CHECK="$(dirname "$0")/examples/todo-check.sh"
+
+test_todo() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$TODO_CHECK" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_todo '{"tool_input":{"command":"npm start"}}' 0 "ignores non-commit commands"
+test_todo '{"tool_input":{"command":"git status"}}' 0 "ignores git status"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"
