@@ -500,6 +500,27 @@ test_large_file '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "ig
 test_large_file '{"tool_name":"Write","tool_input":{"file_path":"/nonexistent/path"}}' 0 "handles nonexistent file"
 echo ""
 
+# ========== commit-message-check (example) ==========
+echo "commit-message-check.sh (example):"
+COMMIT_CHECK="$(dirname "$0")/examples/commit-message-check.sh"
+
+test_commit_msg() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$COMMIT_CHECK" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_commit_msg '{"tool_input":{"command":"npm start"}}' 0 "ignores non-commit commands"
+test_commit_msg '{"tool_input":{"command":"git status"}}' 0 "ignores git status"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"

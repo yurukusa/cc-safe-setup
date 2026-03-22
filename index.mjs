@@ -295,6 +295,7 @@ function examples() {
       'auto-approve-ssh.sh': 'Auto-approve safe SSH commands (uptime, whoami)',
     },
     'Quality': {
+      'commit-message-check.sh': 'Warn on non-conventional commit messages',
       'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
       'enforce-tests.sh': 'Warn when source files change without test files',
       'large-file-guard.sh': 'Warn when Write creates files over 500KB',
