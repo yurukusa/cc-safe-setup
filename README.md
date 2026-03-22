@@ -136,6 +136,7 @@ Need custom hooks beyond the 8 built-in ones? See [`examples/`](examples/) for r
 - **edit-guard.sh** — Block Edit/Write to protected files (defense-in-depth for [#37210](https://github.com/anthropics/claude-code/issues/37210))
 - **auto-approve-build.sh** — Auto-approve npm/yarn/cargo/go/python build, test, and lint commands
 - **auto-approve-docker.sh** — Auto-approve docker build, compose, ps, logs, and other safe commands
+- **block-database-wipe.sh** — Block destructive database commands: Laravel `migrate:fresh`, Django `flush`, Rails `db:drop`, raw `DROP DATABASE` ([#37405](https://github.com/anthropics/claude-code/issues/37405) [#37439](https://github.com/anthropics/claude-code/issues/37439))
 
 ## Learn More
 
