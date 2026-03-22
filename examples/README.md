@@ -21,14 +21,16 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 ## Quick Start
 
 ```bash
-# 1. Copy example to hooks directory
+# One command — copies hook, updates settings.json, makes executable
+npx cc-safe-setup --install-example block-database-wipe
+```
+
+Or manually:
+
+```bash
 cp examples/block-database-wipe.sh ~/.claude/hooks/
-
-# 2. Make executable
 chmod +x ~/.claude/hooks/block-database-wipe.sh
-
-# 3. Add to settings.json
-# See each file's header comment for the JSON configuration
+# Add to settings.json — see each file's header for the JSON config
 ```
 
 ## List from CLI
