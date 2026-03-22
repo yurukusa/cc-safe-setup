@@ -21,6 +21,7 @@ Custom hooks beyond the 8 built-in ones. Copy any file to `~/.claude/hooks/` and
 | **notify-waiting.sh** | Desktop notification when Claude waits for input | |
 | **protect-dotfiles.sh** | Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |
 | **scope-guard.sh** | Block file operations outside project directory | [#36233](https://github.com/anthropics/claude-code/issues/36233) |
+| **test-before-push.sh** | Block git push when tests haven't passed | [#36970](https://github.com/anthropics/claude-code/issues/36970) |
 
 ## Quick Start
 

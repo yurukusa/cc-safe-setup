@@ -293,6 +293,7 @@ function examples() {
     'git-config-guard.sh': 'Block git config --global modifications',
     'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
     'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
+    'test-before-push.sh': 'Block git push when tests have not passed',
   };
 
   console.log();
