@@ -292,6 +292,7 @@ function examples() {
     'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
     'git-config-guard.sh': 'Block git config --global modifications',
     'deploy-guard.sh': 'Block deploy when uncommitted changes exist',
+    'network-guard.sh': 'Warn on suspicious network commands (data exfiltration)',
   };
 
   console.log();
