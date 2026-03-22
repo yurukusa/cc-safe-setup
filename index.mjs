@@ -316,7 +316,7 @@ function examples() {
 
   console.log();
   console.log(c.bold + '  cc-safe-setup --examples' + c.reset);
-  console.log(c.dim + '  24 hooks beyond the 8 built-in ones' + c.reset);
+  console.log(c.dim + '  25 hooks beyond the 8 built-in ones' + c.reset);
   console.log();
 
   for (const [cat, hooks] of Object.entries(CATEGORIES)) {
