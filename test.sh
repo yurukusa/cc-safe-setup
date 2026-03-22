@@ -308,6 +308,32 @@ test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"rm -rf .ssh"
 test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"echo .bashrc is important"}}' 0 "allows echo mentioning dotfiles"
 echo ""
 
+# ========== scope-guard (example) ==========
+echo "scope-guard.sh (example):"
+SCOPE_GUARD="$(dirname "$0")/examples/scope-guard.sh"
+
+test_scope_guard() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$SCOPE_GUARD" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"rm -rf /var/log"}}' 2 "blocks rm -rf with absolute path"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"rm -rf ~/Desktop"}}' 2 "blocks rm -rf targeting home"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"rm -rf ../../other-project"}}' 2 "blocks rm -rf escaping project"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"rm -rf ./node_modules"}}' 0 "allows rm -rf in project subdirectory"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"rm -rf build"}}' 0 "allows rm -rf relative path"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"echo rm -rf /etc is dangerous"}}' 0 "allows echo mentioning rm"
+test_scope_guard '{"tool_name":"Bash","tool_input":{"command":"del /s Documents"}}' 2 "blocks del targeting Documents"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))

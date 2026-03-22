@@ -265,6 +265,7 @@ function examples() {
     'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
     'allowlist.sh': 'Block everything not in allowlist (inverse permission model)',
     'protect-dotfiles.sh': 'Block modifications to ~/.bashrc, ~/.aws/, ~/.ssh/',
+    'scope-guard.sh': 'Block file operations outside project directory',
   };
 
   console.log();
