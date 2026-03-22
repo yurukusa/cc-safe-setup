@@ -245,6 +245,17 @@ test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./"}}' 2 "rm -rf
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ./node_modules"}}' 0 "rm -rf ./node_modules allowed"
 echo ""
 
+# --- destructive-guard: PowerShell Remove-Item ---
+echo "destructive-guard-powershell:"
+extract_hook "destructive-guard"
+test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}' 2 "Remove-Item -Recurse -Force blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item -Force -Recurse ./src"}}' 2 "Remove-Item -Force -Recurse blocked (reordered flags)"
+test_hook "destructive-guard" '{"tool_input":{"command":"powershell.exe -Command \"Remove-Item -Recurse -Force *\""}}' 2 "powershell.exe Remove-Item blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rd /s /q C:\\Users"}}' 2 "rd /s /q blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"del /s /q *.tmp"}}' 2 "del /s /q blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item ./file.txt"}}' 0 "Remove-Item single file allowed"
+echo ""
+
 # --- destructive-guard: sudo edge cases ---
 echo "destructive-guard-sudo:"
 extract_hook "destructive-guard"
