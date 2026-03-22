@@ -20,6 +20,7 @@ Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
 
   Prevents real incidents:
   ✗ rm -rf deleting entire user directories (NTFS junction traversal)
+  ✗ Remove-Item -Recurse -Force destroying unpushed source code
   ✗ Untested code pushed to main at 3am
   ✗ Force-push rewriting shared branch history
   ✗ API keys committed to public repos via git add .
@@ -43,7 +44,7 @@ Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
 
 ## Why This Exists
 
-A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed.
+A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed.
 
 Claude Code ships with no safety hooks by default. This tool fixes that.
 
@@ -51,7 +52,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 | Hook | Prevents | Related Issues |
 |------|----------|----------------|
-| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, `git checkout --force`, `sudo` + destructive, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) |
+| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, `git checkout --force`, `sudo` + destructive, PowerShell `Remove-Item -Recurse -Force`, `rd /s /q`, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) [#37331](https://github.com/anthropics/claude-code/issues/37331) |
 | **Branch Guard** | Pushes to main/master + force-push (`--force`) on all branches | |
 | **Secret Guard** | `git add .env`, credential files, `git add .` with .env present | [#6527](https://github.com/anthropics/claude-code/issues/6527) |
 | **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | |
