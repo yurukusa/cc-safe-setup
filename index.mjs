@@ -261,6 +261,7 @@ function examples() {
     'edit-guard.sh': 'Block Edit/Write to protected files (.env, credentials)',
     'enforce-tests.sh': 'Warn when source files change without test files',
     'notify-waiting.sh': 'Desktop notification when Claude waits for input',
+    'auto-approve-python.sh': 'Auto-approve pytest, mypy, ruff, black, isort commands',
   };
 
   console.log();
