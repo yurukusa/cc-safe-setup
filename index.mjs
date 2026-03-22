@@ -186,7 +186,7 @@ function status() {
     'auto-checkpoint.sh', 'auto-snapshot.sh', 'block-database-wipe.sh', 'branch-name-check.sh', 'commit-message-check.sh', 'env-var-check.sh',
     'deploy-guard.sh', 'edit-guard.sh', 'enforce-tests.sh', 'git-config-guard.sh',
     'large-file-guard.sh', 'network-guard.sh', 'notify-waiting.sh',
-    'protect-dotfiles.sh', 'scope-guard.sh', 'test-before-push.sh', 'timeout-guard.sh',
+    'protect-dotfiles.sh', 'scope-guard.sh', 'test-before-push.sh', 'timeout-guard.sh', 'todo-check.sh',
   ];
   const installedExamples = exampleFiles.filter(f => existsSync(join(HOOKS_DIR, f)));
   if (installedExamples.length > 0) {

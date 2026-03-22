@@ -159,6 +159,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **env-var-check.sh** — Block hardcoded API keys (sk-, ghp_, glpat-) in export commands
 - **timeout-guard.sh** — Warn before long-running commands (npm start, rails s, docker-compose up)
 - **branch-name-check.sh** — Warn on non-conventional branch names (feature/, fix/, etc.)
+- **todo-check.sh** — Warn when committing files with TODO/FIXME/HACK markers
 
 ## Learn More
 
