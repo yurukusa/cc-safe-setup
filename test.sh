@@ -255,6 +255,7 @@ test_hook "destructive-guard" '{"tool_input":{"command":"rd /s /q C:\\Users"}}' 
 test_hook "destructive-guard" '{"tool_input":{"command":"del /s /q *.tmp"}}' 2 "del /s /q blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item ./file.txt"}}' 0 "Remove-Item single file allowed"
 test_hook "destructive-guard" '{"tool_input":{"command":"git commit -m \"docs: mention Remove-Item -Recurse -Force in README\""}}' 0 "git commit mentioning PS command not blocked (false positive fix)"
+test_hook "destructive-guard" '{"tool_input":{"command":"echo \"Remove-Item -Recurse -Force is dangerous\""}}' 0 "echo mentioning PS command not blocked"
 echo ""
 
 # --- destructive-guard: sudo edge cases ---
