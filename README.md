@@ -25,6 +25,7 @@ Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No 
   ✗ Force-push rewriting shared branch history
   ✗ API keys committed to public repos via git add .
   ✗ Syntax errors cascading through 30+ files
+  ✗ Laravel migrate:fresh wiping production database
   ✗ Sessions losing all context with no warning
 
   Hooks to install:
