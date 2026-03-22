@@ -1,6 +1,6 @@
 # Example Hooks
 
-19 hooks beyond the 8 built-in ones, organized by category.
+25 hooks beyond the 8 built-in ones, organized by category.
 
 ## Quick Start
 
