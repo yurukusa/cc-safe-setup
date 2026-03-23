@@ -130,7 +130,9 @@ Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/cl
 
 ## Safety Audit
 
-Check what's missing in your setup:
+**[Try it in your browser](https://yurukusa.github.io/cc-safe-setup/)** — paste your settings.json, get a score instantly. Nothing leaves your browser.
+
+Or from the CLI:
 
 ```bash
 npx cc-safe-setup --audit
