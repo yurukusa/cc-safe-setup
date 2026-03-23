@@ -761,6 +761,19 @@ echo "--- --lint tests ---"
 
 LINT_OUT=$(node "$CLI" --lint 2>&1) || true
 if echo "$LINT_OUT" | grep -q "OK\|WARN\|ERROR\|Clean"; then echo "  PASS: --lint produces output"; PASS=$((PASS + 1)); else echo "  FAIL: --lint should produce output"; FAIL=$((FAIL + 1)); fi
+if echo "$LINT_OUT" | grep -q "hooks registered\|no duplicates"; then echo "  PASS: --lint checks hook count"; PASS=$((PASS + 1)); else echo "  FAIL: --lint should check hooks"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
+# --diff tests
+# ========================
+echo "--- --diff tests ---"
+
+echo '{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"test.sh"}]}]}}' > /tmp/cc-diff-test.json
+DIFF_OUT=$(node "$CLI" --diff /tmp/cc-diff-test.json 2>&1) || true
+if echo "$DIFF_OUT" | grep -q "difference\|No differences"; then echo "  PASS: --diff compares settings"; PASS=$((PASS + 1)); else echo "  FAIL: --diff should show differences"; FAIL=$((FAIL + 1)); fi
+if echo "$DIFF_OUT" | grep -q "local only\|other only\|No diff"; then echo "  PASS: --diff shows direction"; PASS=$((PASS + 1)); else echo "  FAIL: --diff should indicate direction"; FAIL=$((FAIL + 1)); fi
+python3 -c "import os; os.path.exists('/tmp/cc-diff-test.json') and os.remove('/tmp/cc-diff-test.json')" 2>/dev/null
 echo ""
 
 # ========================
