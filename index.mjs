@@ -304,6 +304,7 @@ function examples() {
       'enforce-tests.sh': 'Warn when source files change without test files',
       'large-file-guard.sh': 'Warn when Write creates files over 500KB',
       'todo-check.sh': 'Warn when committing files with TODO/FIXME markers',
+      'verify-before-commit.sh': 'Block commit unless tests passed recently',
     },
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',

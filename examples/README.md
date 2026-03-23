@@ -48,6 +48,7 @@ npx cc-safe-setup --examples
 | **enforce-tests.sh** | Warn when source changes without tests | |
 | **large-file-guard.sh** | Warn when Write creates files >500KB | |
 | **todo-check.sh** | Warn when committing files with TODO/FIXME | |
+| **verify-before-commit.sh** | Block commit unless tests passed recently | [#37818](https://github.com/anthropics/claude-code/issues/37818) |
 
 ## Recovery
 

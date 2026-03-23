@@ -632,6 +632,27 @@ test_path_traversal '{"tool_name":"Write","tool_input":{"file_path":"/etc/cronta
 test_path_traversal '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores Bash tool"
 echo ""
 
+# ========== verify-before-commit (example) ==========
+echo "verify-before-commit.sh (example):"
+VERIFY_COMMIT="$(dirname "$0")/examples/verify-before-commit.sh"
+
+test_verify() {
+    local input="$1" expected_exit="$2" desc="$3"
+    local actual_exit=0
+    echo "$input" | bash "$VERIFY_COMMIT" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_verify '{"tool_input":{"command":"npm start"}}' 0 "ignores non-commit commands"
+test_verify '{"tool_input":{"command":"git status"}}' 0 "ignores git status"
+echo ""
+
 # ========== CLI smoke tests ==========
 echo "CLI smoke tests:"
 CLI="$(dirname "$0")/index.mjs"
