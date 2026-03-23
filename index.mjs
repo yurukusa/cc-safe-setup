@@ -77,6 +77,7 @@ const WATCH = process.argv.includes('--watch');
 const EXPORT = process.argv.includes('--export');
 const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
 const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
+const STATS = process.argv.includes('--stats');
 
 if (HELP) {
   console.log(`
@@ -97,6 +98,7 @@ if (HELP) {
     npx cc-safe-setup --learn      Learn from your block history
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
+    npx cc-safe-setup --stats      Block statistics and patterns report
     npx cc-safe-setup --export     Export hooks config for team sharing
     npx cc-safe-setup --import <file>  Import hooks from exported config
     npx cc-safe-setup --help       Show this help
@@ -747,6 +749,127 @@ async function fullSetup() {
   console.log();
 }
 
+async function stats() {
+  const LOG_PATH = join(HOME, '.claude', 'blocked-commands.log');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --stats' + c.reset);
+  console.log(c.dim + '  Block statistics from your hook history' + c.reset);
+  console.log();
+
+  if (!existsSync(LOG_PATH)) {
+    console.log(c.dim + '  No blocked-commands.log found. Hooks haven\'t blocked anything yet.' + c.reset);
+    console.log(c.dim + '  This is normal if you just installed hooks.' + c.reset);
+    console.log();
+    process.exit(0);
+  }
+
+  const lines = readFileSync(LOG_PATH, 'utf-8').split('\n').filter(l => l.trim());
+  if (lines.length === 0) {
+    console.log(c.dim + '  Log is empty. No blocks recorded yet.' + c.reset);
+    console.log();
+    process.exit(0);
+  }
+
+  // Parse log entries: [timestamp] BLOCKED: reason | cmd: command
+  const entries = [];
+  const reasonCounts = {};
+  const hourCounts = {};
+  const dayCounts = {};
+  const commandPatterns = {};
+
+  for (const line of lines) {
+    const match = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|\s*cmd:\s*(.+)$/);
+    if (!match) continue;
+
+    const [, ts, reason, cmd] = match;
+    const date = new Date(ts);
+    const day = ts.split('T')[0];
+    const hour = date.getHours();
+
+    entries.push({ ts, reason: reason.trim(), cmd: cmd.trim(), date, day, hour });
+
+    // Count reasons
+    const r = reason.trim();
+    reasonCounts[r] = (reasonCounts[r] || 0) + 1;
+
+    // Count by hour
+    hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+
+    // Count by day
+    dayCounts[day] = (dayCounts[day] || 0) + 1;
+
+    // Categorize commands
+    const cmdLower = cmd.toLowerCase();
+    let pattern = 'other';
+    if (cmdLower.includes('rm ')) pattern = 'rm (delete)';
+    else if (cmdLower.includes('git push')) pattern = 'git push';
+    else if (cmdLower.includes('git reset')) pattern = 'git reset';
+    else if (cmdLower.includes('git clean')) pattern = 'git clean';
+    else if (cmdLower.includes('git add')) pattern = 'git add (secrets)';
+    else if (cmdLower.includes('remove-item')) pattern = 'PowerShell delete';
+    else if (cmdLower.includes('git checkout') || cmdLower.includes('git switch')) pattern = 'git checkout --force';
+    commandPatterns[pattern] = (commandPatterns[pattern] || 0) + 1;
+  }
+
+  if (entries.length === 0) {
+    console.log(c.dim + '  No parseable entries in log.' + c.reset);
+    console.log();
+    process.exit(0);
+  }
+
+  // Summary
+  const firstDate = entries[0].day;
+  const lastDate = entries[entries.length - 1].day;
+  const daySpan = Object.keys(dayCounts).length;
+
+  console.log(c.bold + '  Summary' + c.reset);
+  console.log('  Total blocks: ' + c.bold + entries.length + c.reset);
+  console.log('  Period: ' + firstDate + ' to ' + lastDate + ' (' + daySpan + ' days)');
+  console.log('  Average: ' + (entries.length / Math.max(daySpan, 1)).toFixed(1) + ' blocks/day');
+  console.log();
+
+  // Top reasons
+  console.log(c.bold + '  Top Block Reasons' + c.reset);
+  const sortedReasons = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1]);
+  const maxReasonCount = sortedReasons[0]?.[1] || 1;
+  for (const [reason, count] of sortedReasons.slice(0, 8)) {
+    const bar = '█'.repeat(Math.ceil(count / maxReasonCount * 20));
+    const pct = ((count / entries.length) * 100).toFixed(0);
+    console.log('  ' + c.red + bar + c.reset + ' ' + count + ' (' + pct + '%) ' + reason);
+  }
+  console.log();
+
+  // Command categories
+  console.log(c.bold + '  Command Categories' + c.reset);
+  const sortedPatterns = Object.entries(commandPatterns).sort((a, b) => b[1] - a[1]);
+  for (const [pattern, count] of sortedPatterns) {
+    const pct = ((count / entries.length) * 100).toFixed(0);
+    console.log('  ' + c.yellow + count.toString().padStart(4) + c.reset + ' ' + pattern + ' (' + pct + '%)');
+  }
+  console.log();
+
+  // Activity by hour
+  console.log(c.bold + '  Blocks by Hour' + c.reset);
+  const maxHour = Math.max(...Object.values(hourCounts), 1);
+  for (let h = 0; h < 24; h++) {
+    const count = hourCounts[h] || 0;
+    if (count === 0) continue;
+    const bar = '▓'.repeat(Math.ceil(count / maxHour * 15));
+    console.log('  ' + h.toString().padStart(2) + ':00 ' + c.blue + bar + c.reset + ' ' + count);
+  }
+  console.log();
+
+  // Recent blocks (last 5)
+  console.log(c.bold + '  Recent Blocks' + c.reset);
+  for (const entry of entries.slice(-5)) {
+    const time = entry.ts.replace(/T/, ' ').replace(/\+.*/, '');
+    console.log('  ' + c.dim + time + c.reset + ' ' + entry.reason);
+    console.log('    ' + c.dim + entry.cmd.slice(0, 100) + c.reset);
+  }
+  console.log();
+}
+
 async function exportConfig() {
   console.log();
   console.log(c.bold + '  cc-safe-setup --export' + c.reset);
@@ -1304,6 +1427,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (STATS) return stats();
   if (EXPORT) return exportConfig();
   if (IMPORT_FILE) return importConfig(IMPORT_FILE);
 
