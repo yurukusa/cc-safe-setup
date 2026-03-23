@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "One command to make Claude Code safe for autonomous operation. 8 built-in + 38 examples. 22 commands including dashboard, create, audit, lint, diff, benchmark. 2,500+ daily npm downloads.",
   "main": "index.mjs",
   "bin": {
@@ -35,5 +35,5 @@
     "type": "git",
     "url": "https://github.com/yurukusa/cc-safe-setup"
   },
-  "homepage": "https://github.com/yurukusa/cc-safe-setup"
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/"
 }
