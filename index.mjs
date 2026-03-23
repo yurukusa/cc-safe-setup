@@ -82,6 +82,7 @@ const JSON_OUTPUT = process.argv.includes('--json');
 const LINT = process.argv.includes('--lint');
 const DIFF_IDX = process.argv.findIndex(a => a === '--diff');
 const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
+const SHARE = process.argv.includes('--share');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -103,6 +104,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --share         Generate shareable URL for your setup
     npx cc-safe-setup --diff <file>   Compare your settings with another file
     npx cc-safe-setup --lint       Static analysis of hook configuration
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
@@ -775,6 +777,50 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+function share() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --share' + c.reset);
+  console.log();
+
+  if (!existsSync(SETTINGS_PATH)) {
+    console.log(c.red + '  No settings.json found.' + c.reset);
+    process.exit(1);
+  }
+
+  const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+
+  // Strip sensitive data — only keep hooks and permissions structure
+  const shareable = {
+    hooks: settings.hooks || {},
+    permissions: settings.permissions || {},
+    defaultMode: settings.defaultMode,
+  };
+
+  // Remove full file paths, keep only script names
+  for (const trigger of Object.keys(shareable.hooks)) {
+    for (const entry of shareable.hooks[trigger]) {
+      for (const h of (entry.hooks || [])) {
+        if (h.command) {
+          // Keep only the filename
+          h.command = h.command.split('/').pop();
+        }
+      }
+    }
+  }
+
+  const json = JSON.stringify(shareable);
+  const encoded = Buffer.from(json).toString('base64');
+  const url = 'https://yurukusa.github.io/cc-safe-setup/?config=' + encoded;
+
+  console.log(c.green + '  Shareable URL:' + c.reset);
+  console.log();
+  console.log('  ' + url);
+  console.log();
+  console.log(c.dim + '  Anyone with this URL can audit your hook setup in their browser.' + c.reset);
+  console.log(c.dim + '  Only hook names and permissions are shared (no file paths or secrets).' + c.reset);
   console.log();
 }
 
@@ -1938,6 +1984,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (SHARE) return share();
   if (DIFF_FILE) return diff(DIFF_FILE);
   if (LINT) return lint();
   if (CREATE_DESC) return createHook(CREATE_DESC);

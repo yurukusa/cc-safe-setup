@@ -598,6 +598,21 @@ exit 0`
 
   return scripts[id] || '#!/bin/bash\nexit 0';
 }
+
+// Auto-load from URL parameter: ?config=base64encodedJSON
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const config = params.get('config');
+  if (config) {
+    try {
+      const json = atob(config);
+      document.getElementById('settings').value = json;
+      runAudit();
+    } catch(e) {
+      console.error('Invalid config parameter');
+    }
+  }
+})();
 </script>
 </body>
 </html>
