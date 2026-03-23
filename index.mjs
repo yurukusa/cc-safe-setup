@@ -319,6 +319,8 @@ function examples() {
       'test-before-push.sh': 'Block git push when tests have not passed',
       'timeout-guard.sh': 'Warn before long-running commands (servers, watchers)',
       'git-config-guard.sh': 'Block git config --global modifications',
+      'case-sensitive-guard.sh': 'Detect case-insensitive FS collisions (exFAT/NTFS/HFS+)',
+      'compound-command-approver.sh': 'Auto-approve safe compound commands (cd && git log)',
     },
     'Auto-Approve': {
       'auto-approve-build.sh': 'Auto-approve npm/yarn/cargo/go build, test, lint',
@@ -339,15 +341,18 @@ function examples() {
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
       'auto-snapshot.sh': 'Auto-save file snapshots before edits (rollback protection)',
+      'session-checkpoint.sh': 'Save session state before context compaction',
     },
     'UX': {
       'notify-waiting.sh': 'Desktop notification when Claude waits for input',
+      'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd files on session end',
+      'hook-debug-wrapper.sh': 'Wrap any hook to log input/output/exit/timing',
     },
   };
 
   console.log();
   console.log(c.bold + '  cc-safe-setup --examples' + c.reset);
-  console.log(c.dim + '  25 hooks beyond the 8 built-in ones' + c.reset);
+  console.log(c.dim + '  30 hooks beyond the 8 built-in ones' + c.reset);
   console.log();
 
   for (const [cat, hooks] of Object.entries(CATEGORIES)) {
