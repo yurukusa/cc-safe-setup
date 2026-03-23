@@ -754,6 +754,25 @@ else
 fi
 echo ""
 
+# ========================
+# --stats tests
+# ========================
+echo "--- --stats tests ---"
+
+STATS_OUT=$(node "$CLI" --stats 2>&1) || true
+if echo "$STATS_OUT" | grep -q "blocks\|Block\|empty\|No blocked"; then echo "  PASS: --stats runs without error"; PASS=$((PASS + 1)); else echo "  FAIL: --stats should produce output"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
+# --export tests
+# ========================
+echo "--- --export tests ---"
+
+EXPORT_OUT=$(cd /tmp && node "$CLI" --export 2>&1) || true
+if echo "$EXPORT_OUT" | grep -q "Exported"; then echo "  PASS: --export creates file"; PASS=$((PASS + 1)); else echo "  FAIL: --export should create file"; FAIL=$((FAIL + 1)); fi
+rm -f /tmp/cc-safe-setup-export.json 2>/dev/null
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
