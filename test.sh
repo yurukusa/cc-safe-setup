@@ -722,12 +722,32 @@ echo ""
 echo "--- --audit --json tests ---"
 
 JSON_OUT=$(node "$CLI" --audit --json 2>&1)
-if echo "$JSON_OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('score' in d)" 2>/dev/null | grep -q "True"; then
+if echo "$JSON_OUT" | python3 -c "
+import sys,json
+content = sys.stdin.read()
+start = content.find('{')
+if start >= 0:
+    end = content.rfind('}') + 1
+    d = json.loads(content[start:end])
+    print('score' in d)
+else:
+    print(False)
+" 2>/dev/null | grep -q "True"; then
     echo "  PASS: --audit --json has score"; PASS=$((PASS + 1))
 else
     echo "  FAIL: --audit --json should have score"; FAIL=$((FAIL + 1))
 fi
-if echo "$JSON_OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('grade' in d)" 2>/dev/null | grep -q "True"; then
+if echo "$JSON_OUT" | python3 -c "
+import sys,json
+content = sys.stdin.read()
+start = content.find('{')
+if start >= 0:
+    end = content.rfind('}') + 1
+    d = json.loads(content[start:end])
+    print('grade' in d)
+else:
+    print(False)
+" 2>/dev/null | grep -q "True"; then
     echo "  PASS: --audit --json has grade"; PASS=$((PASS + 1))
 else
     echo "  FAIL: --audit --json should have grade"; FAIL=$((FAIL + 1))
