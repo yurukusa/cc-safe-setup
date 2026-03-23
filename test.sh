@@ -673,6 +673,17 @@ node "$CLI" --install-example nonexistent > /dev/null 2>&1 || INSTALL_EXIT=$?
 if [ "$INSTALL_EXIT" -eq 1 ]; then echo "  PASS: --install-example nonexistent exits 1"; PASS=$((PASS + 1)); else echo "  FAIL: --install-example nonexistent (got $INSTALL_EXIT)"; FAIL=$((FAIL + 1)); fi
 echo ""
 
+# ========================
+# --doctor tests
+# ========================
+echo "--- --doctor tests ---"
+
+DOCTOR_OUT=$(node "$CLI" --doctor 2>&1) || true
+if echo "$DOCTOR_OUT" | grep -q "jq"; then echo "  PASS: --doctor checks jq"; PASS=$((PASS + 1)); else echo "  FAIL: --doctor should check jq"; FAIL=$((FAIL + 1)); fi
+if echo "$DOCTOR_OUT" | grep -q "settings.json"; then echo "  PASS: --doctor checks settings.json"; PASS=$((PASS + 1)); else echo "  FAIL: --doctor should check settings.json"; FAIL=$((FAIL + 1)); fi
+if echo "$DOCTOR_OUT" | grep -q "hooks"; then echo "  PASS: --doctor checks hooks section"; PASS=$((PASS + 1)); else echo "  FAIL: --doctor should check hooks"; FAIL=$((FAIL + 1)); fi
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))

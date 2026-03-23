@@ -72,6 +72,7 @@ const AUDIT = process.argv.includes('--audit');
 const LEARN = process.argv.includes('--learn');
 const SCAN = process.argv.includes('--scan');
 const FULL = process.argv.includes('--full');
+const DOCTOR = process.argv.includes('--doctor');
 
 if (HELP) {
   console.log(`
@@ -90,6 +91,7 @@ if (HELP) {
     npx cc-safe-setup --audit --fix  Auto-fix missing protections
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -738,6 +740,174 @@ async function fullSetup() {
   console.log();
 }
 
+async function doctor() {
+  const { execSync, spawnSync } = await import('child_process');
+  const { statSync, readdirSync } = await import('fs');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --doctor' + c.reset);
+  console.log(c.dim + '  Diagnosing why hooks might not be working...' + c.reset);
+  console.log();
+
+  let issues = 0;
+  let warnings = 0;
+
+  const pass = (msg) => console.log(c.green + '  ✓ ' + c.reset + msg);
+  const fail = (msg) => { console.log(c.red + '  ✗ ' + c.reset + msg); issues++; };
+  const warn = (msg) => { console.log(c.yellow + '  ! ' + c.reset + msg); warnings++; };
+
+  // 1. Check jq
+  try {
+    execSync('which jq', { stdio: 'pipe' });
+    const ver = execSync('jq --version', { stdio: 'pipe' }).toString().trim();
+    pass('jq installed (' + ver + ')');
+  } catch {
+    fail('jq is not installed — hooks cannot parse JSON input');
+    console.log(c.dim + '    Fix: brew install jq (macOS) | apt install jq (Linux) | choco install jq (Windows)' + c.reset);
+  }
+
+  // 2. Check settings.json exists
+  if (!existsSync(SETTINGS_PATH)) {
+    fail('~/.claude/settings.json does not exist');
+    console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+  } else {
+    pass('settings.json exists');
+
+    // 3. Parse settings.json
+    let settings;
+    try {
+      settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      pass('settings.json is valid JSON');
+    } catch (e) {
+      fail('settings.json has invalid JSON: ' + e.message);
+      console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx cc-safe-setup' + c.reset);
+    }
+
+    if (settings) {
+      // 4. Check hooks section exists
+      const hooks = settings.hooks;
+      if (!hooks) {
+        fail('No "hooks" section in settings.json');
+      } else {
+        pass('"hooks" section exists in settings.json');
+
+        // 5. Check each hook trigger type
+        for (const trigger of ['PreToolUse', 'PostToolUse', 'Stop']) {
+          const entries = hooks[trigger] || [];
+          if (entries.length > 0) {
+            pass(trigger + ': ' + entries.length + ' hook(s) registered');
+
+            // 6. Check each hook command path
+            for (const entry of entries) {
+              const hookList = entry.hooks || [];
+              for (const h of hookList) {
+                if (h.type !== 'command') continue;
+                const cmd = h.command;
+                // Extract the script path from commands like "bash ~/.claude/hooks/x.sh" or "~/bin/x.sh arg1 arg2"
+                let scriptPath = cmd;
+                // Strip leading interpreter (bash, sh, node, python3, etc.)
+                scriptPath = scriptPath.replace(/^(bash|sh|node|python3?)\s+/, '');
+                // Take first token (before arguments)
+                scriptPath = scriptPath.split(/\s+/)[0];
+                // Resolve ~ to HOME
+                const resolved = scriptPath.replace(/^~/, HOME);
+
+                if (!existsSync(resolved)) {
+                  fail('Hook script not found: ' + scriptPath + (scriptPath !== cmd ? ' (from: ' + cmd + ')' : ''));
+                  console.log(c.dim + '    Fix: create the missing script or update settings.json' + c.reset);
+                  continue;
+                }
+
+                // 7. Check executable permission
+                try {
+                  const stat = statSync(resolved);
+                  const isExec = (stat.mode & 0o111) !== 0;
+                  if (!isExec) {
+                    fail('Not executable: ' + cmd);
+                    console.log(c.dim + '    Fix: chmod +x ' + resolved + c.reset);
+                  }
+                } catch {}
+
+                // 8. Check shebang
+                try {
+                  const content = readFileSync(resolved, 'utf-8');
+                  if (!content.startsWith('#!/')) {
+                    warn('Missing shebang (#!/bin/bash) in: ' + cmd);
+                    console.log(c.dim + '    Add #!/bin/bash as the first line' + c.reset);
+                  }
+                } catch {}
+
+                // 9. Test hook with empty input
+                try {
+                  const result = spawnSync('bash', [resolved], {
+                    input: '{}',
+                    timeout: 5000,
+                    stdio: ['pipe', 'pipe', 'pipe'],
+                  });
+                  if (result.status !== 0 && result.status !== 2) {
+                    warn('Hook exits with code ' + result.status + ' on empty input: ' + cmd);
+                    const stderr = (result.stderr || '').toString().trim();
+                    if (stderr) console.log(c.dim + '    stderr: ' + stderr.slice(0, 200) + c.reset);
+                  }
+                } catch {}
+              }
+            }
+          }
+        }
+      }
+
+      // 10. Check for common misconfigurations
+      if (settings.defaultMode === 'bypassPermissions') {
+        warn('defaultMode is "bypassPermissions" — hooks may be skipped entirely');
+        console.log(c.dim + '    Consider using "dontAsk" instead (hooks still run)' + c.reset);
+      }
+
+      // 11. Check for dangerouslySkipPermissions in allow
+      const allows = settings.permissions?.allow || [];
+      if (allows.includes('Bash(*)')) {
+        warn('Bash(*) in allow list — commands auto-approved before hooks run');
+      }
+    }
+  }
+
+  // 12. Check hooks directory
+  if (!existsSync(HOOKS_DIR)) {
+    fail('~/.claude/hooks/ directory does not exist');
+    console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+  } else {
+    const files = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+    pass('hooks directory exists (' + files.length + ' scripts)');
+  }
+
+  // 13. Check Claude Code version (needs hooks support)
+  try {
+    const ver = execSync('claude --version 2>/dev/null || echo "not found"', { stdio: 'pipe' }).toString().trim();
+    if (ver === 'not found') {
+      warn('Claude Code CLI not found in PATH');
+    } else {
+      pass('Claude Code: ' + ver);
+    }
+  } catch {
+    warn('Could not check Claude Code version');
+  }
+
+  // Summary
+  console.log();
+  if (issues === 0 && warnings === 0) {
+    console.log(c.bold + c.green + '  All checks passed. Hooks should be working.' + c.reset);
+    console.log(c.dim + '  If hooks still don\'t fire, restart Claude Code (hooks load on startup).' + c.reset);
+  } else if (issues === 0) {
+    console.log(c.bold + c.yellow + '  ' + warnings + ' warning(s), but no blocking issues.' + c.reset);
+    console.log(c.dim + '  Hooks should work. Restart Claude Code if they don\'t fire.' + c.reset);
+  } else {
+    console.log(c.bold + c.red + '  ' + issues + ' issue(s) found that prevent hooks from working.' + c.reset);
+    console.log(c.dim + '  Fix the issues above, then restart Claude Code.' + c.reset);
+  }
+  console.log();
+
+  process.exit(issues > 0 ? 1 : 0);
+}
+
 function scan() {
   console.log();
   console.log(c.bold + '  cc-safe-setup --scan' + c.reset);
@@ -888,6 +1058,7 @@ async function main() {
   if (LEARN) return learn();
   if (SCAN) return scan();
   if (FULL) return fullSetup();
+  if (DOCTOR) return doctor();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
