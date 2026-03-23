@@ -71,6 +71,7 @@ const INSTALL_EXAMPLE = INSTALL_EXAMPLE_IDX !== -1 ? process.argv[INSTALL_EXAMPL
 const AUDIT = process.argv.includes('--audit');
 const LEARN = process.argv.includes('--learn');
 const SCAN = process.argv.includes('--scan');
+const FULL = process.argv.includes('--full');
 
 if (HELP) {
   console.log(`
@@ -695,6 +696,44 @@ exit 0`;
   console.log();
 }
 
+async function fullSetup() {
+  console.log();
+  console.log(c.bold + c.green + '  cc-safe-setup --full' + c.reset);
+  console.log(c.dim + '  Complete safety setup in one command' + c.reset);
+  console.log();
+
+  const { execSync } = await import('child_process');
+  const self = process.argv[1];
+
+  // Step 1: Install 8 built-in hooks
+  console.log(c.bold + '  Step 1: Installing 8 built-in safety hooks...' + c.reset);
+  try {
+    execSync('node ' + self + ' --yes', { stdio: 'inherit' });
+  } catch(e) {
+    // --yes doesn't exist, run normal install
+    execSync('node ' + self, { stdio: 'inherit', input: 'y\n' });
+  }
+
+  // Step 2: Scan project and create CLAUDE.md
+  console.log();
+  console.log(c.bold + '  Step 2: Scanning project and creating CLAUDE.md...' + c.reset);
+  scan();
+
+  // Step 3: Audit and show results
+  console.log();
+  console.log(c.bold + '  Step 3: Running safety audit...' + c.reset);
+  // Inject --badge into argv temporarily
+  process.argv.push('--badge');
+  await audit();
+
+  console.log(c.bold + c.green + '  ✓ Full setup complete!' + c.reset);
+  console.log(c.dim + '  Your project now has:' + c.reset);
+  console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
+  console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
+  console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
 function scan() {
   console.log();
   console.log(c.bold + '  cc-safe-setup --scan' + c.reset);
@@ -844,6 +883,7 @@ async function main() {
   if (AUDIT) return audit();
   if (LEARN) return learn();
   if (SCAN) return scan();
+  if (FULL) return fullSetup();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
