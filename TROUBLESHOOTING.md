@@ -1,0 +1,212 @@
+# Troubleshooting Claude Code Hooks
+
+Your hook isn't working. Here's how to fix it, starting with the most common causes.
+
+## Quick Diagnosis
+
+```bash
+npx cc-safe-setup --doctor
+```
+
+This checks jq, settings.json, file permissions, shebangs, and common misconfigurations. If it says "All checks passed" but hooks still don't fire, read on.
+
+## "Hook doesn't block anything"
+
+### 1. Did you restart Claude Code?
+
+Hooks are loaded on startup. After installing or modifying hooks, close Claude Code completely and reopen it.
+
+### 2. Is the hook registered in settings.json?
+
+```bash
+cat ~/.claude/settings.json | jq '.hooks'
+```
+
+You should see your hook's path under the correct trigger. If not:
+
+```bash
+npx cc-safe-setup  # Re-registers all hooks
+```
+
+### 3. Is the hook file executable?
+
+```bash
+ls -la ~/.claude/hooks/your-hook.sh
+# Should show -rwxr-xr-x
+```
+
+Fix: `chmod +x ~/.claude/hooks/your-hook.sh`
+
+### 4. Is jq installed?
+
+Most hooks use jq to parse JSON input.
+
+```bash
+jq --version
+# Should print: jq-1.x
+```
+
+Install: `brew install jq` (macOS) / `apt install jq` (Linux/WSL)
+
+### 5. Does the hook work manually?
+
+Test it outside Claude Code:
+
+```bash
+echo '{"tool_input":{"command":"rm -rf /"}}' | bash ~/.claude/hooks/destructive-guard.sh
+echo $?
+# Should print: 2 (blocked)
+```
+
+If exit code is 0, the hook isn't matching the pattern.
+
+### 6. Wrong exit code
+
+| Exit Code | Meaning |
+|-----------|---------|
+| **0** | Allow (or no opinion) |
+| **2** | Block — the only code that stops execution |
+| **1** | Error (treated as allow, not block!) |
+
+Common mistake: using `exit 1` instead of `exit 2` to block. Only exit 2 blocks.
+
+## "Hook blocks everything"
+
+### 1. Overly broad grep pattern
+
+```bash
+# BAD: matches ANY command containing "rm"
+grep -q 'rm'
+
+# GOOD: matches only rm with -rf flags
+grep -qE 'rm\s+(-[rf]+\s+)*/'
+```
+
+### 2. Missing empty-input guard
+
+Every hook should handle empty input:
+
+```bash
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0  # ← This line is critical
+```
+
+Without this, the hook may exit 2 on tools that don't have `.tool_input.command` (like Read or Glob).
+
+### 3. Wrong matcher
+
+If your hook is for Bash commands but the matcher is empty, it runs on every tool call:
+
+```json
+{"matcher": "Bash"}      ← Correct: only Bash commands
+{"matcher": ""}           ← Runs on EVERY tool (Read, Edit, Glob, etc.)
+```
+
+## "Hook fires but doesn't auto-approve"
+
+### 1. JSON output format is wrong
+
+Auto-approve requires exact JSON structure:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "your reason"
+  }
+}
+```
+
+Missing any field = permission system ignores it.
+
+### 2. jq output is going to stderr
+
+```bash
+# BAD: output goes to stderr
+jq -n '...' >&2
+
+# GOOD: output goes to stdout
+jq -n '...'
+```
+
+Auto-approve JSON must go to stdout.
+
+## "Permission prompts still appear for compound commands"
+
+This is a known Claude Code limitation, not a hook issue. `Bash(git:*)` doesn't match `cd /path && git log`.
+
+Fix:
+
+```bash
+npx cc-safe-setup --install-example compound-command-approver
+```
+
+## "Hooks slow down Claude Code"
+
+### 1. Check execution time
+
+```bash
+npx cc-safe-setup --install-example hook-debug-wrapper
+# Then wrap your slow hook to see timing
+```
+
+Hooks should complete in <50ms. If a hook takes >200ms, it's noticeable.
+
+### 2. Too many hooks on empty matcher
+
+Hooks with `"matcher": ""` run on every single tool call. Move heavy checks to specific matchers:
+
+```json
+{"matcher": "Bash"}        ← Only when Bash runs
+{"matcher": "Edit|Write"}  ← Only when files are edited
+```
+
+### 3. Use --lint to find issues
+
+```bash
+npx cc-safe-setup --lint
+```
+
+Reports performance warnings and configuration issues.
+
+## "Hooks work locally but not for teammates"
+
+### 1. Compare settings
+
+```bash
+npx cc-safe-setup --diff teammate-settings.json
+```
+
+Shows exactly what's different between your setups.
+
+### 2. Export and share
+
+```bash
+npx cc-safe-setup --export   # Creates cc-safe-setup-export.json
+# Send to teammate
+npx cc-safe-setup --import cc-safe-setup-export.json
+```
+
+### 3. Different jq versions
+
+Some hooks use jq features not available in older versions. Check: `jq --version`
+
+## "Hooks run but don't log"
+
+Hooks write to stderr for user-visible messages. For persistent logging:
+
+```bash
+# Add to your hook
+LOG="$HOME/.claude/blocked-commands.log"
+echo "[$(date -Iseconds)] BLOCKED: reason | cmd: $COMMAND" >> "$LOG"
+```
+
+Then view with: `npx cc-safe-setup --watch` or `npx cc-safe-setup --stats`
+
+## Still Stuck?
+
+1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`
+2. Check `~/.claude/hook-debug.log` for detailed I/O traces
+3. Run `npx cc-safe-setup --doctor` for automated checks
+4. Open an issue: [cc-safe-setup issues](https://github.com/yurukusa/cc-safe-setup/issues)

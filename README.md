@@ -224,6 +224,10 @@ Or browse all available examples in [`examples/`](examples/):
 
 **[SAFETY_CHECKLIST.md](SAFETY_CHECKLIST.md)** — Copy-paste checklist for before/during/after autonomous sessions.
 
+## Troubleshooting
+
+**[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — "Hook doesn't work" → step-by-step diagnosis. Covers every common failure pattern.
+
 ## settings.json Reference
 
 **[SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md)** — Complete reference for permissions, hooks, modes, and common configurations. Includes known limitations and workarounds.
