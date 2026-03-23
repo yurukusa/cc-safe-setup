@@ -223,6 +223,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **commit-quality-gate.sh** — Warn on vague commit messages ("update code"), long subjects, mega-commits
 - **session-handoff.sh** — Auto-save git state and session info to `~/.claude/session-handoff.md` on session end
 - **diff-size-guard.sh** — Warn/block when committing too many files at once (default: warn at 10, block at 50)
+- **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
 
 ## Safety Checklist
 
@@ -273,4 +274,3 @@ If cc-safe-setup saved your project from a destructive command, consider giving 
 ## License
 
 MIT
-- **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
