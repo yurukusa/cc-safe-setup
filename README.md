@@ -216,6 +216,8 @@ Or browse all available examples in [`examples/`](examples/):
 - **case-sensitive-guard.sh** — Detect case-insensitive filesystems (exFAT, NTFS, HFS+) and block rm/mkdir that would collide due to case folding ([#37875](https://github.com/anthropics/claude-code/issues/37875))
 - **compound-command-approver.sh** — Auto-approve safe compound commands (`cd && git log`, `cd && npm test`) that the permission system can't match ([#30519](https://github.com/anthropics/claude-code/issues/30519) [#16561](https://github.com/anthropics/claude-code/issues/16561))
 - **tmp-cleanup.sh** — Clean up accumulated `/tmp/claude-*-cwd` files on session end ([#8856](https://github.com/anthropics/claude-code/issues/8856))
+- **session-checkpoint.sh** — Save session state to mission file before context compaction ([#37866](https://github.com/anthropics/claude-code/issues/37866))
+- **verify-before-commit.sh** — Block git commit when lint/test commands haven't been run ([#37818](https://github.com/anthropics/claude-code/issues/37818))
 
 ## Safety Checklist
 

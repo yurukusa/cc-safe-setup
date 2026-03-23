@@ -93,7 +93,7 @@ if (HELP) {
     npx cc-safe-setup --verify     Test each hook with sample inputs
     npx cc-safe-setup --dry-run    Preview without installing
     npx cc-safe-setup --uninstall  Remove all installed hooks
-    npx cc-safe-setup --examples   List 28 example hooks (5 categories)
+    npx cc-safe-setup --examples   List 30 example hooks (5 categories)
     npx cc-safe-setup --install-example <name>  Install a specific example
     npx cc-safe-setup --full       Complete setup: hooks + scan + audit + badge
     npx cc-safe-setup --audit      Safety score (0-100) with fixes
