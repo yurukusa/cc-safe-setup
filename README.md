@@ -198,6 +198,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **branch-name-check.sh** — Warn on non-conventional branch names (feature/, fix/, etc.)
 - **todo-check.sh** — Warn when committing files with TODO/FIXME/HACK markers
 - **path-traversal-guard.sh** — Block Edit/Write with `../../` path traversal and system directories
+- **case-sensitive-guard.sh** — Detect case-insensitive filesystems (exFAT, NTFS, HFS+) and block rm/mkdir that would collide due to case folding ([#37875](https://github.com/anthropics/claude-code/issues/37875))
 
 ## Safety Checklist
 
