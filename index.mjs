@@ -78,6 +78,7 @@ const EXPORT = process.argv.includes('--export');
 const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
 const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
 const STATS = process.argv.includes('--stats');
+const JSON_OUTPUT = process.argv.includes('--json');
 
 if (HELP) {
   console.log(`
@@ -94,6 +95,7 @@ if (HELP) {
     npx cc-safe-setup --full       Complete setup: hooks + scan + audit + badge
     npx cc-safe-setup --audit      Safety score (0-100) with fixes
     npx cc-safe-setup --audit --fix  Auto-fix missing protections
+    npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
@@ -596,7 +598,20 @@ async function audit() {
     console.log(c.dim + '  Paste this into your README.md' + c.reset);
   }
 
+  // JSON output (for CI/CD integration)
+  if (JSON_OUTPUT) {
+    const output = {
+      score,
+      grade: score >= 80 ? 'A' : score >= 60 ? 'B' : score >= 40 ? 'C' : 'F',
+      risks: risks.map(r => ({ severity: r.severity, issue: r.issue, fix: r.fix })),
+      passing: good,
+      timestamp: new Date().toISOString(),
+    };
+    console.log(JSON.stringify(output, null, 2));
+  }
+
   console.log();
+  process.exit(score < (parseInt(process.env.CC_AUDIT_THRESHOLD) || 0) ? 1 : 0);
 }
 
 function learn() {
