@@ -674,6 +674,16 @@ if [ "$INSTALL_EXIT" -eq 1 ]; then echo "  PASS: --install-example nonexistent e
 echo ""
 
 # ========================
+# CI setup: ensure ~/.claude exists
+# ========================
+if [ ! -f "$HOME/.claude/settings.json" ]; then
+    mkdir -p "$HOME/.claude/hooks"
+    echo '{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo test"}]}]}}' > "$HOME/.claude/settings.json"
+    echo "  (CI: created dummy settings.json)"
+    CI_CLEANUP=1
+fi
+
+# ========================
 # --doctor tests
 # ========================
 echo "--- --doctor tests ---"
@@ -794,6 +804,20 @@ EXPORT_OUT=$(node "$CLI" --export 2>&1) || true
 if echo "$EXPORT_OUT" | grep -q "Exported"; then echo "  PASS: --export creates file"; PASS=$((PASS + 1)); else echo "  FAIL: --export should create file"; FAIL=$((FAIL + 1)); fi
 python3 -c "import os; f='cc-safe-setup-export.json'; os.path.exists(f) and os.remove(f)" 2>/dev/null
 echo ""
+
+# CI cleanup
+if [ "${CI_CLEANUP:-0}" = "1" ]; then
+    python3 -c "
+import os, json
+# Remove test-created hooks from settings
+sp = os.path.expanduser('~/.claude/settings.json')
+if os.path.exists(sp):
+    s = json.load(open(sp))
+    for t in list(s.get('hooks',{}).keys()):
+        s['hooks'][t] = [e for e in s['hooks'][t] if not any('block-docker' in (h.get('command','') or '') or 'custom-terraform' in (h.get('command','') or '') for h in e.get('hooks',[]))]
+    json.dump(s, open(sp,'w'), indent=2)
+" 2>/dev/null
+fi
 
 # --- Summary ---
 echo "========================"
