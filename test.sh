@@ -768,9 +768,9 @@ echo ""
 # ========================
 echo "--- --export tests ---"
 
-EXPORT_OUT=$(cd /tmp && node "$CLI" --export 2>&1) || true
+EXPORT_OUT=$(node "$CLI" --export 2>&1) || true
 if echo "$EXPORT_OUT" | grep -q "Exported"; then echo "  PASS: --export creates file"; PASS=$((PASS + 1)); else echo "  FAIL: --export should create file"; FAIL=$((FAIL + 1)); fi
-rm -f /tmp/cc-safe-setup-export.json 2>/dev/null
+python3 -c "import os; f='cc-safe-setup-export.json'; os.path.exists(f) and os.remove(f)" 2>/dev/null
 echo ""
 
 # --- Summary ---
