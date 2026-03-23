@@ -128,6 +128,18 @@ Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/cl
 
 ## Examples
 
+## Safety Audit
+
+Check what's missing in your setup:
+
+```bash
+npx cc-safe-setup --audit
+```
+
+Analyzes 9 safety dimensions and gives you a score (0-100) with one-command fixes for each risk.
+
+## Examples
+
 Need custom hooks beyond the 8 built-in ones? Install any example with one command:
 
 ```bash
