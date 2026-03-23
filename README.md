@@ -244,7 +244,7 @@ Or browse all available examples in [`examples/`](examples/):
 ## Learn More
 
 - [Official Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) — Claude Code hooks documentation
-- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 19 ready-to-use recipes from real GitHub Issues
+- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 25 recipes from real GitHub Issues ([interactive version](https://yurukusa.github.io/claude-code-hooks/))
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [Hook Test Runner](https://github.com/yurukusa/cc-hook-test) — `npx cc-hook-test <hook.sh>` to auto-test any hook
 - [Hooks Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) — printable A4 quick reference
