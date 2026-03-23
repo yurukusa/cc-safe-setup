@@ -1,5 +1,31 @@
 # Changelog
 
+## [3.7.0] - 2026-03-24
+- **--benchmark**: Hook performance measurement (10 runs, color-coded)
+- dependency-audit.sh, diff-size-guard.sh, commit-quality-gate.sh
+- session-handoff.sh, loop-detector.sh, hook-debug-wrapper.sh
+- Japanese README (docs/README.ja.md)
+- CI: example hooks syntax check (36/36)
+- 21 commands, 36 examples, 173 tests
+
+## [3.4.0] - 2026-03-24
+- **--diff**: Compare settings between environments
+- **--share**: Generate shareable audit URL
+- **--lint**: Static analysis of hook configuration
+- **--create**: Natural language hook generator (9 templates)
+- TROUBLESHOOTING.md, SETTINGS_REFERENCE.md, MIGRATION.md
+- Cheat Sheet, Ecosystem comparison page
+- Web: setup generator + URL import
+
+## [3.0.0] - 2026-03-24
+- **--doctor**: Diagnose hook issues (jq, permissions, shebang)
+- **--watch**: Live blocked command dashboard
+- **--stats**: Block history analytics
+- **--export/--import**: Team hook sharing
+- **--audit --json**: CI output with threshold support
+- case-sensitive-guard.sh (#37875), compound-command-approver.sh (#30519)
+- tmp-cleanup.sh (#8856), GitHub Action outputs
+
 ## [2.0.6] - 2026-03-23
 - **9 new examples**: deploy-guard, network-guard, test-before-push, large-file-guard, commit-message-check, env-var-check, timeout-guard, branch-name-check, path-traversal-guard, todo-check
 - Tests: 138 → 154
