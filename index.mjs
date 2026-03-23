@@ -79,6 +79,7 @@ const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
 const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
 const STATS = process.argv.includes('--stats');
 const JSON_OUTPUT = process.argv.includes('--json');
+const LINT = process.argv.includes('--lint');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -100,6 +101,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --lint       Static analysis of hook configuration
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
@@ -765,6 +767,148 @@ async function fullSetup() {
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
   console.log();
+}
+
+async function lint() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --lint' + c.reset);
+  console.log(c.dim + '  Static analysis of hook configuration...' + c.reset);
+  console.log();
+
+  if (!existsSync(SETTINGS_PATH)) {
+    console.log(c.red + '  No settings.json found.' + c.reset);
+    process.exit(1);
+  }
+
+  let settings;
+  try {
+    settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+  } catch (e) {
+    console.log(c.red + '  settings.json parse error: ' + e.message + c.reset);
+    process.exit(1);
+  }
+
+  let warnings = 0;
+  let errors = 0;
+  const warn = (msg) => { console.log(c.yellow + '  WARN: ' + c.reset + msg); warnings++; };
+  const error = (msg) => { console.log(c.red + '  ERROR: ' + c.reset + msg); errors++; };
+  const info = (msg) => { console.log(c.green + '  OK: ' + c.reset + msg); };
+
+  const hooks = settings.hooks || {};
+
+  // 1. Check for duplicate hook commands within same trigger
+  for (const [trigger, entries] of Object.entries(hooks)) {
+    const commands = [];
+    for (const entry of entries) {
+      for (const h of (entry.hooks || [])) {
+        if (h.command) {
+          if (commands.includes(h.command)) {
+            warn(trigger + ': duplicate hook "' + h.command.split('/').pop() + '"');
+          }
+          commands.push(h.command);
+        }
+      }
+    }
+    if (commands.length > 0 && new Set(commands).size === commands.length) {
+      info(trigger + ': no duplicates (' + commands.length + ' hooks)');
+    }
+  }
+
+  // 2. Check for empty matcher on PreToolUse (runs on every tool = slow)
+  for (const entry of (hooks.PreToolUse || [])) {
+    if (!entry.matcher || entry.matcher === '') {
+      const hookNames = (entry.hooks || []).map(h => (h.command || '').split('/').pop()).join(', ');
+      warn('PreToolUse hook with empty matcher runs on EVERY tool call: ' + hookNames);
+    }
+  }
+
+  // 3. Check for empty matcher on PostToolUse with heavy scripts
+  for (const entry of (hooks.PostToolUse || [])) {
+    if (!entry.matcher || entry.matcher === '') {
+      const hookNames = (entry.hooks || []).map(h => (h.command || '').split('/').pop()).join(', ');
+      // Check if any of these scripts are large (>5KB = potentially slow)
+      for (const h of (entry.hooks || [])) {
+        if (h.command) {
+          const resolved = h.command.replace(/^(bash|sh|node)\s+/, '').split(/\s+/)[0].replace(/^~/, HOME);
+          try {
+            const { statSync } = await import('fs');
+            const size = statSync(resolved).size;
+            if (size > 5000) {
+              warn('PostToolUse empty matcher + large script (' + (size/1024).toFixed(1) + 'KB): ' + resolved.split('/').pop());
+            }
+          } catch {}
+        }
+      }
+    }
+  }
+
+  // 4. Check for hooks that exist in settings but script is missing
+  for (const [trigger, entries] of Object.entries(hooks)) {
+    for (const entry of entries) {
+      for (const h of (entry.hooks || [])) {
+        if (h.command) {
+          let scriptPath = h.command.replace(/^(bash|sh|node|python3?)\s+/, '').split(/\s+/)[0];
+          scriptPath = scriptPath.replace(/^~/, HOME);
+          if (!existsSync(scriptPath)) {
+            error(trigger + ': missing script "' + scriptPath.split('/').pop() + '"');
+          }
+        }
+      }
+    }
+  }
+
+  // 5. Check for overly broad allow rules combined with no hooks
+  const allows = settings.permissions?.allow || [];
+  if (allows.includes('Bash(*)') && (hooks.PreToolUse || []).length === 0) {
+    error('Bash(*) in allow list with no PreToolUse hooks = no safety net');
+  } else if (allows.includes('Bash(*)') && (hooks.PreToolUse || []).length > 0) {
+    info('Bash(*) with PreToolUse hooks = hooks provide safety');
+  }
+
+  // 6. Check for conflicting allow and deny
+  const denies = settings.permissions?.deny || [];
+  for (const d of denies) {
+    if (allows.includes(d)) {
+      warn('Same pattern in both allow and deny: ' + d);
+    }
+  }
+
+  // 7. Check total hook count and warn about performance
+  let totalHooks = 0;
+  for (const entries of Object.values(hooks)) {
+    for (const entry of entries) {
+      totalHooks += (entry.hooks || []).length;
+    }
+  }
+  if (totalHooks > 20) {
+    warn(totalHooks + ' total hooks registered — may slow down tool calls');
+  } else if (totalHooks > 0) {
+    info(totalHooks + ' hooks registered');
+  }
+
+  // 8. Check for hooks without type: "command"
+  for (const [trigger, entries] of Object.entries(hooks)) {
+    for (const entry of entries) {
+      for (const h of (entry.hooks || [])) {
+        if (h.type !== 'command') {
+          warn(trigger + ': hook with type "' + h.type + '" (only "command" is supported)');
+        }
+      }
+    }
+  }
+
+  // Summary
+  console.log();
+  if (errors === 0 && warnings === 0) {
+    console.log(c.bold + c.green + '  Clean. No issues found.' + c.reset);
+  } else if (errors === 0) {
+    console.log(c.bold + c.yellow + '  ' + warnings + ' warning(s). No errors.' + c.reset);
+  } else {
+    console.log(c.bold + c.red + '  ' + errors + ' error(s), ' + warnings + ' warning(s).' + c.reset);
+  }
+  console.log();
+
+  process.exit(errors > 0 ? 1 : 0);
 }
 
 async function createHook(description) {
@@ -1688,6 +1832,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (LINT) return lint();
   if (CREATE_DESC) return createHook(CREATE_DESC);
   if (STATS) return stats();
   if (EXPORT) return exportConfig();

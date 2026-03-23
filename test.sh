@@ -755,6 +755,15 @@ fi
 echo ""
 
 # ========================
+# --lint tests
+# ========================
+echo "--- --lint tests ---"
+
+LINT_OUT=$(node "$CLI" --lint 2>&1) || true
+if echo "$LINT_OUT" | grep -q "OK\|WARN\|ERROR\|Clean"; then echo "  PASS: --lint produces output"; PASS=$((PASS + 1)); else echo "  FAIL: --lint should produce output"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
 # --stats tests
 # ========================
 echo "--- --stats tests ---"
