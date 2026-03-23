@@ -80,6 +80,8 @@ const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
 const STATS = process.argv.includes('--stats');
 const JSON_OUTPUT = process.argv.includes('--json');
 const LINT = process.argv.includes('--lint');
+const DIFF_IDX = process.argv.findIndex(a => a === '--diff');
+const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -101,6 +103,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --diff <file>   Compare your settings with another file
     npx cc-safe-setup --lint       Static analysis of hook configuration
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
@@ -766,6 +769,103 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+function diff(otherFile) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --diff' + c.reset);
+  console.log();
+
+  if (!existsSync(otherFile)) {
+    console.log(c.red + '  File not found: ' + otherFile + c.reset);
+    process.exit(1);
+  }
+
+  if (!existsSync(SETTINGS_PATH)) {
+    console.log(c.red + '  No local settings.json found.' + c.reset);
+    process.exit(1);
+  }
+
+  let local, other;
+  try { local = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch { console.log(c.red + '  Cannot parse local settings.json' + c.reset); process.exit(1); }
+  try { other = JSON.parse(readFileSync(otherFile, 'utf-8')); } catch { console.log(c.red + '  Cannot parse ' + otherFile + c.reset); process.exit(1); }
+
+  const getHookCommands = (settings, trigger) => {
+    return (settings.hooks?.[trigger] || []).flatMap(e => (e.hooks || []).map(h => {
+      const cmd = h.command || '';
+      return cmd.split('/').pop().replace(/\.sh$|\.js$|\.py$/, '');
+    }));
+  };
+
+  const getAllow = (settings) => settings.permissions?.allow || [];
+  const getDeny = (settings) => settings.permissions?.deny || [];
+
+  console.log(c.dim + '  Local: ' + SETTINGS_PATH + c.reset);
+  console.log(c.dim + '  Other: ' + otherFile + c.reset);
+  console.log();
+
+  // Compare hooks
+  const triggers = [...new Set([...Object.keys(local.hooks || {}), ...Object.keys(other.hooks || {})])];
+
+  let diffs = 0;
+  for (const trigger of triggers) {
+    const localHooks = new Set(getHookCommands(local, trigger));
+    const otherHooks = new Set(getHookCommands(other, trigger));
+
+    const onlyLocal = [...localHooks].filter(h => !otherHooks.has(h));
+    const onlyOther = [...otherHooks].filter(h => !localHooks.has(h));
+    const both = [...localHooks].filter(h => otherHooks.has(h));
+
+    if (onlyLocal.length > 0 || onlyOther.length > 0) {
+      console.log(c.bold + '  ' + trigger + c.reset);
+      for (const h of both) console.log(c.dim + '    = ' + h + c.reset);
+      for (const h of onlyLocal) { console.log(c.green + '    + ' + h + ' (local only)' + c.reset); diffs++; }
+      for (const h of onlyOther) { console.log(c.red + '    - ' + h + ' (other only)' + c.reset); diffs++; }
+      console.log();
+    }
+  }
+
+  // Compare permissions
+  const localAllow = getAllow(local);
+  const otherAllow = getAllow(other);
+  const onlyLocalAllow = localAllow.filter(a => !otherAllow.includes(a));
+  const onlyOtherAllow = otherAllow.filter(a => !localAllow.includes(a));
+
+  if (onlyLocalAllow.length > 0 || onlyOtherAllow.length > 0) {
+    console.log(c.bold + '  permissions.allow' + c.reset);
+    for (const a of onlyLocalAllow) { console.log(c.green + '    + ' + a + ' (local only)' + c.reset); diffs++; }
+    for (const a of onlyOtherAllow) { console.log(c.red + '    - ' + a + ' (other only)' + c.reset); diffs++; }
+    console.log();
+  }
+
+  // Compare deny
+  const localDeny = getDeny(local);
+  const otherDeny = getDeny(other);
+  const onlyLocalDeny = localDeny.filter(a => !otherDeny.includes(a));
+  const onlyOtherDeny = otherDeny.filter(a => !localDeny.includes(a));
+
+  if (onlyLocalDeny.length > 0 || onlyOtherDeny.length > 0) {
+    console.log(c.bold + '  permissions.deny' + c.reset);
+    for (const d of onlyLocalDeny) { console.log(c.green + '    + ' + d + ' (local only)' + c.reset); diffs++; }
+    for (const d of onlyOtherDeny) { console.log(c.red + '    - ' + d + ' (other only)' + c.reset); diffs++; }
+    console.log();
+  }
+
+  // Compare mode
+  if ((local.defaultMode || 'default') !== (other.defaultMode || 'default')) {
+    console.log(c.bold + '  defaultMode' + c.reset);
+    console.log(c.green + '    local: ' + (local.defaultMode || 'default') + c.reset);
+    console.log(c.red + '    other: ' + (other.defaultMode || 'default') + c.reset);
+    console.log();
+    diffs++;
+  }
+
+  if (diffs === 0) {
+    console.log(c.green + '  No differences found.' + c.reset);
+  } else {
+    console.log(c.dim + '  ' + diffs + ' difference(s) found.' + c.reset);
+  }
   console.log();
 }
 
@@ -1832,6 +1932,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (DIFF_FILE) return diff(DIFF_FILE);
   if (LINT) return lint();
   if (CREATE_DESC) return createHook(CREATE_DESC);
   if (STATS) return stats();
