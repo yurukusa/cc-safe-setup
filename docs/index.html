@@ -111,6 +111,23 @@ function runAudit() {
   const denies = settings.permissions?.deny || [];
   if (denies.length > 0) good.push('Deny rules configured (' + denies.length + ')');
 
+  // 9. defaultMode check
+  const mode = settings.defaultMode;
+  if (mode === 'bypassPermissions') {
+    risks.push({ severity: 'HIGH', issue: 'bypassPermissions mode — all permission checks disabled', fix: 'Use dontAsk with specific allow rules instead' });
+  } else if (mode === 'dontAsk') {
+    good.push('dontAsk mode (auto-approve with hooks still active)');
+  }
+
+  // 10. Stop hooks
+  const stopHooks = settings.hooks?.Stop || [];
+  if (stopHooks.length > 0) good.push('Stop hooks (' + stopHooks.length + ')');
+
+  // 11. sandbox disabled
+  if (settings.sandbox?.enabled === false) {
+    risks.push({ severity: 'MEDIUM', issue: 'Sandbox disabled — commands run without isolation', fix: 'Re-enable sandbox or use excludedCommands for specific tools' });
+  }
+
   // Score
   const score = Math.max(0, 100 - risks.reduce((s, r) => {
     if (r.severity === 'CRITICAL') return s + 30;
