@@ -78,6 +78,10 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Verify hooks work:** `npx cc-safe-setup --verify` — sends test inputs to each hook and confirms they block/allow correctly.
 
+**Troubleshoot:** `npx cc-safe-setup --doctor` — diagnoses why hooks aren't working (jq, permissions, paths, shebang).
+
+**Live monitor:** `npx cc-safe-setup --watch` — real-time dashboard of blocked commands during autonomous sessions.
+
 **Uninstall:** `npx cc-safe-setup --uninstall` — removes all hooks and cleans settings.json.
 
 **Requires:** [jq](https://jqlang.github.io/jq/) for JSON parsing (`brew install jq` / `apt install jq`).
