@@ -353,6 +353,7 @@ function examples() {
       'session-handoff.sh': 'Auto-save session state for next session resume',
       'commit-quality-gate.sh': 'Warn on vague or too-long commit messages',
       'diff-size-guard.sh': 'Warn/block on large diffs (10+ files warn, 50+ block)',
+      'dependency-audit.sh': 'Warn on new package installs not in manifest',
     },
   };
 

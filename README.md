@@ -273,3 +273,4 @@ If cc-safe-setup saved your project from a destructive command, consider giving 
 ## License
 
 MIT
+- **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
