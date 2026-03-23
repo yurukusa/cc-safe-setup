@@ -69,6 +69,7 @@ const EXAMPLES = process.argv.includes('--examples') || process.argv.includes('-
 const INSTALL_EXAMPLE_IDX = process.argv.findIndex(a => a === '--install-example');
 const INSTALL_EXAMPLE = INSTALL_EXAMPLE_IDX !== -1 ? process.argv[INSTALL_EXAMPLE_IDX + 1] : null;
 const AUDIT = process.argv.includes('--audit');
+const LEARN = process.argv.includes('--learn');
 
 if (HELP) {
   console.log(`
@@ -569,6 +570,118 @@ async function audit() {
   console.log();
 }
 
+function learn() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --learn' + c.reset);
+  console.log(c.dim + '  Analyzing your blocked command history to generate custom protections...' + c.reset);
+  console.log();
+
+  const logPath = join(HOME, '.claude', 'blocked-commands.log');
+  if (!existsSync(logPath)) {
+    console.log(c.yellow + '  No blocked-commands.log found.' + c.reset);
+    console.log(c.dim + '  Install cc-safe-setup first, then use Claude Code normally.' + c.reset);
+    console.log(c.dim + '  Blocked commands are logged automatically. Re-run --learn after a few sessions.' + c.reset);
+    console.log();
+    return;
+  }
+
+  const log = readFileSync(logPath, 'utf-8');
+  const lines = log.split('\n').filter(l => l.trim());
+
+  if (lines.length === 0) {
+    console.log(c.green + '  No blocked commands in history. Your setup is catching nothing (or everything is safe).' + c.reset);
+    console.log();
+    return;
+  }
+
+  // Extract command patterns from blocked log
+  const patterns = {};
+  for (const line of lines) {
+    // Extract the command from log lines like "[2026-03-23 12:00:00] BLOCKED: rm -rf / (destructive-guard)"
+    const cmdMatch = line.match(/BLOCKED:\s*(.+?)(?:\s*\(|$)/);
+    if (cmdMatch) {
+      const cmd = cmdMatch[1].trim();
+      // Extract the base command (first word)
+      const base = cmd.split(/\s+/)[0];
+      if (!patterns[base]) patterns[base] = [];
+      patterns[base].push(cmd);
+    }
+  }
+
+  const uniqueBases = Object.keys(patterns);
+  if (uniqueBases.length === 0) {
+    console.log(c.dim + '  Could not parse patterns from log. Format may differ.' + c.reset);
+    console.log();
+    return;
+  }
+
+  console.log(c.bold + '  Patterns found (' + lines.length + ' blocked commands):' + c.reset);
+  console.log();
+
+  const recommendations = [];
+
+  for (const [base, cmds] of Object.entries(patterns)) {
+    const count = cmds.length;
+    const unique = [...new Set(cmds)];
+
+    if (count >= 3) {
+      console.log('  ' + c.red + '⚠' + c.reset + ' ' + c.bold + base + c.reset + ' blocked ' + count + ' times');
+      for (const u of unique.slice(0, 3)) {
+        console.log('    ' + c.dim + u + c.reset);
+      }
+      if (unique.length > 3) console.log('    ' + c.dim + '... and ' + (unique.length - 3) + ' more' + c.reset);
+
+      recommendations.push({
+        command: base,
+        count,
+        examples: unique.slice(0, 5),
+      });
+    } else {
+      console.log('  ' + c.yellow + '·' + c.reset + ' ' + base + ' (' + count + 'x)');
+    }
+  }
+
+  if (recommendations.length > 0) {
+    console.log();
+    console.log(c.bold + '  Recommendations:' + c.reset);
+    console.log();
+    for (const r of recommendations) {
+      console.log('  ' + c.green + '→' + c.reset + ' ' + r.command + ' is frequently blocked (' + r.count + 'x).');
+      console.log('    Consider adding a specific hook or adjusting your allow rules.');
+
+      // Generate a custom hook suggestion
+      const hookCode = `#!/bin/bash
+# Auto-generated: block ${r.command} patterns (seen ${r.count} times)
+CMD=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[[ -z "$CMD" ]] && exit 0
+if echo "$CMD" | grep -qE '^\\s*${r.command}\\b'; then
+    echo "BLOCKED: ${r.command} requires manual approval" >&2
+    exit 2
+fi
+exit 0`;
+
+      const hookPath = join(HOOKS_DIR, 'learned-block-' + r.command + '.sh');
+      console.log('    ' + c.dim + 'Suggested hook: ' + hookPath + c.reset);
+
+      if (process.argv.includes('--apply')) {
+        mkdirSync(HOOKS_DIR, { recursive: true });
+        writeFileSync(hookPath, hookCode);
+        chmodSync(hookPath, 0o755);
+        console.log('    ' + c.green + '✓ Hook created' + c.reset);
+      }
+    }
+
+    if (!process.argv.includes('--apply')) {
+      console.log();
+      console.log(c.dim + '  Run with --apply to auto-create hooks: npx cc-safe-setup --learn --apply' + c.reset);
+    }
+  }
+
+  console.log();
+  console.log(c.bold + '  Summary: ' + lines.length + ' blocked commands, ' + uniqueBases.length + ' unique patterns, ' + recommendations.length + ' recommendations.' + c.reset);
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
   if (VERIFY) return verify();
@@ -576,6 +689,7 @@ async function main() {
   if (EXAMPLES) return examples();
   if (INSTALL_EXAMPLE) return installExample(INSTALL_EXAMPLE);
   if (AUDIT) return audit();
+  if (LEARN) return learn();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
