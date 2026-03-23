@@ -214,6 +214,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **todo-check.sh** — Warn when committing files with TODO/FIXME/HACK markers
 - **path-traversal-guard.sh** — Block Edit/Write with `../../` path traversal and system directories
 - **case-sensitive-guard.sh** — Detect case-insensitive filesystems (exFAT, NTFS, HFS+) and block rm/mkdir that would collide due to case folding ([#37875](https://github.com/anthropics/claude-code/issues/37875))
+- **compound-command-approver.sh** — Auto-approve safe compound commands (`cd && git log`, `cd && npm test`) that the permission system can't match ([#30519](https://github.com/anthropics/claude-code/issues/30519) [#16561](https://github.com/anthropics/claude-code/issues/16561))
 
 ## Safety Checklist
 
