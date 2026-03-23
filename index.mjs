@@ -363,12 +363,18 @@ function examples() {
     },
   };
 
+  // Optional category filter: --examples safety, --examples ux, etc.
+  const filterArg = process.argv[process.argv.indexOf('--examples') + 1] || process.argv[process.argv.indexOf('-e') + 1] || '';
+  const filter = filterArg.toLowerCase();
+
   console.log();
-  console.log(c.bold + '  cc-safe-setup --examples' + c.reset);
-  console.log(c.dim + '  30 hooks beyond the 8 built-in ones' + c.reset);
+  console.log(c.bold + '  cc-safe-setup --examples' + c.reset + (filter ? ' ' + filter : ''));
+  console.log(c.dim + '  38 hooks beyond the 8 built-in ones' + c.reset);
+  if (filter) console.log(c.dim + '  Filter: ' + filter + c.reset);
   console.log();
 
   for (const [cat, hooks] of Object.entries(CATEGORIES)) {
+    if (filter && !cat.toLowerCase().includes(filter)) continue;
     console.log('  ' + c.bold + c.blue + cat + c.reset);
     for (const [file, desc] of Object.entries(hooks)) {
       console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
