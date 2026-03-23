@@ -218,6 +218,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **tmp-cleanup.sh** — Clean up accumulated `/tmp/claude-*-cwd` files on session end ([#8856](https://github.com/anthropics/claude-code/issues/8856))
 - **session-checkpoint.sh** — Save session state to mission file before context compaction ([#37866](https://github.com/anthropics/claude-code/issues/37866))
 - **verify-before-commit.sh** — Block git commit when lint/test commands haven't been run ([#37818](https://github.com/anthropics/claude-code/issues/37818))
+- **hook-debug-wrapper.sh** — Wrap any hook to log input/output/exit code/timing to `~/.claude/hook-debug.log`
 
 ## Safety Checklist
 
