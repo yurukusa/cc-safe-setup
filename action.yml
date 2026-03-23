@@ -1,0 +1,34 @@
+name: 'Claude Code Safety Audit'
+description: 'Check your Claude Code safety setup and fail CI if score is below threshold'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  threshold:
+    description: 'Minimum safety score (0-100). CI fails if below this.'
+    required: false
+    default: '70'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run safety audit
+      shell: bash
+      run: |
+        echo "::group::Claude Code Safety Audit"
+        npx cc-safe-setup@latest --audit 2>&1 | tee /tmp/audit-output.txt
+        echo "::endgroup::"
+
+        # Extract score
+        SCORE=$(grep -oP 'Safety Score: \K\d+' /tmp/audit-output.txt || echo "0")
+        THRESHOLD="${{ inputs.threshold }}"
+
+        echo "Safety Score: $SCORE / 100 (threshold: $THRESHOLD)"
+
+        if [ "$SCORE" -lt "$THRESHOLD" ]; then
+          echo "::error::Safety score $SCORE is below threshold $THRESHOLD. Run 'npx cc-safe-setup --audit --fix' to improve."
+          exit 1
+        else
+          echo "::notice::Safety score $SCORE meets threshold $THRESHOLD ✓"
+        fi
