@@ -73,6 +73,7 @@ const LEARN = process.argv.includes('--learn');
 const SCAN = process.argv.includes('--scan');
 const FULL = process.argv.includes('--full');
 const DOCTOR = process.argv.includes('--doctor');
+const WATCH = process.argv.includes('--watch');
 
 if (HELP) {
   console.log(`
@@ -92,6 +93,7 @@ if (HELP) {
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
+    npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -740,6 +742,117 @@ async function fullSetup() {
   console.log();
 }
 
+async function watch() {
+  const { spawn } = await import('child_process');
+  const { createReadStream, watchFile } = await import('fs');
+  const { createInterface: createRL } = await import('readline');
+
+  const LOG_PATH = join(HOME, '.claude', 'blocked-commands.log');
+  const ERROR_LOG = join(HOME, '.claude', 'session-errors.log');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --watch' + c.reset);
+  console.log(c.dim + '  Live safety dashboard — watching blocked commands' + c.reset);
+  console.log(c.dim + '  Log: ' + LOG_PATH + c.reset);
+  console.log();
+
+  let blockCount = 0;
+  let lastPrint = 0;
+
+  function formatLine(line) {
+    // Format: [2026-03-24T01:30:00+09:00] BLOCKED: reason | cmd: actual command
+    const match = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|\s*cmd:\s*(.+)$/);
+    if (!match) return c.dim + '  ' + line + c.reset;
+
+    const [, ts, reason, cmd] = match;
+    const time = ts.replace(/T/, ' ').replace(/\+.*/, '');
+    blockCount++;
+
+    let severity = c.yellow;
+    if (reason.match(/rm|reset|clean|Remove-Item|drop/i)) severity = c.red;
+    if (reason.match(/push|force/i)) severity = c.red;
+    if (reason.match(/env|secret|credential/i)) severity = c.red;
+
+    return severity + '  BLOCKED' + c.reset + ' ' + c.dim + time + c.reset + '\n' +
+           '    ' + c.bold + reason.trim() + c.reset + '\n' +
+           '    ' + c.dim + cmd.trim().slice(0, 120) + c.reset;
+  }
+
+  function printStats() {
+    const now = Date.now();
+    if (now - lastPrint < 30000) return;
+    lastPrint = now;
+    console.log(c.dim + '  --- ' + blockCount + ' blocks total | ' + new Date().toLocaleTimeString() + ' ---' + c.reset);
+  }
+
+  // Print existing log entries
+  if (existsSync(LOG_PATH)) {
+    const rl = createRL({ input: createReadStream(LOG_PATH) });
+    for await (const line of rl) {
+      if (line.trim()) console.log(formatLine(line));
+    }
+    if (blockCount > 0) {
+      console.log();
+      console.log(c.dim + '  === History: ' + blockCount + ' blocks ===' + c.reset);
+      console.log(c.dim + '  Watching for new blocks... (Ctrl+C to stop)' + c.reset);
+      console.log();
+    }
+  } else {
+    console.log(c.dim + '  No blocked-commands.log yet. Hooks will create it on first block.' + c.reset);
+    console.log(c.dim + '  Watching... (Ctrl+C to stop)' + c.reset);
+    console.log();
+  }
+
+  // Watch for new entries using tail -f
+  let tailProcess;
+  try {
+    // Ensure log file exists for tail
+    if (!existsSync(LOG_PATH)) {
+      const { mkdirSync: mkDir, writeFileSync: writeFile } = await import('fs');
+      mkDir(dirname(LOG_PATH), { recursive: true });
+      writeFile(LOG_PATH, '', 'utf-8');
+    }
+
+    tailProcess = spawn('tail', ['-f', '-n', '0', LOG_PATH], { stdio: ['ignore', 'pipe', 'ignore'] });
+
+    const tailRL = createRL({ input: tailProcess.stdout });
+    for await (const line of tailRL) {
+      if (line.trim()) {
+        console.log(formatLine(line));
+        printStats();
+      }
+    }
+  } catch (e) {
+    // tail not available — fall back to polling
+    let lastSize = 0;
+    try {
+      const { statSync } = await import('fs');
+      lastSize = statSync(LOG_PATH).size;
+    } catch {}
+
+    console.log(c.dim + '  (tail not available, using polling)' + c.reset);
+
+    setInterval(async () => {
+      try {
+        const { statSync, readFileSync: readFile } = await import('fs');
+        const stat = statSync(LOG_PATH);
+        if (stat.size > lastSize) {
+          const content = readFile(LOG_PATH, 'utf-8');
+          const lines = content.split('\n').slice(-10);
+          for (const line of lines) {
+            if (line.trim()) console.log(formatLine(line));
+          }
+          lastSize = stat.size;
+          printStats();
+        }
+      } catch {}
+    }, 2000);
+
+    // Keep process alive
+    await new Promise(() => {});
+  }
+}
+
 async function doctor() {
   const { execSync, spawnSync } = await import('child_process');
   const { statSync, readdirSync } = await import('fs');
@@ -1059,6 +1172,7 @@ async function main() {
   if (SCAN) return scan();
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
+  if (WATCH) return watch();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
