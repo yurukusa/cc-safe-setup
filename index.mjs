@@ -568,6 +568,18 @@ async function audit() {
     console.log();
     console.log(c.dim + '  Run with --fix to auto-apply: npx cc-safe-setup --audit --fix' + c.reset);
   }
+
+  // Badge output
+  if (process.argv.includes('--badge')) {
+    const color = score >= 80 ? 'brightgreen' : score >= 50 ? 'yellow' : 'red';
+    const badge = `![Claude Code Safety](https://img.shields.io/badge/Claude_Code_Safety-${score}%2F100-${color})`;
+    console.log();
+    console.log(c.bold + '  README Badge:' + c.reset);
+    console.log('  ' + badge);
+    console.log();
+    console.log(c.dim + '  Paste this into your README.md' + c.reset);
+  }
+
   console.log();
 }
 
