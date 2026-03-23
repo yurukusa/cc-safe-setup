@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Safety Audit</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 2rem; }
+.container { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #f0f6fc; }
+.subtitle { color: #8b949e; margin-bottom: 2rem; }
+textarea { width: 100%; height: 200px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: 13px; padding: 1rem; resize: vertical; }
+textarea::placeholder { color: #484f58; }
+button { background: #238636; color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
+button:hover { background: #2ea043; }
+.results { margin-top: 2rem; }
+.score { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
+.score.good { color: #3fb950; }
+.score.mid { color: #d29922; }
+.score.bad { color: #f85149; }
+.risk { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; margin: 0.5rem 0; }
+.risk .severity { font-weight: bold; margin-right: 0.5rem; }
+.risk .severity.critical, .risk .severity.high { color: #f85149; }
+.risk .severity.medium { color: #d29922; }
+.risk .severity.low { color: #8b949e; }
+.risk .fix { color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 0.5rem; }
+.good-item { color: #3fb950; margin: 0.25rem 0; }
+.privacy { color: #484f58; font-size: 12px; margin-top: 2rem; text-align: center; }
+a { color: #58a6ff; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Claude Code Safety Audit</h1>
+<p class="subtitle">Paste your <code>~/.claude/settings.json</code> below. Nothing leaves your browser.</p>
+
+<textarea id="settings" placeholder='{
+  "permissions": { "allow": ["Bash(git:*)"] },
+  "hooks": {
+    "PreToolUse": [{ "matcher": "Bash", "hooks": [{"type":"command","command":"..."}] }]
+  }
+}'></textarea>
+<br>
+<button onclick="runAudit()">Run Audit</button>
+
+<div class="results" id="results"></div>
+
+<p class="privacy">🔒 100% client-side. Your settings never leave this page. <a href="https://github.com/yurukusa/cc-safe-setup">Source</a></p>
+</div>
+
+<script>
+function runAudit() {
+  const raw = document.getElementById('settings').value.trim();
+  const el = document.getElementById('results');
+
+  let settings;
+  try {
+    settings = JSON.parse(raw);
+  } catch(e) {
+    el.innerHTML = '<p style="color:#f85149">Invalid JSON. Paste your settings.json content.</p>';
+    return;
+  }
+
+  const risks = [];
+  const good = [];
+
+  const preHooks = settings.hooks?.PreToolUse || [];
+  const postHooks = settings.hooks?.PostToolUse || [];
+  const allCmds = JSON.stringify(preHooks).toLowerCase();
+
+  // 1. PreToolUse hooks
+  if (preHooks.length === 0) {
+    risks.push({ severity: 'CRITICAL', issue: 'No PreToolUse hooks — rm -rf, git reset --hard run unchecked', fix: 'npx cc-safe-setup' });
+  } else {
+    good.push('PreToolUse hooks (' + preHooks.length + ')');
+  }
+
+  // 2. Destructive guard
+  if (!allCmds.match(/destructive|guard|block|rm.*rf|reset.*hard/)) {
+    risks.push({ severity: 'HIGH', issue: 'No destructive command blocker', fix: 'npx cc-safe-setup' });
+  } else good.push('Destructive command protection');
+
+  // 3. Branch guard
+  if (!allCmds.match(/branch|push|main|master/)) {
+    risks.push({ severity: 'HIGH', issue: 'No branch push protection', fix: 'npx cc-safe-setup' });
+  } else good.push('Branch push protection');
+
+  // 4. Secret guard
+  if (!allCmds.match(/secret|env|credential/)) {
+    risks.push({ severity: 'HIGH', issue: 'No secret leak protection (.env commits)', fix: 'npx cc-safe-setup' });
+  } else good.push('Secret leak protection');
+
+  // 5. Database wipe
+  if (!allCmds.match(/database|wipe|migrate|prisma/)) {
+    risks.push({ severity: 'MEDIUM', issue: 'No database wipe protection', fix: 'npx cc-safe-setup --install-example block-database-wipe' });
+  } else good.push('Database wipe protection');
+
+  // 6. PostToolUse
+  if (postHooks.length === 0) {
+    risks.push({ severity: 'MEDIUM', issue: 'No PostToolUse hooks (no syntax checking)', fix: 'npx cc-safe-setup' });
+  } else good.push('PostToolUse hooks (' + postHooks.length + ')');
+
+  // 7. Allow rules check
+  const allows = settings.permissions?.allow || [];
+  if (allows.includes('Bash(*)')) {
+    risks.push({ severity: 'MEDIUM', issue: 'Bash(*) in allow list — all commands auto-approved without checks', fix: 'Use specific patterns like Bash(git:*) instead' });
+  }
+
+  // 8. Deny rules
+  const denies = settings.permissions?.deny || [];
+  if (denies.length > 0) good.push('Deny rules configured (' + denies.length + ')');
+
+  // Score
+  const score = Math.max(0, 100 - risks.reduce((s, r) => {
+    if (r.severity === 'CRITICAL') return s + 30;
+    if (r.severity === 'HIGH') return s + 20;
+    if (r.severity === 'MEDIUM') return s + 10;
+    return s + 5;
+  }, 0));
+
+  const scoreClass = score >= 80 ? 'good' : score >= 50 ? 'mid' : 'bad';
+
+  let html = '<div class="score ' + scoreClass + '">Safety Score: ' + score + '/100</div>';
+
+  if (good.length > 0) {
+    html += '<h3 style="color:#3fb950;margin:1rem 0 0.5rem">✓ Working</h3>';
+    html += good.map(g => '<div class="good-item">✓ ' + g + '</div>').join('');
+  }
+
+  if (risks.length > 0) {
+    html += '<h3 style="margin:1rem 0 0.5rem">⚠ Risks (' + risks.length + ')</h3>';
+    html += risks.map(r =>
+      '<div class="risk"><span class="severity ' + r.severity.toLowerCase() + '">[' + r.severity + ']</span>' + r.issue +
+      '<div class="fix">Fix: ' + r.fix + '</div></div>'
+    ).join('');
+  }
+
+  if (risks.length === 0) {
+    html += '<p style="color:#3fb950;margin-top:1rem">No risks detected. Your setup looks solid.</p>';
+  }
+
+  el.innerHTML = html;
+}
+</script>
+</body>
+</html>
