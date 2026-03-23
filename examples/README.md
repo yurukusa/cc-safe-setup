@@ -1,64 +1,26 @@
 # Example Hooks
 
-25 hooks beyond the 8 built-in ones, organized by category.
-
-## Quick Start
+38 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation.
 
 ```bash
-# One command — copies hook, updates settings.json, makes executable
-npx cc-safe-setup --install-example block-database-wipe
-
-# Browse all examples with categories
-npx cc-safe-setup --examples
+npx cc-safe-setup --install-example <name>
+npx cc-safe-setup --examples  # list all
 ```
 
-## Safety Guards
+## Safety Guards (13)
+allowlist, block-database-wipe, case-sensitive-guard, compound-command-approver, deploy-guard, env-var-check, git-config-guard, network-guard, path-traversal-guard, protect-dotfiles, scope-guard, test-before-push, timeout-guard
 
-| Hook | Purpose | Issue |
-|------|---------|-------|
-| **allowlist.sh** | Block everything not explicitly approved | [#37471](https://github.com/anthropics/claude-code/issues/37471) |
-| **block-database-wipe.sh** | Block migrate:fresh, DROP DATABASE, Prisma reset | [#37405](https://github.com/anthropics/claude-code/issues/37405) |
-| **deploy-guard.sh** | Block deploy with uncommitted changes | [#37314](https://github.com/anthropics/claude-code/issues/37314) |
-| **env-var-check.sh** | Block hardcoded API keys in export commands | |
-| **git-config-guard.sh** | Block git config --global | [#37201](https://github.com/anthropics/claude-code/issues/37201) |
-| **network-guard.sh** | Warn on suspicious network commands | [#37420](https://github.com/anthropics/claude-code/issues/37420) |
-| **path-traversal-guard.sh** | Block Edit/Write with ../ path traversal | |
-| **protect-dotfiles.sh** | Block changes to ~/.bashrc, ~/.aws/, ~/.ssh/ | [#37478](https://github.com/anthropics/claude-code/issues/37478) |
-| **scope-guard.sh** | Block operations outside project directory | [#36233](https://github.com/anthropics/claude-code/issues/36233) |
-| **test-before-push.sh** | Block git push without tests | [#36970](https://github.com/anthropics/claude-code/issues/36970) |
-| **timeout-guard.sh** | Warn before long-running commands (servers, watchers) | |
+## Auto-Approve (5)
+auto-approve-build, auto-approve-docker, auto-approve-git-read, auto-approve-python, auto-approve-ssh
 
-## Auto-Approve
+## Quality (8)
+branch-name-check, commit-message-check, commit-quality-gate, edit-guard, enforce-tests, large-file-guard, todo-check, verify-before-commit
 
-| Hook | Purpose | Issue |
-|------|---------|-------|
-| **auto-approve-build.sh** | npm/yarn/cargo/go build, test, lint | |
-| **auto-approve-docker.sh** | docker build, compose, ps, logs | |
-| **auto-approve-git-read.sh** | git status/log/diff with -C flags | [#36900](https://github.com/anthropics/claude-code/issues/36900) |
-| **auto-approve-python.sh** | pytest, mypy, ruff, black, isort | |
-| **auto-approve-ssh.sh** | Safe SSH commands (uptime, whoami) | |
+## Recovery (3)
+auto-checkpoint, auto-snapshot, session-checkpoint
 
-## Quality
+## UX (9)
+cost-tracker, dependency-audit, diff-size-guard, hook-debug-wrapper, loop-detector, notify-waiting, read-before-edit, session-handoff, tmp-cleanup
 
-| Hook | Purpose | Issue |
-|------|---------|-------|
-| **branch-name-check.sh** | Warn on non-conventional branch names | |
-| **commit-message-check.sh** | Warn on non-conventional commit messages | |
-| **edit-guard.sh** | Block Edit/Write to protected files | [#37210](https://github.com/anthropics/claude-code/issues/37210) |
-| **enforce-tests.sh** | Warn when source changes without tests | |
-| **large-file-guard.sh** | Warn when Write creates files >500KB | |
-| **todo-check.sh** | Warn when committing files with TODO/FIXME | |
-| **verify-before-commit.sh** | Block commit unless tests passed recently | [#37818](https://github.com/anthropics/claude-code/issues/37818) |
-
-## Recovery
-
-| Hook | Purpose | Issue |
-|------|---------|-------|
-| **auto-checkpoint.sh** | Auto-commit after edits (compaction protection) | [#34674](https://github.com/anthropics/claude-code/issues/34674) |
-| **auto-snapshot.sh** | Save file copies before edits | [#37386](https://github.com/anthropics/claude-code/issues/37386) |
-
-## UX
-
-| Hook | Purpose | Issue |
-|------|---------|-------|
-| **notify-waiting.sh** | Desktop notification when Claude waits | |
+## Write Your Own
+See [CONTRIBUTING.md](../CONTRIBUTING.md).
