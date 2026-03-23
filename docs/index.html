@@ -88,6 +88,31 @@ a { color: #58a6ff; text-decoration: none; }
 <div class="tab-content" id="tab-fix"></div>
 <div class="tab-content" id="tab-manual"></div>
 
+<h2 style="margin-top:2rem">Hook Builder</h2>
+<p class="subtitle">Build a custom hook without writing code.</p>
+
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0">
+  <div style="flex:1;min-width:200px">
+    <label style="color:#8b949e;font-size:.8rem">What should the hook do?</label>
+    <select id="hb-action" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem">
+      <option value="block">Block a command</option>
+      <option value="warn">Warn about a command</option>
+      <option value="approve">Auto-approve a command</option>
+    </select>
+  </div>
+  <div style="flex:2;min-width:300px">
+    <label style="color:#8b949e;font-size:.8rem">Command pattern (regex)</label>
+    <input id="hb-pattern" placeholder="e.g. rm\s+-rf, git push --force, npm publish" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem;font-family:monospace;font-size:.85rem">
+  </div>
+</div>
+<div style="margin:.5rem 0">
+  <label style="color:#8b949e;font-size:.8rem">Message shown to Claude</label>
+  <input id="hb-message" placeholder="e.g. Run tests before publishing" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem">
+</div>
+<button class="btn" onclick="buildHook()">Generate Hook</button>
+
+<div id="hb-result" style="margin-top:1rem"></div>
+
 <p class="privacy">100% client-side. Your settings never leave this page. <a href="https://github.com/yurukusa/cc-safe-setup">Source</a> · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> · <a href="ecosystem.html">Compare all hook projects</a></p>
 </div>
 
@@ -597,6 +622,48 @@ exit 0`
   };
 
   return scripts[id] || '#!/bin/bash\nexit 0';
+}
+
+function buildHook() {
+  const action = document.getElementById('hb-action').value;
+  const pattern = document.getElementById('hb-pattern').value.trim();
+  const message = document.getElementById('hb-message').value.trim() || 'Blocked by hook';
+  const el = document.getElementById('hb-result');
+
+  if (!pattern) { el.innerHTML = '<p style="color:#f85149">Enter a command pattern.</p>'; return; }
+
+  let script = '#!/bin/bash\n';
+  script += 'INPUT=$(cat)\n';
+  script += 'COMMAND=$(echo "$INPUT" | jq -r \'.tool_input.command // empty\' 2>/dev/null)\n';
+  script += '[ -z "$COMMAND" ] && exit 0\n\n';
+
+  if (action === 'block') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    echo "BLOCKED: ' + message.replace(/"/g, '\\"') + '" >&2\n';
+    script += '    echo "Command: $COMMAND" >&2\n';
+    script += '    exit 2\n';
+    script += 'fi\n';
+  } else if (action === 'warn') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    echo "WARNING: ' + message.replace(/"/g, '\\"') + '" >&2\n';
+    script += '    echo "Command: $COMMAND" >&2\n';
+    script += 'fi\n';
+  } else if (action === 'approve') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    jq -n \'{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"' + message.replace(/"/g, '\\"') + '"}}\'\n';
+    script += 'fi\n';
+  }
+  script += 'exit 0';
+
+  const settings = {
+    hooks: { PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: '~/.claude/hooks/custom-hook.sh' }] }] }
+  };
+
+  el.innerHTML = '<h3>Hook Script</h3>' +
+    '<div class="code-block"><button class="copy-btn" onclick="copyText(\'hb-script\')">Copy</button><pre id="hb-script">' + escHtml(script) + '</pre></div>' +
+    '<h3>settings.json entry</h3>' +
+    '<div class="code-block"><button class="copy-btn" onclick="copyText(\'hb-settings\')">Copy</button><pre id="hb-settings">' + escHtml(JSON.stringify(settings, null, 2)) + '</pre></div>' +
+    '<p style="color:#8b949e;font-size:.8rem;margin-top:.5rem">Save the script as <code>~/.claude/hooks/custom-hook.sh</code>, run <code>chmod +x</code>, and merge the settings entry.</p>';
 }
 
 // Auto-load from URL parameter: ?config=base64encodedJSON
