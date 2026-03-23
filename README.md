@@ -208,10 +208,14 @@ Or browse all available examples in [`examples/`](examples/):
 
 **[SAFETY_CHECKLIST.md](SAFETY_CHECKLIST.md)** — Copy-paste checklist for before/during/after autonomous sessions.
 
+## Migration Guide
+
+**[MIGRATION.md](MIGRATION.md)** — Step-by-step guide for moving from permissions-only to permissions + hooks. Keep your existing config, add safety layers on top.
+
 ## Learn More
 
-- [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
-- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 18 ready-to-use recipes from real GitHub Issues
+- [Official Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) — Claude Code hooks documentation
+- [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 19 ready-to-use recipes from real GitHub Issues
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
 
