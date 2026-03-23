@@ -138,6 +138,29 @@ npx cc-safe-setup --audit
 
 Analyzes 9 safety dimensions and gives you a score (0-100) with one-command fixes for each risk.
 
+### CI Integration (GitHub Action)
+
+```yaml
+# .github/workflows/safety.yml
+- uses: yurukusa/cc-safe-setup@main
+  with:
+    threshold: 70  # CI fails if score drops below this
+```
+
+### Project Scanner
+
+```bash
+npx cc-safe-setup --scan         # detect tech stack, recommend hooks
+npx cc-safe-setup --scan --apply # auto-create CLAUDE.md with project rules
+```
+
+### Self-Learning Safety
+
+```bash
+npx cc-safe-setup --learn        # analyze your block history for patterns
+npx cc-safe-setup --learn --apply # auto-generate custom hooks from patterns
+```
+
 ## Examples
 
 Need custom hooks beyond the 8 built-in ones? Install any example with one command:
