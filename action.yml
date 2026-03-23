@@ -10,21 +10,47 @@ inputs:
     required: false
     default: '70'
 
+outputs:
+  score:
+    description: 'Safety score (0-100)'
+    value: ${{ steps.audit.outputs.score }}
+  grade:
+    description: 'Safety grade (A/B/C/F)'
+    value: ${{ steps.audit.outputs.grade }}
+  risks:
+    description: 'Number of risks found'
+    value: ${{ steps.audit.outputs.risks }}
+
 runs:
   using: 'composite'
   steps:
     - name: Run safety audit
+      id: audit
       shell: bash
       run: |
         echo "::group::Claude Code Safety Audit"
+        npx cc-safe-setup@latest --audit --json 2>/dev/null > /tmp/audit-json.txt || true
         npx cc-safe-setup@latest --audit 2>&1 | tee /tmp/audit-output.txt
         echo "::endgroup::"
 
-        # Extract score
-        SCORE=$(grep -oP 'Safety Score: \K\d+' /tmp/audit-output.txt || echo "0")
+        # Parse JSON output
+        if [ -s /tmp/audit-json.txt ]; then
+          SCORE=$(python3 -c "import json; print(json.load(open('/tmp/audit-json.txt'))['score'])" 2>/dev/null || echo "0")
+          GRADE=$(python3 -c "import json; print(json.load(open('/tmp/audit-json.txt'))['grade'])" 2>/dev/null || echo "?")
+          RISK_COUNT=$(python3 -c "import json; print(len(json.load(open('/tmp/audit-json.txt'))['risks']))" 2>/dev/null || echo "0")
+        else
+          SCORE=$(grep -oP 'Safety Score: \K\d+' /tmp/audit-output.txt || echo "0")
+          GRADE="?"
+          RISK_COUNT="?"
+        fi
+
         THRESHOLD="${{ inputs.threshold }}"
 
-        echo "Safety Score: $SCORE / 100 (threshold: $THRESHOLD)"
+        echo "score=$SCORE" >> $GITHUB_OUTPUT
+        echo "grade=$GRADE" >> $GITHUB_OUTPUT
+        echo "risks=$RISK_COUNT" >> $GITHUB_OUTPUT
+
+        echo "Safety Score: $SCORE/100 (Grade: $GRADE, Risks: $RISK_COUNT, Threshold: $THRESHOLD)"
 
         if [ "$SCORE" -lt "$THRESHOLD" ]; then
           echo "::error::Safety score $SCORE is below threshold $THRESHOLD. Run 'npx cc-safe-setup --audit --fix' to improve."
