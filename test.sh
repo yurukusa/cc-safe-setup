@@ -805,6 +805,24 @@ if echo "$EXPORT_OUT" | grep -q "Exported"; then echo "  PASS: --export creates 
 python3 -c "import os; f='cc-safe-setup-export.json'; os.path.exists(f) and os.remove(f)" 2>/dev/null
 echo ""
 
+# ========================
+# --share tests
+# ========================
+echo "--- --share tests ---"
+
+SHARE_OUT=$(node "$CLI" --share 2>&1) || true
+if echo "$SHARE_OUT" | grep -q "yurukusa.github.io"; then echo "  PASS: --share generates URL"; PASS=$((PASS + 1)); else echo "  FAIL: --share should generate URL"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
+# --benchmark tests
+# ========================
+echo "--- --benchmark tests ---"
+
+BENCH_OUT=$(timeout 30 node "$CLI" --benchmark 2>&1) || true
+if echo "$BENCH_OUT" | grep -q "ms\|Hook\|performance"; then echo "  PASS: --benchmark runs"; PASS=$((PASS + 1)); else echo "  FAIL: --benchmark should show timings"; FAIL=$((FAIL + 1)); fi
+echo ""
+
 # CI cleanup
 if [ "${CI_CLEANUP:-0}" = "1" ]; then
     python3 -c "
