@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks Ecosystem</title>
+<meta name="description" content="Compare all Claude Code hook projects — features, language, stars, and installation methods.">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 2rem; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #f0f6fc; }
+h2 { font-size: 1.2rem; margin: 2rem 0 1rem; color: #f0f6fc; }
+.subtitle { color: #8b949e; margin-bottom: 2rem; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+th { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 2px solid #30363d; color: #f0f6fc; font-weight: 600; }
+td { padding: 0.5rem; border-bottom: 1px solid #21262d; vertical-align: top; }
+tr:hover td { background: #161b22; }
+.badge { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold; margin-right: 0.3rem; }
+.badge-bash { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb44; }
+.badge-js { background: #f0e68c22; color: #f0e68c; border: 1px solid #f0e68c44; }
+.badge-py { background: #3fb95022; color: #3fb950; border: 1px solid #3fb95044; }
+.badge-ts { background: #388bfd22; color: #388bfd; border: 1px solid #388bfd44; }
+.check { color: #3fb950; }
+.cross { color: #484f58; }
+.note { color: #8b949e; font-size: 0.8rem; margin-top: 2rem; }
+.footer { color: #484f58; font-size: 0.75rem; margin-top: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Claude Code Hooks Ecosystem</h1>
+<p class="subtitle">A neutral comparison of all major hook projects. Pick the one that fits your stack.</p>
+
+<h2>Projects at a Glance</h2>
+<table>
+<tr>
+  <th>Project</th>
+  <th>Language</th>
+  <th>Hooks</th>
+  <th>Install</th>
+  <th>Focus</th>
+</tr>
+<tr>
+  <td><a href="https://github.com/kenryu42/claude-code-safety-net">safety-net</a></td>
+  <td><span class="badge badge-ts">TS</span></td>
+  <td>5 rules</td>
+  <td>npx</td>
+  <td>Destructive command blocking with configurable severity</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></td>
+  <td><span class="badge badge-bash">Bash</span></td>
+  <td>8 + 26 examples</td>
+  <td>npx</td>
+  <td>Full safety suite: block, audit, create, learn, watch, doctor</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/karanb192/claude-code-hooks">karanb192/hooks</a></td>
+  <td><span class="badge badge-js">JS</span></td>
+  <td>5+</td>
+  <td>copy files</td>
+  <td>JS hooks with configurable safety levels and logging</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/disler/claude-code-hooks-mastery">hooks-mastery</a></td>
+  <td><span class="badge badge-py">Python</span></td>
+  <td>12</td>
+  <td>copy files</td>
+  <td>Python hooks covering all hook events + LLM integration</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/lasso-security/claude-hooks">lasso-security</a></td>
+  <td><span class="badge badge-py">Python</span></td>
+  <td>1 skill</td>
+  <td>install.sh</td>
+  <td>Prompt injection defense using YAML pattern matching</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/johnlindquist/claude-hooks">johnlindquist</a></td>
+  <td><span class="badge badge-ts">TS</span></td>
+  <td>8</td>
+  <td>Bun</td>
+  <td>TypeScript hooks with Bun runtime, notification focus</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/yurukusa/claude-code-hooks">claude-code-hooks</a></td>
+  <td><span class="badge badge-bash">Bash</span></td>
+  <td>16 + 5 templates</td>
+  <td>install.sh</td>
+  <td>Production hooks from 1000+ hours autonomous operation</td>
+</tr>
+</table>
+
+<h2>Feature Comparison</h2>
+<table>
+<tr>
+  <th>Feature</th>
+  <th>safety-net</th>
+  <th>cc-safe-setup</th>
+  <th>karanb192</th>
+  <th>mastery</th>
+  <th>lasso</th>
+</tr>
+<tr>
+  <td>rm -rf blocker</td>
+  <td class="check">&#10003;</td>
+  <td class="check">&#10003;</td>
+  <td class="check">&#10003;</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Branch push guard</td>
+  <td class="check">&#10003;</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Secret leak prevention</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Syntax validation</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Context monitor</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Prompt injection defense</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+</tr>
+<tr>
+  <td>Auto-approve safe cmds</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Database wipe guard</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Safety audit/score</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Hook generator (NL)</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+<tr>
+  <td>Zero dependencies</td>
+  <td class="cross">TS</td>
+  <td class="check">jq only</td>
+  <td class="check">Node</td>
+  <td class="cross">uv/pip</td>
+  <td class="cross">uv</td>
+</tr>
+<tr>
+  <td>GitHub Action</td>
+  <td class="cross">-</td>
+  <td class="check">&#10003;</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+  <td class="cross">-</td>
+</tr>
+</table>
+
+<p class="note">This page is maintained by the cc-safe-setup team but aims to be neutral. PRs welcome for corrections: <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+
+<h2>Which Should I Use?</h2>
+<table>
+<tr><th>If you want...</th><th>Use this</th></tr>
+<tr><td>Quickest setup, bash-based</td><td><code>npx cc-safe-setup</code></td></tr>
+<tr><td>TypeScript hooks, configurable severity</td><td>safety-net</td></tr>
+<tr><td>Python hooks, all event types</td><td>hooks-mastery</td></tr>
+<tr><td>Prompt injection protection</td><td>lasso-security</td></tr>
+<tr><td>JS hooks with logging</td><td>karanb192</td></tr>
+<tr><td>Complete ops toolkit (hooks + templates)</td><td>claude-code-hooks</td></tr>
+</table>
+
+<div class="footer">
+  Last updated: March 2026 · <a href="https://yurukusa.github.io/cc-safe-setup/">Safety Audit Tool</a> · <a href="https://github.com/yurukusa/cc-safe-setup">Source</a>
+</div>
+</div>
+</body>
+</html>
