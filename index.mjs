@@ -398,7 +398,7 @@ async function installExample(name) {
   console.log();
 }
 
-function audit() {
+async function audit() {
   console.log();
   console.log(c.bold + '  cc-safe-setup --audit' + c.reset);
   console.log(c.dim + '  Analyzing your Claude Code safety setup...' + c.reset);
@@ -543,6 +543,29 @@ function audit() {
     return sum + 5;
   }, 0));
   console.log(c.bold + '  Safety Score: ' + (score >= 80 ? c.green : score >= 50 ? c.yellow : c.red) + score + '/100' + c.reset);
+
+  // --audit --fix: auto-fix what we can
+  if (process.argv.includes('--fix') && risks.length > 0) {
+    console.log();
+    console.log(c.bold + '  Applying fixes...' + c.reset);
+    const { execSync } = await import('child_process');
+    for (const r of risks) {
+      if (r.fix.startsWith('npx cc-safe-setup')) {
+        try {
+          const cmd = r.fix.replace('npx cc-safe-setup', 'node ' + process.argv[1]);
+          console.log('  ' + c.dim + '→ ' + r.fix + c.reset);
+          execSync(cmd, { stdio: 'inherit' });
+        } catch(e) {
+          console.log('  ' + c.red + '  Failed: ' + e.message + c.reset);
+        }
+      }
+    }
+    console.log();
+    console.log(c.green + '  Re-run --audit to verify fixes.' + c.reset);
+  } else if (risks.length > 0) {
+    console.log();
+    console.log(c.dim + '  Run with --fix to auto-apply: npx cc-safe-setup --audit --fix' + c.reset);
+  }
   console.log();
 }
 
