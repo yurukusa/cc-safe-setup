@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.**
 
-Not just a destructive command blocker — 8 hooks covering safety, quality, monitoring, and developer experience.
+8 built-in hooks + 32 installable examples. Audit, create, lint, diff, watch, and learn. [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) · [Web Tool](https://yurukusa.github.io/cc-safe-setup/) · [Troubleshooting](TROUBLESHOOTING.md)
 
 ```bash
 npx cc-safe-setup
