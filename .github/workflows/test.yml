@@ -9,6 +9,20 @@ jobs:
         with:
           node-version: '20'
       - run: sudo apt-get install -y jq
-      - run: node index.mjs --help
-      - run: node index.mjs --dry-run
-      - run: bash test.sh
+      - name: CLI smoke tests
+        run: |
+          node index.mjs --help
+          node index.mjs --dry-run
+      - name: Example hooks syntax check
+        run: |
+          ERRORS=0
+          for f in examples/*.sh; do
+            if ! bash -n "$f" 2>/dev/null; then
+              echo "SYNTAX ERROR: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          echo "$(($(ls examples/*.sh | wc -l) - ERRORS))/$(ls examples/*.sh | wc -l) examples passed syntax check"
+          [ "$ERRORS" -eq 0 ] || exit 1
+      - name: Full test suite
+        run: bash test.sh
