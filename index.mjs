@@ -350,6 +350,8 @@ function examples() {
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd files on session end',
       'hook-debug-wrapper.sh': 'Wrap any hook to log input/output/exit/timing',
       'loop-detector.sh': 'Detect and break command repetition loops',
+      'session-handoff.sh': 'Auto-save session state for next session resume',
+      'commit-quality-gate.sh': 'Warn on vague or too-long commit messages',
     },
   };
 
