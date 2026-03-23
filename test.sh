@@ -684,6 +684,56 @@ if echo "$DOCTOR_OUT" | grep -q "settings.json"; then echo "  PASS: --doctor che
 if echo "$DOCTOR_OUT" | grep -q "hooks"; then echo "  PASS: --doctor checks hooks section"; PASS=$((PASS + 1)); else echo "  FAIL: --doctor should check hooks"; FAIL=$((FAIL + 1)); fi
 echo ""
 
+# ========================
+# --create tests
+# ========================
+echo "--- --create tests ---"
+
+# Test that --create generates a hook file
+CREATE_OUT=$(node "$CLI" --create "block docker system prune" 2>&1) || true
+if echo "$CREATE_OUT" | grep -q "Created"; then echo "  PASS: --create generates hook"; PASS=$((PASS + 1)); else echo "  FAIL: --create should generate hook"; FAIL=$((FAIL + 1)); fi
+if echo "$CREATE_OUT" | grep -q "Registered"; then echo "  PASS: --create registers in settings"; PASS=$((PASS + 1)); else echo "  FAIL: --create should register"; FAIL=$((FAIL + 1)); fi
+if echo "$CREATE_OUT" | grep -q "passes empty input"; then echo "  PASS: --create runs smoke test"; PASS=$((PASS + 1)); else echo "  FAIL: --create should smoke test"; FAIL=$((FAIL + 1)); fi
+
+# Test generic fallback
+GENERIC_OUT=$(node "$CLI" --create "block terraform apply in staging" 2>&1) || true
+if echo "$GENERIC_OUT" | grep -q "generic"; then echo "  PASS: --create falls back to generic"; PASS=$((PASS + 1)); else echo "  FAIL: --create should fall back to generic"; FAIL=$((FAIL + 1)); fi
+
+# Cleanup test-created hooks
+python3 -c "
+import json, os
+settings_path = os.path.expanduser('~/.claude/settings.json')
+with open(settings_path) as f:
+    s = json.load(f)
+for trigger in list(s.get('hooks', {}).keys()):
+    s['hooks'][trigger] = [e for e in s['hooks'][trigger] if not any('block-docker' in (h.get('command','') or '') or 'custom-terraform' in (h.get('command','') or '') for h in e.get('hooks', []))]
+with open(settings_path, 'w') as f:
+    json.dump(s, f, indent=2)
+for f in ['block-docker-destructive.sh', 'custom-terraform-apply-in-staging.sh']:
+    p = os.path.expanduser(f'~/.claude/hooks/{f}')
+    if os.path.exists(p):
+        os.remove(p)
+" 2>/dev/null
+echo ""
+
+# ========================
+# --audit --json tests
+# ========================
+echo "--- --audit --json tests ---"
+
+JSON_OUT=$(node "$CLI" --audit --json 2>&1)
+if echo "$JSON_OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('score' in d)" 2>/dev/null | grep -q "True"; then
+    echo "  PASS: --audit --json has score"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: --audit --json should have score"; FAIL=$((FAIL + 1))
+fi
+if echo "$JSON_OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('grade' in d)" 2>/dev/null | grep -q "True"; then
+    echo "  PASS: --audit --json has grade"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: --audit --json should have grade"; FAIL=$((FAIL + 1))
+fi
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
