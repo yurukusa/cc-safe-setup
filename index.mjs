@@ -347,6 +347,7 @@ function examples() {
       'notify-waiting.sh': 'Desktop notification when Claude waits for input',
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd files on session end',
       'hook-debug-wrapper.sh': 'Wrap any hook to log input/output/exit/timing',
+      'loop-detector.sh': 'Detect and break command repetition loops',
     },
   };
 

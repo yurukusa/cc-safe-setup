@@ -219,6 +219,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **session-checkpoint.sh** — Save session state to mission file before context compaction ([#37866](https://github.com/anthropics/claude-code/issues/37866))
 - **verify-before-commit.sh** — Block git commit when lint/test commands haven't been run ([#37818](https://github.com/anthropics/claude-code/issues/37818))
 - **hook-debug-wrapper.sh** — Wrap any hook to log input/output/exit code/timing to `~/.claude/hook-debug.log`
+- **loop-detector.sh** — Detect and break command repetition loops (warn at 3, block at 5 repeats)
 
 ## Safety Checklist
 
