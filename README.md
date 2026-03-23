@@ -197,6 +197,10 @@ Or browse all available examples in [`examples/`](examples/):
 - **todo-check.sh** — Warn when committing files with TODO/FIXME/HACK markers
 - **path-traversal-guard.sh** — Block Edit/Write with `../../` path traversal and system directories
 
+## Safety Checklist
+
+**[SAFETY_CHECKLIST.md](SAFETY_CHECKLIST.md)** — Copy-paste checklist for before/during/after autonomous sessions.
+
 ## Learn More
 
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
