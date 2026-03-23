@@ -83,6 +83,7 @@ const LINT = process.argv.includes('--lint');
 const DIFF_IDX = process.argv.findIndex(a => a === '--diff');
 const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
 const SHARE = process.argv.includes('--share');
+const BENCHMARK = process.argv.includes('--benchmark');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -104,6 +105,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --benchmark     Measure hook execution time
     npx cc-safe-setup --share         Generate shareable URL for your setup
     npx cc-safe-setup --diff <file>   Compare your settings with another file
     npx cc-safe-setup --lint       Static analysis of hook configuration
@@ -781,6 +783,89 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function benchmark() {
+  const { spawnSync } = await import('child_process');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --benchmark' + c.reset);
+  console.log(c.dim + '  Measuring hook execution time (10 runs each)...' + c.reset);
+  console.log();
+
+  if (!existsSync(SETTINGS_PATH)) {
+    console.log(c.red + '  No settings.json found.' + c.reset);
+    process.exit(1);
+  }
+
+  const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+  const hooks = settings.hooks || {};
+  const results = [];
+  const testInput = JSON.stringify({ tool_input: { command: 'echo hello' } });
+  const RUNS = 10;
+
+  for (const [trigger, entries] of Object.entries(hooks)) {
+    for (const entry of entries) {
+      for (const h of (entry.hooks || [])) {
+        if (h.type !== 'command') continue;
+        let scriptPath = (h.command || '').replace(/^(bash|sh|node)\s+/, '').split(/\s+/)[0];
+        scriptPath = scriptPath.replace(/^~/, HOME);
+        if (!existsSync(scriptPath)) continue;
+
+        const name = scriptPath.split('/').pop();
+        const times = [];
+
+        for (let i = 0; i < RUNS; i++) {
+          const start = process.hrtime.bigint();
+          spawnSync('bash', [scriptPath], {
+            input: testInput,
+            timeout: 5000,
+            stdio: ['pipe', 'pipe', 'pipe'],
+          });
+          const end = process.hrtime.bigint();
+          times.push(Number(end - start) / 1_000_000); // ms
+        }
+
+        const avg = times.reduce((a, b) => a + b, 0) / times.length;
+        const max = Math.max(...times);
+        const min = Math.min(...times);
+
+        results.push({ name, trigger, avg, max, min, matcher: entry.matcher || '(all)' });
+      }
+    }
+  }
+
+  // Sort by avg time descending
+  results.sort((a, b) => b.avg - a.avg);
+
+  // Display
+  const maxAvg = results[0]?.avg || 1;
+  console.log(c.bold + '  Hook                          Avg     Min     Max    Trigger' + c.reset);
+  console.log('  ' + '-'.repeat(75));
+
+  for (const r of results) {
+    const bar = '█'.repeat(Math.ceil(r.avg / maxAvg * 15));
+    const avgColor = r.avg > 100 ? c.red : r.avg > 50 ? c.yellow : c.green;
+    console.log(
+      '  ' + r.name.padEnd(30) +
+      avgColor + r.avg.toFixed(1).padStart(6) + 'ms' + c.reset +
+      r.min.toFixed(1).padStart(6) + 'ms' +
+      r.max.toFixed(1).padStart(6) + 'ms' +
+      '  ' + c.dim + r.trigger + c.reset
+    );
+  }
+
+  console.log();
+  const totalAvg = results.reduce((s, r) => s + r.avg, 0);
+  const slow = results.filter(r => r.avg > 50);
+
+  console.log(c.dim + '  Total avg per tool call: ' + totalAvg.toFixed(1) + 'ms (sum of all hooks on that trigger)' + c.reset);
+  if (slow.length > 0) {
+    console.log(c.yellow + '  ' + slow.length + ' hook(s) over 50ms — consider optimizing' + c.reset);
+  } else {
+    console.log(c.green + '  All hooks under 50ms — good performance' + c.reset);
+  }
   console.log();
 }
 
@@ -1988,6 +2073,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (BENCHMARK) return benchmark();
   if (SHARE) return share();
   if (DIFF_FILE) return diff(DIFF_FILE);
   if (LINT) return lint();
