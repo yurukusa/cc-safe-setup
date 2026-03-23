@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks Cheat Sheet</title>
+<style>
+@media print { body { padding: 0; background: #fff; color: #000; font-size: 9px; } .no-print { display: none; } h1 { font-size: 14px; } h2 { font-size: 11px; } pre { font-size: 8px; border: 1px solid #ccc; } .col { break-inside: avoid; } }
+@media screen { body { background: #0d1117; color: #c9d1d9; padding: 1rem; } pre { background: #161b22; border: 1px solid #30363d; } h1 { color: #f0f6fc; } h2 { color: #f0f6fc; } a { color: #58a6ff; } }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; font-size: 11px; line-height: 1.4; }
+.container { max-width: 900px; margin: 0 auto; columns: 2; column-gap: 1.5rem; }
+h1 { font-size: 16px; margin-bottom: 0.3rem; text-align: center; column-span: all; }
+.subtitle { text-align: center; margin-bottom: 0.8rem; font-size: 10px; opacity: 0.7; column-span: all; }
+h2 { font-size: 12px; margin: 0.6rem 0 0.3rem; border-bottom: 1px solid #30363d; padding-bottom: 0.15rem; }
+pre { padding: 0.4rem; border-radius: 4px; overflow-x: auto; font-size: 9.5px; margin: 0.2rem 0 0.4rem; white-space: pre-wrap; word-break: break-all; }
+.col { break-inside: avoid; margin-bottom: 0.3rem; }
+table { width: 100%; border-collapse: collapse; font-size: 9.5px; margin: 0.2rem 0; }
+th, td { text-align: left; padding: 0.15rem 0.3rem; border-bottom: 1px solid #21262d; }
+th { font-weight: 600; }
+code { font-size: 9px; padding: 0.1rem 0.2rem; border-radius: 2px; }
+@media screen { code { background: #161b22; } }
+.footer { text-align: center; font-size: 8px; opacity: 0.5; margin-top: 0.5rem; column-span: all; }
+</style>
+</head>
+<body>
+<h1>Claude Code Hooks Cheat Sheet</h1>
+<p class="subtitle">Quick reference · Print this page (Ctrl+P) · <a href="https://github.com/yurukusa/cc-safe-setup" class="no-print">github.com/yurukusa/cc-safe-setup</a></p>
+
+<div class="container">
+
+<div class="col">
+<h2>Hook Lifecycle</h2>
+<pre>Prompt → PreToolUse → Tool Executes → PostToolUse → Stop
+         ↑ block here                  ↑ check here    ↑ log here</pre>
+</div>
+
+<div class="col">
+<h2>Exit Codes</h2>
+<table>
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr><td><code>0</code></td><td>Allow (or no opinion)</td></tr>
+<tr><td><code>2</code></td><td><strong>Block</strong> — tool call cancelled</td></tr>
+<tr><td>other</td><td>Error (treated as allow)</td></tr>
+</table>
+</div>
+
+<div class="col">
+<h2>Hook Events</h2>
+<table>
+<tr><th>Event</th><th>Matcher</th><th>Use</th></tr>
+<tr><td>PreToolUse</td><td>Bash</td><td>Block commands</td></tr>
+<tr><td>PostToolUse</td><td>Edit|Write</td><td>Syntax check</td></tr>
+<tr><td>PostToolUse</td><td>(empty)</td><td>All tools</td></tr>
+<tr><td>Stop</td><td>(empty)</td><td>Session end</td></tr>
+<tr><td>UserPromptSubmit</td><td>—</td><td>Validate input</td></tr>
+</table>
+</div>
+
+<div class="col">
+<h2>settings.json Structure</h2>
+<pre>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/guard.sh"
+      }]
+    }]
+  }
+}</pre>
+</div>
+
+<div class="col">
+<h2>Minimal Block Hook</h2>
+<pre>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'PATTERN'; then
+    echo "BLOCKED: reason" >&2
+    exit 2
+fi
+exit 0</pre>
+</div>
+
+<div class="col">
+<h2>Auto-Approve Hook</h2>
+<pre>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '^\s*git\s+(status|log|diff)'; then
+    jq -n '{
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow"
+      }
+    }'
+fi
+exit 0</pre>
+</div>
+
+<div class="col">
+<h2>PostToolUse Syntax Check</h2>
+<pre>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+case "${FILE##*.}" in
+  py) python3 -m py_compile "$FILE" 2>&1 ;;
+  sh) bash -n "$FILE" 2>&1 ;;
+  json) jq empty "$FILE" 2>&1 ;;
+  js) node --check "$FILE" 2>&1 ;;
+esac
+exit 0</pre>
+</div>
+
+<div class="col">
+<h2>Modify Input</h2>
+<pre>#!/bin/bash
+# Strip comments from bash commands
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+CLEAN=$(echo "$COMMAND" | sed '/^#/d; /^$/d')
+[ "$CLEAN" = "$COMMAND" ] && exit 0
+jq -n --arg cmd "$CLEAN" '{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "updatedInput": {"command": $cmd}
+  }
+}'</pre>
+</div>
+
+<div class="col">
+<h2>stdin JSON Reference</h2>
+<table>
+<tr><th>Event</th><th>Key Fields</th></tr>
+<tr><td>PreToolUse (Bash)</td><td><code>.tool_input.command</code></td></tr>
+<tr><td>PreToolUse (Edit)</td><td><code>.tool_input.file_path</code></td></tr>
+<tr><td>PostToolUse</td><td><code>.tool_input.file_path</code></td></tr>
+<tr><td>Stop</td><td><code>.stop_reason</code></td></tr>
+<tr><td>UserPromptSubmit</td><td><code>.prompt</code></td></tr>
+</table>
+</div>
+
+<div class="col">
+<h2>Test a Hook</h2>
+<pre># Manual test
+echo '{"tool_input":{"command":"rm -rf /"}}' \
+  | bash ~/.claude/hooks/guard.sh
+echo $?  # 2 = blocked
+
+# Auto-test
+npx cc-hook-test ~/.claude/hooks/guard.sh</pre>
+</div>
+
+<div class="col">
+<h2>Quick Setup Commands</h2>
+<table>
+<tr><td><code>npx cc-safe-setup</code></td><td>Install 8 hooks</td></tr>
+<tr><td><code>--create "desc"</code></td><td>Generate hook</td></tr>
+<tr><td><code>--audit</code></td><td>Safety score</td></tr>
+<tr><td><code>--lint</code></td><td>Config analysis</td></tr>
+<tr><td><code>--doctor</code></td><td>Diagnose issues</td></tr>
+<tr><td><code>--watch</code></td><td>Live dashboard</td></tr>
+<tr><td><code>--stats</code></td><td>Block statistics</td></tr>
+<tr><td><code>--verify</code></td><td>Test all hooks</td></tr>
+<tr><td><code>--export</code></td><td>Share with team</td></tr>
+</table>
+</div>
+
+<div class="col">
+<h2>Common Patterns</h2>
+<table>
+<tr><th>Block</th><th>Pattern</th></tr>
+<tr><td>rm -rf /</td><td><code>rm\s+(-[rf]+\s+)*/</code></td></tr>
+<tr><td>force push</td><td><code>git\s+push.*--force</code></td></tr>
+<tr><td>push main</td><td><code>git\s+push.*main</code></td></tr>
+<tr><td>.env commit</td><td><code>git\s+add.*\.env</code></td></tr>
+<tr><td>git reset</td><td><code>git\s+reset\s+--hard</code></td></tr>
+<tr><td>DB wipe</td><td><code>migrate:fresh|DROP\s+DB</code></td></tr>
+</table>
+</div>
+
+</div>
+
+<p class="footer">cc-safe-setup v3.2.0 · 20 recipes: <a href="https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md" class="no-print">COOKBOOK.md</a> · Full ref: <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SETTINGS_REFERENCE.md" class="no-print">SETTINGS_REFERENCE.md</a></p>
+</body>
+</html>
