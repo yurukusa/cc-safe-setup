@@ -68,6 +68,7 @@ const VERIFY = process.argv.includes('--verify') || process.argv.includes('-v');
 const EXAMPLES = process.argv.includes('--examples') || process.argv.includes('-e');
 const INSTALL_EXAMPLE_IDX = process.argv.findIndex(a => a === '--install-example');
 const INSTALL_EXAMPLE = INSTALL_EXAMPLE_IDX !== -1 ? process.argv[INSTALL_EXAMPLE_IDX + 1] : null;
+const AUDIT = process.argv.includes('--audit');
 
 if (HELP) {
   console.log(`
@@ -81,6 +82,7 @@ if (HELP) {
     npx cc-safe-setup --uninstall  Remove all installed hooks
     npx cc-safe-setup --examples   List 25 example hooks (5 categories)
     npx cc-safe-setup --install-example <name>  Install a specific example
+    npx cc-safe-setup --audit      Analyze your setup and recommend missing protections
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -396,12 +398,161 @@ async function installExample(name) {
   console.log();
 }
 
+function audit() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --audit' + c.reset);
+  console.log(c.dim + '  Analyzing your Claude Code safety setup...' + c.reset);
+  console.log();
+
+  const risks = [];
+  const good = [];
+
+  // 1. Check if any PreToolUse hooks exist
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch(e) {}
+  }
+  const preHooks = (settings.hooks?.PreToolUse || []);
+  const postHooks = (settings.hooks?.PostToolUse || []);
+  const stopHooks = (settings.hooks?.Stop || []);
+
+  if (preHooks.length === 0) {
+    risks.push({
+      severity: 'CRITICAL',
+      issue: 'No PreToolUse hooks — destructive commands (rm -rf, git reset --hard) can run unchecked',
+      fix: 'npx cc-safe-setup'
+    });
+  } else {
+    good.push('PreToolUse hooks installed (' + preHooks.length + ')');
+  }
+
+  // 2. Check for destructive command protection
+  const allHookCommands = preHooks.map(h => h.hooks?.map(hh => hh.command || '').join(' ') || '').join(' ');
+  if (!allHookCommands.match(/destructive|guard|block|rm|reset/i)) {
+    risks.push({
+      severity: 'HIGH',
+      issue: 'No destructive command blocker detected — rm -rf /, git reset --hard could execute',
+      fix: 'npx cc-safe-setup (installs destructive-guard)'
+    });
+  } else {
+    good.push('Destructive command protection detected');
+  }
+
+  // 3. Check for branch protection
+  if (!allHookCommands.match(/branch|push|main|master/i)) {
+    risks.push({
+      severity: 'HIGH',
+      issue: 'No branch push protection — code could be pushed directly to main/master',
+      fix: 'npx cc-safe-setup (installs branch-guard)'
+    });
+  } else {
+    good.push('Branch push protection detected');
+  }
+
+  // 4. Check for secret leak protection
+  if (!allHookCommands.match(/secret|env|credential/i)) {
+    risks.push({
+      severity: 'HIGH',
+      issue: 'No secret leak protection — .env files could be committed via git add .',
+      fix: 'npx cc-safe-setup (installs secret-guard)'
+    });
+  } else {
+    good.push('Secret leak protection detected');
+  }
+
+  // 5. Check for database wipe protection
+  if (!allHookCommands.match(/database|wipe|migrate|prisma/i)) {
+    risks.push({
+      severity: 'MEDIUM',
+      issue: 'No database wipe protection — migrate:fresh, prisma migrate reset could wipe data',
+      fix: 'npx cc-safe-setup --install-example block-database-wipe'
+    });
+  } else {
+    good.push('Database wipe protection detected');
+  }
+
+  // 6. Check for syntax checking
+  if (postHooks.length === 0) {
+    risks.push({
+      severity: 'MEDIUM',
+      issue: 'No PostToolUse hooks — no automatic syntax checking after edits',
+      fix: 'npx cc-safe-setup (installs syntax-check)'
+    });
+  } else {
+    good.push('PostToolUse hooks installed (' + postHooks.length + ')');
+  }
+
+  // 7. Check for CLAUDE.md
+  const CC_DIR = join(HOME, '.claude');
+  const claudeMdPaths = ['CLAUDE.md', '.claude/CLAUDE.md', join(CC_DIR, 'CLAUDE.md')];
+  const hasClaudeMd = claudeMdPaths.some(p => existsSync(p));
+  if (!hasClaudeMd) {
+    risks.push({
+      severity: 'MEDIUM',
+      issue: 'No CLAUDE.md found — Claude has no project-specific instructions',
+      fix: 'Create CLAUDE.md with project rules and conventions'
+    });
+  } else {
+    good.push('CLAUDE.md found');
+  }
+
+  // 8. Check for dotfile protection
+  if (!allHookCommands.match(/dotfile|bashrc|protect/i)) {
+    risks.push({
+      severity: 'LOW',
+      issue: 'No dotfile protection — ~/.bashrc, ~/.aws/ could be modified',
+      fix: 'npx cc-safe-setup --install-example protect-dotfiles'
+    });
+  }
+
+  // 9. Check for scope guard
+  if (!allHookCommands.match(/scope|traversal|outside/i)) {
+    risks.push({
+      severity: 'LOW',
+      issue: 'No scope guard — files outside project directory could be modified',
+      fix: 'npx cc-safe-setup --install-example scope-guard'
+    });
+  }
+
+  // Display results
+  if (good.length > 0) {
+    console.log(c.bold + '  ✓ What\'s working:' + c.reset);
+    for (const g of good) {
+      console.log('  ' + c.green + '✓' + c.reset + ' ' + g);
+    }
+    console.log();
+  }
+
+  if (risks.length === 0) {
+    console.log(c.green + c.bold + '  No risks detected. Your setup looks solid.' + c.reset);
+  } else {
+    console.log(c.bold + '  ⚠ Risks found (' + risks.length + '):' + c.reset);
+    console.log();
+    for (const r of risks) {
+      const severityColor = r.severity === 'CRITICAL' ? c.red : r.severity === 'HIGH' ? c.red : c.yellow;
+      console.log('  ' + severityColor + '[' + r.severity + ']' + c.reset + ' ' + r.issue);
+      console.log('  ' + c.dim + '  Fix: ' + r.fix + c.reset);
+    }
+  }
+
+  console.log();
+  const score = Math.max(0, 100 - risks.reduce((sum, r) => {
+    if (r.severity === 'CRITICAL') return sum + 30;
+    if (r.severity === 'HIGH') return sum + 20;
+    if (r.severity === 'MEDIUM') return sum + 10;
+    return sum + 5;
+  }, 0));
+  console.log(c.bold + '  Safety Score: ' + (score >= 80 ? c.green : score >= 50 ? c.yellow : c.red) + score + '/100' + c.reset);
+  console.log();
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
   if (VERIFY) return verify();
   if (STATUS) return status();
   if (EXAMPLES) return examples();
   if (INSTALL_EXAMPLE) return installExample(INSTALL_EXAMPLE);
+  if (AUDIT) return audit();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
