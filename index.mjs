@@ -374,9 +374,18 @@ function examples() {
   console.log();
 
   for (const [cat, hooks] of Object.entries(CATEGORIES)) {
-    if (filter && !cat.toLowerCase().includes(filter)) continue;
+    // Filter by category name OR hook name/description
+    const filteredHooks = filter
+      ? Object.entries(hooks).filter(([file, desc]) =>
+          cat.toLowerCase().includes(filter) ||
+          file.toLowerCase().includes(filter) ||
+          desc.toLowerCase().includes(filter))
+      : Object.entries(hooks);
+
+    if (filteredHooks.length === 0) continue;
+
     console.log('  ' + c.bold + c.blue + cat + c.reset);
-    for (const [file, desc] of Object.entries(hooks)) {
+    for (const [file, desc] of filteredHooks) {
       console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
       console.log('    ' + c.dim + desc + c.reset);
     }
