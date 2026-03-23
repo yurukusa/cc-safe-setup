@@ -224,6 +224,8 @@ Or browse all available examples in [`examples/`](examples/):
 - **session-handoff.sh** — Auto-save git state and session info to `~/.claude/session-handoff.md` on session end
 - **diff-size-guard.sh** — Warn/block when committing too many files at once (default: warn at 10, block at 50)
 - **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
+- **cost-tracker.sh** — Estimate session token cost and warn at thresholds ($1, $5)
+- **read-before-edit.sh** — Warn when editing files not recently read (prevents old_string mismatches)
 
 ## Safety Checklist
 

@@ -356,6 +356,8 @@ function examples() {
       'commit-quality-gate.sh': 'Warn on vague or too-long commit messages',
       'diff-size-guard.sh': 'Warn/block on large diffs (10+ files warn, 50+ block)',
       'dependency-audit.sh': 'Warn on new package installs not in manifest',
+      'cost-tracker.sh': 'Estimate session token cost ($1 warn, $5 alert)',
+      'read-before-edit.sh': 'Warn when editing files not recently read',
     },
   };
 
