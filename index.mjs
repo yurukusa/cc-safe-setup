@@ -74,6 +74,9 @@ const SCAN = process.argv.includes('--scan');
 const FULL = process.argv.includes('--full');
 const DOCTOR = process.argv.includes('--doctor');
 const WATCH = process.argv.includes('--watch');
+const EXPORT = process.argv.includes('--export');
+const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
+const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
 
 if (HELP) {
   console.log(`
@@ -94,6 +97,8 @@ if (HELP) {
     npx cc-safe-setup --learn      Learn from your block history
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
+    npx cc-safe-setup --export     Export hooks config for team sharing
+    npx cc-safe-setup --import <file>  Import hooks from exported config
     npx cc-safe-setup --help       Show this help
 
   Hooks installed:
@@ -742,6 +747,132 @@ async function fullSetup() {
   console.log();
 }
 
+async function exportConfig() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --export' + c.reset);
+  console.log(c.dim + '  Exporting hooks config for team sharing...' + c.reset);
+  console.log();
+
+  if (!existsSync(SETTINGS_PATH)) {
+    console.log(c.red + '  No settings.json found. Run npx cc-safe-setup first.' + c.reset);
+    process.exit(1);
+  }
+
+  const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+  const hooks = settings.hooks || {};
+
+  // Collect installed hook scripts
+  const exportData = {
+    version: '1.0',
+    generator: 'cc-safe-setup',
+    exported_at: new Date().toISOString(),
+    hooks: {},
+    scripts: {},
+  };
+
+  // Copy hook configuration
+  exportData.hooks = JSON.parse(JSON.stringify(hooks));
+
+  // Read and embed script contents
+  const scriptPaths = new Set();
+  for (const trigger of Object.keys(hooks)) {
+    for (const entry of hooks[trigger]) {
+      for (const h of (entry.hooks || [])) {
+        if (h.type === 'command' && h.command) {
+          let scriptPath = h.command.replace(/^(bash|sh|node)\s+/, '').split(/\s+/)[0];
+          scriptPath = scriptPath.replace(/^~/, HOME);
+          if (existsSync(scriptPath)) {
+            const relName = scriptPath.replace(HOME, '~');
+            exportData.scripts[relName] = readFileSync(scriptPath, 'utf-8');
+            scriptPaths.add(relName);
+          }
+        }
+      }
+    }
+  }
+
+  const outputFile = 'cc-safe-setup-export.json';
+  writeFileSync(outputFile, JSON.stringify(exportData, null, 2));
+
+  console.log(c.green + '  ✓ Exported to ' + outputFile + c.reset);
+  console.log(c.dim + '  Contains: ' + Object.keys(exportData.hooks).length + ' trigger types, ' + scriptPaths.size + ' hook scripts' + c.reset);
+  console.log();
+  console.log(c.dim + '  Share this file with your team. They can import with:' + c.reset);
+  console.log(c.bold + '  npx cc-safe-setup --import ' + outputFile + c.reset);
+  console.log();
+}
+
+async function importConfig(file) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --import ' + file + c.reset);
+  console.log(c.dim + '  Importing hooks config...' + c.reset);
+  console.log();
+
+  if (!existsSync(file)) {
+    console.log(c.red + '  File not found: ' + file + c.reset);
+    process.exit(1);
+  }
+
+  let exportData;
+  try {
+    exportData = JSON.parse(readFileSync(file, 'utf-8'));
+  } catch (e) {
+    console.log(c.red + '  Invalid JSON in ' + file + c.reset);
+    process.exit(1);
+  }
+
+  if (!exportData.hooks || !exportData.scripts) {
+    console.log(c.red + '  Invalid export file (missing hooks or scripts section)' + c.reset);
+    process.exit(1);
+  }
+
+  // Install scripts
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  let installed = 0;
+
+  for (const [relPath, content] of Object.entries(exportData.scripts)) {
+    const absPath = relPath.replace(/^~/, HOME);
+    const dir = dirname(absPath);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(absPath, content);
+    chmodSync(absPath, 0o755);
+    console.log(c.green + '  ✓ ' + c.reset + relPath);
+    installed++;
+  }
+
+  // Merge hooks into settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+    } catch {}
+  }
+
+  if (!settings.hooks) settings.hooks = {};
+
+  for (const [trigger, entries] of Object.entries(exportData.hooks)) {
+    if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
+    // Add entries that don't already exist (by command path)
+    const existing = new Set(
+      settings.hooks[trigger].flatMap(e => (e.hooks || []).map(h => h.command))
+    );
+    for (const entry of entries) {
+      const newCommands = (entry.hooks || []).filter(h => !existing.has(h.command));
+      if (newCommands.length > 0) {
+        settings.hooks[trigger].push({ ...entry, hooks: newCommands });
+      }
+    }
+  }
+
+  mkdirSync(dirname(SETTINGS_PATH), { recursive: true });
+  writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+
+  console.log();
+  console.log(c.bold + c.green + '  ✓ Imported ' + installed + ' hook scripts' + c.reset);
+  console.log(c.dim + '  Restart Claude Code to activate.' + c.reset);
+  console.log();
+}
+
 async function watch() {
   const { spawn } = await import('child_process');
   const { createReadStream, watchFile } = await import('fs');
@@ -1173,6 +1304,8 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (EXPORT) return exportConfig();
+  if (IMPORT_FILE) return importConfig(IMPORT_FILE);
 
   console.log();
   console.log(c.bold + '  cc-safe-setup' + c.reset);
