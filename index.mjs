@@ -79,6 +79,8 @@ const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
 const IMPORT_FILE = IMPORT_IDX !== -1 ? process.argv[IMPORT_IDX + 1] : null;
 const STATS = process.argv.includes('--stats');
 const JSON_OUTPUT = process.argv.includes('--json');
+const CREATE_IDX = process.argv.findIndex(a => a === '--create');
+const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
 if (HELP) {
   console.log(`
@@ -100,6 +102,7 @@ if (HELP) {
     npx cc-safe-setup --learn      Learn from your block history
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
+    npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
     npx cc-safe-setup --stats      Block statistics and patterns report
     npx cc-safe-setup --export     Export hooks config for team sharing
     npx cc-safe-setup --import <file>  Import hooks from exported config
@@ -761,6 +764,249 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function createHook(description) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --create' + c.reset);
+  console.log(c.dim + '  Generating hook from: "' + description + '"' + c.reset);
+  console.log();
+
+  const desc = description.toLowerCase();
+
+  // Pattern matching engine — matches description to hook templates
+  const patterns = [
+    {
+      match: /block.*(npm\s+publish|yarn\s+publish|pnpm\s+publish)/,
+      name: 'block-publish-without-tests',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '(npm|yarn|pnpm)\\s+publish'; then
+    # Check if tests were run recently
+    if [ -f "package.json" ]; then
+        TEST_CMD=$(python3 -c "import json; print(json.load(open('package.json')).get('scripts',{}).get('test',''))" 2>/dev/null)
+        if [ -n "$TEST_CMD" ]; then
+            echo "BLOCKED: Run tests before publishing." >&2
+            echo "Command: $COMMAND" >&2
+            echo "Run: npm test && npm publish" >&2
+            exit 2
+        fi
+    fi
+fi
+exit 0`,
+    },
+    {
+      match: /block.*(docker\s+rm|docker\s+system\s+prune|docker.*(?:remove|delete|prune))/,
+      name: 'block-docker-destructive',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qiE 'docker\\s+(system\\s+prune|rm\\s+-f|rmi\\s+-f|volume\\s+rm|network\\s+rm)'; then
+    echo "BLOCKED: Destructive docker command." >&2
+    echo "Command: $COMMAND" >&2
+    exit 2
+fi
+exit 0`,
+    },
+    {
+      match: /block.*(curl.*pipe|curl.*\|.*sh|wget.*pipe|wget.*\|)/,
+      name: 'block-curl-pipe-sh',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '(curl|wget)\\s.*\\|\\s*(bash|sh|zsh|python)'; then
+    echo "BLOCKED: Piping remote content to shell." >&2
+    echo "Command: $COMMAND" >&2
+    echo "Download first, review, then execute." >&2
+    exit 2
+fi
+exit 0`,
+    },
+    {
+      match: /block.*(pip\s+install|pip3\s+install).*(?:sudo|system|global)/,
+      name: 'block-global-pip',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '(sudo\\s+)?(pip3?|python3?\\s+-m\\s+pip)\\s+install' && ! echo "$COMMAND" | grep -qE '(--user|venv|virtualenv|-e\\s+\\.)'; then
+    echo "BLOCKED: pip install without --user or virtual environment." >&2
+    echo "Command: $COMMAND" >&2
+    echo "Use: pip install --user, or activate a virtualenv first." >&2
+    exit 2
+fi
+exit 0`,
+    },
+    {
+      match: /block.*(large\s+file|big\s+file|file\s+size|over\s+\d+)/,
+      name: 'block-large-writes',
+      trigger: 'PreToolUse', matcher: 'Write',
+      script: `#!/bin/bash
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // empty' 2>/dev/null)
+[ -z "$FILE" ] && exit 0
+SIZE=\${#CONTENT}
+LIMIT=\${CC_MAX_WRITE_SIZE:-500000}
+if [ "$SIZE" -gt "$LIMIT" ]; then
+    echo "WARNING: Writing $SIZE bytes to $FILE (limit: $LIMIT)." >&2
+    echo "Set CC_MAX_WRITE_SIZE to adjust the limit." >&2
+    exit 2
+fi
+exit 0`,
+    },
+    {
+      match: /block.*(drop\s+table|truncate|delete\s+from|alter\s+table)/,
+      name: 'block-raw-sql-destructive',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qiE '(DROP\\s+TABLE|TRUNCATE\\s+TABLE|DELETE\\s+FROM\\s+[a-z]|ALTER\\s+TABLE.*DROP)'; then
+    echo "BLOCKED: Destructive SQL command detected." >&2
+    echo "Command: $COMMAND" >&2
+    exit 2
+fi
+exit 0`,
+    },
+    {
+      match: /auto.?approve.*(test|jest|pytest|mocha|vitest)/,
+      name: 'auto-approve-tests',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '^\\s*(npm\\s+test|npx\\s+(jest|vitest|mocha)|pytest|python3?\\s+-m\\s+pytest|cargo\\s+test|go\\s+test)'; then
+    jq -n '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"test command auto-approved"}}'
+fi
+exit 0`,
+    },
+    {
+      match: /warn.*(todo|fixme|hack|xxx)/i,
+      name: 'warn-todo-markers',
+      trigger: 'PostToolUse', matcher: 'Edit|Write',
+      script: `#!/bin/bash
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+COUNT=$(grep -ciE '(TODO|FIXME|HACK|XXX)' "$FILE" 2>/dev/null || echo 0)
+[ "$COUNT" -gt 0 ] && echo "NOTE: $FILE has $COUNT TODO/FIXME markers." >&2
+exit 0`,
+    },
+    {
+      match: /block.*(commit|push).*without.*(test|lint|check)/,
+      name: 'block-commit-without-checks',
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'git\\s+(commit|push)' && ! echo "$COMMAND" | grep -qE '(--no-verify|--allow-empty)'; then
+    if [ -f "package.json" ] && command -v npm &>/dev/null; then
+        npm test --silent 2>/dev/null
+        if [ $? -ne 0 ]; then
+            echo "BLOCKED: Tests failing. Fix tests before commit/push." >&2
+            exit 2
+        fi
+    fi
+fi
+exit 0`,
+    },
+  ];
+
+  // Find matching pattern
+  let matched = null;
+  for (const p of patterns) {
+    if (p.match.test(desc)) {
+      matched = p;
+      break;
+    }
+  }
+
+  if (!matched) {
+    // Generate a generic blocking hook from the description
+    const keywords = desc.match(/block\s+(.+)/i)?.[1] || desc;
+    const sanitized = keywords.replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').slice(0, 30);
+    matched = {
+      name: 'custom-' + sanitized,
+      trigger: 'PreToolUse', matcher: 'Bash',
+      script: `#!/bin/bash
+# Custom hook: ${description}
+# Generated by cc-safe-setup --create
+# Edit the grep pattern to match your specific commands
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+# TODO: Replace this pattern with the commands you want to block
+if echo "$COMMAND" | grep -qiE '${keywords.replace(/'/g, '').replace(/\s+/g, '.*')}'; then
+    echo "BLOCKED: ${description}" >&2
+    echo "Command: $COMMAND" >&2
+    exit 2
+fi
+exit 0`,
+    };
+    console.log(c.yellow + '  No exact template match. Generated a generic hook.' + c.reset);
+    console.log(c.dim + '  Edit the grep pattern in the generated script.' + c.reset);
+    console.log();
+  }
+
+  // Write the hook script
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  const hookPath = join(HOOKS_DIR, matched.name + '.sh');
+  writeFileSync(hookPath, matched.script);
+  chmodSync(hookPath, 0o755);
+
+  console.log(c.green + '  ✓ Created: ' + hookPath + c.reset);
+  console.log(c.dim + '  Trigger: ' + matched.trigger + ', Matcher: ' + matched.matcher + c.reset);
+
+  // Register in settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+  if (!settings.hooks) settings.hooks = {};
+  if (!settings.hooks[matched.trigger]) settings.hooks[matched.trigger] = [];
+
+  // Check if already registered
+  const existing = settings.hooks[matched.trigger].flatMap(e => (e.hooks || []).map(h => h.command));
+  if (!existing.some(cmd => cmd.includes(matched.name))) {
+    settings.hooks[matched.trigger].push({
+      matcher: matched.matcher,
+      hooks: [{ type: 'command', command: hookPath }],
+    });
+    writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    console.log(c.green + '  ✓ Registered in settings.json' + c.reset);
+  } else {
+    console.log(c.dim + '  Already registered in settings.json' + c.reset);
+  }
+
+  // Quick test
+  const { spawnSync } = await import('child_process');
+  const testResult = spawnSync('bash', [hookPath], {
+    input: '{}',
+    timeout: 5000,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  if (testResult.status === 0) {
+    console.log(c.green + '  ✓ Hook passes empty input test' + c.reset);
+  } else {
+    console.log(c.yellow + '  ! Hook exits ' + testResult.status + ' on empty input (may need adjustment)' + c.reset);
+  }
+
+  console.log();
+  console.log(c.dim + '  Test it: npx cc-hook-test ' + hookPath + c.reset);
+  console.log(c.dim + '  Restart Claude Code to activate.' + c.reset);
   console.log();
 }
 
@@ -1442,6 +1688,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (CREATE_DESC) return createHook(CREATE_DESC);
   if (STATS) return stats();
   if (EXPORT) return exportConfig();
   if (IMPORT_FILE) return importConfig(IMPORT_FILE);
