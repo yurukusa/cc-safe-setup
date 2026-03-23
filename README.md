@@ -229,6 +229,7 @@ Or browse all available examples in [`examples/`](examples/):
 - [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 19 ready-to-use recipes from real GitHub Issues
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
 - [Hook Test Runner](https://github.com/yurukusa/cc-hook-test) — `npx cc-hook-test <hook.sh>` to auto-test any hook
+- [Ecosystem Comparison](https://yurukusa.github.io/cc-safe-setup/ecosystem.html) — all Claude Code hook projects compared
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
 
 ## FAQ
