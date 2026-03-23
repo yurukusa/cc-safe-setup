@@ -84,6 +84,7 @@ const DIFF_IDX = process.argv.findIndex(a => a === '--diff');
 const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
 const SHARE = process.argv.includes('--share');
 const BENCHMARK = process.argv.includes('--benchmark');
+const DASHBOARD = process.argv.includes('--dashboard');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -105,6 +106,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --dashboard     Real-time status dashboard
     npx cc-safe-setup --benchmark     Measure hook execution time
     npx cc-safe-setup --share         Generate shareable URL for your setup
     npx cc-safe-setup --diff <file>   Compare your settings with another file
@@ -786,6 +788,74 @@ async function fullSetup() {
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
   console.log();
+}
+
+async function dashboard() {
+  const { createReadStream, watchFile } = await import('fs');
+  const { createInterface: createRL } = await import('readline');
+
+  const BLOCK_LOG = join(HOME, '.claude', 'blocked-commands.log');
+  const COST_FILE = '/tmp/cc-cost-tracker-calls';
+  const CONTEXT_FILE = '/tmp/cc-context-pct';
+
+  const clear = () => process.stdout.write('\x1b[2J\x1b[H');
+
+  // Count hooks
+  let hookCount = 0;
+  let exampleCount = 0;
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      for (const entries of Object.values(s.hooks || {})) {
+        hookCount += entries.reduce((n, e) => n + (e.hooks || []).length, 0);
+      }
+    } catch {}
+  }
+  exampleCount = existsSync(join(HOOKS_DIR)) ?
+    (await import('fs')).readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh')).length : 0;
+
+  function render() {
+    clear();
+
+    // Header
+    console.log(c.bold + '  cc-safe-setup --dashboard' + c.reset + '  ' + c.dim + new Date().toLocaleTimeString() + c.reset);
+    console.log('  ' + '─'.repeat(50));
+
+    // Status row
+    const context = existsSync(CONTEXT_FILE) ? readFileSync(CONTEXT_FILE, 'utf-8').trim() + '%' : '?';
+    const calls = existsSync(COST_FILE) ? readFileSync(COST_FILE, 'utf-8').trim() : '0';
+    const cost = (parseInt(calls) * 0.105).toFixed(2);
+
+    console.log('  Hooks: ' + c.green + hookCount + c.reset + ' registered  |  Scripts: ' + exampleCount);
+    console.log('  Context: ' + c.yellow + context + c.reset + '  |  Cost: ~$' + cost + ' (' + calls + ' calls)');
+    console.log('  ' + '─'.repeat(50));
+
+    // Recent blocks
+    console.log(c.bold + '  Recent Blocks' + c.reset);
+    if (existsSync(BLOCK_LOG)) {
+      const lines = readFileSync(BLOCK_LOG, 'utf-8').split('\n').filter(l => l.trim());
+      const recent = lines.slice(-5);
+      for (const line of recent) {
+        const m = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|/);
+        if (m) {
+          const time = m[1].replace(/T/, ' ').replace(/\+.*/, '').slice(11, 16);
+          console.log('  ' + c.dim + time + c.reset + '  ' + c.red + m[2].trim() + c.reset);
+        }
+      }
+      if (recent.length === 0) console.log(c.dim + '  (none)' + c.reset);
+    } else {
+      console.log(c.dim + '  (no log yet)' + c.reset);
+    }
+
+    console.log('  ' + '─'.repeat(50));
+    console.log(c.dim + '  Refreshing every 3s. Ctrl+C to exit.' + c.reset);
+  }
+
+  render();
+  setInterval(render, 3000);
+
+  // Keep alive
+  await new Promise(() => {});
 }
 
 async function benchmark() {
@@ -2075,6 +2145,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (DASHBOARD) return dashboard();
   if (BENCHMARK) return benchmark();
   if (SHARE) return share();
   if (DIFF_FILE) return diff(DIFF_FILE);
