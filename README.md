@@ -160,6 +160,17 @@ npx cc-safe-setup --scan         # detect tech stack, recommend hooks
 npx cc-safe-setup --scan --apply # auto-create CLAUDE.md with project rules
 ```
 
+### Create Hooks from Plain English
+
+```bash
+npx cc-safe-setup --create "block npm publish without tests"
+npx cc-safe-setup --create "auto approve test commands"
+npx cc-safe-setup --create "block curl pipe to bash"
+npx cc-safe-setup --create "block DROP TABLE and TRUNCATE"
+```
+
+9 built-in templates + generic fallback. Creates the script, registers it, and runs a smoke test.
+
 ### Self-Learning Safety
 
 ```bash
