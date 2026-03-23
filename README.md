@@ -222,6 +222,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **loop-detector.sh** — Detect and break command repetition loops (warn at 3, block at 5 repeats)
 - **commit-quality-gate.sh** — Warn on vague commit messages ("update code"), long subjects, mega-commits
 - **session-handoff.sh** — Auto-save git state and session info to `~/.claude/session-handoff.md` on session end
+- **diff-size-guard.sh** — Warn/block when committing too many files at once (default: warn at 10, block at 50)
 
 ## Safety Checklist
 

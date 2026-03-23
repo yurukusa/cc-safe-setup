@@ -352,6 +352,7 @@ function examples() {
       'loop-detector.sh': 'Detect and break command repetition loops',
       'session-handoff.sh': 'Auto-save session state for next session resume',
       'commit-quality-gate.sh': 'Warn on vague or too-long commit messages',
+      'diff-size-guard.sh': 'Warn/block on large diffs (10+ files warn, 50+ block)',
     },
   };
 
