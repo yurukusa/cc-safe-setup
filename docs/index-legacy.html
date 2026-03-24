@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Safety Audit & Setup Generator</title>
+<meta name="description" content="Audit your Claude Code settings and generate safety hooks — 100% in your browser. No npm required.">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 2rem; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #f0f6fc; }
+h2 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; color: #f0f6fc; }
+h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #c9d1d9; }
+.subtitle { color: #8b949e; margin-bottom: 2rem; }
+textarea { width: 100%; height: 180px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: 13px; padding: 1rem; resize: vertical; }
+textarea::placeholder { color: #484f58; }
+.btn { background: #238636; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; margin-top: 0.75rem; margin-right: 0.5rem; }
+.btn:hover { background: #2ea043; }
+.btn-secondary { background: #30363d; }
+.btn-secondary:hover { background: #484f58; }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; margin-top: 0; }
+.results { margin-top: 1.5rem; }
+.score { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
+.score.good { color: #3fb950; }
+.score.mid { color: #d29922; }
+.score.bad { color: #f85149; }
+.risk { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; margin: 0.5rem 0; }
+.risk .severity { font-weight: bold; margin-right: 0.5rem; }
+.risk .severity.critical, .risk .severity.high { color: #f85149; }
+.risk .severity.medium { color: #d29922; }
+.risk .severity.low { color: #8b949e; }
+.risk .fix { color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 0.5rem; }
+.good-item { color: #3fb950; margin: 0.25rem 0; }
+.privacy { color: #484f58; font-size: 12px; margin-top: 2rem; text-align: center; }
+a { color: #58a6ff; text-decoration: none; }
+.tabs { display: flex; gap: 0; margin-top: 2rem; border-bottom: 1px solid #30363d; }
+.tab { padding: 0.6rem 1.2rem; cursor: pointer; color: #8b949e; border-bottom: 2px solid transparent; font-size: 0.9rem; }
+.tab.active { color: #f0f6fc; border-bottom-color: #f78166; }
+.tab:hover { color: #c9d1d9; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.code-block { position: relative; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; margin: 0.5rem 0; overflow-x: auto; }
+.code-block pre { font-family: monospace; font-size: 12px; white-space: pre; color: #c9d1d9; margin: 0; }
+.code-block .copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #30363d; color: #c9d1d9; border: 1px solid #484f58; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.code-block .copy-btn:hover { background: #484f58; }
+.hook-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; margin: 0.5rem 0; }
+.hook-card summary { cursor: pointer; font-weight: bold; color: #f0f6fc; }
+.hook-card summary:hover { color: #58a6ff; }
+.hook-card .desc { color: #8b949e; font-size: 0.85rem; margin-top: 0.25rem; }
+.setup-steps { counter-reset: step; list-style: none; padding: 0; }
+.setup-steps li { counter-increment: step; padding: 0.75rem 0 0.75rem 2.5rem; position: relative; border-left: 2px solid #30363d; margin-left: 1rem; }
+.setup-steps li::before { content: counter(step); position: absolute; left: -1rem; top: 0.65rem; width: 2rem; height: 2rem; background: #238636; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+.setup-steps li:last-child { border-left: 2px solid transparent; }
+.badge-row { display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap; }
+.badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.badge-green { background: #238636; color: #fff; }
+.badge-yellow { background: #9e6a03; color: #fff; }
+.badge-red { background: #da3633; color: #fff; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: #484f58; }
+.empty-state p { margin: 0.5rem 0; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Claude Code Safety Audit</h1>
+<p class="subtitle">Audit your setup and generate safety hooks — 100% in your browser. No npm required.</p>
+
+<textarea id="settings" placeholder='{
+  "permissions": { "allow": ["Bash(git:*)"] },
+  "hooks": {
+    "PreToolUse": [{ "matcher": "Bash", "hooks": [{"type":"command","command":"..."}] }]
+  }
+}'></textarea>
+<br>
+<button class="btn" onclick="runAudit()">Run Audit</button>
+<button class="btn btn-secondary" onclick="generateFresh()">Generate Fresh Setup</button>
+
+<div class="results" id="results"></div>
+
+<div class="tabs" id="tabs" style="display:none">
+  <div class="tab active" onclick="switchTab('audit')">Audit Results</div>
+  <div class="tab" onclick="switchTab('fix')">Fix & Generate</div>
+  <div class="tab" onclick="switchTab('manual')">Manual Install Guide</div>
+</div>
+
+<div class="tab-content active" id="tab-audit"></div>
+<div class="tab-content" id="tab-fix"></div>
+<div class="tab-content" id="tab-manual"></div>
+
+<h2 style="margin-top:2rem">Hook Builder</h2>
+<p class="subtitle">Build a custom hook without writing code.</p>
+
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0">
+  <div style="flex:1;min-width:200px">
+    <label style="color:#8b949e;font-size:.8rem">What should the hook do?</label>
+    <select id="hb-action" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem">
+      <option value="block">Block a command</option>
+      <option value="warn">Warn about a command</option>
+      <option value="approve">Auto-approve a command</option>
+    </select>
+  </div>
+  <div style="flex:2;min-width:300px">
+    <label style="color:#8b949e;font-size:.8rem">Command pattern (regex)</label>
+    <input id="hb-pattern" placeholder="e.g. rm\s+-rf, git push --force, npm publish" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem;font-family:monospace;font-size:.85rem">
+  </div>
+</div>
+<div style="margin:.5rem 0">
+  <label style="color:#8b949e;font-size:.8rem">Message shown to Claude</label>
+  <input id="hb-message" placeholder="e.g. Run tests before publishing" style="width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;margin-top:.25rem">
+</div>
+<button class="btn" onclick="buildHook()">Generate Hook</button>
+
+<div id="hb-result" style="margin-top:1rem"></div>
+
+<p class="privacy">100% client-side. Your settings never leave this page. <a href="https://github.com/yurukusa/cc-safe-setup">Source</a> · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> · <a href="ecosystem.html">Compare all hook projects</a></p>
+</div>
+
+<script>
+// Hook metadata for generation
+const HOOKS = {
+  'destructive-guard': {
+    trigger: 'PreToolUse', matcher: 'Bash',
+    name: 'Destructive Command Blocker',
+    desc: 'Blocks rm -rf /, git reset --hard, git clean -fd, PowerShell Remove-Item'
+  },
+  'branch-guard': {
+    trigger: 'PreToolUse', matcher: 'Bash',
+    name: 'Branch Push Protector',
+    desc: 'Blocks push to main/master and force-push on all branches'
+  },
+  'secret-guard': {
+    trigger: 'PreToolUse', matcher: 'Bash',
+    name: 'Secret Leak Prevention',
+    desc: 'Blocks git add .env, credential files, git add . with .env present'
+  },
+  'comment-strip': {
+    trigger: 'PreToolUse', matcher: 'Bash',
+    name: 'Bash Comment Stripper',
+    desc: 'Strips comments that break permission allowlists'
+  },
+  'cd-git-allow': {
+    trigger: 'PreToolUse', matcher: 'Bash',
+    name: 'cd+git Auto-Approver',
+    desc: 'Auto-approves read-only cd + git compound commands'
+  },
+  'syntax-check': {
+    trigger: 'PostToolUse', matcher: 'Edit|Write',
+    name: 'Post-Edit Syntax Validator',
+    desc: 'Checks Python, Shell, JSON, YAML, JS syntax after edits'
+  },
+  'context-monitor': {
+    trigger: 'PostToolUse', matcher: '',
+    name: 'Context Window Monitor',
+    desc: 'Graduated warnings at 40%/25%/20%/15% context remaining'
+  },
+  'api-error-alert': {
+    trigger: 'Stop', matcher: '',
+    name: 'API Error Alert',
+    desc: 'Desktop notification + log when session stops from API errors'
+  }
+};
+
+let lastAuditState = null;
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['audit','fix','manual'][i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  const text = el.textContent || el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.closest('.code-block').querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function runAudit() {
+  const raw = document.getElementById('settings').value.trim();
+  const el = document.getElementById('results');
+
+  if (!raw) {
+    generateFresh();
+    return;
+  }
+
+  let settings;
+  try {
+    settings = JSON.parse(raw);
+  } catch(e) {
+    el.innerHTML = '<p style="color:#f85149">Invalid JSON. Paste your settings.json content.</p>';
+    return;
+  }
+
+  const {risks, good, score, missing} = analyzeSettings(settings);
+  lastAuditState = {settings, risks, good, score, missing};
+
+  // Show tabs
+  document.getElementById('tabs').style.display = 'flex';
+
+  renderAuditTab(risks, good, score);
+  renderFixTab(settings, risks, missing);
+  renderManualTab();
+  switchTab('audit');
+  el.innerHTML = '';
+}
+
+function generateFresh() {
+  const emptySettings = {};
+  const {risks, good, score, missing} = analyzeSettings(emptySettings);
+  lastAuditState = {settings: emptySettings, risks, good, score, missing};
+
+  document.getElementById('tabs').style.display = 'flex';
+  document.getElementById('results').innerHTML = '';
+
+  renderAuditTab(risks, good, score);
+  renderFixTab(emptySettings, risks, Object.keys(HOOKS));
+  renderManualTab();
+  switchTab('fix');
+}
+
+function analyzeSettings(settings) {
+  const risks = [];
+  const good = [];
+  const missing = [];
+
+  const preHooks = settings.hooks?.PreToolUse || [];
+  const postHooks = settings.hooks?.PostToolUse || [];
+  const stopHooks = settings.hooks?.Stop || [];
+  const allCmds = JSON.stringify(preHooks).toLowerCase();
+  const postCmds = JSON.stringify(postHooks).toLowerCase();
+  const stopCmds = JSON.stringify(stopHooks).toLowerCase();
+
+  if (preHooks.length === 0) {
+    risks.push({ severity: 'CRITICAL', issue: 'No PreToolUse hooks — rm -rf, git reset --hard run unchecked', fix: 'npx cc-safe-setup' });
+    missing.push('destructive-guard', 'branch-guard', 'secret-guard', 'comment-strip', 'cd-git-allow');
+  } else {
+    good.push('PreToolUse hooks (' + preHooks.length + ')');
+    if (!allCmds.match(/destructive|guard|block|rm.*rf|reset.*hard/)) {
+      risks.push({ severity: 'HIGH', issue: 'No destructive command blocker', fix: 'npx cc-safe-setup' });
+      missing.push('destructive-guard');
+    } else good.push('Destructive command protection');
+
+    if (!allCmds.match(/branch|push|main|master/)) {
+      risks.push({ severity: 'HIGH', issue: 'No branch push protection', fix: 'npx cc-safe-setup' });
+      missing.push('branch-guard');
+    } else good.push('Branch push protection');
+
+    if (!allCmds.match(/secret|env|credential/)) {
+      risks.push({ severity: 'HIGH', issue: 'No secret leak protection (.env commits)', fix: 'npx cc-safe-setup' });
+      missing.push('secret-guard');
+    } else good.push('Secret leak protection');
+
+    if (!allCmds.match(/comment|strip/)) missing.push('comment-strip');
+    if (!allCmds.match(/cd.*git.*allow|auto.*approv/)) missing.push('cd-git-allow');
+  }
+
+  if (!allCmds.match(/database|wipe|migrate|prisma/)) {
+    risks.push({ severity: 'MEDIUM', issue: 'No database wipe protection', fix: 'npx cc-safe-setup --install-example block-database-wipe' });
+  } else good.push('Database wipe protection');
+
+  if (postHooks.length === 0) {
+    risks.push({ severity: 'MEDIUM', issue: 'No PostToolUse hooks (no syntax checking)', fix: 'npx cc-safe-setup' });
+    missing.push('syntax-check', 'context-monitor');
+  } else {
+    good.push('PostToolUse hooks (' + postHooks.length + ')');
+    if (!postCmds.match(/syntax|check|py_compile|node.*check/)) missing.push('syntax-check');
+    if (!postCmds.match(/context|monitor|capacity/)) missing.push('context-monitor');
+  }
+
+  if (stopHooks.length === 0) {
+    missing.push('api-error-alert');
+  } else {
+    good.push('Stop hooks (' + stopHooks.length + ')');
+  }
+
+  const allows = settings.permissions?.allow || [];
+  if (allows.includes('Bash(*)')) {
+    risks.push({ severity: 'MEDIUM', issue: 'Bash(*) in allow list — all commands auto-approved', fix: 'Use specific patterns like Bash(git:*) instead' });
+  }
+
+  const denies = settings.permissions?.deny || [];
+  if (denies.length > 0) good.push('Deny rules (' + denies.length + ')');
+
+  const mode = settings.defaultMode;
+  if (mode === 'bypassPermissions') {
+    risks.push({ severity: 'HIGH', issue: 'bypassPermissions — all permission checks disabled', fix: 'Use dontAsk with hooks instead' });
+  } else if (mode === 'dontAsk') {
+    good.push('dontAsk mode (auto-approve, hooks still run)');
+  }
+
+  if (settings.sandbox?.enabled === false) {
+    risks.push({ severity: 'MEDIUM', issue: 'Sandbox disabled', fix: 'Re-enable or use excludedCommands' });
+  }
+
+  const score = Math.max(0, 100 - risks.reduce((s, r) => {
+    if (r.severity === 'CRITICAL') return s + 30;
+    if (r.severity === 'HIGH') return s + 20;
+    if (r.severity === 'MEDIUM') return s + 10;
+    return s + 5;
+  }, 0));
+
+  return {risks, good, score, missing: [...new Set(missing)]};
+}
+
+function renderAuditTab(risks, good, score) {
+  const scoreClass = score >= 80 ? 'good' : score >= 50 ? 'mid' : 'bad';
+  let html = '<div class="score ' + scoreClass + '">Safety Score: ' + score + '/100</div>';
+
+  if (good.length > 0) {
+    html += '<h3 style="color:#3fb950">Working</h3>';
+    html += good.map(g => '<div class="good-item">' + g + '</div>').join('');
+  }
+
+  if (risks.length > 0) {
+    html += '<h3 style="margin-top:1rem">Risks (' + risks.length + ')</h3>';
+    html += risks.map(r =>
+      '<div class="risk"><span class="severity ' + r.severity.toLowerCase() + '">[' + r.severity + ']</span> ' + escHtml(r.issue) +
+      '<div class="fix">Fix: ' + escHtml(r.fix) + '</div></div>'
+    ).join('');
+  }
+
+  if (risks.length === 0) {
+    html += '<p style="color:#3fb950;margin-top:1rem">No risks detected. Your setup looks solid.</p>';
+  }
+
+  document.getElementById('tab-audit').innerHTML = html;
+}
+
+function renderFixTab(settings, risks, missing) {
+  if (missing.length === 0) {
+    document.getElementById('tab-fix').innerHTML = '<p style="color:#3fb950;margin-top:1rem">All 8 hooks detected. Nothing to add.</p>';
+    return;
+  }
+
+  // Generate the settings.json patch
+  const patch = generateSettingsPatch(settings, missing);
+  const installScript = generateInstallScript(missing);
+
+  let html = '<h2>Quick Fix</h2>';
+  html += '<p style="color:#8b949e;margin-bottom:1rem">Missing ' + missing.length + ' hook(s). Choose your install method:</p>';
+
+  // Option 1: npx
+  html += '<h3>Option 1: One command (recommended)</h3>';
+  html += '<div class="code-block"><button class="copy-btn" onclick="copyText(\'npx-cmd\')">Copy</button><pre id="npx-cmd">npx cc-safe-setup</pre></div>';
+
+  // Option 2: Generated settings.json
+  html += '<h3>Option 2: Copy settings.json patch</h3>';
+  html += '<p style="color:#8b949e;font-size:0.85rem;margin:0.25rem 0">Merge this into your <code>~/.claude/settings.json</code>:</p>';
+  html += '<div class="code-block"><button class="copy-btn" onclick="copyText(\'settings-patch\')">Copy</button><pre id="settings-patch">' + escHtml(JSON.stringify(patch, null, 2)) + '</pre></div>';
+
+  // Option 3: Full install script
+  html += '<h3>Option 3: Shell script (no npm needed)</h3>';
+  html += '<p style="color:#8b949e;font-size:0.85rem;margin:0.25rem 0">Run this in your terminal. Creates hook scripts and updates settings.json:</p>';
+  html += '<div class="code-block" style="max-height:400px;overflow-y:auto"><button class="copy-btn" onclick="copyText(\'install-script\')">Copy</button><pre id="install-script">' + escHtml(installScript) + '</pre></div>';
+
+  // Hook details
+  html += '<h3 style="margin-top:1.5rem">Hooks being added</h3>';
+  for (const id of missing) {
+    const h = HOOKS[id];
+    if (!h) continue;
+    html += '<div class="hook-card"><summary>' + escHtml(h.name) + '</summary>';
+    html += '<div class="desc">' + escHtml(h.desc) + ' &middot; Trigger: ' + h.trigger + (h.matcher ? ' &middot; Matcher: ' + h.matcher : '') + '</div></div>';
+  }
+
+  document.getElementById('tab-fix').innerHTML = html;
+}
+
+function renderManualTab() {
+  let html = '<h2>Manual Installation Guide</h2>';
+  html += '<p style="color:#8b949e;margin-bottom:1rem">Step-by-step for setting up Claude Code safety hooks without any tools.</p>';
+
+  html += '<ol class="setup-steps">';
+  html += '<li><strong>Create the hooks directory</strong><div class="code-block"><pre>mkdir -p ~/.claude/hooks</pre></div></li>';
+  html += '<li><strong>Create hook scripts</strong><br><span style="color:#8b949e;font-size:0.85rem">Use the "Fix & Generate" tab to get the script content, or run <code>npx cc-safe-setup --dry-run</code> to preview.</span></li>';
+  html += '<li><strong>Make scripts executable</strong><div class="code-block"><pre>chmod +x ~/.claude/hooks/*.sh</pre></div></li>';
+  html += '<li><strong>Update settings.json</strong><br><span style="color:#8b949e;font-size:0.85rem">Add the hook entries from "Fix & Generate" tab to <code>~/.claude/settings.json</code>.</span></li>';
+  html += '<li><strong>Restart Claude Code</strong><br><span style="color:#8b949e;font-size:0.85rem">Close and reopen Claude Code. Hooks activate on restart.</span></li>';
+  html += '<li><strong>Verify</strong><div class="code-block"><pre>npx cc-safe-setup --verify</pre></div><span style="color:#8b949e;font-size:0.85rem">Or test manually: try <code>rm -rf /</code> in Claude Code — the hook should block it.</span></li>';
+  html += '</ol>';
+
+  html += '<h3 style="margin-top:1.5rem">Requirements</h3>';
+  html += '<ul style="margin-left:1.5rem;color:#8b949e;font-size:0.85rem">';
+  html += '<li><code>jq</code> — for JSON parsing in hooks (<code>brew install jq</code> / <code>apt install jq</code>)</li>';
+  html += '<li><code>bash</code> — hooks are bash scripts</li>';
+  html += '<li>Claude Code v2.1+ — for hooks support</li>';
+  html += '</ul>';
+
+  html += '<h3 style="margin-top:1.5rem">Hooks Reference</h3>';
+  for (const [id, h] of Object.entries(HOOKS)) {
+    html += '<div class="hook-card"><details><summary>' + escHtml(h.name) + ' <span style="color:#484f58;font-weight:normal;font-size:0.8rem">(' + id + '.sh)</span></summary>';
+    html += '<div class="desc" style="margin-top:0.5rem">' + escHtml(h.desc) + '</div>';
+    html += '<div style="margin-top:0.25rem;font-size:0.8rem;color:#484f58">Trigger: ' + h.trigger + (h.matcher ? ' | Matcher: ' + h.matcher : ' | Matcher: (all)') + '</div>';
+    html += '</details></div>';
+  }
+
+  document.getElementById('tab-manual').innerHTML = html;
+}
+
+function generateSettingsPatch(existing, missing) {
+  const patch = JSON.parse(JSON.stringify(existing || {}));
+  if (!patch.hooks) patch.hooks = {};
+  if (!patch.hooks.PreToolUse) patch.hooks.PreToolUse = [];
+  if (!patch.hooks.PostToolUse) patch.hooks.PostToolUse = [];
+  if (!patch.hooks.Stop) patch.hooks.Stop = [];
+
+  for (const id of missing) {
+    const h = HOOKS[id];
+    if (!h) continue;
+    const entry = {
+      matcher: h.matcher,
+      hooks: [{ type: 'command', command: '~/.claude/hooks/' + id + '.sh' }]
+    };
+    if (h.trigger === 'PreToolUse') patch.hooks.PreToolUse.push(entry);
+    else if (h.trigger === 'PostToolUse') patch.hooks.PostToolUse.push(entry);
+    else if (h.trigger === 'Stop') patch.hooks.Stop.push(entry);
+  }
+
+  // Clean empty arrays
+  if (patch.hooks.PreToolUse.length === 0) delete patch.hooks.PreToolUse;
+  if (patch.hooks.PostToolUse.length === 0) delete patch.hooks.PostToolUse;
+  if (patch.hooks.Stop.length === 0) delete patch.hooks.Stop;
+
+  return patch;
+}
+
+function generateInstallScript(missing) {
+  let script = '#!/bin/bash\n';
+  script += '# Claude Code Safety Hooks — Generated by https://yurukusa.github.io/cc-safe-setup/\n';
+  script += '# Run: bash install-safety-hooks.sh\n\n';
+  script += 'set -euo pipefail\n\n';
+  script += 'HOOK_DIR="$HOME/.claude/hooks"\n';
+  script += 'SETTINGS="$HOME/.claude/settings.json"\n\n';
+  script += '# Check jq\n';
+  script += 'if ! command -v jq &>/dev/null; then\n';
+  script += '  echo "Error: jq is required. Install with: brew install jq / apt install jq"\n';
+  script += '  exit 1\n';
+  script += 'fi\n\n';
+  script += 'mkdir -p "$HOOK_DIR"\n\n';
+
+  // Write each hook script
+  for (const id of missing) {
+    const h = HOOKS[id];
+    if (!h) continue;
+    script += '# --- ' + h.name + ' ---\n';
+    script += 'cat > "$HOOK_DIR/' + id + '.sh" << \'HOOKEOF\'\n';
+    script += getMinimalHookScript(id);
+    script += '\nHOOKEOF\n';
+    script += 'chmod +x "$HOOK_DIR/' + id + '.sh"\n';
+    script += 'echo "Installed: ' + id + '.sh"\n\n';
+  }
+
+  // Update settings.json
+  script += '# --- Update settings.json ---\n';
+  script += 'if [ ! -f "$SETTINGS" ]; then\n';
+  script += '  echo "{}" > "$SETTINGS"\n';
+  script += 'fi\n\n';
+
+  // Build jq command to merge hooks
+  const pre = missing.filter(id => HOOKS[id]?.trigger === 'PreToolUse');
+  const post = missing.filter(id => HOOKS[id]?.trigger === 'PostToolUse');
+  const stop = missing.filter(id => HOOKS[id]?.trigger === 'Stop');
+
+  if (pre.length > 0) {
+    script += '# Add PreToolUse hooks\n';
+    for (const id of pre) {
+      const h = HOOKS[id];
+      script += 'jq \'.hooks.PreToolUse += [{"matcher":"' + h.matcher + '","hooks":[{"type":"command","command":"\'$HOOK_DIR\'/' + id + '.sh"}]}]\' "$SETTINGS" > /tmp/cc-settings-tmp.json && mv /tmp/cc-settings-tmp.json "$SETTINGS"\n';
+    }
+    script += '\n';
+  }
+
+  if (post.length > 0) {
+    script += '# Add PostToolUse hooks\n';
+    for (const id of post) {
+      const h = HOOKS[id];
+      script += 'jq \'.hooks.PostToolUse += [{"matcher":"' + h.matcher + '","hooks":[{"type":"command","command":"\'$HOOK_DIR\'/' + id + '.sh"}]}]\' "$SETTINGS" > /tmp/cc-settings-tmp.json && mv /tmp/cc-settings-tmp.json "$SETTINGS"\n';
+    }
+    script += '\n';
+  }
+
+  if (stop.length > 0) {
+    script += '# Add Stop hooks\n';
+    for (const id of stop) {
+      script += 'jq \'.hooks.Stop += [{"matcher":"","hooks":[{"type":"command","command":"\'$HOOK_DIR\'/' + id + '.sh"}]}]\' "$SETTINGS" > /tmp/cc-settings-tmp.json && mv /tmp/cc-settings-tmp.json "$SETTINGS"\n';
+    }
+    script += '\n';
+  }
+
+  script += 'echo ""\n';
+  script += 'echo "Done. ' + missing.length + ' safety hooks installed."\n';
+  script += 'echo "Restart Claude Code to activate."\n';
+
+  return script;
+}
+
+function getMinimalHookScript(id) {
+  // Minimal but functional versions of each hook
+  const scripts = {
+    'destructive-guard': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+[ "\${CC_ALLOW_DESTRUCTIVE:-0}" = "1" ] && exit 0
+SAFE_DIRS="\${CC_SAFE_DELETE_DIRS:-node_modules:dist:build:.cache:__pycache__:coverage:.next}"
+# rm -rf on sensitive paths
+if echo "$COMMAND" | grep -qE 'rm\\s+(-[rf]+\\s+)*(\\/$|\\/\\s|\\/home|\\/etc|\\/usr|~\\/|~\\s*$|\\.\\.\\/|\\.\\s*$)'; then
+  SAFE=0
+  IFS=':' read -ra D <<< "$SAFE_DIRS"
+  for d in "\${D[@]}"; do echo "$COMMAND" | grep -qE "rm\\s+.*\${d}\\s*$" && SAFE=1 && break; done
+  [ "$SAFE" = 0 ] && echo "BLOCKED: rm on sensitive path. Command: $COMMAND" >&2 && exit 2
+fi
+# git reset --hard
+echo "$COMMAND" | grep -qE '(^|;|&&)\\s*git\\s+reset\\s+--hard' && echo "BLOCKED: git reset --hard" >&2 && exit 2
+# git clean
+echo "$COMMAND" | grep -qE '(^|;|&&)\\s*git\\s+clean\\s+-[a-z]*[fd]' && echo "BLOCKED: git clean" >&2 && exit 2
+# PowerShell destructive
+echo "$COMMAND" | grep -qiE 'Remove-Item.*-Recurse.*-Force|rd\\s+/s\\s+/q' && echo "BLOCKED: Destructive PowerShell command" >&2 && exit 2
+# git checkout --force
+echo "$COMMAND" | grep -qE '(^|;|&&)\\s*git\\s+(checkout|switch)\\s+.*(--force|-f\\b)' && echo "BLOCKED: git checkout --force" >&2 && exit 2
+exit 0`,
+
+    'branch-guard': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+echo "$COMMAND" | grep -qE '^\\s*git\\s+push' || exit 0
+# Force push
+if [ "\${CC_ALLOW_FORCE_PUSH:-0}" != "1" ]; then
+  echo "$COMMAND" | grep -qE 'git\\s+push\\s+.*(-f\\b|--force\\b|--force-with-lease)' && echo "BLOCKED: Force push" >&2 && exit 2
+fi
+# Protected branches
+PROTECTED="\${CC_PROTECT_BRANCHES:-main:master}"
+IFS=':' read -ra B <<< "$PROTECTED"
+for b in "\${B[@]}"; do
+  echo "$COMMAND" | grep -qwE "origin\\s+\${b}|\${b}\\s|\${b}$" && echo "BLOCKED: Push to protected branch $b" >&2 && exit 2
+done
+exit 0`,
+
+    'secret-guard': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+echo "$COMMAND" | grep -qE '^\\s*git\\s+add' || exit 0
+# Direct .env staging
+echo "$COMMAND" | grep -qiE 'git\\s+add\\s+.*\\.env(\\s|$|\\.)' && echo "BLOCKED: .env file staging" >&2 && exit 2
+# Credential files
+echo "$COMMAND" | grep -qiE 'git\\s+add\\s+.*(credentials|\\.pem|\\.key|\\.p12|id_rsa|id_ed25519)' && echo "BLOCKED: Credential file staging" >&2 && exit 2
+# git add . with .env present
+if echo "$COMMAND" | grep -qE 'git\\s+add\\s+(-A|--all|\\.)(\\s|$)'; then
+  [ -f ".env" ] || [ -f ".env.local" ] && echo "BLOCKED: git add . with .env present" >&2 && exit 2
+fi
+exit 0`,
+
+    'comment-strip': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+CLEAN=$(echo "$COMMAND" | sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d')
+[ "$CLEAN" = "$COMMAND" ] && exit 0
+[ -z "$CLEAN" ] && exit 0
+jq -n --arg cmd "$CLEAN" '{"hookSpecificOutput":{"hookEventName":"PreToolUse","updatedInput":{"command":$cmd}}}'`,
+
+    'cd-git-allow': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+echo "$COMMAND" | grep -qE '^\\s*cd\\s+.*&&\\s*git\\s' || exit 0
+GIT_CMD=$(echo "$COMMAND" | grep -oP '&&\\s*git\\s+\\K\\S+')
+for safe in log diff status branch show rev-parse tag remote; do
+  [ "$GIT_CMD" = "$safe" ] && jq -n '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"cd+git auto-approved"}}' && exit 0
+done
+exit 0`,
+
+    'syntax-check': `#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+[ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ] && exit 0
+EXT="\${FILE_PATH##*.}"
+case "$EXT" in
+  py) python3 -m py_compile "$FILE_PATH" 2>&1 || echo "SYNTAX ERROR (Python): $FILE_PATH" >&2 ;;
+  sh|bash) bash -n "$FILE_PATH" 2>&1 || echo "SYNTAX ERROR (Shell): $FILE_PATH" >&2 ;;
+  json) command -v jq &>/dev/null && { jq empty "$FILE_PATH" 2>&1 || echo "SYNTAX ERROR (JSON): $FILE_PATH" >&2; } ;;
+  js) command -v node &>/dev/null && { node --check "$FILE_PATH" 2>&1 || echo "SYNTAX ERROR (JS): $FILE_PATH" >&2; } ;;
+esac
+exit 0`,
+
+    'context-monitor': `#!/bin/bash
+COUNTER_FILE="/tmp/cc-context-monitor-count"
+COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
+COUNT=$((COUNT + 1))
+echo "$COUNT" > "$COUNTER_FILE"
+[ $((COUNT % 5)) -ne 0 ] && exit 0
+# Estimate context usage from tool call count (~180 calls = full context)
+PCT=$(( 100 - (COUNT * 100 / 180) ))
+[ "$PCT" -lt 0 ] && PCT=0
+if [ "$PCT" -le 15 ]; then
+  echo "EMERGENCY: Context ~\${PCT}% remaining. Run /compact NOW." >&2
+elif [ "$PCT" -le 25 ]; then
+  echo "WARNING: Context ~\${PCT}% remaining. Finish current task." >&2
+elif [ "$PCT" -le 40 ]; then
+  echo "CAUTION: Context ~\${PCT}% remaining." >&2
+fi
+exit 0`,
+
+    'api-error-alert': `#!/bin/bash
+INPUT=$(cat)
+REASON=$(echo "$INPUT" | jq -r '.stop_reason // "unknown"' 2>/dev/null)
+[ "$REASON" = "user" ] || [ "$REASON" = "normal" ] || [ -z "$REASON" ] && exit 0
+LOG="\${CC_ERROR_ALERT_LOG:-$HOME/.claude/session-errors.log}"
+mkdir -p "$(dirname "$LOG")" 2>/dev/null
+echo "[$(date -Iseconds)] Session stopped: reason=$REASON" >> "$LOG"
+exit 0`
+  };
+
+  return scripts[id] || '#!/bin/bash\nexit 0';
+}
+
+function buildHook() {
+  const action = document.getElementById('hb-action').value;
+  const pattern = document.getElementById('hb-pattern').value.trim();
+  const message = document.getElementById('hb-message').value.trim() || 'Blocked by hook';
+  const el = document.getElementById('hb-result');
+
+  if (!pattern) { el.innerHTML = '<p style="color:#f85149">Enter a command pattern.</p>'; return; }
+
+  let script = '#!/bin/bash\n';
+  script += 'INPUT=$(cat)\n';
+  script += 'COMMAND=$(echo "$INPUT" | jq -r \'.tool_input.command // empty\' 2>/dev/null)\n';
+  script += '[ -z "$COMMAND" ] && exit 0\n\n';
+
+  if (action === 'block') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    echo "BLOCKED: ' + message.replace(/"/g, '\\"') + '" >&2\n';
+    script += '    echo "Command: $COMMAND" >&2\n';
+    script += '    exit 2\n';
+    script += 'fi\n';
+  } else if (action === 'warn') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    echo "WARNING: ' + message.replace(/"/g, '\\"') + '" >&2\n';
+    script += '    echo "Command: $COMMAND" >&2\n';
+    script += 'fi\n';
+  } else if (action === 'approve') {
+    script += 'if echo "$COMMAND" | grep -qE \'' + pattern.replace(/'/g, "'\\''") + '\'; then\n';
+    script += '    jq -n \'{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"' + message.replace(/"/g, '\\"') + '"}}\'\n';
+    script += 'fi\n';
+  }
+  script += 'exit 0';
+
+  const settings = {
+    hooks: { PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: '~/.claude/hooks/custom-hook.sh' }] }] }
+  };
+
+  el.innerHTML = '<h3>Hook Script</h3>' +
+    '<div class="code-block"><button class="copy-btn" onclick="copyText(\'hb-script\')">Copy</button><pre id="hb-script">' + escHtml(script) + '</pre></div>' +
+    '<h3>settings.json entry</h3>' +
+    '<div class="code-block"><button class="copy-btn" onclick="copyText(\'hb-settings\')">Copy</button><pre id="hb-settings">' + escHtml(JSON.stringify(settings, null, 2)) + '</pre></div>' +
+    '<p style="color:#8b949e;font-size:.8rem;margin-top:.5rem">Save the script as <code>~/.claude/hooks/custom-hook.sh</code>, run <code>chmod +x</code>, and merge the settings entry.</p>';
+}
+
+// Auto-load from URL parameter: ?config=base64encodedJSON
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const config = params.get('config');
+  if (config) {
+    try {
+      const json = atob(config);
+      document.getElementById('settings').value = json;
+      runAudit();
+    } catch(e) {
+      console.error('Invalid config parameter');
+    }
+  }
+})();
+</script>
+</body>
+</html>
