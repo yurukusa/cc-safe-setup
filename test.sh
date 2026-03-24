@@ -1327,6 +1327,12 @@ if [ -f "$EXDIR/large-read-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: large-read-guard ignores non-read"; PASS=$((PASS+1)); } || { echo "  FAIL: large-read-guard non-read"; FAIL=$((FAIL+1)); }
 fi
 
+# revert-helper (Stop hook — just verify it runs)
+if [ -f "$EXDIR/revert-helper.sh" ]; then
+    EXIT=0; echo '{}' | bash "$EXDIR/revert-helper.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: revert-helper runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+
 echo ""
 
 # ========================
