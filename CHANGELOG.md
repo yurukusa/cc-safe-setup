@@ -1,5 +1,11 @@
 # Changelog
 
+## [28.0.0] - 2026-03-25
+- **300 HOOKS** — 239 new hooks in one session (61→300)
+- 40 React/JS/performance hooks, 15 OWASP security hooks, 10 a11y hooks
+- 45 CLI commands, 561 tests, 5 languages, 11 web tools
+- 200 hooks in registry, 25 articles, 67 npm releases
+
 ## [26.0.0] - 2026-03-25
 - **250 HOOKS** — 189 new hooks in one session (61→250)
 - 15 OWASP security hooks (injection, XSS, auth, TLS, CORS, CSP)
