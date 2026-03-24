@@ -1479,3 +1479,61 @@ if [ -f "$EXDIR/auto-stash-before-pull.sh" ]; then
     EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/auto-stash-before-pull.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && { echo "  PASS: auto-stash ignores non-pull"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-stash"; FAIL=$((FAIL+1)); }
 fi
+if [ -f "$EXDIR/ci-skip-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"git commit -m \"fix [skip ci]\""}}' | bash "$EXDIR/ci-skip-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: ci-skip-guard warns on [skip ci] (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_input":{"command":"git commit -m \"normal commit\""}}' | bash "$EXDIR/ci-skip-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: ci-skip-guard allows normal commit"; PASS=$((PASS+1)); } || { echo "  FAIL: ci-skip-guard normal"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/debug-leftover-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/debug-leftover-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: debug-leftover ignores non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: debug-leftover"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/env-drift-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"normal.js"}}' | bash "$EXDIR/env-drift-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: env-drift ignores non-env files"; PASS=$((PASS+1)); } || { echo "  FAIL: env-drift"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/package-script-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"normal.js"}}' | bash "$EXDIR/package-script-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: package-script ignores non-package"; PASS=$((PASS+1)); } || { echo "  FAIL: package-script"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/git-blame-context.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"test.js","old_string":"x"}}' | bash "$EXDIR/git-blame-context.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: git-blame-context runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/import-cycle-warn.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"test.js","new_string":"const x = 1"}}' | bash "$EXDIR/import-cycle-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: import-cycle-warn runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/lockfile-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/lockfile-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: lockfile-guard ignores non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: lockfile-guard"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/git-lfs-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/git-lfs-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: git-lfs-guard ignores non-add"; PASS=$((PASS+1)); } || { echo "  FAIL: git-lfs"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/context-snapshot.sh" ]; then
+    EXIT=0; echo '{}' | bash "$EXDIR/context-snapshot.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: context-snapshot runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/docker-prune-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"docker system prune"}}' | bash "$EXDIR/docker-prune-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: docker-prune warns (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/node-version-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/node-version-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: node-version ignores non-node"; PASS=$((PASS+1)); } || { echo "  FAIL: node-version"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/pip-venv-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/pip-venv-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: pip-venv ignores non-pip"; PASS=$((PASS+1)); } || { echo "  FAIL: pip-venv"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/no-git-amend-push.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/no-git-amend-push.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-git-amend ignores non-amend"; PASS=$((PASS+1)); } || { echo "  FAIL: no-git-amend"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/sensitive-regex-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"new_string":"const x = 1"}}' | bash "$EXDIR/sensitive-regex-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: regex-guard allows safe code"; PASS=$((PASS+1)); } || { echo "  FAIL: regex-guard"; FAIL=$((FAIL+1)); }
+fi
