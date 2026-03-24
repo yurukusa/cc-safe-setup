@@ -88,6 +88,7 @@ const DASHBOARD = process.argv.includes('--dashboard');
 const ISSUES = process.argv.includes('--issues');
 const MIGRATE = process.argv.includes('--migrate');
 const GENERATE_CI = process.argv.includes('--generate-ci');
+const REPORT = process.argv.includes('--report');
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -826,6 +827,70 @@ async function fullSetup() {
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
   console.log();
+}
+
+async function report() {
+  // Generate markdown safety report
+  let hookCount = 0;
+  let scriptCount = 0;
+  let auditScore = 0;
+
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      for (const entries of Object.values(s.hooks || {})) {
+        hookCount += entries.reduce((n, e) => n + (e.hooks || []).length, 0);
+      }
+      // Quick audit
+      let risks = 0;
+      const pre = s.hooks?.PreToolUse || [];
+      const post = s.hooks?.PostToolUse || [];
+      if (pre.length === 0) risks += 30;
+      const allCmds = JSON.stringify(pre).toLowerCase();
+      if (!allCmds.match(/destructive|guard|rm.*rf/)) risks += 20;
+      if (!allCmds.match(/branch|push|main/)) risks += 20;
+      if (!allCmds.match(/secret|env|credential/)) risks += 20;
+      if (post.length === 0) risks += 10;
+      auditScore = Math.max(0, 100 - risks);
+    } catch {}
+  }
+
+  if (existsSync(HOOKS_DIR)) {
+    const fsModule = await import('fs');
+    scriptCount = fsModule.readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh')).length;
+  }
+
+  const grade = auditScore >= 80 ? 'A' : auditScore >= 60 ? 'B' : auditScore >= 40 ? 'C' : 'F';
+  const emoji = auditScore >= 80 ? '🟢' : auditScore >= 50 ? '🟡' : '🔴';
+
+  const blockLog = join(HOME, '.claude', 'blocked-commands.log');
+  let totalBlocks = 0;
+  if (existsSync(blockLog)) {
+    totalBlocks = readFileSync(blockLog, 'utf-8').split('\n').filter(l => l.trim()).length;
+  }
+
+  const md = `## ${emoji} Claude Code Safety Report
+
+| Metric | Value |
+|--------|-------|
+| Safety Score | **${auditScore}/100** (Grade ${grade}) |
+| Hooks Registered | ${hookCount} |
+| Hook Scripts | ${scriptCount} |
+| Commands Blocked | ${totalBlocks} |
+| Generated | ${new Date().toISOString().split('T')[0]} |
+
+### Quick Actions
+- Audit: \`npx cc-safe-setup --audit\`
+- Dashboard: \`npx cc-safe-setup --dashboard\`
+- Find hooks: \`npx cc-hook-registry recommend\`
+`;
+
+  console.log(md);
+
+  // Also write to file
+  const reportPath = join(process.cwd(), 'SAFETY_REPORT.md');
+  writeFileSync(reportPath, md);
+  console.log(c.green + 'Report saved: ' + reportPath + c.reset);
 }
 
 function generateCI() {
@@ -2575,6 +2640,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (REPORT) return report();
   if (GENERATE_CI) return generateCI();
   if (MIGRATE) return migrate();
   if (COMPARE) return compare(COMPARE.a, COMPARE.b);
