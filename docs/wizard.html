@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Safety Wizard — Find Your Setup in 30 Seconds</title>
+<meta name="description" content="Answer 3 questions, get the exact commands to make Claude Code safe for your project.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.c{max-width:600px;width:100%}
+h1{color:#f0f6fc;font-size:1.4rem;text-align:center;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;text-align:center;margin-bottom:1.5rem}
+.step{display:none}
+.step.active{display:block}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:1rem;text-align:center}
+.options{display:grid;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.8rem;cursor:pointer;transition:all .15s;text-align:center}
+.opt:hover{border-color:#58a6ff;background:#1c2333}
+.opt.selected{border-color:#238636;background:#23863611}
+.opt-title{font-weight:600;color:#f0f6fc;font-size:.9rem}
+.opt-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.result{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;text-align:center}
+.result h2{color:#f0f6fc;font-size:1.1rem;margin-bottom:.5rem}
+.cmd{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.7rem;font-family:monospace;font-size:.95rem;color:#58a6ff;cursor:pointer;margin:.5rem 0;display:block}
+.cmd:hover{background:#161b22}
+.extra{margin-top:.8rem;font-size:.8rem;color:#8b949e}
+.extra code{background:#21262d;padding:.1rem .3rem;border-radius:3px}
+a{color:#58a6ff;text-decoration:none}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+.progress{display:flex;justify-content:center;gap:.3rem;margin-bottom:1rem}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d}
+.dot.done{background:#238636}
+.dot.current{background:#58a6ff}
+.restart{background:none;border:1px solid #30363d;color:#8b949e;padding:.3rem .6rem;border-radius:4px;cursor:pointer;font-size:.75rem;margin-top:.8rem}
+.restart:hover{color:#f0f6fc;border-color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Safety Setup Wizard</h1>
+<p class="sub">3 questions → your exact setup commands</p>
+<div class="progress" id="prog"></div>
+
+<div class="step active" id="s1">
+<div class="q">How do you use Claude Code?</div>
+<div class="options">
+<div class="opt" onclick="pick(1,'solo')"><div class="opt-title">Solo developer</div><div class="opt-desc">I'm the only one on this project</div></div>
+<div class="opt" onclick="pick(1,'team')"><div class="opt-title">Team</div><div class="opt-desc">Multiple developers share this repo</div></div>
+<div class="opt" onclick="pick(1,'auto')"><div class="opt-title">Autonomous / Headless</div><div class="opt-desc">Claude runs unattended for hours</div></div>
+</div>
+</div>
+
+<div class="step" id="s2">
+<div class="q">What's your primary stack?</div>
+<div class="options">
+<div class="opt" onclick="pick(2,'node')"><div class="opt-title">Node.js / TypeScript</div></div>
+<div class="opt" onclick="pick(2,'python')"><div class="opt-title">Python</div></div>
+<div class="opt" onclick="pick(2,'go')"><div class="opt-title">Go</div></div>
+<div class="opt" onclick="pick(2,'rust')"><div class="opt-title">Rust</div></div>
+<div class="opt" onclick="pick(2,'java')"><div class="opt-title">Java / Kotlin</div></div>
+<div class="opt" onclick="pick(2,'other')"><div class="opt-title">Other / Mixed</div></div>
+</div>
+</div>
+
+<div class="step" id="s3">
+<div class="q">What's your biggest concern?</div>
+<div class="options">
+<div class="opt" onclick="pick(3,'safety')"><div class="opt-title">File deletion / data loss</div><div class="opt-desc">rm -rf, git reset, database drops</div></div>
+<div class="opt" onclick="pick(3,'prompts')"><div class="opt-title">Too many permission prompts</div><div class="opt-desc">Approving cat/ls/git status 100 times</div></div>
+<div class="opt" onclick="pick(3,'cost')"><div class="opt-title">Cost / context management</div><div class="opt-desc">Sessions getting expensive or losing context</div></div>
+<div class="opt" onclick="pick(3,'all')"><div class="opt-title">All of the above</div></div>
+</div>
+</div>
+
+<div class="step" id="s4">
+<div class="result">
+<h2 id="r-title">Your Setup</h2>
+<div id="r-cmd"></div>
+<div class="extra" id="r-extra"></div>
+<button class="restart" onclick="restart()">Start over</button>
+</div>
+</div>
+
+<div class="footer">
+<a href="hub.html">All tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+const answers = {};
+function pick(step, val) {
+  answers[step] = val;
+  document.getElementById('s'+step).classList.remove('active');
+  if (step < 3) {
+    document.getElementById('s'+(step+1)).classList.add('active');
+  } else {
+    showResult();
+  }
+  updateProgress(step);
+}
+
+function updateProgress(step) {
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((d, i) => {
+    d.className = 'dot' + (i < step ? ' done' : i === step ? ' current' : '');
+  });
+}
+
+function showResult() {
+  document.getElementById('s4').classList.add('active');
+  const { 1: usage, 2: stack, 3: concern } = answers;
+
+  let cmds = [], extras = [];
+
+  // Base command
+  if (usage === 'auto') {
+    cmds.push('npx cc-safe-setup --profile strict');
+    extras.push('Strict profile: 33 hooks for autonomous sessions');
+  } else if (usage === 'team') {
+    cmds.push('npx cc-safe-setup --shield');
+    cmds.push('npx cc-safe-setup --team');
+    cmds.push('git add .claude/ && git commit -m "chore: add safety hooks"');
+    extras.push('--team copies hooks with relative paths for git sharing');
+  } else {
+    cmds.push('npx cc-safe-setup --shield');
+  }
+
+  // Stack-specific
+  const stackMap = {
+    node: 'auto-approve-build',
+    python: 'auto-approve-python',
+    go: 'auto-approve-go',
+    rust: 'auto-approve-cargo',
+    java: 'auto-approve-gradle',
+  };
+  if (stackMap[stack]) {
+    cmds.push(`npx cc-safe-setup --install-example ${stackMap[stack]}`);
+  }
+
+  // Concern-specific
+  if (concern === 'prompts' || concern === 'all') {
+    cmds.push('npx cc-safe-setup --install-example auto-approve-readonly');
+    extras.push('auto-approve-readonly eliminates ~80% of permission prompts');
+  }
+  if (concern === 'cost' || concern === 'all') {
+    cmds.push('npx cc-safe-setup --install-example token-budget-guard');
+    extras.push('token-budget-guard warns at $10, blocks at $50');
+  }
+
+  // Always
+  cmds.push('npx cc-safe-setup --verify');
+
+  document.getElementById('r-title').textContent =
+    usage === 'auto' ? 'Autonomous Safety Setup' :
+    usage === 'team' ? 'Team Safety Setup' : 'Your Safety Setup';
+
+  document.getElementById('r-cmd').innerHTML = cmds.map(c =>
+    `<div class="cmd" onclick="navigator.clipboard.writeText('${c}');this.style.borderColor='#238636';setTimeout(()=>this.style.borderColor='#30363d',1000)">${c}</div>`
+  ).join('');
+
+  document.getElementById('r-extra').innerHTML = extras.map(e => `<div>💡 ${e}</div>`).join('');
+}
+
+function restart() {
+  for (let i = 1; i <= 4; i++) document.getElementById('s'+i).classList.remove('active');
+  document.getElementById('s1').classList.add('active');
+  updateProgress(0);
+}
+
+// Init progress dots
+document.getElementById('prog').innerHTML = [1,2,3].map((_, i) => `<div class="dot${i===0?' current':''}"></div>`).join('');
+</script>
+</body>
+</html>
