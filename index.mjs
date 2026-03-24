@@ -93,6 +93,8 @@ const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
 const ANALYZE = process.argv.includes('--analyze');
 const TEAM = process.argv.includes('--team');
+const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
+const MIGRATE_FROM = MIGRATE_FROM_IDX !== -1 ? process.argv[MIGRATE_FROM_IDX + 1] : null;
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
@@ -130,6 +132,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --migrate-from <tool>  Migrate from safety-net/hooks-mastery/etc.
     npx cc-safe-setup --team         Set up project-level hooks (commit to repo for team)
     npx cc-safe-setup --profile <level>  Switch safety profile (strict/standard/minimal)
     npx cc-safe-setup --analyze     Analyze what Claude did in your last session
@@ -837,6 +840,141 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function migrateFrom(tool) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --migrate-from ' + (tool || '?') + c.reset);
+  console.log();
+
+  const KNOWN_TOOLS = {
+    'safety-net': {
+      name: 'Claude Code Safety Net',
+      npm: '@anthropic-ai/claude-code-safety-net',
+      detect: () => {
+        if (!existsSync(SETTINGS_PATH)) return false;
+        const s = readFileSync(SETTINGS_PATH, 'utf-8');
+        return s.includes('safety-net') || s.includes('claude-code-safety-net');
+      },
+      mapping: {
+        'destructive-commands': 'destructive-guard',
+        'secret-files': 'secret-guard',
+        'branch-protection': 'branch-guard',
+        'git-operations': 'branch-guard',
+      },
+      desc: 'TypeScript hooks with configurable severity levels'
+    },
+    'hooks-mastery': {
+      name: 'Claude Code Hooks Mastery',
+      npm: null,
+      detect: () => {
+        if (!existsSync(SETTINGS_PATH)) return false;
+        const s = readFileSync(SETTINGS_PATH, 'utf-8');
+        return s.includes('hooks_mastery') || s.includes('hooks-mastery');
+      },
+      mapping: {
+        'safety': 'destructive-guard',
+        'git-safety': 'branch-guard',
+      },
+      desc: 'Python hooks for all events + LLM integration'
+    },
+    'manual': {
+      name: 'Custom/Manual Hooks',
+      npm: null,
+      detect: () => {
+        if (!existsSync(SETTINGS_PATH)) return false;
+        const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+        return Object.keys(s.hooks || {}).length > 0;
+      },
+      mapping: {},
+      desc: 'Hand-written hooks in settings.json'
+    }
+  };
+
+  if (!tool) {
+    console.log(c.bold + '  Supported migration sources:' + c.reset);
+    console.log();
+    for (const [id, info] of Object.entries(KNOWN_TOOLS)) {
+      const detected = info.detect();
+      const icon = detected ? c.green + '●' + c.reset : c.dim + '○' + c.reset;
+      console.log(`  ${icon} ${c.bold}${id}${c.reset} — ${info.desc}`);
+      if (detected) console.log(`    ${c.green}Detected in your settings${c.reset}`);
+      console.log(`    ${c.dim}npx cc-safe-setup --migrate-from ${id}${c.reset}`);
+      console.log();
+    }
+    return;
+  }
+
+  const source = KNOWN_TOOLS[tool];
+  if (!source) {
+    console.log(c.red + `  Unknown tool: ${tool}` + c.reset);
+    console.log(c.dim + '  Supported: ' + Object.keys(KNOWN_TOOLS).join(', ') + c.reset);
+    return;
+  }
+
+  console.log(c.dim + `  Migrating from: ${source.name}` + c.reset);
+  console.log();
+
+  // Read current settings
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+
+  // Analyze existing hooks
+  let existingHooks = [];
+  for (const [trigger, groups] of Object.entries(settings.hooks || {})) {
+    for (const group of groups) {
+      for (const hook of (group.hooks || [])) {
+        existingHooks.push({ trigger, matcher: group.matcher, command: hook.command || '' });
+      }
+    }
+  }
+
+  console.log(`  Found ${existingHooks.length} existing hook(s) in settings.json`);
+  console.log();
+
+  // Identify what cc-safe-setup equivalents exist
+  const replacements = [];
+  for (const h of existingHooks) {
+    const cmd = h.command.toLowerCase();
+    let replacement = null;
+
+    // Try source-specific mapping
+    for (const [pattern, ccHook] of Object.entries(source.mapping)) {
+      if (cmd.includes(pattern)) {
+        replacement = ccHook;
+        break;
+      }
+    }
+
+    // Generic detection
+    if (!replacement) {
+      if (cmd.includes('rm') || cmd.includes('destruct')) replacement = 'destructive-guard';
+      else if (cmd.includes('branch') || cmd.includes('push')) replacement = 'branch-guard';
+      else if (cmd.includes('secret') || cmd.includes('env')) replacement = 'secret-guard';
+      else if (cmd.includes('syntax') || cmd.includes('lint')) replacement = 'syntax-check';
+      else if (cmd.includes('context') || cmd.includes('monitor')) replacement = 'context-monitor';
+    }
+
+    if (replacement) {
+      replacements.push({ old: h.command, new: replacement });
+      console.log(`  ${c.yellow}→${c.reset} ${h.command.substring(0, 50)}`);
+      console.log(`    ${c.green}→${c.reset} cc-safe-setup: ${replacement}`);
+    } else {
+      console.log(`  ${c.dim}?${c.reset} ${h.command.substring(0, 50)} (no equivalent, keeping)`);
+    }
+  }
+
+  console.log();
+  console.log(c.bold + '  Migration plan:' + c.reset);
+  console.log(`  ${c.green}${replacements.length}${c.reset} hooks can be replaced with cc-safe-setup equivalents`);
+  console.log(`  ${c.dim}${existingHooks.length - replacements.length}${c.reset} hooks will be kept as-is`);
+  console.log();
+  console.log(c.dim + '  To apply: npx cc-safe-setup --shield' + c.reset);
+  console.log(c.dim + '  This installs cc-safe-setup hooks alongside existing ones.' + c.reset);
+  console.log(c.dim + '  Remove old hooks manually after verifying the new ones work.' + c.reset);
   console.log();
 }
 
@@ -3381,6 +3519,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (MIGRATE_FROM_IDX !== -1) return migrateFrom(MIGRATE_FROM);
   if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
