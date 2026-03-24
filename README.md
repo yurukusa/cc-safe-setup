@@ -224,6 +224,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **session-handoff.sh** — Auto-save git state and session info to `~/.claude/session-handoff.md` on session end
 - **diff-size-guard.sh** — Warn/block when committing too many files at once (default: warn at 10, block at 50)
 - **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
+- **env-source-guard.sh** — Block sourcing .env files into shell environment ([#401](https://github.com/anthropics/claude-code/issues/401))
 - **symlink-guard.sh** — Detect symlink/junction traversal in rm targets ([#36339](https://github.com/anthropics/claude-code/issues/36339) [#764](https://github.com/anthropics/claude-code/issues/764))
 - **binary-file-guard.sh** — Warn when Write targets binary file types (images, archives)
 - **stale-branch-guard.sh** — Warn when working branch is far behind default
