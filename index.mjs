@@ -414,12 +414,14 @@ function examples() {
   };
 
   // Optional category filter: --examples safety, --examples ux, etc.
-  const filterArg = process.argv[process.argv.indexOf('--examples') + 1] || process.argv[process.argv.indexOf('-e') + 1] || '';
-  const filter = filterArg.toLowerCase();
+  const exIdx = Math.max(process.argv.indexOf('--examples'), process.argv.indexOf('-e'));
+  const nextArg = exIdx !== -1 ? (process.argv[exIdx + 1] || '') : '';
+  const filter = nextArg.startsWith('-') ? '' : nextArg.toLowerCase();
 
   console.log();
   console.log(c.bold + '  cc-safe-setup --examples' + c.reset + (filter ? ' ' + filter : ''));
-  console.log(c.dim + '  38 hooks beyond the 8 built-in ones' + c.reset);
+  const totalExamples = Object.values(CATEGORIES).reduce((sum, cat) => sum + Object.keys(cat).length, 0);
+  console.log(c.dim + `  ${totalExamples} hooks beyond the 8 built-in ones` + c.reset);
   if (filter) console.log(c.dim + '  Filter: ' + filter + c.reset);
   console.log();
 
