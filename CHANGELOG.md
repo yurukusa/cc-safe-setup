@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.3.0] - 2026-03-24
+- **--quickfix**: Auto-detect and fix 10 common Claude Code problems
+- **367 automated tests** (+47 from v7.2.0, full example hook coverage)
+- **28 CLI commands** total
+- Hook Playground web tool (interactive command safety checker)
+- Beginner tutorial drafts (EN + JP)
+
 ## [7.2.0] - 2026-03-24
 - **71 total hooks** (8 built-in + 61 bash + 2 Python)
 - **27 CLI commands** including --report, --generate-ci, --migrate, --compare, --issues
