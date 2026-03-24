@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cc-safe-setup — Claude Code Safety Hub</title>
+<meta name="description" content="112 hooks, 34 commands, 10 tools. Everything you need to make Claude Code safe.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}
+.hero{text-align:center;padding:3rem 1.5rem 2rem}
+h1{color:#f0f6fc;font-size:2rem;margin-bottom:.5rem}
+.tagline{color:#8b949e;font-size:1rem;margin-bottom:1.5rem}
+.stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin:1rem 0}
+.stat{text-align:center}
+.stat-num{font-size:1.8rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.75rem;color:#8b949e}
+.install{background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:8px;font-family:monospace;font-size:1rem;border:none;cursor:pointer;margin:1.5rem 0;display:inline-block}
+.install:hover{background:#2ea043}
+.grid{max-width:1000px;margin:0 auto;padding:0 1.5rem 2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:#58a6ff}
+.card-icon{font-size:1.5rem;margin-bottom:.4rem}
+.card-title{font-weight:700;color:#f0f6fc;font-size:.95rem;margin-bottom:.3rem}
+.card-desc{color:#8b949e;font-size:.8rem;line-height:1.4}
+.card-tag{display:inline-block;background:#21262d;color:#8b949e;font-size:.65rem;padding:.1rem .3rem;border-radius:3px;margin-top:.4rem}
+.section-title{text-align:center;color:#f0f6fc;font-size:1.1rem;margin:2rem 0 1rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer{text-align:center;padding:2rem;color:#484f58;font-size:.75rem}
+a{color:#58a6ff;text-decoration:none}
+.start{max-width:600px;margin:0 auto;padding:0 1.5rem}
+.start-step{display:flex;gap:.8rem;align-items:flex-start;margin:.5rem 0}
+.start-num{background:#238636;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.start-text{font-size:.85rem;color:#c9d1d9}
+code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>cc-safe-setup</h1>
+<div class="tagline">Make Claude Code safe for autonomous operation</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-num">112</div><div class="stat-label">hooks</div></div>
+<div class="stat"><div class="stat-num">34</div><div class="stat-label">commands</div></div>
+<div class="stat"><div class="stat-num">457</div><div class="stat-label">tests</div></div>
+<div class="stat"><div class="stat-num">10</div><div class="stat-label">web tools</div></div>
+</div>
+
+<button class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</button>
+<div style="color:#8b949e;font-size:.8rem">One command. 30 seconds. Zero dependencies.</div>
+</div>
+
+<div class="section-title">Get Started</div>
+<div class="start">
+<div class="start-step"><div class="start-num">1</div><div class="start-text">Run <code>npx cc-safe-setup --shield</code> — installs hooks, detects your stack, generates CLAUDE.md</div></div>
+<div class="start-step"><div class="start-num">2</div><div class="start-text">Run <code>npx cc-safe-setup --verify</code> — confirms all hooks block correctly</div></div>
+<div class="start-step"><div class="start-num">3</div><div class="start-text">For teams: <code>npx cc-safe-setup --team</code> — commit <code>.claude/</code> to share with everyone</div></div>
+</div>
+
+<div class="section-title">Tools & Documentation</div>
+
+<div class="grid">
+<a href="index.html" class="card">
+<div class="card-icon">🔍</div>
+<div class="card-title">Safety Audit</div>
+<div class="card-desc">Score your Claude Code setup out of 100. Find gaps and get fix suggestions.</div>
+<span class="card-tag">interactive</span>
+</a>
+
+<a href="hooks-cheatsheet.html" class="card">
+<div class="card-icon">📋</div>
+<div class="card-title">Cheat Sheet</div>
+<div class="card-desc">30+ copy-paste hook patterns. Block, approve, monitor — with one-click copy.</div>
+<span class="card-tag">reference</span>
+</a>
+
+<a href="builder.html" class="card">
+<div class="card-icon">🔧</div>
+<div class="card-title">Hook Builder</div>
+<div class="card-desc">Describe what you want in English. Get a working hook + settings.json entry.</div>
+<span class="card-tag">generator</span>
+</a>
+
+<a href="by-example.html" class="card">
+<div class="card-icon">⚡</div>
+<div class="card-title">By Example</div>
+<div class="card-desc">10 real GitHub Issues. See the before (disaster) and after (hook saves it).</div>
+<span class="card-tag">learn</span>
+</a>
+
+<a href="matrix.html" class="card">
+<div class="card-icon">📊</div>
+<div class="card-title">Hook Matrix</div>
+<div class="card-desc">All hooks in a sortable, filterable table. Find exactly what you need.</div>
+<span class="card-tag">interactive</span>
+</a>
+
+<a href="faq.html" class="card">
+<div class="card-icon">❓</div>
+<div class="card-title">FAQ</div>
+<div class="card-desc">15 questions answered. How hooks work, performance, debugging, and more.</div>
+<span class="card-tag">reference</span>
+</a>
+
+<a href="settings-reference.html" class="card">
+<div class="card-icon">⚙️</div>
+<div class="card-title">Settings Reference</div>
+<div class="card-desc">Every settings.json field explained. Hooks, permissions, env, models.</div>
+<span class="card-tag">reference</span>
+</a>
+
+<a href="troubleshooting.html" class="card">
+<div class="card-icon">🔧</div>
+<div class="card-title">Troubleshooting</div>
+<div class="card-desc">10 common problems with step-by-step fixes. Hook not firing? Start here.</div>
+<span class="card-tag">debug</span>
+</a>
+
+<a href="migration-guide.html" class="card">
+<div class="card-icon">🔀</div>
+<div class="card-title">Migration Guide</div>
+<div class="card-desc">Moving from Cursor, Windsurf, Aider, or Copilot? Map your safety setup.</div>
+<span class="card-tag">guide</span>
+</a>
+
+<a href="https://yurukusa.github.io/cc-hook-registry/playground.html" class="card">
+<div class="card-icon">🎮</div>
+<div class="card-title">Playground</div>
+<div class="card-desc">Type any command, see which hooks fire. Test before you install.</div>
+<span class="card-tag">interactive</span>
+</a>
+</div>
+
+<div class="section-title">Also Available</div>
+<div class="grid">
+<a href="https://github.com/yurukusa/cc-safe-setup" class="card">
+<div class="card-title">GitHub Repository</div>
+<div class="card-desc">Source code, issues, releases. Star if useful.</div>
+</a>
+<a href="https://www.npmjs.com/package/cc-safe-setup" class="card">
+<div class="card-title">npm Package</div>
+<div class="card-desc">2,500+ daily downloads. Zero dependencies.</div>
+</a>
+<a href="https://yurukusa.github.io/cc-hook-registry/" class="card">
+<div class="card-title">Hook Registry</div>
+<div class="card-desc">70 hooks from 7 projects. Search, browse, install.</div>
+</a>
+</div>
+
+<div class="footer">
+cc-safe-setup — MIT License · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a>
+</div>
+</body>
+</html>
