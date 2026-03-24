@@ -85,6 +85,7 @@ const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
 const SHARE = process.argv.includes('--share');
 const BENCHMARK = process.argv.includes('--benchmark');
 const DASHBOARD = process.argv.includes('--dashboard');
+const ISSUES = process.argv.includes('--issues');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -106,6 +107,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --issues        Show GitHub Issues each hook addresses
     npx cc-safe-setup --dashboard     Real-time status dashboard
     npx cc-safe-setup --benchmark     Measure hook execution time
     npx cc-safe-setup --share         Generate shareable URL for your setup
@@ -802,6 +804,59 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+function issues() {
+  // Map hooks to the GitHub Issues they address
+  const ISSUE_MAP = [
+    { hook: 'destructive-guard', issues: ['#36339 rm -rf NTFS junction (93r)', '#36640 NFS mount deletion', '#37331 PowerShell Remove-Item (13r)', '#36233 Mac filesystem deleted (67r)'] },
+    { hook: 'branch-guard', issues: ['Untested code pushed to main at 3am'] },
+    { hook: 'secret-guard', issues: ['#6527 .env committed to public repo (94r)'] },
+    { hook: 'syntax-check', issues: ['Syntax errors cascading through 30+ files'] },
+    { hook: 'context-monitor', issues: ['Sessions dying at 3% context with no warning'] },
+    { hook: 'comment-strip', issues: ['#29582 Bash comments break permissions (18r)'] },
+    { hook: 'cd-git-allow', issues: ['#32985 cd+git permission spam (9r)', '#16561 Compound commands (101r)'] },
+    { hook: 'api-error-alert', issues: ['Sessions silently dying from rate limits'] },
+    { hook: 'block-database-wipe', issues: ['#37405 Database destroyed (0r)', '#34729 Prisma migrate reset data loss'] },
+    { hook: 'compound-command-approver', issues: ['#30519 Permission matching broken (53r)', '#16561 Parse compound commands (101r)'] },
+    { hook: 'case-sensitive-guard', issues: ['#37875 exFAT case collision (0r)'] },
+    { hook: 'tmp-cleanup', issues: ['#8856 /tmp/claude-*-cwd leak (67r)', '#17609 tmp files not cleaned (29r)'] },
+    { hook: 'loop-detector', issues: ['Command repetition loops wasting context'] },
+    { hook: 'session-handoff', issues: ['#17428 Enhanced /compact (104r)', '#6354 CLAUDE.md lost after compact (27r)'] },
+    { hook: 'cost-tracker', issues: ['No visibility into session token costs'] },
+    { hook: 'deploy-guard', issues: ['#37314 Deploy without commit'] },
+    { hook: 'protect-dotfiles', issues: ['#37478 .bashrc destroyed (3r)'] },
+    { hook: 'scope-guard', issues: ['#36233 Files deleted outside project (67r)'] },
+    { hook: 'env-source-guard', issues: ['#401 .env loaded into bash environment (54r)'] },
+    { hook: 'diff-size-guard', issues: ['Unreviable mega-commits'] },
+    { hook: 'dependency-audit', issues: ['Supply chain risk from unknown packages'] },
+    { hook: 'read-before-edit', issues: ['old_string mismatch from editing unread files'] },
+  ];
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --issues' + c.reset);
+  console.log(c.dim + '  Which GitHub Issues each hook addresses' + c.reset);
+  console.log();
+
+  let totalIssues = 0;
+  for (const entry of ISSUE_MAP) {
+    console.log('  ' + c.green + entry.hook + c.reset);
+    for (const issue of entry.issues) {
+      const isLink = issue.startsWith('#');
+      if (isLink) {
+        const num = issue.match(/#(\d+)/)?.[1];
+        console.log('    ' + c.dim + 'https://github.com/anthropics/claude-code/issues/' + num + c.reset);
+        console.log('    ' + issue.replace(/#\d+\s*/, ''));
+      } else {
+        console.log('    ' + c.dim + issue + c.reset);
+      }
+      totalIssues++;
+    }
+    console.log();
+  }
+
+  console.log(c.bold + '  ' + ISSUE_MAP.length + ' hooks addressing ' + totalIssues + ' issues/problems' + c.reset);
   console.log();
 }
 
@@ -2272,6 +2327,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (ISSUES) return issues();
   if (DASHBOARD) return dashboard();
   if (BENCHMARK) return benchmark();
   if (SHARE) return share();
