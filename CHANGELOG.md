@@ -1,5 +1,18 @@
 # Changelog
 
+## [10.3.0] - 2026-03-24
+- **--guard**: Instant rule enforcement — `--guard "never touch the database"`
+- **--diff-hooks**: Compare global vs project hook configurations
+- **531 tests** (500+ milestone), **116 hooks**, **37 CLI commands**, **5 languages**
+- test-coverage-guard, stale-env-guard, ci-skip-guard, debug-leftover-guard
+- Rust destructive-guard example
+- 10 web tools + Hub portal + By Example + Migration Guide + Troubleshooting + Matrix + Settings Reference
+- 13 article drafts (1 published, 9 cron, 3 CDP-pending)
+- Medium story draft for maximum reach
+
+## [10.0.0] - 2026-03-24
+- 500+ test milestone, fixed test ordering
+
 ## [9.3.0] - 2026-03-24
 - **--from-claudemd**: Convert CLAUDE.md rules to enforceable hooks (16 patterns)
 - **--health**: Hook health dashboard (size, permissions, age)
