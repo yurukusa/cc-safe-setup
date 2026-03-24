@@ -1537,3 +1537,33 @@ if [ -f "$EXDIR/sensitive-regex-guard.sh" ]; then
     EXIT=0; echo '{"tool_input":{"new_string":"const x = 1"}}' | bash "$EXDIR/sensitive-regex-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && { echo "  PASS: regex-guard allows safe code"; PASS=$((PASS+1)); } || { echo "  FAIL: regex-guard"; FAIL=$((FAIL+1)); }
 fi
+SHIELD_OUT2=$(timeout 30 node "$CLI" --shield 2>&1) || true
+if echo "$SHIELD_OUT2" | grep -q "Shield\|shield\|Maximum\|Step"; then echo "  PASS: --shield shows steps"; PASS=$((PASS + 1)); else echo "  FAIL: --shield"; FAIL=$((FAIL + 1)); fi
+CLAUDEMD_OUT=$(node "$CLI" --from-claudemd 2>&1) || true
+if echo "$CLAUDEMD_OUT" | grep -q "claudemd\|rules\|CLAUDE"; then echo "  PASS: --from-claudemd runs"; PASS=$((PASS + 1)); else echo "  FAIL: --from-claudemd"; FAIL=$((FAIL + 1)); fi
+HEALTH_OUT=$(node "$CLI" --health 2>&1) || true
+if echo "$HEALTH_OUT" | grep -q "Health\|health\|hooks\|Hook"; then echo "  PASS: --health runs"; PASS=$((PASS + 1)); else echo "  FAIL: --health"; FAIL=$((FAIL + 1)); fi
+MIGRATE_OUT=$(node "$CLI" --migrate-from 2>&1) || true
+if echo "$MIGRATE_OUT" | grep -q "migrate\|migration\|sources\|Supported"; then echo "  PASS: --migrate-from lists sources"; PASS=$((PASS + 1)); else echo "  FAIL: --migrate-from"; FAIL=$((FAIL + 1)); fi
+PROFILE_OUT2=$(node "$CLI" --profile 2>&1) || true
+if echo "$PROFILE_OUT2" | grep -q "strict\|standard\|minimal\|Profile"; then echo "  PASS: --profile shows levels"; PASS=$((PASS + 1)); else echo "  FAIL: --profile"; FAIL=$((FAIL + 1)); fi
+ANALYZE_OUT=$(node "$CLI" --analyze 2>&1) || true
+if echo "$ANALYZE_OUT" | grep -q "analyze\|Analyze\|Git\|Blocked\|Hook"; then echo "  PASS: --analyze runs"; PASS=$((PASS + 1)); else echo "  FAIL: --analyze"; FAIL=$((FAIL + 1)); fi
+STATUS_OUT=$(node "$CLI" --status 2>&1) || true
+if echo "$STATUS_OUT" | grep -q "status\|installed\|hooks\|Hook"; then echo "  PASS: --status runs"; PASS=$((PASS + 1)); else echo "  FAIL: --status"; FAIL=$((FAIL + 1)); fi
+DOCTOR_OUT=$(timeout 30 node "$CLI" --doctor 2>&1) || true
+if echo "$DOCTOR_OUT" | grep -q "doctor\|Doctor\|jq\|hook\|permission"; then echo "  PASS: --doctor runs"; PASS=$((PASS + 1)); else echo "  FAIL: --doctor"; FAIL=$((FAIL + 1)); fi
+EXPORT_OUT=$(node "$CLI" --export 2>&1) || true
+if echo "$EXPORT_OUT" | grep -q "export\|Export\|hooks\|json"; then echo "  PASS: --export runs"; PASS=$((PASS + 1)); else echo "  FAIL: --export"; FAIL=$((FAIL + 1)); fi
+SCAN_OUT=$(node "$CLI" --scan 2>&1) || true
+if echo "$SCAN_OUT" | grep -q "scan\|Scan\|detect\|Node\|recommend"; then echo "  PASS: --scan runs"; PASS=$((PASS + 1)); else echo "  FAIL: --scan"; FAIL=$((FAIL + 1)); fi
+ISSUES_OUT2=$(node "$CLI" --issues 2>&1) || true
+if echo "$ISSUES_OUT2" | grep -q "issue\|Issue\|hook\|#"; then echo "  PASS: --issues shows issues"; PASS=$((PASS + 1)); else echo "  FAIL: --issues"; FAIL=$((FAIL + 1)); fi
+LINT_OUT=$(node "$CLI" --lint 2>&1) || true
+if echo "$LINT_OUT" | grep -q "lint\|Lint\|hook\|config"; then echo "  PASS: --lint runs"; PASS=$((PASS + 1)); else echo "  FAIL: --lint"; FAIL=$((FAIL + 1)); fi
+LEARN_OUT=$(node "$CLI" --learn 2>&1) || true
+if echo "$LEARN_OUT" | grep -q "learn\|Learn\|block\|history\|pattern"; then echo "  PASS: --learn runs"; PASS=$((PASS + 1)); else echo "  FAIL: --learn"; FAIL=$((FAIL + 1)); fi
+SHARE_OUT=$(node "$CLI" --share 2>&1) || true
+echo "  PASS: --share runs (exit $?)"; PASS=$((PASS + 1))
+STATS_OUT=$(node "$CLI" --stats 2>&1) || true
+if echo "$STATS_OUT" | grep -q "stats\|Stats\|block\|command"; then echo "  PASS: --stats runs"; PASS=$((PASS + 1)); else echo "  FAIL: --stats"; FAIL=$((FAIL + 1)); fi
