@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "One command to make Claude Code safe for autonomous operation. 8 built-in + 39 examples. 23 commands including dashboard, issues, create, audit, lint, diff. 260 tests. 2,500+ daily npm downloads.",
   "main": "index.mjs",
   "bin": {
