@@ -917,7 +917,7 @@ fi
 
 # auto-approve-build
 if [ -f "$EXDIR/auto-approve-build.sh" ]; then
-    OUT=$(echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/auto-approve-build.sh" 2>/dev/null)
+    OUT=$(echo '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' | bash "$EXDIR/auto-approve-build.sh" 2>/dev/null)
     echo "$OUT" | grep -q "approve\|allow" && { echo "  PASS: auto-approve-build allows npm test"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-build"; FAIL=$((FAIL+1)); }
 fi
 
