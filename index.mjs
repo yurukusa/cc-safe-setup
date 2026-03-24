@@ -135,6 +135,8 @@ if (HELP) {
     api-error-alert      Notifies when session stops due to API errors
 
   More: https://github.com/yurukusa/cc-safe-setup
+  Find hooks: npx cc-hook-registry search <keyword>
+  Test hooks: npx cc-hook-test <hook.sh>
 `);
   process.exit(0);
 }
