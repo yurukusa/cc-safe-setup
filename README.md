@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 51 examples = **59 hooks**. 26 CLI commands. 284 tests. [Web Tool](https://yurukusa.github.io/cc-safe-setup/) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) · [Troubleshooting](TROUBLESHOOTING.md)
+8 built-in + 68 examples = **76 hooks**. 28 CLI commands. 394 tests. [Web Tool](https://yurukusa.github.io/cc-safe-setup/) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) · [Troubleshooting](TROUBLESHOOTING.md)
 
 ```bash
 npx cc-safe-setup
@@ -87,7 +87,7 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 51 examples |
+| `--install-example <name>` | Install from 68 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
