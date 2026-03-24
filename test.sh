@@ -823,6 +823,98 @@ BENCH_OUT=$(timeout 30 node "$CLI" --benchmark 2>&1) || true
 if echo "$BENCH_OUT" | grep -q "ms\|Hook\|performance"; then echo "  PASS: --benchmark runs"; PASS=$((PASS + 1)); else echo "  FAIL: --benchmark should show timings"; FAIL=$((FAIL + 1)); fi
 echo ""
 
+# ========================
+# --issues tests
+# ========================
+echo "--- --issues tests ---"
+
+ISSUES_OUT=$(node "$CLI" --issues 2>&1) || true
+if echo "$ISSUES_OUT" | grep -q "hooks addressing"; then echo "  PASS: --issues shows hook count"; PASS=$((PASS + 1)); else echo "  FAIL: --issues should count hooks"; FAIL=$((FAIL + 1)); fi
+if echo "$ISSUES_OUT" | grep -q "36339"; then echo "  PASS: --issues includes #36339"; PASS=$((PASS + 1)); else echo "  FAIL: --issues should reference #36339"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
+# Example hooks syntax tests
+# ========================
+echo "--- Example hooks syntax ---"
+
+EXAMPLES_DIR="$(dirname "$0")/examples"
+EX_PASS=0
+EX_FAIL=0
+for f in "$EXAMPLES_DIR"/*.sh; do
+    if bash -n "$f" 2>/dev/null; then
+        EX_PASS=$((EX_PASS + 1))
+    else
+        echo "  FAIL: syntax error in $(basename "$f")"
+        EX_FAIL=$((EX_FAIL + 1))
+    fi
+done
+echo "  PASS: $EX_PASS/$((EX_PASS + EX_FAIL)) example hooks pass bash -n"
+PASS=$((PASS + EX_PASS))
+FAIL=$((FAIL + EX_FAIL))
+echo ""
+
+# ========================
+# Example hooks empty input tests
+# ========================
+echo "--- Example hooks empty input ---"
+
+EI_PASS=0
+EI_FAIL=0
+for f in "$EXAMPLES_DIR"/*.sh; do
+    EXIT=0
+    echo '{}' | bash "$f" > /dev/null 2>/dev/null || EXIT=$?
+    if [ "$EXIT" -eq 0 ]; then
+        EI_PASS=$((EI_PASS + 1))
+    else
+        echo "  FAIL: $(basename "$f") exits $EXIT on empty input"
+        EI_FAIL=$((EI_FAIL + 1))
+    fi
+done
+echo "  PASS: $EI_PASS/$((EI_PASS + EI_FAIL)) examples handle empty input"
+PASS=$((PASS + EI_PASS))
+FAIL=$((FAIL + EI_FAIL))
+echo ""
+
+# ========================
+# --create template tests
+# ========================
+echo "--- --create template tests ---"
+
+TEMPLATES=("block docker system prune" "block curl pipe to bash" "auto approve test commands" "block DROP TABLE" "warn on TODO markers")
+for tmpl in "${TEMPLATES[@]}"; do
+    OUT=$(node "$CLI" --create "$tmpl" 2>&1) || true
+    if echo "$OUT" | grep -q "Created\|generic"; then
+        echo "  PASS: --create '$tmpl'"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: --create '$tmpl'"
+        FAIL=$((FAIL + 1))
+    fi
+done
+
+# Cleanup create-generated hooks
+python3 -c "
+import os, json
+sp = os.path.expanduser('~/.claude/settings.json')
+if os.path.exists(sp):
+    s = json.load(open(sp))
+    for t in list(s.get('hooks',{}).keys()):
+        s['hooks'][t] = [e for e in s['hooks'][t] if not any(
+            'block-docker' in (h.get('command','') or '') or
+            'block-curl' in (h.get('command','') or '') or
+            'auto-approve-tests' in (h.get('command','') or '') or
+            'block-raw-sql' in (h.get('command','') or '') or
+            'warn-todo' in (h.get('command','') or '') or
+            'custom-' in (h.get('command','') or '')
+            for h in e.get('hooks',[]))]
+    json.dump(s, open(sp,'w'), indent=2)
+for f in os.listdir(os.path.expanduser('~/.claude/hooks/')):
+    if f.startswith(('block-docker','block-curl','auto-approve-tests','block-raw-sql','warn-todo','custom-')):
+        os.remove(os.path.expanduser(f'~/.claude/hooks/{f}'))
+" 2>/dev/null
+echo ""
+
 # CI cleanup
 if [ "${CI_CLEANUP:-0}" = "1" ]; then
     python3 -c "
