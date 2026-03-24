@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks Matrix — 112 Hooks at a Glance</title>
+<meta name="description" content="Interactive matrix of all 112 Claude Code hooks. Filter by trigger, category, and action type.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1rem;font-size:.82rem}
+.c{max-width:1100px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.3rem;margin-bottom:.2rem}
+.sub{color:#8b949e;font-size:.8rem;margin-bottom:.8rem}
+a{color:#58a6ff;text-decoration:none}
+input{width:100%;padding:.5rem;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:.85rem;margin-bottom:.5rem}
+input::placeholder{color:#484f58}
+.filters{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.5rem}
+.f{padding:.2rem .5rem;border-radius:3px;border:1px solid #30363d;background:transparent;color:#8b949e;cursor:pointer;font-size:.7rem}
+.f.on{background:#238636;border-color:#238636;color:#fff}
+table{width:100%;border-collapse:collapse}
+th,td{padding:.3rem .4rem;border:1px solid #21262d;text-align:left;font-size:.75rem}
+th{background:#161b22;color:#f0f6fc;position:sticky;top:0;cursor:pointer}
+th:hover{background:#21262d}
+tr:hover td{background:#161b2288}
+.act-block{color:#f85149;font-weight:bold}
+.act-warn{color:#d29922}
+.act-approve{color:#3fb950}
+.act-monitor{color:#58a6ff}
+.count{color:#8b949e;font-size:.78rem;margin:.3rem 0}
+.footer{text-align:center;color:#484f58;font-size:.65rem;margin-top:1rem}
+td code{background:#21262d;padding:.1rem .2rem;border-radius:2px;font-size:.7rem;cursor:pointer}
+td code:hover{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Matrix</h1>
+<p class="sub">112 hooks. Click column headers to sort. Search to filter.</p>
+
+<input id="q" placeholder="Filter hooks..." oninput="render()">
+<div class="filters" id="filters"></div>
+<div class="count" id="count"></div>
+<div style="overflow-x:auto"><table id="tbl"><thead><tr>
+<th onclick="sortBy('name')">Hook</th>
+<th onclick="sortBy('cat')">Category</th>
+<th onclick="sortBy('trigger')">Trigger</th>
+<th onclick="sortBy('action')">Action</th>
+<th>Description</th>
+<th>Install</th>
+</tr></thead><tbody id="tbody"></tbody></table></div>
+
+<div class="footer">
+<a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
+<a href="builder.html">Builder</a> ·
+<a href="troubleshooting.html">Troubleshoot</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+const H=[
+{n:'destructive-guard',c:'safety',t:'Pre',a:'block',d:'rm -rf, git reset --hard, git clean',i:'npx cc-safe-setup'},
+{n:'branch-guard',c:'safety',t:'Pre',a:'block',d:'Push to main/master, force-push',i:'npx cc-safe-setup'},
+{n:'secret-guard',c:'safety',t:'Pre',a:'block',d:'git add .env, credential files',i:'npx cc-safe-setup'},
+{n:'syntax-check',c:'quality',t:'Post',a:'warn',d:'Python/Shell/JSON/JS syntax after edits',i:'npx cc-safe-setup'},
+{n:'context-monitor',c:'monitor',t:'Post',a:'warn',d:'Context warnings at 40/25/20/15%',i:'npx cc-safe-setup'},
+{n:'comment-strip',c:'utility',t:'Pre',a:'warn',d:'Fix bash comments breaking permissions',i:'npx cc-safe-setup'},
+{n:'cd-git-allow',c:'approve',t:'Pre',a:'approve',d:'Auto-approve cd && git compounds',i:'npx cc-safe-setup'},
+{n:'api-error-alert',c:'monitor',t:'Stop',a:'monitor',d:'Notify on session API errors',i:'npx cc-safe-setup'},
+{n:'scope-guard',c:'safety',t:'Pre',a:'block',d:'Block operations outside project',i:'--install-example scope-guard'},
+{n:'no-sudo-guard',c:'safety',t:'Pre',a:'block',d:'Block all sudo commands',i:'--install-example no-sudo-guard'},
+{n:'protect-claudemd',c:'safety',t:'Pre',a:'block',d:'Block edits to CLAUDE.md/settings',i:'--install-example protect-claudemd'},
+{n:'protect-dotfiles',c:'safety',t:'Pre',a:'block',d:'Block .bashrc, .aws/, .ssh/ changes',i:'--install-example protect-dotfiles'},
+{n:'block-database-wipe',c:'safety',t:'Pre',a:'block',d:'DROP DATABASE, migrate:fresh, prisma reset',i:'--install-example block-database-wipe'},
+{n:'deploy-guard',c:'deploy',t:'Pre',a:'warn',d:'Warn deploy with uncommitted changes',i:'--install-example deploy-guard'},
+{n:'no-deploy-friday',c:'deploy',t:'Pre',a:'block',d:'Block deploys on Fridays',i:'--install-example no-deploy-friday'},
+{n:'work-hours-guard',c:'deploy',t:'Pre',a:'warn',d:'Restrict risky ops outside hours',i:'--install-example work-hours-guard'},
+{n:'uncommitted-work-guard',c:'safety',t:'Pre',a:'block',d:'Block destructive git when dirty',i:'--install-example uncommitted-work-guard'},
+{n:'test-deletion-guard',c:'quality',t:'Pre',a:'warn',d:'Warn when removing test assertions',i:'--install-example test-deletion-guard'},
+{n:'overwrite-guard',c:'safety',t:'Pre',a:'warn',d:'Warn before overwriting files',i:'--install-example overwrite-guard'},
+{n:'memory-write-guard',c:'safety',t:'Pre',a:'warn',d:'Log writes to ~/.claude/',i:'--install-example memory-write-guard'},
+{n:'fact-check-gate',c:'quality',t:'Post',a:'warn',d:'Docs reference unread source files',i:'--install-example fact-check-gate'},
+{n:'token-budget-guard',c:'monitor',t:'Post',a:'block',d:'Block when cost exceeds budget',i:'--install-example token-budget-guard'},
+{n:'conflict-marker-guard',c:'quality',t:'Pre',a:'block',d:'Block commits with conflict markers',i:'--install-example conflict-marker-guard'},
+{n:'error-memory-guard',c:'safety',t:'Post',a:'block',d:'Block retries of failed commands',i:'--install-example error-memory-guard'},
+{n:'strict-allowlist',c:'safety',t:'Pre',a:'block',d:'Only allow permitted commands',i:'--install-example strict-allowlist'},
+{n:'hardcoded-secret-detector',c:'security',t:'Post',a:'warn',d:'Detect AWS keys, passwords, JWT',i:'--install-example hardcoded-secret-detector'},
+{n:'auto-approve-build',c:'approve',t:'Pre',a:'approve',d:'npm test, cargo build, go test',i:'--install-example auto-approve-build'},
+{n:'auto-approve-python',c:'approve',t:'Pre',a:'approve',d:'pytest, mypy, ruff, black',i:'--install-example auto-approve-python'},
+{n:'auto-approve-docker',c:'approve',t:'Pre',a:'approve',d:'docker build, compose, ps',i:'--install-example auto-approve-docker'},
+{n:'auto-approve-go',c:'approve',t:'Pre',a:'approve',d:'go build/test/vet/fmt',i:'--install-example auto-approve-go'},
+{n:'auto-approve-cargo',c:'approve',t:'Pre',a:'approve',d:'cargo build/test/clippy',i:'--install-example auto-approve-cargo'},
+{n:'auto-approve-make',c:'approve',t:'Pre',a:'approve',d:'make build/test/lint',i:'--install-example auto-approve-make'},
+{n:'auto-approve-gradle',c:'approve',t:'Pre',a:'approve',d:'gradle build/test',i:'--install-example auto-approve-gradle'},
+{n:'auto-approve-maven',c:'approve',t:'Pre',a:'approve',d:'mvn compile/test/verify',i:'--install-example auto-approve-maven'},
+{n:'loop-detector',c:'safety',t:'Pre',a:'block',d:'Break command repetition loops',i:'--install-example loop-detector'},
+{n:'cost-tracker',c:'monitor',t:'Post',a:'monitor',d:'Estimate session token cost',i:'--install-example cost-tracker'},
+{n:'session-handoff',c:'utility',t:'Stop',a:'monitor',d:'Save state for next session',i:'--install-example session-handoff'},
+{n:'revert-helper',c:'utility',t:'Stop',a:'monitor',d:'Show undo on session end',i:'--install-example revert-helper'},
+{n:'compact-reminder',c:'utility',t:'Stop',a:'warn',d:'Suggest /compact after N calls',i:'--install-example compact-reminder'},
+{n:'env-drift-guard',c:'quality',t:'Post',a:'warn',d:'.env vs .env.example mismatch',i:'--install-example env-drift-guard'},
+{n:'package-script-guard',c:'quality',t:'Pre',a:'warn',d:'Warn on package.json script changes',i:'--install-example package-script-guard'},
+{n:'git-blame-context',c:'quality',t:'Pre',a:'monitor',d:'Show file ownership before edits',i:'--install-example git-blame-context'},
+{n:'import-cycle-warn',c:'quality',t:'Post',a:'warn',d:'Detect circular imports',i:'--install-example import-cycle-warn'},
+{n:'lockfile-guard',c:'quality',t:'Pre',a:'warn',d:'Warn when lockfiles modified',i:'--install-example lockfile-guard'},
+{n:'context-snapshot',c:'utility',t:'Stop',a:'monitor',d:'Save branch/files/TODOs state',i:'--install-example context-snapshot'},
+{n:'prompt-injection-guard',c:'security',t:'Post',a:'warn',d:'Detect injection in output',i:'--install-example prompt-injection-guard'},
+{n:'no-eval',c:'security',t:'Post',a:'warn',d:'Warn on eval() usage',i:'--install-example no-eval'},
+{n:'no-console-log',c:'quality',t:'Post',a:'warn',d:'Warn on console.log in prod',i:'--install-example no-console-log'},
+{n:'no-wildcard-import',c:'quality',t:'Post',a:'warn',d:'Warn on import * patterns',i:'--install-example no-wildcard-import'},
+];
+
+const cats=[...new Set(H.map(h=>h.c))].sort();
+const actClass={block:'act-block',warn:'act-warn',approve:'act-approve',monitor:'act-monitor'};
+let filter='all',sortKey='name',sortDir=1;
+
+document.getElementById('filters').innerHTML=['all',...cats].map(c=>`<button class="f${c==='all'?' on':''}" onclick="setF('${c}')">${c}</button>`).join('');
+
+function setF(f){filter=f;document.querySelectorAll('.f').forEach(b=>b.classList.toggle('on',b.textContent===f));render();}
+function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}
+
+function render(){
+  const q=document.getElementById('q').value.toLowerCase();
+  let list=H.filter(h=>(filter==='all'||h.c===filter)&&(!q||h.n.includes(q)||h.d.toLowerCase().includes(q)||h.c.includes(q)));
+  list.sort((a,b)=>{const av=a[sortKey]||'',bv=b[sortKey]||'';return av<bv?-sortDir:av>bv?sortDir:0;});
+  document.getElementById('count').textContent=list.length+'/'+H.length+' hooks';
+  document.getElementById('tbody').innerHTML=list.map(h=>`<tr>
+    <td><strong>${h.n}</strong></td>
+    <td>${h.c}</td>
+    <td>${h.t}</td>
+    <td class="${actClass[h.a]||''}">${h.a}</td>
+    <td>${h.d}</td>
+    <td><code onclick="navigator.clipboard.writeText('npx cc-safe-setup ${h.i}');this.textContent='✓'">${h.i.substring(0,25)}</code></td>
+  </tr>`).join('');
+}
+render();
+</script>
+</body>
+</html>
