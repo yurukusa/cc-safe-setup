@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Builder — Claude Code</title>
+<meta name="description" content="Generate Claude Code hooks from plain English. No coding required.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+input,select{width:100%;padding:.6rem;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:.9rem;margin-bottom:.6rem}
+input:focus,select:focus{outline:none;border-color:#58a6ff}
+input::placeholder{color:#484f58}
+label{display:block;color:#8b949e;font-size:.78rem;margin-bottom:.2rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.8rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;position:relative;margin:.5rem 0}
+.copy-btn{position:absolute;top:.4rem;right:.4rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-size:.7rem}
+.copy-btn:hover{color:#f0f6fc;border-color:#58a6ff}
+.btn{background:#238636;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.9rem;width:100%;margin:.5rem 0}
+.btn:hover{background:#2ea043}
+.templates{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.4rem;margin:.8rem 0}
+.tmpl{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem;cursor:pointer;font-size:.78rem;color:#8b949e;transition:border-color .15s}
+.tmpl:hover{border-color:#58a6ff;color:#c9d1d9}
+.tmpl-title{font-weight:600;color:#c9d1d9;font-size:.82rem}
+.section{margin:1.2rem 0}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+.note{background:#161b22;border-left:3px solid #58a6ff;padding:.5rem .8rem;font-size:.78rem;color:#8b949e;margin:.5rem 0}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Hook Builder</h1>
+<p class="sub">Describe what you want in plain English. Get a working hook.</p>
+
+<div class="section">
+  <label>What should the hook do?</label>
+  <input id="desc" placeholder="e.g., Block npm publish without running tests first" oninput="clearOutput()">
+</div>
+
+<div class="section">
+  <label>Trigger event</label>
+  <select id="trigger">
+    <option value="PreToolUse">PreToolUse (before tool runs — block/approve)</option>
+    <option value="PostToolUse">PostToolUse (after tool runs — check results)</option>
+    <option value="Stop">Stop (when Claude finishes — notify/cleanup)</option>
+  </select>
+</div>
+
+<div class="section">
+  <label>Tool matcher (regex)</label>
+  <input id="matcher" placeholder='e.g., Bash, Edit|Write, or empty for all' value="Bash">
+</div>
+
+<button class="btn" onclick="generate()">Generate Hook</button>
+
+<div id="output" class="hidden">
+  <h2 style="color:#f0f6fc;font-size:1rem;margin:1rem 0 .5rem">Generated Hook</h2>
+  <pre id="hook-code"><code></code><button class="copy-btn" onclick="copyCode()">Copy</button></pre>
+
+  <h2 style="color:#f0f6fc;font-size:1rem;margin:1rem 0 .5rem">settings.json entry</h2>
+  <pre id="settings-code"><code></code><button class="copy-btn" onclick="copySettings()">Copy Settings</button></pre>
+
+  <div class="note">
+    <strong>Install:</strong> Save the hook to <code>~/.claude/hooks/your-hook.sh</code>, run <code>chmod +x</code>, and add the settings.json entry.
+    <br>Or use the CLI: <code id="cli-cmd"></code>
+  </div>
+</div>
+
+<div class="section">
+  <h2 style="color:#8b949e;font-size:.9rem;margin-bottom:.5rem">Templates</h2>
+  <div class="templates" id="templates"></div>
+</div>
+
+<div class="footer">
+  <a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
+  <a href="https://yurukusa.github.io/cc-hook-registry/playground.html">Playground</a> ·
+  <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+const TEMPLATES = [
+  { title: 'Block rm -rf /', desc: 'Block rm -rf on root directory', trigger: 'PreToolUse', matcher: 'Bash', pattern: 'rm\\s+.*-rf\\s+/', action: 'block', msg: 'rm -rf on root directory' },
+  { title: 'Block force push', desc: 'Block git push --force', trigger: 'PreToolUse', matcher: 'Bash', pattern: 'git\\s+push\\s+.*--force', action: 'block', msg: 'Force push' },
+  { title: 'Block .env commit', desc: 'Block git add .env files', trigger: 'PreToolUse', matcher: 'Bash', pattern: 'git\\s+add\\s+.*\\.env', action: 'block', msg: 'Adding .env to git' },
+  { title: 'Block sudo', desc: 'Block all sudo commands', trigger: 'PreToolUse', matcher: 'Bash', pattern: '^\\s*sudo\\b', action: 'block', msg: 'sudo command' },
+  { title: 'Block DB drop', desc: 'Block DROP DATABASE/TABLE', trigger: 'PreToolUse', matcher: 'Bash', pattern: 'DROP\\s+(DATABASE|TABLE)', action: 'block', msg: 'Database drop' },
+  { title: 'Auto-approve tests', desc: 'Auto-approve npm test, pytest, cargo test', trigger: 'PreToolUse', matcher: 'Bash', pattern: '^\\s*(npm\\s+test|pytest|cargo\\s+test)', action: 'approve', msg: 'Safe test command' },
+  { title: 'Warn large output', desc: 'Warn when output exceeds 50KB', trigger: 'PostToolUse', matcher: '', pattern: null, action: 'warn-output', msg: 'Large output consuming context' },
+  { title: 'Session end notify', desc: 'Desktop notification on session end', trigger: 'Stop', matcher: '', pattern: null, action: 'notify', msg: 'Session completed' },
+  { title: 'Block npm -g', desc: 'Block global npm install', trigger: 'PreToolUse', matcher: 'Bash', pattern: 'npm\\s+install\\s+(-g|--global)', action: 'block', msg: 'Global npm install' },
+  { title: 'Block deploy Friday', desc: 'Block deploy commands on Fridays', trigger: 'PreToolUse', matcher: 'Bash', pattern: null, action: 'friday', msg: 'No deploys on Friday' },
+];
+
+document.getElementById('templates').innerHTML = TEMPLATES.map((t,i) => `
+  <div class="tmpl" onclick="useTemplate(${i})">
+    <div class="tmpl-title">${t.title}</div>
+    <div>${t.desc}</div>
+  </div>
+`).join('');
+
+function useTemplate(i) {
+  const t = TEMPLATES[i];
+  document.getElementById('desc').value = t.desc;
+  document.getElementById('trigger').value = t.trigger;
+  document.getElementById('matcher').value = t.matcher;
+  generate(t);
+}
+
+function clearOutput() {
+  document.getElementById('output').classList.add('hidden');
+}
+
+function generate(template) {
+  const desc = document.getElementById('desc').value.trim();
+  const trigger = document.getElementById('trigger').value;
+  const matcher = document.getElementById('matcher').value.trim();
+
+  if (!desc && !template) return;
+
+  let hookCode, hookName;
+
+  if (template) {
+    hookName = template.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    hookCode = generateFromTemplate(template);
+  } else {
+    hookName = desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30);
+    hookCode = generateFromDesc(desc, trigger, matcher);
+  }
+
+  const settingsCode = JSON.stringify({
+    hooks: {
+      [trigger]: [{
+        matcher: matcher,
+        hooks: [{ type: "command", command: `bash ~/.claude/hooks/${hookName}.sh` }]
+      }]
+    }
+  }, null, 2);
+
+  document.getElementById('hook-code').querySelector('code').textContent = hookCode;
+  document.getElementById('settings-code').querySelector('code').textContent = settingsCode;
+  document.getElementById('cli-cmd').textContent = `npx cc-safe-setup --create "${desc}"`;
+  document.getElementById('output').classList.remove('hidden');
+}
+
+function generateFromTemplate(t) {
+  if (t.action === 'block') {
+    return `#!/bin/bash
+# ${t.desc}
+# TRIGGER: ${t.trigger}  MATCHER: "${t.matcher}"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '${t.pattern}'; then
+  echo "BLOCKED: ${t.msg}" >&2
+  exit 2
+fi
+exit 0`;
+  }
+  if (t.action === 'approve') {
+    return `#!/bin/bash
+# ${t.desc}
+# TRIGGER: ${t.trigger}  MATCHER: "${t.matcher}"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '${t.pattern}'; then
+  echo '{"decision":"approve","reason":"${t.msg}"}'
+fi
+exit 0`;
+  }
+  if (t.action === 'warn-output') {
+    return `#!/bin/bash
+# ${t.desc}
+# TRIGGER: PostToolUse  MATCHER: ""
+OUTPUT=$(cat | jq -r '.tool_result // empty' 2>/dev/null)
+LEN=\${#OUTPUT}
+if [ "$LEN" -gt 50000 ]; then
+  echo "WARNING: Output is \${LEN} chars — consuming context fast" >&2
+fi
+exit 0`;
+  }
+  if (t.action === 'notify') {
+    return `#!/bin/bash
+# ${t.desc}
+# TRIGGER: Stop  MATCHER: ""
+notify-send "Claude Code" "Session completed" 2>/dev/null || \\
+osascript -e 'display notification "Session completed"' 2>/dev/null
+exit 0`;
+  }
+  if (t.action === 'friday') {
+    return `#!/bin/bash
+# ${t.desc}
+# TRIGGER: PreToolUse  MATCHER: "Bash"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if [ "$(date +%u)" = "5" ]; then
+  if echo "$COMMAND" | grep -qE '(deploy|publish|release)'; then
+    echo "BLOCKED: No deploys on Friday" >&2
+    exit 2
+  fi
+fi
+exit 0`;
+  }
+  return '#!/bin/bash\n# Custom hook\nexit 0';
+}
+
+function generateFromDesc(desc, trigger, matcher) {
+  const d = desc.toLowerCase();
+  let pattern = '', action = 'block', msg = desc;
+
+  if (d.includes('block') || d.includes('prevent') || d.includes('stop')) {
+    action = 'block';
+    if (d.includes('rm') || d.includes('delete')) pattern = 'rm\\s+.*-rf';
+    else if (d.includes('push') && d.includes('main')) pattern = 'git\\s+push\\s+.*\\b(main|master)\\b';
+    else if (d.includes('force')) pattern = '--force';
+    else if (d.includes('sudo')) pattern = '^\\s*sudo\\b';
+    else if (d.includes('drop')) pattern = 'DROP\\s+(DATABASE|TABLE)';
+    else if (d.includes('publish')) pattern = 'npm\\s+publish';
+    else if (d.includes('deploy')) pattern = '(deploy|vercel|netlify|firebase)';
+    else pattern = d.split(' ').pop();
+  } else if (d.includes('approve') || d.includes('allow') || d.includes('auto')) {
+    action = 'approve';
+    if (d.includes('test')) pattern = '(npm\\s+test|pytest|cargo\\s+test)';
+    else if (d.includes('build')) pattern = '(npm\\s+run\\s+build|cargo\\s+build|go\\s+build)';
+    else if (d.includes('git')) pattern = 'git\\s+(status|log|diff)';
+    else pattern = d.split(' ').pop();
+  } else if (d.includes('warn') || d.includes('alert') || d.includes('notify')) {
+    action = 'warn';
+    pattern = d.split(' ').pop();
+  }
+
+  if (action === 'block') {
+    return `#!/bin/bash
+# ${desc}
+# TRIGGER: ${trigger}  MATCHER: "${matcher}"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qiE '${pattern}'; then
+  echo "BLOCKED: ${msg}" >&2
+  exit 2
+fi
+exit 0`;
+  }
+  if (action === 'approve') {
+    return `#!/bin/bash
+# ${desc}
+# TRIGGER: ${trigger}  MATCHER: "${matcher}"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qiE '${pattern}'; then
+  echo '{"decision":"approve","reason":"${msg}"}'
+fi
+exit 0`;
+  }
+  return `#!/bin/bash
+# ${desc}
+# TRIGGER: ${trigger}  MATCHER: "${matcher}"
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qiE '${pattern}'; then
+  echo "WARNING: ${msg}" >&2
+fi
+exit 0`;
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('hook-code').querySelector('code').textContent);
+  document.getElementById('hook-code').querySelector('.copy-btn').textContent = 'Copied!';
+  setTimeout(() => document.getElementById('hook-code').querySelector('.copy-btn').textContent = 'Copy', 1500);
+}
+
+function copySettings() {
+  navigator.clipboard.writeText(document.getElementById('settings-code').querySelector('code').textContent);
+  document.getElementById('settings-code').querySelector('.copy-btn').textContent = 'Copied!';
+  setTimeout(() => document.getElementById('settings-code').querySelector('.copy-btn').textContent = 'Copy Settings', 1500);
+}
+</script>
+</body>
+</html>
