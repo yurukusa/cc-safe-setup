@@ -1,5 +1,13 @@
 # Changelog
 
+## [17.4.0] - 2026-03-25
+- **165 hooks** (+104 from session start), **45 CLI commands**, **561 tests**
+- --changelog, --init-project, --score, --test-hook, --save-profile, --guard, --suggest, --why, --replay, --from-claudemd, --team, --profile, --analyze, --health, --quickfix, --migrate-from, --diff-hooks, --shield
+- 11 web tools (+ Setup Wizard), 123 registry hooks
+- 9 OSS PRs (3,755★), 14 issue answers, 22 articles, 11 Zenn Book chapters
+- CDP dialog polling fix, npm 40% smaller
+- 104 new hooks in one session — the largest single-session expansion ever
+
 ## [14.1.0] - 2026-03-25
 - **141 hooks**, **44 CLI commands**, **561 tests**, **5 languages**, **11 web tools**
 - --init-project, --score, --test-hook, --save-profile
