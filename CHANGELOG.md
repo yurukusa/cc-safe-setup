@@ -1,5 +1,12 @@
 # Changelog
 
+## [14.1.0] - 2026-03-25
+- **141 hooks**, **44 CLI commands**, **561 tests**, **5 languages**, **11 web tools**
+- --init-project, --score, --test-hook, --save-profile
+- Setup Wizard, 104 registry hooks, 9 OSS PRs (3,755★), 12 issue answers
+- CDP dialog polling fix, npm 40% smaller, Zenn Book Ch9-10
+- 21 new hooks: relative-path, encoding, ssh-key, terraform, k8s, subagent-scope, etc.
+
 ## [11.0.0] - 2026-03-24
 - **--suggest**: Predictive risk analysis (git history, files, deps, config)
 - **--why**: Show real incident behind each hook (20 documented)
