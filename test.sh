@@ -834,6 +834,17 @@ if echo "$ISSUES_OUT" | grep -q "36339"; then echo "  PASS: --issues includes #3
 echo ""
 
 # ========================
+# --quickfix tests
+# ========================
+echo "--- --quickfix tests ---"
+
+QUICKFIX_OUT=$(node "$CLI" --quickfix 2>&1) || true
+if echo "$QUICKFIX_OUT" | grep -q "quickfix\|Auto-detect"; then echo "  PASS: --quickfix runs"; PASS=$((PASS + 1)); else echo "  FAIL: --quickfix should show title"; FAIL=$((FAIL + 1)); fi
+if echo "$QUICKFIX_OUT" | grep -q "Summary"; then echo "  PASS: --quickfix shows summary"; PASS=$((PASS + 1)); else echo "  FAIL: --quickfix should show summary"; FAIL=$((FAIL + 1)); fi
+if echo "$QUICKFIX_OUT" | grep -q "OK\|fixed\|warning"; then echo "  PASS: --quickfix shows counts"; PASS=$((PASS + 1)); else echo "  FAIL: --quickfix should show counts"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
 # Example hooks syntax tests
 # ========================
 echo "--- Example hooks syntax ---"

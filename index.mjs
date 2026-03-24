@@ -89,6 +89,7 @@ const ISSUES = process.argv.includes('--issues');
 const MIGRATE = process.argv.includes('--migrate');
 const GENERATE_CI = process.argv.includes('--generate-ci');
 const REPORT = process.argv.includes('--report');
+const QUICKFIX = process.argv.includes('--quickfix');
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -124,6 +125,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
     npx cc-safe-setup --stats      Block statistics and patterns report
     npx cc-safe-setup --export     Export hooks config for team sharing
     npx cc-safe-setup --import <file>  Import hooks from exported config
@@ -826,6 +828,200 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function quickfix() {
+  const { execSync } = await import('child_process');
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --quickfix' + c.reset);
+  console.log(c.dim + '  Auto-detect and fix common Claude Code problems' + c.reset);
+  console.log();
+
+  let fixed = 0, warnings = 0, ok = 0;
+
+  // Check 1: jq installed
+  try {
+    execSync('which jq', { stdio: 'pipe' });
+    console.log(c.green + '  ✓' + c.reset + ' jq is installed');
+    ok++;
+  } catch {
+    console.log(c.red + '  ✗' + c.reset + ' jq is not installed — hooks cannot parse JSON');
+    console.log(c.dim + '    Fix: brew install jq (macOS) | sudo apt install jq (Linux)' + c.reset);
+    warnings++;
+  }
+
+  // Check 2: ~/.claude directory exists
+  const claudeDir = join(HOME, '.claude');
+  if (existsSync(claudeDir)) {
+    console.log(c.green + '  ✓' + c.reset + ' ~/.claude directory exists');
+    ok++;
+  } else {
+    mkdirSync(claudeDir, { recursive: true });
+    console.log(c.yellow + '  ⚡' + c.reset + ' Created ~/.claude directory');
+    fixed++;
+  }
+
+  // Check 3: hooks directory exists
+  if (existsSync(HOOKS_DIR)) {
+    console.log(c.green + '  ✓' + c.reset + ' ~/.claude/hooks directory exists');
+    ok++;
+  } else {
+    mkdirSync(HOOKS_DIR, { recursive: true });
+    console.log(c.yellow + '  ⚡' + c.reset + ' Created ~/.claude/hooks directory');
+    fixed++;
+  }
+
+  // Check 4: settings.json exists and is valid JSON
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      console.log(c.green + '  ✓' + c.reset + ' settings.json is valid JSON');
+      ok++;
+    } catch (e) {
+      console.log(c.red + '  ✗' + c.reset + ' settings.json has invalid JSON: ' + e.message);
+      console.log(c.dim + '    This is the #1 cause of hooks not working.' + c.reset);
+      console.log(c.dim + '    Common fix: remove trailing commas, check for comments (JSONC not supported in all contexts)' + c.reset);
+      warnings++;
+    }
+  } else {
+    writeFileSync(SETTINGS_PATH, '{}');
+    console.log(c.yellow + '  ⚡' + c.reset + ' Created empty settings.json');
+    fixed++;
+  }
+
+  // Check 5: hooks have executable permission
+  if (existsSync(HOOKS_DIR)) {
+    const { readdirSync, statSync } = await import('fs');
+    const hooks = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+    let nonExec = 0;
+    for (const h of hooks) {
+      const p = join(HOOKS_DIR, h);
+      const st = statSync(p);
+      if (!(st.mode & 0o111)) {
+        chmodSync(p, 0o755);
+        nonExec++;
+      }
+    }
+    if (nonExec > 0) {
+      console.log(c.yellow + '  ⚡' + c.reset + ` Fixed ${nonExec} hook(s) missing executable permission`);
+      fixed += nonExec;
+    } else if (hooks.length > 0) {
+      console.log(c.green + '  ✓' + c.reset + ` All ${hooks.length} hooks have executable permission`);
+      ok++;
+    }
+  }
+
+  // Check 6: hooks have correct shebang
+  if (existsSync(HOOKS_DIR)) {
+    const { readdirSync } = await import('fs');
+    const hooks = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+    let badShebang = 0;
+    for (const h of hooks) {
+      const content = readFileSync(join(HOOKS_DIR, h), 'utf-8');
+      const firstLine = content.split('\n')[0];
+      if (!firstLine.startsWith('#!')) {
+        badShebang++;
+        console.log(c.red + '  ✗' + c.reset + ` ${h} missing shebang (#!/bin/bash)`);
+      }
+    }
+    if (badShebang === 0 && hooks.length > 0) {
+      console.log(c.green + '  ✓' + c.reset + ' All hooks have valid shebang lines');
+      ok++;
+    }
+    warnings += badShebang;
+  }
+
+  // Check 7: settings.json hooks reference existing files
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      let broken = 0;
+      for (const [trigger, groups] of Object.entries(settings.hooks || {})) {
+        for (const group of groups) {
+          for (const hook of (group.hooks || [])) {
+            const cmd = hook.command || '';
+            // Extract script path from command
+            const match = cmd.match(/bash\s+"?([^"\s]+\.sh)/);
+            if (match && !existsSync(match[1])) {
+              console.log(c.red + '  ✗' + c.reset + ` Hook references missing file: ${match[1]}`);
+              broken++;
+            }
+          }
+        }
+      }
+      if (broken === 0) {
+        console.log(c.green + '  ✓' + c.reset + ' All hook file references are valid');
+        ok++;
+      }
+      warnings += broken;
+    } catch {}
+  }
+
+  // Check 8: No .env in git staging
+  try {
+    const staged = execSync('git diff --cached --name-only 2>/dev/null', { encoding: 'utf-8' });
+    if (/\.env/i.test(staged)) {
+      console.log(c.red + '  ✗' + c.reset + ' .env file is staged in git! Run: git reset HEAD .env');
+      warnings++;
+    } else {
+      console.log(c.green + '  ✓' + c.reset + ' No secret files in git staging area');
+      ok++;
+    }
+  } catch {
+    console.log(c.dim + '  · Not in a git repository (skipping git checks)' + c.reset);
+  }
+
+  // Check 9: CLAUDE.md exists in project
+  if (existsSync('CLAUDE.md')) {
+    console.log(c.green + '  ✓' + c.reset + ' CLAUDE.md found in project');
+    ok++;
+  } else {
+    console.log(c.yellow + '  △' + c.reset + ' No CLAUDE.md — consider creating one for project-specific rules');
+    warnings++;
+  }
+
+  // Check 10: Safety hooks installed
+  let safetyHooks = 0;
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      const allHookCmds = [];
+      for (const groups of Object.values(s.hooks || {})) {
+        for (const g of groups) {
+          for (const h of (g.hooks || [])) allHookCmds.push(h.command || '');
+        }
+      }
+      const critical = ['destructive-guard', 'branch-guard', 'secret-guard'];
+      for (const name of critical) {
+        if (allHookCmds.some(c => c.includes(name))) {
+          safetyHooks++;
+        } else {
+          console.log(c.yellow + '  △' + c.reset + ` Missing critical hook: ${name}`);
+          console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+          warnings++;
+        }
+      }
+      if (safetyHooks === 3) {
+        console.log(c.green + '  ✓' + c.reset + ' All 3 critical safety hooks installed');
+        ok++;
+      }
+    } catch {}
+  }
+
+  console.log();
+  console.log(c.bold + '  Summary' + c.reset);
+  console.log(c.green + `  ${ok} OK` + c.reset + c.yellow + ` · ${fixed} fixed` + c.reset + c.red + ` · ${warnings} warnings` + c.reset);
+
+  if (fixed > 0) {
+    console.log();
+    console.log(c.green + `  ⚡ Auto-fixed ${fixed} issue(s)` + c.reset);
+  }
+  if (warnings > 0) {
+    console.log();
+    console.log(c.yellow + '  Run npx cc-safe-setup to install missing safety hooks' + c.reset);
+    console.log(c.yellow + '  Run npx cc-safe-setup --doctor for detailed diagnosis' + c.reset);
+  }
   console.log();
 }
 
@@ -2640,6 +2836,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (QUICKFIX) return quickfix();
   if (REPORT) return report();
   if (GENERATE_CI) return generateCI();
   if (MIGRATE) return migrate();
