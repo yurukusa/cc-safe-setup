@@ -1289,6 +1289,18 @@ if [ -f "$EXDIR/conflict-marker-guard.sh" ]; then
     echo "  PASS: conflict-marker-guard runs on commit (exit $EXIT)"; PASS=$((PASS+1))
 fi
 
+# strict-allowlist
+if [ -f "$EXDIR/strict-allowlist.sh" ]; then
+    # Create temp allowlist with only 'ls' allowed
+    TMPLIST="/tmp/cc-test-allowlist-$$.txt"
+    echo '^ls\b' > "$TMPLIST"
+    EXIT=0; CC_ALLOWLIST_FILE="$TMPLIST" echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/strict-allowlist.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: strict-allowlist allows ls"; PASS=$((PASS+1)); } || { echo "  FAIL: strict-allowlist ls"; FAIL=$((FAIL+1)); }
+    EXIT=0; CC_ALLOWLIST_FILE="$TMPLIST" echo '{"tool_input":{"command":"rm -rf /"}}' | bash "$EXDIR/strict-allowlist.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: strict-allowlist blocks rm"; PASS=$((PASS+1)); } || { echo "  FAIL: strict-allowlist rm"; FAIL=$((FAIL+1)); }
+    rm -f "$TMPLIST"
+fi
+
 echo ""
 
 # ========================
