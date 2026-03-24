@@ -877,6 +877,60 @@ FAIL=$((FAIL + EI_FAIL))
 echo ""
 
 # ========================
+# Example hooks functional tests
+# ========================
+echo "--- Example hooks functional tests ---"
+
+EXDIR="$EXAMPLES_DIR"
+
+# block-database-wipe
+if [ -f "$EXDIR/block-database-wipe.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"php artisan migrate:fresh"}}' | bash "$EXDIR/block-database-wipe.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: block-database-wipe blocks migrate:fresh"; PASS=$((PASS+1)); } || { echo "  FAIL: block-database-wipe"; FAIL=$((FAIL+1)); }
+    EXIT=0; echo '{"tool_input":{"command":"php artisan migrate"}}' | bash "$EXDIR/block-database-wipe.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: block-database-wipe allows migrate"; PASS=$((PASS+1)); } || { echo "  FAIL: allows migrate"; FAIL=$((FAIL+1)); }
+fi
+
+# compound-command-approver
+if [ -f "$EXDIR/compound-command-approver.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"cd /tmp && git log"}}' | bash "$EXDIR/compound-command-approver.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow" && { echo "  PASS: compound-approver allows cd+git"; PASS=$((PASS+1)); } || { echo "  FAIL: compound-approver"; FAIL=$((FAIL+1)); }
+fi
+
+# no-sudo-guard
+if [ -f "$EXDIR/no-sudo-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"sudo apt install foo"}}' | bash "$EXDIR/no-sudo-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: no-sudo blocks sudo"; PASS=$((PASS+1)); } || { echo "  FAIL: no-sudo"; FAIL=$((FAIL+1)); }
+fi
+
+# protect-claudemd
+if [ -f "$EXDIR/protect-claudemd.sh" ]; then
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"CLAUDE.md"}}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: protect-claudemd blocks CLAUDE.md edit"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd"; FAIL=$((FAIL+1)); }
+fi
+
+# env-source-guard
+if [ -f "$EXDIR/env-source-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"source .env"}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: env-source-guard blocks source .env"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard"; FAIL=$((FAIL+1)); }
+fi
+
+# auto-approve-build
+if [ -f "$EXDIR/auto-approve-build.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/auto-approve-build.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow" && { echo "  PASS: auto-approve-build allows npm test"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-build"; FAIL=$((FAIL+1)); }
+fi
+
+# loop-detector (reset state first)
+if [ -f "$EXDIR/loop-detector.sh" ]; then
+    rm -f /tmp/cc-loop-detector-history 2>/dev/null
+    EXIT=0; echo '{"tool_input":{"command":"unique-cmd-test-12345"}}' | bash "$EXDIR/loop-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: loop-detector allows first run"; PASS=$((PASS+1)); } || { echo "  FAIL: loop-detector"; FAIL=$((FAIL+1)); }
+fi
+
+echo ""
+
+# ========================
 # --create template tests
 # ========================
 echo "--- --create template tests ---"
