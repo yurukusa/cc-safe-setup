@@ -1,5 +1,21 @@
 # Changelog
 
+## [9.3.0] - 2026-03-24
+- **--from-claudemd**: Convert CLAUDE.md rules to enforceable hooks (16 patterns)
+- **--health**: Hook health dashboard (size, permissions, age)
+- **--migrate-from**: Migrate from safety-net/hooks-mastery/manual
+- **Rust** destructive-guard example (5 languages)
+- **10 web tools**: Hub, Matrix, Troubleshooting, Settings Reference, By Example, Migration, Builder, FAQ, Cheat Sheet, Playground
+- **114 hooks** (106 bash + 2 Python + 1 Go + 1 TypeScript + 1 Rust + 3 new)
+- **35 CLI commands**, **457 tests**
+- ci-skip-guard, debug-leftover-guard, env-drift-guard, package-script-guard, git-blame-context, import-cycle-warn, docker-prune-guard, node-version-guard, pip-venv-guard, no-git-amend-push, sensitive-regex-guard, lockfile-guard, git-lfs-guard, context-snapshot
+
+## [9.1.0] - 2026-03-24
+- Improved --generate-ci (npx-based, actually works)
+
+## [9.0.0] - 2026-03-24
+- 112 hooks, 34 commands, 8 web tools
+
 ## [8.4.0] - 2026-03-24
 - **--team**: Project-level hook sharing (relative paths, git-committable)
 - **--analyze**: Session analysis (blocked commands, git activity, costs)
