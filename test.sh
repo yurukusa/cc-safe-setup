@@ -1301,6 +1301,32 @@ if [ -f "$EXDIR/strict-allowlist.sh" ]; then
     rm -f "$TMPLIST"
 fi
 
+# error-memory-guard
+if [ -f "$EXDIR/error-memory-guard.sh" ]; then
+    rm -f /tmp/cc-error-memory-* 2>/dev/null
+    EXIT=0; echo '{"tool_input":{"command":"echo ok"},"tool_result":"success","tool_result_exit_code":0}' | bash "$EXDIR/error-memory-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: error-memory-guard ignores success"; PASS=$((PASS+1)); } || { echo "  FAIL: error-memory-guard success"; FAIL=$((FAIL+1)); }
+    EXIT=0; echo '{"tool_input":{"command":"bad-cmd"},"tool_result":"error","tool_result_exit_code":1}' | bash "$EXDIR/error-memory-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: error-memory-guard tracks first failure (exit $EXIT)"; PASS=$((PASS+1))
+    rm -f /tmp/cc-error-memory-* 2>/dev/null
+fi
+
+# parallel-edit-guard
+if [ -f "$EXDIR/parallel-edit-guard.sh" ]; then
+    rm -rf /tmp/cc-edit-locks 2>/dev/null
+    EXIT=0; echo '{"tool_input":{"file_path":"test.js"}}' | bash "$EXDIR/parallel-edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: parallel-edit-guard allows first edit"; PASS=$((PASS+1)); } || { echo "  FAIL: parallel-edit-guard first"; FAIL=$((FAIL+1)); }
+    rm -rf /tmp/cc-edit-locks 2>/dev/null
+fi
+
+# large-read-guard
+if [ -f "$EXDIR/large-read-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"cat /etc/hostname"}}' | bash "$EXDIR/large-read-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: large-read-guard runs on cat (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/large-read-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: large-read-guard ignores non-read"; PASS=$((PASS+1)); } || { echo "  FAIL: large-read-guard non-read"; FAIL=$((FAIL+1)); }
+fi
+
 echo ""
 
 # ========================
