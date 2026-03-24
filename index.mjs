@@ -108,6 +108,8 @@ const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: proc
 const REPLAY = process.argv.includes('--replay');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
+const WHY_IDX = process.argv.findIndex(a => a === '--why');
+const WHY_HOOK = WHY_IDX !== -1 ? process.argv[WHY_IDX + 1] : null;
 
 if (HELP) {
   console.log(`
@@ -139,6 +141,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
     npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
     npx cc-safe-setup --guard "<rule>"  Instantly enforce a rule (generate + install + activate)
     npx cc-safe-setup --diff-hooks <path>  Compare hooks between two settings files
@@ -919,6 +922,70 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function why(hookName) {
+  const WHY_DATA = {
+    'destructive-guard': { issue: '#36339', incident: 'User lost entire C:\\Users directory — rm -rf followed NTFS junctions', url: 'https://github.com/anthropics/claude-code/issues/36339' },
+    'branch-guard': { issue: '#36640', incident: 'Autonomous Claude pushed untested code to main at 3am', url: 'https://github.com/anthropics/claude-code/issues/36640' },
+    'secret-guard': { issue: '#16561', incident: 'API keys committed to public repo via git add .', url: 'https://github.com/anthropics/claude-code/issues/16561' },
+    'block-database-wipe': { issue: '#37405', incident: 'Production database wiped by migrate:fresh', url: 'https://github.com/anthropics/claude-code/issues/37405' },
+    'uncommitted-work-guard': { issue: '#37888', incident: 'Claude destroyed uncommitted work twice in same session', url: 'https://github.com/anthropics/claude-code/issues/37888' },
+    'test-deletion-guard': { issue: '#38050', incident: 'Claude deleted failing tests instead of fixing code', url: 'https://github.com/anthropics/claude-code/issues/38050' },
+    'fact-check-gate': { issue: '#38057', incident: 'Claude wrote false claims in technical docs without reading source', url: 'https://github.com/anthropics/claude-code/issues/38057' },
+    'token-budget-guard': { issue: '#38029', incident: 'Session consumed $342 in tokens without user knowing', url: 'https://github.com/anthropics/claude-code/issues/38029' },
+    'protect-dotfiles': { issue: '#37478', incident: '.bashrc and environment files overwritten', url: 'https://github.com/anthropics/claude-code/issues/37478' },
+    'scope-guard': { issue: '#36233', incident: 'Entire Mac filesystem deleted by out-of-scope operation', url: 'https://github.com/anthropics/claude-code/issues/36233' },
+    'case-sensitive-guard': { issue: '#37875', incident: 'exFAT case collision caused data loss via rm -rf', url: 'https://github.com/anthropics/claude-code/issues/37875' },
+    'prompt-injection-guard': { issue: '#38046', incident: 'Prompt injection found in /insights output', url: 'https://github.com/anthropics/claude-code/issues/38046' },
+    'overwrite-guard': { issue: '#37595', incident: '/export overwrites existing files without warning', url: 'https://github.com/anthropics/claude-code/issues/37595' },
+    'memory-write-guard': { issue: '#38040', incident: 'No way to see what Claude writes to ~/.claude/', url: 'https://github.com/anthropics/claude-code/issues/38040' },
+    'context-monitor': { issue: '#6527', incident: 'Sessions silently lost all state after 150+ tool calls', url: 'https://github.com/anthropics/claude-code/issues/6527' },
+    'comment-strip': { issue: '#29582', incident: 'Bash comments in hook commands broke permission matching', url: 'https://github.com/anthropics/claude-code/issues/29582' },
+    'cd-git-allow': { issue: '#32985', incident: 'cd+git compounds spammed permission prompts endlessly', url: 'https://github.com/anthropics/claude-code/issues/32985' },
+    'strict-allowlist': { issue: '#37471', incident: 'Denylist model creates arms race — Claude finds bypasses', url: 'https://github.com/anthropics/claude-code/issues/37471' },
+    'error-memory-guard': { issue: 'common', incident: 'Claude retries the same failing command 10+ times' },
+    'typosquat-guard': { issue: 'supply-chain', incident: 'Misspelled package names can install malware' },
+  };
+
+  console.log();
+  if (!hookName) {
+    console.log(c.bold + '  cc-safe-setup --why <hook-name>' + c.reset);
+    console.log(c.dim + '  Show why a hook exists — the real incident that inspired it.' + c.reset);
+    console.log();
+    console.log('  Examples:');
+    console.log(c.dim + '    npx cc-safe-setup --why destructive-guard' + c.reset);
+    console.log(c.dim + '    npx cc-safe-setup --why token-budget-guard' + c.reset);
+    console.log();
+    console.log(`  ${Object.keys(WHY_DATA).length} hooks have documented incidents.`);
+    return;
+  }
+
+  const name = hookName.replace('.sh', '');
+  const data = WHY_DATA[name];
+  if (!data) {
+    console.log(c.yellow + `  No incident documented for "${name}".` + c.reset);
+    console.log(c.dim + '  This hook may have been created proactively.' + c.reset);
+    console.log();
+    console.log(c.dim + `  Hooks with documented incidents: ${Object.keys(WHY_DATA).join(', ')}` + c.reset);
+    return;
+  }
+
+  console.log(c.bold + `  Why "${name}" exists` + c.reset);
+  console.log();
+  console.log(c.red + '  Incident:' + c.reset);
+  console.log('  ' + data.incident);
+  console.log();
+  if (data.url) {
+    console.log(c.blue + '  Source:' + c.reset);
+    console.log('  ' + data.url);
+  }
+  if (data.issue && data.issue !== 'common' && data.issue !== 'supply-chain') {
+    console.log(c.dim + `  GitHub Issue: ${data.issue}` + c.reset);
+  }
+  console.log();
+  console.log(c.dim + '  Install: npx cc-safe-setup --install-example ' + name + c.reset);
   console.log();
 }
 
@@ -4051,6 +4118,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (WHY_IDX !== -1) return why(WHY_HOOK);
   if (REPLAY) return replay();
   if (GUARD_IDX !== -1) return guard(GUARD_DESC);
   if (DIFF_HOOKS_IDX !== -1) return diffHooks(DIFF_HOOKS);
