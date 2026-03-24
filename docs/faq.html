@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks FAQ — Every Question Answered</title>
+<meta name="description" content="Answers to every common question about Claude Code hooks. Why hooks? How do they work? What about performance?">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+code{background:#161b22;padding:.15rem .3rem;border-radius:3px;font-size:.85rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.7rem;font-size:.8rem;color:#e6edf3;overflow-x:auto;margin:.4rem 0}
+details{background:#161b22;border:1px solid #30363d;border-radius:6px;margin:.5rem 0}
+summary{padding:.7rem .9rem;cursor:pointer;font-weight:600;color:#f0f6fc;font-size:.9rem;list-style:none}
+summary::before{content:"▸ ";color:#58a6ff}
+details[open] summary::before{content:"▾ "}
+details[open] summary{border-bottom:1px solid #21262d}
+.answer{padding:.7rem .9rem;font-size:.85rem}
+.answer p{margin:.4rem 0}
+.cat{color:#58a6ff;font-size:.75rem;font-weight:bold;text-transform:uppercase;margin:1.5rem 0 .5rem;letter-spacing:.05em}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.quick{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;margin:.8rem 0;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Claude Code Hooks FAQ</h1>
+<p class="sub">Every question we've been asked, answered. <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">Official docs</a></p>
+
+<div class="quick">
+<strong>TL;DR:</strong> Hooks are shell scripts that run before/after Claude Code tools. <code>exit 2</code> = block. <code>exit 0</code> = allow. Install 8 safety hooks: <code>npx cc-safe-setup</code>
+</div>
+
+<div class="cat">Basics</div>
+
+<details>
+<summary>What are Claude Code hooks?</summary>
+<div class="answer">
+<p>Shell scripts that run at specific points in Claude Code's lifecycle:</p>
+<ul>
+<li><strong>PreToolUse</strong> — before any tool (Bash, Edit, Write) executes</li>
+<li><strong>PostToolUse</strong> — after a tool completes</li>
+<li><strong>Stop</strong> — when Claude finishes responding</li>
+</ul>
+<p>They're configured in <code>~/.claude/settings.json</code> and enforced at the process level — the model cannot bypass them.</p>
+</div>
+</details>
+
+<details>
+<summary>How is this different from CLAUDE.md?</summary>
+<div class="answer">
+<p><strong>CLAUDE.md</strong> is a prompt-level instruction. It works well at the start of a session but degrades as context fills up. After 100+ tool calls, Claude may "forget" rules.</p>
+<p><strong>Hooks</strong> run on every single tool call, enforced by the runtime. Even if Claude wants to ignore them, <code>exit 2</code> physically prevents the action.</p>
+<p>Use both: CLAUDE.md for guidelines, hooks for hard constraints.</p>
+</div>
+</details>
+
+<details>
+<summary>Do I need to know bash to use hooks?</summary>
+<div class="answer">
+<p>Not really. You can:</p>
+<ol>
+<li>Use <code>npx cc-safe-setup</code> to install pre-built hooks (zero coding)</li>
+<li>Use <code>npx cc-safe-setup --create "your description"</code> to generate hooks from English</li>
+<li>Use the <a href="builder.html">Hook Builder</a> web tool</li>
+<li>Copy-paste from the <a href="hooks-cheatsheet.html">Cheat Sheet</a></li>
+</ol>
+</div>
+</details>
+
+<div class="cat">How It Works</div>
+
+<details>
+<summary>What does exit code 2 do?</summary>
+<div class="answer">
+<p><code>exit 2</code> blocks the tool call. The model receives a message that the operation was blocked and must try a different approach.</p>
+<p><code>exit 0</code> allows the operation (default).</p>
+<p><code>exit 1</code> is treated as a hook error and is silently ignored — don't use it for blocking.</p>
+</div>
+</details>
+
+<details>
+<summary>What JSON does the hook receive on stdin?</summary>
+<div class="answer">
+<p>For <strong>PreToolUse</strong> (Bash):</p>
+<pre><code>{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}</code></pre>
+<p>For <strong>PreToolUse</strong> (Edit):</p>
+<pre><code>{"tool_name":"Edit","tool_input":{"file_path":"app.js","old_string":"...","new_string":"..."}}</code></pre>
+<p>For <strong>PostToolUse</strong>:</p>
+<pre><code>{"tool_name":"Bash","tool_input":{"command":"ls"},"tool_result":"file1.txt\nfile2.txt"}</code></pre>
+<p>Extract with: <code>cat | jq -r '.tool_input.command // empty'</code></p>
+</div>
+</details>
+
+<details>
+<summary>Can I auto-approve commands via hooks?</summary>
+<div class="answer">
+<p>Yes. Output JSON to stdout:</p>
+<pre><code>echo '{"decision":"approve","reason":"Safe test command"}'
+exit 0</code></pre>
+<p>This skips the permission prompt for that specific tool call.</p>
+</div>
+</details>
+
+<details>
+<summary>What does the "matcher" field do?</summary>
+<div class="answer">
+<p>It's a regex matched against the tool name:</p>
+<ul>
+<li><code>"Bash"</code> — only Bash commands</li>
+<li><code>"Edit|Write"</code> — file modifications</li>
+<li><code>""</code> (empty) — matches ALL tools</li>
+<li><code>"Read"</code> — file reads</li>
+</ul>
+</div>
+</details>
+
+<div class="cat">Performance & Safety</div>
+
+<details>
+<summary>Do hooks slow down Claude Code?</summary>
+<div class="answer">
+<p>No. Each hook runs in ~5ms (bash + jq). Even with 10 hooks chained, total overhead is <50ms per tool call — imperceptible compared to the API latency.</p>
+<p>You can measure: <code>npx cc-safe-setup --benchmark</code></p>
+</div>
+</details>
+
+<details>
+<summary>Can Claude disable or modify hooks?</summary>
+<div class="answer">
+<p>Claude can edit <code>settings.json</code> via the Edit tool. To prevent this:</p>
+<pre><code>npx cc-safe-setup --install-example protect-claudemd</code></pre>
+<p>This hook blocks edits to CLAUDE.md and settings files.</p>
+</div>
+</details>
+
+<details>
+<summary>What if my hook has a bug?</summary>
+<div class="answer">
+<p>If a hook exits with code 1 (error), Claude Code treats it as a hook failure and <strong>ignores it</strong> — the tool call proceeds. This is by design: buggy hooks don't block all operations.</p>
+<p>Only <code>exit 2</code> blocks. If your hook accidentally exits 2 for everything, use <code>npx cc-safe-setup --doctor</code> to diagnose.</p>
+</div>
+</details>
+
+<details>
+<summary>Can I use Python/TypeScript instead of bash?</summary>
+<div class="answer">
+<p>Yes. The <code>command</code> field can run anything:</p>
+<pre><code>{"type": "command", "command": "python3 ~/.claude/hooks/my-guard.py"}</code></pre>
+<p>cc-safe-setup includes Python examples: <code>examples/python/destructive_guard.py</code></p>
+<p>For TypeScript, see <a href="https://www.npmjs.com/package/@anthropic-ai/claude-code-safety-net">safety-net</a> (1,185★).</p>
+</div>
+</details>
+
+<div class="cat">Common Issues</div>
+
+<details>
+<summary>My hook doesn't fire — what's wrong?</summary>
+<div class="answer">
+<p>Run diagnostics: <code>npx cc-safe-setup --doctor</code></p>
+<p>Common causes:</p>
+<ol>
+<li><strong>Not executable:</strong> <code>chmod +x ~/.claude/hooks/your-hook.sh</code></li>
+<li><strong>Missing shebang:</strong> First line must be <code>#!/bin/bash</code></li>
+<li><strong>Wrong matcher:</strong> <code>"Bash"</code> won't fire for Edit/Write tools</li>
+<li><strong>settings.json syntax error:</strong> Validate with <code>python3 -c "import json; json.load(open('$HOME/.claude/settings.json'))"</code></li>
+<li><strong>jq not installed:</strong> <code>which jq</code> — install if missing</li>
+</ol>
+<p>Quick fix: <code>npx cc-safe-setup --quickfix</code></p>
+</div>
+</details>
+
+<details>
+<summary>My hook blocks everything</summary>
+<div class="answer">
+<p>Your hook is returning <code>exit 2</code> for all inputs. Debug by testing manually:</p>
+<pre><code>echo '{"tool_input":{"command":"ls"}}' | bash ~/.claude/hooks/your-hook.sh
+echo "Exit: $?"</code></pre>
+<p>If it exits 2 for <code>ls</code>, your regex is too broad. Check the <code>grep -qE</code> pattern.</p>
+</div>
+</details>
+
+<details>
+<summary>Multiple hooks — does order matter?</summary>
+<div class="answer">
+<p>Hooks in the same group run sequentially. If any hook exits 2, the tool call is blocked — remaining hooks don't run.</p>
+<p><strong>Important:</strong> Each hook consumes stdin. If you chain multiple hooks in the same group, the second hook gets empty stdin. Put each hook in a separate matcher group, or use <code>tee</code>.</p>
+</div>
+</details>
+
+<details>
+<summary>Can hooks access the internet?</summary>
+<div class="answer">
+<p>Yes. Hooks are regular shell scripts — they can make HTTP requests, send notifications, write to databases, etc.</p>
+<p>Example: send a Slack notification when a dangerous command is blocked:</p>
+<pre><code>curl -s -X POST "$SLACK_WEBHOOK" -d "{\"text\":\"Blocked: $COMMAND\"}"</code></pre>
+</div>
+</details>
+
+<div class="cat">Installation</div>
+
+<details>
+<summary>How do I install hooks?</summary>
+<div class="answer">
+<p>Three ways:</p>
+<ol>
+<li><strong>One command:</strong> <code>npx cc-safe-setup</code> (installs 8 safety hooks)</li>
+<li><strong>Individual:</strong> <code>npx cc-safe-setup --install-example block-database-wipe</code></li>
+<li><strong>Manual:</strong> Save script to <code>~/.claude/hooks/</code>, <code>chmod +x</code>, add to <code>settings.json</code></li>
+</ol>
+</div>
+</details>
+
+<details>
+<summary>How do I uninstall hooks?</summary>
+<div class="answer">
+<pre><code>npx cc-safe-setup --uninstall</code></pre>
+<p>Or manually: remove the hook entries from <code>~/.claude/settings.json</code> and delete the script files.</p>
+</div>
+</details>
+
+<details>
+<summary>Where are hooks stored?</summary>
+<div class="answer">
+<p>Scripts: <code>~/.claude/hooks/</code></p>
+<p>Configuration: <code>~/.claude/settings.json</code> (global) or <code>.claude/settings.json</code> (project)</p>
+<p>Project-level hooks override global hooks for the same matcher.</p>
+</div>
+</details>
+
+<div class="footer">
+  <a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
+  <a href="builder.html">Hook Builder</a> ·
+  <a href="https://yurukusa.github.io/cc-hook-registry/playground.html">Playground</a> ·
+  <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
