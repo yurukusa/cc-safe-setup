@@ -398,6 +398,7 @@ function examples() {
       'auto-approve-gradle.sh': 'Auto-approve gradle/gradlew build/test',
       'auto-approve-maven.sh': 'Auto-approve mvn compile/test/verify',
       'permission-cache.sh': 'Auto-approve previously approved commands in session',
+      'auto-approve-readonly.sh': 'Auto-approve 50+ read-only commands (cat, ls, grep, find)',
     },
     'Quality': {
       'branch-name-check.sh': 'Warn on non-conventional branch names',
