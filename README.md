@@ -64,6 +64,37 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 Each hook exists because a real incident happened without it.
 
+## All 26 Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `npx cc-safe-setup` | Install 8 safety hooks |
+| `--create "desc"` | Generate hook from plain English |
+| `--audit [--fix\|--json\|--badge]` | Safety score 0-100 |
+| `--lint` | Static analysis of config |
+| `--diff <file>` | Compare settings |
+| `--compare <a> <b>` | Side-by-side hook comparison |
+| `--migrate` | Detect hooks from other projects |
+| `--generate-ci` | Create GitHub Actions workflow |
+| `--share` | Generate shareable URL |
+| `--benchmark` | Measure hook speed |
+| `--dashboard` | Real-time terminal UI |
+| `--issues` | GitHub Issues each hook addresses |
+| `--doctor` | Diagnose hook problems |
+| `--watch` | Live blocked command feed |
+| `--stats` | Block history analytics |
+| `--learn [--apply]` | Pattern learning |
+| `--scan [--apply]` | Tech stack detection |
+| `--export / --import` | Team config sharing |
+| `--verify` | Test each hook |
+| `--install-example <name>` | Install from 51 examples |
+| `--examples [filter]` | Browse examples by keyword |
+| `--full` | All-in-one setup |
+| `--status` | Check installed hooks |
+| `--dry-run` | Preview changes |
+| `--uninstall` | Remove all hooks |
+| `--help` | Show help |
+
 ## How It Works
 
 1. Writes hook scripts to `~/.claude/hooks/`
