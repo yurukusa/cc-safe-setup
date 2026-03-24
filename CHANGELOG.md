@@ -1,5 +1,11 @@
 # Changelog
 
+## [26.0.0] - 2026-03-25
+- **250 HOOKS** — 189 new hooks in one session (61→250)
+- 15 OWASP security hooks (injection, XSS, auth, TLS, CORS, CSP)
+- 200 hooks in web registry, 45 commands, 561 tests
+- 24 articles (5 published), 65 npm releases
+
 ## [22.0.0] - 2026-03-25
 - **200 HOOKS MILESTONE** — 139 new hooks in one session (61→200)
 - 45 CLI commands, 561 tests, 5 languages, 11 web tools, 140 registry hooks
