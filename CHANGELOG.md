@@ -1,5 +1,18 @@
 # Changelog
 
+## [11.0.0] - 2026-03-24
+- **--suggest**: Predictive risk analysis (git history, files, deps, config)
+- **--why**: Show real incident behind each hook (20 documented)
+- **--replay**: Visual blocked commands timeline
+- **--guard**: Instant rule enforcement from plain English
+- **--diff-hooks**: Compare hook configurations
+- **120 hooks**, **40 CLI commands**, **544 tests**, **5 languages**
+- 10 web tools + Hub, 80 registry hooks
+- OSS: 4 PRs to 3 repos (3,255★ combined)
+- CDP dialog polling fix (WSL2 root cause)
+- typosquat-guard, test-coverage-guard, stale-env-guard, permission-cache, git-author-guard, typescript-strict-guard, ci-skip-guard, debug-leftover-guard
+- 14 article drafts (10 cron, 3 CDP pending)
+
 ## [10.3.0] - 2026-03-24
 - **--guard**: Instant rule enforcement — `--guard "never touch the database"`
 - **--diff-hooks**: Compare global vs project hook configurations
