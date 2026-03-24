@@ -90,6 +90,7 @@ const MIGRATE = process.argv.includes('--migrate');
 const GENERATE_CI = process.argv.includes('--generate-ci');
 const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
+const SHIELD = process.argv.includes('--shield');
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -125,6 +126,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --shield     Maximum safety in one command (fix + scan + install + CLAUDE.md)
     npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
     npx cc-safe-setup --stats      Block statistics and patterns report
     npx cc-safe-setup --export     Export hooks config for team sharing
@@ -828,6 +830,210 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function shield() {
+  const { execSync } = await import('child_process');
+  const { readdirSync } = await import('fs');
+  console.log();
+  console.log(c.bold + '  🛡️  cc-safe-setup --shield' + c.reset);
+  console.log(c.dim + '  Maximum safety in one command' + c.reset);
+  console.log();
+
+  // Step 1: Fix environment issues
+  console.log(c.bold + '  Step 1: Fix environment' + c.reset);
+  await quickfix();
+
+  // Step 2: Install core safety hooks
+  console.log();
+  console.log(c.bold + '  Step 2: Install safety hooks' + c.reset);
+  // Run the default install
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  let installed = 0;
+  for (const [hookId, hookMeta] of Object.entries(HOOKS)) {
+    const hookPath = join(HOOKS_DIR, `${hookId}.sh`);
+    if (!existsSync(hookPath)) {
+      writeFileSync(hookPath, SCRIPTS[hookId]);
+      chmodSync(hookPath, 0o755);
+      installed++;
+      console.log(c.green + '  +' + c.reset + ` ${hookMeta.name}`);
+    } else {
+      console.log(c.dim + '  ✓' + c.reset + ` ${hookMeta.name} (already installed)`);
+    }
+  }
+
+  // Step 3: Detect project stack and install recommended examples
+  console.log();
+  console.log(c.bold + '  Step 3: Project-aware hooks' + c.reset);
+  const cwd = process.cwd();
+  const extras = [];
+  if (existsSync(join(cwd, 'package.json'))) {
+    extras.push('auto-approve-build');
+    try {
+      const pkg = JSON.parse(readFileSync(join(cwd, 'package.json'), 'utf-8'));
+      if (pkg.dependencies?.prisma || pkg.devDependencies?.prisma) extras.push('block-database-wipe');
+      if (pkg.scripts?.deploy) extras.push('deploy-guard');
+    } catch {}
+  }
+  if (existsSync(join(cwd, 'requirements.txt')) || existsSync(join(cwd, 'pyproject.toml'))) extras.push('auto-approve-python');
+  if (existsSync(join(cwd, 'Dockerfile'))) extras.push('auto-approve-docker');
+  if (existsSync(join(cwd, 'go.mod'))) extras.push('auto-approve-go');
+  if (existsSync(join(cwd, 'Cargo.toml'))) extras.push('auto-approve-cargo');
+  if (existsSync(join(cwd, 'Makefile'))) extras.push('auto-approve-make');
+  if (existsSync(join(cwd, '.env'))) extras.push('env-source-guard');
+
+  // Always include these for maximum safety
+  extras.push('scope-guard', 'no-sudo-guard', 'protect-claudemd');
+
+  for (const ex of extras) {
+    const exPath = join(__dirname, 'examples', `${ex}.sh`);
+    const hookPath = join(HOOKS_DIR, `${ex}.sh`);
+    if (existsSync(exPath) && !existsSync(hookPath)) {
+      copyFileSync(exPath, hookPath);
+      chmodSync(hookPath, 0o755);
+      console.log(c.green + '  +' + c.reset + ` ${ex}`);
+      installed++;
+    } else if (existsSync(hookPath)) {
+      console.log(c.dim + '  ✓' + c.reset + ` ${ex} (already installed)`);
+    }
+  }
+
+  // Step 4: Update settings.json
+  console.log();
+  console.log(c.bold + '  Step 4: Configure settings.json' + c.reset);
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+  if (!settings.hooks) settings.hooks = {};
+
+  // Collect all installed hooks
+  const hookFiles = existsSync(HOOKS_DIR)
+    ? readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'))
+    : [];
+
+  // Build hook entries by trigger type
+  const preToolHooks = [];
+  const postToolHooks = [];
+  const stopHooks = [];
+
+  for (const f of hookFiles) {
+    const content = readFileSync(join(HOOKS_DIR, f), 'utf-8');
+    const cmd = `bash ${join(HOOKS_DIR, f)}`;
+
+    // Check if already in settings
+    const alreadyConfigured = JSON.stringify(settings.hooks).includes(f);
+    if (alreadyConfigured) continue;
+
+    // Determine trigger from file content
+    if (content.includes('TRIGGER: Stop') || f.includes('api-error') || f.includes('revert-helper') || f.includes('session-handoff') || f.includes('compact-reminder') || f.includes('notify') || f.includes('tmp-cleanup')) {
+      stopHooks.push({ type: 'command', command: cmd });
+    } else if (content.includes('TRIGGER: PostToolUse') || f.includes('syntax-check') || f.includes('context-monitor') || f.includes('output-length') || f.includes('error-memory') || f.includes('cost-tracker')) {
+      postToolHooks.push({ type: 'command', command: cmd });
+    } else {
+      // Default: PreToolUse
+      const matcher = (f.includes('edit-guard') || f.includes('protect-dotfiles') || f.includes('overwrite-guard') || f.includes('binary-file') || f.includes('parallel-edit') || f.includes('test-deletion') || f.includes('memory-write'))
+        ? 'Edit|Write'
+        : 'Bash';
+      preToolHooks.push({ type: 'command', command: cmd, _matcher: matcher });
+    }
+  }
+
+  // Group PreToolUse hooks by matcher
+  if (preToolHooks.length > 0) {
+    if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
+    const bashHooks = preToolHooks.filter(h => h._matcher === 'Bash').map(({ _matcher, ...h }) => h);
+    const editHooks = preToolHooks.filter(h => h._matcher === 'Edit|Write').map(({ _matcher, ...h }) => h);
+    if (bashHooks.length > 0) {
+      const existing = settings.hooks.PreToolUse.find(e => e.matcher === 'Bash');
+      if (existing) {
+        const existingCmds = new Set(existing.hooks.map(h => h.command));
+        for (const h of bashHooks) {
+          if (!existingCmds.has(h.command)) existing.hooks.push(h);
+        }
+      } else {
+        settings.hooks.PreToolUse.push({ matcher: 'Bash', hooks: bashHooks });
+      }
+    }
+    if (editHooks.length > 0) {
+      const existing = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
+      if (existing) {
+        const existingCmds = new Set(existing.hooks.map(h => h.command));
+        for (const h of editHooks) {
+          if (!existingCmds.has(h.command)) existing.hooks.push(h);
+        }
+      } else {
+        settings.hooks.PreToolUse.push({ matcher: 'Edit|Write', hooks: editHooks });
+      }
+    }
+  }
+  if (postToolHooks.length > 0) {
+    if (!settings.hooks.PostToolUse) settings.hooks.PostToolUse = [];
+    const existing = settings.hooks.PostToolUse.find(e => e.matcher === '');
+    if (existing) {
+      const existingCmds = new Set(existing.hooks.map(h => h.command));
+      for (const h of postToolHooks) {
+        if (!existingCmds.has(h.command)) existing.hooks.push(h);
+      }
+    } else {
+      settings.hooks.PostToolUse.push({ matcher: '', hooks: postToolHooks });
+    }
+  }
+  if (stopHooks.length > 0) {
+    if (!settings.hooks.Stop) settings.hooks.Stop = [];
+    const existing = settings.hooks.Stop.find(e => e.matcher === '');
+    if (existing) {
+      const existingCmds = new Set(existing.hooks.map(h => h.command));
+      for (const h of stopHooks) {
+        if (!existingCmds.has(h.command)) existing.hooks.push(h);
+      }
+    } else {
+      settings.hooks.Stop.push({ matcher: '', hooks: stopHooks });
+    }
+  }
+
+  writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+  console.log(c.green + '  ✓' + c.reset + ' settings.json updated');
+
+  // Step 5: Generate CLAUDE.md template if none exists
+  console.log();
+  console.log(c.bold + '  Step 5: CLAUDE.md' + c.reset);
+  if (!existsSync(join(cwd, 'CLAUDE.md'))) {
+    const template = `# Project Rules
+
+## Safety
+- Do not push to main/master directly
+- Do not force-push
+- Do not delete files outside this project
+- Do not commit .env or credential files
+- Run tests before committing
+
+## Code Style
+- Follow existing conventions
+- Keep functions small and focused
+- Add comments only when the logic isn't obvious
+
+## Git
+- Use descriptive commit messages
+- One logical change per commit
+- Create feature branches for new work
+`;
+    writeFileSync(join(cwd, 'CLAUDE.md'), template);
+    console.log(c.green + '  +' + c.reset + ' Created CLAUDE.md with safety rules template');
+  } else {
+    console.log(c.dim + '  ✓' + c.reset + ' CLAUDE.md already exists');
+  }
+
+  // Summary
+  console.log();
+  const totalHooks = hookFiles.length;
+  console.log(c.bold + c.green + '  🛡️  Shield activated!' + c.reset);
+  console.log(c.dim + `  ${totalHooks} hooks installed and configured.` + c.reset);
+  console.log(c.dim + '  Your Claude Code sessions are now protected.' + c.reset);
+  console.log();
+  console.log(c.dim + '  Verify: npx cc-safe-setup --verify' + c.reset);
+  console.log(c.dim + '  Status: npx cc-safe-setup --status' + c.reset);
   console.log();
 }
 
@@ -2836,6 +3042,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();
   if (REPORT) return report();
   if (GENERATE_CI) return generateCI();

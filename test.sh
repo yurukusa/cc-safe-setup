@@ -845,6 +845,17 @@ if echo "$QUICKFIX_OUT" | grep -q "OK\|fixed\|warning"; then echo "  PASS: --qui
 echo ""
 
 # ========================
+# --shield tests
+# ========================
+echo "--- --shield tests ---"
+
+# Shield is too invasive for CI (installs hooks), just test it runs
+SHIELD_OUT=$(timeout 30 node "$CLI" --shield 2>&1) || true
+if echo "$SHIELD_OUT" | grep -q "shield\|Shield\|Maximum"; then echo "  PASS: --shield runs"; PASS=$((PASS + 1)); else echo "  FAIL: --shield should show title"; FAIL=$((FAIL + 1)); fi
+if echo "$SHIELD_OUT" | grep -q "Step\|activated"; then echo "  PASS: --shield shows steps"; PASS=$((PASS + 1)); else echo "  FAIL: --shield should show steps"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
 # Example hooks syntax tests
 # ========================
 echo "--- Example hooks syntax ---"
