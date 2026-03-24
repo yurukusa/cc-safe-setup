@@ -92,6 +92,8 @@ const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
 const ANALYZE = process.argv.includes('--analyze');
+const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
+const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -127,6 +129,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --profile <level>  Switch safety profile (strict/standard/minimal)
     npx cc-safe-setup --analyze     Analyze what Claude did in your last session
     npx cc-safe-setup --shield     Maximum safety in one command (fix + scan + install + CLAUDE.md)
     npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
@@ -832,6 +835,119 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function profile(level) {
+  const { readdirSync } = await import('fs');
+  console.log();
+
+  const PROFILES = {
+    strict: {
+      desc: 'Maximum safety — blocks everything dangerous, requires verification',
+      hooks: ['destructive-guard', 'branch-guard', 'secret-guard', 'syntax-check',
+        'context-monitor', 'comment-strip', 'cd-git-allow', 'api-error-alert',
+        'scope-guard', 'no-sudo-guard', 'protect-claudemd', 'env-source-guard',
+        'no-install-global', 'deploy-guard', 'protect-dotfiles', 'symlink-guard',
+        'strict-allowlist', 'uncommitted-work-guard', 'test-deletion-guard',
+        'overwrite-guard', 'error-memory-guard', 'hardcoded-secret-detector',
+        'conflict-marker-guard', 'token-budget-guard', 'fact-check-gate',
+        'block-database-wipe', 'no-eval', 'file-size-limit', 'large-read-guard',
+        'loop-detector', 'verify-before-done', 'diff-size-guard', 'commit-scope-guard']
+    },
+    standard: {
+      desc: 'Balanced — blocks dangerous commands, auto-approves safe ones',
+      hooks: ['destructive-guard', 'branch-guard', 'secret-guard', 'syntax-check',
+        'context-monitor', 'comment-strip', 'cd-git-allow', 'api-error-alert',
+        'scope-guard', 'no-sudo-guard', 'protect-claudemd',
+        'auto-approve-build', 'auto-approve-python', 'auto-approve-docker',
+        'loop-detector', 'deploy-guard', 'block-database-wipe',
+        'compound-command-approver', 'session-handoff', 'cost-tracker']
+    },
+    minimal: {
+      desc: 'Essential only — just the 8 core safety hooks',
+      hooks: ['destructive-guard', 'branch-guard', 'secret-guard', 'syntax-check',
+        'context-monitor', 'comment-strip', 'cd-git-allow', 'api-error-alert']
+    },
+  };
+
+  if (!level || !PROFILES[level]) {
+    console.log(c.bold + '  Safety Profiles' + c.reset);
+    console.log();
+    for (const [name, prof] of Object.entries(PROFILES)) {
+      console.log(`  ${c.bold}${name}${c.reset} (${prof.hooks.length} hooks)`);
+      console.log(`  ${c.dim}${prof.desc}${c.reset}`);
+      console.log(`  ${c.dim}npx cc-safe-setup --profile ${name}${c.reset}`);
+      console.log();
+    }
+    return;
+  }
+
+  const prof = PROFILES[level];
+  console.log(c.bold + `  Applying "${level}" profile` + c.reset);
+  console.log(c.dim + `  ${prof.desc}` + c.reset);
+  console.log();
+
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  let installed = 0;
+
+  for (const hookId of prof.hooks) {
+    const hookPath = join(HOOKS_DIR, `${hookId}.sh`);
+    if (existsSync(hookPath)) {
+      console.log(c.dim + '  ✓' + c.reset + ` ${hookId}`);
+      continue;
+    }
+
+    // Try built-in first
+    if (SCRIPTS[hookId]) {
+      writeFileSync(hookPath, SCRIPTS[hookId]);
+      chmodSync(hookPath, 0o755);
+      installed++;
+      console.log(c.green + '  +' + c.reset + ` ${hookId}`);
+      continue;
+    }
+
+    // Try examples
+    const exPath = join(__dirname, 'examples', `${hookId}.sh`);
+    if (existsSync(exPath)) {
+      copyFileSync(exPath, hookPath);
+      chmodSync(hookPath, 0o755);
+      installed++;
+      console.log(c.green + '  +' + c.reset + ` ${hookId}`);
+      continue;
+    }
+
+    console.log(c.yellow + '  ?' + c.reset + ` ${hookId} (not found)`);
+  }
+
+  // Update settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+  if (!settings.hooks) settings.hooks = {};
+
+  // Register all hooks in settings
+  const hookFiles = prof.hooks.filter(h => existsSync(join(HOOKS_DIR, `${h}.sh`)));
+  const bashHooks = hookFiles.map(h => ({ type: 'command', command: `bash ${join(HOOKS_DIR, h + '.sh')}` }));
+
+  // Simplified: put all under PreToolUse Bash for now
+  if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
+  const existing = settings.hooks.PreToolUse.find(e => e.matcher === 'Bash');
+  if (existing) {
+    const existingCmds = new Set(existing.hooks.map(h => h.command));
+    for (const h of bashHooks) {
+      if (!existingCmds.has(h.command)) existing.hooks.push(h);
+    }
+  } else {
+    settings.hooks.PreToolUse.push({ matcher: 'Bash', hooks: bashHooks });
+  }
+
+  writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+
+  console.log();
+  console.log(c.green + `  ✓ "${level}" profile applied (${installed} new hooks installed)` + c.reset);
+  console.log(c.dim + `  ${prof.hooks.length} hooks total in profile` + c.reset);
   console.log();
 }
 
@@ -3154,6 +3270,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
   if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();
