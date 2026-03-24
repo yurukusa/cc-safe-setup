@@ -1,5 +1,21 @@
 # Changelog
 
+## [8.0.0] - 2026-03-24
+- **--shield**: Maximum safety in one command (fix + scan + install + CLAUDE.md)
+- **88 hooks** (8 built-in + 80 examples), **433 tests**, **29 commands**
+- worktree-guard, commit-scope-guard, compact-reminder, auto-stash-before-pull, revert-helper
+- Hook Builder web tool (generate from plain English)
+- FAQ page (15 questions answered)
+- 5 web tools total (Audit, Cheat Sheet, Builder, FAQ, Playground)
+
+## [7.9.0] - 2026-03-24
+- Hook Builder and FAQ web tools
+- Zenn tutorial published
+
+## [7.8.0] - 2026-03-24
+- revert-helper Stop hook
+- OSS: PR #40 to disler/multi-agent-observability (1,295★)
+
 ## [7.7.0] - 2026-03-24
 - **420 automated tests**, **83 hooks** (8 built-in + 75 examples)
 - **error-memory-guard**: Block retries of commands that already failed 3x
