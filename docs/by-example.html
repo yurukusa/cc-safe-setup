@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks by Example — Real Incidents, Real Fixes</title>
+<meta name="description" content="Every hook was born from a real incident. See the before/after for each one.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+.example{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.ex-title{font-weight:700;color:#f0f6fc;font-size:.95rem;margin-bottom:.3rem}
+.ex-issue{font-size:.7rem;color:#58a6ff;margin-bottom:.5rem}
+.ex-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.5rem 0}
+.before,.after{border-radius:6px;padding:.6rem;font-size:.78rem}
+.before{background:#da363311;border:1px solid #da363333}
+.after{background:#23863611;border:1px solid #23863633}
+.label{font-size:.65rem;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.label-bad{color:#f85149}
+.label-good{color:#3fb950}
+pre{background:#0d1117;border-radius:4px;padding:.4rem;font-size:.75rem;overflow-x:auto;margin:.3rem 0;color:#e6edf3}
+.install{font-family:monospace;font-size:.75rem;color:#58a6ff;margin-top:.4rem;cursor:pointer}
+.install:hover{text-decoration:underline}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+code{background:#21262d;padding:.1rem .25rem;border-radius:3px;font-size:.8rem}
+.count{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Hooks by Example</h1>
+<p class="sub">Every hook was born from a real incident. Here's the before and after.</p>
+<p class="count">15 examples from real GitHub Issues</p>
+
+<div class="example">
+<div class="ex-title">destructive-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/36339">#36339</a> — User lost entire C:\Users directory</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude: "Let me clean up the temp files"
+$ rm -rf /
+→ Entire filesystem deleted via NTFS junction traversal</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Let me clean up the temp files"
+$ rm -rf /
+→ BLOCKED: rm -rf on root directory
+Claude: "I'll target just the temp folder instead"
+$ rm -rf /tmp/old-builds</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup');this.textContent='Copied!'">npx cc-safe-setup</div>
+</div>
+
+<div class="example">
+<div class="ex-title">branch-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/36640">#36640</a> — Untested code pushed to main at 3am</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude (autonomous, 3am): "Changes look good"
+$ git push origin main --force
+→ Production branch overwritten with untested code</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude (autonomous, 3am): "Changes look good"
+$ git push origin main --force
+→ BLOCKED: Force push to main
+Claude: "I'll create a PR instead"
+$ git push origin feature/auth-fix</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup');this.textContent='Copied!'">npx cc-safe-setup</div>
+</div>
+
+<div class="example">
+<div class="ex-title">secret-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/16561">#16561</a> — API keys committed via git add .</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude: "Let me commit all changes"
+$ git add .
+$ git push
+→ .env with API keys pushed to public repo</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Let me commit all changes"
+$ git add .
+→ BLOCKED: .env file would be staged
+Claude: "I'll add specific files instead"
+$ git add src/ tests/</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup');this.textContent='Copied!'">npx cc-safe-setup</div>
+</div>
+
+<div class="example">
+<div class="ex-title">uncommitted-work-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/37888">#37888</a> — Destroyed work twice in same session</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude: "Let me start fresh"
+$ git checkout -- .
+→ 3 hours of uncommitted edits gone forever
+(Claude does it again 20 minutes later)</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Let me start fresh"
+$ git checkout -- .
+→ BLOCKED: 12 uncommitted changes would be lost
+Claude: "I'll commit first"
+$ git stash && git checkout -- .</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example uncommitted-work-guard');this.textContent='Copied!'">npx cc-safe-setup --install-example uncommitted-work-guard</div>
+</div>
+
+<div class="example">
+<div class="ex-title">test-deletion-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/38050">#38050</a> — Claude deletes failing tests instead of fixing code</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Test: auth.test.js — 5 assertions
+Claude: "Tests are failing, let me fix"
+→ Deletes 3 test assertions
+→ "All tests pass now!" (because there are fewer tests)</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Tests are failing, let me fix"
+→ WARNING: Removing 3 test assertions
+→ "Fix the code, not the tests"
+Claude: "You're right, let me fix the auth logic"</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example test-deletion-guard');this.textContent='Copied!'">npx cc-safe-setup --install-example test-deletion-guard</div>
+</div>
+
+<div class="example">
+<div class="ex-title">token-budget-guard</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/38029">#38029</a> — Session consumed $342 without user knowing</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Session resumes, generates 652K output tokens
+No warning, no limit
+Bill arrives: $342 for one session</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Session runs normally...
+→ WARNING: Estimated cost ~$10, approaching $50 limit
+→ Consider /compact or new session
+At $50: BLOCKED — start a new session</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example token-budget-guard');this.textContent='Copied!'">npx cc-safe-setup --install-example token-budget-guard</div>
+</div>
+
+<div class="example">
+<div class="ex-title">fact-check-gate</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/38057">#38057</a> — False claims in technical docs</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude edits README.md:
+"The `processAuth()` function accepts a JWT token"
+→ processAuth() doesn't exist. Claude never read the source.</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude edits README.md referencing `auth.ts`
+→ WARNING: Doc references auth.ts — verify it was read
+Claude: "Let me read the source first"
+$ Read auth.ts → writes accurate documentation</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example fact-check-gate');this.textContent='Copied!'">npx cc-safe-setup --install-example fact-check-gate</div>
+</div>
+
+<div class="example">
+<div class="ex-title">block-database-wipe</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/37405">#37405</a> — Production database wiped</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude: "Let me reset the database schema"
+$ php artisan migrate:fresh
+→ All production data permanently deleted</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Let me reset the database schema"
+$ php artisan migrate:fresh
+→ BLOCKED: migrate:fresh wipes all tables
+Claude: "I'll create a migration instead"
+$ php artisan make:migration add_users_table</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example block-database-wipe');this.textContent='Copied!'">npx cc-safe-setup --install-example block-database-wipe</div>
+</div>
+
+<div class="example">
+<div class="ex-title">error-memory-guard</div>
+<div class="ex-issue">Common pattern — Claude retries the same failing command 10 times</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>$ npm install broken-pkg  → ERROR
+$ npm install broken-pkg  → ERROR
+$ npm install broken-pkg  → ERROR
+(repeats 10 more times)</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>$ npm install broken-pkg  → ERROR (tracked)
+$ npm install broken-pkg  → ERROR (2nd failure)
+$ npm install broken-pkg  → BLOCKED: Failed 3 times
+→ Try a different approach
+Claude: "Let me check if there's an alternative package"</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example error-memory-guard');this.textContent='Copied!'">npx cc-safe-setup --install-example error-memory-guard</div>
+</div>
+
+<div class="example">
+<div class="ex-title">protect-dotfiles</div>
+<div class="ex-issue"><a href="https://github.com/anthropics/claude-code/issues/37478">#37478</a> — .bashrc overwritten</div>
+<div class="ex-row">
+<div class="before"><div class="label label-bad">Without hook</div>
+<pre>Claude: "Let me set up the dev environment"
+→ Overwrites ~/.bashrc with new PATH
+→ All shell aliases, functions, and config lost</pre></div>
+<div class="after"><div class="label label-good">With hook</div>
+<pre>Claude: "Let me set up the dev environment"
+→ BLOCKED: Modifying ~/.bashrc
+Claude: "I'll add to a project-local .envrc instead"</pre></div>
+</div>
+<div class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example protect-dotfiles');this.textContent='Copied!'">npx cc-safe-setup --install-example protect-dotfiles</div>
+</div>
+
+<div style="text-align:center;margin:1.5rem 0">
+<p style="color:#8b949e;font-size:.85rem">Want all of these? One command:</p>
+<pre style="display:inline-block;font-size:1rem;padding:.6rem 1.2rem;cursor:pointer" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</pre>
+</div>
+
+<div class="footer">
+  <a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
+  <a href="builder.html">Builder</a> ·
+  <a href="faq.html">FAQ</a> ·
+  <a href="migration-guide.html">Migration</a> ·
+  <a href="https://yurukusa.github.io/cc-hook-registry/playground.html">Playground</a> ·
+  <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
