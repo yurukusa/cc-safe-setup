@@ -1558,6 +1558,33 @@ if echo "$STATS_OUT" | grep -q "stats\|Stats\|block\|command"; then echo "  PASS
 
 WHY_OUT=$(node "$CLI" --why destructive-guard 2>&1) || true
 if echo "$WHY_OUT" | grep -q 'C:.Users\|NTFS\|36339'; then echo "  PASS: --why shows incident"; PASS=$((PASS + 1)); else echo "  FAIL: --why"; FAIL=$((FAIL + 1)); fi
+
+if [ -f "$EXDIR/auto-approve-readonly.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"cat README.md"}}' | bash "$EXDIR/auto-approve-readonly.sh" 2>/dev/null)
+    echo "$OUT" | grep -q 'approve' && { echo "  PASS: auto-approve-readonly approves cat"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-readonly cat"; FAIL=$((FAIL+1)); }
+    OUT=$(echo '{"tool_input":{"command":"git status"}}' | bash "$EXDIR/auto-approve-readonly.sh" 2>/dev/null)
+    echo "$OUT" | grep -q 'approve' && { echo "  PASS: auto-approve-readonly approves git status"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-readonly git status"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/max-session-duration.sh" ]; then
+    rm -f /tmp/cc-session-start-* 2>/dev/null
+    EXIT=0; echo '{}' | bash "$EXDIR/max-session-duration.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: max-session-duration runs (exit $EXIT)"; PASS=$((PASS+1))
+    rm -f /tmp/cc-session-start-* 2>/dev/null
+fi
+if [ -f "$EXDIR/dependency-version-pin.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"normal.js"}}' | bash "$EXDIR/dependency-version-pin.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: dep-version-pin ignores non-package"; PASS=$((PASS+1)); } || { echo "  FAIL: dep-version-pin"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/api-endpoint-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/api-endpoint-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: api-endpoint ignores non-curl"; PASS=$((PASS+1)); } || { echo "  FAIL: api-endpoint"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/crontab-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/crontab-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: crontab-guard ignores non-crontab"; PASS=$((PASS+1)); } || { echo "  FAIL: crontab-guard"; FAIL=$((FAIL+1)); }
+fi
+SUGGEST_OUT=$(timeout 30 node "$CLI" --suggest 2>&1) || true
+if echo "$SUGGEST_OUT" | grep -q 'suggest\|Suggest\|risk\|Risk\|hook'; then echo "  PASS: --suggest runs"; PASS=$((PASS + 1)); else echo "  FAIL: --suggest"; FAIL=$((FAIL + 1)); fi
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
