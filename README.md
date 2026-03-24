@@ -87,12 +87,26 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 75 examples |
+| `--install-example <name>` | Install from 118 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
 | `--dry-run` | Preview changes |
 | `--uninstall` | Remove all hooks |
+| `--shield` | Maximum safety in one command |
+| `--guard "rule"` | Instantly enforce a rule from English |
+| `--suggest` | Predict risks from project analysis |
+| `--from-claudemd` | Convert CLAUDE.md rules to hooks |
+| `--team` | Project-level hooks for git sharing |
+| `--profile [level]` | Switch safety profiles |
+| `--save-profile <name>` | Save current hooks as profile |
+| `--analyze` | Session analysis dashboard |
+| `--health` | Hook health table |
+| `--quickfix` | Auto-fix common problems |
+| `--replay` | Visual blocked commands timeline |
+| `--why <hook>` | Show real incident behind hook |
+| `--migrate-from <tool>` | Migrate from other hook tools |
+| `--diff-hooks [path]` | Compare hook configurations |
 | `--help` | Show help |
 
 ## How It Works
