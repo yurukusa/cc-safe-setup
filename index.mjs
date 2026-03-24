@@ -106,6 +106,8 @@ const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const REPLAY = process.argv.includes('--replay');
+const SAVE_PROFILE_IDX = process.argv.findIndex(a => a === '--save-profile');
+const SAVE_PROFILE = SAVE_PROFILE_IDX !== -1 ? process.argv[SAVE_PROFILE_IDX + 1] : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 const SUGGEST = process.argv.includes('--suggest');
@@ -142,6 +144,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --save-profile <name>  Save current hooks as a named profile
     npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
     npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
     npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
@@ -925,6 +928,53 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function saveProfile(name) {
+  const { readdirSync } = await import('fs');
+  const profilesDir = join(HOME, '.claude', 'profiles');
+  mkdirSync(profilesDir, { recursive: true });
+
+  if (!name) {
+    // List saved profiles
+    console.log();
+    console.log(c.bold + '  Saved Profiles' + c.reset);
+    console.log();
+    const files = existsSync(profilesDir) ? readdirSync(profilesDir).filter(f => f.endsWith('.json')) : [];
+    if (files.length === 0) {
+      console.log(c.dim + '  No saved profiles yet.' + c.reset);
+      console.log(c.dim + '  Save: npx cc-safe-setup --save-profile my-setup' + c.reset);
+    } else {
+      for (const f of files) {
+        const pName = f.replace('.json', '');
+        const data = JSON.parse(readFileSync(join(profilesDir, f), 'utf-8'));
+        console.log(`  ${c.bold}${pName}${c.reset} (${data.hooks?.length || 0} hooks, saved ${data.savedAt?.split('T')[0] || '?'})`);
+        console.log(c.dim + `    Load: npx cc-safe-setup --profile ${pName}` + c.reset);
+      }
+    }
+    console.log();
+    return;
+  }
+
+  // Save current hook state
+  const hookDir = join(HOME, '.claude', 'hooks');
+  const hooks = existsSync(hookDir) ? readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py')) : [];
+
+  const profile = {
+    name,
+    savedAt: new Date().toISOString(),
+    hooks: hooks.map(h => h.replace(/\.(sh|py)$/, '')),
+    settings: existsSync(SETTINGS_PATH) ? JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')) : {},
+  };
+
+  const profilePath = join(profilesDir, `${name}.json`);
+  writeFileSync(profilePath, JSON.stringify(profile, null, 2));
+
+  console.log();
+  console.log(c.green + `  ✓ Profile "${name}" saved (${hooks.length} hooks)` + c.reset);
+  console.log(c.dim + `  File: ${profilePath}` + c.reset);
+  console.log(c.dim + `  Load: npx cc-safe-setup --profile ${name}` + c.reset);
   console.log();
 }
 
@@ -4261,6 +4311,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);
   if (SUGGEST) return suggest();
   if (WHY_IDX !== -1) return why(WHY_HOOK);
   if (REPLAY) return replay();
