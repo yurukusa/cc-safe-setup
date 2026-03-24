@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.2.0] - 2026-03-24
+- **71 total hooks** (8 built-in + 61 bash + 2 Python)
+- **27 CLI commands** including --report, --generate-ci, --migrate, --compare, --issues
+- **318 automated tests** (+145 from session start)
+- Python hook examples (destructive_guard.py, secret_guard.py)
+- Unified SPA web tool (audit + builder + cookbook + ecosystem + cheat sheet)
+- New hooks: no-deploy-friday, work-hours-guard, protect-claudemd, reinject-claudemd,
+  symlink-guard, env-source-guard, no-sudo-guard, no-install-global, git-tag-guard,
+  npm-publish-guard, auto-approve-{go,cargo,make,gradle,maven}, output-length-guard
+- 15 example hooks with individual functional tests
+
 ## [3.7.0] - 2026-03-24
 - **--benchmark**: Hook performance measurement (10 runs, color-coded)
 - dependency-audit.sh, diff-size-guard.sh, commit-quality-gate.sh
