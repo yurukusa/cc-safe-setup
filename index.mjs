@@ -92,6 +92,7 @@ const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
 const ANALYZE = process.argv.includes('--analyze');
+const TEAM = process.argv.includes('--team');
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
@@ -129,6 +130,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --team         Set up project-level hooks (commit to repo for team)
     npx cc-safe-setup --profile <level>  Switch safety profile (strict/standard/minimal)
     npx cc-safe-setup --analyze     Analyze what Claude did in your last session
     npx cc-safe-setup --shield     Maximum safety in one command (fix + scan + install + CLAUDE.md)
@@ -835,6 +837,115 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function team() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --team' + c.reset);
+  console.log(c.dim + '  Set up project-level hooks (commit to repo for team sharing)' + c.reset);
+  console.log();
+
+  const cwd = process.cwd();
+  const projectHooksDir = join(cwd, '.claude', 'hooks');
+  const projectSettings = join(cwd, '.claude', 'settings.local.json');
+
+  // Create .claude/hooks/ in project
+  mkdirSync(projectHooksDir, { recursive: true });
+
+  // Copy core safety hooks to project
+  const coreHooks = ['destructive-guard', 'branch-guard', 'secret-guard', 'syntax-check',
+    'context-monitor', 'comment-strip', 'cd-git-allow', 'api-error-alert'];
+
+  let installed = 0;
+  for (const hookId of coreHooks) {
+    const destPath = join(projectHooksDir, `${hookId}.sh`);
+    if (existsSync(destPath)) {
+      console.log(c.dim + '  ✓' + c.reset + ` ${hookId}`);
+      continue;
+    }
+
+    if (SCRIPTS[hookId]) {
+      writeFileSync(destPath, SCRIPTS[hookId]);
+      chmodSync(destPath, 0o755);
+      installed++;
+      console.log(c.green + '  +' + c.reset + ` ${hookId}`);
+    }
+  }
+
+  // Detect stack and add relevant hooks
+  const extras = [];
+  if (existsSync(join(cwd, 'package.json'))) extras.push('auto-approve-build');
+  if (existsSync(join(cwd, 'requirements.txt')) || existsSync(join(cwd, 'pyproject.toml'))) extras.push('auto-approve-python');
+  if (existsSync(join(cwd, 'go.mod'))) extras.push('auto-approve-go');
+  if (existsSync(join(cwd, 'Cargo.toml'))) extras.push('auto-approve-cargo');
+  if (existsSync(join(cwd, 'Dockerfile'))) extras.push('auto-approve-docker');
+
+  for (const ex of extras) {
+    const destPath = join(projectHooksDir, `${ex}.sh`);
+    const srcPath = join(__dirname, 'examples', `${ex}.sh`);
+    if (existsSync(destPath)) continue;
+    if (existsSync(srcPath)) {
+      copyFileSync(srcPath, destPath);
+      chmodSync(destPath, 0o755);
+      installed++;
+      console.log(c.green + '  +' + c.reset + ` ${ex} (project-specific)`);
+    }
+  }
+
+  // Generate settings.local.json
+  const allHooks = [...coreHooks, ...extras].filter(h => existsSync(join(projectHooksDir, `${h}.sh`)));
+
+  const bashHooks = allHooks.map(h => ({
+    type: 'command',
+    command: `bash .claude/hooks/${h}.sh`
+  }));
+
+  const settings = {
+    hooks: {
+      PreToolUse: [
+        { matcher: 'Bash', hooks: bashHooks.filter((_, i) => {
+          const name = allHooks[i];
+          return !['syntax-check', 'context-monitor', 'api-error-alert'].includes(name);
+        })},
+        { matcher: 'Edit|Write', hooks: [
+          { type: 'command', command: 'bash .claude/hooks/syntax-check.sh' }
+        ]}
+      ],
+      PostToolUse: [
+        { matcher: '', hooks: [
+          { type: 'command', command: 'bash .claude/hooks/context-monitor.sh' }
+        ]}
+      ],
+      Stop: [
+        { matcher: '', hooks: [
+          { type: 'command', command: 'bash .claude/hooks/api-error-alert.sh' }
+        ]}
+      ]
+    }
+  };
+
+  writeFileSync(projectSettings, JSON.stringify(settings, null, 2));
+  console.log();
+  console.log(c.green + '  ✓' + c.reset + ' Created .claude/settings.local.json');
+
+  // Add .claude/hooks to .gitignore if not there
+  const gitignorePath = join(cwd, '.gitignore');
+  if (existsSync(gitignorePath)) {
+    const gi = readFileSync(gitignorePath, 'utf-8');
+    if (!gi.includes('.claude/')) {
+      // Don't add — hooks should be committed for team sharing
+    }
+  }
+
+  console.log();
+  console.log(c.bold + '  Next steps:' + c.reset);
+  console.log(c.dim + '  1. git add .claude/' + c.reset);
+  console.log(c.dim + '  2. git commit -m "chore: add Claude Code safety hooks"' + c.reset);
+  console.log(c.dim + '  3. Team members get hooks automatically on git pull' + c.reset);
+  console.log();
+  console.log(c.dim + `  ${installed} hooks installed, ${allHooks.length} total configured.` + c.reset);
+  console.log(c.dim + '  Hooks use relative paths (.claude/hooks/) — portable across machines.' + c.reset);
   console.log();
 }
 
@@ -3270,6 +3381,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
   if (SHIELD) return shield();
