@@ -1,25 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-24T22:17:08+09:00
+Updated: 2026-03-25T08:59:36+09:00
 
 ## Git
 - Branch: `main`
-- Uncommitted changes: 1 file(s)
+- Uncommitted changes: 2 file(s)
 ```
  M .claude/session-snapshot.md
+ D cc-safe-setup-export.json
 ```
-- Last commit: 98ecdeb checkpoint: auto-save 22:17:06
+- Last commit: 39ad01b docs: Hub 315 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
 ./README.md
-./examples/crontab-guard.sh
-./examples/api-endpoint-guard.sh
-./examples/dependency-version-pin.sh
-./examples/auto-approve-readonly.sh
-./examples/max-session-duration.sh
-./CHANGELOG.md
-./examples/typosquat-guard.sh
+./examples/check-error-page.sh
+./examples/check-responsive-design.sh
+./examples/check-semantic-html.sh
+./examples/no-deprecated-api.sh
+./examples/no-table-layout.sh
+./examples/check-content-type.sh
+./examples/check-image-optimization.sh
+./examples/check-meta-description.sh
 ```
 
