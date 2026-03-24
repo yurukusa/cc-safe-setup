@@ -1399,20 +1399,6 @@ if os.path.exists(sp):
 " 2>/dev/null
 fi
 
-# --- Summary ---
-echo "========================"
-TOTAL=$((PASS + FAIL))
-echo "Results: $PASS/$TOTAL passed"
-if [ "$FAIL" -gt 0 ]; then
-    echo "FAILURES: $FAIL"
-    exit 1
-else
-    echo "All tests passed!"
-fi
-if [ -f "$EXDIR/no-console-log.sh" ]; then
-    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"console.log(x)"}}' | bash "$EXDIR/no-console-log.sh" >/dev/null 2>/dev/null || EXIT=$?
-    echo "  PASS: no-console-log warns on console.log (exit $EXIT)"; PASS=$((PASS+1))
-fi
 if [ -f "$EXDIR/no-eval.sh" ]; then
     EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"eval(userInput)"}}' | bash "$EXDIR/no-eval.sh" >/dev/null 2>/dev/null || EXIT=$?
     echo "  PASS: no-eval warns on eval() (exit $EXIT)"; PASS=$((PASS+1))
@@ -1567,3 +1553,19 @@ SHARE_OUT=$(node "$CLI" --share 2>&1) || true
 echo "  PASS: --share runs (exit $?)"; PASS=$((PASS + 1))
 STATS_OUT=$(node "$CLI" --stats 2>&1) || true
 if echo "$STATS_OUT" | grep -q "stats\|Stats\|block\|command"; then echo "  PASS: --stats runs"; PASS=$((PASS + 1)); else echo "  FAIL: --stats"; FAIL=$((FAIL + 1)); fi
+
+
+# --- Summary ---
+echo "========================"
+TOTAL=$((PASS + FAIL))
+echo "Results: $PASS/$TOTAL passed"
+if [ "$FAIL" -gt 0 ]; then
+    echo "FAILURES: $FAIL"
+    exit 1
+else
+    echo "All tests passed!"
+fi
+if [ -f "$EXDIR/no-console-log.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"console.log(x)"}}' | bash "$EXDIR/no-console-log.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: no-console-log warns on console.log (exit $EXIT)"; PASS=$((PASS+1))
+fi
