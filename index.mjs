@@ -112,6 +112,7 @@ const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 const SUGGEST = process.argv.includes('--suggest');
 const INIT_PROJECT = process.argv.includes('--init-project');
+const SCORE_ONLY = process.argv.includes('--score');
 const TEST_HOOK_IDX = process.argv.findIndex(a => a === '--test-hook');
 const TEST_HOOK = TEST_HOOK_IDX !== -1 ? process.argv[TEST_HOOK_IDX + 1] : null;
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
@@ -149,6 +150,7 @@ if (HELP) {
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
     npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
     npx cc-safe-setup --save-profile <name>  Save current hooks as a named profile
+    npx cc-safe-setup --score           Print safety score (0-100) and exit
     npx cc-safe-setup --init-project    Complete project setup (CLAUDE.md + hooks + CI + .gitignore)
     npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
     npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
@@ -1070,6 +1072,44 @@ async function saveProfile(name) {
   console.log(c.dim + `  File: ${profilePath}` + c.reset);
   console.log(c.dim + `  Load: npx cc-safe-setup --profile ${name}` + c.reset);
   console.log();
+}
+
+async function scoreOnly() {
+  const { readdirSync } = await import('fs');
+  let score = 0;
+
+  // Hooks installed (max 50 points)
+  const hookDir = join(HOME, '.claude', 'hooks');
+  const hookCount = existsSync(hookDir) ? readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py')).length : 0;
+  score += Math.min(hookCount * 3, 50);
+
+  // Critical hooks (max 20 points)
+  const critical = ['destructive-guard', 'branch-guard', 'secret-guard'];
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      const cmds = JSON.stringify(s.hooks || {});
+      for (const h of critical) {
+        if (cmds.includes(h)) score += 7;
+      }
+    } catch {}
+  }
+
+  // CLAUDE.md exists (10 points)
+  if (existsSync(join(process.cwd(), 'CLAUDE.md'))) score += 10;
+
+  // .gitignore has .env (10 points)
+  const gi = existsSync(join(process.cwd(), '.gitignore')) ? readFileSync(join(process.cwd(), '.gitignore'), 'utf-8') : '';
+  if (gi.includes('.env')) score += 10;
+
+  // CI workflow (10 points)
+  if (existsSync(join(process.cwd(), '.github', 'workflows', 'claude-code-safety.yml'))) score += 10;
+
+  score = Math.min(score, 100);
+
+  // Output just the score for piping
+  console.log(score);
+  process.exit(score >= 70 ? 0 : 1);
 }
 
 async function initProject() {
@@ -4498,6 +4538,7 @@ async function main() {
   if (WATCH) return watch();
   if (TEST_HOOK_IDX !== -1) return testHook(TEST_HOOK);
   if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);
+  if (SCORE_ONLY) return scoreOnly();
   if (INIT_PROJECT) return initProject();
   if (SUGGEST) return suggest();
   if (WHY_IDX !== -1) return why(WHY_HOOK);
