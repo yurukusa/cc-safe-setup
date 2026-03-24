@@ -226,6 +226,15 @@ Or browse all available examples in [`examples/`](examples/):
 - **dependency-audit.sh** — Warn when installing packages not in manifest (npm/pip/cargo supply chain awareness)
 - **env-source-guard.sh** — Block sourcing .env files into shell environment ([#401](https://github.com/anthropics/claude-code/issues/401))
 - **symlink-guard.sh** — Detect symlink/junction traversal in rm targets ([#36339](https://github.com/anthropics/claude-code/issues/36339) [#764](https://github.com/anthropics/claude-code/issues/764))
+- **no-sudo-guard.sh** — Block all sudo commands
+- **no-install-global.sh** — Block npm -g and system-wide pip
+- **no-curl-upload.sh** — Warn on curl POST/upload (data exfiltration)
+- **no-port-bind.sh** — Warn on network port binding
+- **git-tag-guard.sh** — Block pushing all tags at once
+- **npm-publish-guard.sh** — Version check before npm publish
+- **max-file-count-guard.sh** — Warn when 20+ new files created per session
+- **protect-claudemd.sh** — Block edits to CLAUDE.md and settings files
+- **reinject-claudemd.sh** — Re-inject CLAUDE.md rules after compaction ([#6354](https://github.com/anthropics/claude-code/issues/6354))
 - **binary-file-guard.sh** — Warn when Write targets binary file types (images, archives)
 - **stale-branch-guard.sh** — Warn when working branch is far behind default
 - **cost-tracker.sh** — Estimate session token cost and warn at thresholds ($1, $5)

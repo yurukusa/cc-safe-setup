@@ -370,6 +370,15 @@ function examples() {
       'symlink-guard.sh': 'Detect symlink/junction traversal in rm targets',
       'cost-tracker.sh': 'Estimate session token cost ($1 warn, $5 alert)',
       'read-before-edit.sh': 'Warn when editing files not recently read',
+      'no-sudo-guard.sh': 'Block all sudo commands',
+      'no-install-global.sh': 'Block npm -g and system-wide pip',
+      'no-curl-upload.sh': 'Warn on curl POST/upload',
+      'no-port-bind.sh': 'Warn on network port binding',
+      'git-tag-guard.sh': 'Block pushing all tags at once',
+      'npm-publish-guard.sh': 'Version check before npm publish',
+      'max-file-count-guard.sh': 'Warn when 20+ files created per session',
+      'protect-claudemd.sh': 'Block edits to CLAUDE.md and settings files',
+      'reinject-claudemd.sh': 'Re-inject CLAUDE.md rules after compaction',
     },
   };
 
