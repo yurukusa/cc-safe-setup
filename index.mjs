@@ -806,70 +806,182 @@ async function fullSetup() {
 }
 
 async function dashboard() {
-  const { createReadStream, watchFile } = await import('fs');
-  const { createInterface: createRL } = await import('readline');
+  const fsModule = await import('fs');
 
   const BLOCK_LOG = join(HOME, '.claude', 'blocked-commands.log');
+  const ERROR_LOG = join(HOME, '.claude', 'session-errors.log');
   const COST_FILE = '/tmp/cc-cost-tracker-calls';
   const CONTEXT_FILE = '/tmp/cc-context-pct';
+  const HANDOFF_FILE = join(HOME, '.claude', 'session-handoff.md');
+  const W = 60; // dashboard width
 
   const clear = () => process.stdout.write('\x1b[2J\x1b[H');
 
-  // Count hooks
-  let hookCount = 0;
-  let exampleCount = 0;
+  // ANSI box drawing helpers
+  const box = {
+    tl: '┌', tr: '┐', bl: '└', br: '┘',
+    h: '─', v: '│', lt: '├', rt: '┤',
+  };
+
+  function hline(left, right, w) { return left + box.h.repeat(w - 2) + right; }
+  function pad(text, w) {
+    const stripped = text.replace(/\x1b\[[0-9;]*m/g, '');
+    const padding = Math.max(0, w - 2 - stripped.length);
+    return box.v + ' ' + text + ' '.repeat(padding) + box.v;
+  }
+  function progressBar(pct, w, filledColor, emptyColor) {
+    const barW = w - 2;
+    const filled = Math.round(pct / 100 * barW);
+    return filledColor + '█'.repeat(filled) + emptyColor + '░'.repeat(barW - filled) + c.reset;
+  }
+  function sparkline(values, w) {
+    const chars = ' ▁▂▃▄▅▆▇';
+    const max = Math.max(...values, 1);
+    return values.slice(-w).map(v => chars[Math.min(7, Math.round(v / max * 7))]).join('');
+  }
+
+  // Collect hook info
+  let hooksByTrigger = {};
+  let totalHooks = 0;
+  let scriptCount = 0;
   if (existsSync(SETTINGS_PATH)) {
     try {
       const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
-      for (const entries of Object.values(s.hooks || {})) {
-        hookCount += entries.reduce((n, e) => n + (e.hooks || []).length, 0);
+      for (const [trigger, entries] of Object.entries(s.hooks || {})) {
+        const count = entries.reduce((n, e) => n + (e.hooks || []).length, 0);
+        hooksByTrigger[trigger] = count;
+        totalHooks += count;
       }
     } catch {}
   }
-  exampleCount = existsSync(join(HOOKS_DIR)) ?
-    (await import('fs')).readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh')).length : 0;
+  if (existsSync(HOOKS_DIR)) {
+    scriptCount = fsModule.readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh')).length;
+  }
+
+  // Audit score (cached)
+  let auditScore = '?';
+  try {
+    // Quick inline audit
+    let risks = 0;
+    const s = existsSync(SETTINGS_PATH) ? JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')) : {};
+    const pre = s.hooks?.PreToolUse || [];
+    const post = s.hooks?.PostToolUse || [];
+    if (pre.length === 0) risks += 30;
+    const allCmds = JSON.stringify(pre).toLowerCase();
+    if (!allCmds.match(/destructive|guard|rm.*rf/)) risks += 20;
+    if (!allCmds.match(/branch|push|main/)) risks += 20;
+    if (!allCmds.match(/secret|env|credential/)) risks += 20;
+    if (post.length === 0) risks += 10;
+    auditScore = Math.max(0, 100 - risks);
+  } catch {}
 
   function render() {
     clear();
 
-    // Header
-    console.log(c.bold + '  cc-safe-setup --dashboard' + c.reset + '  ' + c.dim + new Date().toLocaleTimeString() + c.reset);
-    console.log('  ' + '─'.repeat(50));
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString();
+    const dateStr = now.toLocaleDateString();
 
-    // Status row
-    const context = existsSync(CONTEXT_FILE) ? readFileSync(CONTEXT_FILE, 'utf-8').trim() + '%' : '?';
-    const calls = existsSync(COST_FILE) ? readFileSync(COST_FILE, 'utf-8').trim() : '0';
-    const cost = (parseInt(calls) * 0.105).toFixed(2);
+    // Read live data
+    const contextPct = existsSync(CONTEXT_FILE) ? parseInt(readFileSync(CONTEXT_FILE, 'utf-8').trim()) || 0 : -1;
+    const toolCalls = existsSync(COST_FILE) ? parseInt(readFileSync(COST_FILE, 'utf-8').trim()) || 0 : 0;
+    const costEst = (toolCalls * 0.105).toFixed(2);
 
-    console.log('  Hooks: ' + c.green + hookCount + c.reset + ' registered  |  Scripts: ' + exampleCount);
-    console.log('  Context: ' + c.yellow + context + c.reset + '  |  Cost: ~$' + cost + ' (' + calls + ' calls)');
-    console.log('  ' + '─'.repeat(50));
-
-    // Recent blocks
-    console.log(c.bold + '  Recent Blocks' + c.reset);
+    // Parse block log
+    let blocks = [];
+    let blocksByHour = new Array(24).fill(0);
+    let blockReasons = {};
     if (existsSync(BLOCK_LOG)) {
       const lines = readFileSync(BLOCK_LOG, 'utf-8').split('\n').filter(l => l.trim());
-      const recent = lines.slice(-5);
-      for (const line of recent) {
-        const m = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|/);
+      for (const line of lines) {
+        const m = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|\s*cmd:\s*(.+)$/);
         if (m) {
-          const time = m[1].replace(/T/, ' ').replace(/\+.*/, '').slice(11, 16);
-          console.log('  ' + c.dim + time + c.reset + '  ' + c.red + m[2].trim() + c.reset);
+          const hour = new Date(m[1]).getHours();
+          if (!isNaN(hour)) blocksByHour[hour]++;
+          const reason = m[2].trim();
+          blockReasons[reason] = (blockReasons[reason] || 0) + 1;
+          blocks.push({ time: m[1], reason, cmd: m[3].trim() });
         }
       }
-      if (recent.length === 0) console.log(c.dim + '  (none)' + c.reset);
-    } else {
-      console.log(c.dim + '  (no log yet)' + c.reset);
     }
 
-    console.log('  ' + '─'.repeat(50));
+    const totalBlocks = blocks.length;
+    const todayBlocks = blocks.filter(b => b.time.startsWith(dateStr.split('/').reverse().join('-'))).length;
+
+    // === RENDER ===
+    console.log(hline(box.tl, box.tr, W));
+    console.log(pad(c.bold + 'cc-safe-setup dashboard' + c.reset + '  ' + c.dim + timeStr + c.reset, W));
+    console.log(hline(box.lt, box.rt, W));
+
+    // Status panel
+    const scoreColor = auditScore >= 80 ? c.green : auditScore >= 50 ? c.yellow : c.red;
+    const grade = auditScore >= 80 ? 'A' : auditScore >= 60 ? 'B' : auditScore >= 40 ? 'C' : 'F';
+    console.log(pad('Score: ' + scoreColor + auditScore + '/100' + c.reset + ' (Grade ' + grade + ')  Hooks: ' + c.green + totalHooks + c.reset + '  Scripts: ' + scriptCount, W));
+
+    // Context bar
+    if (contextPct >= 0) {
+      const ctxColor = contextPct > 40 ? c.green : contextPct > 20 ? c.yellow : c.red;
+      console.log(pad('Context: ' + ctxColor + contextPct + '%' + c.reset + ' ' + progressBar(contextPct, 30, ctxColor, c.dim), W));
+    } else {
+      console.log(pad('Context: ' + c.dim + 'unknown' + c.reset, W));
+    }
+
+    // Cost
+    console.log(pad('Cost: ~$' + costEst + ' (' + toolCalls + ' tool calls, Opus)', W));
+    console.log(pad('Blocks: ' + c.red + totalBlocks + c.reset + ' total  |  Today: ' + todayBlocks, W));
+
+    // Hooks by trigger
+    console.log(hline(box.lt, box.rt, W));
+    console.log(pad(c.bold + 'Hooks by Trigger' + c.reset, W));
+    for (const [trigger, count] of Object.entries(hooksByTrigger)) {
+      const bar = '█'.repeat(Math.min(count, 20));
+      console.log(pad(c.dim + trigger.padEnd(18) + c.reset + c.blue + bar + c.reset + ' ' + count, W));
+    }
+
+    // Hourly activity sparkline
+    console.log(hline(box.lt, box.rt, W));
+    console.log(pad(c.bold + 'Block Activity (24h)' + c.reset, W));
+    console.log(pad(c.yellow + sparkline(blocksByHour, 24) + c.reset + '  ' + c.dim + '0h' + ' '.repeat(20) + '23h' + c.reset, W));
+
+    // Top block reasons
+    console.log(hline(box.lt, box.rt, W));
+    console.log(pad(c.bold + 'Top Block Reasons' + c.reset, W));
+    const sortedReasons = Object.entries(blockReasons).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxR = sortedReasons[0]?.[1] || 1;
+    for (const [reason, count] of sortedReasons) {
+      const bar = '▓'.repeat(Math.ceil(count / maxR * 15));
+      console.log(pad(c.red + bar + c.reset + ' ' + count + ' ' + c.dim + reason.slice(0, 25) + c.reset, W));
+    }
+    if (sortedReasons.length === 0) {
+      console.log(pad(c.dim + '(no blocks recorded)' + c.reset, W));
+    }
+
+    // Recent blocks
+    console.log(hline(box.lt, box.rt, W));
+    console.log(pad(c.bold + 'Recent Blocks' + c.reset, W));
+    const recent = blocks.slice(-5);
+    for (const b of recent) {
+      const time = b.time.replace(/T/, ' ').replace(/\+.*/, '').slice(11, 16);
+      console.log(pad(c.dim + time + c.reset + ' ' + c.red + b.reason.slice(0, 35) + c.reset, W));
+    }
+    if (recent.length === 0) console.log(pad(c.dim + '(none)' + c.reset, W));
+
+    // Session errors
+    let errorCount = 0;
+    if (existsSync(ERROR_LOG)) {
+      errorCount = readFileSync(ERROR_LOG, 'utf-8').split('\n').filter(l => l.trim()).length;
+    }
+    if (errorCount > 0) {
+      console.log(hline(box.lt, box.rt, W));
+      console.log(pad(c.yellow + 'Session errors: ' + errorCount + c.reset, W));
+    }
+
+    console.log(hline(box.bl, box.br, W));
     console.log(c.dim + '  Refreshing every 3s. Ctrl+C to exit.' + c.reset);
   }
 
   render();
   setInterval(render, 3000);
-
-  // Keep alive
   await new Promise(() => {});
 }
 
