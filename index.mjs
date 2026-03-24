@@ -924,6 +924,10 @@ function issues() {
     { hook: 'diff-size-guard', issues: ['Unreviable mega-commits'] },
     { hook: 'dependency-audit', issues: ['Supply chain risk from unknown packages'] },
     { hook: 'read-before-edit', issues: ['old_string mismatch from editing unread files'] },
+    { hook: 'symlink-guard', issues: ['#36339 NTFS junction traversal (93r)', '#764 Symlink resolution failure (63r)'] },
+    { hook: 'binary-file-guard', issues: ['Binary file corruption from Write tool'] },
+    { hook: 'stale-branch-guard', issues: ['Merge conflicts from stale branches'] },
+    { hook: 'reinject-claudemd', issues: ['#6354 CLAUDE.md lost after compaction (27r)'] },
   ];
 
   console.log();
