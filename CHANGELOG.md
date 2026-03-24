@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.7.0] - 2026-03-24
+- **420 automated tests**, **83 hooks** (8 built-in + 75 examples)
+- **error-memory-guard**: Block retries of commands that already failed 3x
+- **parallel-edit-guard**: Detect concurrent edits via lock files
+- **large-read-guard**: Warn before catting large files into context
+- **strict-allowlist**: Allowlist-only enforcement mode (#37471)
+- Gumroad Ops Kit updated to v3.2 via CDP (self-service)
+
+## [7.6.0] - 2026-03-24
+- strict-allowlist hook added
+- 72 examples, 409 tests
+
 ## [7.5.0] - 2026-03-24
 - **405 automated tests** (400+ milestone)
 - **71 example hooks** (68→71: fact-check-gate, token-budget-guard, conflict-marker-guard)
