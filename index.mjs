@@ -97,6 +97,8 @@ const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
 const MIGRATE_FROM = MIGRATE_FROM_IDX !== -1 ? process.argv[MIGRATE_FROM_IDX + 1] : null;
 const HEALTH = process.argv.includes('--health');
 const FROM_CLAUDEMD = process.argv.includes('--from-claudemd');
+const DIFF_HOOKS_IDX = process.argv.findIndex(a => a === '--diff-hooks');
+const DIFF_HOOKS = DIFF_HOOKS_IDX !== -1 ? process.argv[DIFF_HOOKS_IDX + 1] : null;
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
@@ -134,6 +136,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --diff-hooks <path>  Compare hooks between two settings files
     npx cc-safe-setup --from-claudemd  Convert CLAUDE.md rules into hooks
     npx cc-safe-setup --health        Hook health dashboard (size, permissions, age)
     npx cc-safe-setup --migrate-from <tool>  Migrate from safety-net/hooks-mastery/etc.
@@ -844,6 +847,95 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function diffHooks(otherPath) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --diff-hooks' + c.reset);
+  console.log(c.dim + '  Compare hook configurations' + c.reset);
+  console.log();
+
+  // Parse hooks from a settings file
+  function getHooks(path) {
+    if (!existsSync(path)) return new Set();
+    try {
+      const s = JSON.parse(readFileSync(path, 'utf-8'));
+      const hooks = new Set();
+      for (const [trigger, groups] of Object.entries(s.hooks || {})) {
+        for (const group of groups) {
+          for (const h of (group.hooks || [])) {
+            const cmd = h.command || '';
+            const name = cmd.split('/').pop().replace('.sh', '').replace('.py', '');
+            if (name) hooks.add(name);
+          }
+        }
+      }
+      return hooks;
+    } catch { return new Set(); }
+  }
+
+  // Get current settings
+  const myHooks = getHooks(SETTINGS_PATH);
+
+  if (!otherPath) {
+    // Compare global vs project settings
+    const projectSettings = join(process.cwd(), '.claude', 'settings.json');
+    const projectLocal = join(process.cwd(), '.claude', 'settings.local.json');
+
+    if (existsSync(projectSettings) || existsSync(projectLocal)) {
+      const projectHooks = new Set([
+        ...getHooks(projectSettings),
+        ...getHooks(projectLocal)
+      ]);
+
+      console.log(c.bold + '  Global vs Project comparison' + c.reset);
+      console.log(`  Global: ${myHooks.size} hooks (${SETTINGS_PATH})`);
+      console.log(`  Project: ${projectHooks.size} hooks (.claude/settings*.json)`);
+      console.log();
+
+      const onlyGlobal = [...myHooks].filter(h => !projectHooks.has(h));
+      const onlyProject = [...projectHooks].filter(h => !myHooks.has(h));
+      const both = [...myHooks].filter(h => projectHooks.has(h));
+
+      if (both.length > 0) {
+        console.log(c.green + `  ✓ ${both.length} hooks in both:` + c.reset);
+        both.slice(0, 10).forEach(h => console.log(c.dim + `    ${h}` + c.reset));
+        if (both.length > 10) console.log(c.dim + `    ... and ${both.length - 10} more` + c.reset);
+        console.log();
+      }
+      if (onlyGlobal.length > 0) {
+        console.log(c.yellow + `  △ ${onlyGlobal.length} only in global:` + c.reset);
+        onlyGlobal.forEach(h => console.log(`    ${h}`));
+        console.log();
+      }
+      if (onlyProject.length > 0) {
+        console.log(c.blue + `  ○ ${onlyProject.length} only in project:` + c.reset);
+        onlyProject.forEach(h => console.log(`    ${h}`));
+        console.log();
+      }
+    } else {
+      console.log(c.dim + '  No project-level settings found.' + c.reset);
+      console.log(c.dim + '  Create with: npx cc-safe-setup --team' + c.reset);
+      console.log();
+      console.log(c.bold + '  Global hooks (' + myHooks.size + '):' + c.reset);
+      [...myHooks].sort().forEach(h => console.log(`    ${h}`));
+    }
+  } else {
+    // Compare with specified file
+    const otherHooks = getHooks(otherPath);
+    console.log(`  File A: ${SETTINGS_PATH} (${myHooks.size} hooks)`);
+    console.log(`  File B: ${otherPath} (${otherHooks.size} hooks)`);
+    console.log();
+
+    const onlyA = [...myHooks].filter(h => !otherHooks.has(h));
+    const onlyB = [...otherHooks].filter(h => !myHooks.has(h));
+    const both = [...myHooks].filter(h => otherHooks.has(h));
+
+    console.log(c.green + `  ${both.length} shared` + c.reset);
+    if (onlyA.length > 0) console.log(c.yellow + `  ${onlyA.length} only in A: ${onlyA.join(', ')}` + c.reset);
+    if (onlyB.length > 0) console.log(c.blue + `  ${onlyB.length} only in B: ${onlyB.join(', ')}` + c.reset);
+  }
   console.log();
 }
 
@@ -3723,6 +3815,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (DIFF_HOOKS_IDX !== -1) return diffHooks(DIFF_HOOKS);
   if (FROM_CLAUDEMD) return fromClaudeMd();
   if (HEALTH) return health();
   if (MIGRATE_FROM_IDX !== -1) return migrateFrom(MIGRATE_FROM);
