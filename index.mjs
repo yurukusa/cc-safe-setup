@@ -96,6 +96,7 @@ const TEAM = process.argv.includes('--team');
 const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
 const MIGRATE_FROM = MIGRATE_FROM_IDX !== -1 ? process.argv[MIGRATE_FROM_IDX + 1] : null;
 const HEALTH = process.argv.includes('--health');
+const FROM_CLAUDEMD = process.argv.includes('--from-claudemd');
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
@@ -133,6 +134,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --from-claudemd  Convert CLAUDE.md rules into hooks
     npx cc-safe-setup --health        Hook health dashboard (size, permissions, age)
     npx cc-safe-setup --migrate-from <tool>  Migrate from safety-net/hooks-mastery/etc.
     npx cc-safe-setup --team         Set up project-level hooks (commit to repo for team)
@@ -842,6 +844,89 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function fromClaudeMd() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --from-claudemd' + c.reset);
+  console.log(c.dim + '  Convert CLAUDE.md rules into enforceable hooks' + c.reset);
+  console.log();
+
+  // Find CLAUDE.md
+  const cwd = process.cwd();
+  let claudeMdPath = null;
+  for (const p of [join(cwd, 'CLAUDE.md'), join(cwd, '.claude', 'CLAUDE.md')]) {
+    if (existsSync(p)) { claudeMdPath = p; break; }
+  }
+
+  if (!claudeMdPath) {
+    console.log(c.yellow + '  No CLAUDE.md found in project.' + c.reset);
+    console.log(c.dim + '  Run: npx cc-safe-setup --shield (creates one)' + c.reset);
+    return;
+  }
+
+  const content = readFileSync(claudeMdPath, 'utf-8').toLowerCase();
+  console.log(c.dim + '  Reading: ' + claudeMdPath + c.reset);
+  console.log();
+
+  // Pattern matching: CLAUDE.md rules → hooks
+  const RULE_MAP = [
+    { patterns: ['do not push to main', 'don\'t push to main', 'no push main', 'never push to main'], hook: 'branch-guard', desc: '"Do not push to main" → branch-guard' },
+    { patterns: ['do not force', 'no force push', 'don\'t force push'], hook: 'branch-guard', desc: '"No force push" → branch-guard' },
+    { patterns: ['do not delete', 'don\'t delete', 'no rm -rf', 'never delete'], hook: 'destructive-guard', desc: '"Do not delete files" → destructive-guard' },
+    { patterns: ['do not commit .env', 'don\'t commit secret', 'no credentials', 'never commit .env'], hook: 'secret-guard', desc: '"No .env commits" → secret-guard' },
+    { patterns: ['run tests before', 'test before commit', 'tests must pass'], hook: 'verify-before-done', desc: '"Run tests first" → verify-before-done' },
+    { patterns: ['do not use sudo', 'no sudo', 'don\'t use sudo'], hook: 'no-sudo-guard', desc: '"No sudo" → no-sudo-guard' },
+    { patterns: ['stay in project', 'only this project', 'don\'t modify outside', 'do not edit files outside'], hook: 'scope-guard', desc: '"Stay in project" → scope-guard' },
+    { patterns: ['don\'t modify .bashrc', 'do not edit dotfile', 'protect home'], hook: 'protect-dotfiles', desc: '"Protect dotfiles" → protect-dotfiles' },
+    { patterns: ['do not deploy on friday', 'no friday deploy'], hook: 'no-deploy-friday', desc: '"No Friday deploy" → no-deploy-friday' },
+    { patterns: ['do not install global', 'no npm -g', 'don\'t install globally'], hook: 'no-install-global', desc: '"No global installs" → no-install-global' },
+    { patterns: ['descriptive commit', 'meaningful commit', 'good commit message'], hook: 'commit-quality-gate', desc: '"Good commit messages" → commit-quality-gate' },
+    { patterns: ['one logical change', 'small commit', 'focused commit', 'don\'t commit too many'], hook: 'commit-scope-guard', desc: '"Small commits" → commit-scope-guard' },
+    { patterns: ['feature branch', 'create branch', 'feat/ fix/ chore/'], hook: 'branch-naming-convention', desc: '"Feature branches" → branch-naming-convention' },
+    { patterns: ['do not drop database', 'no migrate:fresh', 'protect database'], hook: 'block-database-wipe', desc: '"Protect database" → block-database-wipe' },
+    { patterns: ['read before edit', 'understand before changing'], hook: 'read-before-edit', desc: '"Read first" → read-before-edit' },
+    { patterns: ['do not overwrite', 'use edit not write'], hook: 'overwrite-guard', desc: '"Use Edit, not Write" → overwrite-guard' },
+  ];
+
+  const matched = [];
+  for (const rule of RULE_MAP) {
+    if (rule.patterns.some(p => content.includes(p))) {
+      matched.push(rule);
+    }
+  }
+
+  if (matched.length === 0) {
+    console.log(c.yellow + '  No enforceable rules detected in CLAUDE.md.' + c.reset);
+    console.log(c.dim + '  CLAUDE.md may contain guidelines that can\'t be converted to hooks.' + c.reset);
+    console.log(c.dim + '  For custom hooks: npx cc-safe-setup --create "your rule"' + c.reset);
+    return;
+  }
+
+  console.log(c.bold + `  Found ${matched.length} rules that can be enforced with hooks:` + c.reset);
+  console.log();
+
+  for (const m of matched) {
+    const hookPath = join(HOOKS_DIR, `${m.hook}.sh`);
+    const installed = existsSync(hookPath);
+    const icon = installed ? c.green + '✓' + c.reset : c.yellow + '○' + c.reset;
+    const status = installed ? c.dim + '(installed)' + c.reset : '';
+    console.log(`  ${icon} ${m.desc} ${status}`);
+    if (!installed) {
+      console.log(c.dim + `    npx cc-safe-setup --install-example ${m.hook}` + c.reset);
+    }
+  }
+
+  const notInstalled = matched.filter(m => !existsSync(join(HOOKS_DIR, `${m.hook}.sh`)));
+  if (notInstalled.length > 0) {
+    console.log();
+    console.log(c.bold + `  Install all ${notInstalled.length} missing hooks:` + c.reset);
+    console.log(c.dim + '  npx cc-safe-setup --shield' + c.reset);
+  } else {
+    console.log();
+    console.log(c.green + '  All detected rules are already enforced by hooks!' + c.reset);
+  }
   console.log();
 }
 
@@ -3638,6 +3723,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (FROM_CLAUDEMD) return fromClaudeMd();
   if (HEALTH) return health();
   if (MIGRATE_FROM_IDX !== -1) return migrateFrom(MIGRATE_FROM);
   if (TEAM) return team();
