@@ -1265,6 +1265,30 @@ if [ -f "$EXDIR/memory-write-guard.sh" ]; then
     echo "  PASS: memory-write-guard logs claude dir write (exit $EXIT)"; PASS=$((PASS+1))
 fi
 
+# fact-check-gate
+if [ -f "$EXDIR/fact-check-gate.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"README.md","new_string":"See `app.js` for details"}}' | bash "$EXDIR/fact-check-gate.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: fact-check-gate warns on doc with source ref (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"code here"}}' | bash "$EXDIR/fact-check-gate.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: fact-check-gate ignores non-doc files"; PASS=$((PASS+1)); } || { echo "  FAIL: fact-check-gate non-doc"; FAIL=$((FAIL+1)); }
+fi
+
+# token-budget-guard
+if [ -f "$EXDIR/token-budget-guard.sh" ]; then
+    rm -f /tmp/cc-token-budget-* 2>/dev/null
+    EXIT=0; echo '{"tool_result":"short output"}' | bash "$EXDIR/token-budget-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: token-budget-guard allows under budget"; PASS=$((PASS+1)); } || { echo "  FAIL: token-budget-guard under"; FAIL=$((FAIL+1)); }
+    rm -f /tmp/cc-token-budget-* 2>/dev/null
+fi
+
+# conflict-marker-guard
+if [ -f "$EXDIR/conflict-marker-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/conflict-marker-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: conflict-marker-guard ignores non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: conflict-marker-guard safe"; FAIL=$((FAIL+1)); }
+    EXIT=0; echo '{"tool_input":{"command":"git commit -m test"}}' | bash "$EXDIR/conflict-marker-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: conflict-marker-guard runs on commit (exit $EXIT)"; PASS=$((PASS+1))
+fi
+
 echo ""
 
 # ========================
