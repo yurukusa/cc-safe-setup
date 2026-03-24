@@ -86,6 +86,7 @@ const SHARE = process.argv.includes('--share');
 const BENCHMARK = process.argv.includes('--benchmark');
 const DASHBOARD = process.argv.includes('--dashboard');
 const ISSUES = process.argv.includes('--issues');
+const MIGRATE = process.argv.includes('--migrate');
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -109,6 +110,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --migrate       Detect hooks from other projects, suggest replacements
     npx cc-safe-setup --compare <a> <b>  Compare two hooks side-by-side
     npx cc-safe-setup --issues        Show GitHub Issues each hook addresses
     npx cc-safe-setup --dashboard     Real-time status dashboard
@@ -821,6 +823,75 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function migrate() {
+  const { readdirSync } = await import('fs');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --migrate' + c.reset);
+  console.log(c.dim + '  Detecting hooks from other projects...' + c.reset);
+  console.log();
+
+  if (!existsSync(HOOKS_DIR)) {
+    console.log(c.dim + '  No hooks installed.' + c.reset);
+    process.exit(0);
+  }
+
+  const files = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh') || f.endsWith('.js') || f.endsWith('.py'));
+
+  // Detection patterns for other projects
+  const detections = [
+    { pattern: /safety-net|cc-safety-net|SAFETY_LEVEL/i, project: 'claude-code-safety-net', replacement: 'npx cc-safe-setup (destructive-guard, branch-guard)' },
+    { pattern: /karanb192|block-dangerous-commands\.js/i, project: 'karanb192/claude-code-hooks', replacement: 'npx cc-safe-setup (destructive-guard)' },
+    { pattern: /hooks-mastery|disler|pre_tool_use\.py/i, project: 'disler/claude-code-hooks-mastery', replacement: 'npx cc-safe-setup (multiple hooks)' },
+    { pattern: /cchooks|from cchooks/i, project: 'GowayLee/cchooks', replacement: 'npx cc-safe-setup (bash equivalents)' },
+    { pattern: /lasso.*security|prompt.*injection.*pattern/i, project: 'lasso-security/claude-hooks', replacement: 'No direct equivalent (unique functionality)' },
+  ];
+
+  let found = 0;
+  const suggestions = [];
+
+  for (const file of files) {
+    const content = readFileSync(join(HOOKS_DIR, file), 'utf-8');
+
+    for (const det of detections) {
+      if (det.pattern.test(content) || det.pattern.test(file)) {
+        console.log('  ' + c.yellow + '!' + c.reset + ' ' + file + c.dim + ' ← from ' + det.project + c.reset);
+        console.log('    ' + c.dim + 'Replacement: ' + det.replacement + c.reset);
+        found++;
+        break;
+      }
+    }
+
+    // Detect hand-written hooks that duplicate built-in functionality
+    if (content.includes('rm -rf') && !file.includes('destructive-guard')) {
+      suggestions.push({ file, suggest: 'destructive-guard', reason: 'rm -rf detection already built-in' });
+    }
+    if (content.includes('git push') && content.includes('main') && !file.includes('branch-guard')) {
+      suggestions.push({ file, suggest: 'branch-guard', reason: 'branch protection already built-in' });
+    }
+    if (content.includes('.env') && content.includes('git add') && !file.includes('secret-guard')) {
+      suggestions.push({ file, suggest: 'secret-guard', reason: 'secret leak prevention already built-in' });
+    }
+  }
+
+  if (suggestions.length > 0) {
+    console.log();
+    console.log(c.bold + '  Duplicate functionality detected:' + c.reset);
+    for (const s of suggestions) {
+      console.log('  ' + c.dim + s.file + c.reset + ' → ' + c.green + s.suggest + c.reset);
+      console.log('    ' + c.dim + s.reason + c.reset);
+    }
+  }
+
+  console.log();
+  if (found === 0 && suggestions.length === 0) {
+    console.log(c.green + '  No migration needed. All hooks are cc-safe-setup native.' + c.reset);
+  } else {
+    console.log(c.dim + '  Run npx cc-safe-setup to install built-in replacements.' + c.reset);
+  }
   console.log();
 }
 
@@ -2437,6 +2508,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (MIGRATE) return migrate();
   if (COMPARE) return compare(COMPARE.a, COMPARE.b);
   if (ISSUES) return issues();
   if (DASHBOARD) return dashboard();
