@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 92 examples = **100 hooks**. 31 CLI commands. 433 tests. [Web Tool](https://yurukusa.github.io/cc-safe-setup/) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
+8 built-in + 92 examples = **100 hooks**. 32 CLI commands. 457 tests. [Web Tool](https://yurukusa.github.io/cc-safe-setup/) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
 
 ```bash
 npx cc-safe-setup
@@ -104,6 +104,8 @@ Each hook exists because a real incident happened without it.
 Safe to run multiple times. Existing settings are preserved. A backup is created if settings.json can't be parsed.
 
 **Maximum safety:** `npx cc-safe-setup --shield` — one command: fix environment, install hooks, detect stack, configure settings, generate CLAUDE.md.
+
+**Team setup:** `npx cc-safe-setup --team` — copy hooks to `.claude/hooks/` with relative paths, commit to repo for team sharing.
 
 **Preview first:** `npx cc-safe-setup --dry-run`
 
