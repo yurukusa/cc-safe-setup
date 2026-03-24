@@ -97,6 +97,8 @@ const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
 const MIGRATE_FROM = MIGRATE_FROM_IDX !== -1 ? process.argv[MIGRATE_FROM_IDX + 1] : null;
 const HEALTH = process.argv.includes('--health');
 const FROM_CLAUDEMD = process.argv.includes('--from-claudemd');
+const GUARD_IDX = process.argv.findIndex(a => a === '--guard');
+const GUARD_DESC = GUARD_IDX !== -1 ? process.argv.slice(GUARD_IDX + 1).join(' ') : null;
 const DIFF_HOOKS_IDX = process.argv.findIndex(a => a === '--diff-hooks');
 const DIFF_HOOKS = DIFF_HOOKS_IDX !== -1 ? process.argv[DIFF_HOOKS_IDX + 1] : null;
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
@@ -136,6 +138,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --guard "<rule>"  Instantly enforce a rule (generate + install + activate)
     npx cc-safe-setup --diff-hooks <path>  Compare hooks between two settings files
     npx cc-safe-setup --from-claudemd  Convert CLAUDE.md rules into hooks
     npx cc-safe-setup --health        Hook health dashboard (size, permissions, age)
@@ -847,6 +850,93 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function guard(description) {
+  if (!description) {
+    console.log();
+    console.log(c.bold + '  cc-safe-setup --guard "<rule>"' + c.reset);
+    console.log(c.dim + '  Instantly enforce a rule — generates, installs, and activates a hook.' + c.reset);
+    console.log();
+    console.log('  Examples:');
+    console.log(c.dim + '    npx cc-safe-setup --guard "never touch the database"' + c.reset);
+    console.log(c.dim + '    npx cc-safe-setup --guard "block all sudo commands"' + c.reset);
+    console.log(c.dim + '    npx cc-safe-setup --guard "no force push"' + c.reset);
+    console.log(c.dim + '    npx cc-safe-setup --guard "warn before deleting files"' + c.reset);
+    console.log();
+    return;
+  }
+
+  console.log();
+  console.log(c.bold + `  🛡️ Guard: "${description}"` + c.reset);
+  console.log();
+
+  const desc = description.toLowerCase();
+  let hookName, hookScript, trigger = 'PreToolUse', matcher = 'Bash';
+
+  // Map natural language to hook patterns
+  if (desc.match(/database|drop|migrate|prisma|sql/)) {
+    hookName = 'guard-database';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qiE '(DROP\\s+(DATABASE|TABLE)|migrate:fresh|prisma\\s+reset|db:drop|TRUNCATE)'; then\n  echo "BLOCKED: Database operation blocked by guard rule." >&2\n  echo "Rule: ${description}" >&2\n  exit 2\nfi\nexit 0`;
+  } else if (desc.match(/sudo|root|admin/)) {
+    hookName = 'guard-sudo';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qE '^\\s*sudo\\b'; then\n  echo "BLOCKED: sudo blocked by guard rule." >&2\n  echo "Rule: ${description}" >&2\n  exit 2\nfi\nexit 0`;
+  } else if (desc.match(/force.?push|push.*force/)) {
+    hookName = 'guard-force-push';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qE 'git\\s+push\\s+.*--force'; then\n  echo "BLOCKED: Force push blocked by guard rule." >&2\n  echo "Rule: ${description}" >&2\n  exit 2\nfi\nexit 0`;
+  } else if (desc.match(/push.*main|main.*push/)) {
+    hookName = 'guard-push-main';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qE 'git\\s+push\\s+.*\\b(main|master)\\b'; then\n  echo "BLOCKED: Push to main blocked by guard rule." >&2\n  echo "Rule: ${description}" >&2\n  exit 2\nfi\nexit 0`;
+  } else if (desc.match(/delet|rm|remov/)) {
+    hookName = 'guard-delete';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qE 'rm\\s+.*-rf'; then\n  echo "WARNING: Deletion detected." >&2\n  echo "Rule: ${description}" >&2\nfi\nexit 0`;
+  } else if (desc.match(/deploy|ship|release|publish/)) {
+    hookName = 'guard-deploy';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qiE '(deploy|publish|release|vercel|netlify)'; then\n  echo "WARNING: Deploy/publish command detected." >&2\n  echo "Rule: ${description}" >&2\nfi\nexit 0`;
+  } else if (desc.match(/test|spec/)) {
+    hookName = 'guard-test-required';
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qE 'git\\s+commit'; then\n  echo "WARNING: Commit detected." >&2\n  echo "Rule: ${description}" >&2\nfi\nexit 0`;
+  } else {
+    // Generic guard — extract keyword and block commands containing it
+    const keyword = desc.replace(/[^a-z0-9 ]/g, '').split(' ').filter(w => w.length > 3).pop() || 'guard';
+    hookName = `guard-${keyword}`;
+    hookScript = `#!/bin/bash\nCOMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)\n[ -z "$COMMAND" ] && exit 0\nif echo "$COMMAND" | grep -qiE '${keyword}'; then\n  echo "WARNING: Command matches guard rule." >&2\n  echo "Rule: ${description}" >&2\nfi\nexit 0`;
+  }
+
+  // Write hook
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  const hookPath = join(HOOKS_DIR, `${hookName}.sh`);
+  writeFileSync(hookPath, hookScript);
+  chmodSync(hookPath, 0o755);
+  console.log(c.green + '  ✓' + c.reset + ` Hook created: ${hookPath}`);
+
+  // Register in settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+  if (!settings.hooks) settings.hooks = {};
+  if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
+
+  const cmd = `bash ${hookPath}`;
+  const alreadyExists = JSON.stringify(settings.hooks).includes(hookName);
+  if (!alreadyExists) {
+    const existing = settings.hooks[trigger].find(e => e.matcher === matcher);
+    if (existing) {
+      existing.hooks.push({ type: 'command', command: cmd });
+    } else {
+      settings.hooks[trigger].push({ matcher, hooks: [{ type: 'command', command: cmd }] });
+    }
+    writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    console.log(c.green + '  ✓' + c.reset + ' Registered in settings.json');
+  }
+
+  console.log(c.green + '  ✓' + c.reset + ' Guard active immediately');
+  console.log();
+  console.log(c.dim + `  Rule: "${description}"` + c.reset);
+  console.log(c.dim + `  Hook: ${hookName}.sh` + c.reset);
+  console.log(c.dim + '  Remove: npx cc-safe-setup --uninstall' + c.reset);
   console.log();
 }
 
@@ -3815,6 +3905,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (GUARD_IDX !== -1) return guard(GUARD_DESC);
   if (DIFF_HOOKS_IDX !== -1) return diffHooks(DIFF_HOOKS);
   if (FROM_CLAUDEMD) return fromClaudeMd();
   if (HEALTH) return health();
