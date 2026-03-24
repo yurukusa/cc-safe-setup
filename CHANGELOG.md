@@ -1,5 +1,13 @@
 # Changelog
 
+## [22.0.0] - 2026-03-25
+- **200 HOOKS MILESTONE** — 139 new hooks in one session (61→200)
+- 45 CLI commands, 561 tests, 5 languages, 11 web tools, 140 registry hooks
+- 9 OSS PRs (3,755★), 14 issue answers, 23 articles, 11 Zenn Book chapters
+- Quality hooks: no-var, prefer-const, no-any-type, no-nested-ternary, no-sync-fs
+- Security hooks: sql-injection-detect, cors-star-warn, no-http-without-https
+- Code review hooks: max-function-length, no-deep-nesting, no-empty-function
+
 ## [17.4.0] - 2026-03-25
 - **165 hooks** (+104 from session start), **45 CLI commands**, **561 tests**
 - --changelog, --init-project, --score, --test-hook, --save-profile, --guard, --suggest, --why, --replay, --from-claudemd, --team, --profile, --analyze, --health, --quickfix, --migrate-from, --diff-hooks, --shield
