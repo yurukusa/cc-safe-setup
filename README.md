@@ -109,6 +109,21 @@ Each hook exists because a real incident happened without it.
 | `--diff-hooks [path]` | Compare hook configurations |
 | `--help` | Show help |
 
+## Quick Start by Scenario
+
+| I want to... | Command |
+|---|---|
+| Make Claude Code safe right now | `npx cc-safe-setup --shield` |
+| Stop permission prompt spam | `npx cc-safe-setup --install-example auto-approve-readonly` |
+| Enforce a rule instantly | `npx cc-safe-setup --guard "never delete production data"` |
+| See what risks my project has | `npx cc-safe-setup --suggest` |
+| Convert CLAUDE.md rules to hooks | `npx cc-safe-setup --from-claudemd` |
+| Share hooks with my team | `npx cc-safe-setup --team && git add .claude/` |
+| Choose a safety level | `npx cc-safe-setup --profile strict` |
+| See what Claude blocked today | `npx cc-safe-setup --replay` |
+| Know why a hook exists | `npx cc-safe-setup --why destructive-guard` |
+| Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
+
 ## How It Works
 
 1. Writes hook scripts to `~/.claude/hooks/`
