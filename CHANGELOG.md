@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.4.0] - 2026-03-24
+- **--team**: Project-level hook sharing (relative paths, git-committable)
+- **--analyze**: Session analysis (blocked commands, git activity, costs)
+- **--profile**: Safety profiles (strict/standard/minimal)
+- **32 CLI commands**, **457 tests**, **100 hooks**
+- 24 new tests for newest hooks batch
+- 7 article drafts with cron pipelines (3/28-4/2)
+
 ## [8.3.0] - 2026-03-24
 - **--profile**: Switch safety profiles (strict/standard/minimal)
 - **--analyze**: See what Claude did in sessions (blocked commands, git activity, costs)
