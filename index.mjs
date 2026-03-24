@@ -91,6 +91,7 @@ const GENERATE_CI = process.argv.includes('--generate-ci');
 const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
+const ANALYZE = process.argv.includes('--analyze');
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -126,6 +127,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --analyze     Analyze what Claude did in your last session
     npx cc-safe-setup --shield     Maximum safety in one command (fix + scan + install + CLAUDE.md)
     npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
     npx cc-safe-setup --stats      Block statistics and patterns report
@@ -830,6 +832,116 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function analyze() {
+  const { execSync } = await import('child_process');
+  const { readdirSync, statSync } = await import('fs');
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --analyze' + c.reset);
+  console.log(c.dim + '  What Claude did in your sessions' + c.reset);
+  console.log();
+
+  // 1. Blocked commands log
+  const blockLog = join(HOME, '.claude', 'blocked-commands.log');
+  let blocks = [];
+  if (existsSync(blockLog)) {
+    const content = readFileSync(blockLog, 'utf-8');
+    blocks = content.split('\n').filter(l => l.trim());
+    const recent = blocks.slice(-20);
+    console.log(c.bold + '  Blocked Commands' + c.reset + c.dim + ` (${blocks.length} total)` + c.reset);
+    if (recent.length > 0) {
+      // Count by type
+      const types = {};
+      for (const line of blocks) {
+        const match = line.match(/BLOCKED:\s*(.+?)(?:\s*—|\s*\(|$)/);
+        if (match) {
+          const type = match[1].trim().substring(0, 40);
+          types[type] = (types[type] || 0) + 1;
+        }
+      }
+      const sorted = Object.entries(types).sort((a, b) => b[1] - a[1]);
+      for (const [type, count] of sorted.slice(0, 8)) {
+        const bar = '█'.repeat(Math.min(count, 20));
+        console.log(`    ${c.red}${bar}${c.reset} ${count}× ${type}`);
+      }
+    } else {
+      console.log(c.green + '    No blocked commands recorded.' + c.reset);
+    }
+    console.log();
+  }
+
+  // 2. Git activity (last 24h)
+  console.log(c.bold + '  Git Activity (last 24h)' + c.reset);
+  try {
+    const log = execSync('git log --oneline --since="24 hours ago" 2>/dev/null', { encoding: 'utf-8' }).trim();
+    if (log) {
+      const commits = log.split('\n');
+      console.log(c.dim + `    ${commits.length} commits` + c.reset);
+      for (const commit of commits.slice(0, 10)) {
+        console.log(`    ${c.blue}•${c.reset} ${commit}`);
+      }
+      if (commits.length > 10) console.log(c.dim + `    ... and ${commits.length - 10} more` + c.reset);
+    } else {
+      console.log(c.dim + '    No commits in last 24h' + c.reset);
+    }
+  } catch {
+    console.log(c.dim + '    Not in a git repository' + c.reset);
+  }
+  console.log();
+
+  // 3. Files changed (last 24h)
+  console.log(c.bold + '  Files Changed (last 24h)' + c.reset);
+  try {
+    const diff = execSync('git diff --stat HEAD~10 2>/dev/null || git diff --stat 2>/dev/null', { encoding: 'utf-8' }).trim();
+    if (diff) {
+      const lines = diff.split('\n');
+      const summary = lines[lines.length - 1];
+      console.log(c.dim + `    ${summary.trim()}` + c.reset);
+    }
+  } catch {}
+  console.log();
+
+  // 4. Hook health
+  console.log(c.bold + '  Hook Health' + c.reset);
+  const hookDir = join(HOME, '.claude', 'hooks');
+  if (existsSync(hookDir)) {
+    const hooks = readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py'));
+    let execCount = 0, nonExec = 0;
+    for (const h of hooks) {
+      const st = statSync(join(hookDir, h));
+      if (st.mode & 0o111) execCount++; else nonExec++;
+    }
+    console.log(`    ${c.green}${execCount}${c.reset} hooks executable${nonExec > 0 ? `, ${c.red}${nonExec}${c.reset} missing permissions` : ''}`);
+  }
+
+  // 5. Context usage estimate
+  console.log();
+  console.log(c.bold + '  Session Estimates' + c.reset);
+  // Check tool call log if exists
+  const toolLog = join(HOME, '.claude', 'tool-calls.log');
+  if (existsSync(toolLog)) {
+    const logContent = readFileSync(toolLog, 'utf-8');
+    const calls = logContent.split('\n').filter(l => l.trim());
+    const today = new Date().toISOString().split('T')[0];
+    const todayCalls = calls.filter(l => l.includes(today));
+    console.log(`    Tool calls today: ${todayCalls.length}`);
+  }
+
+  // Token budget state
+  const budgetFiles = existsSync('/tmp') ? readdirSync('/tmp').filter(f => f.startsWith('cc-token-budget-')) : [];
+  if (budgetFiles.length > 0) {
+    for (const bf of budgetFiles.slice(0, 3)) {
+      const tokens = parseInt(readFileSync(join('/tmp', bf), 'utf-8').trim()) || 0;
+      const costCents = Math.round(tokens * 75 / 10000);
+      console.log(`    Estimated cost: ~$${(costCents / 100).toFixed(2)} (${tokens.toLocaleString()} tokens)`);
+    }
+  }
+
+  console.log();
+  console.log(c.dim + '  Tip: Use --stats for block history analytics' + c.reset);
+  console.log(c.dim + '  Tip: Use --dashboard for real-time monitoring' + c.reset);
   console.log();
 }
 
@@ -3042,6 +3154,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (ANALYZE) return analyze();
   if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();
   if (REPORT) return report();
