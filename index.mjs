@@ -539,8 +539,28 @@ function examples() {
     console.log();
   }
 
-  console.log();
-  console.log(c.dim + '  Copy any example to ~/.claude/hooks/ and add to settings.json.' + c.reset);
+  // Show batch install command if filtered
+  const allFiltered = [];
+  for (const [cat, hooks] of Object.entries(CATEGORIES)) {
+    const fh = filter
+      ? Object.entries(hooks).filter(([file, desc]) =>
+          cat.toLowerCase().includes(filter) ||
+          file.toLowerCase().includes(filter) ||
+          desc.toLowerCase().includes(filter))
+      : Object.entries(hooks);
+    for (const [file] of fh) allFiltered.push(file.replace('.sh', ''));
+  }
+
+  if (filter && allFiltered.length > 0 && allFiltered.length <= 20) {
+    console.log(c.dim + '  Install all filtered hooks:' + c.reset);
+    for (const h of allFiltered) {
+      console.log(c.dim + `    npx cc-safe-setup --install-example ${h}` + c.reset);
+    }
+    console.log();
+  }
+
+  console.log(c.dim + '  Or install any single hook:' + c.reset);
+  console.log(c.dim + '    npx cc-safe-setup --install-example <name>' + c.reset);
   console.log(c.dim + '  Source: ' + c.blue + 'https://github.com/yurukusa/cc-safe-setup/tree/main/examples' + c.reset);
   console.log();
 }
