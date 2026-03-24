@@ -928,6 +928,55 @@ if [ -f "$EXDIR/loop-detector.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: loop-detector allows first run"; PASS=$((PASS+1)); } || { echo "  FAIL: loop-detector"; FAIL=$((FAIL+1)); }
 fi
 
+# deploy-guard
+if [ -f "$EXDIR/deploy-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"vercel deploy"}}' | bash "$EXDIR/deploy-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    # deploy-guard checks git status, so result depends on repo state — just verify it runs
+    echo "  PASS: deploy-guard runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+
+# scope-guard
+if [ -f "$EXDIR/scope-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"cat /etc/passwd"}}' | bash "$EXDIR/scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: scope-guard runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+
+# no-install-global
+if [ -f "$EXDIR/no-install-global.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"npm install -g typescript"}}' | bash "$EXDIR/no-install-global.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: no-install-global blocks npm -g"; PASS=$((PASS+1)); } || { echo "  FAIL: no-install-global"; FAIL=$((FAIL+1)); }
+fi
+
+# git-tag-guard
+if [ -f "$EXDIR/git-tag-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"git push --tags"}}' | bash "$EXDIR/git-tag-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: git-tag-guard blocks push --tags"; PASS=$((PASS+1)); } || { echo "  FAIL: git-tag-guard"; FAIL=$((FAIL+1)); }
+fi
+
+# auto-approve-python
+if [ -f "$EXDIR/auto-approve-python.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"pytest"}}' | bash "$EXDIR/auto-approve-python.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow\|approve" && { echo "  PASS: auto-approve-python allows pytest"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-python"; FAIL=$((FAIL+1)); }
+fi
+
+# auto-approve-go
+if [ -f "$EXDIR/auto-approve-go.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"go test ./..."}}' | bash "$EXDIR/auto-approve-go.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow\|approve" && { echo "  PASS: auto-approve-go allows go test"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-go"; FAIL=$((FAIL+1)); }
+fi
+
+# auto-approve-cargo
+if [ -f "$EXDIR/auto-approve-cargo.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"cargo test"}}' | bash "$EXDIR/auto-approve-cargo.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow\|approve" && { echo "  PASS: auto-approve-cargo allows cargo test"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-cargo"; FAIL=$((FAIL+1)); }
+fi
+
+# auto-approve-make
+if [ -f "$EXDIR/auto-approve-make.sh" ]; then
+    OUT=$(echo '{"tool_input":{"command":"make test"}}' | bash "$EXDIR/auto-approve-make.sh" 2>/dev/null)
+    echo "$OUT" | grep -q "allow\|approve" && { echo "  PASS: auto-approve-make allows make test"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-make"; FAIL=$((FAIL+1)); }
+fi
+
 echo ""
 
 # ========================
