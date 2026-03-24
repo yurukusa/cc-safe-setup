@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Troubleshooting — Fix Any Problem in 2 Minutes</title>
+<meta name="description" content="Hook not firing? Claude ignoring rules? Permission prompt spam? Fix every common Claude Code problem.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+a{color:#58a6ff;text-decoration:none}
+code{background:#161b22;padding:.12rem .25rem;border-radius:3px;font-size:.82rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem;font-size:.78rem;color:#e6edf3;overflow-x:auto;margin:.3rem 0}
+.problem{background:#161b22;border:1px solid #30363d;border-radius:8px;margin:.6rem 0;overflow:hidden}
+.problem-header{padding:.6rem .8rem;cursor:pointer;font-weight:600;color:#f0f6fc;font-size:.88rem;display:flex;align-items:center;gap:.5rem}
+.problem-header:hover{background:#21262d}
+.problem-icon{font-size:1rem}
+.problem-body{padding:0 .8rem .6rem;font-size:.82rem;display:none}
+.problem.open .problem-body{display:block}
+.step{background:#0d1117;border-radius:4px;padding:.4rem .6rem;margin:.3rem 0;border-left:3px solid #30363d}
+.step-yes{border-left-color:#238636}
+.step-no{border-left-color:#da3633}
+.step-fix{border-left-color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.quick{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.6rem;margin:.5rem 0;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Troubleshooting</h1>
+<p class="sub">Click your problem. Follow the steps. Fixed in 2 minutes.</p>
+
+<div class="quick">
+<strong>Quick fix for most problems:</strong> <code>npx cc-safe-setup --quickfix</code>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🔇</span> My hook doesn't fire</div>
+<div class="problem-body">
+<div class="step">1. Is the hook file executable? <code>ls -la ~/.claude/hooks/your-hook.sh</code></div>
+<div class="step-fix">Fix: <code>chmod +x ~/.claude/hooks/your-hook.sh</code></div>
+
+<div class="step">2. Does it have a shebang? First line must be <code>#!/bin/bash</code></div>
+<div class="step-fix">Fix: Add <code>#!/bin/bash</code> as the very first line</div>
+
+<div class="step">3. Is it registered in settings.json?</div>
+<pre>cat ~/.claude/settings.json | python3 -m json.tool | grep your-hook</pre>
+<div class="step-fix">Fix: <code>npx cc-safe-setup --shield</code> (auto-registers all hooks)</div>
+
+<div class="step">4. Is the matcher correct? <code>"Bash"</code> won't fire for Edit/Write</div>
+<div class="step-fix">Use <code>""</code> (empty) to match all tools, or <code>"Edit|Write"</code> for file ops</div>
+
+<div class="step">5. Is jq installed? <code>which jq</code></div>
+<div class="step-fix">Install: <code>brew install jq</code> (macOS) or <code>sudo apt install jq</code> (Linux)</div>
+
+<div class="step">6. Test it manually:</div>
+<pre>echo '{"tool_input":{"command":"rm -rf /"}}' | bash ~/.claude/hooks/your-hook.sh; echo "Exit: $?"</pre>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🚫</span> My hook blocks everything</div>
+<div class="problem-body">
+<div class="step">Your regex pattern is too broad. Test with a safe command:</div>
+<pre>echo '{"tool_input":{"command":"ls -la"}}' | bash ~/.claude/hooks/your-hook.sh; echo "Exit: $?"</pre>
+<div class="step">If it exits 2 for <code>ls</code>, your grep pattern matches too much.</div>
+<div class="step-fix">Check the <code>grep -qE</code> pattern in your hook. Add <code>\b</code> word boundaries.</div>
+<div class="step-fix">Example: <code>grep -qE '\brm\s+.*-rf\s+/'</code> instead of <code>grep -q 'rm'</code></div>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">📋</span> Claude ignores CLAUDE.md rules</div>
+<div class="problem-body">
+<div class="step">This is normal — CLAUDE.md rules degrade as context fills up.</div>
+<div class="step-fix"><strong>Solution: Convert critical rules to hooks.</strong></div>
+<pre># Example: "Don't push to main" as a hook instead of a rule
+npx cc-safe-setup  # Installs branch-guard</pre>
+<div class="step">For any rule that must be enforced 100%, create a hook:</div>
+<pre>npx cc-safe-setup --create "your rule in plain English"</pre>
+<div class="step-fix">CLAUDE.md is for guidelines. Hooks are for hard constraints. Use both.</div>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🔔</span> Too many permission prompts</div>
+<div class="problem-body">
+<div class="step">Install auto-approve hooks for safe commands:</div>
+<pre>npx cc-safe-setup --install-example auto-approve-build    # npm test, cargo build
+npx cc-safe-setup --install-example auto-approve-python   # pytest, mypy
+npx cc-safe-setup --install-example auto-approve-git-read # git status, git log
+npx cc-safe-setup --install-example compound-command-approver # cd && git log</pre>
+<div class="step">Or add permissions in settings.json:</div>
+<pre>"permissions": {"allow": ["Bash(npm test)", "Bash(git status)", "Read(*)"]}</pre>
+<div class="step-fix">The <code>--profile standard</code> includes auto-approve hooks for common commands.</div>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">💾</span> settings.json won't parse</div>
+<div class="problem-body">
+<div class="step">Validate:</div>
+<pre>python3 -c "import json; json.load(open('$HOME/.claude/settings.json'))"</pre>
+<div class="step-fix">Common causes: trailing commas, comments (JSON doesn't allow them), unescaped quotes</div>
+<div class="step">Auto-fix:</div>
+<pre>npx cc-safe-setup --quickfix</pre>
+<div class="step-fix">If totally broken: <code>echo '{}' > ~/.claude/settings.json</code> then re-run setup</div>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🔄</span> Claude keeps retrying the same failed command</div>
+<div class="problem-body">
+<div class="step">Install the error memory guard:</div>
+<pre>npx cc-safe-setup --install-example error-memory-guard</pre>
+<div class="step-fix">After 3 failures of the same command, it blocks and says "try a different approach".</div>
+<div class="step">Also useful: loop detector</div>
+<pre>npx cc-safe-setup --install-example loop-detector</pre>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">💸</span> Session costs too much</div>
+<div class="problem-body">
+<div class="step">Install token budget guard:</div>
+<pre>npx cc-safe-setup --install-example token-budget-guard</pre>
+<div class="step-fix">Warns at $10, blocks at $50 (configurable via <code>CC_TOKEN_BUDGET</code> and <code>CC_TOKEN_BLOCK</code>)</div>
+<div class="step">Monitor with:</div>
+<pre>npx cc-safe-setup --analyze</pre>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🧠</span> Context fills up too fast</div>
+<div class="problem-body">
+<div class="step">Three hooks help:</div>
+<pre>npx cc-safe-setup --install-example output-length-guard   # Warn on large outputs
+npx cc-safe-setup --install-example large-read-guard      # Warn before cat on large files
+npx cc-safe-setup --install-example compact-reminder      # Suggest /compact after N calls</pre>
+<div class="step-fix">The context-monitor hook (installed by default) warns at 40%, 25%, 20%, 15%.</div>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">👥</span> Team members have different hook setups</div>
+<div class="problem-body">
+<div class="step">Use project-level hooks:</div>
+<pre>npx cc-safe-setup --team
+git add .claude/
+git commit -m "chore: add team safety hooks"</pre>
+<div class="step-fix">Hooks are copied to <code>.claude/hooks/</code> with relative paths. Works on any machine.</div>
+<div class="step">Generate CI to enforce:</div>
+<pre>npx cc-safe-setup --generate-ci</pre>
+</div>
+</div>
+
+<div class="problem" onclick="this.classList.toggle('open')">
+<div class="problem-header"><span class="problem-icon">🔀</span> Hooks from different tools conflict</div>
+<div class="problem-body">
+<div class="step">Analyze what you have:</div>
+<pre>npx cc-safe-setup --migrate-from manual  # See all existing hooks
+npx cc-safe-setup --health               # Check hook health</pre>
+<div class="step-fix">Hooks in the same group run sequentially. If one consumes stdin, the next gets nothing.</div>
+<div class="step">Fix: Put each hook in a separate matcher group in settings.json.</div>
+</div>
+</div>
+
+<div class="quick" style="margin-top:1rem">
+<strong>Still stuck?</strong>
+<code>npx cc-safe-setup --doctor</code> — full diagnosis<br>
+<code>npx cc-safe-setup --quickfix</code> — auto-fix common issues<br>
+<a href="faq.html">FAQ</a> — 15 questions answered
+</div>
+
+<div class="footer">
+  <a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
+  <a href="builder.html">Builder</a> ·
+  <a href="faq.html">FAQ</a> ·
+  <a href="settings-reference.html">Settings Ref</a> ·
+  <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
