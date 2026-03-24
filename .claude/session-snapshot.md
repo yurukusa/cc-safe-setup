@@ -1,25 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-24T19:01:52+09:00
+Updated: 2026-03-24T20:43:43+09:00
 
 ## Git
 - Branch: `main`
-- Uncommitted changes: 1 file(s)
+- Uncommitted changes: 2 file(s)
 ```
  M .claude/session-snapshot.md
+ D cc-safe-setup-export.json
 ```
-- Last commit: 0696585 checkpoint: auto-save 19:01:50
+- Last commit: 55ac3a2 checkpoint: auto-save 20:42:31
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./test.sh
-./CHANGELOG.md
-./examples/debug-leftover-guard.sh
-./examples/ci-skip-guard.sh
 ./README.md
-./examples/rust/destructive_guard.rs
-./examples/package-script-guard.sh
-./examples/env-drift-guard.sh
-./examples/import-cycle-warn.sh
+./examples/typosquat-guard.sh
+./examples/typescript-strict-guard.sh
+./examples/git-author-guard.sh
+./examples/permission-cache.sh
+./CHANGELOG.md
+./examples/stale-env-guard.sh
+./examples/test-coverage-guard.sh
 ```
 
