@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hooks Cheat Sheet — Copy-Paste Patterns</title>
+<meta name="description" content="30+ copy-paste hook patterns for Claude Code. Block dangerous commands, auto-approve safe ones, monitor costs. One page, zero fluff.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.5}
+.c{max-width:900px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid #21262d}
+h3{color:#c9d1d9;font-size:.9rem;margin:.8rem 0 .3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+code{background:#161b22;padding:.15rem .3rem;border-radius:3px;font-size:.85rem;color:#e6edf3}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;overflow-x:auto;font-size:.8rem;color:#e6edf3;margin:.4rem 0 .8rem;position:relative}
+.copy{position:absolute;top:.4rem;right:.4rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-size:.7rem}
+.copy:hover{color:#f0f6fc;border-color:#58a6ff}
+.pattern{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;margin:.5rem 0}
+.pattern-title{font-weight:600;color:#f0f6fc;font-size:.85rem}
+.pattern-desc{color:#8b949e;font-size:.78rem;margin:.2rem 0}
+.badge{display:inline-block;padding:.1rem .3rem;border-radius:3px;font-size:.6rem;font-weight:bold;margin-left:.3rem}
+.b-block{background:#da363322;color:#f85149;border:1px solid #da363344}
+.b-warn{background:#d2992222;color:#d29922;border:1px solid #d2992244}
+.b-approve{background:#23863622;color:#3fb950;border:1px solid #23863644}
+.b-monitor{background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb44}
+.toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.3rem;margin:.8rem 0}
+.toc a{display:block;background:#161b22;border:1px solid #30363d;border-radius:4px;padding:.3rem .5rem;font-size:.75rem}
+.toc a:hover{border-color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.quick{background:#238636;color:#fff;padding:.5rem 1rem;border-radius:6px;font-family:monospace;font-size:.85rem;cursor:pointer;border:none;display:block;width:100%;text-align:center;margin:.5rem 0}
+.quick:hover{background:#2ea043}
+table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.8rem}
+th,td{padding:.3rem .5rem;border:1px solid #21262d;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+.note{background:#161b22;border-left:3px solid #58a6ff;padding:.5rem .8rem;margin:.5rem 0;font-size:.78rem;color:#8b949e}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Claude Code Hooks Cheat Sheet</h1>
+<p class="sub">Copy-paste patterns. Zero fluff. <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">Official docs</a></p>
+
+<button class="quick" onclick="navigator.clipboard.writeText('npx cc-safe-setup');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup — install 8 safety hooks instantly',1500)">npx cc-safe-setup — install 8 safety hooks instantly</button>
+
+<div class="toc">
+  <a href="#basics">Basics</a>
+  <a href="#block">Block Patterns</a>
+  <a href="#approve">Auto-Approve</a>
+  <a href="#monitor">Monitor</a>
+  <a href="#settings">settings.json</a>
+  <a href="#debug">Debug</a>
+  <a href="#recipes">Quick Recipes</a>
+  <a href="#exit-codes">Exit Codes</a>
+</div>
+
+<h2 id="basics">How Hooks Work</h2>
+
+<table>
+<tr><th>Event</th><th>When</th><th>Use for</th></tr>
+<tr><td><code>PreToolUse</code></td><td>Before any tool runs</td><td>Block/approve commands</td></tr>
+<tr><td><code>PostToolUse</code></td><td>After tool completes</td><td>Check results, monitor</td></tr>
+<tr><td><code>Stop</code></td><td>Claude finishes responding</td><td>Notifications, cleanup</td></tr>
+<tr><td><code>SubagentStop</code></td><td>Subagent finishes</td><td>Monitor sub-agents</td></tr>
+</table>
+
+<table>
+<tr><th>Exit Code</th><th>Effect</th></tr>
+<tr><td><code>0</code></td><td>Allow (no action)</td></tr>
+<tr><td><code>2</code></td><td><strong>BLOCK</strong> — model cannot bypass</td></tr>
+<tr><td>stdout JSON</td><td>Override decision (approve/block with reason)</td></tr>
+</table>
+
+<div class="note">
+<strong>Key insight:</strong> CLAUDE.md rules degrade as context fills up. Hooks run every single time, enforced at the process level.
+</div>
+
+<h2 id="block">Block Patterns</h2>
+
+<h3>Block a specific command <span class="badge b-block">BLOCK</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'rm\s+.*-rf\s+/'; then
+  echo "BLOCKED: rm -rf on root" >&2
+  exit 2
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Block file edits to specific paths <span class="badge b-block">BLOCK</span></h3>
+<pre><code>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+[ -z "$FILE" ] && exit 0
+case "$FILE" in
+  */.env*|*/.ssh/*|*/.aws/*|*/credentials*)
+    echo "BLOCKED: Protected file" >&2; exit 2 ;;
+esac
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Block git push to main <span class="badge b-block">BLOCK</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'git\s+push\s+.*\b(main|master)\b'; then
+  echo "BLOCKED: Direct push to main" >&2; exit 2
+fi
+if echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force'; then
+  echo "BLOCKED: Force push" >&2; exit 2
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Block destructive git when dirty <span class="badge b-block">BLOCK</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+echo "$COMMAND" | grep -qE 'git\s+(checkout\s+--|reset\s+--hard|clean\s+-f)' || exit 0
+DIRTY=$(git status --porcelain 2>/dev/null)
+if [ -n "$DIRTY" ]; then
+  echo "BLOCKED: Uncommitted changes would be lost" >&2; exit 2
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Block commits with conflict markers <span class="badge b-block">BLOCK</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+echo "$COMMAND" | grep -qE 'git\s+commit' || exit 0
+CONFLICTS=$(git diff --cached --name-only 2>/dev/null | while read f; do
+  [ -f "$f" ] && grep -lE '^(<{7}|={7}|>{7})' "$f" 2>/dev/null
+done)
+if [ -n "$CONFLICTS" ]; then
+  echo "BLOCKED: Conflict markers in staged files" >&2; exit 2
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h2 id="approve">Auto-Approve Patterns</h2>
+
+<h3>Auto-approve safe commands <span class="badge b-approve">APPROVE</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '^\s*(npm\s+test|cargo\s+test|go\s+test|pytest|make\s+test)'; then
+  echo '{"decision":"approve","reason":"Safe test command"}'
+  exit 0
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Auto-approve read-only git <span class="badge b-approve">APPROVE</span></h3>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '^\s*git\s+(status|log|diff|show|branch|remote|tag\s+-l)'; then
+  echo '{"decision":"approve","reason":"Read-only git"}'
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h2 id="monitor">Monitor Patterns</h2>
+
+<h3>Log all tool calls <span class="badge b-monitor">MONITOR</span></h3>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // .tool_input.file_path // ""' 2>/dev/null)
+echo "[$(date -Iseconds)] $TOOL: $CMD" >> ~/.claude/tool-calls.log
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Warn on large output <span class="badge b-warn">WARN</span></h3>
+<pre><code>#!/bin/bash
+OUTPUT=$(cat | jq -r '.tool_result // empty' 2>/dev/null)
+LEN=${#OUTPUT}
+if [ "$LEN" -gt 50000 ]; then
+  echo "WARNING: Output is ${LEN} chars — consuming context fast" >&2
+fi
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Desktop notification on session end <span class="badge b-monitor">MONITOR</span></h3>
+<pre><code>#!/bin/bash
+# TRIGGER: Stop  MATCHER: ""
+MSG=$(cat | jq -r '.stop_reason // "completed"' 2>/dev/null)
+notify-send "Claude Code" "Session $MSG" 2>/dev/null ||     # Linux
+osascript -e "display notification \"$MSG\"" 2>/dev/null     # macOS
+exit 0</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h2 id="settings">settings.json Reference</h2>
+
+<h3>Minimal setup (one hook)</h3>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "bash ~/.claude/hooks/my-guard.sh"
+      }]
+    }]
+  }
+}</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Multiple hooks on different triggers</h3>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {"type":"command","command":"bash ~/.claude/hooks/destructive-guard.sh"},
+          {"type":"command","command":"bash ~/.claude/hooks/branch-guard.sh"}
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {"type":"command","command":"bash ~/.claude/hooks/scope-guard.sh"}
+        ]
+      }
+    ],
+    "PostToolUse": [{
+      "matcher": "",
+      "hooks": [{"type":"command","command":"bash ~/.claude/hooks/monitor.sh"}]
+    }],
+    "Stop": [{
+      "matcher": "",
+      "hooks": [{"type":"command","command":"bash ~/.claude/hooks/notify.sh"}]
+    }]
+  }
+}</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<div class="note">
+<strong>Matcher:</strong> Empty string <code>""</code> matches all tools. <code>"Bash"</code> matches Bash only. <code>"Edit|Write"</code> matches either. Matcher is a regex against the tool name.
+</div>
+
+<h2 id="debug">Debug Hooks</h2>
+
+<h3>Test a hook manually</h3>
+<pre><code># Test PreToolUse hook with sample input
+echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | bash ~/.claude/hooks/my-guard.sh
+echo "Exit code: $?"</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Check hook is executable</h3>
+<pre><code>ls -la ~/.claude/hooks/
+# Fix: chmod +x ~/.claude/hooks/*.sh</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Validate settings.json</h3>
+<pre><code>python3 -c "import json; json.load(open('$HOME/.claude/settings.json')); print('Valid')"</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h3>Quick health check</h3>
+<pre><code>npx cc-safe-setup --quickfix   # Auto-detect and fix problems
+npx cc-safe-setup --doctor     # Detailed diagnosis
+npx cc-safe-setup --verify     # Test each hook</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+
+<h2 id="recipes">Quick Recipes</h2>
+
+<div class="pattern">
+<div class="pattern-title">I want to block all sudo commands</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --install-example no-sudo-guard</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to block database drops</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --install-example block-database-wipe</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to auto-approve Python tools</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --install-example auto-approve-python</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to prevent deploys on Fridays</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --install-example no-deploy-friday</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to track session cost</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --install-example token-budget-guard</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to generate a custom hook</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --create "block npm publish without tests"</code></div>
+</div>
+
+<div class="pattern">
+<div class="pattern-title">I want to detect what my stack needs</div>
+<div class="pattern-desc"><code>npx cc-safe-setup --scan</code></div>
+</div>
+
+<h2 id="exit-codes">Exit Code Reference</h2>
+<table>
+<tr><th>Code</th><th>Meaning</th><th>When to use</th></tr>
+<tr><td><code>0</code></td><td>Allow / no opinion</td><td>Default — hook has nothing to say</td></tr>
+<tr><td><code>2</code></td><td>BLOCK</td><td>Dangerous command detected</td></tr>
+<tr><td><code>0</code> + stdout JSON</td><td>Override decision</td><td>Auto-approve with reason</td></tr>
+<tr><td><code>1</code></td><td>Hook error (ignored)</td><td>Don't use — hook failures are silent</td></tr>
+</table>
+
+<div class="note">
+<strong>stdout JSON format:</strong> <code>{"decision":"approve","reason":"Safe command"}</code> or <code>{"decision":"block","reason":"Too dangerous"}</code>
+</div>
+
+<div class="footer">
+  <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 71 hooks, 28 commands, 405 tests ·
+  <a href="https://yurukusa.github.io/cc-hook-registry/playground.html">Playground</a> ·
+  <a href="https://yurukusa.github.io/cc-hook-registry/">Registry</a>
+</div>
+</div>
+
+<script>
+function copyBlock(btn) {
+  const code = btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard.writeText(code);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}
+</script>
+</body>
+</html>
