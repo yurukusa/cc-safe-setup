@@ -1409,3 +1409,73 @@ if [ "$FAIL" -gt 0 ]; then
 else
     echo "All tests passed!"
 fi
+if [ -f "$EXDIR/no-console-log.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"console.log(x)"}}' | bash "$EXDIR/no-console-log.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: no-console-log warns on console.log (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/no-eval.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"eval(userInput)"}}' | bash "$EXDIR/no-eval.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: no-eval warns on eval() (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/file-size-limit.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"small.txt","content":"hello"}}' | bash "$EXDIR/file-size-limit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: file-size-limit allows small files"; PASS=$((PASS+1)); } || { echo "  FAIL: file-size-limit small"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/branch-naming-convention.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"git checkout -b random-name"}}' | bash "$EXDIR/branch-naming-convention.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: branch-naming runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/no-todo-ship.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/no-todo-ship.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-todo-ship ignores non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: no-todo-ship non-commit"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/hardcoded-secret-detector.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"const key = \"AKIAIOSFODNN7EXAMPLE\""}}' | bash "$EXDIR/hardcoded-secret-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: hardcoded-secret warns on AWS key (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"app.js","new_string":"const x = 42"}}' | bash "$EXDIR/hardcoded-secret-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: hardcoded-secret ignores normal code"; PASS=$((PASS+1)); } || { echo "  FAIL: hardcoded-secret normal"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/changelog-reminder.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"npm version patch"}}' | bash "$EXDIR/changelog-reminder.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: changelog-reminder runs on version bump (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/license-check.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"/tmp/nonexistent-license-test.js"}}' | bash "$EXDIR/license-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: license-check runs (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/no-wildcard-import.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"app.py","new_string":"from os import *"}}' | bash "$EXDIR/no-wildcard-import.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: no-wildcard-import warns (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/pr-description-check.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"gh pr create --title test"}}' | bash "$EXDIR/pr-description-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: pr-description-check warns on no body (exit $EXIT)"; PASS=$((PASS+1))
+fi
+if [ -f "$EXDIR/rate-limit-guard.sh" ]; then
+    rm -f /tmp/cc-rate-limit-* 2>/dev/null
+    EXIT=0; echo '{}' | bash "$EXDIR/rate-limit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: rate-limit-guard runs (exit $EXIT)"; PASS=$((PASS+1))
+    rm -f /tmp/cc-rate-limit-* 2>/dev/null
+fi
+if [ -f "$EXDIR/backup-before-refactor.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/backup-before-refactor.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: backup-before-refactor ignores safe cmd"; PASS=$((PASS+1)); } || { echo "  FAIL: backup-before-refactor"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/worktree-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/worktree-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-guard ignores safe cmd"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-guard"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/commit-scope-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/commit-scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: commit-scope-guard ignores non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: commit-scope-guard"; FAIL=$((FAIL+1)); }
+fi
+if [ -f "$EXDIR/compact-reminder.sh" ]; then
+    rm -f /tmp/cc-tool-count-* 2>/dev/null
+    EXIT=0; echo '{}' | bash "$EXDIR/compact-reminder.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: compact-reminder runs (exit $EXIT)"; PASS=$((PASS+1))
+    rm -f /tmp/cc-tool-count-* 2>/dev/null
+fi
+if [ -f "$EXDIR/auto-stash-before-pull.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"ls"}}' | bash "$EXDIR/auto-stash-before-pull.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: auto-stash ignores non-pull"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-stash"; FAIL=$((FAIL+1)); }
+fi
