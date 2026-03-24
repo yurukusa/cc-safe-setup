@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 104 examples = **112 hooks**. 35 CLI commands. 531 tests. 5 languages. [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
+8 built-in + 104 examples = **116 hooks**. 36 CLI commands. 531 tests. 5 languages. [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
 
 ```bash
 npx cc-safe-setup
