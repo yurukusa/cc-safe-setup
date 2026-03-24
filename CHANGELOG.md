@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.3.0] - 2026-03-24
+- **--profile**: Switch safety profiles (strict/standard/minimal)
+- **--analyze**: See what Claude did in sessions (blocked commands, git activity, costs)
+- **100 HOOKS milestone** (92 examples + 8 built-in)
+- 10 new hooks: no-console-log, backup-before-refactor, rate-limit-guard, file-size-limit, no-eval, branch-naming-convention, pr-description-check, no-wildcard-import, no-todo-ship, license-check
+- hardcoded-secret-detector, changelog-reminder
+- **31 CLI commands**, **433 tests**
+
+## [8.1.0] - 2026-03-24
+- 100 hooks milestone
+
 ## [8.0.0] - 2026-03-24
 - **--shield**: Maximum safety in one command (fix + scan + install + CLAUDE.md)
 - **88 hooks** (8 built-in + 80 examples), **433 tests**, **29 commands**
