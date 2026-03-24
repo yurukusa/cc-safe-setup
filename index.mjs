@@ -1881,6 +1881,16 @@ async function profile(level) {
     },
   };
 
+  // Check for saved custom profiles
+  const profilesDir = join(HOME, '.claude', 'profiles');
+  if (level && !PROFILES[level]) {
+    const customPath = join(profilesDir, `${level}.json`);
+    if (existsSync(customPath)) {
+      const custom = JSON.parse(readFileSync(customPath, 'utf-8'));
+      PROFILES[level] = { desc: `Custom profile (saved ${custom.savedAt?.split('T')[0] || '?'})`, hooks: custom.hooks || [] };
+    }
+  }
+
   if (!level || !PROFILES[level]) {
     console.log(c.bold + '  Safety Profiles' + c.reset);
     console.log();
@@ -1889,6 +1899,25 @@ async function profile(level) {
       console.log(`  ${c.dim}${prof.desc}${c.reset}`);
       console.log(`  ${c.dim}npx cc-safe-setup --profile ${name}${c.reset}`);
       console.log();
+    }
+
+    // Show saved profiles too
+    if (existsSync(profilesDir)) {
+      const saved = readdirSync(profilesDir).filter(f => f.endsWith('.json'));
+      if (saved.length > 0) {
+        console.log(c.bold + '  Saved Profiles' + c.reset);
+        console.log();
+        for (const f of saved) {
+          const sName = f.replace('.json', '');
+          try {
+            const data = JSON.parse(readFileSync(join(profilesDir, f), 'utf-8'));
+            console.log(`  ${c.bold}${sName}${c.reset} (${data.hooks?.length || 0} hooks)`);
+            console.log(`  ${c.dim}Saved ${data.savedAt?.split('T')[0] || '?'}${c.reset}`);
+            console.log(`  ${c.dim}npx cc-safe-setup --profile ${sName}${c.reset}`);
+            console.log();
+          } catch {}
+        }
+      }
     }
     return;
   }
