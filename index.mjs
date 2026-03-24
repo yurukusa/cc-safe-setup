@@ -108,6 +108,7 @@ const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: proc
 const REPLAY = process.argv.includes('--replay');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
+const SUGGEST = process.argv.includes('--suggest');
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
 const WHY_HOOK = WHY_IDX !== -1 ? process.argv[WHY_IDX + 1] : null;
 
@@ -141,6 +142,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
     npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
     npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
     npx cc-safe-setup --guard "<rule>"  Instantly enforce a rule (generate + install + activate)
@@ -922,6 +924,146 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function suggest() {
+  const { execSync } = await import('child_process');
+  const { readdirSync } = await import('fs');
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --suggest' + c.reset);
+  console.log(c.dim + '  Analyzing your project for potential risks...' + c.reset);
+  console.log();
+
+  const cwd = process.cwd();
+  const risks = [];
+
+  // 1. Check git history for past incidents
+  try {
+    const log = execSync('git log --oneline -100 2>/dev/null', { encoding: 'utf-8' });
+    if (log.includes('revert') || log.includes('Revert')) {
+      risks.push({ level: 'high', risk: 'Reverts in git history — code has been rolled back', hook: 'auto-checkpoint', reason: 'Auto-checkpoint protects against needing reverts' });
+    }
+    if (log.includes('force') || log.includes('--force')) {
+      risks.push({ level: 'high', risk: 'Force operations in history', hook: 'branch-guard', reason: 'Prevents force-push and destructive git' });
+    }
+    if (log.match(/fix.*fix.*fix/i)) {
+      risks.push({ level: 'medium', risk: 'Multiple fix commits in sequence — possible churn', hook: 'verify-before-done', reason: 'Ensures tests pass before committing fixes' });
+    }
+  } catch {}
+
+  // 2. Check for risky file patterns
+  const hasEnv = existsSync(join(cwd, '.env'));
+  const hasEnvExample = existsSync(join(cwd, '.env.example'));
+  if (hasEnv && !existsSync(join(cwd, '.gitignore'))) {
+    risks.push({ level: 'critical', risk: '.env exists but no .gitignore — secrets may be committed', hook: 'secret-guard', reason: 'Blocks git add .env' });
+  }
+  if (hasEnv && hasEnvExample) {
+    risks.push({ level: 'low', risk: '.env and .env.example both exist', hook: 'env-drift-guard', reason: 'Detects variable mismatch between the two' });
+  }
+
+  // 3. Check for database usage
+  const hasPrisma = existsSync(join(cwd, 'prisma'));
+  const hasRails = existsSync(join(cwd, 'Gemfile'));
+  const hasLaravel = existsSync(join(cwd, 'artisan'));
+  const hasDjango = existsSync(join(cwd, 'manage.py'));
+  if (hasPrisma || hasRails || hasLaravel || hasDjango) {
+    risks.push({ level: 'high', risk: 'Database framework detected — destructive migrations possible', hook: 'block-database-wipe', reason: 'Blocks DROP, migrate:fresh, db:drop' });
+  }
+
+  // 4. Check for deployment config
+  const hasDocker = existsSync(join(cwd, 'Dockerfile'));
+  const hasVercel = existsSync(join(cwd, 'vercel.json'));
+  const hasNetlify = existsSync(join(cwd, 'netlify.toml'));
+  if (hasDocker || hasVercel || hasNetlify) {
+    risks.push({ level: 'medium', risk: 'Deploy configuration found', hook: 'deploy-guard', reason: 'Prevents deploy with uncommitted changes' });
+    risks.push({ level: 'low', risk: 'Friday deploys possible', hook: 'no-deploy-friday', reason: 'Block deploys on Fridays' });
+  }
+
+  // 5. Check package.json for risky scripts
+  if (existsSync(join(cwd, 'package.json'))) {
+    try {
+      const pkg = JSON.parse(readFileSync(join(cwd, 'package.json'), 'utf-8'));
+      if (!pkg.scripts?.test || pkg.scripts.test.includes('no test')) {
+        risks.push({ level: 'medium', risk: 'No test script — code changes go unverified', hook: 'test-coverage-guard', reason: 'Warns when code grows without tests' });
+      }
+      if (pkg.scripts?.deploy || pkg.scripts?.publish) {
+        risks.push({ level: 'medium', risk: 'Deploy/publish script exists', hook: 'npm-publish-guard', reason: 'Version check before publish' });
+      }
+    } catch {}
+  }
+
+  // 6. Check for large repo (many files)
+  try {
+    const fileCount = parseInt(execSync('git ls-files | wc -l 2>/dev/null', { encoding: 'utf-8' }).trim());
+    if (fileCount > 500) {
+      risks.push({ level: 'medium', risk: `Large repo (${fileCount} files) — scope creep risk`, hook: 'scope-guard', reason: 'Prevents operations outside project' });
+      risks.push({ level: 'low', risk: 'Large diffs more likely', hook: 'diff-size-guard', reason: 'Warns on large uncommitted changes' });
+    }
+  } catch {}
+
+  // 7. Check for .claude/ config
+  if (!existsSync(join(cwd, 'CLAUDE.md'))) {
+    risks.push({ level: 'medium', risk: 'No CLAUDE.md — Claude has no project-specific rules', hook: null, reason: 'Run --shield to generate one' });
+  }
+
+  // 8. Always recommend essentials if not installed
+  let installed = new Set();
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      for (const groups of Object.values(s.hooks || {})) {
+        for (const g of groups) {
+          for (const h of (g.hooks || [])) {
+            installed.add((h.command || '').split('/').pop().replace('.sh', ''));
+          }
+        }
+      }
+    } catch {}
+  }
+
+  if (!installed.has('destructive-guard')) {
+    risks.push({ level: 'critical', risk: 'No destructive-guard — rm -rf / is not blocked', hook: 'destructive-guard', reason: 'Essential: prevents file system destruction' });
+  }
+
+  // Display results
+  if (risks.length === 0) {
+    console.log(c.green + '  No risks detected. Your project looks safe!' + c.reset);
+    return;
+  }
+
+  risks.sort((a, b) => {
+    const order = { critical: 0, high: 1, medium: 2, low: 3 };
+    return (order[a.level] || 9) - (order[b.level] || 9);
+  });
+
+  const levelColors = { critical: c.red, high: c.red, medium: c.yellow, low: c.dim };
+  const levelIcons = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };
+
+  for (const r of risks) {
+    const color = levelColors[r.level] || c.dim;
+    const icon = levelIcons[r.level] || '·';
+    console.log(`  ${icon} ${color}${r.level.toUpperCase()}${c.reset}: ${r.risk}`);
+    if (r.hook) {
+      const isInstalled = installed.has(r.hook);
+      if (isInstalled) {
+        console.log(c.green + `     ✓ ${r.hook} (installed)` + c.reset);
+      } else {
+        console.log(c.yellow + `     → Install: npx cc-safe-setup --install-example ${r.hook}` + c.reset);
+      }
+    } else {
+      console.log(c.dim + `     → ${r.reason}` + c.reset);
+    }
+    console.log();
+  }
+
+  const unprotected = risks.filter(r => r.hook && !installed.has(r.hook));
+  if (unprotected.length > 0) {
+    console.log(c.bold + `  ${unprotected.length} unprotected risk(s). Fix all:` + c.reset);
+    console.log(c.yellow + '  npx cc-safe-setup --shield' + c.reset);
+  } else {
+    console.log(c.green + '  All detected risks are covered by installed hooks!' + c.reset);
+  }
   console.log();
 }
 
@@ -4118,6 +4260,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (SUGGEST) return suggest();
   if (WHY_IDX !== -1) return why(WHY_HOOK);
   if (REPLAY) return replay();
   if (GUARD_IDX !== -1) return guard(GUARD_DESC);
