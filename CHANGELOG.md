@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.5.0] - 2026-03-24
+- **405 automated tests** (400+ milestone)
+- **71 example hooks** (68→71: fact-check-gate, token-budget-guard, conflict-marker-guard)
+- Hooks Cheat Sheet (copy-paste patterns, 30+ recipes)
+- GitHub Issue answers with hook code (#37888, #38050, #38057)
+
+## [7.4.0] - 2026-03-24
+- **uncommitted-work-guard**: Block destructive git with uncommitted changes (#37888)
+- **test-deletion-guard**: Warn when removing test assertions (#38050)
+- **overwrite-guard**: Warn before silently overwriting files (#37595)
+- **memory-write-guard**: Log writes to ~/.claude/ directory (#38040)
+- 68 example hooks, 394 tests
+
 ## [7.3.0] - 2026-03-24
 - **--quickfix**: Auto-detect and fix 10 common Claude Code problems
 - **367 automated tests** (+47 from v7.2.0, full example hook coverage)
