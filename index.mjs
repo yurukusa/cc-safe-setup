@@ -937,6 +937,11 @@ function issues() {
     { hook: 'binary-file-guard', issues: ['Binary file corruption from Write tool'] },
     { hook: 'stale-branch-guard', issues: ['Merge conflicts from stale branches'] },
     { hook: 'reinject-claudemd', issues: ['#6354 CLAUDE.md lost after compaction (27r)'] },
+    { hook: 'no-sudo-guard', issues: ['Privilege escalation prevention'] },
+    { hook: 'no-install-global', issues: ['System package pollution'] },
+    { hook: 'protect-claudemd', issues: ['AI modifying its own config files'] },
+    { hook: 'git-tag-guard', issues: ['Accidental tag push'] },
+    { hook: 'npm-publish-guard', issues: ['Accidental publish without version check'] },
   ];
 
   console.log();
