@@ -1555,6 +1555,9 @@ STATS_OUT=$(node "$CLI" --stats 2>&1) || true
 if echo "$STATS_OUT" | grep -q "stats\|Stats\|block\|command"; then echo "  PASS: --stats runs"; PASS=$((PASS + 1)); else echo "  FAIL: --stats"; FAIL=$((FAIL + 1)); fi
 
 
+
+WHY_OUT=$(node "$CLI" --why destructive-guard 2>&1) || true
+if echo "$WHY_OUT" | grep -q 'C:.Users\|NTFS\|36339'; then echo "  PASS: --why shows incident"; PASS=$((PASS + 1)); else echo "  FAIL: --why"; FAIL=$((FAIL + 1)); fi
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
