@@ -95,6 +95,7 @@ const ANALYZE = process.argv.includes('--analyze');
 const TEAM = process.argv.includes('--team');
 const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
 const MIGRATE_FROM = MIGRATE_FROM_IDX !== -1 ? process.argv[MIGRATE_FROM_IDX + 1] : null;
+const HEALTH = process.argv.includes('--health');
 const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
@@ -132,6 +133,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --health        Hook health dashboard (size, permissions, age)
     npx cc-safe-setup --migrate-from <tool>  Migrate from safety-net/hooks-mastery/etc.
     npx cc-safe-setup --team         Set up project-level hooks (commit to repo for team)
     npx cc-safe-setup --profile <level>  Switch safety profile (strict/standard/minimal)
@@ -840,6 +842,92 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function health() {
+  const { readdirSync, statSync } = await import('fs');
+  console.log();
+  console.log(c.bold + '  Hook Health Dashboard' + c.reset);
+  console.log();
+
+  if (!existsSync(HOOKS_DIR)) {
+    console.log(c.red + '  No hooks directory found.' + c.reset);
+    console.log(c.dim + '  Run: npx cc-safe-setup --shield' + c.reset);
+    return;
+  }
+
+  const hooks = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh') || f.endsWith('.py'));
+  if (hooks.length === 0) {
+    console.log(c.yellow + '  No hooks installed.' + c.reset);
+    return;
+  }
+
+  // Table header
+  const pad = (s, n) => s.substring(0, n).padEnd(n);
+  console.log(c.dim + '  ' + pad('Hook', 30) + pad('Size', 8) + pad('Perms', 7) + pad('Age', 12) + 'Shebang' + c.reset);
+  console.log(c.dim + '  ' + '─'.repeat(70) + c.reset);
+
+  let healthy = 0, issues = 0;
+  const now = Date.now();
+
+  for (const h of hooks.sort()) {
+    const fullPath = join(HOOKS_DIR, h);
+    const st = statSync(fullPath);
+    const content = readFileSync(fullPath, 'utf-8');
+    const firstLine = content.split('\n')[0];
+
+    // Size
+    const size = st.size < 1024 ? st.size + 'B' : Math.round(st.size / 1024) + 'KB';
+
+    // Permissions
+    const isExec = !!(st.mode & 0o111);
+    const perms = isExec ? c.green + '✓ exec' + c.reset : c.red + '✗ exec' + c.reset;
+
+    // Age
+    const ageDays = Math.floor((now - st.mtimeMs) / 86400000);
+    const age = ageDays === 0 ? 'today' : ageDays === 1 ? '1 day' : ageDays + ' days';
+
+    // Shebang
+    const hasShebang = firstLine.startsWith('#!');
+    const shebang = hasShebang ? c.green + '✓' + c.reset : c.red + '✗' + c.reset;
+
+    // Status icon
+    const ok = isExec && hasShebang;
+    const icon = ok ? c.green + '●' + c.reset : c.red + '●' + c.reset;
+    if (ok) healthy++; else issues++;
+
+    console.log('  ' + icon + ' ' + pad(h, 29) + pad(size, 8) + pad(isExec ? '✓ exec' : '✗ exec', 7) + pad(age, 12) + (hasShebang ? '✓' : '✗'));
+  }
+
+  console.log(c.dim + '  ' + '─'.repeat(70) + c.reset);
+  console.log(`  ${c.green}${healthy} healthy${c.reset} · ${issues > 0 ? c.red + issues + ' issues' + c.reset : c.dim + '0 issues' + c.reset} · ${hooks.length} total`);
+
+  if (issues > 0) {
+    console.log();
+    console.log(c.yellow + '  Fix issues: npx cc-safe-setup --quickfix' + c.reset);
+  }
+
+  // Settings.json hook count
+  console.log();
+  if (existsSync(SETTINGS_PATH)) {
+    try {
+      const s = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+      let configured = 0;
+      for (const groups of Object.values(s.hooks || {})) {
+        for (const g of groups) {
+          configured += (g.hooks || []).length;
+        }
+      }
+      console.log(c.dim + `  ${configured} hooks configured in settings.json` + c.reset);
+      if (configured < hooks.length) {
+        console.log(c.yellow + `  ${hooks.length - configured} hooks installed but not configured.` + c.reset);
+        console.log(c.dim + '  Run --shield to auto-configure all hooks.' + c.reset);
+      }
+    } catch {
+      console.log(c.red + '  settings.json has syntax errors.' + c.reset);
+    }
+  }
   console.log();
 }
 
@@ -3519,6 +3607,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (HEALTH) return health();
   if (MIGRATE_FROM_IDX !== -1) return migrateFrom(MIGRATE_FROM);
   if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
