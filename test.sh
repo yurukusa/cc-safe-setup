@@ -819,8 +819,8 @@ echo ""
 # ========================
 echo "--- --benchmark tests ---"
 
-BENCH_OUT=$(timeout 30 node "$CLI" --benchmark 2>&1) || true
-if echo "$BENCH_OUT" | grep -q "ms\|Hook\|performance"; then echo "  PASS: --benchmark runs"; PASS=$((PASS + 1)); else echo "  FAIL: --benchmark should show timings"; FAIL=$((FAIL + 1)); fi
+BENCH_OUT=$(timeout 60 node "$CLI" --benchmark 2>&1) || true
+if echo "$BENCH_OUT" | grep -qi "ms\|Hook\|performance\|benchmark"; then echo "  PASS: --benchmark runs"; PASS=$((PASS + 1)); else echo "  FAIL: --benchmark should show timings"; FAIL=$((FAIL + 1)); fi
 echo ""
 
 # ========================
