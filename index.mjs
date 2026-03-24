@@ -111,6 +111,7 @@ const SAVE_PROFILE = SAVE_PROFILE_IDX !== -1 ? process.argv[SAVE_PROFILE_IDX + 1
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 const SUGGEST = process.argv.includes('--suggest');
+const INIT_PROJECT = process.argv.includes('--init-project');
 const TEST_HOOK_IDX = process.argv.findIndex(a => a === '--test-hook');
 const TEST_HOOK = TEST_HOOK_IDX !== -1 ? process.argv[TEST_HOOK_IDX + 1] : null;
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
@@ -148,6 +149,7 @@ if (HELP) {
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
     npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
     npx cc-safe-setup --save-profile <name>  Save current hooks as a named profile
+    npx cc-safe-setup --init-project    Complete project setup (CLAUDE.md + hooks + CI + .gitignore)
     npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
     npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
     npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
@@ -1067,6 +1069,68 @@ async function saveProfile(name) {
   console.log(c.green + `  ✓ Profile "${name}" saved (${hooks.length} hooks)` + c.reset);
   console.log(c.dim + `  File: ${profilePath}` + c.reset);
   console.log(c.dim + `  Load: npx cc-safe-setup --profile ${name}` + c.reset);
+  console.log();
+}
+
+async function initProject() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --init-project' + c.reset);
+  console.log(c.dim + '  Complete Claude Code setup for this project' + c.reset);
+  console.log();
+
+  const cwd = process.cwd();
+  let steps = 0;
+
+  // Step 1: Shield (hooks + stack detection + settings)
+  console.log(c.bold + '  Step 1: Safety hooks' + c.reset);
+  await shield();
+  steps++;
+
+  // Step 2: .gitignore — add .claude/settings.local.json
+  console.log(c.bold + '  Step 2: .gitignore' + c.reset);
+  const gitignorePath = join(cwd, '.gitignore');
+  if (existsSync(gitignorePath)) {
+    const gi = readFileSync(gitignorePath, 'utf-8');
+    const additions = [];
+    if (!gi.includes('.claude/settings.local.json')) additions.push('.claude/settings.local.json');
+    if (!gi.includes('.env')) additions.push('.env');
+    if (!gi.includes('.env.local')) additions.push('.env.local');
+    if (additions.length > 0) {
+      writeFileSync(gitignorePath, gi.trimEnd() + '\n\n# Claude Code\n' + additions.join('\n') + '\n');
+      console.log(c.green + `  +` + c.reset + ` Added ${additions.length} entries to .gitignore`);
+    } else {
+      console.log(c.dim + '  ✓ .gitignore already configured' + c.reset);
+    }
+  } else {
+    writeFileSync(gitignorePath, '# Claude Code\n.claude/settings.local.json\n.env\n.env.local\nnode_modules/\n');
+    console.log(c.green + '  +' + c.reset + ' Created .gitignore');
+  }
+  steps++;
+  console.log();
+
+  // Step 3: Generate CI workflow
+  console.log(c.bold + '  Step 3: CI workflow' + c.reset);
+  const ciPath = join(cwd, '.github', 'workflows', 'claude-code-safety.yml');
+  if (!existsSync(ciPath)) {
+    generateCI();
+  } else {
+    console.log(c.dim + '  ✓ CI workflow already exists' + c.reset);
+  }
+  steps++;
+  console.log();
+
+  // Step 4: Risk analysis
+  console.log(c.bold + '  Step 4: Risk analysis' + c.reset);
+  await suggest();
+  steps++;
+
+  // Summary
+  console.log();
+  console.log(c.bold + c.green + '  ✓ Project initialized!' + c.reset);
+  console.log(c.dim + `  ${steps} steps completed.` + c.reset);
+  console.log();
+  console.log(c.dim + '  Next: git add .claude/ CLAUDE.md .github/ .gitignore' + c.reset);
+  console.log(c.dim + '  Then: git commit -m "chore: initialize Claude Code safety"' + c.reset);
   console.log();
 }
 
@@ -4434,6 +4498,7 @@ async function main() {
   if (WATCH) return watch();
   if (TEST_HOOK_IDX !== -1) return testHook(TEST_HOOK);
   if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);
+  if (INIT_PROJECT) return initProject();
   if (SUGGEST) return suggest();
   if (WHY_IDX !== -1) return why(WHY_HOOK);
   if (REPLAY) return replay();
