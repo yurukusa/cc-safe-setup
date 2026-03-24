@@ -1,5 +1,10 @@
 # Changelog
 
+## [28.1.0] - 2026-03-25
+- **305 HOOKS** — 244 new hooks in session 40 (61→305)
+- 210 hooks in web registry
+- Session 40 stats: 68 npm releases, 9 OSS PRs, 15 issue answers, 25 articles
+
 ## [28.0.0] - 2026-03-25
 - **300 HOOKS** — 239 new hooks in one session (61→300)
 - 40 React/JS/performance hooks, 15 OWASP security hooks, 10 a11y hooks
