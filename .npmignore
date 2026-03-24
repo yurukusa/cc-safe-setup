@@ -2,3 +2,11 @@ demo.svg
 test.sh
 .github/
 CHANGELOG.md
+docs/
+.claude/
+cc-safe-setup-export.json
+examples/go/
+examples/rust/
+examples/typescript/
+examples/python/__pycache__/
+*.tgz
