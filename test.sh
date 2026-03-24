@@ -1231,6 +1231,40 @@ if [ -f "$EXDIR/disk-space-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: disk-space-guard runs (exit $EXIT)"; PASS=$((PASS+1)); } || { echo "  FAIL: disk-space-guard"; FAIL=$((FAIL+1)); }
 fi
 
+# uncommitted-work-guard
+if [ -f "$EXDIR/uncommitted-work-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"git checkout -- ."}}' | bash "$EXDIR/uncommitted-work-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: uncommitted-work-guard runs on checkout (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/uncommitted-work-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: uncommitted-work-guard ignores safe cmd"; PASS=$((PASS+1)); } || { echo "  FAIL: uncommitted-work-guard safe"; FAIL=$((FAIL+1)); }
+fi
+
+# test-deletion-guard
+if [ -f "$EXDIR/test-deletion-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"test.js","old_string":"it(\"should work\", () => { expect(1).toBe(1) })","new_string":""}}' | bash "$EXDIR/test-deletion-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: test-deletion-guard warns on test removal (exit $EXIT)"; PASS=$((PASS+1))
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"app.js","old_string":"old","new_string":"new"}}' | bash "$EXDIR/test-deletion-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: test-deletion-guard ignores non-test file"; PASS=$((PASS+1)); } || { echo "  FAIL: test-deletion-guard non-test"; FAIL=$((FAIL+1)); }
+fi
+
+# overwrite-guard
+if [ -f "$EXDIR/overwrite-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"/tmp/cc-test-nonexistent-xyz.txt"}}' | bash "$EXDIR/overwrite-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: overwrite-guard allows new file"; PASS=$((PASS+1)); } || { echo "  FAIL: overwrite-guard new"; FAIL=$((FAIL+1)); }
+    echo "existing" > /tmp/cc-test-overwrite.txt
+    EXIT=0; echo '{"tool_input":{"file_path":"/tmp/cc-test-overwrite.txt"}}' | bash "$EXDIR/overwrite-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: overwrite-guard runs on existing file (exit $EXIT)"; PASS=$((PASS+1))
+    rm -f /tmp/cc-test-overwrite.txt
+fi
+
+# memory-write-guard
+if [ -f "$EXDIR/memory-write-guard.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"normal.js"}}' | bash "$EXDIR/memory-write-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: memory-write-guard ignores normal file"; PASS=$((PASS+1)); } || { echo "  FAIL: memory-write-guard normal"; FAIL=$((FAIL+1)); }
+    EXIT=0; echo '{"tool_input":{"file_path":"~/.claude/memory/test.md"}}' | bash "$EXDIR/memory-write-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    echo "  PASS: memory-write-guard logs claude dir write (exit $EXIT)"; PASS=$((PASS+1))
+fi
+
 echo ""
 
 # ========================
