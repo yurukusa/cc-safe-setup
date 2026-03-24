@@ -86,6 +86,8 @@ const SHARE = process.argv.includes('--share');
 const BENCHMARK = process.argv.includes('--benchmark');
 const DASHBOARD = process.argv.includes('--dashboard');
 const ISSUES = process.argv.includes('--issues');
+const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
+const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -107,6 +109,7 @@ if (HELP) {
     npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
     npx cc-safe-setup --scan       Detect tech stack, recommend hooks
     npx cc-safe-setup --learn      Learn from your block history
+    npx cc-safe-setup --compare <a> <b>  Compare two hooks side-by-side
     npx cc-safe-setup --issues        Show GitHub Issues each hook addresses
     npx cc-safe-setup --dashboard     Real-time status dashboard
     npx cc-safe-setup --benchmark     Measure hook execution time
@@ -804,6 +807,90 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function compare(hookA, hookB) {
+  const { spawnSync } = await import('child_process');
+  const { statSync } = await import('fs');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --compare' + c.reset);
+  console.log();
+
+  if (!hookA || !hookB) {
+    console.log(c.red + '  Usage: npx cc-safe-setup --compare <hook-a.sh> <hook-b.sh>' + c.reset);
+    process.exit(1);
+  }
+
+  // Resolve paths
+  const resolveHook = (h) => {
+    if (existsSync(h)) return h;
+    const inHooks = join(HOOKS_DIR, h);
+    if (existsSync(inHooks)) return inHooks;
+    const inExamples = join(__dirname, 'examples', h);
+    if (existsSync(inExamples)) return inExamples;
+    return null;
+  };
+
+  const pathA = resolveHook(hookA);
+  const pathB = resolveHook(hookB);
+
+  if (!pathA) { console.log(c.red + '  Hook A not found: ' + hookA + c.reset); process.exit(1); }
+  if (!pathB) { console.log(c.red + '  Hook B not found: ' + hookB + c.reset); process.exit(1); }
+
+  const nameA = hookA.split('/').pop();
+  const nameB = hookB.split('/').pop();
+
+  // Test cases
+  const tests = [
+    { name: 'empty input', input: '{}' },
+    { name: 'safe command', input: '{"tool_input":{"command":"echo hello"}}' },
+    { name: 'rm -rf /', input: '{"tool_input":{"command":"rm -rf /"}}' },
+    { name: 'rm -rf ~', input: '{"tool_input":{"command":"rm -rf ~"}}' },
+    { name: 'git push main', input: '{"tool_input":{"command":"git push origin main"}}' },
+    { name: 'git push --force', input: '{"tool_input":{"command":"git push --force"}}' },
+    { name: 'git add .env', input: '{"tool_input":{"command":"git add .env"}}' },
+    { name: 'git reset --hard', input: '{"tool_input":{"command":"git reset --hard"}}' },
+    { name: 'npm test', input: '{"tool_input":{"command":"npm test"}}' },
+    { name: 'cd && git log', input: '{"tool_input":{"command":"cd /tmp && git log"}}' },
+  ];
+
+  function runHook(path, input) {
+    const start = process.hrtime.bigint();
+    const result = spawnSync('bash', [path], { input, timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] });
+    const ms = Number(process.hrtime.bigint() - start) / 1_000_000;
+    return { exit: result.status ?? -1, ms, stderr: (result.stderr || Buffer.alloc(0)).toString().slice(0, 80) };
+  }
+
+  // Header
+  console.log('  ' + c.bold + 'Test'.padEnd(20) + nameA.padEnd(25) + nameB + c.reset);
+  console.log('  ' + '-'.repeat(65));
+
+  let sameCount = 0;
+  let diffCount = 0;
+
+  for (const test of tests) {
+    const a = runHook(pathA, test.input);
+    const b = runHook(pathB, test.input);
+    const same = a.exit === b.exit;
+    if (same) sameCount++; else diffCount++;
+
+    const exitA = a.exit === 0 ? c.green + 'allow' + c.reset : a.exit === 2 ? c.red + 'BLOCK' + c.reset : c.yellow + 'err' + a.exit + c.reset;
+    const exitB = b.exit === 0 ? c.green + 'allow' + c.reset : b.exit === 2 ? c.red + 'BLOCK' + c.reset : c.yellow + 'err' + b.exit + c.reset;
+    const marker = same ? ' ' : c.yellow + '≠' + c.reset;
+
+    console.log('  ' + marker + ' ' + test.name.padEnd(18) + (exitA + ' ' + a.ms.toFixed(0) + 'ms').padEnd(30) + exitB + ' ' + b.ms.toFixed(0) + 'ms');
+  }
+
+  // Size comparison
+  const sizeA = statSync(pathA).size;
+  const sizeB = statSync(pathB).size;
+
+  console.log('  ' + '-'.repeat(65));
+  console.log('  Same decisions: ' + sameCount + '/' + tests.length);
+  if (diffCount > 0) console.log('  ' + c.yellow + 'Different: ' + diffCount + c.reset);
+  console.log('  Size: ' + nameA + ' ' + sizeA + 'B vs ' + nameB + ' ' + sizeB + 'B');
   console.log();
 }
 
@@ -2327,6 +2414,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (COMPARE) return compare(COMPARE.a, COMPARE.b);
   if (ISSUES) return issues();
   if (DASHBOARD) return dashboard();
   if (BENCHMARK) return benchmark();
