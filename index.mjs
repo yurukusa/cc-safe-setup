@@ -105,6 +105,7 @@ const PROFILE_IDX = process.argv.findIndex(a => a === '--profile');
 const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
+const REPLAY = process.argv.includes('--replay');
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 
@@ -138,6 +139,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
     npx cc-safe-setup --guard "<rule>"  Instantly enforce a rule (generate + install + activate)
     npx cc-safe-setup --diff-hooks <path>  Compare hooks between two settings files
     npx cc-safe-setup --from-claudemd  Convert CLAUDE.md rules into hooks
@@ -850,6 +852,83 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function replay() {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --replay' + c.reset);
+  console.log(c.dim + '  Replay blocked commands timeline' + c.reset);
+  console.log();
+
+  const LOG_PATH = join(HOME, '.claude', 'blocked-commands.log');
+  if (!existsSync(LOG_PATH)) {
+    console.log(c.dim + '  No blocked commands log found.' + c.reset);
+    console.log(c.dim + '  Hooks will create it when they block something.' + c.reset);
+    return;
+  }
+
+  const content = readFileSync(LOG_PATH, 'utf-8');
+  const lines = content.split('\n').filter(l => l.trim());
+
+  if (lines.length === 0) {
+    console.log(c.dim + '  Log is empty — no commands blocked yet.' + c.reset);
+    return;
+  }
+
+  // Parse entries
+  const entries = [];
+  for (const line of lines) {
+    const match = line.match(/^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|\s*cmd:\s*(.+)$/);
+    if (match) {
+      entries.push({ time: match[1], reason: match[2].trim(), cmd: match[3].trim() });
+    }
+  }
+
+  // Group by day
+  const days = {};
+  for (const e of entries) {
+    const day = e.time.split('T')[0] || 'unknown';
+    if (!days[day]) days[day] = [];
+    days[day].push(e);
+  }
+
+  // Show last 7 days
+  const sortedDays = Object.keys(days).sort().slice(-7);
+
+  for (const day of sortedDays) {
+    const dayEntries = days[day];
+    console.log(c.bold + `  ${day}` + c.reset + c.dim + ` (${dayEntries.length} blocks)` + c.reset);
+
+    // Category counts
+    const cats = {};
+    for (const e of dayEntries) {
+      const cat = e.reason.split(' ')[0] || 'other';
+      cats[cat] = (cats[cat] || 0) + 1;
+    }
+
+    // Top categories as mini bar chart
+    const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    for (const [cat, count] of sorted) {
+      const bar = '█'.repeat(Math.min(count, 30));
+      const color = cat.match(/rm|reset|clean|Remove/i) ? c.red : cat.match(/push|force/i) ? c.red : c.yellow;
+      console.log(`    ${color}${bar}${c.reset} ${count}× ${cat}`);
+    }
+
+    // Show last 3 entries of the day
+    const recent = dayEntries.slice(-3);
+    for (const e of recent) {
+      const time = (e.time.split('T')[1] || '').replace(/\+.*/, '').substring(0, 8);
+      console.log(c.dim + `    ${time} ${e.reason.substring(0, 40)} → ${e.cmd.substring(0, 50)}` + c.reset);
+    }
+    console.log();
+  }
+
+  // Summary
+  console.log(c.bold + '  Summary' + c.reset);
+  console.log(`  Total blocks: ${entries.length}`);
+  console.log(`  Days with blocks: ${Object.keys(days).length}`);
+  console.log(`  Avg per day: ${Math.round(entries.length / Math.max(Object.keys(days).length, 1))}`);
   console.log();
 }
 
@@ -3905,6 +3984,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (REPLAY) return replay();
   if (GUARD_IDX !== -1) return guard(GUARD_DESC);
   if (DIFF_HOOKS_IDX !== -1) return diffHooks(DIFF_HOOKS);
   if (FROM_CLAUDEMD) return fromClaudeMd();
