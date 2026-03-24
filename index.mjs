@@ -111,6 +111,8 @@ const SAVE_PROFILE = SAVE_PROFILE_IDX !== -1 ? process.argv[SAVE_PROFILE_IDX + 1
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
 const CREATE_DESC = CREATE_IDX !== -1 ? process.argv.slice(CREATE_IDX + 1).join(' ') : null;
 const SUGGEST = process.argv.includes('--suggest');
+const TEST_HOOK_IDX = process.argv.findIndex(a => a === '--test-hook');
+const TEST_HOOK = TEST_HOOK_IDX !== -1 ? process.argv[TEST_HOOK_IDX + 1] : null;
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
 const WHY_HOOK = WHY_IDX !== -1 ? process.argv[WHY_IDX + 1] : null;
 
@@ -144,6 +146,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
+    npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
     npx cc-safe-setup --save-profile <name>  Save current hooks as a named profile
     npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
     npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
@@ -928,6 +931,81 @@ async function fullSetup() {
   console.log(c.dim + '  • 8 built-in safety hooks' + c.reset);
   console.log(c.dim + '  • Project-specific hook recommendations' + c.reset);
   console.log(c.dim + '  • Safety score and README badge' + c.reset);
+  console.log();
+}
+
+async function testHook(hookName) {
+  const { execSync } = await import('child_process');
+  console.log();
+
+  if (!hookName) {
+    console.log(c.bold + '  cc-safe-setup --test-hook <name>' + c.reset);
+    console.log(c.dim + '  Test any hook with sample inputs.' + c.reset);
+    console.log();
+    console.log('  Example: npx cc-safe-setup --test-hook destructive-guard');
+    return;
+  }
+
+  const name = hookName.replace('.sh', '');
+  // Find the hook
+  let hookPath = join(HOOKS_DIR, `${name}.sh`);
+  if (!existsSync(hookPath)) hookPath = join(__dirname, 'examples', `${name}.sh`);
+  if (!existsSync(hookPath)) {
+    console.log(c.red + `  Hook "${name}" not found.` + c.reset);
+    return;
+  }
+
+  console.log(c.bold + `  Testing: ${name}` + c.reset);
+  console.log(c.dim + `  File: ${hookPath}` + c.reset);
+  console.log();
+
+  // Sample inputs per hook type
+  const SAMPLES = {
+    'should-block': [
+      { desc: 'dangerous rm', input: '{"tool_input":{"command":"rm -rf /"}}' },
+      { desc: 'git reset hard', input: '{"tool_input":{"command":"git reset --hard"}}' },
+      { desc: 'force push', input: '{"tool_input":{"command":"git push origin main --force"}}' },
+      { desc: 'git add .env', input: '{"tool_input":{"command":"git add .env"}}' },
+      { desc: 'sudo command', input: '{"tool_input":{"command":"sudo rm -rf /home"}}' },
+      { desc: 'drop database', input: '{"tool_input":{"command":"DROP DATABASE production"}}' },
+    ],
+    'should-allow': [
+      { desc: 'safe ls', input: '{"tool_input":{"command":"ls -la"}}' },
+      { desc: 'git status', input: '{"tool_input":{"command":"git status"}}' },
+      { desc: 'npm test', input: '{"tool_input":{"command":"npm test"}}' },
+      { desc: 'cat file', input: '{"tool_input":{"command":"cat README.md"}}' },
+      { desc: 'empty input', input: '{}' },
+    ],
+  };
+
+  let pass = 0, total = 0;
+
+  for (const [category, samples] of Object.entries(SAMPLES)) {
+    console.log(c.dim + `  ${category}:` + c.reset);
+    for (const sample of samples) {
+      total++;
+      try {
+        execSync(`echo '${sample.input}' | bash "${hookPath}"`, { stdio: 'pipe', timeout: 5000 });
+        // Exit 0 = allowed
+        const icon = category === 'should-allow' ? c.green + '✓' : c.yellow + '·';
+        console.log(`    ${icon}${c.reset} ${sample.desc} → allowed (exit 0)`);
+        if (category === 'should-allow') pass++;
+      } catch (e) {
+        const code = e.status;
+        if (code === 2) {
+          // Blocked
+          const icon = category === 'should-block' ? c.green + '✓' : c.red + '✗';
+          console.log(`    ${icon}${c.reset} ${sample.desc} → ${c.red}BLOCKED${c.reset} (exit 2)`);
+          if (category === 'should-block') pass++;
+        } else {
+          console.log(`    ${c.yellow}?${c.reset} ${sample.desc} → exit ${code}`);
+        }
+      }
+    }
+  }
+
+  console.log();
+  console.log(`  ${pass}/${total} samples matched expected behavior`);
   console.log();
 }
 
@@ -4340,6 +4418,7 @@ async function main() {
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
   if (WATCH) return watch();
+  if (TEST_HOOK_IDX !== -1) return testHook(TEST_HOOK);
   if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);
   if (SUGGEST) return suggest();
   if (WHY_IDX !== -1) return why(WHY_HOOK);
