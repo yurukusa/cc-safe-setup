@@ -64,7 +64,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 Each hook exists because a real incident happened without it.
 
-## All 26 Commands
+## All 45 Commands
 
 | Command | What It Does |
 |---------|-------------|
@@ -87,7 +87,7 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 118 examples |
+| `--install-example <name>` | Install from 316 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
@@ -107,6 +107,11 @@ Each hook exists because a real incident happened without it.
 | `--why <hook>` | Show real incident behind hook |
 | `--migrate-from <tool>` | Migrate from other hook tools |
 | `--diff-hooks [path]` | Compare hook configurations |
+| `--init-project` | Full project setup (hooks + CLAUDE.md + CI) |
+| `--score` | CI-friendly safety score (exit 1 if below threshold) |
+| `--test-hook <name>` | Test a specific hook with sample input |
+| `--changelog` | Show what changed in each version |
+| `--report` | Generate safety report |
 | `--help` | Show help |
 
 ## Quick Start by Scenario

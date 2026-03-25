@@ -2391,7 +2391,7 @@ async function shield() {
   if (existsSync(join(cwd, '.env'))) extras.push('env-source-guard');
 
   // Always include these for maximum safety
-  extras.push('scope-guard', 'no-sudo-guard', 'protect-claudemd');
+  extras.push('scope-guard', 'no-sudo-guard', 'protect-claudemd', 'memory-write-guard', 'skill-gate', 'auto-approve-test', 'auto-approve-readonly');
 
   for (const ex of extras) {
     const exPath = join(__dirname, 'examples', `${ex}.sh`);
