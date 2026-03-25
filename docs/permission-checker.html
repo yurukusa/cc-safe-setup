@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Permission Checker — cc-safe-setup</title>
+<meta name="description" content="Paste your settings.json and check if all hook scripts exist and are executable. Diagnose Permission denied errors.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+textarea{width:100%;min-height:200px;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;padding:.8rem;font-family:monospace;font-size:.82rem;resize:vertical}
+button{background:#238636;color:#fff;border:none;padding:.5rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.85rem;margin:.8rem 0}
+button:hover{background:#2ea043}
+.results{margin-top:1rem}
+.hook{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0;font-size:.82rem;display:flex;align-items:center;gap:.5rem}
+.hook.ok{border-color:#238636}
+.hook.warn{border-color:#d29922}
+.hook.err{border-color:#da3633}
+.icon{font-size:1rem;flex-shrink:0}
+.path{color:#8b949e;font-family:monospace;font-size:.75rem;word-break:break-all}
+.tip{background:rgba(88,166,255,0.08);border-left:3px solid #58a6ff;padding:.5rem .8rem;margin:.8rem 0;font-size:.8rem;color:#8b949e}
+.summary{display:flex;gap:1.5rem;margin:1rem 0;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:1.5rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.7rem;color:#8b949e;text-transform:uppercase}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Permission Checker</h1>
+<p class="sub">Paste your settings.json to check all hook commands for common issues.</p>
+
+<div class="tip">
+<strong>Getting "Permission denied" or "No such file"?</strong> This tool analyzes your hook configuration and identifies broken paths, missing scripts, and Windows backslash issues.
+</div>
+
+<textarea id="input" placeholder='Paste your ~/.claude/settings.json here...'></textarea>
+<button onclick="check()">Check Hooks</button>
+
+<div id="results" class="results"></div>
+
+<div style="max-width:900px;margin:1.5rem auto;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.5rem;text-align:center">
+<div style="color:#f0f6fc;font-weight:600;margin-bottom:.3rem">Need the full production setup?</div>
+<div style="color:#8b949e;font-size:.85rem;margin-bottom:.5rem">16 hooks + templates + CLAUDE.md from 700+ hours autonomous. $19 pay-what-you-want.</div>
+<a href="https://yurukusa.gumroad.com/l/cc-codex-ops-kit?utm_source=landing&utm_medium=page&utm_campaign=permission-checker" style="display:inline-block;background:#58a6ff;color:#0d1117;padding:.4rem 1.2rem;border-radius:6px;text-decoration:none;font-weight:600;font-size:.85rem">Get the Ops Kit →</a>
+</div>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · MIT License
+</div>
+</div>
+
+<script>
+function check() {
+  const el = document.getElementById('results');
+  const raw = document.getElementById('input').value.trim();
+  if (!raw) { el.innerHTML = '<p style="color:#d29922">Paste your settings.json first.</p>'; return; }
+
+  let settings;
+  try { settings = JSON.parse(raw); } catch(e) {
+    el.innerHTML = `<p style="color:#da3633">Invalid JSON: ${e.message}</p>`;
+    return;
+  }
+
+  const hooks = settings.hooks || {};
+  const results = [];
+  let total = 0, ok = 0, warn = 0, err = 0;
+
+  for (const [trigger, matchers] of Object.entries(hooks)) {
+    if (!Array.isArray(matchers)) continue;
+    for (const m of matchers) {
+      if (!m.hooks || !Array.isArray(m.hooks)) continue;
+      for (const h of m.hooks) {
+        if (!h.command) continue;
+        total++;
+        const cmd = h.command;
+        const issues = [];
+
+        // Check for Windows backslash paths
+        if (cmd.includes('\\')) {
+          issues.push({level: 'err', msg: 'Contains backslashes (\\) — bash cannot resolve these. Use forward slashes (/).'});
+        }
+
+        // Check for absolute vs relative path
+        const parts = cmd.split(/\s+/);
+        const script = parts[parts.length - 1];
+
+        if (script.startsWith('C:') || script.startsWith('D:')) {
+          if (!cmd.includes('/')) {
+            issues.push({level: 'err', msg: 'Windows drive letter with backslashes. Convert to: ' + cmd.replace(/\\\\/g, '/').replace(/\\/g, '/')});
+          }
+        }
+
+        // Check for common path issues
+        if (script.includes('~')) {
+          issues.push({level: 'warn', msg: 'Uses ~ (tilde) — may not expand in all contexts. Consider using absolute path.'});
+        }
+
+        if (!script.endsWith('.sh') && !script.endsWith('.py') && !script.includes('/')) {
+          issues.push({level: 'warn', msg: 'Not a file path — may be a system command. Verify it exists in PATH.'});
+        }
+
+        // Check trigger+matcher consistency
+        if (trigger === 'PreToolUse' && !m.matcher) {
+          issues.push({level: 'warn', msg: 'Empty matcher on PreToolUse — runs on ALL tools. Consider restricting to "Bash" or "Edit|Write".'});
+        }
+
+        const status = issues.some(i => i.level === 'err') ? 'err' : issues.some(i => i.level === 'warn') ? 'warn' : 'ok';
+        if (status === 'err') err++;
+        else if (status === 'warn') warn++;
+        else ok++;
+
+        results.push({trigger, matcher: m.matcher || '(all)', cmd, issues, status});
+      }
+    }
+  }
+
+  let html = `<div class="summary">
+    <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">hooks</div></div>
+    <div class="stat"><div class="stat-num" style="color:#39d353">${ok}</div><div class="stat-label">ok</div></div>
+    <div class="stat"><div class="stat-num" style="color:#d29922">${warn}</div><div class="stat-label">warnings</div></div>
+    <div class="stat"><div class="stat-num" style="color:#da3633">${err}</div><div class="stat-label">errors</div></div>
+  </div>`;
+
+  if (total === 0) {
+    html += '<p style="color:#d29922">No hooks found in this settings.json. Are you sure this is the right file?</p>';
+  }
+
+  for (const r of results) {
+    const icon = r.status === 'ok' ? '✅' : r.status === 'warn' ? '⚠️' : '❌';
+    html += `<div class="hook ${r.status}">
+      <span class="icon">${icon}</span>
+      <div>
+        <strong>${r.trigger}</strong> [${r.matcher}]
+        <div class="path">${esc(r.cmd)}</div>
+        ${r.issues.map(i => `<div style="color:${i.level==='err'?'#da3633':'#d29922'};font-size:.75rem;margin-top:.2rem">${esc(i.msg)}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  if (err > 0) {
+    html += `<div class="tip"><strong>Quick fix:</strong> Run <code>npx cc-safe-setup --doctor</code> to auto-diagnose and fix common issues.</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
