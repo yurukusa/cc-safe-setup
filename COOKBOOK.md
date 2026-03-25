@@ -135,6 +135,16 @@ All browser-based, nothing leaves your machine:
 - [Playground](https://yurukusa.github.io/cc-safe-setup/playground.html) — Write and test hooks
 - [Hook Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) — Generate hooks from English
 
+## 27. Bypass Protected Directory Prompts (PermissionRequest)
+
+PreToolUse hooks can't bypass built-in protected-directory checks — they run *before* those checks. Use PermissionRequest instead:
+
+```bash
+npx cc-safe-setup --install-example allow-git-hooks-dir
+```
+
+Or manually: create a PermissionRequest hook that outputs `permissionDecision: "allow"`. See [Troubleshooting](TROUBLESHOOTING.md#pretooluse-allow-doesnt-bypass-protected-directory-prompts) for details.
+
 ## Further Reading
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)

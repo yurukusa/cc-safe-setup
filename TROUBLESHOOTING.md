@@ -132,6 +132,34 @@ jq -n '...'
 
 Auto-approve JSON must go to stdout.
 
+## "PreToolUse allow doesn't bypass protected directory prompts"
+
+This is expected behavior, not a bug.
+
+**Execution order:**
+1. PreToolUse hooks run
+2. Built-in protected-directory checks run (`.claude/`, `.git/`, etc.)
+3. PermissionRequest hooks run
+
+PreToolUse's `permissionDecision: "allow"` gets overridden by the built-in checks in step 2. To bypass protected directory prompts, use **PermissionRequest** hooks instead:
+
+```bash
+#!/bin/bash
+# Save as: ~/.claude/hooks/allow-protected-dir.sh
+# Trigger: PermissionRequest (not PreToolUse)
+INPUT=$(cat)
+PATH_TARGET=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.command // empty')
+
+# Allow writes to a specific protected directory
+if echo "$PATH_TARGET" | grep -q '/my-project/.git/hooks'; then
+  jq -n '{hookSpecificOutput: {hookEventName: "PermissionRequest", permissionDecision: "allow", permissionDecisionReason: "Allowed: git hooks directory"}}'
+  exit 0
+fi
+exit 0
+```
+
+**Rule of thumb:** PreToolUse = block dangerous actions. PermissionRequest = allow trusted actions that trigger built-in prompts.
+
 ## "Permission prompts still appear for compound commands"
 
 This is a known Claude Code limitation, not a hook issue. `Bash(git:*)` doesn't match `cd /path && git log`.
