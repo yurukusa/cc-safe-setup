@@ -1624,6 +1624,19 @@ else
   echo "  FAIL: --rules didn't create file"; FAIL=$((FAIL + 1))
 fi
 
+# hook-permission-fixer
+if [ -f "$EXDIR/hook-permission-fixer.sh" ]; then
+    bash -n "$EXDIR/hook-permission-fixer.sh" && { echo "  PASS: hook-permission-fixer syntax OK"; PASS=$((PASS+1)); } || { echo "  FAIL: hook-permission-fixer syntax"; FAIL=$((FAIL+1)); }
+fi
+
+# response-budget-guard
+if [ -f "$EXDIR/response-budget-guard.sh" ]; then
+    bash -n "$EXDIR/response-budget-guard.sh" && { echo "  PASS: response-budget-guard syntax OK"; PASS=$((PASS+1)); } || { echo "  FAIL: response-budget-guard syntax"; FAIL=$((FAIL+1)); }
+    # Functional: should exit 0 on normal call
+    EXIT=0; echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | CC_RESPONSE_TOOL_LIMIT=1000 bash "$EXDIR/response-budget-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: response-budget-guard passes normal call"; PASS=$((PASS+1)); } || { echo "  FAIL: response-budget-guard normal call (exit=$EXIT)"; FAIL=$((FAIL+1)); }
+fi
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
