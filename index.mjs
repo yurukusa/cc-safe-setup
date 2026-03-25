@@ -4397,26 +4397,26 @@ async function compileRules(rulesFile) {
 
 # Block dangerous commands
 - block: "rm -rf on root or home"
-  pattern: "rm\\\\s+-rf\\\\s+(\\\\/$|~)"
+  pattern: "rm\\s+-rf\\s+(\\/$|~)"
 
 - block: "git push to main"
-  pattern: "git\\\\s+push.*(main|master)"
+  pattern: "git\\s+push.*(main|master)"
 
 - block: "git force push"
-  pattern: "git\\\\s+push.*--force"
+  pattern: "git\\s+push.*--force"
 
 - block: "git add .env"
-  pattern: "git\\\\s+add.*\\\\.env"
+  pattern: "git\\s+add.*\\.env"
 
 # Auto-approve safe commands
 - approve: "read-only commands"
   commands: [cat, head, tail, ls, grep, find, which, pwd, date]
 
 - approve: "git read commands"
-  pattern: "^\\\\s*git\\\\s+(status|log|diff|show|branch)"
+  pattern: "^\\s*git\\s+(status|log|diff|show|branch)"
 
 - approve: "test runners"
-  pattern: "^\\\\s*(npm\\\\s+test|pytest|go\\\\s+test|cargo\\\\s+test)"
+  pattern: "^\\s*(npm\\s+test|pytest|go\\s+test|cargo\\s+test)"
 
 # Protect files from edits
 - protect: ".env"
