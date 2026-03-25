@@ -1766,6 +1766,8 @@ test_trigger_detection() {
     local detected="PreToolUse"
     if echo "$content" | grep -qE 'TRIGGER: PermissionRequest|^#.*PermissionRequest hook'; then
         detected="PermissionRequest"
+    elif echo "$content" | grep -q 'TRIGGER: UserPromptSubmit'; then
+        detected="UserPromptSubmit"
     elif echo "$content" | grep -q 'TRIGGER: PostToolUse'; then
         detected="PostToolUse"
     elif echo "$content" | grep -q 'TRIGGER: SessionStart'; then
