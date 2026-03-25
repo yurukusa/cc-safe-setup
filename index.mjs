@@ -601,9 +601,12 @@ async function installExample(name) {
   let matcher = 'Bash';
 
   // Detect trigger from header comments
-  if (content.includes('PostToolUse')) trigger = 'PostToolUse';
-  if (content.includes('Notification')) trigger = 'Notification';
-  if (content.includes('Stop')) trigger = 'Stop';
+  if (content.includes('TRIGGER: PostToolUse') || content.includes('PostToolUse')) trigger = 'PostToolUse';
+  if (content.includes('TRIGGER: Notification') || content.includes('Notification')) trigger = 'Notification';
+  if (content.includes('TRIGGER: Stop') || content.includes('Stop')) trigger = 'Stop';
+  if (content.includes('TRIGGER: SessionStart') || content.includes('SessionStart')) trigger = 'SessionStart';
+  if (content.includes('TRIGGER: PreCompact') || content.includes('PreCompact')) trigger = 'PreCompact';
+  if (content.includes('TRIGGER: SessionEnd') || content.includes('SessionEnd')) trigger = 'SessionEnd';
 
   // Detect matcher from header
   const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);
