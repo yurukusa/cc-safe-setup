@@ -4922,6 +4922,16 @@ async function doctor() {
               for (const h of hookList) {
                 if (h.type !== 'command') continue;
                 const cmd = h.command;
+
+                // Check for Windows backslash paths
+                if (cmd.includes('\\')) {
+                  fail('Windows backslash in hook command: ' + cmd);
+                  const fixed = cmd.replace(/\\/g, '/');
+                  console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx cc-safe-setup@latest' + c.reset);
+                  console.log(c.dim + '    Or manually change to: ' + fixed + c.reset);
+                  continue;
+                }
+
                 // Extract the script path from commands like "bash ~/.claude/hooks/x.sh" or "~/bin/x.sh arg1 arg2"
                 let scriptPath = cmd;
                 // Strip leading interpreter (bash, sh, node, python3, etc.)
