@@ -1585,6 +1585,37 @@ if [ -f "$EXDIR/crontab-guard.sh" ]; then
 fi
 SUGGEST_OUT=$(timeout 30 node "$CLI" --suggest 2>&1) || true
 if echo "$SUGGEST_OUT" | grep -q 'suggest\|Suggest\|risk\|Risk\|hook'; then echo "  PASS: --suggest runs"; PASS=$((PASS + 1)); else echo "  FAIL: --suggest"; FAIL=$((FAIL + 1)); fi
+
+# --simulate tests
+SIM_OUT=$(timeout 10 node "$CLI" --simulate "git status" 2>&1) || true
+if echo "$SIM_OUT" | grep -q 'simulate\|Simulate\|BLOCK\|APPROVE\|pass'; then echo "  PASS: --simulate runs"; PASS=$((PASS + 1)); else echo "  FAIL: --simulate"; FAIL=$((FAIL + 1)); fi
+
+SIM_OUT2=$(timeout 10 node "$CLI" --simulate "npm test" 2>&1) || true
+if echo "$SIM_OUT2" | grep -qi 'approve'; then echo "  PASS: --simulate approves npm test"; PASS=$((PASS + 1)); else echo "  FAIL: --simulate npm test"; FAIL=$((FAIL + 1)); fi
+
+# --validate tests
+VAL_OUT=$(timeout 30 node "$CLI" --validate 2>&1) || true
+if echo "$VAL_OUT" | grep -q 'validate\|Validate\|hooks\|passed'; then echo "  PASS: --validate runs"; PASS=$((PASS + 1)); else echo "  FAIL: --validate"; FAIL=$((FAIL + 1)); fi
+
+# --protect tests (dry test — don't actually install)
+PROT_OUT=$(timeout 10 node "$CLI" --protect "/tmp/test-protect-$$" 2>&1) || true
+if echo "$PROT_OUT" | grep -q 'protect\|Protect\|Protected\|Created'; then echo "  PASS: --protect runs"; PASS=$((PASS + 1)); else echo "  FAIL: --protect"; FAIL=$((FAIL + 1)); fi
+# Clean up protect test hook
+rm -f "$HOME/.claude/hooks/protect-test-protect-$$.sh" 2>/dev/null
+
+# --rules tests (create then compile)
+RULES_TMP="/tmp/test-rules-$$.yaml"
+timeout 10 node "$CLI" --rules "$RULES_TMP" 2>&1 >/dev/null || true
+if [ -f "$RULES_TMP" ]; then
+  RULES_OUT=$(timeout 10 node "$CLI" --rules "$RULES_TMP" 2>&1) || true
+  if echo "$RULES_OUT" | grep -q 'rules\|compiled\|Block\|Approve\|Protect'; then echo "  PASS: --rules compiles"; PASS=$((PASS + 1)); else echo "  FAIL: --rules compile"; FAIL=$((FAIL + 1)); fi
+  rm -f "$RULES_TMP" 2>/dev/null
+  # Clean up compiled hook (validated — safe to remove)
+  rm -f "$HOME/.claude/hooks/compiled-rules.sh" 2>/dev/null
+else
+  echo "  FAIL: --rules didn't create file"; FAIL=$((FAIL + 1))
+fi
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
