@@ -1,5 +1,11 @@
 # Changelog
 
+## [29.0.0] - 2026-03-26
+- **BREAKING**: `--install-example` now correctly detects PermissionRequest trigger and comment-style matchers
+- Previously, PermissionRequest hooks were silently registered as PreToolUse (wrong trigger!)
+- Comment-style `# Matcher: Edit|Write` headers now parsed (previously only JSON format)
+- All 4 new PermissionRequest examples install correctly with proper trigger and matcher
+
 ## [28.9.0] - 2026-03-26
 - **New**: 4 PermissionRequest hooks now discoverable via `--examples permission`
 - **Docs**: hook-patterns.html — PermissionRequest pattern with copy-paste code
