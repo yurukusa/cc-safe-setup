@@ -1573,7 +1573,7 @@ async function guard(description) {
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
 
-  const cmd = `bash ${hookPath}`;
+  const cmd = `bash ${toBashPath(hookPath)}`;
   const alreadyExists = JSON.stringify(settings.hooks).includes(hookName);
   if (!alreadyExists) {
     const existing = settings.hooks[trigger].find(e => e.matcher === matcher);
@@ -2435,7 +2435,7 @@ async function shield() {
 
   for (const f of hookFiles) {
     const content = readFileSync(join(HOOKS_DIR, f), 'utf-8');
-    const cmd = `bash ${join(HOOKS_DIR, f)}`;
+    const cmd = `bash ${toBashPath(join(HOOKS_DIR, f))}`;
 
     // Check if already in settings
     const alreadyConfigured = JSON.stringify(settings.hooks).includes(f);
@@ -4557,7 +4557,7 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
-  const hookCmd = `bash ${hookPath}`;
+  const hookCmd = `bash ${toBashPath(hookPath)}`;
 
   // Check all matchers for existing compiled-rules entry
   let found = false;
@@ -4679,7 +4679,7 @@ exit 0
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
   // Register under specific matchers based on rule types (NEVER use "" matcher)
-  const hookCmd = `bash ${hookPath}`;
+  const hookCmd = `bash ${toBashPath(hookPath)}`;
   const hasBlocks = rules.some(r => r.type === 'block');
   const hasApproves = rules.some(r => r.type === 'approve');
   const hasProtects = rules.some(r => r.type === 'protect');
