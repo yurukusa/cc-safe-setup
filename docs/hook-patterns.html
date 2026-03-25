@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Hook Patterns Every Claude Code User Should Know</title>
+<meta name="description" content="The 10 foundational patterns for writing Claude Code hooks. Block, approve, warn, log, validate, protect, limit, checkpoint, enforce, recover.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.2rem}
+h2{color:#58a6ff;font-size:1rem;margin:1.5rem 0 .3rem}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+.pattern{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1rem;margin:.6rem 0}
+.pattern-name{font-weight:700;color:#f0f6fc;font-size:.9rem}
+.pattern-when{font-size:.78rem;color:#8b949e;margin:.2rem 0}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem;font-size:.75rem;color:#e6edf3;overflow-x:auto;margin:.3rem 0;position:relative}
+.copy{position:absolute;top:.2rem;right:.2rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.1rem .3rem;border-radius:3px;cursor:pointer;font-size:.6rem}
+.copy:hover{color:#f0f6fc}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>10 Hook Patterns</h1>
+<p class="sub">The building blocks for every Claude Code hook. Learn these patterns, combine them for any use case.</p>
+
+<h2>1. Block</h2>
+<div class="pattern">
+<div class="pattern-name">Exit 2 to prevent a tool call</div>
+<div class="pattern-when">Use: PreToolUse · When you want to stop something dangerous</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+if echo "$COMMAND" | grep -qE 'rm\s+-rf'; then
+    echo "BLOCKED: rm -rf" >&2
+    exit 2
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>2. Approve</h2>
+<div class="pattern">
+<div class="pattern-name">JSON stdout to skip permission prompt</div>
+<div class="pattern-when">Use: PreToolUse · When a command is always safe</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+case "$(echo "$COMMAND" | awk '{print $1}')" in
+    cat|ls|grep|find)
+        echo '{"decision":"approve","reason":"Read-only"}'
+        exit 0 ;;
+esac
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>3. Warn</h2>
+<div class="pattern">
+<div class="pattern-name">stderr message without blocking</div>
+<div class="pattern-when">Use: PostToolUse · When you want Claude to see a reminder</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+if echo "$COMMAND" | grep -qE 'git\s+commit'; then
+    echo "REMINDER: Did you run tests?" >&2
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>4. Log</h2>
+<div class="pattern">
+<div class="pattern-name">Record events to a file</div>
+<div class="pattern-when">Use: PostToolUse · When you need an audit trail</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+echo "[$(date -Iseconds)] $TOOL: ${CMD:0:80}" >> ~/.claude/activity.log
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>5. Validate</h2>
+<div class="pattern">
+<div class="pattern-name">Check result quality after execution</div>
+<div class="pattern-when">Use: PostToolUse · When you want to catch errors</div>
+<pre><code>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+case "$FILE" in
+    *.py) python3 -m py_compile "$FILE" 2>&1 || echo "SYNTAX ERROR: $FILE" >&2 ;;
+    *.json) python3 -m json.tool "$FILE" >/dev/null 2>&1 || echo "BAD JSON: $FILE" >&2 ;;
+esac
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>6. Protect</h2>
+<div class="pattern">
+<div class="pattern-name">Guard specific files from modification</div>
+<div class="pattern-when">Use: PreToolUse on Edit|Write · When a file must not change</div>
+<pre><code>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] && exit 0
+if [[ "$FILE" == *".env" ]]; then
+    jq -n '{"decision":"block","reason":"Protected file"}'
+    exit 0
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>7. Limit</h2>
+<div class="pattern">
+<div class="pattern-name">Cap frequency or quantity</div>
+<div class="pattern-when">Use: PreToolUse · When too many of something is dangerous</div>
+<pre><code>#!/bin/bash
+TRACKER="$HOME/.claude/agent-count"
+COUNT=$(cat "$TRACKER" 2>/dev/null || echo 0)
+if [ "$COUNT" -ge 5 ]; then
+    echo "BLOCKED: Too many agents" >&2; exit 2
+fi
+echo $((COUNT + 1)) > "$TRACKER"
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>8. Checkpoint</h2>
+<div class="pattern">
+<div class="pattern-name">Save state before risky operations</div>
+<div class="pattern-when">Use: PreToolUse on Edit|Write · For rollback capability</div>
+<pre><code>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+mkdir -p .claude/checkpoints
+cp "$FILE" ".claude/checkpoints/$(basename "$FILE").$(date +%s).bak"
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>9. Enforce</h2>
+<div class="pattern">
+<div class="pattern-name">Re-inject rules after context loss</div>
+<div class="pattern-when">Use: PostToolUse · When CLAUDE.md rules get forgotten</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+if echo "$COMMAND" | grep -qE 'git\s+push.*(main|master)'; then
+    echo "RULE: CLAUDE.md prohibits pushing to main" >&2
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>10. Recover</h2>
+<div class="pattern">
+<div class="pattern-name">Auto-fix or alert on failure</div>
+<div class="pattern-when">Use: Stop · When the session ends unexpectedly</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+REASON=$(echo "$INPUT" | jq -r '.stop_reason // empty')
+if [ "$REASON" = "error" ]; then
+    # Send notification
+    echo "Session ended with error" >> ~/.claude/alerts.log
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="exit-codes.html">Exit Codes</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+<script>
+function cp(btn){
+  const code=btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard.writeText(code);
+  btn.textContent='Copied!';
+  setTimeout(()=>btn.textContent='Copy',1500);
+}
+</script>
+</body>
+</html>
