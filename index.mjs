@@ -421,6 +421,10 @@ function examples() {
       'auto-approve-maven.sh': 'Auto-approve mvn compile/test/verify',
       'permission-cache.sh': 'Auto-approve previously approved commands in session',
       'auto-approve-readonly.sh': 'Auto-approve 50+ read-only commands (cat, ls, grep, find)',
+      'auto-approve-compound-git.sh': 'PermissionRequest: auto-approve compound git commands (cd && git)',
+      'allow-git-hooks-dir.sh': 'PermissionRequest: allow writes to .git/hooks/ directory',
+      'allow-claude-settings.sh': 'PermissionRequest: allow writes to .claude/ (isolated environments)',
+      'allow-protected-dirs.sh': 'PermissionRequest: allow ALL protected directory writes (containers only)',
     },
     'Quality': {
       'branch-name-check.sh': 'Warn on non-conventional branch names',
