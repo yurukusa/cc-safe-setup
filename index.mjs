@@ -754,6 +754,31 @@ async function audit() {
     });
   }
 
+  // 10. Check for Windows backslash paths in hook commands
+  const allCmds = [...preHooks, ...postHooks, ...stopHooks]
+    .flatMap(e => (e.hooks || []).map(h => h.command || ''));
+  const backslashCmds = allCmds.filter(c => c.includes('\\'));
+  if (backslashCmds.length > 0) {
+    risks.push({
+      severity: 'CRITICAL',
+      issue: `${backslashCmds.length} hook command(s) have Windows backslash paths — hooks will fail with "No such file"`,
+      fix: 'npx cc-safe-setup --uninstall && npx cc-safe-setup@latest'
+    });
+  }
+
+  // 11. Check for hook permission fixer (SessionStart)
+  const sessionHooks = settings.hooks?.SessionStart || [];
+  const hasPermFixer = sessionHooks.some(e =>
+    (e.hooks || []).some(h => (h.command || '').includes('permission'))
+  );
+  if (!hasPermFixer && process.platform === 'win32') {
+    risks.push({
+      severity: 'LOW',
+      issue: 'No SessionStart permission fixer — plugin updates may break hook permissions on Windows',
+      fix: 'npx cc-safe-setup --install-example hook-permission-fixer'
+    });
+  }
+
   // Display results
   if (good.length > 0) {
     console.log(c.bold + '  ✓ What\'s working:' + c.reset);
