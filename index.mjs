@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, copyFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, copyFileSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
@@ -10,6 +10,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
 const HOOKS_DIR = join(HOME, '.claude', 'hooks');
 const SETTINGS_PATH = join(HOME, '.claude', 'settings.json');
+
+// Convert Windows backslash paths to bash-compatible forward slashes
+const toBashPath = (p) => p.replace(/\\/g, '/');
 
 const c = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
@@ -614,7 +617,7 @@ async function installExample(name) {
 
   const hookEntry = {
     matcher: matcher,
-    hooks: [{ type: 'command', command: destPath }],
+    hooks: [{ type: 'command', command: toBashPath(destPath) }],
   };
 
   // Check if already installed
@@ -2213,7 +2216,7 @@ async function profile(level) {
 
   // Register all hooks in settings
   const hookFiles = prof.hooks.filter(h => existsSync(join(HOOKS_DIR, `${h}.sh`)));
-  const bashHooks = hookFiles.map(h => ({ type: 'command', command: `bash ${join(HOOKS_DIR, h + '.sh')}` }));
+  const bashHooks = hookFiles.map(h => ({ type: 'command', command: `bash ${toBashPath(join(HOOKS_DIR, h + '.sh'))}` }));
 
   // Simplified: put all under PreToolUse Bash for now
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
@@ -3880,7 +3883,7 @@ exit 0`,
   if (!existing.some(cmd => cmd.includes(matched.name))) {
     settings.hooks[matched.trigger].push({
       matcher: matched.matcher,
-      hooks: [{ type: 'command', command: hookPath }],
+      hooks: [{ type: 'command', command: toBashPath(hookPath) }],
     });
     writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
     console.log(c.green + '  ✓ Registered in settings.json' + c.reset);
@@ -4437,8 +4440,8 @@ async function compileRules(rulesFile) {
     const blockMatch = trimmed.match(/^-\s+block:\s+"(.+)"/);
     const approveMatch = trimmed.match(/^-\s+approve:\s+"(.+)"/);
     const protectMatch = trimmed.match(/^-\s+protect:\s+"(.+)"/);
-    const patternMatch = trimmed.match(/^\s+pattern:\s+"(.+)"/);
-    const commandsMatch = trimmed.match(/^\s+commands:\s+\[(.+)\]/);
+    const patternMatch = trimmed.match(/^pattern:\s+"(.+)"/);
+    const commandsMatch = trimmed.match(/^commands:\s+\[(.+)\]/);
 
     if (blockMatch) { current = { type: 'block', name: blockMatch[1] }; rules.push(current); }
     else if (approveMatch) { current = { type: 'approve', name: approveMatch[1] }; rules.push(current); }
@@ -4531,6 +4534,20 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
   const hookPath = join(HOOKS_DIR, 'compiled-rules.sh');
   writeFileSync(hookPath, script);
   chmodSync(hookPath, 0o755);
+
+  // Syntax check — a broken hook returns exit 2 which blocks ALL tools
+  const { execSync } = await import('child_process');
+  try {
+    execSync(`bash -n "${hookPath}"`, { stdio: 'pipe' });
+  } catch (e) {
+    const stderr = (e.stderr || '').toString().trim();
+    unlinkSync(hookPath);
+    console.log(c.red + '  ✗ Syntax error in generated hook — aborted' + c.reset);
+    if (stderr) console.log(c.dim + '    ' + stderr + c.reset);
+    console.log(c.dim + '  Check your rules file for unescaped special characters.' + c.reset);
+    console.log();
+    return;
+  }
 
   // Register in settings.json
   let settings = {};
@@ -5278,7 +5295,7 @@ async function main() {
     if (!exists) {
       settings.hooks[trigger].push({
         matcher: hook.matcher,
-        hooks: [{ type: 'command', command: hookPath }]
+        hooks: [{ type: 'command', command: toBashPath(hookPath) }]
       });
     }
   }
@@ -5295,6 +5312,8 @@ async function main() {
   console.log('  ' + c.blue + '  --doctor' + c.reset + '            Verify hooks work');
   console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
   console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
+  console.log();
+  console.log('  ' + c.dim + '22 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
 }
 
