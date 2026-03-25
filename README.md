@@ -328,6 +328,20 @@ Or browse all available examples in [`examples/`](examples/):
 
 **[SAFETY_CHECKLIST.md](SAFETY_CHECKLIST.md)** — Copy-paste checklist for before/during/after autonomous sessions.
 
+## Windows Support
+
+Works on Windows via WSL or Git Bash. Native PowerShell is not supported (hooks are bash scripts).
+
+**Common issue:** If you see `Permission denied` or `No such file` errors after install, run:
+
+```bash
+npx cc-safe-setup --doctor
+```
+
+This detects Windows backslash paths (`C:\Users\...` → `C:/Users/...`) and missing execute permissions.
+
+See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
+
 ## Troubleshooting
 
 **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — "Hook doesn't work" → step-by-step diagnosis. Covers every common failure pattern.
