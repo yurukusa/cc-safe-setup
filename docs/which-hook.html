@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Hook Do I Need? — Interactive Decision Tree</title>
+<meta name="description" content="Answer 3 questions to find the exact Claude Code hook you need. Interactive decision tree.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1.2rem}
+.q{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0}
+.q-text{font-size:.95rem;color:#f0f6fc;font-weight:600;margin-bottom:.6rem}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.choice{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .8rem;border-radius:6px;cursor:pointer;font-size:.82rem;transition:all .15s}
+.choice:hover{border-color:#58a6ff;color:#f0f6fc}
+.result{background:rgba(57,211,83,0.08);border:1px solid rgba(57,211,83,0.3);border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0;display:none}
+.result-name{font-size:1.1rem;font-weight:700;color:#39d353;margin-bottom:.3rem}
+.result-desc{font-size:.85rem;color:#8b949e;margin-bottom:.5rem}
+.result-install{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.4rem .6rem;font-family:monospace;font-size:.82rem;color:#e6edf3}
+.restart{background:none;border:1px solid #30363d;color:#8b949e;padding:.3rem .7rem;border-radius:4px;cursor:pointer;font-size:.75rem;margin-top:.8rem}
+.restart:hover{color:#f0f6fc}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Which Hook Do I Need?</h1>
+<p class="sub">Answer a few questions. Get the exact hook and install command.</p>
+
+<div id="tree"></div>
+<button class="restart" onclick="start()" style="display:none" id="restart-btn">Start over</button>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="hook-patterns.html">Patterns</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+const TREE = {
+  q: "What problem do you want to solve?",
+  choices: [
+    { text: "Prevent dangerous commands", next: {
+      q: "What kind of danger?",
+      choices: [
+        { text: "rm -rf, git reset --hard", result: { name: "destructive-guard", desc: "Blocks rm -rf, git reset --hard, git clean -fd, chmod 777, PowerShell Remove-Item.", install: "npx cc-safe-setup" }},
+        { text: "Push to main/master", result: { name: "branch-guard", desc: "Blocks direct pushes to main and force-pushes.", install: "npx cc-safe-setup" }},
+        { text: "Commit secrets/.env", result: { name: "secret-guard", desc: "Blocks git add .env and credential files.", install: "npx cc-safe-setup" }},
+        { text: "All of the above", result: { name: "--shield", desc: "Maximum safety. Installs all guards + auto-detection.", install: "npx cc-safe-setup --shield" }}
+      ]
+    }},
+    { text: "Reduce permission prompts", next: {
+      q: "Which commands are you tired of approving?",
+      choices: [
+        { text: "cat, ls, grep, git log", result: { name: "auto-approve-readonly", desc: "Auto-approves 50+ read-only commands. Reduces prompts ~80%.", install: "npx cc-safe-setup --install-example auto-approve-readonly" }},
+        { text: "npm test, pytest, go test", result: { name: "auto-approve-test", desc: "Auto-approves test runner commands across all languages.", install: "npx cc-safe-setup --install-example auto-approve-test" }},
+        { text: "npm run build, make", result: { name: "auto-approve-build", desc: "Auto-approves build commands.", install: "npx cc-safe-setup --install-example auto-approve-build" }},
+        { text: "All safe commands", result: { name: "--shield", desc: "Installs readonly + test + build auto-approve together.", install: "npx cc-safe-setup --shield" }}
+      ]
+    }},
+    { text: "Protect specific files", result: { name: "--protect", desc: "Block edits to any file or directory. One command per path.", install: "npx cc-safe-setup --protect .env" }},
+    { text: "Catch code errors", next: {
+      q: "What kind of errors?",
+      choices: [
+        { text: "Syntax errors after edits", result: { name: "syntax-check", desc: "Validates Python, Shell, JSON, YAML, JS after every edit.", install: "npx cc-safe-setup" }},
+        { text: "Edit didn't apply correctly", result: { name: "edit-verify", desc: "Checks file exists, isn't empty, new_string present, no conflict markers.", install: "npx cc-safe-setup --install-example edit-verify" }},
+        { text: "Commit without running tests", result: { name: "test-before-commit", desc: "Blocks git commit if no recent test results.", install: "npx cc-safe-setup --install-example test-before-commit" }}
+      ]
+    }},
+    { text: "Monitor session health", next: {
+      q: "What do you want to monitor?",
+      choices: [
+        { text: "Context window running out", result: { name: "context-monitor", desc: "Graduated warnings at 40%, 25%, 20%, 15% remaining.", install: "npx cc-safe-setup" }},
+        { text: "Session state for compaction", result: { name: "session-state-saver", desc: "Auto-saves state every 50 tool calls. Survives compaction.", install: "npx cc-safe-setup --install-example session-state-saver" }},
+        { text: "Too many subagents", result: { name: "subagent-budget-guard", desc: "Limits concurrent subagents to prevent context overflow.", install: "npx cc-safe-setup --install-example subagent-budget-guard" }}
+      ]
+    }},
+    { text: "Enforce CLAUDE.md rules", result: { name: "claudemd-enforcer", desc: "Re-injects CLAUDE.md rules as warnings after compaction. Rules survive context loss.", install: "npx cc-safe-setup --install-example claudemd-enforcer" }},
+    { text: "Debug my hooks", next: {
+      q: "What's the problem?",
+      choices: [
+        { text: "Hooks aren't firing", result: { name: "--doctor", desc: "13-point diagnostic: jq, settings, paths, permissions, syntax.", install: "npx cc-safe-setup --doctor" }},
+        { text: "Don't know what hooks do", result: { name: "--simulate", desc: "Preview how hooks react to any command.", install: "npx cc-safe-setup --simulate \"rm -rf /\"" }},
+        { text: "Broken hook locked me out", result: { name: "--validate / --safe-mode", desc: "Validate finds and disables broken hooks. Safe-mode disables all.", install: "npx cc-safe-setup --validate" }},
+        { text: "Want to check all hooks", result: { name: "--validate", desc: "Syntax check + exit code test on all hooks. Auto-disables dangerous ones.", install: "npx cc-safe-setup --validate" }}
+      ]
+    }}
+  ]
+};
+
+function start() {
+  document.getElementById('restart-btn').style.display = 'none';
+  render(TREE);
+}
+
+function render(node) {
+  const el = document.getElementById('tree');
+  if (node.result) {
+    el.innerHTML = `<div class="result" style="display:block">
+      <div class="result-name">${node.result.name}</div>
+      <div class="result-desc">${node.result.desc}</div>
+      <div class="result-install">${node.result.install}</div>
+    </div>`;
+    document.getElementById('restart-btn').style.display = 'inline-block';
+    return;
+  }
+  let html = `<div class="q"><div class="q-text">${node.q}</div><div class="btn-row">`;
+  node.choices.forEach((c, i) => {
+    html += `<button class="choice" onclick="pick(${i})">${c.text}</button>`;
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+  window._current = node;
+}
+
+function pick(i) {
+  const choice = window._current.choices[i];
+  if (choice.result) {
+    render({ result: choice.result });
+  } else if (choice.next) {
+    render(choice.next);
+  }
+}
+
+start();
+</script>
+</body>
+</html>
