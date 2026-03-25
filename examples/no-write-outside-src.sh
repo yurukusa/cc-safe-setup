@@ -1,3 +1,4 @@
+#!/bin/bash
 FILE=$(cat | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$FILE" ] && exit 0
 case "$FILE" in

@@ -1,3 +1,4 @@
+#!/bin/bash
 # TRIGGER: PostToolUse  MATCHER: "Edit|Write"
 CONTENT=$(cat | jq -r ".tool_input.new_string // empty" 2>/dev/null)
 [ -z "$CONTENT" ] && exit 0

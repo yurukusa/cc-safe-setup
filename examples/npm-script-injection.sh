@@ -1,3 +1,4 @@
+#!/bin/bash
 CONTENT=$(cat | jq -r '.tool_input.new_string // empty' 2>/dev/null)
 FILE=$(cat | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$CONTENT" ] && exit 0

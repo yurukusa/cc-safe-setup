@@ -1,3 +1,4 @@
+#!/bin/bash
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 STATE_DIR="${HOME}/.claude"

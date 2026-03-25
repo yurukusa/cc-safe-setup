@@ -1,3 +1,4 @@
+#!/bin/bash
 CONTENT=$(cat | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
 [ -z "$CONTENT" ] && exit 0
 echo "$CONTENT" | grep -qE "readFileSync|writeFileSync|mkdirSync|existsSync" && echo "NOTE: Sync fs in hot path — consider async" >&2

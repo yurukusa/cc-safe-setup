@@ -1,3 +1,18 @@
+#!/bin/bash
+# ================================================================
+# auto-compact-prep.sh — Save checkpoint before context compaction
+# ================================================================
+# PURPOSE:
+#   Tracks tool call count per session. When threshold is reached,
+#   saves a checkpoint file with git state so Claude can recover
+#   context after automatic compaction.
+#
+# TRIGGER: PreToolUse  MATCHER: ""
+#
+# CONFIG:
+#   CC_COMPACT_PREP_THRESHOLD=200  (save checkpoint after N tool calls)
+# ================================================================
+
 INPUT=$(cat)
 STATE_DIR="${HOME}/.claude"
 COUNTER_FILE="${STATE_DIR}/session-call-count"
@@ -5,15 +20,11 @@ PREP_FLAG="${STATE_DIR}/compact-prep-done"
 CHECKPOINT=".claude/pre-compact-checkpoint.md"
 COUNT=0
 [ -f "$COUNTER_FILE" ] && COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
-if [ "$COUNT" -eq 0 ]; then
-    COUNT=1
-    echo "$COUNT" > "$COUNTER_FILE"
-else
-    COUNT=$((COUNT + 1))
-    echo "$COUNT" > "$COUNTER_FILE"
-fi
+COUNT=$((COUNT + 1))
+echo "$COUNT" > "$COUNTER_FILE"
+
 THRESHOLD=${CC_COMPACT_PREP_THRESHOLD:-200}
-if (( COUNT >= THRESHOLD )) && [ ! -f "$PREP_FLAG" ]; then
+if [ "$COUNT" -ge "$THRESHOLD" ] && [ ! -f "$PREP_FLAG" ]; then
     mkdir -p "$(dirname "$CHECKPOINT")" 2>/dev/null
     BRANCH=$(git branch --show-current 2>/dev/null || echo "?")
     DIRTY=$(git status --porcelain 2>/dev/null | wc -l)

@@ -1,3 +1,4 @@
+#!/bin/bash
 FILE=$(cat | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 case "$FILE" in *Dockerfile*) ;; *) exit 0;; esac
 CONTENT=$(cat | jq -r '.tool_input.new_string // empty' 2>/dev/null)
