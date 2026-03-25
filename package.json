@@ -1,7 +1,7 @@
 {
   "name": "cc-safe-setup",
-  "version": "28.5.0",
-  "description": "One command to make Claude Code safe. 336 hooks (8 built-in + 330 examples). 49 CLI commands. 988 tests. 5 languages.",
+  "version": "28.6.0",
+  "description": "One command to make Claude Code safe. 337 hooks (8 built-in + 331 examples). 49 CLI commands. 996 tests. 5 languages.",
   "main": "index.mjs",
   "bin": {
     "cc-safe-setup": "index.mjs"

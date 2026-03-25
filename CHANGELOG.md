@@ -1,5 +1,12 @@
 # Changelog
 
+## [28.6.0] - 2026-03-26
+- **New**: PermissionRequest hook support — `allow-git-hooks-dir.sh` example (first PermissionRequest example)
+- **Docs**: Hook execution order documented (PreToolUse → built-in checks → PermissionRequest)
+- **Docs**: TROUBLESHOOTING.md — new section "PreToolUse allow doesn't bypass protected directory prompts"
+- **Docs**: COOKBOOK.md — Recipe #27: Bypass Protected Directory Prompts
+- **Stats**: 331 examples, 996 tests, 49 commands, 23 web tools
+
 ## [28.4.9] - 2026-03-26
 - **Bug fix**: --rules YAML template regex escaping (\\s → \s for grep whitespace matching)
 - **Bug fix**: Windows path backslash in --shield, --guard, --rules, --protect (#1)
