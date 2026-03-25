@@ -302,6 +302,8 @@ function status() {
     console.log('  ' + c.dim + '+ ' + installedExamples.length + ' example hooks' + c.reset);
   }
   console.log();
+  console.log(c.dim + '  Tip: --validate to check health · --simulate "cmd" to test · --shield for max safety' + c.reset);
+  console.log();
 
   // Exit code for CI: 0 = all installed, 1 = missing hooks
   if (missing > 0) process.exit(1);
