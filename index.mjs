@@ -132,52 +132,43 @@ if (HELP) {
   console.log(`
   cc-safe-setup — Make Claude Code safe for autonomous operation
 
-  Usage:
-    npx cc-safe-setup              Install 8 safety hooks
-    npx cc-safe-setup --status     Check installed hooks
-    npx cc-safe-setup --verify     Test each hook with sample inputs
-    npx cc-safe-setup --dry-run    Preview without installing
-    npx cc-safe-setup --uninstall  Remove all installed hooks
-    npx cc-safe-setup --examples   List 30 example hooks (5 categories)
-    npx cc-safe-setup --install-example <name>  Install a specific example
-    npx cc-safe-setup --full       Complete setup: hooks + scan + audit + badge
-    npx cc-safe-setup --audit      Safety score (0-100) with fixes
-    npx cc-safe-setup --audit --fix  Auto-fix missing protections
-    npx cc-safe-setup --audit --json  Machine-readable output for CI/CD
-    npx cc-safe-setup --scan       Detect tech stack, recommend hooks
-    npx cc-safe-setup --learn      Learn from your block history
-    npx cc-safe-setup --generate-ci   Generate GitHub Actions workflow for safety checks
-    npx cc-safe-setup --migrate       Detect hooks from other projects, suggest replacements
-    npx cc-safe-setup --compare <a> <b>  Compare two hooks side-by-side
-    npx cc-safe-setup --issues        Show GitHub Issues each hook addresses
-    npx cc-safe-setup --dashboard     Real-time status dashboard
-    npx cc-safe-setup --benchmark     Measure hook execution time
-    npx cc-safe-setup --share         Generate shareable URL for your setup
-    npx cc-safe-setup --diff <file>   Compare your settings with another file
-    npx cc-safe-setup --lint       Static analysis of hook configuration
-    npx cc-safe-setup --doctor     Diagnose why hooks aren't working
-    npx cc-safe-setup --simulate "rm -rf /"  See how hooks react to a command
-    npx cc-safe-setup --protect .env         Block edits to a specific file/dir
-    npx cc-safe-setup --rules [file]       Compile YAML rules into a single hook
-    npx cc-safe-setup --watch      Live dashboard of blocked commands
-    npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
-    npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
-    npx cc-safe-setup --save-profile <name>  Save current hooks as a named profile
-    npx cc-safe-setup --changelog       Show what changed in recent versions
-    npx cc-safe-setup --score           Print safety score (0-100) and exit
-    npx cc-safe-setup --init-project    Complete project setup (CLAUDE.md + hooks + CI + .gitignore)
-    npx cc-safe-setup --suggest        Analyze project and predict risks → suggest hooks
-    npx cc-safe-setup --why <hook>     Why this hook exists (real incident + issue link)
-    npx cc-safe-setup --replay         Replay blocked commands timeline (demo/review)
-    npx cc-safe-setup --guard "<rule>"  Instantly enforce a rule (generate + install + activate)
-    npx cc-safe-setup --diff-hooks <path>  Compare hooks between two settings files
-    npx cc-safe-setup --from-claudemd  Convert CLAUDE.md rules into hooks
-    npx cc-safe-setup --health        Hook health dashboard (size, permissions, age)
-    npx cc-safe-setup --migrate-from <tool>  Migrate from safety-net/hooks-mastery/etc.
-    npx cc-safe-setup --team         Set up project-level hooks (commit to repo for team)
-    npx cc-safe-setup --profile <level>  Switch safety profile (strict/standard/minimal)
-    npx cc-safe-setup --analyze     Analyze what Claude did in your last session
-    npx cc-safe-setup --shield     Maximum safety in one command (fix + scan + install + CLAUDE.md)
+  Quick Start:
+    npx cc-safe-setup              Install 8 safety hooks (30 sec)
+    npx cc-safe-setup --shield     Maximum safety — one command
+    npx cc-safe-setup --doctor     Diagnose hook problems
+
+  Protect:
+    --protect .env                 Block edits to a specific file
+    --guard "never delete prod"    Enforce a rule from plain English
+    --simulate "rm -rf /"          Preview how hooks react to a command
+    --validate                     Check all hooks for errors (auto-fix)
+    --safe-mode                    Emergency: disable all hooks
+
+  Install & Configure:
+    --install-example <name>       Install from 300+ example hooks
+    --examples                     Browse examples by category
+    --from-claudemd                Convert CLAUDE.md rules into hooks
+    --rules [file]                 Compile YAML rules into hooks
+    --team                         Set up project-level hooks for git
+    --profile <level>              Switch profile (strict/standard/minimal)
+    --shield                       Full setup: hooks + scan + CLAUDE.md
+
+  Diagnose & Monitor:
+    --status / --verify            Check installed hooks / test them
+    --doctor                       13-point diagnostic
+    --audit [--fix] [--json]       Safety score 0-100
+    --watch                        Live blocked command feed
+    --health                       Hook health dashboard
+    --suggest                      Predict risks from project analysis
+
+  Manage:
+    --dry-run / --uninstall        Preview / remove hooks
+    --export / --import            Share configuration
+    --diff <file>                  Compare settings
+    --lint                         Static analysis of config
+
+  More: --create, --why, --replay, --score, --changelog, --analyze,
+        --benchmark, --dashboard, --migrate-from, --init-project
     npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
     npx cc-safe-setup --stats      Block statistics and patterns report
     npx cc-safe-setup --export     Export hooks config for team sharing
