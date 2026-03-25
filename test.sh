@@ -1676,6 +1676,57 @@ test_allow_git_hooks '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "no
 test_allow_git_hooks '{"tool_input":{"command":"ls"}}' 0 "handles missing file_path"
 echo ""
 
+# ========== allow-claude-settings (example, PermissionRequest) ==========
+echo "allow-claude-settings.sh (example):"
+ALLOW_CLAUDE_SETTINGS="$(dirname "$0")/examples/allow-claude-settings.sh"
+
+test_allow_claude() {
+    local input="$1" expect_allow="$2" desc="$3"
+    local output
+    output=$(echo "$input" | bash "$ALLOW_CLAUDE_SETTINGS" 2>/dev/null)
+    local has_allow=0
+    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    if [ "$has_allow" -eq "$expect_allow" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected allow=$expect_allow, got $has_allow)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_allow_claude '{"tool_input":{"file_path":"/home/user/.claude/settings.json"}}' 1 "allows .claude/settings.json"
+test_allow_claude '{"tool_input":{"file_path":"/home/user/.claude/hooks/my-hook.sh"}}' 1 "allows .claude/hooks/"
+test_allow_claude '{"tool_input":{"file_path":"/home/user/project/src/main.py"}}' 0 "no opinion on normal files"
+test_allow_claude '{"tool_input":{"file_path":"/home/user/.git/config"}}' 0 "does not allow .git/ (only .claude/)"
+echo ""
+
+# ========== allow-protected-dirs (example, PermissionRequest) ==========
+echo "allow-protected-dirs.sh (example):"
+ALLOW_PROTECTED="$(dirname "$0")/examples/allow-protected-dirs.sh"
+
+test_allow_protected() {
+    local input="$1" expect_allow="$2" desc="$3"
+    local output
+    output=$(echo "$input" | bash "$ALLOW_PROTECTED" 2>/dev/null)
+    local has_allow=0
+    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    if [ "$has_allow" -eq "$expect_allow" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected allow=$expect_allow, got $has_allow)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_allow_protected '{"tool_input":{"file_path":"/project/.claude/settings.json"}}' 1 "allows .claude/"
+test_allow_protected '{"tool_input":{"file_path":"/project/.git/config"}}' 1 "allows .git/"
+test_allow_protected '{"tool_input":{"file_path":"/project/.vscode/settings.json"}}' 1 "allows .vscode/"
+test_allow_protected '{"tool_input":{"file_path":"/project/.idea/workspace.xml"}}' 1 "allows .idea/"
+test_allow_protected '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "no opinion on normal files"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))

@@ -232,6 +232,22 @@ echo "[$(date -Iseconds)] BLOCKED: reason | cmd: $COMMAND" >> "$LOG"
 
 Then view with: `npx cc-safe-setup --watch` or `npx cc-safe-setup --stats`
 
+## "claude -p returns empty output when Stop hook is configured"
+
+This is a known Claude Code v2.1.83 bug ([#38651](https://github.com/anthropics/claude-code/issues/38651)), not a cc-safe-setup issue. Any Stop hook — even `true` — causes `-p` (print mode) to return empty stdout.
+
+**Workaround:** Temporarily remove Stop hooks when using `-p` mode:
+
+```bash
+# Quick toggle: comment out Stop hooks before -p commands
+npx cc-safe-setup --status  # See which hooks are active
+# Manually comment out Stop hooks in ~/.claude/settings.json
+# Run your -p command
+# Uncomment Stop hooks after
+```
+
+This should be fixed in a future Claude Code release.
+
 ## Still Stuck?
 
 1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`
