@@ -1,5 +1,16 @@
 # Changelog
 
+## [28.4.5] - 2026-03-26
+- **Bug fix**: --rules YAML template regex escaping (\\s → \s, grep now matches whitespace correctly)
+- **Bug fix**: Windows path backslash issue in --shield, --guard, --rules (#1)
+- **New hooks**: hook-permission-fixer (SessionStart auto-fix +x), response-budget-guard (anti-loop)
+- **New web tool**: Permission Checker (23rd tool) — diagnose broken hook paths
+- **CTA**: Added Ops Kit links to 7 documentation pages
+- **Stats**: 330 examples, 987 tests, 49 commands, 23 web tools
+- **Zenn**: 32 articles imported to git repo, all 44 articles with CTA
+- **Issue answers**: #38901, #38923 (plugin hook permission fix), cc-safe-setup #1 (Windows paths)
+- **npm**: 10,143 downloads/day
+
 ## [28.3.5] - 2026-03-25
 - **327 HOOKS** (314 bash + 5 non-bash + 8 built-in), **955 tests**
 - New hooks: skill-gate, auto-approve-test, no-push-without-ci, no-commit-fixup, no-large-commit, no-sleep-in-hooks, check-git-hooks-compat
