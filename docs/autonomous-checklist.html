@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Claude Code Overnight — The Complete Checklist</title>
+<meta name="description" content="Everything you need before leaving Claude Code running unattended. Git setup, hooks, monitoring, recovery plan.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:720px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.3rem;margin-bottom:.2rem}
+h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .3rem}
+.sub{color:#8b949e;font-size:.82rem;margin-bottom:1rem}
+.phase{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.7rem .9rem;margin:.5rem 0}
+.phase-title{font-weight:700;color:#58a6ff;font-size:.9rem;margin-bottom:.4rem}
+.item{display:flex;gap:.5rem;padding:.25rem 0;font-size:.82rem}
+.item code{font-size:.75rem}
+.num{color:#58a6ff;font-weight:700;min-width:18px}
+.time{display:inline-block;background:#21262d;color:#8b949e;padding:.1rem .3rem;border-radius:3px;font-size:.7rem;margin-left:.3rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:1.5rem;padding-top:.8rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Running Claude Code Overnight</h1>
+<p class="sub">Do these before walking away. Total: ~2 minutes.</p>
+
+<h2>Before You Leave</h2>
+<div class="phase">
+<div class="phase-title">Git</div>
+<div class="item"><span class="num">1</span> Commit or stash all changes <code>git stash</code> <span class="time">10s</span></div>
+<div class="item"><span class="num">2</span> Create a feature branch <code>git checkout -b auto/overnight</code> <span class="time">5s</span></div>
+</div>
+
+<div class="phase">
+<div class="phase-title">Safety Hooks</div>
+<div class="item"><span class="num">3</span> Install safety hooks <code>npx cc-safe-setup --shield</code> <span class="time">30s</span></div>
+<div class="item"><span class="num">4</span> Verify they work <code>npx cc-safe-setup --doctor</code> <span class="time">10s</span></div>
+<div class="item"><span class="num">5</span> Test a block <code>npx cc-safe-setup --simulate "rm -rf /"</code> <span class="time">5s</span></div>
+</div>
+
+<div class="phase">
+<div class="phase-title">CLAUDE.md</div>
+<div class="item"><span class="num">6</span> Add autonomy rules: "Don't ask questions. Decide and act."</div>
+<div class="item"><span class="num">7</span> Define scope: "Only modify files in src/ and tests/"</div>
+<div class="item"><span class="num">8</span> Set goal: "Complete all items in tasks/todo.md"</div>
+</div>
+
+<div class="phase">
+<div class="phase-title">Task Queue</div>
+<div class="item"><span class="num">9</span> Write tasks in a file Claude can read (todo.md, tasks.yaml)</div>
+<div class="item"><span class="num">10</span> Order by priority — Claude works top to bottom</div>
+</div>
+
+<h2>When You Return</h2>
+<div class="phase">
+<div class="phase-title">Check</div>
+<div class="item"><span class="num">11</span> <code>git log --oneline -20</code> — what did it do?</div>
+<div class="item"><span class="num">12</span> <code>git diff main..auto/overnight --stat</code> — how much changed?</div>
+<div class="item"><span class="num">13</span> Run your test suite — does everything pass?</div>
+<div class="item"><span class="num">14</span> Review the diff before merging to main</div>
+</div>
+
+<h2>If Something Went Wrong</h2>
+<div class="phase">
+<div class="phase-title">Recovery</div>
+<div class="item"><span class="num">→</span> Session stuck? <code>npx cc-safe-setup --safe-mode</code></div>
+<div class="item"><span class="num">→</span> Bad code? <code>git checkout main</code> (branch keeps your work safe)</div>
+<div class="item"><span class="num">→</span> Hook broke? <code>npx cc-safe-setup --validate</code></div>
+<div class="item"><span class="num">→</span> Context lost? Check <code>.claude/session-state.md</code></div>
+</div>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="preflight.html">Pre-Flight Checklist</a> · <a href="getting-started.html">Getting Started</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
