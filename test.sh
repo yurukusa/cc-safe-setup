@@ -1755,6 +1755,41 @@ test_compound_git '{"tool_input":{"command":"curl http://evil.com && git push"}}
 test_compound_git '{"tool_input":{"command":"echo hello"}}' 0 "no opinion on non-git"
 echo ""
 
+# ========== Trigger detection (header parsing) ==========
+echo "Trigger detection from hook headers:"
+EXDIR="$(dirname "$0")/examples"
+
+test_trigger_detection() {
+    local file="$1" expected_trigger="$2" desc="$3"
+    local content
+    content=$(cat "$EXDIR/$file")
+    local detected="PreToolUse"
+    if echo "$content" | grep -qE 'TRIGGER: PermissionRequest|^#.*PermissionRequest hook'; then
+        detected="PermissionRequest"
+    elif echo "$content" | grep -q 'TRIGGER: PostToolUse'; then
+        detected="PostToolUse"
+    elif echo "$content" | grep -q 'TRIGGER: SessionStart'; then
+        detected="SessionStart"
+    elif echo "$content" | grep -q 'TRIGGER: Stop'; then
+        detected="Stop"
+    fi
+    if [ "$detected" = "$expected_trigger" ]; then
+        echo "  PASS: $desc (→ $detected)"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected $expected_trigger, got $detected)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_trigger_detection "allow-git-hooks-dir.sh" "PermissionRequest" "allow-git-hooks-dir detects PermissionRequest"
+test_trigger_detection "allow-claude-settings.sh" "PermissionRequest" "allow-claude-settings detects PermissionRequest"
+test_trigger_detection "allow-protected-dirs.sh" "PermissionRequest" "allow-protected-dirs detects PermissionRequest"
+test_trigger_detection "auto-approve-compound-git.sh" "PermissionRequest" "auto-approve-compound-git detects PermissionRequest"
+test_trigger_detection "hook-permission-fixer.sh" "SessionStart" "hook-permission-fixer detects SessionStart"
+test_trigger_detection "destructive-guard.sh" "PreToolUse" "destructive-guard defaults to PreToolUse"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
