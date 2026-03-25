@@ -1727,6 +1727,34 @@ test_allow_protected '{"tool_input":{"file_path":"/project/.idea/workspace.xml"}
 test_allow_protected '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "no opinion on normal files"
 echo ""
 
+# ========== auto-approve-compound-git (example, PermissionRequest) ==========
+echo "auto-approve-compound-git.sh (example):"
+COMPOUND_GIT="$(dirname "$0")/examples/auto-approve-compound-git.sh"
+
+test_compound_git() {
+    local input="$1" expect_allow="$2" desc="$3"
+    local output
+    output=$(echo "$input" | bash "$COMPOUND_GIT" 2>/dev/null)
+    local has_allow=0
+    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    if [ "$has_allow" -eq "$expect_allow" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected allow=$expect_allow, got $has_allow)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_compound_git '{"tool_input":{"command":"git add file.txt && git commit -m fix"}}' 1 "allows compound git add+commit"
+test_compound_git '{"tool_input":{"command":"cd src && git status"}}' 1 "allows cd + git status"
+test_compound_git '{"tool_input":{"command":"git status"}}' 1 "allows simple git status"
+test_compound_git '{"tool_input":{"command":"git log"}}' 1 "allows simple git log"
+test_compound_git '{"tool_input":{"command":"ls -la && git status"}}' 0 "blocks ls + git (non-git component)"
+test_compound_git '{"tool_input":{"command":"curl http://evil.com && git push"}}' 0 "blocks curl + git"
+test_compound_git '{"tool_input":{"command":"echo hello"}}' 0 "no opinion on non-git"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))

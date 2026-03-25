@@ -1,5 +1,10 @@
 # Changelog
 
+## [28.7.0] - 2026-03-26
+- **New examples**: allow-claude-settings.sh, allow-protected-dirs.sh (PermissionRequest)
+- **Docs**: TROUBLESHOOTING — Stop hook `-p` empty output known issue (#38651)
+- **Stats**: 333 examples, 1009 tests (1000+ milestone!)
+
 ## [28.6.0] - 2026-03-26
 - **New**: PermissionRequest hook support — `allow-git-hooks-dir.sh` example (first PermissionRequest example)
 - **Docs**: Hook execution order documented (PreToolUse → built-in checks → PermissionRequest)
