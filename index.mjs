@@ -405,6 +405,8 @@ function examples() {
       'pip-venv-guard.sh': 'Warn on pip install outside venv',
       'no-git-amend-push.sh': 'Warn on amending pushed commits',
       'typosquat-guard.sh': 'Detect npm/pip typosquatting attacks',
+      'hook-permission-fixer.sh': 'Auto-fix missing execute permissions on hooks (SessionStart)',
+      'response-budget-guard.sh': 'Track and limit tool calls per response (anti-loop)',
     },
     'Auto-Approve': {
       'auto-approve-build.sh': 'Auto-approve npm/yarn/cargo/go build, test, lint',
