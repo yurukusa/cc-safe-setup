@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Playground — Write, Test, and Debug Claude Code Hooks</title>
+<meta name="description" content="Write Claude Code hooks in your browser. Test with sample inputs. See output instantly. No install needed.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1rem;line-height:1.5}
+.c{max-width:1100px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.3rem;margin-bottom:.2rem}
+h2{color:#f0f6fc;font-size:.95rem;margin:.8rem 0 .3rem}
+.sub{color:#8b949e;font-size:.8rem;margin-bottom:.8rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden}
+.panel-header{background:#21262d;padding:.4rem .7rem;font-size:.78rem;font-weight:600;color:#8b949e;display:flex;justify-content:space-between;align-items:center}
+textarea{width:100%;height:220px;background:#0d1117;border:none;color:#e6edf3;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.78rem;padding:.6rem;resize:vertical}
+textarea:focus{outline:none}
+.output{padding:.6rem;font-family:monospace;font-size:.78rem;min-height:100px;white-space:pre-wrap;word-break:break-all}
+.btn{background:#58a6ff;color:#0d1117;border:none;padding:.4rem 1rem;border-radius:5px;cursor:pointer;font-weight:600;font-size:.82rem}
+.btn:hover{opacity:.9}
+.btn-sm{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:.25rem .5rem;font-size:.7rem;border-radius:4px;cursor:pointer}
+.btn-sm:hover{color:#f0f6fc;border-color:#58a6ff}
+.toolbar{display:flex;gap:.5rem;align-items:center;padding:.5rem 0;flex-wrap:wrap}
+.badge{display:inline-block;padding:.1rem .4rem;border-radius:10px;font-size:.65rem;font-weight:600}
+.badge-block{background:rgba(248,81,73,0.15);color:#f85149}
+.badge-approve{background:rgba(57,211,83,0.15);color:#39d353}
+.badge-pass{background:rgba(139,148,158,0.15);color:#8b949e}
+.badge-error{background:rgba(210,153,34,0.15);color:#d29922}
+select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:.25rem .5rem;border-radius:4px;font-size:.75rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:1.5rem;padding-top:.8rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+.footer a:hover{color:#c9d1d9}
+.hint{font-size:.72rem;color:#484f58;margin-top:.3rem}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Playground</h1>
+<p class="sub">Write a hook. Pick a sample input. Click Run. See what happens. No install needed.</p>
+
+<div class="toolbar">
+  <label style="font-size:.78rem;color:#8b949e">Template:</label>
+  <select id="template" onchange="loadTemplate()">
+    <option value="empty">Empty hook</option>
+    <option value="block-pattern">Block a pattern</option>
+    <option value="approve-readonly">Auto-approve readonly</option>
+    <option value="log-command">Log commands</option>
+    <option value="guard-path">Guard file paths</option>
+  </select>
+  <label style="font-size:.78rem;color:#8b949e;margin-left:1rem">Sample input:</label>
+  <select id="sample" onchange="loadSample()">
+    <option value="rm-rf">rm -rf /</option>
+    <option value="git-status">git status</option>
+    <option value="git-push-main">git push origin main</option>
+    <option value="npm-test">npm test</option>
+    <option value="cat-env">cat .env</option>
+    <option value="git-add-env">git add .env</option>
+    <option value="edit-file">Edit: src/app.js</option>
+    <option value="write-memory">Write: memory file</option>
+    <option value="custom">Custom...</option>
+  </select>
+  <button class="btn" onclick="runHook()">Run Hook</button>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-header">
+      <span>Hook Script (bash)</span>
+      <span id="event-label">PreToolUse · Bash</span>
+    </div>
+    <textarea id="hook" spellcheck="false">#!/bin/bash
+# Your hook code here
+# stdin = JSON with tool_name and tool_input
+# exit 0 = allow, exit 2 = block
+# stdout JSON = approve/block decision
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Example: block rm -rf
+if echo "$COMMAND" | grep -qE 'rm\s+-rf'; then
+    echo "BLOCKED: rm -rf detected" >&2
+    exit 2
+fi
+
+exit 0</textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <span>Input (JSON via stdin)</span>
+      <button class="btn-sm" onclick="formatInput()">Format</button>
+    </div>
+    <textarea id="input" spellcheck="false">{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rm -rf /"
+  }
+}</textarea>
+  </div>
+</div>
+
+<h2>Output</h2>
+<div class="panel">
+  <div class="panel-header">
+    <span>Result</span>
+    <span id="result-badge"></span>
+  </div>
+  <div class="output" id="output">Click "Run Hook" to see the result.</div>
+</div>
+<p class="hint">Hooks are simulated client-side using pattern matching. For real execution, use <code>npx cc-safe-setup --simulate "command"</code> or <code>--test-hook name</code>.</p>
+
+<div class="footer">
+  <a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="validator.html">Validator</a> ·
+  <a href="settings-reference.html">Settings</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+  <br>Real testing: <code>npx cc-safe-setup --test-hook destructive-guard</code>
+</div>
+</div>
+
+<script>
+const TEMPLATES = {
+  empty: `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Your logic here
+
+exit 0`,
+  'block-pattern': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+
+# Block dangerous patterns
+if echo "$COMMAND" | grep -qE 'rm\\s+-rf|git\\s+reset\\s+--hard|git\\s+clean\\s+-fd'; then
+    echo "BLOCKED: Destructive command detected" >&2
+    exit 2
+fi
+
+exit 0`,
+  'approve-readonly': `#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+
+BASE=$(echo "$COMMAND" | awk '{print $1}' | sed 's|.*/||')
+
+case "$BASE" in
+    cat|head|tail|ls|grep|find|which|pwd|date)
+        echo '{"decision":"approve","reason":"Read-only command"}'
+        exit 0 ;;
+esac
+
+if echo "$COMMAND" | grep -qE '^\\s*git\\s+(status|log|diff|show|branch)\\b'; then
+    echo '{"decision":"approve","reason":"Read-only git"}'
+    exit 0
+fi
+
+exit 0`,
+  'log-command': `#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+echo "[$(date)] Command: $COMMAND" >> /tmp/hook.log
+echo "Logged to /tmp/hook.log" >&2
+
+exit 0`,
+  'guard-path': `#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+[[ "$TOOL" != "Edit" && "$TOOL" != "Write" ]] && exit 0
+[ -z "$FILE" ] && exit 0
+
+# Block writes to sensitive paths
+if [[ "$FILE" == *".claude/"*"/memory/"* ]]; then
+    jq -n '{"decision":"block","reason":"Memory file edit requires review"}'
+    exit 0
+fi
+
+exit 0`
+};
+
+const SAMPLES = {
+  'rm-rf': {tool_name:'Bash',tool_input:{command:'rm -rf /'}},
+  'git-status': {tool_name:'Bash',tool_input:{command:'git status'}},
+  'git-push-main': {tool_name:'Bash',tool_input:{command:'git push origin main'}},
+  'npm-test': {tool_name:'Bash',tool_input:{command:'npm test'}},
+  'cat-env': {tool_name:'Bash',tool_input:{command:'cat .env'}},
+  'git-add-env': {tool_name:'Bash',tool_input:{command:'git add .env'}},
+  'edit-file': {tool_name:'Edit',tool_input:{file_path:'src/app.js',old_string:'foo',new_string:'bar'}},
+  'write-memory': {tool_name:'Write',tool_input:{file_path:'~/.claude/projects/demo/memory/test.md',content:'test'}},
+  custom: {tool_name:'Bash',tool_input:{command:'echo hello'}}
+};
+
+function loadTemplate(){
+  document.getElementById('hook').value = TEMPLATES[document.getElementById('template').value] || TEMPLATES.empty;
+}
+
+function loadSample(){
+  const key = document.getElementById('sample').value;
+  document.getElementById('input').value = JSON.stringify(SAMPLES[key]||SAMPLES.custom, null, 2);
+  const tool = (SAMPLES[key]||{}).tool_name || 'Bash';
+  document.getElementById('event-label').textContent = `PreToolUse · ${tool}`;
+}
+
+function formatInput(){
+  try{
+    const v = JSON.parse(document.getElementById('input').value);
+    document.getElementById('input').value = JSON.stringify(v, null, 2);
+  }catch(e){
+    document.getElementById('output').textContent = 'Invalid JSON: ' + e.message;
+  }
+}
+
+function runHook(){
+  const hookCode = document.getElementById('hook').value;
+  const inputJson = document.getElementById('input').value;
+  let input;
+  try { input = JSON.parse(inputJson); } catch(e) {
+    showResult('error', 'Invalid input JSON: ' + e.message);
+    return;
+  }
+
+  // Client-side simulation of bash hook logic
+  const cmd = input.tool_input?.command || '';
+  const file = input.tool_input?.file_path || '';
+  const tool = input.tool_name || '';
+
+  let stdout = '';
+  let stderr = '';
+  let exitCode = 0;
+
+  // Parse hook for patterns
+  const lines = hookCode.split('\n');
+  for (const line of lines) {
+    // Detect grep -qE patterns → test against command
+    const grepMatch = line.match(/grep\s+-qE\s+['"](.+?)['"]/);
+    if (grepMatch) {
+      try {
+        const re = new RegExp(grepMatch[1].replace(/\\\\/g, '\\'));
+        const testStr = cmd || file;
+        if (re.test(testStr)) {
+          // Check what follows (exit 2 = block, approve JSON)
+          const nextLines = lines.slice(lines.indexOf(line));
+          for (const nl of nextLines) {
+            if (nl.includes('exit 2')) { exitCode = 2; stderr = extractMessage(nextLines); break; }
+            if (nl.includes('"approve"')) { stdout = extractJson(nextLines); break; }
+            if (nl.includes('"block"')) { stdout = extractJson(nextLines); exitCode = 0; break; }
+          }
+          if (exitCode === 2 || stdout) break;
+        }
+      } catch {}
+    }
+
+    // Detect case patterns
+    const caseMatch = line.match(/^\s*([\w|]+)\)/);
+    if (caseMatch && !line.includes('esac')) {
+      const patterns = caseMatch[1].split('|');
+      const base = cmd.trim().split(/\s+/)[0]?.replace(/.*\//, '') || '';
+      if (patterns.includes(base)) {
+        const nextLines = lines.slice(lines.indexOf(line));
+        for (const nl of nextLines) {
+          if (nl.includes('"approve"')) { stdout = '{"decision":"approve","reason":"Matched case pattern"}'; break; }
+          if (nl.includes('exit 2')) { exitCode = 2; stderr = 'Blocked by case match'; break; }
+          if (nl.includes(';;')) break;
+        }
+        if (stdout || exitCode === 2) break;
+      }
+    }
+
+    // Detect file path checks
+    if (line.includes('.claude/') && line.includes('memory') && file.includes('.claude/') && file.includes('memory')) {
+      const nextLines = lines.slice(lines.indexOf(line));
+      for (const nl of nextLines) {
+        if (nl.includes('"block"')) { stdout = '{"decision":"block","reason":"Memory file blocked"}'; break; }
+        if (nl.includes('exit 2')) { exitCode = 2; stderr = 'Memory file blocked'; break; }
+      }
+      if (stdout || exitCode === 2) break;
+    }
+  }
+
+  // Determine result
+  if (exitCode === 2) {
+    showResult('block', `Exit code: 2 (BLOCKED)\n\nstderr:\n${stderr || '(blocked)'}\n\nstdout:\n${stdout || '(empty)'}`);
+  } else if (stdout.includes('"approve"')) {
+    showResult('approve', `Exit code: 0 (APPROVED)\n\nstdout:\n${stdout}\n\nstderr:\n${stderr || '(empty)'}`);
+  } else if (stdout.includes('"block"')) {
+    showResult('block', `Exit code: 0 with block decision\n\nstdout:\n${stdout}\n\nstderr:\n${stderr || '(empty)'}`);
+  } else {
+    showResult('pass', `Exit code: 0 (PASSTHROUGH)\n\nNo approve/block decision — command proceeds to normal permission prompt.\n\nstdout:\n${stdout || '(empty)'}\nstderr:\n${stderr || '(empty)'}`);
+  }
+}
+
+function extractMessage(lines) {
+  for (const l of lines) {
+    const m = l.match(/echo\s+"(.+?)"\s+>&2/);
+    if (m) return m[1];
+  }
+  return 'Blocked';
+}
+
+function extractJson(lines) {
+  for (const l of lines) {
+    const m = l.match(/echo\s+'(\{.+?\})'/);
+    if (m) return m[1];
+    if (l.includes('jq -n')) {
+      return '{"decision":"block/approve","reason":"(from jq)"}';
+    }
+  }
+  return '';
+}
+
+function showResult(type, text) {
+  const el = document.getElementById('output');
+  const badge = document.getElementById('result-badge');
+  el.textContent = text;
+  el.style.color = type==='block'?'#f85149':type==='approve'?'#39d353':type==='error'?'#d29922':'#8b949e';
+  badge.className = 'badge badge-' + type;
+  badge.textContent = type.toUpperCase();
+}
+</script>
+</body>
+</html>

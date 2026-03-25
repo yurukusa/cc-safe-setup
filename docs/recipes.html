@@ -38,7 +38,7 @@ input:focus{outline:none;border-color:#58a6ff}
 <p class="sub">Real problems. Copy-paste solutions. Each recipe is a working hook you can install in 10 seconds.</p>
 
 <input id="q" placeholder="Search recipes... (permission, git, memory, test, deploy)" oninput="filter()">
-<div class="count" id="count">30 recipes</div>
+<div class="count" id="count">14 recipes</div>
 
 <div id="recipes">
 
@@ -200,6 +200,41 @@ BASE=$(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev
 exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 </div>
 
+<div class="recipe" data-tags="quality edit verify truncation">
+<h3 onclick="toggle(this)">Verify file edits actually applied</h3>
+<div class="recipe-meta">Event: PostToolUse · Matcher: Edit|Write · Fixes Issue #32658</div>
+<div class="recipe-desc">Claude assumes edits succeed. This hook checks: file exists, isn't empty, new_string is present, no conflict markers.</div>
+<div class="install">npx cc-safe-setup --install-example edit-verify</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+[[ "$TOOL" != "Edit" && "$TOOL" != "Write" ]] && exit 0
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && { echo "WARNING: File missing: $FILE" >&2; exit 0; }
+SIZE=$(wc -c < "$FILE")
+[ "$SIZE" -eq 0 ] && echo "WARNING: File empty after edit: $FILE" >&2
+if [ "$TOOL" = "Edit" ]; then
+    FIRST=$(echo "$INPUT" | jq -r '.tool_input.new_string // empty' | head -1)
+    [ -n "$FIRST" ] && ! grep -qF "$FIRST" "$FILE" && echo "WARNING: new_string not found in $FILE" >&2
+fi
+grep -qE '^(<<<<<<<|=======|>>>>>>>)' "$FILE" && echo "WARNING: Conflict markers in $FILE" >&2
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="safety backup rollback checkpoint">
+<h3 onclick="toggle(this)">Auto-backup files before every edit</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Edit|Write · Enables rollback</div>
+<div class="recipe-desc">Creates a timestamped backup in .claude/checkpoints/ before every edit. Keeps last 20 per file.</div>
+<div class="install">npx cc-safe-setup --install-example auto-git-checkpoint</div>
+<pre><code>#!/bin/bash
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+mkdir -p .claude/checkpoints
+cp "$FILE" ".claude/checkpoints/$(basename "$FILE").$(date +%H%M%S).bak"
+ls -t ".claude/checkpoints/$(basename "$FILE")".*.bak | tail -n +21 | xargs rm -f
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
 <h2>Monitoring</h2>
 
 <div class="recipe" data-tags="monitoring context window overflow">
@@ -251,7 +286,37 @@ echo "[$(date)] Fired: $0" >> /tmp/hook-fire.log
 
 </div>
 
+<h2>Try It: Hook Simulator</h2>
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.8rem">Type a command to see which hooks would block, approve, or pass it through.</p>
+
+<div style="display:flex;gap:8px;margin-bottom:1rem">
+<input id="sim" placeholder="Type a command... (e.g. rm -rf /, git push main, npm test)" style="flex:1" onkeydown="if(event.key==='Enter')runSim()">
+<button onclick="runSim()" style="background:#58a6ff;color:#0d1117;border:none;padding:.5rem 1rem;border-radius:6px;cursor:pointer;font-weight:600">Simulate</button>
+</div>
+
+<div id="sim-results" style="min-height:60px"></div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.8rem">
+<button class="sim-example" onclick="simEx('rm -rf /')">rm -rf /</button>
+<button class="sim-example" onclick="simEx('git push origin main')">git push main</button>
+<button class="sim-example" onclick="simEx('git status')">git status</button>
+<button class="sim-example" onclick="simEx('npm test')">npm test</button>
+<button class="sim-example" onclick="simEx('cat .env')">cat .env</button>
+<button class="sim-example" onclick="simEx('git add .env')">git add .env</button>
+<button class="sim-example" onclick="simEx('git reset --hard')">git reset --hard</button>
+<button class="sim-example" onclick="simEx('chmod -R 777 /')">chmod 777 /</button>
+</div>
+
+<style>
+.sim-example{background:#21262d;color:#8b949e;border:1px solid #30363d;padding:.3rem .6rem;border-radius:4px;cursor:pointer;font-size:.75rem}
+.sim-example:hover{color:#f0f6fc;border-color:#58a6ff}
+.sim-block{color:#f85149;font-weight:700}
+.sim-approve{color:#39d353;font-weight:700}
+.sim-pass{color:#484f58}
+</style>
+
 <div class="footer">
+
   <a href="hub.html">Hub</a> · <a href="hooks-cheatsheet.html">Cheat Sheet</a> · <a href="builder.html">Builder</a> ·
   <a href="settings-reference.html">Settings</a> · <a href="troubleshooting.html">Troubleshooting</a> ·
   <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
@@ -277,6 +342,67 @@ function filter(){
     if(match)shown++;
   });
   document.getElementById('count').textContent=shown+' recipes';
+}
+
+// Hook simulator — client-side pattern matching
+const HOOKS = [
+  {name:'destructive-guard', check: cmd => {
+    if (/rm\s+(-[rf]+\s+)*(\/|~|\.\.|\.\s*$)/.test(cmd)) return 'block';
+    if (/git\s+reset\s+--hard/.test(cmd)) return 'block';
+    if (/git\s+clean\s+-[a-z]*[fd]/.test(cmd)) return 'block';
+    if (/chmod\s+(-R\s+)?777\s+(\/|~|\.)/.test(cmd)) return 'block';
+    if (/find\s+(\/|~|\.\.)\s.*-delete/.test(cmd)) return 'block';
+    if (/Remove-Item.*-Recurse.*-Force/i.test(cmd)) return 'block';
+    return 'pass';
+  }},
+  {name:'branch-guard', check: cmd => {
+    if (/git\s+push\s.*(main|master)\b/.test(cmd)) return 'block';
+    if (/git\s+push\s.*--force/.test(cmd)) return 'block';
+    return 'pass';
+  }},
+  {name:'secret-guard', check: cmd => {
+    if (/git\s+add\s+.*\.env/.test(cmd)) return 'block';
+    if (/git\s+add\s+(-A|\.)/.test(cmd)) return 'block';
+    return 'pass';
+  }},
+  {name:'auto-approve-readonly', check: cmd => {
+    const base = cmd.trim().split(/\s+/)[0].replace(/.*\//,'');
+    if (['cat','head','tail','less','wc','grep','rg','find','ls','tree','stat','file','which','type','date','uptime','pwd','df','du','free','ps'].includes(base)) return 'approve';
+    if (/^\s*git\s+(status|log|diff|show|branch|remote|blame|ls-files)\b/.test(cmd)) return 'approve';
+    return 'pass';
+  }},
+  {name:'auto-approve-test', check: cmd => {
+    if (/^\s*(npm\s+test|npx\s+(jest|vitest|mocha)|pytest|go\s+test|cargo\s+test)\b/.test(cmd)) return 'approve';
+    return 'pass';
+  }},
+  {name:'memory-write-guard', check: cmd => 'pass'},
+  {name:'skill-gate', check: cmd => 'pass'},
+  {name:'no-sudo-guard', check: cmd => {
+    if (/^\s*sudo\s/.test(cmd)) return 'block';
+    return 'pass';
+  }},
+  {name:'context-monitor', check: cmd => 'pass'},
+  {name:'syntax-check', check: cmd => 'pass'},
+];
+
+function simEx(cmd){document.getElementById('sim').value=cmd;runSim()}
+function runSim(){
+  const cmd=document.getElementById('sim').value.trim();
+  if(!cmd){document.getElementById('sim-results').innerHTML='<span style="color:#8b949e">Type a command above.</span>';return}
+  let html='';
+  let blocks=0,approves=0,passes=0;
+  for(const h of HOOKS){
+    const r=h.check(cmd);
+    if(r==='block'){blocks++;html+=`<div class="sim-block">✗ BLOCK — ${h.name}</div>`}
+    else if(r==='approve'){approves++;html+=`<div class="sim-approve">✓ APPROVE — ${h.name}</div>`}
+    else{passes++;html+=`<div class="sim-pass">· pass — ${h.name}</div>`}
+  }
+  html+=`<div style="margin-top:.5rem;font-weight:700;color:${blocks?'#f85149':approves?'#39d353':'#8b949e'}">`;
+  if(blocks) html+=`→ This command would be BLOCKED`;
+  else if(approves) html+=`→ This command would be auto-approved (no prompt)`;
+  else html+=`→ This command would trigger a permission prompt`;
+  html+=`</div>`;
+  document.getElementById('sim-results').innerHTML=html;
 }
 </script>
 </body>

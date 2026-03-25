@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 319 examples = **327 hooks**. 45 CLI commands. 955 tests. 5 languages. [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Wizard](https://yurukusa.github.io/cc-safe-setup/wizard.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
+8 built-in + 319 examples = **327 hooks**. 45 CLI commands. 955 tests. 5 languages. [**Getting Started**](https://yurukusa.github.io/cc-safe-setup/getting-started.html) · [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Wizard](https://yurukusa.github.io/cc-safe-setup/wizard.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
 
 ```bash
 npx cc-safe-setup
@@ -110,6 +110,8 @@ Each hook exists because a real incident happened without it.
 | `--init-project` | Full project setup (hooks + CLAUDE.md + CI) |
 | `--score` | CI-friendly safety score (exit 1 if below threshold) |
 | `--test-hook <name>` | Test a specific hook with sample input |
+| `--simulate "cmd"` | Preview how all hooks react to a command |
+| `--protect <path>` | Block edits to a file or directory |
 | `--changelog` | Show what changed in each version |
 | `--report` | Generate safety report |
 | `--help` | Show help |
@@ -130,6 +132,8 @@ Each hook exists because a real incident happened without it.
 | Block silent memory file edits | `npx cc-safe-setup --install-example memory-write-guard` |
 | Stop built-in skills editing opaquely | `npx cc-safe-setup --install-example skill-gate` |
 | Diagnose why hooks aren't working | `npx cc-safe-setup --doctor` |
+| Preview how hooks react to a command | `npx cc-safe-setup --simulate "git push origin main"` |
+| Protect a specific file from edits | `npx cc-safe-setup --protect .env` |
 | Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
 
 ## How It Works

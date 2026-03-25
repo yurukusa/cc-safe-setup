@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Autonomous Pre-Flight Checklist</title>
+<meta name="description" content="14-point safety checklist before running Claude Code autonomously. Print it. Share it. Never skip it.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.2rem}
+h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;border-bottom:1px solid #21262d}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+.check{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid #161b22;align-items:flex-start}
+.check:last-child{border-bottom:none}
+.checkbox{width:20px;height:20px;border:2px solid #30363d;border-radius:4px;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.checkbox.checked{background:#39d353;border-color:#39d353;color:#0d1117}
+.check-body{flex:1}
+.check-title{font-weight:600;font-size:.88rem;color:#f0f6fc}
+.check-desc{font-size:.78rem;color:#8b949e;margin-top:2px}
+.check-fix{font-size:.75rem;color:#58a6ff;margin-top:3px;font-family:monospace}
+.section{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1rem;margin:.6rem 0}
+.score-bar{display:flex;gap:0;border-radius:6px;overflow:hidden;height:8px;background:#21262d;margin:.8rem 0}
+.score-fill{height:100%;transition:width .3s}
+.score-text{text-align:center;font-size:.85rem;font-weight:700;margin:.3rem 0}
+.cta{text-align:center;margin:1.5rem 0;padding:1rem;background:#161b22;border:1px solid #30363d;border-radius:8px}
+.cta code{background:#21262d;padding:.3rem .6rem;border-radius:4px;font-size:.85rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:1.5rem;padding-top:.8rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+.print-btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:.3rem .8rem;border-radius:4px;cursor:pointer;font-size:.75rem;float:right}
+.print-btn:hover{color:#f0f6fc;border-color:#58a6ff}
+@media print{
+  body{background:#fff;color:#000;padding:1rem}
+  .c{max-width:100%}
+  h1,.check-title{color:#000}
+  h2{color:#333;border-color:#ddd}
+  .section{border-color:#ddd;background:#f9f9f9}
+  .check-desc{color:#555}
+  .check-fix{color:#0066cc}
+  .checkbox{border-color:#999}
+  .checkbox.checked{background:#22863a;border-color:#22863a}
+  .print-btn,.footer,.cta{display:none}
+  .score-bar{background:#eee}
+}
+</style>
+</head>
+<body>
+<div class="c">
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
+<h1>Autonomous Pre-Flight Checklist</h1>
+<p class="sub">14 checks before running Claude Code unattended. Check each item. Fix reds before launch. <span id="score-label"></span></p>
+
+<div class="score-bar"><div class="score-fill" id="score-fill" style="width:0;background:#f85149"></div></div>
+<div class="score-text" id="score-text">0 / 14</div>
+
+<h2>1. Safety Hooks</h2>
+<div class="section">
+
+<div class="check" data-id="destructive">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Destructive command guard installed</div>
+<div class="check-desc">rm -rf, git reset --hard, git clean -fd, chmod 777, PowerShell Remove-Item are blocked.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+</div>
+</div>
+
+<div class="check" data-id="branch">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Branch push guard installed</div>
+<div class="check-desc">No direct pushes to main/master. No force-pushes to any branch.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+</div>
+</div>
+
+<div class="check" data-id="secret">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Secret leak prevention installed</div>
+<div class="check-desc">git add .env, credential files, and git add . with .env present are blocked.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+</div>
+</div>
+
+<div class="check" data-id="syntax">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Syntax checker installed</div>
+<div class="check-desc">Python, Shell, JSON, YAML errors caught immediately after every edit.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+</div>
+</div>
+
+</div>
+
+<h2>2. Monitoring</h2>
+<div class="section">
+
+<div class="check" data-id="context">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Context window monitor active</div>
+<div class="check-desc">Warns at 40%, 25%, 20%, 15% remaining. Prevents silent session death.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+</div>
+</div>
+
+<div class="check" data-id="edit-verify">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Edit verification hook installed</div>
+<div class="check-desc">Checks file exists, isn't empty, and new_string is present after every edit.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --install-example edit-verify</div>
+</div>
+</div>
+
+</div>
+
+<h2>3. Recovery</h2>
+<div class="section">
+
+<div class="check" data-id="git-clean">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Git working tree is clean</div>
+<div class="check-desc">All changes committed or stashed before autonomous session starts.</div>
+<div class="check-fix">Fix: git stash or git commit</div>
+</div>
+</div>
+
+<div class="check" data-id="branch-created">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Working on a feature branch (not main)</div>
+<div class="check-desc">Easy rollback if something goes wrong. Main stays clean.</div>
+<div class="check-fix">Fix: git checkout -b feature/autonomous-session</div>
+</div>
+</div>
+
+<div class="check" data-id="checkpoint">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Auto-checkpoint or state saver installed</div>
+<div class="check-desc">Session state survives context compaction. Files backed up before edits.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --install-example session-state-saver</div>
+</div>
+</div>
+
+</div>
+
+<h2>4. Configuration</h2>
+<div class="section">
+
+<div class="check" data-id="claudemd">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">CLAUDE.md has clear instructions</div>
+<div class="check-desc">Project rules, scope boundaries, and "don't ask, decide" autonomy rules defined.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --shield (generates CLAUDE.md)</div>
+</div>
+</div>
+
+<div class="check" data-id="jq">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">jq is installed</div>
+<div class="check-desc">Required for all hooks to parse JSON input. Without it, hooks silently fail.</div>
+<div class="check-fix">Fix: brew install jq (macOS) | apt install jq (Linux) | choco install jq (Windows)</div>
+</div>
+</div>
+
+<div class="check" data-id="doctor">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">npx cc-safe-setup --doctor passes</div>
+<div class="check-desc">All 13 diagnostic checks pass. Hooks are properly registered and executable.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --doctor (shows what to fix)</div>
+</div>
+</div>
+
+<div class="check" data-id="simulate">
+<div class="checkbox" onclick="toggle(this)"></div>
+<div class="check-body">
+<div class="check-title">Dangerous commands are blocked (verified)</div>
+<div class="check-desc">Tested with --simulate that rm -rf, git push main, etc. are actually blocked.</div>
+<div class="check-fix">Fix: npx cc-safe-setup --simulate "rm -rf /"</div>
+</div>
+</div>
+
+</div>
+
+<div class="cta">
+  <p style="font-size:.9rem;margin-bottom:.5rem"><strong>Pass all 14?</strong> You're ready for autonomous operation.</p>
+  <p style="font-size:.8rem;color:#8b949e">One command covers checks 1-6: <code>npx cc-safe-setup --shield</code></p>
+</div>
+
+<div class="footer">
+  <a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="validator.html">Validator</a> ·
+  <a href="playground.html">Playground</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+function toggle(el){
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+  updateScore();
+}
+function updateScore(){
+  const total = document.querySelectorAll('.checkbox').length;
+  const checked = document.querySelectorAll('.checkbox.checked').length;
+  const pct = Math.round(checked/total*100);
+  document.getElementById('score-fill').style.width = pct+'%';
+  document.getElementById('score-fill').style.background = pct>=100?'#39d353':pct>=70?'#d29922':'#f85149';
+  document.getElementById('score-text').textContent = checked+' / '+total;
+  document.getElementById('score-label').textContent = pct>=100?'✓ Ready for launch':pct>=70?'Almost there':'Fix items below';
+}
+updateScore();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started — Make Claude Code Safe in 5 Minutes</title>
+<meta name="description" content="Step-by-step guide for beginners. Install safety hooks, understand what they do, verify they work. No coding required.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.2rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+.step{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3.5rem}
+.step-num{position:absolute;left:1rem;top:1rem;width:28px;height:28px;background:#21262d;border:2px solid #58a6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:#58a6ff}
+.step.done .step-num{background:#39d353;border-color:#39d353;color:#0d1117}
+.step h3{font-size:.95rem;color:#f0f6fc;margin-bottom:.3rem}
+.step p{font-size:.83rem;color:#8b949e}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem .7rem;font-size:.8rem;color:#e6edf3;margin:.4rem 0;position:relative;overflow-x:auto}
+.copy{position:absolute;top:.3rem;right:.3rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.15rem .4rem;border-radius:3px;cursor:pointer;font-size:.6rem}
+.copy:hover{color:#f0f6fc}
+code{background:#161b22;padding:.1rem .25rem;border-radius:3px;font-size:.82rem}
+.why{background:rgba(88,166,255,0.08);border-left:3px solid #58a6ff;padding:.5rem .8rem;margin:.5rem 0;font-size:.8rem;color:#8b949e}
+.warn{background:rgba(210,153,34,0.08);border-left:3px solid #d29922;padding:.5rem .8rem;margin:.5rem 0;font-size:.8rem;color:#d29922}
+.next{display:flex;gap:12px;flex-wrap:wrap;margin:1rem 0}
+.next a{background:#21262d;border:1px solid #30363d;padding:.4rem .8rem;border-radius:6px;color:#58a6ff;text-decoration:none;font-size:.8rem}
+.next a:hover{border-color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+.time{font-size:.75rem;color:#39d353;margin-left:.5rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Getting Started</h1>
+<p class="sub">Make Claude Code safe in 5 minutes. No coding required. Works on macOS, Linux, and Windows (WSL).</p>
+
+<div class="why">
+<strong>Why this matters:</strong> Claude Code has no safety hooks by default. Users have <a href="https://github.com/anthropics/claude-code/issues/36339" style="color:#58a6ff">lost entire directories</a>, pushed untested code to main, and committed API keys to public repos. These hooks prevent that.
+</div>
+
+<h2>Prerequisites</h2>
+
+<div class="step">
+<div class="step-num">0</div>
+<h3>Install jq <span class="time">30 sec</span></h3>
+<p>Hooks need jq to read JSON. Check if you have it:</p>
+<pre><code>jq --version</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>If not installed:</p>
+<pre><code># macOS
+brew install jq
+
+# Ubuntu / Debian
+sudo apt install jq
+
+# Windows (in WSL)
+sudo apt install jq</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>Install</h2>
+
+<div class="step">
+<div class="step-num">1</div>
+<h3>Run one command <span class="time">30 sec</span></h3>
+<p>This installs 8 safety hooks and configures your settings.json:</p>
+<pre><code>npx cc-safe-setup</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>You'll see a list of hooks. Press <code>Y</code> to install.</p>
+<div class="why">What gets installed: destructive command blocker, branch push guard, secret leak prevention, syntax checker, context monitor, bash comment stripper, cd+git auto-approver, API error alert.</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<h3>Restart Claude Code <span class="time">10 sec</span></h3>
+<p>Hooks load on startup. Close Claude Code and reopen it:</p>
+<pre><code># In your terminal, exit Claude Code (Ctrl+C or type /exit)
+# Then start it again
+claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<h3>Verify hooks work <span class="time">30 sec</span></h3>
+<p>Run the diagnostic to confirm everything is set up:</p>
+<pre><code>npx cc-safe-setup --doctor</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>All items should show <span style="color:#39d353">✓</span>. If any show <span style="color:#f85149">✗</span>, the doctor tells you how to fix it.</p>
+</div>
+
+<h2>Test It</h2>
+
+<div class="step">
+<div class="step-num">4</div>
+<h3>Simulate a dangerous command <span class="time">30 sec</span></h3>
+<p>See how hooks react without actually running the command:</p>
+<pre><code>npx cc-safe-setup --simulate "rm -rf /"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>You should see: <span style="color:#f85149">✗ BLOCK — destructive-guard</span></p>
+<pre><code>npx cc-safe-setup --simulate "git status"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>You should see: <span style="color:#8b949e">→ This command would trigger a permission prompt</span></p>
+</div>
+
+<h2>Optional: Reduce Permission Prompts</h2>
+
+<div class="step">
+<div class="step-num">5</div>
+<h3>Auto-approve read-only commands <span class="time">30 sec</span></h3>
+<p>Tired of approving <code>ls</code>, <code>cat</code>, and <code>git log</code>? This hook auto-approves commands that can't modify anything:</p>
+<pre><code>npx cc-safe-setup --install-example auto-approve-readonly</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>Reduces permission prompts by about 80%. Only commands that write, delete, or push still require approval.</p>
+</div>
+
+<div class="step">
+<div class="step-num">6</div>
+<h3>Auto-approve test commands <span class="time">10 sec</span></h3>
+<pre><code>npx cc-safe-setup --install-example auto-approve-test</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>npm test, pytest, go test, cargo test — all auto-approved.</p>
+</div>
+
+<h2>Optional: Maximum Safety</h2>
+
+<div class="step">
+<div class="step-num">7</div>
+<h3>Shield mode <span class="time">30 sec</span></h3>
+<p>For autonomous sessions where Claude runs unattended:</p>
+<pre><code>npx cc-safe-setup --shield</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<p>Installs everything from steps 1-6 plus: scope guard, memory write guard, skill gate, and project-specific hooks based on your tech stack.</p>
+</div>
+
+<h2>What Happens Next</h2>
+
+<p style="font-size:.85rem;color:#8b949e;margin:.5rem 0">The hooks run silently in the background. You won't notice them until they block something dangerous. When they do, you'll see a clear message explaining what was blocked and why.</p>
+
+<div class="warn">
+<strong>Note:</strong> Hooks are bypassed when Claude Code runs with <code>--dangerously-skip-permissions</code> or <code>--bare</code>. These modes disable all safety hooks by design.
+</div>
+
+<h2>Next Steps</h2>
+<div class="next">
+<a href="preflight.html">Pre-Flight Checklist →</a>
+<a href="recipes.html">Hook Recipes →</a>
+<a href="validator.html">Validate settings.json →</a>
+<a href="playground.html">Hook Playground →</a>
+<a href="settings-reference.html">Settings Reference →</a>
+<a href="troubleshooting.html">Troubleshooting →</a>
+</div>
+
+<div class="footer">
+  <a href="hub.html">Hub</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · MIT License
+  <br>Questions? <a href="https://github.com/yurukusa/cc-safe-setup/issues">Open an issue</a>
+</div>
+</div>
+
+<script>
+function cp(btn){
+  const code=btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard.writeText(code);
+  btn.textContent='Copied!';
+  setTimeout(()=>btn.textContent='Copy',1500);
+}
+</script>
+</body>
+</html>
