@@ -1,5 +1,10 @@
 # Changelog
 
+## [28.9.0] - 2026-03-26
+- **New**: 4 PermissionRequest hooks now discoverable via `--examples permission`
+- **Docs**: hook-patterns.html — PermissionRequest pattern with copy-paste code
+- **Fix**: --examples category list updated (136 discoverable, 336 total)
+
 ## [28.8.0] - 2026-03-26
 - **New**: auto-approve-compound-git.sh — PermissionRequest hook for compound git commands (#30519)
 - **Fix**: Example count corrected to 336 (was underreported)
