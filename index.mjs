@@ -605,16 +605,19 @@ async function installExample(name) {
   let matcher = 'Bash';
 
   // Detect trigger from header comments
-  if (content.includes('TRIGGER: PostToolUse') || content.includes('PostToolUse')) trigger = 'PostToolUse';
-  if (content.includes('TRIGGER: Notification') || content.includes('Notification')) trigger = 'Notification';
-  if (content.includes('TRIGGER: Stop') || content.includes('Stop')) trigger = 'Stop';
-  if (content.includes('TRIGGER: SessionStart') || content.includes('SessionStart')) trigger = 'SessionStart';
-  if (content.includes('TRIGGER: PreCompact') || content.includes('PreCompact')) trigger = 'PreCompact';
-  if (content.includes('TRIGGER: SessionEnd') || content.includes('SessionEnd')) trigger = 'SessionEnd';
+  if (content.includes('TRIGGER: PermissionRequest') || content.match(/^#.*PermissionRequest hook/m)) trigger = 'PermissionRequest';
+  else if (content.includes('TRIGGER: PostToolUse') || content.includes('PostToolUse')) trigger = 'PostToolUse';
+  else if (content.includes('TRIGGER: Notification') || content.includes('Notification')) trigger = 'Notification';
+  else if (content.includes('TRIGGER: Stop') || content.includes('Stop')) trigger = 'Stop';
+  else if (content.includes('TRIGGER: SessionStart') || content.includes('SessionStart')) trigger = 'SessionStart';
+  else if (content.includes('TRIGGER: PreCompact') || content.includes('PreCompact')) trigger = 'PreCompact';
+  else if (content.includes('TRIGGER: SessionEnd') || content.includes('SessionEnd')) trigger = 'SessionEnd';
 
-  // Detect matcher from header
+  // Detect matcher from header (JSON format or comment format)
   const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);
   if (matcherMatch) matcher = matcherMatch[1];
+  const commentMatcher = content.match(/^#\s*Matcher:\s*(.+)$/m);
+  if (commentMatcher) matcher = commentMatcher[1].trim();
 
   // Update settings.json
   let settings = {};
