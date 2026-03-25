@@ -41,10 +41,10 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="tagline">Make Claude Code safe for autonomous operation</div>
 
 <div class="stats">
-<div class="stat"><div class="stat-num">334</div><div class="stat-label">hooks</div></div>
+<div class="stat"><div class="stat-num">336</div><div class="stat-label">hooks</div></div>
 <div class="stat"><div class="stat-num">49</div><div class="stat-label">commands</div></div>
 <div class="stat"><div class="stat-num">974</div><div class="stat-label">tests</div></div>
-<div class="stat"><div class="stat-num">17</div><div class="stat-label">web tools</div></div>
+<div class="stat"><div class="stat-num">22</div><div class="stat-label">web tools</div></div>
 </div>
 
 <button class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</button>
@@ -157,6 +157,34 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="card-title">Troubleshooting</div>
 <div class="card-desc">10 common problems with step-by-step fixes. Hook not firing? Start here.</div>
 <span class="card-tag">debug</span>
+</a>
+
+<a href="which-hook.html" class="card">
+<div class="card-icon">🤔</div>
+<div class="card-title">Which Hook?</div>
+<div class="card-desc">Answer 2-3 questions → get the exact hook you need. No knowledge required.</div>
+<span class="card-tag">interactive</span>
+</a>
+
+<a href="hook-patterns.html" class="card">
+<div class="card-icon">🧱</div>
+<div class="card-title">10 Patterns</div>
+<div class="card-desc">Block, Approve, Warn, Log, Validate, Protect, Limit, Checkpoint, Enforce, Recover.</div>
+<span class="card-tag">reference</span>
+</a>
+
+<a href="common-mistakes.html" class="card">
+<div class="card-icon">⚠️</div>
+<div class="card-title">Common Mistakes</div>
+<div class="card-desc">7 mistakes that cause real incidents. Syntax error lockout, broad matchers, missing jq.</div>
+<span class="card-tag">debug</span>
+</a>
+
+<a href="compare.html" class="card">
+<div class="card-icon">⚖️</div>
+<div class="card-title">Compare</div>
+<div class="card-desc">Manual setup vs cc-safe-setup vs do nothing. 15 criteria compared.</div>
+<span class="card-tag">decision</span>
 </a>
 
 <a href="migration-guide.html" class="card">
