@@ -114,10 +114,15 @@ const SUGGEST = process.argv.includes('--suggest');
 const INIT_PROJECT = process.argv.includes('--init-project');
 const SCORE_ONLY = process.argv.includes('--score');
 const CHANGELOG_CMD = process.argv.includes('--changelog');
+const VALIDATE = process.argv.includes('--validate');
+const SAFE_MODE = process.argv.includes('--safe-mode');
+const SAFE_MODE_OFF = process.argv.includes('--safe-mode') && process.argv.includes('off');
 const SIMULATE_IDX = process.argv.findIndex(a => a === '--simulate');
 const SIMULATE_CMD = SIMULATE_IDX !== -1 ? process.argv.slice(SIMULATE_IDX + 1).join(' ') : null;
 const PROTECT_IDX = process.argv.findIndex(a => a === '--protect');
 const PROTECT_PATH = PROTECT_IDX !== -1 ? process.argv[PROTECT_IDX + 1] : null;
+const RULES_IDX = process.argv.findIndex(a => a === '--rules');
+const RULES_FILE = RULES_IDX !== -1 ? (process.argv[RULES_IDX + 1] || '.claude/rules.yaml') : null;
 const TEST_HOOK_IDX = process.argv.findIndex(a => a === '--test-hook');
 const TEST_HOOK = TEST_HOOK_IDX !== -1 ? process.argv[TEST_HOOK_IDX + 1] : null;
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
@@ -153,6 +158,7 @@ if (HELP) {
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
     npx cc-safe-setup --simulate "rm -rf /"  See how hooks react to a command
     npx cc-safe-setup --protect .env         Block edits to a specific file/dir
+    npx cc-safe-setup --rules [file]       Compile YAML rules into a single hook
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
     npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
@@ -4266,6 +4272,320 @@ async function watch() {
   }
 }
 
+async function validateHooks() {
+  const { spawnSync } = await import('child_process');
+  const { readdirSync, renameSync } = await import('fs');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --validate' + c.reset);
+  console.log(c.dim + '  Checking all hooks for syntax errors and dangerous exit codes...' + c.reset);
+  console.log();
+
+  if (!existsSync(HOOKS_DIR)) {
+    console.log(c.yellow + '  No hooks directory found.' + c.reset);
+    return;
+  }
+
+  const disabledDir = join(HOME, '.claude', 'hooks-disabled');
+  const hooks = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+  let ok = 0, dangerous = 0;
+
+  for (const h of hooks) {
+    const path = join(HOOKS_DIR, h);
+    const name = h.replace('.sh', '');
+
+    // 1. Syntax check
+    const syntax = spawnSync('bash', ['-n', path], { stdio: 'pipe', timeout: 5000 });
+    if (syntax.status !== 0) {
+      mkdirSync(disabledDir, { recursive: true });
+      renameSync(path, join(disabledDir, h));
+      console.log(c.red + '  ✗ ' + name + c.reset + ' — SYNTAX ERROR (exit ' + syntax.status + ')');
+      console.log(c.dim + '    Moved to hooks-disabled/. A syntax error exit 2 blocks ALL tools.' + c.reset);
+      dangerous++;
+      continue;
+    }
+
+    // 2. Empty input test — exit 2 = would block all tools
+    const test = spawnSync('bash', [path], {
+      input: '{}', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe']
+    });
+    if (test.status === 2) {
+      mkdirSync(disabledDir, { recursive: true });
+      renameSync(path, join(disabledDir, h));
+      console.log(c.red + '  ✗ ' + name + c.reset + ' — BLOCKS on empty input (exit 2)');
+      console.log(c.dim + '    Moved to hooks-disabled/.' + c.reset);
+      dangerous++;
+      continue;
+    }
+
+    ok++;
+    console.log(c.green + '  ✓ ' + c.reset + name);
+  }
+
+  console.log();
+  if (dangerous > 0) {
+    console.log(c.red + '  ' + dangerous + ' dangerous hook(s) disabled.' + c.reset);
+    console.log(c.dim + '  Restart Claude Code to apply. Disabled hooks are in ~/.claude/hooks-disabled/' + c.reset);
+  } else {
+    console.log(c.green + '  All ' + ok + ' hooks passed validation.' + c.reset);
+  }
+  console.log();
+}
+
+async function safeMode(enable) {
+  const { readdirSync, renameSync, rmdirSync } = await import('fs');
+  const disabledDir = join(HOME, '.claude', 'hooks-disabled');
+  const backupSettings = join(HOME, '.claude', 'settings-backup.json');
+
+  console.log();
+  if (enable) {
+    console.log(c.bold + '  cc-safe-setup --safe-mode' + c.reset);
+    console.log(c.dim + '  Disabling all hooks...' + c.reset);
+
+    if (!existsSync(HOOKS_DIR)) {
+      console.log(c.yellow + '  No hooks to disable.' + c.reset);
+      return;
+    }
+
+    mkdirSync(disabledDir, { recursive: true });
+    const hooks = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+    for (const h of hooks) {
+      renameSync(join(HOOKS_DIR, h), join(disabledDir, h));
+    }
+
+    // Backup settings and clear hooks
+    if (existsSync(SETTINGS_PATH)) {
+      const settings = readFileSync(SETTINGS_PATH, 'utf-8');
+      writeFileSync(backupSettings, settings);
+      const parsed = JSON.parse(settings);
+      parsed.hooks = {};
+      writeFileSync(SETTINGS_PATH, JSON.stringify(parsed, null, 2));
+    }
+
+    console.log(c.green + '  Safe mode ON.' + c.reset + ' ' + hooks.length + ' hooks disabled.');
+    console.log(c.dim + '  Restart Claude Code. Run --safe-mode off to restore.' + c.reset);
+  } else {
+    console.log(c.bold + '  cc-safe-setup --safe-mode off' + c.reset);
+
+    if (existsSync(disabledDir)) {
+      mkdirSync(HOOKS_DIR, { recursive: true });
+      const hooks = readdirSync(disabledDir).filter(f => f.endsWith('.sh'));
+      for (const h of hooks) {
+        renameSync(join(disabledDir, h), join(HOOKS_DIR, h));
+      }
+      try { rmdirSync(disabledDir); } catch {}
+      console.log(c.green + '  Restored ' + hooks.length + ' hooks.' + c.reset);
+    }
+
+    if (existsSync(backupSettings)) {
+      copyFileSync(backupSettings, SETTINGS_PATH);
+      unlinkSync(backupSettings);
+      console.log(c.green + '  Restored settings.json from backup.' + c.reset);
+    }
+
+    console.log(c.dim + '  Restart Claude Code to activate hooks.' + c.reset);
+  }
+  console.log();
+}
+
+async function compileRules(rulesFile) {
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --rules' + c.reset);
+
+  if (!existsSync(rulesFile)) {
+    // Create example rules file
+    const exampleDir = rulesFile.includes('/') ? rulesFile.substring(0, rulesFile.lastIndexOf('/')) : '.';
+    mkdirSync(exampleDir, { recursive: true });
+    writeFileSync(rulesFile, `# Claude Code Safety Rules
+# Run: npx cc-safe-setup --rules ${rulesFile}
+
+# Block dangerous commands
+- block: "rm -rf on root or home"
+  pattern: "rm\\\\s+-rf\\\\s+(\\\\/$|~)"
+
+- block: "git push to main"
+  pattern: "git\\\\s+push.*(main|master)"
+
+- block: "git force push"
+  pattern: "git\\\\s+push.*--force"
+
+- block: "git add .env"
+  pattern: "git\\\\s+add.*\\\\.env"
+
+# Auto-approve safe commands
+- approve: "read-only commands"
+  commands: [cat, head, tail, ls, grep, find, which, pwd, date]
+
+- approve: "git read commands"
+  pattern: "^\\\\s*git\\\\s+(status|log|diff|show|branch)"
+
+- approve: "test runners"
+  pattern: "^\\\\s*(npm\\\\s+test|pytest|go\\\\s+test|cargo\\\\s+test)"
+
+# Protect files from edits
+- protect: ".env"
+- protect: "config/secrets.yaml"
+`);
+    console.log(c.green + '  + ' + c.reset + 'Created ' + rulesFile + ' with example rules');
+    console.log(c.dim + '  Edit the file, then run this command again to compile.' + c.reset);
+    console.log();
+    return;
+  }
+
+  // Parse YAML (simple parser — no dependency needed)
+  const content = readFileSync(rulesFile, 'utf-8');
+  const rules = [];
+  let current = null;
+
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#') || !trimmed) continue;
+
+    const blockMatch = trimmed.match(/^-\s+block:\s+"(.+)"/);
+    const approveMatch = trimmed.match(/^-\s+approve:\s+"(.+)"/);
+    const protectMatch = trimmed.match(/^-\s+protect:\s+"(.+)"/);
+    const patternMatch = trimmed.match(/^\s+pattern:\s+"(.+)"/);
+    const commandsMatch = trimmed.match(/^\s+commands:\s+\[(.+)\]/);
+
+    if (blockMatch) { current = { type: 'block', name: blockMatch[1] }; rules.push(current); }
+    else if (approveMatch) { current = { type: 'approve', name: approveMatch[1] }; rules.push(current); }
+    else if (protectMatch) { rules.push({ type: 'protect', path: protectMatch[1] }); current = null; }
+    else if (patternMatch && current) { current.pattern = patternMatch[1]; }
+    else if (commandsMatch && current) { current.commands = commandsMatch[1].split(',').map(s => s.trim()); }
+  }
+
+  if (rules.length === 0) {
+    console.log(c.yellow + '  No rules found in ' + rulesFile + c.reset);
+    return;
+  }
+
+  console.log(c.dim + '  Compiling ' + rules.length + ' rules from ' + rulesFile + c.reset);
+
+  // Generate consolidated hook script
+  let script = `#!/bin/bash
+# Auto-generated from: ${rulesFile}
+# Generated: $(date -Iseconds)
+# Rules: ${rules.length}
+# Regenerate: npx cc-safe-setup --rules ${rulesFile}
+
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+
+`;
+
+  // Block rules
+  const blocks = rules.filter(r => r.type === 'block');
+  if (blocks.length > 0) {
+    script += '# === Block Rules ===\n';
+    script += 'if [ "$TOOL" = "Bash" ] && [ -n "$COMMAND" ]; then\n';
+    for (const rule of blocks) {
+      if (rule.pattern) {
+        script += `  if echo "$COMMAND" | grep -qE '${rule.pattern}'; then\n`;
+        script += `    echo "BLOCKED: ${rule.name}" >&2\n`;
+        script += `    exit 2\n`;
+        script += `  fi\n`;
+      }
+    }
+    script += 'fi\n\n';
+  }
+
+  // Approve rules
+  const approves = rules.filter(r => r.type === 'approve');
+  if (approves.length > 0) {
+    script += '# === Approve Rules ===\n';
+    script += 'if [ "$TOOL" = "Bash" ] && [ -n "$COMMAND" ]; then\n';
+    for (const rule of approves) {
+      if (rule.commands) {
+        const base = '$(echo "$COMMAND" | awk \'{ print $1 }\' | sed \'s|.*/||\')'
+        script += `  BASE=${base}\n`;
+        script += `  case "$BASE" in\n`;
+        script += `    ${rule.commands.join('|')}) echo '{"decision":"approve","reason":"${rule.name}"}'; exit 0 ;;\n`;
+        script += `  esac\n`;
+      }
+      if (rule.pattern) {
+        script += `  if echo "$COMMAND" | grep -qE '${rule.pattern}'; then\n`;
+        script += `    echo '{"decision":"approve","reason":"${rule.name}"}'\n`;
+        script += `    exit 0\n`;
+        script += `  fi\n`;
+      }
+    }
+    script += 'fi\n\n';
+  }
+
+  // Protect rules
+  const protects = rules.filter(r => r.type === 'protect');
+  if (protects.length > 0) {
+    script += '# === Protect Rules ===\n';
+    script += 'if [ "$TOOL" = "Edit" ] || [ "$TOOL" = "Write" ]; then\n';
+    script += '  [ -z "$FILE" ] && exit 0\n';
+    for (const rule of protects) {
+      const path = rule.path;
+      if (path.endsWith('/')) {
+        script += `  [[ "$FILE" == *"${path}"* ]] && { jq -n '{"decision":"block","reason":"Protected: ${path}"}'; exit 0; }\n`;
+      } else {
+        script += `  [[ "$FILE" == *"${path}" ]] && { jq -n '{"decision":"block","reason":"Protected: ${path}"}'; exit 0; }\n`;
+      }
+    }
+    script += 'fi\n\n';
+  }
+
+  script += 'exit 0\n';
+
+  // Write hook
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  const hookPath = join(HOOKS_DIR, 'compiled-rules.sh');
+  writeFileSync(hookPath, script);
+  chmodSync(hookPath, 0o755);
+
+  // Register in settings.json
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+  if (!settings.hooks) settings.hooks = {};
+  if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
+
+  const hookCmd = `bash ${hookPath}`;
+
+  // Check all matchers for existing compiled-rules entry
+  let found = false;
+  for (const entry of settings.hooks.PreToolUse) {
+    const idx = (entry.hooks || []).findIndex(h => h.command && h.command.includes('compiled-rules'));
+    if (idx !== -1) {
+      entry.hooks[idx] = { type: 'command', command: hookCmd };
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    // Add to catch-all matcher
+    let allMatcher = settings.hooks.PreToolUse.find(e => e.matcher === '');
+    if (!allMatcher) {
+      allMatcher = { matcher: '', hooks: [] };
+      settings.hooks.PreToolUse.push(allMatcher);
+    }
+    allMatcher.hooks.push({ type: 'command', command: hookCmd });
+  }
+
+  writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+
+  // Summary
+  console.log();
+  for (const rule of rules) {
+    if (rule.type === 'block') console.log(c.red + '  ✗ ' + c.reset + 'Block: ' + rule.name);
+    else if (rule.type === 'approve') console.log(c.green + '  ✓ ' + c.reset + 'Approve: ' + rule.name);
+    else if (rule.type === 'protect') console.log(c.blue + '  🔒 ' + c.reset + 'Protect: ' + rule.path);
+  }
+  console.log();
+  console.log(c.bold + '  ' + rules.length + ' rules compiled' + c.reset + ' → ' + hookPath);
+  console.log(c.dim + '  Restart Claude Code to activate.' + c.reset);
+  console.log(c.dim + '  Edit ' + rulesFile + ' and re-run to update.' + c.reset);
+  console.log();
+}
+
 async function protect(targetPath) {
   const { resolve, basename } = await import('path');
 
@@ -4303,13 +4623,44 @@ fi
 exit 0
 `;
 
-  // Write hook
-  mkdirSync(HOOKS_DIR, { recursive: true });
-  writeFileSync(hookPath, script);
-  chmodSync(hookPath, 0o755);
-  console.log(c.green + '  + ' + c.reset + 'Created ' + hookName);
+  // Safety: write to /tmp first, validate, then copy to hooks/
+  const tmpScript = '/tmp/cc-compiled-rules-' + Date.now() + '.sh';
+  writeFileSync(tmpScript, script);
+  chmodSync(tmpScript, 0o755);
 
-  // Register in settings.json
+  // Validate 1: bash syntax check
+  const { spawnSync: checkSpawn } = await import('child_process');
+  const syntaxCheck = checkSpawn('bash', ['-n', tmpScript], { stdio: 'pipe' });
+  if (syntaxCheck.status !== 0) {
+    const err = (syntaxCheck.stderr || '').toString().trim();
+    console.log(c.red + '  ERROR: Generated script has syntax errors:' + c.reset);
+    console.log(c.dim + '  ' + err + c.reset);
+    try { unlinkSync(tmpScript); } catch {}
+    console.log(c.dim + '  Script NOT installed. Fix your rules and try again.' + c.reset);
+    return;
+  }
+
+  // Validate 2: empty input must NOT return exit 2 (which blocks all tools)
+  const emptyTest = checkSpawn('bash', [tmpScript], {
+    input: '{}', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe']
+  });
+  if (emptyTest.status === 2) {
+    console.log(c.red + '  ERROR: Script returns exit 2 on empty input.' + c.reset);
+    console.log(c.red + '  This would BLOCK ALL Claude Code tools.' + c.reset);
+    try { unlinkSync(tmpScript); } catch {}
+    return;
+  }
+
+  // Validated — copy to hooks dir
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  const hookContent = readFileSync(tmpScript, 'utf-8');
+  writeFileSync(hookPath, hookContent);
+  chmodSync(hookPath, 0o755);
+  try { unlinkSync(tmpScript); } catch {}
+  console.log(c.green + '  + ' + c.reset + 'Created ' + hookName + ' (syntax verified)');
+
+  // Register in settings.json — use "Bash" matcher ONLY (never "")
+  // "" matcher affects ALL tools and a broken hook would lock out the session
   let settings = {};
   if (existsSync(SETTINGS_PATH)) {
     try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
@@ -4317,16 +4668,34 @@ exit 0
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
-  // Find or create Edit|Write matcher
-  let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
-  if (!editMatcher) {
-    editMatcher = { matcher: 'Edit|Write', hooks: [] };
-    settings.hooks.PreToolUse.push(editMatcher);
+  // Register under specific matchers based on rule types (NEVER use "" matcher)
+  const hookCmd = `bash ${hookPath}`;
+  const hasBlocks = rules.some(r => r.type === 'block');
+  const hasApproves = rules.some(r => r.type === 'approve');
+  const hasProtects = rules.some(r => r.type === 'protect');
+
+  // Block and approve rules need Bash matcher
+  if (hasBlocks || hasApproves) {
+    let bashMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Bash');
+    if (!bashMatcher) {
+      bashMatcher = { matcher: 'Bash', hooks: [] };
+      settings.hooks.PreToolUse.push(bashMatcher);
+    }
+    if (!bashMatcher.hooks.some(h => h.command === hookCmd)) {
+      bashMatcher.hooks.push({ type: 'command', command: hookCmd });
+    }
   }
 
-  const hookCmd = `bash ${hookPath}`;
-  if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
-    editMatcher.hooks.push({ type: 'command', command: hookCmd });
+  // Protect rules need Edit|Write matcher
+  if (hasProtects) {
+    let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
+    if (!editMatcher) {
+      editMatcher = { matcher: 'Edit|Write', hooks: [] };
+      settings.hooks.PreToolUse.push(editMatcher);
+    }
+    if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
+      editMatcher.hooks.push({ type: 'command', command: hookCmd });
+    }
   }
 
   writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
@@ -4796,9 +5165,12 @@ async function main() {
   if (LEARN) return learn();
   if (SCAN) return scan();
   if (FULL) return fullSetup();
+  if (VALIDATE) return validateHooks();
+  if (SAFE_MODE) return safeMode(!SAFE_MODE_OFF);
   if (DOCTOR) return doctor();
   if (SIMULATE_CMD) return simulate(SIMULATE_CMD);
   if (PROTECT_PATH) return protect(PROTECT_PATH);
+  if (RULES_FILE) return compileRules(RULES_FILE);
   if (WATCH) return watch();
   if (TEST_HOOK_IDX !== -1) return testHook(TEST_HOOK);
   if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);

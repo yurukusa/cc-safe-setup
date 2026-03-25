@@ -44,6 +44,28 @@ if echo "$OUTPUT" | grep -qP '<!--.*(?:execute|run|delete|remove).*-->'; then
     SUSPICIOUS=1
 fi
 
+# tool_runtime_configuration injection (GitHub #28586)
+if echo "$OUTPUT" | grep -qiE '<tool_runtime_configuration>|</tool_runtime_configuration>'; then
+    echo "WARNING: tool_runtime_configuration injection detected — can disable tools" >&2
+    SUSPICIOUS=1
+fi
+
+# MCP server instruction override (GitHub #30545)
+if echo "$OUTPUT" | grep -qiE 'override.*CLAUDE\.md|ignore.*project\s+rules|disregard.*instructions'; then
+    echo "WARNING: Possible MCP instruction override detected" >&2
+    SUSPICIOUS=1
+fi
+
+# Base64-encoded commands (obfuscated injection)
+if echo "$OUTPUT" | grep -qE '[A-Za-z0-9+/]{40,}={0,2}'; then
+    # Check if it decodes to something suspicious
+    DECODED=$(echo "$OUTPUT" | grep -oE '[A-Za-z0-9+/]{40,}={0,2}' | head -1 | base64 -d 2>/dev/null || true)
+    if echo "$DECODED" | grep -qiE 'rm\s+-rf|curl.*\|.*sh|eval|exec'; then
+        echo "WARNING: Base64-encoded command detected in tool output" >&2
+        SUSPICIOUS=1
+    fi
+fi
+
 if [ "$SUSPICIOUS" -eq 1 ]; then
     echo "Review the output carefully before acting on it." >&2
 fi
