@@ -5350,7 +5350,7 @@ async function main() {
   console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
   console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
   console.log();
-  console.log('  ' + c.dim + '22 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
+  console.log('  ' + c.dim + '23 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
 }
 
