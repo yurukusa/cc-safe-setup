@@ -1,14 +1,18 @@
 # Changelog
 
-## [28.4.5] - 2026-03-26
-- **Bug fix**: --rules YAML template regex escaping (\\s → \s, grep now matches whitespace correctly)
-- **Bug fix**: Windows path backslash issue in --shield, --guard, --rules (#1)
-- **New hooks**: hook-permission-fixer (SessionStart auto-fix +x), response-budget-guard (anti-loop)
-- **New web tool**: Permission Checker (23rd tool) — diagnose broken hook paths
-- **CTA**: Added Ops Kit links to 7 documentation pages
-- **Stats**: 330 examples, 987 tests, 49 commands, 23 web tools
-- **Zenn**: 32 articles imported to git repo, all 44 articles with CTA
-- **Issue answers**: #38901, #38923 (plugin hook permission fix), cc-safe-setup #1 (Windows paths)
+## [28.4.9] - 2026-03-26
+- **Bug fix**: --rules YAML template regex escaping (\\s → \s for grep whitespace matching)
+- **Bug fix**: Windows path backslash in --shield, --guard, --rules, --protect (#1)
+- **Bug fix**: Add missing shebangs to 145 example hooks
+- **New hooks**: hook-permission-fixer (auto-fix +x at session start), response-budget-guard (anti-loop)
+- **New web tool**: Permission Checker (23rd) — diagnose broken paths, Windows issues
+- **--doctor**: Now detects Windows backslash paths in hook commands
+- **--audit**: New checks for Windows paths (CRITICAL) and missing permission fixer (LOW)
+- **COOKBOOK.md**: 26 practical recipes for common scenarios
+- **Windows Support**: README section added with diagnosis guide
+- **Docs**: Ops Kit CTA on 7 pages (getting-started, hub, recipes, playground, validator, cheatsheet, faq)
+- **Stats**: 330 examples, 988 tests, 49 commands, 23 web tools
+- **Issue answers**: anthropics/claude-code #38901, #38923; cc-safe-setup #1
 - **npm**: 10,143 downloads/day
 
 ## [28.3.5] - 2026-03-25
