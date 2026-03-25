@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 Common Hook Mistakes (and How to Fix Them)</title>
+<meta name="description" content="The most common Claude Code hook mistakes: syntax errors that block all tools, wrong matchers, missing jq, and more. Each with a fix.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+.mistake{background:#161b22;border:1px solid #30363d;border-radius:8px;margin:.8rem 0;overflow:hidden}
+.mistake-header{background:rgba(248,81,73,0.08);padding:.6rem .8rem;border-bottom:1px solid #30363d;display:flex;gap:.5rem;align-items:center}
+.mistake-num{background:#f85149;color:#0d1117;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.mistake-title{font-weight:600;color:#f0f6fc;font-size:.9rem}
+.mistake-body{padding:.6rem .8rem}
+.mistake-body p{font-size:.82rem;color:#8b949e;margin:.3rem 0}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.4rem .6rem;font-size:.75rem;color:#e6edf3;overflow-x:auto;margin:.3rem 0}
+.fix{background:rgba(57,211,83,0.08);border-left:3px solid #39d353;padding:.4rem .7rem;margin:.4rem 0;font-size:.8rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>7 Common Hook Mistakes</h1>
+<p class="sub">Each one has caused real incidents. Each one has a simple fix.</p>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">1</div><div class="mistake-title">Bash syntax error = blocks ALL tools</div></div>
+<div class="mistake-body">
+<p>Bash returns exit code 2 for syntax errors. Claude Code treats exit 2 as "block." A broken script silently blocks every tool call.</p>
+<pre><code># This script has a syntax error (missing 'then'):
+if [ -z "$INPUT" ]
+fi
+# bash exits with code 2 → Claude blocks the tool</code></pre>
+<div class="fix"><strong>Fix:</strong> Always run <code>bash -n hook.sh</code> before deploying. Or: <code>npx cc-safe-setup --validate</code></div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">2</div><div class="mistake-title">Using matcher "" during development</div></div>
+<div class="mistake-body">
+<p>Matcher <code>""</code> applies to ALL tools (Bash, Read, Write, Edit, Grep, Agent). If your hook breaks, you can't even read files to debug it.</p>
+<pre><code>// DON'T:
+{"matcher": "", "hooks": [...]}
+
+// DO:
+{"matcher": "Bash", "hooks": [...]}</code></pre>
+<div class="fix"><strong>Fix:</strong> Use <code>"Bash"</code> during development. Only use <code>""</code> for well-tested production hooks.</div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">3</div><div class="mistake-title">Missing jq = silent failure</div></div>
+<div class="mistake-body">
+<p>Most hooks use <code>jq</code> to parse JSON stdin. If jq isn't installed, the hook silently fails and does nothing.</p>
+<pre><code># This silently fails without jq:
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')</code></pre>
+<div class="fix"><strong>Fix:</strong> Run <code>npx cc-safe-setup --doctor</code> — it checks jq installation first.</div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">4</div><div class="mistake-title">Forgetting to exit 0 at the end</div></div>
+<div class="mistake-body">
+<p>If the last command in your script fails, bash inherits that exit code. If it happens to be 2, you accidentally block.</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+grep -q "something" <<< "$INPUT"  # returns 1 if no match
+# Script exits with grep's exit code (1) — hook error</code></pre>
+<div class="fix"><strong>Fix:</strong> Always end with explicit <code>exit 0</code></div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">5</div><div class="mistake-title">Matching too broadly with grep</div></div>
+<div class="mistake-body">
+<p>Matching <code>rm</code> in the command string catches directory names like <code>soft-hold-enrollment</code> that contain "rm".</p>
+<pre><code># DON'T: matches "rm" in directory names
+grep -q "rm" <<< "$COMMAND"
+
+# DO: match rm as a word boundary with flags
+grep -qE '\brm\s+-[rf]' <<< "$COMMAND"</code></pre>
+<div class="fix"><strong>Fix:</strong> Use <code>\b</code> word boundaries and <code>\s+</code> whitespace in regex patterns.</div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">6</div><div class="mistake-title">Not handling empty input</div></div>
+<div class="mistake-body">
+<p>Hooks receive <code>{}</code> for some edge cases. If your script doesn't handle empty fields, it may crash or block unexpectedly.</p>
+<pre><code># Safe pattern:
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$COMMAND" ] && exit 0  # exit early on empty</code></pre>
+<div class="fix"><strong>Fix:</strong> Always check for empty values and exit 0 early.</div>
+</div>
+</div>
+
+<div class="mistake">
+<div class="mistake-header"><div class="mistake-num">7</div><div class="mistake-title">Hook takes too long</div></div>
+<div class="mistake-body">
+<p>Hooks have a timeout. If your hook does network calls or heavy processing, it may time out and silently fail. On Windows, Python hooks take 200-500ms to start.</p>
+<div class="fix"><strong>Fix:</strong> Keep hooks fast. Use bash instead of Python. Avoid network calls. Run <code>npx cc-safe-setup --benchmark</code> to measure.</div>
+</div>
+</div>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="exit-codes.html">Exit Codes</a> · <a href="hook-patterns.html">Patterns</a> · <a href="recipes.html">Recipes</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
