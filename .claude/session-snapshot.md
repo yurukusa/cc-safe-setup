@@ -1,13 +1,14 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-25T17:49:19+09:00
+Updated: 2026-03-25T18:19:28+09:00
 
 ## Git
 - Branch: `main`
-- Uncommitted changes: 1 file(s)
+- Uncommitted changes: 2 file(s)
 ```
  M .claude/session-snapshot.md
+ D cc-safe-setup-export.json
 ```
-- Last commit: d508d5d checkpoint: auto-save 17:49:18
+- Last commit: 6456c11 checkpoint: auto-save 18:18:14
 
 ## Recent Files
 ```
