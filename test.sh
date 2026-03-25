@@ -1649,6 +1649,33 @@ if [ -f "$EXDIR/response-budget-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: response-budget-guard passes normal call"; PASS=$((PASS+1)); } || { echo "  FAIL: response-budget-guard normal call (exit=$EXIT)"; FAIL=$((FAIL+1)); }
 fi
 
+# ========== allow-git-hooks-dir (example, PermissionRequest) ==========
+echo "allow-git-hooks-dir.sh (example):"
+ALLOW_GIT_HOOKS="$(dirname "$0")/examples/allow-git-hooks-dir.sh"
+
+test_allow_git_hooks() {
+    local input="$1" expect_allow="$2" desc="$3"
+    local output
+    output=$(echo "$input" | bash "$ALLOW_GIT_HOOKS" 2>/dev/null)
+    local has_allow=0
+    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    if [ "$has_allow" -eq "$expect_allow" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected allow=$expect_allow, got $has_allow)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_allow_git_hooks '{"tool_input":{"file_path":"/project/.git/hooks/pre-commit"}}' 1 "allows .git/hooks/pre-commit"
+test_allow_git_hooks '{"tool_input":{"file_path":"/project/.git/hooks/pre-push"}}' 1 "allows .git/hooks/pre-push"
+test_allow_git_hooks '{"tool_input":{"file_path":"/project/.git/config"}}' 0 "does not allow .git/config"
+test_allow_git_hooks '{"tool_input":{"file_path":"/project/.git/HEAD"}}' 0 "does not allow .git/HEAD"
+test_allow_git_hooks '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "no opinion on normal files"
+test_allow_git_hooks '{"tool_input":{"command":"ls"}}' 0 "handles missing file_path"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
