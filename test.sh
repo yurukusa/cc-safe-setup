@@ -1627,6 +1627,18 @@ fi
 # hook-permission-fixer
 if [ -f "$EXDIR/hook-permission-fixer.sh" ]; then
     bash -n "$EXDIR/hook-permission-fixer.sh" && { echo "  PASS: hook-permission-fixer syntax OK"; PASS=$((PASS+1)); } || { echo "  FAIL: hook-permission-fixer syntax"; FAIL=$((FAIL+1)); }
+    # Functional: create a non-executable script, run fixer, check it's now executable
+    TMPFIX="/tmp/cc-test-perm-fixer-$$"
+    mkdir -p "$TMPFIX/.claude/hooks"
+    echo '#!/bin/bash' > "$TMPFIX/.claude/hooks/test-hook.sh"
+    chmod -x "$TMPFIX/.claude/hooks/test-hook.sh"
+    HOME="$TMPFIX" bash "$EXDIR/hook-permission-fixer.sh" >/dev/null 2>/dev/null
+    if [ -x "$TMPFIX/.claude/hooks/test-hook.sh" ]; then
+        echo "  PASS: hook-permission-fixer fixes missing +x"; PASS=$((PASS+1))
+    else
+        echo "  FAIL: hook-permission-fixer should fix missing +x"; FAIL=$((FAIL+1))
+    fi
+    rm -rf "$TMPFIX"
 fi
 
 # response-budget-guard
