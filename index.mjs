@@ -5288,10 +5288,11 @@ async function main() {
   console.log();
   console.log(c.bold + '  Done.' + c.reset + ' ' + Object.keys(HOOKS).length + ' safety hooks installed.');
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
-  console.log('  ' + c.dim + 'Verify:' + c.reset + ' ' + c.blue + 'npx cc-health-check' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Need more? 16 hooks + templates for autonomous teams:' + c.reset);
-  console.log('  https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=npm&utm_medium=cli&utm_campaign=safe-setup');
+  console.log('  ' + c.dim + 'Next steps:' + c.reset);
+  console.log('  ' + c.blue + '  --doctor' + c.reset + '            Verify hooks work');
+  console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
+  console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
   console.log();
 }
 
