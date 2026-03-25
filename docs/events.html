@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hook Events — When Does Each One Fire?</title>
+<meta name="description" content="PreToolUse, PostToolUse, Stop, SubagentStop, UserPromptSubmit — when each fires, what data it receives, what it can do.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+.event{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;margin:.8rem 0}
+.event-name{font-size:1.1rem;font-weight:700;color:#58a6ff}
+.event-when{font-size:.85rem;color:#8b949e;margin:.3rem 0}
+table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.8rem}
+th,td{padding:.4rem .5rem;border:1px solid #21262d;text-align:left}
+th{background:#0d1117;color:#f0f6fc}
+code{background:#0d1117;padding:.1rem .25rem;border-radius:3px;font-size:.78rem}
+.yes{color:#39d353}
+.no{color:#f85149}
+.flow{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.8rem;margin:.8rem 0;font-family:monospace;font-size:.78rem;color:#8b949e;text-align:center}
+.flow b{color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Events</h1>
+<p class="sub">When each event fires, what data it receives, and what it can do.</p>
+
+<div class="flow">
+User sends message → <b>UserPromptSubmit</b> → Claude thinks → <b>PreToolUse</b> → Tool runs → <b>PostToolUse</b> → ... → Claude stops → <b>Stop</b>
+</div>
+
+<div class="event">
+<div class="event-name">PreToolUse</div>
+<div class="event-when">Fires <strong>before</strong> every tool call. Can block or approve.</div>
+<table>
+<tr><th>stdin field</th><th>Value</th></tr>
+<tr><td><code>tool_name</code></td><td>Bash, Edit, Write, Read, Glob, Grep, Agent, Skill, ...</td></tr>
+<tr><td><code>tool_input</code></td><td>Tool-specific: <code>.command</code> (Bash), <code>.file_path</code> (Edit/Write/Read), <code>.pattern</code> (Grep)</td></tr>
+</table>
+<table>
+<tr><th>Can do</th><th>How</th></tr>
+<tr><td class="yes">Block</td><td><code>exit 2</code></td></tr>
+<tr><td class="yes">Approve (skip prompt)</td><td><code>echo '{"decision":"approve"}'</code></td></tr>
+<tr><td class="yes">Warn</td><td><code>echo "WARNING" >&2</code></td></tr>
+<tr><td class="no">Modify input</td><td>Not possible</td></tr>
+</table>
+</div>
+
+<div class="event">
+<div class="event-name">PostToolUse</div>
+<div class="event-when">Fires <strong>after</strong> every tool call. Can validate results.</div>
+<table>
+<tr><th>stdin field</th><th>Value</th></tr>
+<tr><td><code>tool_name</code></td><td>Same as PreToolUse</td></tr>
+<tr><td><code>tool_input</code></td><td>Same as PreToolUse</td></tr>
+<tr><td><code>tool_result</code></td><td>The tool's output/result</td></tr>
+</table>
+<table>
+<tr><th>Can do</th><th>How</th></tr>
+<tr><td class="yes">Warn about result</td><td><code>echo "SYNTAX ERROR" >&2</code></td></tr>
+<tr><td class="yes">Log activity</td><td>Write to log file</td></tr>
+<tr><td class="no">Block (too late)</td><td>Tool already ran</td></tr>
+<tr><td class="no">Modify result</td><td>Not possible (without updatedToolOutput)</td></tr>
+</table>
+</div>
+
+<div class="event">
+<div class="event-name">Stop</div>
+<div class="event-when">Fires when Claude <strong>finishes responding</strong>.</div>
+<table>
+<tr><th>stdin field</th><th>Value</th></tr>
+<tr><td><code>stop_reason</code></td><td>end_turn, error, max_tokens, etc.</td></tr>
+</table>
+<table>
+<tr><th>Can do</th><th>How</th></tr>
+<tr><td class="yes">Send notification</td><td>Desktop alert, sound, webhook</td></tr>
+<tr><td class="yes">Log session summary</td><td>Write to proof-log</td></tr>
+<tr><td class="yes">Clean up temp files</td><td>Any cleanup script</td></tr>
+</table>
+</div>
+
+<div class="event">
+<div class="event-name">UserPromptSubmit</div>
+<div class="event-when">Fires when the <strong>user sends a message</strong>.</div>
+<table>
+<tr><th>stdin field</th><th>Value</th></tr>
+<tr><td><code>prompt</code></td><td>The user's message text</td></tr>
+</table>
+<table>
+<tr><th>Can do</th><th>How</th></tr>
+<tr><td class="yes">Inject reminders</td><td><code>echo "REMINDER: check tests" >&2</code></td></tr>
+<tr><td class="yes">Log prompts</td><td>Write to log</td></tr>
+<tr><td class="yes">Block submission</td><td><code>exit 2</code></td></tr>
+</table>
+</div>
+
+<div class="event">
+<div class="event-name">SubagentStop</div>
+<div class="event-when">Fires when a <strong>subagent finishes</strong>.</div>
+<table>
+<tr><th>Can do</th><th>How</th></tr>
+<tr><td class="yes">Track subagent completion</td><td>Decrement counter</td></tr>
+<tr><td class="yes">Notify</td><td>Sound/alert when agent done</td></tr>
+</table>
+</div>
+
+<h2 style="color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem">Quick Reference: Which Event?</h2>
+<table>
+<tr><th>I want to...</th><th>Event</th></tr>
+<tr><td>Block a dangerous command</td><td><strong>PreToolUse</strong></td></tr>
+<tr><td>Auto-approve safe commands</td><td><strong>PreToolUse</strong></td></tr>
+<tr><td>Check syntax after edits</td><td><strong>PostToolUse</strong></td></tr>
+<tr><td>Detect prompt injection</td><td><strong>PostToolUse</strong></td></tr>
+<tr><td>Monitor context usage</td><td><strong>PostToolUse</strong></td></tr>
+<tr><td>Send "task done" notification</td><td><strong>Stop</strong></td></tr>
+<tr><td>Log session summary</td><td><strong>Stop</strong></td></tr>
+<tr><td>Inject reminders per message</td><td><strong>UserPromptSubmit</strong></td></tr>
+<tr><td>Track subagent count</td><td><strong>SubagentStop</strong></td></tr>
+</table>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="hook-patterns.html">Patterns</a> · <a href="exit-codes.html">Exit Codes</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>
