@@ -463,6 +463,8 @@ function examples() {
       'session-checkpoint.sh': 'Save session state before context compaction',
     },
     'UX': {
+      'prompt-length-guard.sh': 'UserPromptSubmit: warn on long prompts (>5000 chars)',
+      'prompt-injection-detector.sh': 'UserPromptSubmit: detect prompt injection patterns',
       'notify-waiting.sh': 'Desktop notification when Claude waits for input',
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd files on session end',
       'hook-debug-wrapper.sh': 'Wrap any hook to log input/output/exit/timing',
@@ -612,6 +614,7 @@ async function installExample(name) {
   else if (content.includes('TRIGGER: SessionStart') || content.includes('SessionStart')) trigger = 'SessionStart';
   else if (content.includes('TRIGGER: PreCompact') || content.includes('PreCompact')) trigger = 'PreCompact';
   else if (content.includes('TRIGGER: SessionEnd') || content.includes('SessionEnd')) trigger = 'SessionEnd';
+  else if (content.includes('TRIGGER: UserPromptSubmit') || content.match(/^#.*UserPromptSubmit hook/m)) trigger = 'UserPromptSubmit';
 
   // Detect matcher from header (JSON format or comment format)
   const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);

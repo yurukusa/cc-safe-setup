@@ -1788,6 +1788,8 @@ test_trigger_detection "allow-protected-dirs.sh" "PermissionRequest" "allow-prot
 test_trigger_detection "auto-approve-compound-git.sh" "PermissionRequest" "auto-approve-compound-git detects PermissionRequest"
 test_trigger_detection "hook-permission-fixer.sh" "SessionStart" "hook-permission-fixer detects SessionStart"
 test_trigger_detection "protect-dotfiles.sh" "PreToolUse" "protect-dotfiles defaults to PreToolUse"
+test_trigger_detection "prompt-length-guard.sh" "UserPromptSubmit" "prompt-length-guard detects UserPromptSubmit"
+test_trigger_detection "prompt-injection-detector.sh" "UserPromptSubmit" "prompt-injection-detector detects UserPromptSubmit"
 echo ""
 
 # --- Summary ---
