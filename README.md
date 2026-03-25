@@ -87,7 +87,7 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 335 examples |
+| `--install-example <name>` | Install from 336 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |

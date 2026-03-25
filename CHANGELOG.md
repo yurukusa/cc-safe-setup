@@ -1,5 +1,11 @@
 # Changelog
 
+## [28.8.0] - 2026-03-26
+- **New**: auto-approve-compound-git.sh — PermissionRequest hook for compound git commands (#30519)
+- **Fix**: Example count corrected to 336 (was underreported)
+- **Fix**: Draft factcheck — code examples now match actual hook files
+- **Stats**: 336 examples, 1018 tests
+
 ## [28.7.0] - 2026-03-26
 - **New examples**: allow-claude-settings.sh, allow-protected-dirs.sh (PermissionRequest)
 - **Docs**: TROUBLESHOOTING — Stop hook `-p` empty output known issue (#38651)

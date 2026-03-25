@@ -54,6 +54,22 @@ esac
 exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 </div>
 
+<div class="pattern" style="border-color:#d29922">
+<div class="pattern-name">PermissionRequest: Bypass protected directory prompts</div>
+<div class="pattern-when">Use: PermissionRequest (not PreToolUse!) · When .claude/ .git/ .vscode/ writes should be auto-approved</div>
+<pre><code>#!/bin/bash
+# PreToolUse can't bypass protected dirs — runs BEFORE built-in checks.
+# PermissionRequest runs AFTER, so it works.
+FILE=$(cat | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] && exit 0
+if echo "$FILE" | grep -qE '\.git/hooks/'; then
+  jq -n '{hookSpecificOutput:{hookEventName:"PermissionRequest",
+    permissionDecision:"allow",
+    permissionDecisionReason:"Allowed: git hooks"}}'
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
 <h2>3. Warn</h2>
 <div class="pattern">
 <div class="pattern-name">stderr message without blocking</div>
