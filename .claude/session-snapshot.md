@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-25T09:28:49+09:00
+Updated: 2026-03-25T09:35:52+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-25T09:28:49+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f1f8f88 checkpoint: auto-save 09:28:47
+- Last commit: 37e31b4 checkpoint: auto-save 09:34:41
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./examples/no-commit-fixup.sh
+./examples/no-push-without-ci.sh
+./examples/auto-approve-test.sh
 ./README.md
 ./examples/skill-gate.sh
 ./examples/check-error-page.sh
 ./examples/check-responsive-design.sh
 ./examples/check-semantic-html.sh
 ./examples/no-deprecated-api.sh
-./examples/no-table-layout.sh
-./examples/check-content-type.sh
-./examples/check-image-optimization.sh
 ```
 
