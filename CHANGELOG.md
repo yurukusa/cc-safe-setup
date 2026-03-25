@@ -1,5 +1,9 @@
 # Changelog
 
+## [29.1.0] - 2026-03-26
+- **Tests**: Trigger detection tests (verify PermissionRequest/SessionStart/PreToolUse parsing)
+- **Stats**: 1024 tests (2^10 milestone!)
+
 ## [29.0.0] - 2026-03-26
 - **BREAKING**: `--install-example` now correctly detects PermissionRequest trigger and comment-style matchers
 - Previously, PermissionRequest hooks were silently registered as PreToolUse (wrong trigger!)
