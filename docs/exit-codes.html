@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hook Exit Codes — The Complete Guide</title>
+<meta name="description" content="Exit code 0 = allow. Exit code 2 = block. Exit code 1 = error (ignored). Bash syntax errors = exit 2 = accidental block. The full guide.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.05rem;margin:1.3rem 0 .4rem;padding-bottom:.3rem;border-bottom:1px solid #21262d}
+.sub{color:#8b949e;font-size:.83rem;margin-bottom:1rem}
+.code-table{width:100%;border-collapse:collapse;margin:.5rem 0}
+.code-table th,.code-table td{padding:.5rem .7rem;border:1px solid #21262d;text-align:left;font-size:.85rem}
+.code-table th{background:#161b22;color:#f0f6fc;font-weight:600}
+.exit-0{color:#39d353;font-weight:700}
+.exit-1{color:#d29922;font-weight:700}
+.exit-2{color:#f85149;font-weight:700}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.6rem;font-size:.78rem;color:#e6edf3;overflow-x:auto;margin:.4rem 0}
+code{background:#161b22;padding:.12rem .25rem;border-radius:3px;font-size:.82rem}
+.warn{background:rgba(248,81,73,0.08);border-left:3px solid #f85149;padding:.5rem .8rem;margin:.6rem 0;font-size:.83rem}
+.tip{background:rgba(57,211,83,0.08);border-left:3px solid #39d353;padding:.5rem .8rem;margin:.6rem 0;font-size:.83rem}
+.info{background:rgba(88,166,255,0.08);border-left:3px solid #58a6ff;padding:.5rem .8rem;margin:.6rem 0;font-size:.83rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#484f58;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Exit Codes</h1>
+<p class="sub">The complete guide to what exit codes mean in Claude Code hooks. Includes the bash syntax error trap that can lock your entire session.</p>
+
+<h2>The Three Exit Codes</h2>
+<table class="code-table">
+<tr><th>Exit Code</th><th>Meaning</th><th>Effect</th></tr>
+<tr><td class="exit-0">0</td><td>Allow / Passthrough</td><td>Tool call proceeds normally. Default for hooks that don't match.</td></tr>
+<tr><td class="exit-1">1</td><td>Hook Error (ignored)</td><td>Hook crashed or failed. Tool call still proceeds. Error shown in UI.</td></tr>
+<tr><td class="exit-2">2</td><td>Block</td><td>Tool call is <strong>prevented</strong>. Claude sees "blocked by hook" message.</td></tr>
+</table>
+
+<h2>stdout JSON Decisions</h2>
+<p style="font-size:.85rem;color:#8b949e;margin:.3rem 0">Hooks can also output JSON to stdout for more control:</p>
+<table class="code-table">
+<tr><th>stdout JSON</th><th>Effect</th></tr>
+<tr><td><code>{"decision":"approve","reason":"Safe command"}</code></td><td>Auto-approve (skip permission prompt)</td></tr>
+<tr><td><code>{"decision":"block","reason":"Too dangerous"}</code></td><td>Block the tool call</td></tr>
+</table>
+
+<div class="info">
+<strong>Priority:</strong> Exit code 2 always blocks, regardless of stdout. stdout JSON is checked only when exit code is 0.
+</div>
+
+<h2>The Bash Syntax Error Trap</h2>
+
+<div class="warn">
+<strong>DANGER:</strong> Bash syntax errors return <strong>exit code 2</strong> — the same code that means "block." A broken hook script will accidentally block tool calls.
+</div>
+
+<p style="font-size:.85rem;margin:.5rem 0">Example of the trap:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+if [ -z "$INPUT" ]    # Missing 'then'
+fi                     # bash: syntax error near unexpected token 'fi'
+exit 0
+</code></pre>
+
+<p style="font-size:.85rem;margin:.3rem 0">This script never reaches <code>exit 0</code>. Bash aborts at the syntax error with exit code 2. Claude Code sees exit 2 and blocks the tool call.</p>
+
+<p style="font-size:.85rem;margin:.3rem 0"><strong>If the hook's matcher is <code>""</code> (all tools)</strong>, this blocks Read, Write, Edit, Bash, Grep, and Agent — making the session completely unrecoverable.</p>
+
+<h2>How to Prevent It</h2>
+
+<pre><code># Always syntax-check before deploying a hook:
+bash -n ~/.claude/hooks/my-hook.sh
+
+# Test with empty input:
+echo '{}' | bash ~/.claude/hooks/my-hook.sh
+echo $?   # Must be 0, not 2
+
+# Or use the automated validator:
+npx cc-safe-setup --validate</code></pre>
+
+<div class="tip">
+<strong>Best practice:</strong> Never use matcher <code>""</code> during development. Use <code>"Bash"</code> to limit blast radius if something goes wrong.
+</div>
+
+<h2>Recovery from a Broken Hook</h2>
+
+<table class="code-table">
+<tr><th>Situation</th><th>Solution</th></tr>
+<tr><td>Hook crashes (exit 1)</td><td>No action needed — tool call proceeds. Fix the hook when convenient.</td></tr>
+<tr><td>Hook blocks (exit 2, intentional)</td><td>Working as designed. The hook prevented a dangerous operation.</td></tr>
+<tr><td>Hook blocks (exit 2, syntax error)</td><td>From <strong>outside</strong> Claude Code: <code>rm ~/.claude/hooks/broken-hook.sh</code></td></tr>
+<tr><td>All tools blocked (matcher "")</td><td>From outside: <code>rm ~/.claude/hooks/broken-hook.sh</code> then restart Claude Code</td></tr>
+<tr><td>Can't identify the broken hook</td><td><code>npx cc-safe-setup --validate</code> (auto-detects and disables)</td></tr>
+<tr><td>Emergency: disable everything</td><td><code>npx cc-safe-setup --safe-mode</code></td></tr>
+</table>
+
+<h2>Hook Template (Safe)</h2>
+<pre><code>#!/bin/bash
+# Safe hook template — always exits 0 on empty/unknown input
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+
+# Only process relevant tools
+[[ "$TOOL" != "Bash" ]] && exit 0
+[ -z "$COMMAND" ] && exit 0
+
+# Your logic here
+# if dangerous: exit 2
+# if safe: echo '{"decision":"approve","reason":"..."}' && exit 0
+# otherwise: exit 0
+
+exit 0</code></pre>
+
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="settings-reference.html">Settings Reference</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+</body>
+</html>

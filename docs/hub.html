@@ -41,10 +41,10 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="tagline">Make Claude Code safe for autonomous operation</div>
 
 <div class="stats">
-<div class="stat"><div class="stat-num">327</div><div class="stat-label">hooks</div></div>
-<div class="stat"><div class="stat-num">45</div><div class="stat-label">commands</div></div>
-<div class="stat"><div class="stat-num">955</div><div class="stat-label">tests</div></div>
-<div class="stat"><div class="stat-num">16</div><div class="stat-label">web tools</div></div>
+<div class="stat"><div class="stat-num">334</div><div class="stat-label">hooks</div></div>
+<div class="stat"><div class="stat-num">49</div><div class="stat-label">commands</div></div>
+<div class="stat"><div class="stat-num">974</div><div class="stat-label">tests</div></div>
+<div class="stat"><div class="stat-num">17</div><div class="stat-label">web tools</div></div>
 </div>
 
 <button class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</button>
@@ -143,6 +143,13 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="card-title">Settings Reference</div>
 <div class="card-desc">Every settings.json field explained. Hooks, permissions, env, models.</div>
 <span class="card-tag">reference</span>
+</a>
+
+<a href="exit-codes.html" class="card">
+<div class="card-icon">🚦</div>
+<div class="card-title">Exit Codes</div>
+<div class="card-desc">Exit 0 = allow. Exit 2 = block. Plus the bash syntax error trap that can lock your session.</div>
+<span class="card-tag">critical</span>
 </a>
 
 <a href="troubleshooting.html" class="card">
