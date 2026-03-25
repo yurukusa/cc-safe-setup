@@ -6,13 +6,13 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 319 examples = **327 hooks**. 45 CLI commands. 955 tests. 5 languages. [**Getting Started**](https://yurukusa.github.io/cc-safe-setup/getting-started.html) · [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Wizard](https://yurukusa.github.io/cc-safe-setup/wizard.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
-
 ```bash
 npx cc-safe-setup
 ```
 
-Installs 8 production-tested safety hooks in ~10 seconds. Zero dependencies. No manual configuration.
+Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to main, catches secret leaks, validates syntax after every edit. Zero dependencies.
+
+[**Getting Started**](https://yurukusa.github.io/cc-safe-setup/getting-started.html) · [**All Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Validate your settings.json](https://yurukusa.github.io/cc-safe-setup/validator.html)
 
 ```
   cc-safe-setup
