@@ -1609,6 +1609,14 @@ timeout 10 node "$CLI" --rules "$RULES_TMP" 2>&1 >/dev/null || true
 if [ -f "$RULES_TMP" ]; then
   RULES_OUT=$(timeout 10 node "$CLI" --rules "$RULES_TMP" 2>&1) || true
   if echo "$RULES_OUT" | grep -q 'rules\|compiled\|Block\|Approve\|Protect'; then echo "  PASS: --rules compiles"; PASS=$((PASS + 1)); else echo "  FAIL: --rules compile"; FAIL=$((FAIL + 1)); fi
+  # Regression test: compiled hook actually blocks rm -rf ~ (escaped regex must work)
+  COMPILED_HOOK="$HOME/.claude/hooks/compiled-rules.sh"
+  if [ -f "$COMPILED_HOOK" ]; then
+    BLOCK_EXIT=0; echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf ~"}}' | bash "$COMPILED_HOOK" >/dev/null 2>/dev/null || BLOCK_EXIT=$?
+    [ "$BLOCK_EXIT" -eq 2 ] && { echo "  PASS: --rules compiled hook blocks rm -rf ~"; PASS=$((PASS + 1)); } || { echo "  FAIL: --rules compiled hook should block rm -rf ~ (exit=$BLOCK_EXIT)"; FAIL=$((FAIL + 1)); }
+    APPROVE_OUT=$(echo '{"tool_name":"Bash","tool_input":{"command":"cat foo.txt"}}' | bash "$COMPILED_HOOK" 2>/dev/null)
+    echo "$APPROVE_OUT" | grep -q '"approve"' && { echo "  PASS: --rules compiled hook approves cat"; PASS=$((PASS + 1)); } || { echo "  FAIL: --rules compiled hook should approve cat"; FAIL=$((FAIL + 1)); }
+  fi
   rm -f "$RULES_TMP" 2>/dev/null
   # Clean up compiled hook (validated — safe to remove)
   rm -f "$HOME/.claude/hooks/compiled-rules.sh" 2>/dev/null
