@@ -1,17 +1,20 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-25T13:28:44+09:00
+Updated: 2026-03-25T16:30:28+09:00
 
 ## Git
 - Branch: `main`
-- Uncommitted changes: 1 file(s)
+- Uncommitted changes: 2 file(s)
 ```
  M .claude/session-snapshot.md
+ D cc-safe-setup-export.json
 ```
-- Last commit: 5d1fe18 checkpoint: auto-save 13:28:43
+- Last commit: 4e82d5a checkpoint: auto-save 16:29:16
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./examples/mcp-tool-guard.sh
+./examples/prompt-injection-guard.sh
 ./README.md
 ./examples/auto-git-checkpoint.sh
 ./examples/edit-verify.sh
@@ -19,7 +22,5 @@ Updated: 2026-03-25T13:28:44+09:00
 ./examples/auto-compact-prep.sh
 ./examples/session-state-saver.sh
 ./CHANGELOG.md
-./examples/check-git-hooks-compat.sh
-./examples/no-sleep-in-hooks.sh
 ```
 
