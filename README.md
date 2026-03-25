@@ -64,7 +64,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 Each hook exists because a real incident happened without it.
 
-## All 45 Commands
+## All 49 Commands
 
 | Command | What It Does |
 |---------|-------------|
@@ -112,6 +112,9 @@ Each hook exists because a real incident happened without it.
 | `--test-hook <name>` | Test a specific hook with sample input |
 | `--simulate "cmd"` | Preview how all hooks react to a command |
 | `--protect <path>` | Block edits to a file or directory |
+| `--rules [file]` | Compile YAML rules into hooks |
+| `--validate` | Validate all hook scripts (syntax + structure) |
+| `--safe-mode` | Maximum protection: all safety hooks + strict config |
 | `--changelog` | Show what changed in each version |
 | `--report` | Generate safety report |
 | `--help` | Show help |
@@ -134,6 +137,9 @@ Each hook exists because a real incident happened without it.
 | Diagnose why hooks aren't working | `npx cc-safe-setup --doctor` |
 | Preview how hooks react to a command | `npx cc-safe-setup --simulate "git push origin main"` |
 | Protect a specific file from edits | `npx cc-safe-setup --protect .env` |
+| Define rules in YAML, compile to hooks | `npx cc-safe-setup --rules rules.yaml` |
+| Validate all hook scripts are correct | `npx cc-safe-setup --validate` |
+| Maximum protection mode | `npx cc-safe-setup --safe-mode` |
 | Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
 
 ## How It Works
