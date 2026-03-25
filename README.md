@@ -6,7 +6,7 @@
 
 **One command to make Claude Code safe for autonomous operation.** [日本語](docs/README.ja.md)
 
-8 built-in + 313 examples = **321 hooks**. 45 CLI commands. 941 tests. 5 languages. [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [Wizard](https://yurukusa.github.io/cc-safe-setup/wizard.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
+8 built-in + 319 examples = **327 hooks**. 45 CLI commands. 955 tests. 5 languages. [**Hub**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Wizard](https://yurukusa.github.io/cc-safe-setup/wizard.html) · [Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html) · [Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) · [FAQ](https://yurukusa.github.io/cc-safe-setup/faq.html) · [Examples](https://yurukusa.github.io/cc-safe-setup/by-example.html) · [Matrix](https://yurukusa.github.io/cc-safe-setup/matrix.html) · [Playground](https://yurukusa.github.io/cc-hook-registry/playground.html)
 
 ```bash
 npx cc-safe-setup
@@ -127,6 +127,9 @@ Each hook exists because a real incident happened without it.
 | Choose a safety level | `npx cc-safe-setup --profile strict` |
 | See what Claude blocked today | `npx cc-safe-setup --replay` |
 | Know why a hook exists | `npx cc-safe-setup --why destructive-guard` |
+| Block silent memory file edits | `npx cc-safe-setup --install-example memory-write-guard` |
+| Stop built-in skills editing opaquely | `npx cc-safe-setup --install-example skill-gate` |
+| Diagnose why hooks aren't working | `npx cc-safe-setup --doctor` |
 | Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
 
 ## How It Works

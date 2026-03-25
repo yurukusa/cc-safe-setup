@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hook Recipes — Copy-Paste Solutions for Real Problems</title>
+<meta name="description" content="30 hook recipes for Claude Code. Each solves a specific problem with copy-paste code. From permission prompt fatigue to silent file edits.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
+.c{max-width:860px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid #21262d}
+h3{color:#58a6ff;font-size:.92rem;margin:.8rem 0 .3rem;cursor:pointer}
+h3:hover{text-decoration:underline}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+code{background:#161b22;padding:.12rem .25rem;border-radius:3px;font-size:.82rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.6rem;font-size:.78rem;color:#e6edf3;overflow-x:auto;margin:.3rem 0;position:relative;display:none}
+.recipe.open pre{display:block}
+.copy{position:absolute;top:.3rem;right:.3rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.15rem .4rem;border-radius:3px;cursor:pointer;font-size:.65rem}
+.copy:hover{color:#f0f6fc}
+.recipe{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1rem;margin:.5rem 0}
+.recipe-meta{font-size:.75rem;color:#8b949e;margin-bottom:.3rem}
+.recipe-desc{font-size:.85rem;color:#8b949e;margin-bottom:.4rem}
+.tag{display:inline-block;background:#21262d;color:#8b949e;padding:.1rem .4rem;border-radius:10px;font-size:.7rem;margin-right:.3rem}
+.install{background:rgba(57,211,83,0.1);border:1px solid rgba(57,211,83,0.3);border-radius:6px;padding:.4rem .7rem;margin:.3rem 0;font-size:.8rem;color:#39d353;font-family:monospace}
+input{width:100%;padding:.5rem .8rem;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:.9rem;margin-bottom:1rem}
+input:focus{outline:none;border-color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.count{color:#8b949e;font-size:.8rem;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Hook Recipes</h1>
+<p class="sub">Real problems. Copy-paste solutions. Each recipe is a working hook you can install in 10 seconds.</p>
+
+<input id="q" placeholder="Search recipes... (permission, git, memory, test, deploy)" oninput="filter()">
+<div class="count" id="count">30 recipes</div>
+
+<div id="recipes">
+
+<h2>Permission & Approval</h2>
+
+<div class="recipe" data-tags="permission approve readonly">
+<h3 onclick="toggle(this)">Stop permission prompts for read-only commands</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash · Reduces prompts ~80%</div>
+<div class="recipe-desc">Auto-approve cat, ls, grep, git log, and 50+ other read-only commands.</div>
+<div class="install">npx cc-safe-setup --install-example auto-approve-readonly</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+BASE=$(echo "$COMMAND" | sed 's/^[A-Z_]*=[^ ]* //g' | awk '{print $1}' | sed 's|.*/||')
+case "$BASE" in
+    cat|head|tail|less|wc|grep|rg|find|locate|\
+    ls|tree|stat|file|which|type|date|uptime|pwd|df|du)
+        echo '{"decision":"approve","reason":"Read-only command"}'
+        exit 0 ;;
+esac
+if echo "$COMMAND" | grep -qE '^\s*git\s+(status|log|diff|show|branch|remote|blame)\b'; then
+    echo '{"decision":"approve","reason":"Read-only git"}'
+    exit 0
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="permission approve test">
+<h3 onclick="toggle(this)">Auto-approve test commands</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
+<div class="recipe-desc">npm test, pytest, go test, cargo test, jest, vitest — all auto-approved.</div>
+<div class="install">npx cc-safe-setup --install-example auto-approve-test</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE '^\s*(npm\s+test|npx\s+(jest|vitest|mocha)|pytest|go\s+test|cargo\s+test)\b'; then
+    echo '{"decision":"approve","reason":"Test runner"}'
+    exit 0
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>Safety Guards</h2>
+
+<div class="recipe" data-tags="safety destructive rm git">
+<h3 onclick="toggle(this)">Block rm -rf, git reset --hard, and other destructive commands</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash · Prevents data loss</div>
+<div class="recipe-desc">The #1 safety hook. Blocks commands that cause irreversible damage. Built after a user lost C:\Users to rm -rf following NTFS junctions.</div>
+<div class="install">npx cc-safe-setup</div>
+<pre><code>#!/bin/bash
+# Built-in with cc-safe-setup. Blocks:
+# rm -rf on /, ~, .., /home, /etc
+# git reset --hard, git clean -fd
+# chmod -R 777, find -delete on broad paths
+# sudo + dangerous commands
+# PowerShell Remove-Item -Recurse -Force
+# See: https://github.com/yurukusa/cc-safe-setup</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="safety git branch push">
+<h3 onclick="toggle(this)">Prevent pushes to main/master</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
+<div class="recipe-desc">Block direct pushes to main and force-pushes to any branch. Built-in with cc-safe-setup.</div>
+<div class="install">npx cc-safe-setup</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'git\s+push\s.*(main|master)\b'; then
+    echo "BLOCKED: Push to main/master" >&2; exit 2
+fi
+if echo "$COMMAND" | grep -qE 'git\s+push\s.*--force'; then
+    echo "BLOCKED: Force push" >&2; exit 2
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="safety secret env credential">
+<h3 onclick="toggle(this)">Prevent committing secrets and .env files</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
+<div class="recipe-desc">Block git add .env, credential files, and git add . when .env exists.</div>
+<div class="install">npx cc-safe-setup</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+if echo "$COMMAND" | grep -qE 'git\s+add\s+.*\.env'; then
+    echo "BLOCKED: Adding .env to git" >&2; exit 2
+fi
+if echo "$COMMAND" | grep -qE 'git\s+add\s+(-A|\.)' && [ -f ".env" ]; then
+    echo "BLOCKED: git add . with .env present. Use git add <specific-files>" >&2; exit 2
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="safety memory permission">
+<h3 onclick="toggle(this)">Block silent memory file edits</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Edit|Write · Fixes Issue #38040</div>
+<div class="recipe-desc">Memory files shape AI behavior across sessions but bypass permission prompts. This hook blocks unreviewed writes.</div>
+<div class="install">npx cc-safe-setup --install-example memory-write-guard</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] && exit 0
+if [[ "$FILE" == *".claude/"*"/memory/"* ]]; then
+    jq -n '{"decision":"block","reason":"Memory file edit requires review"}'
+    exit 0
+fi
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="safety skill opaque">
+<h3 onclick="toggle(this)">Block built-in skills that edit files silently</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Skill · Fixes Issue #38040</div>
+<div class="recipe-desc">Built-in skills like update-config and simplify modify files without showing changes. Block them and use Edit tool directly.</div>
+<div class="install">npx cc-safe-setup --install-example skill-gate</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+[[ "$TOOL" != "Skill" ]] && exit 0
+SKILL=$(echo "$INPUT" | jq -r '.tool_input.skill // empty')
+case "$SKILL" in
+    update-config|keybindings-help|simplify|statusline-setup)
+        jq -n --arg s "$SKILL" '{"decision":"block","reason":"Skill " + $s + " edits files silently"}'
+        exit 0 ;;
+esac
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>Code Quality</h2>
+
+<div class="recipe" data-tags="quality syntax python json yaml">
+<h3 onclick="toggle(this)">Auto-check syntax after every file edit</h3>
+<div class="recipe-meta">Event: PostToolUse · Matcher: Edit|Write</div>
+<div class="recipe-desc">Catches Python, Shell, JSON, YAML, and JS syntax errors immediately after Claude edits a file.</div>
+<div class="install">npx cc-safe-setup</div>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
+case "$FILE" in
+    *.py) python3 -m py_compile "$FILE" 2>&1 && exit 0 || echo "SYNTAX ERROR in $FILE" >&2 ;;
+    *.sh) bash -n "$FILE" 2>&1 && exit 0 || echo "SYNTAX ERROR in $FILE" >&2 ;;
+    *.json) python3 -m json.tool "$FILE" >/dev/null 2>&1 && exit 0 || echo "INVALID JSON: $FILE" >&2 ;;
+    *.yaml|*.yml) python3 -c "import yaml; yaml.safe_load(open('$FILE'))" 2>&1 && exit 0 || echo "INVALID YAML: $FILE" >&2 ;;
+esac
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="quality commit fixup wip">
+<h3 onclick="toggle(this)">Warn about fixup/WIP commits before push</h3>
+<div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
+<div class="recipe-desc">Catches branches with fixup!, squash!, or WIP commits that should be squashed before pushing.</div>
+<div class="install">npx cc-safe-setup --install-example no-commit-fixup</div>
+<pre><code>#!/bin/bash
+COMMAND=$(cat | jq -r '.tool_input.command // empty')
+echo "$COMMAND" | grep -qE '^\s*git\s+push\b' || exit 0
+BASE=$(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null)
+[ -n "$BASE" ] && git log --oneline "$BASE"..HEAD | grep -iE '^[a-f0-9]+ (fixup!|squash!|WIP)' && \
+    echo "WARNING: Branch has fixup/WIP commits. Squash before pushing." >&2
+exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>Monitoring</h2>
+
+<div class="recipe" data-tags="monitoring context window overflow">
+<h3 onclick="toggle(this)">Monitor context window usage</h3>
+<div class="recipe-meta">Event: PostToolUse · Matcher: (all) · Prevents silent context loss</div>
+<div class="recipe-desc">Graduated warnings at 40%, 25%, 20%, 15% remaining context. Prevents the session from silently losing state.</div>
+<div class="install">npx cc-safe-setup</div>
+<pre><code>#!/bin/bash
+# Built-in with cc-safe-setup
+# Monitors context_window_tokens_remaining from PostToolUse events
+# Warns at 40%, 25%, 20%, 15% thresholds
+# At 15%: suggests compacting or handing off
+# See: https://github.com/yurukusa/cc-safe-setup</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<h2>Troubleshooting</h2>
+
+<div class="recipe" data-tags="troubleshoot diagnose doctor">
+<h3 onclick="toggle(this)">Diagnose why hooks aren't working</h3>
+<div class="recipe-meta">CLI command · 13 automated checks</div>
+<div class="recipe-desc">Checks jq, settings.json validity, hook paths, permissions, shebang, and runs test inputs.</div>
+<div class="install">npx cc-safe-setup --doctor</div>
+<pre><code># Checks performed:
+# 1. jq installed?
+# 2. settings.json exists?
+# 3. settings.json valid JSON?
+# 4. hooks section present?
+# 5. Each trigger type registered?
+# 6. Each hook script file exists?
+# 7. Each script is executable?
+# 8. Each script has shebang?
+# 9. Each script runs without error on empty input?
+# 10. bypassPermissions not set (hooks get skipped)?
+# 11. Bash(*) not in allow list?
+# 12. hooks directory exists?
+# 13. Claude Code version?</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+<div class="recipe" data-tags="troubleshoot fire log debug">
+<h3 onclick="toggle(this)">Verify a hook is actually firing</h3>
+<div class="recipe-meta">Add to any hook · Takes 10 seconds</div>
+<div class="recipe-desc">Add this to the top of any hook to log when it fires. Check /tmp/hook-fire.log after running Claude Code.</div>
+<div class="install">Add to any .sh file:</div>
+<pre><code>#!/bin/bash
+echo "[$(date)] Fired: $0" >> /tmp/hook-fire.log
+
+# ... rest of your hook</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+</div>
+
+</div>
+
+<div class="footer">
+  <a href="hub.html">Hub</a> · <a href="hooks-cheatsheet.html">Cheat Sheet</a> · <a href="builder.html">Builder</a> ·
+  <a href="settings-reference.html">Settings</a> · <a href="troubleshooting.html">Troubleshooting</a> ·
+  <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+</div>
+
+<script>
+function toggle(el){el.parentElement.classList.toggle('open')}
+function cp(btn){
+  const code=btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard.writeText(code);
+  btn.textContent='Copied!';
+  setTimeout(()=>btn.textContent='Copy',1500);
+}
+function filter(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const recipes=document.querySelectorAll('.recipe');
+  let shown=0;
+  recipes.forEach(r=>{
+    const text=(r.textContent+' '+r.dataset.tags).toLowerCase();
+    const match=!q||text.includes(q);
+    r.style.display=match?'':'none';
+    if(match)shown++;
+  });
+  document.getElementById('count').textContent=shown+' recipes';
+}
+</script>
+</body>
+</html>

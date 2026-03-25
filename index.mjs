@@ -114,6 +114,8 @@ const SUGGEST = process.argv.includes('--suggest');
 const INIT_PROJECT = process.argv.includes('--init-project');
 const SCORE_ONLY = process.argv.includes('--score');
 const CHANGELOG_CMD = process.argv.includes('--changelog');
+const SIMULATE_IDX = process.argv.findIndex(a => a === '--simulate');
+const SIMULATE_CMD = SIMULATE_IDX !== -1 ? process.argv.slice(SIMULATE_IDX + 1).join(' ') : null;
 const TEST_HOOK_IDX = process.argv.findIndex(a => a === '--test-hook');
 const TEST_HOOK = TEST_HOOK_IDX !== -1 ? process.argv[TEST_HOOK_IDX + 1] : null;
 const WHY_IDX = process.argv.findIndex(a => a === '--why');
@@ -147,6 +149,7 @@ if (HELP) {
     npx cc-safe-setup --diff <file>   Compare your settings with another file
     npx cc-safe-setup --lint       Static analysis of hook configuration
     npx cc-safe-setup --doctor     Diagnose why hooks aren't working
+    npx cc-safe-setup --simulate "rm -rf /"  See how hooks react to a command
     npx cc-safe-setup --watch      Live dashboard of blocked commands
     npx cc-safe-setup --create "<desc>"  Generate a custom hook from description
     npx cc-safe-setup --test-hook <name>  Test a specific hook with sample inputs
@@ -4260,6 +4263,140 @@ async function watch() {
   }
 }
 
+async function simulate(command) {
+  const { spawnSync } = await import('child_process');
+  const { readdirSync } = await import('fs');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --simulate' + c.reset);
+  console.log(c.dim + '  Simulating how hooks would react to:' + c.reset);
+  console.log(c.blue + '  $ ' + command + c.reset);
+  console.log();
+
+  // Build fake PreToolUse JSON for Bash
+  const fakeInput = JSON.stringify({
+    tool_name: 'Bash',
+    tool_input: { command }
+  });
+
+  // Read settings to find registered hooks
+  let settings = {};
+  if (existsSync(SETTINGS_PATH)) {
+    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  }
+
+  const hookEntries = settings.hooks?.PreToolUse || [];
+  let tested = 0;
+  let approved = 0;
+  let blocked = 0;
+  let passthrough = 0;
+
+  for (const entry of hookEntries) {
+    const matcher = entry.matcher || '';
+    // Check if matcher includes Bash (or matches all)
+    if (matcher && !matcher.match(/Bash/i) && matcher !== '') continue;
+
+    for (const h of (entry.hooks || [])) {
+      if (h.type !== 'command') continue;
+      const cmd = h.command;
+
+      // Extract script name for display
+      const parts = cmd.split(/\s+/);
+      const scriptPath = parts[parts.length - 1];
+      const scriptName = scriptPath.split('/').pop().replace('.sh', '');
+
+      // Resolve path
+      const resolved = scriptPath.replace(/^~/, HOME);
+      if (!existsSync(resolved)) {
+        console.log(c.yellow + '  ? ' + c.reset + scriptName + c.dim + ' (script not found)' + c.reset);
+        continue;
+      }
+
+      tested++;
+
+      // Run the hook with fake input
+      const result = spawnSync('bash', [resolved], {
+        input: fakeInput,
+        timeout: 5000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+
+      const stdout = (result.stdout || '').toString().trim();
+      const stderr = (result.stderr || '').toString().trim();
+      const exitCode = result.status;
+
+      if (exitCode === 2) {
+        blocked++;
+        console.log(c.red + '  ✗ BLOCK ' + c.reset + c.bold + scriptName + c.reset);
+        if (stderr) console.log(c.dim + '    ' + stderr.split('\n')[0] + c.reset);
+      } else if (stdout.includes('"approve"') || stdout.includes('"decision":"approve"')) {
+        approved++;
+        let reason = '';
+        try { reason = JSON.parse(stdout).reason || JSON.parse(stdout).decision; } catch {}
+        console.log(c.green + '  ✓ APPROVE ' + c.reset + scriptName + (reason ? c.dim + ' (' + reason + ')' + c.reset : ''));
+      } else {
+        passthrough++;
+        console.log(c.dim + '  · pass    ' + scriptName + c.reset);
+      }
+    }
+  }
+
+  // Also check installed hook scripts not in settings
+  if (existsSync(HOOKS_DIR)) {
+    const hookFiles = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
+    const registeredScripts = new Set();
+    for (const entry of hookEntries) {
+      for (const h of (entry.hooks || [])) {
+        if (h.command) registeredScripts.add(h.command.split('/').pop().replace('.sh', ''));
+      }
+    }
+
+    const unregistered = hookFiles.filter(f => !registeredScripts.has(f.replace('.sh', '')));
+    if (unregistered.length > 0) {
+      console.log();
+      console.log(c.dim + '  Unregistered hooks (not in settings.json):' + c.reset);
+      for (const f of unregistered.slice(0, 5)) {
+        const resolved = join(HOOKS_DIR, f);
+        const result = spawnSync('bash', [resolved], {
+          input: fakeInput,
+          timeout: 5000,
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        const exitCode = result.status;
+        const stdout = (result.stdout || '').toString().trim();
+        const name = f.replace('.sh', '');
+
+        if (exitCode === 2) {
+          console.log(c.red + '  ✗ BLOCK ' + c.reset + name + c.dim + ' (unregistered)' + c.reset);
+        } else if (stdout.includes('"approve"')) {
+          console.log(c.green + '  ✓ APPROVE ' + c.reset + name + c.dim + ' (unregistered)' + c.reset);
+        } else {
+          console.log(c.dim + '  · pass    ' + name + ' (unregistered)' + c.reset);
+        }
+      }
+      if (unregistered.length > 5) {
+        console.log(c.dim + '    ... and ' + (unregistered.length - 5) + ' more' + c.reset);
+      }
+    }
+  }
+
+  // Summary
+  console.log();
+  console.log(c.bold + '  Summary: ' + c.reset +
+    (blocked > 0 ? c.red + blocked + ' blocked' + c.reset + ' · ' : '') +
+    (approved > 0 ? c.green + approved + ' approved' + c.reset + ' · ' : '') +
+    passthrough + ' passthrough');
+
+  if (blocked > 0) {
+    console.log(c.red + '  → This command would be BLOCKED' + c.reset);
+  } else if (approved > 0) {
+    console.log(c.green + '  → This command would be auto-approved (no prompt)' + c.reset);
+  } else {
+    console.log(c.dim + '  → This command would trigger a permission prompt' + c.reset);
+  }
+  console.log();
+}
+
 async function doctor() {
   const { execSync, spawnSync } = await import('child_process');
   const { statSync, readdirSync } = await import('fs');
@@ -4579,6 +4716,7 @@ async function main() {
   if (SCAN) return scan();
   if (FULL) return fullSetup();
   if (DOCTOR) return doctor();
+  if (SIMULATE_CMD) return simulate(SIMULATE_CMD);
   if (WATCH) return watch();
   if (TEST_HOOK_IDX !== -1) return testHook(TEST_HOOK);
   if (SAVE_PROFILE_IDX !== -1) return saveProfile(SAVE_PROFILE);
@@ -4707,7 +4845,7 @@ async function main() {
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
   console.log('  ' + c.dim + 'Verify:' + c.reset + ' ' + c.blue + 'npx cc-health-check' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Full kit (16 hooks + templates + tools):' + c.reset);
+  console.log('  ' + c.dim + 'Need more? 16 hooks + templates for autonomous teams:' + c.reset);
   console.log('  https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=npm&utm_medium=cli&utm_campaign=safe-setup');
   console.log();
 }

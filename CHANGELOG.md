@@ -1,5 +1,14 @@
 # Changelog
 
+## [28.3.5] - 2026-03-25
+- **327 HOOKS** (314 bash + 5 non-bash + 8 built-in), **955 tests**
+- New hooks: skill-gate, auto-approve-test, no-push-without-ci, no-commit-fixup, no-large-commit, no-sleep-in-hooks, check-git-hooks-compat
+- --shield now auto-installs memory-write-guard, skill-gate, auto-approve-test, auto-approve-readonly
+- 227 hooks in web registry
+- Issue answers: #38040 (memory permission gap), #37988 (Windows hook timeout), #37913 (permission timeout)
+- GitHub profile README created (https://github.com/yurukusa/yurukusa)
+- Ops Kit LP updated (8K downloads/week, correct Gumroad slug)
+
 ## [28.1.0] - 2026-03-25
 - **305 HOOKS** — 244 new hooks in session 40 (61→305)
 - 210 hooks in web registry
