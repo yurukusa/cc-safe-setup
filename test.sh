@@ -1794,6 +1794,69 @@ test_trigger_detection "prompt-length-guard.sh" "UserPromptSubmit" "prompt-lengt
 test_trigger_detection "prompt-injection-detector.sh" "UserPromptSubmit" "prompt-injection-detector detects UserPromptSubmit"
 echo ""
 
+# ========== Example hook tests (safety guards) ==========
+EXDIR="$(dirname "$0")/examples"
+
+test_ex() {
+    local script="$1" input="$2" expected_exit="$3" desc="$4"
+    local actual_exit=0
+    echo "$input" | bash "$EXDIR/$script" > /dev/null 2>/dev/null || actual_exit=$?
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+echo "scope-guard.sh:"
+test_ex scope-guard.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "echo allowed"
+test_ex scope-guard.sh '{"tool_name":"Bash","tool_input":{"command":"rm -rf node_modules"}}' 0 "rm node_modules allowed"
+test_ex scope-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"./src/main.ts"}}' 0 "non-Bash skipped"
+echo ""
+
+echo "git-config-guard.sh:"
+test_ex git-config-guard.sh '{"tool_input":{"command":"git config --global user.email x"}}' 2 "blocks --global"
+test_ex git-config-guard.sh '{"tool_input":{"command":"git config --system core.editor vim"}}' 2 "blocks --system"
+test_ex git-config-guard.sh '{"tool_input":{"command":"git config --local user.name test"}}' 0 "allows --local"
+test_ex git-config-guard.sh '{"tool_input":{"command":"git status"}}' 0 "ignores non-config"
+echo ""
+
+echo "path-traversal-guard.sh:"
+test_ex path-traversal-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"../../etc/passwd"}}' 2 "blocks ../../"
+test_ex path-traversal-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"./src/main.ts"}}' 0 "allows project path"
+test_ex path-traversal-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-Write"
+echo ""
+
+echo "env-var-check.sh:"
+test_ex env-var-check.sh '{"tool_input":{"command":"export PATH=/usr/bin"}}' 0 "PATH export passes"
+test_ex env-var-check.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-export passes"
+echo ""
+
+echo "auto-approve-readonly.sh:"
+test_ex auto-approve-readonly.sh '{"tool_input":{"command":"cat README.md"}}' 0 "cat approved"
+test_ex auto-approve-readonly.sh '{"tool_input":{"command":"ls -la src/"}}' 0 "ls approved"
+test_ex auto-approve-readonly.sh '{"tool_input":{"command":"grep -r TODO src/"}}' 0 "grep approved"
+test_ex auto-approve-readonly.sh '{"tool_input":{"command":"wc -l file.txt"}}' 0 "wc approved"
+echo ""
+
+echo "auto-approve-git-read.sh:"
+test_ex auto-approve-git-read.sh '{"tool_input":{"command":"git status"}}' 0 "git status approved"
+test_ex auto-approve-git-read.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "git log approved"
+test_ex auto-approve-git-read.sh '{"tool_input":{"command":"git diff HEAD"}}' 0 "git diff approved"
+echo ""
+
+echo "auto-approve-build.sh:"
+test_ex auto-approve-build.sh '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build approved"
+test_ex auto-approve-build.sh '{"tool_name":"Bash","tool_input":{"command":"cargo test"}}' 0 "cargo test approved"
+echo ""
+
+echo "auto-approve-python.sh:"
+test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"python -m pytest"}}' 0 "pytest approved"
+test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"ruff check ."}}' 0 "ruff approved"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
