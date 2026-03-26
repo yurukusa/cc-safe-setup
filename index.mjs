@@ -606,15 +606,18 @@ async function installExample(name) {
   let trigger = 'PreToolUse';
   let matcher = 'Bash';
 
-  // Detect trigger from header comments
-  if (content.includes('TRIGGER: PermissionRequest') || content.match(/^#.*PermissionRequest hook/m)) trigger = 'PermissionRequest';
-  else if (content.includes('TRIGGER: PostToolUse') || content.includes('PostToolUse')) trigger = 'PostToolUse';
-  else if (content.includes('TRIGGER: Notification') || content.includes('Notification')) trigger = 'Notification';
-  else if (content.includes('TRIGGER: Stop') || content.includes('Stop')) trigger = 'Stop';
-  else if (content.includes('TRIGGER: SessionStart') || content.includes('SessionStart')) trigger = 'SessionStart';
-  else if (content.includes('TRIGGER: PreCompact') || content.includes('PreCompact')) trigger = 'PreCompact';
-  else if (content.includes('TRIGGER: SessionEnd') || content.includes('SessionEnd')) trigger = 'SessionEnd';
-  else if (content.includes('TRIGGER: UserPromptSubmit') || content.match(/^#.*UserPromptSubmit hook/m)) trigger = 'UserPromptSubmit';
+  // Detect trigger from header comments (case-insensitive for "Trigger:" prefix)
+  const triggerMatch = content.match(/^#\s*[Tt]rigger:\s*(\S+)/m);
+  if (triggerMatch) {
+    const t = triggerMatch[1];
+    if (['PermissionRequest','PostToolUse','Notification','Stop','SessionStart','PreCompact','SessionEnd','UserPromptSubmit'].includes(t)) {
+      trigger = t;
+    }
+  } else if (content.match(/^#.*PermissionRequest hook/m)) {
+    trigger = 'PermissionRequest';
+  } else if (content.match(/^#.*UserPromptSubmit hook/m)) {
+    trigger = 'UserPromptSubmit';
+  }
 
   // Detect matcher from header (JSON format or comment format)
   const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);
