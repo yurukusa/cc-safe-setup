@@ -5363,6 +5363,36 @@ test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"API_KEY=abc12
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"PATH=/usr/bin"}}' 0 "passes safe env var"
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":""}}' 0 "passes empty output"
 
+# ========== Edge case tests for robustness ==========
+echo ""
+echo "edge-cases-robustness:"
+
+# Built-in hooks: null/malformed inputs
+for hookname in destructive-guard branch-guard secret-guard syntax-check context-monitor comment-strip cd-git-allow api-error-alert; do
+  extract_hook "$hookname"
+  test_hook "$hookname" '{}' 0 "$hookname: empty JSON"
+  test_hook "$hookname" '{"tool_input":{"command":null}}' 0 "$hookname: null command"
+  test_hook "$hookname" '{"other":"data"}' 0 "$hookname: missing tool_input"
+done
+
+# New hooks: special characters and long commands
+for hookname in cred-exfil rm-safety clf-fallback auto-mode-safe compound-cmd; do
+  test_hook "$hookname" '{"tool_name":"Bash","tool_input":{"command":"echo \"hello\" | grep -E \"[a-z]+\""}}' 0 "$hookname: special chars"
+  test_hook "$hookname" '{"tool_name":"Bash","tool_input":{"command":null}}' 0 "$hookname: null command"
+  test_hook "$hookname" '{}' 0 "$hookname: empty JSON"
+done
+
+# Write hooks: edge cases
+test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"","content":""}}' 0 "write-secret: empty path+content"
+test_hook "write-secret" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","new_string":""}}' 0 "write-secret: empty new_string"
+test_hook "write-secret" '{"tool_name":"Read","tool_input":{"file_path":"x.js"}}' 0 "write-secret: ignores Read tool"
+
+# Permission audit: edge cases
+test_hook "perm-audit" '{"tool_name":"Unknown","tool_input":{}}' 0 "audit: unknown tool"
+
+# Token counter: edge cases
+test_hook "token-cnt" '{"tool_name":"","tool_input":{}}' 0 "counter: empty tool name"
+
     # Summary
 
 echo "========================"
