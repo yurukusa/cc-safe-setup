@@ -160,6 +160,19 @@ exit 0
 
 **Rule of thumb:** PreToolUse = block dangerous actions. PermissionRequest = allow trusted actions that trigger built-in prompts.
 
+## "PermissionRequest hooks don't fire in `-p` mode"
+
+**Known limitation** ([#35646](https://github.com/anthropics/claude-code/issues/35646)): In headless/pipe mode (`claude -p`), the protected-directory check short-circuits *before* PermissionRequest hooks fire. This means:
+
+| Mode | PermissionRequest fires? | Hook workaround works? |
+|------|-------------------------|----------------------|
+| Interactive (`claude`) | ✅ Yes | ✅ Yes |
+| Interactive + bypassPermissions | ✅ Yes | ✅ Yes |
+| Pipe mode (`claude -p`) | ❌ No | ❌ No |
+| Pipe + `--dangerously-skip-permissions` | ❌ No | ❌ No |
+
+**Workaround:** Currently none for `-p` mode. If your automation needs to write to `.claude/`, use interactive mode with hooks instead. This is a Claude Code core issue — the fix requires the harness to route protected-dir checks through PermissionRequest in all modes.
+
 ## "Permission prompts still appear for compound commands"
 
 This is a known Claude Code limitation, not a hook issue. `Bash(git:*)` doesn't match `cd /path && git log`.
