@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "29.5.0",
+  "version": "29.6.0",
   "description": "One command to make Claude Code safe. 335 example hooks + 8 built-in. 52 CLI commands. 1,760 tests. Works with Auto Mode.",
   "main": "index.mjs",
   "bin": {
