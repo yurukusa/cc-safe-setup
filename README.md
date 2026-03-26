@@ -387,6 +387,8 @@ No. Each hook runs in ~10ms. They only fire on specific events (before tool use,
 
 Found a false positive? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md). Want a new hook? Open a [feature request](https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md).
 
+📘 **Want the full story?** [Production guide from 700+ hours of autonomous operation](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — the incidents, fixes, and patterns behind every hook in this tool.
+
 If cc-safe-setup saved your project from a destructive command, consider giving it a star — it helps others find this tool.
 
 ## License
