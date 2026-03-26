@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-27T07:20:55+09:00
+Updated: 2026-03-27T07:21:00+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-03-27T07:20:55+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e93119e docs: update pain points table with prefer-builtin-tools example Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+- Last commit: 39dee63 checkpoint: auto-save 07:20:58
 
 ## Recent Files
 ```
