@@ -368,6 +368,9 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Hooks Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) — printable A4 quick reference
 - [Ecosystem Comparison](https://yurukusa.github.io/cc-safe-setup/ecosystem.html) — all Claude Code hook projects compared
 - [The incident that inspired this tool](https://github.com/anthropics/claude-code/issues/36339) — NTFS junction rm -rf
+- [How to prevent rm -rf disasters](https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf.html) — real incidents and the hook that stops them
+- [How to prevent force-push to main](https://yurukusa.github.io/cc-safe-setup/prevent-force-push.html) — branch protection via hooks
+- [How to prevent secret leaks](https://yurukusa.github.io/cc-safe-setup/prevent-secret-leaks.html) — stop git add . from committing .env
 
 ## FAQ
 
