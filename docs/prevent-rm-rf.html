@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code rm -rf Disasters — cc-safe-setup</title>
+<meta name="description" content="Claude Code can run rm -rf and delete your entire filesystem. Real incidents from GitHub Issues. One command to prevent it: npx cc-safe-setup.">
+<meta name="keywords" content="claude code rm -rf, claude code delete files, claude code safety, destructive command guard, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf.html">
+<meta property="og:title" content="Prevent Claude Code rm -rf Disasters">
+<meta property="og:description" content="Real incidents where Claude Code deleted filesystems. One command to prevent it.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Prevent Claude Code rm -rf Disasters</h1>
+<p>Claude Code has full terminal access. It can — and has — run <code>rm -rf /</code> and deleted entire filesystems. These aren't hypothetical risks. They're real incidents reported on GitHub.</p>
+
+<h2>Real Incidents</h2>
+
+<div class="incident">
+<p class="incident-title">Entire C:\Users directory deleted via NTFS junction</p>
+<p><code>rm -rf</code> followed NTFS junctions and wiped the entire user profile directory. All documents, settings, and installed programs — gone.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36339">#36339</a> — 40+ reactions</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">All source code destroyed by Remove-Item -Recurse -Force</p>
+<p>Claude ran <code>Remove-Item -Recurse -Force *</code> on a repository root, destroying all unpushed source code.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/37331">#37331</a></p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Entire Mac filesystem deleted during cleanup</p>
+<p>During a "cleanup" task, Claude deleted critical system directories on macOS.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36233">#36233</a></p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Force-push rewrote shared branch history at 3am</p>
+<p>An autonomous Claude Code session pushed force to main while the developer was asleep, rewriting the shared branch history.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36640">#36640</a></p>
+</div>
+
+<h2>Why CLAUDE.md Can't Prevent This</h2>
+<p>CLAUDE.md rules are part of the prompt context. When context fills up, rules get pushed out. Claude can (and does) ignore them. A rule saying "never run rm -rf" is a <em>suggestion</em>, not enforcement.</p>
+
+<h2>The Fix: PreToolUse Hooks</h2>
+<p>Claude Code <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">Hooks</a> run at the process level, outside the model's control. A PreToolUse hook that exits with code 2 blocks the tool invocation. The model cannot bypass this.</p>
+
+<div class="fix">
+<p><strong>destructive-guard.sh</strong> — the hook that prevents rm -rf:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Block rm -rf with dangerous targets
+if echo "$COMMAND" | grep -qE 'rm\s+.*-[rRf]*[rR][rRf]*\s+(/|~|\$HOME|\.\.)'; then
+  echo "BLOCKED: Destructive rm command targeting root/home" >&2
+  exit 2
+fi
+
+exit 0</code></pre>
+</div>
+
+<div class="cta">
+<h2>Install All 8 Safety Hooks in 10 Seconds</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Blocks rm -rf, prevents force-push to main, catches secret leaks, validates syntax after every edit. <span class="badge">1,712 tests</span> <span class="badge">332 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
+</div>
+
+<h2>Verify Your Setup</h2>
+<pre><code>npx cc-safe-setup --verify</code></pre>
+<p>Sends test inputs to each hook and confirms they block correctly:</p>
+<pre><code>destructive-guard:
+  &#10004; rm -rf / → BLOCKED
+  &#10004; rm -rf node_modules → ALLOWED
+8/8 hooks verified</code></pre>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic. Score below 80 means your Claude Code setup has gaps.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup is open source, zero dependencies, and installs nothing globally. All hooks run locally. <a href="https://github.com/yurukusa/cc-safe-setup">View source on GitHub</a>.</p>
+</body>
+</html>
