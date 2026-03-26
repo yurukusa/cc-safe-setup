@@ -1,5 +1,10 @@
 # Changelog
 
+## [29.4.0] - 2026-03-26
+- **Tests**: 32 new tests for 10 example hooks (scope-guard, git-config-guard, path-traversal-guard, env-var-check, auto-approve-readonly/git-read/build/python, block-database-wipe, deploy-guard, network-guard)
+- **Fix**: --doctor now checks all 9 hook trigger types
+- **Stats**: 1062 tests (up from 1030)
+
 ## [29.3.0] - 2026-03-26
 - **Fix**: Unified trigger detection with regex (case-insensitive `Trigger:` / `TRIGGER:`)
 - Previously, hooks with `# Trigger: X` (capitalized) would not be detected by --install-example
