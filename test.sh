@@ -121,6 +121,16 @@ else
     FAIL=$((FAIL + 1))
 fi
 test_hook "cd-git-allow" '{"tool_input":{"command":"npm install"}}' 0 "non-cd command passes"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /home && git diff HEAD~1"}}' 0 "cd+git diff auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd src && git status"}}' 0 "cd+git status auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git branch -a"}}' 0 "cd+git branch auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git show HEAD"}}' 0 "cd+git show auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git rev-parse HEAD"}}' 0 "cd+git rev-parse auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git reset --hard"}}' 0 "cd+git reset not auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git clean -fd"}}' 0 "cd+git clean not auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"cd /tmp && git checkout ."}}' 0 "cd+git checkout not auto-approved"
+test_hook "cd-git-allow" '{"tool_input":{"command":"ls -la"}}' 0 "non-cd-git passes through"
+test_hook "cd-git-allow" '{"tool_input":{"command":""}}' 0 "empty command passes"
 echo ""
 
 # --- context-monitor ---
@@ -149,6 +159,21 @@ test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.py"}}' 0 "
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.py"}}' 0 "invalid Python reports but exits 0"
 test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0 "nonexistent file exits 0"
 rm -f /tmp/test-valid.py /tmp/test-invalid.py
+# JSON files
+echo '{"valid": true}' > /tmp/test-valid.json
+echo '{"invalid":' > /tmp/test-invalid.json
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.json"}}' 0 "valid JSON passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.json"}}' 0 "invalid JSON reports but exits 0"
+rm -f /tmp/test-valid.json /tmp/test-invalid.json
+# Shell files
+echo '#!/bin/bash\necho ok' > /tmp/test-valid.sh
+echo '#!/bin/bash\nif then' > /tmp/test-invalid.sh
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.sh"}}' 0 "valid shell passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.sh"}}' 0 "invalid shell reports but exits 0"
+rm -f /tmp/test-valid.sh /tmp/test-invalid.sh
+# Non-checkable files
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/image.png"}}' 0 "non-checkable file passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/readme.md"}}' 0 "markdown file passes"
 echo ""
 
 # --- destructive-guard edge cases ---
@@ -211,6 +236,9 @@ extract_hook "api-error-alert"
 test_hook "api-error-alert" '{"stop_reason":"user"}' 0 "ignores user-initiated stop"
 test_hook "api-error-alert" '{"stop_reason":"end_turn"}' 0 "ignores normal end_turn"
 test_hook "api-error-alert" '{"stop_reason":"tool_use"}' 0 "ignores tool_use stop"
+test_hook "api-error-alert" '{"stop_reason":"max_tokens"}' 0 "handles max_tokens"
+test_hook "api-error-alert" '{}' 0 "empty input passes"
+test_hook "api-error-alert" '{"stop_reason":""}' 0 "empty stop_reason passes"
 echo ""
 
 # --- CLI smoke tests ---
