@@ -9,6 +9,10 @@ jobs:
         with:
           node-version: '20'
       - run: sudo apt-get install -y jq
+      - name: Configure git for tests
+        run: |
+          git config --global user.email "ci@test.com"
+          git config --global user.name "CI"
       - name: CLI smoke tests
         run: |
           node index.mjs --help
