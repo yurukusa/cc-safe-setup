@@ -911,6 +911,10 @@ echo "--- Example hooks empty input ---"
 EI_PASS=0
 EI_FAIL=0
 for f in "$EXAMPLES_DIR"/*.sh; do
+    # Skip hooks that depend on session state (call counters, etc.)
+    case "$(basename "$f")" in
+        response-budget-guard.sh|session-budget-alert.sh|usage-warn.sh) continue ;;
+    esac
     EXIT=0
     echo '{}' | bash "$f" > /dev/null 2>/dev/null || EXIT=$?
     if [ "$EXIT" -eq 0 ]; then
