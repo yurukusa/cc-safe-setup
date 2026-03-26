@@ -1875,6 +1875,41 @@ test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"pyt
 test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"ruff check ."}}' 0 "ruff approved"
 echo ""
 
+echo "auto-approve-docker.sh:"
+test_ex auto-approve-docker.sh '{"tool_name":"Bash","tool_input":{"command":"docker build ."}}' 0 "docker build approved"
+test_ex auto-approve-docker.sh '{"tool_name":"Bash","tool_input":{"command":"docker compose up"}}' 0 "docker compose approved"
+test_ex auto-approve-docker.sh '{"tool_name":"Bash","tool_input":{"command":"docker ps"}}' 0 "docker ps approved"
+echo ""
+
+echo "auto-approve-go.sh:"
+test_ex auto-approve-go.sh '{"tool_name":"Bash","tool_input":{"command":"go test ./..."}}' 0 "go test approved"
+test_ex auto-approve-go.sh '{"tool_name":"Bash","tool_input":{"command":"go build"}}' 0 "go build approved"
+echo ""
+
+echo "auto-approve-cargo.sh:"
+test_ex auto-approve-cargo.sh '{"tool_name":"Bash","tool_input":{"command":"cargo test"}}' 0 "cargo test approved"
+test_ex auto-approve-cargo.sh '{"tool_name":"Bash","tool_input":{"command":"cargo clippy"}}' 0 "cargo clippy approved"
+echo ""
+
+echo "auto-approve-make.sh:"
+test_ex auto-approve-make.sh '{"tool_name":"Bash","tool_input":{"command":"make build"}}' 0 "make build approved"
+test_ex auto-approve-make.sh '{"tool_name":"Bash","tool_input":{"command":"make test"}}' 0 "make test approved"
+echo ""
+
+echo "auto-approve-maven.sh:"
+test_ex auto-approve-maven.sh '{"tool_name":"Bash","tool_input":{"command":"mvn test"}}' 0 "mvn test approved"
+test_ex auto-approve-maven.sh '{"tool_name":"Bash","tool_input":{"command":"mvn compile"}}' 0 "mvn compile approved"
+echo ""
+
+echo "auto-approve-ssh.sh:"
+test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":"ssh user@host uptime"}}' 0 "ssh uptime approved"
+echo ""
+
+echo "commit-quality-gate.sh:"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "vague commit warns (exit 0)"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-commit passes"
+echo ""
+
 # --- Summary ---
 echo "========================"
 TOTAL=$((PASS + FAIL))
