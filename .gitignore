@@ -1,1 +1,5 @@
 __pycache__/
+.claude/checkpoints/
+.claude/pre-compact-checkpoint.md
+cc-safe-setup-export.json
+.claude/session-snapshot.md
