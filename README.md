@@ -87,7 +87,7 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 336 examples |
+| `--install-example <name>` | Install from 338 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
@@ -137,6 +137,9 @@ Each hook exists because a real incident happened without it.
 | Diagnose why hooks aren't working | `npx cc-safe-setup --doctor` |
 | Preview how hooks react to a command | `npx cc-safe-setup --simulate "git push origin main"` |
 | Protect a specific file from edits | `npx cc-safe-setup --protect .env` |
+| Stop .git/ write prompts | `npx cc-safe-setup --install-example allow-git-hooks-dir` |
+| Auto-approve compound git commands | `npx cc-safe-setup --install-example auto-approve-compound-git` |
+| Detect prompt injection patterns | `npx cc-safe-setup --install-example prompt-injection-detector` |
 | Define rules in YAML, compile to hooks | `npx cc-safe-setup --rules rules.yaml` |
 | Validate all hook scripts are correct | `npx cc-safe-setup --validate` |
 | Maximum protection mode | `npx cc-safe-setup --safe-mode` |
