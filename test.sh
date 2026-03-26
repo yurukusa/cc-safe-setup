@@ -4037,6 +4037,75 @@ if [ -f "$EXDIR/checkpoint-tamper-guard.sh" ]; then
 fi
 echo ""
 
+# ========== auto-mode-safe-commands tests ==========
+echo ""
+echo "auto-mode-safe-commands.sh:"
+cp examples/auto-mode-safe-commands.sh /tmp/test-auto-mode-safe.sh && chmod +x /tmp/test-auto-mode-safe.sh
+
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"cat /tmp/test.txt"}}' 0 "cat approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "git status approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"git log --oneline -5"}}' 0 "git log approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"grep -r TODO src/"}}' 0 "grep approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"curl -s https://api.example.com"}}' 0 "curl GET approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"jq .name package.json"}}' 0 "jq approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "echo approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"npm list --depth=0"}}' 0 "npm list approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"ls -la src/"}}' 0 "ls approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"find . -name *.js"}}' 0 "find approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"git diff HEAD~1"}}' 0 "git diff approves"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"rm -rf /tmp/junk"}}' 0 "rm passes through (no opinion)"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"curl -s -X POST https://api.example.com"}}' 0 "curl POST passes through"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 0 "npm install passes through"
+test_hook "auto-mode-safe" '{"tool_name":"Bash","tool_input":{"command":"git push origin main"}}' 0 "git push passes through"
+
+# ========== write-secret-guard tests ==========
+echo ""
+echo "write-secret-guard.sh:"
+cp examples/write-secret-guard.sh /tmp/test-write-secret.sh && chmod +x /tmp/test-write-secret.sh
+
+# Generate test secrets dynamically to avoid GitHub secret scanning push protection
+_AWS="AKI""AIOSFODNN7""EXAMPLE"
+_GHP="gh""p_abcdefghijklmnopqrst""uvwxyz1234"
+_OAI="sk""-proj-abcdefghijklmno""pqrst1234567890"
+_ANT="sk""-ant-api03-abcdefghij""klmnopqrst"
+_SLK="xox""b-12345-67890-abcdefg""hijklmnop"
+_STR="sk""_live_abcdefghijklmno""pqrst1234"
+_GGL="AIz""aSyB-abcdefghijklmnop""qrstuvwxyz12345"
+
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"config.js\",\"content\":\"const key = \\\"${_AWS}\\\";\"}}" 2 "blocks AWS key"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"app.py\",\"content\":\"TOKEN = \\\"${_GHP}\\\"\"}}" 2 "blocks GitHub token"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"config.ts\",\"content\":\"apiKey = \\\"${_OAI}\\\"\"}}" 2 "blocks OpenAI key"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"config.py\",\"content\":\"KEY = \\\"${_ANT}\\\"\"}}" 2 "blocks Anthropic key"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"bot.js\",\"content\":\"token = \\\"${_SLK}\\\"\"}}" 2 "blocks Slack token"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"pay.js\",\"content\":\"key = \\\"${_STR}\\\"\"}}" 2 "blocks Stripe key"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"maps.js\",\"content\":\"key = \\\"${_GGL}\\\"\"}}" 2 "blocks Google API key"
+test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"key.pem","content":"-----BEGIN RSA PRIVATE KEY-----\nMIIE"}}' 2 "blocks private key"
+test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"cfg.py","content":"DB = \"postgres://admin:secret@db:5432/app\""}}' 2 "blocks database URL"
+test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"app.js","content":"const port = process.env.PORT || 3000;"}}' 0 "allows normal code"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\".env.example\",\"content\":\"${_AWS}\"}}" 0 "allows env.example"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"test/auth.test.js\",\"content\":\"${_GHP}\"}}" 0 "allows test file"
+test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"config.js","content":"const key = process.env.API_KEY;"}}' 0 "allows env var reference"
+test_hook "write-secret" "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"cfg.js\",\"new_string\":\"${_GHP}\"}}" 2 "blocks Edit with secret"
+test_hook "write-secret" '{"tool_name":"Edit","tool_input":{"file_path":"index.js","new_string":"const x = 42;"}}' 0 "allows Edit normal code"
+
+# ========== compound-command-allow tests ==========
+echo ""
+echo "compound-command-allow.sh:"
+cp examples/compound-command-allow.sh /tmp/test-compound-cmd.sh && chmod +x /tmp/test-compound-cmd.sh
+
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"cd /tmp && git log --oneline"}}' 0 "cd && git log approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"echo hello | grep hell"}}' 0 "echo | grep approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"npm test && npm run build"}}' 0 "npm test && run build approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"cat pkg.json | jq .name | grep x"}}' 0 "cat | jq | grep approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"cd src && ls -la && git diff"}}' 0 "cd && ls && git diff approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"mkdir -p /tmp/test && cd /tmp/test"}}' 0 "mkdir && cd approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"git status; git branch -a"}}' 0 "git status; git branch approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"python3 -m pytest && echo done"}}' 0 "pytest && echo approves"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"cd /tmp && rm -rf ."}}' 0 "cd && rm -rf passes through"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"git status && git push origin main"}}' 0 "git status && git push passes through"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"curl -s -X POST https://api.com"}}' 0 "curl POST passes through"
+test_hook "compound-cmd" '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 0 "npm install passes through"
+
     # Summary
 
 echo "========================"
