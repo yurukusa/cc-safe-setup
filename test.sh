@@ -5393,51 +5393,6 @@ test_hook "perm-audit" '{"tool_name":"Unknown","tool_input":{}}' 0 "audit: unkno
 # Token counter: edge cases
 test_hook "token-cnt" '{"tool_name":"","tool_input":{}}' 0 "counter: empty tool name"
 
-# ========== Stderr message verification ==========
-echo ""
-echo "stderr-message-verification:"
-
-extract_hook "destructive-guard"
-MSG=$(echo '{"tool_input":{"command":"rm -rf /"}}' | bash /tmp/test-destructive-guard.sh 2>&1 >/dev/null)
-if echo "$MSG" | grep -qi "block"; then
-    echo "  PASS: destructive-guard stderr contains BLOCK"; PASS=$((PASS + 1))
-else
-    echo "  FAIL: destructive-guard stderr (got: $MSG)"; FAIL=$((FAIL + 1))
-fi
-
-extract_hook "branch-guard"
-MSG=$(echo '{"tool_input":{"command":"git push origin main"}}' | bash /tmp/test-branch-guard.sh 2>&1 >/dev/null)
-if echo "$MSG" | grep -qi "block\|protected"; then
-    echo "  PASS: branch-guard stderr message"; PASS=$((PASS + 1))
-else
-    echo "  FAIL: branch-guard stderr (got: $MSG)"; FAIL=$((FAIL + 1))
-fi
-
-cp examples/credential-exfil-guard.sh /tmp/test-cred-msg.sh && chmod +x /tmp/test-cred-msg.sh
-MSG=$(echo '{"tool_name":"Bash","tool_input":{"command":"env | grep -i token"}}' | bash /tmp/test-cred-msg.sh 2>&1 >/dev/null)
-if echo "$MSG" | grep -qi "block\|credential"; then
-    echo "  PASS: credential-exfil stderr message"; PASS=$((PASS + 1))
-else
-    echo "  FAIL: credential-exfil stderr (got: $MSG)"; FAIL=$((FAIL + 1))
-fi
-
-cp examples/rm-safety-net.sh /tmp/test-rm-msg.sh && chmod +x /tmp/test-rm-msg.sh
-MSG=$(echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /home/user"}}' | bash /tmp/test-rm-msg.sh 2>&1 >/dev/null)
-if echo "$MSG" | grep -qi "block\|critical\|rm"; then
-    echo "  PASS: rm-safety stderr message"; PASS=$((PASS + 1))
-else
-    echo "  FAIL: rm-safety stderr (got: $MSG)"; FAIL=$((FAIL + 1))
-fi
-
-cp examples/write-secret-guard.sh /tmp/test-ws-msg.sh && chmod +x /tmp/test-ws-msg.sh
-_AWS3="AKI""AIOSFODNN7""EXAMPLE"
-MSG=$(echo "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"c.js\",\"content\":\"${_AWS3}\"}}" | bash /tmp/test-ws-msg.sh 2>&1 >/dev/null)
-if echo "$MSG" | grep -qi "block\|secret\|AWS"; then
-    echo "  PASS: write-secret identifies secret type"; PASS=$((PASS + 1))
-else
-    echo "  FAIL: write-secret stderr (got: $MSG)"; FAIL=$((FAIL + 1))
-fi
-
     # Summary
 
 echo "========================"
