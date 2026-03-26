@@ -12,7 +12,7 @@ npx cc-safe-setup
 
 Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to main, catches secret leaks, validates syntax after every edit. Zero dependencies.
 
-[**Getting Started**](https://yurukusa.github.io/cc-safe-setup/getting-started.html) · [**All Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Validate your settings.json](https://yurukusa.github.io/cc-safe-setup/validator.html)
+[**Getting Started**](https://yurukusa.github.io/cc-safe-setup/getting-started.html) · [**All Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Recipes**](https://yurukusa.github.io/cc-safe-setup/recipes.html) · [Validate your settings.json](https://yurukusa.github.io/cc-safe-setup/validator.html) · [**Check your score**](https://yurukusa.github.io/cc-health-check/) (`npx cc-health-check`)
 
 ```
   cc-safe-setup
