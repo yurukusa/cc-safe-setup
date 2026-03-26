@@ -203,6 +203,14 @@ test_hook "destructive-guard" '{"tool_input":{"command":"  rm  -rf  /"}}' 2 "ext
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf /var"}}' 2 "rm -rf /var blocked"
 # git push --force is branch-guard's responsibility, not destructive-guard
 test_hook "destructive-guard" '{"tool_input":{"command":"git push origin feature"}}' 0 "git push (non-destructive) passes"
+# Windows PowerShell destructive commands
+test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}' 2 "PowerShell Remove-Item -Recurse -Force blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rd /s /q C:\\"}}' 2 "Windows rd /s /q blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 2 "rm -rf $HOME blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -- ."}}' 2 "git checkout -- . blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf .git"}}' 2 "rm -rf .git blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm file.txt"}}' 0 "rm single file allowed"
+test_hook "destructive-guard" '{"tool_input":{"command":"git stash drop"}}' 0 "git stash drop allowed"
 echo ""
 
 # --- secret-guard edge cases ---
