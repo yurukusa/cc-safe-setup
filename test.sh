@@ -4020,6 +4020,19 @@ if [ -f "$EXDIR/write-test-ratio.sh" ]; then
     test_ex write-test-ratio.sh '{"tool_input":{"command":"npm test"}}' 0 "non-git passes"
 fi
 
+# --- checkpoint-tamper-guard ---
+echo "checkpoint-tamper-guard.sh:"
+if [ -f "$EXDIR/checkpoint-tamper-guard.sh" ]; then
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"command":"echo test > .claude/checkpoints/abc"}}' 2 "blocks command writing to checkpoints"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"command":"rm -f session-call-count"}}' 2 "blocks deleting hook state files"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"command":"chmod 777 .claude/checkpoints"}}' 2 "blocks chmod on checkpoints"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"file_path":"/home/user/.claude/checkpoints/state.json"}}' 2 "blocks Edit/Write to checkpoint files"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "allows normal commands"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"file_path":"src/app.js"}}' 0 "allows normal file edits"
+    test_ex checkpoint-tamper-guard.sh '{"tool_input":{"command":"cat .claude/checkpoints/abc"}}' 2 "blocks cat redirect to checkpoints"
+fi
+echo ""
+
     # Summary
 
 echo "========================"
