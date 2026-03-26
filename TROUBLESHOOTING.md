@@ -261,6 +261,36 @@ npx cc-safe-setup --status  # See which hooks are active
 
 This should be fixed in a future Claude Code release.
 
+## "write-secret-guard blocks normal code"
+
+The write-secret-guard hook may false-positive on strings that look like API keys (20+ alphanumeric characters after specific prefixes). Fix:
+
+1. If the blocked file is a test file, rename it to include `test` in the path
+2. If it's a `.env.example`, the hook should already allow it — check the filename pattern
+3. For specific false positives, add an allowlist pattern to the hook
+
+## "credential-exfil-guard blocks my grep"
+
+The hook blocks `grep` commands that search for secret-related keywords. If you need to search for `token` or `key` in code:
+
+```bash
+# This is blocked:
+env | grep -i token
+
+# This is allowed (searching code, not environment):
+grep "token" src/auth.js
+```
+
+The hook only blocks `env/printenv/set` piped to grep with secret keywords, not general file searches.
+
+## "compound-command-allow doesn't approve my command"
+
+The hook has a strict whitelist. If a command isn't on the list, it passes through to the normal permission system. Common misses:
+
+- `docker` commands (not whitelisted — install `auto-approve-docker` instead)
+- `pip install` (not whitelisted — install `pip-venv-guard` instead)
+- Custom scripts (unknown to the whitelist)
+
 ## Still Stuck?
 
 1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`

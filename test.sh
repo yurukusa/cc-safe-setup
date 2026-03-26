@@ -5390,6 +5390,48 @@ test_hook "write-secret" '{"tool_name":"Read","tool_input":{"file_path":"x.js"}}
 # Permission audit: edge cases
 test_hook "perm-audit" '{"tool_name":"Unknown","tool_input":{}}' 0 "audit: unknown tool"
 
+# ========== New hooks batch 3 ==========
+
+echo ""
+echo "git-stash-before-danger.sh:"
+cp examples/git-stash-before-danger.sh /tmp/test-git-stash-d.sh && chmod +x /tmp/test-git-stash-d.sh
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":"git checkout feature"}}' 0 "stash before checkout (passes)"
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":"git reset --hard HEAD"}}' 0 "stash before reset (passes)"
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":"git pull origin main"}}' 0 "stash before pull (passes)"
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "ignores safe git"
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "ignores non-git"
+test_hook "git-stash-d" '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "handles empty"
+
+echo ""
+echo "session-summary-stop.sh:"
+cp examples/session-summary-stop.sh /tmp/test-sess-summary.sh && chmod +x /tmp/test-sess-summary.sh
+test_hook "sess-summary" '{"stop_reason":"end_turn"}' 0 "outputs summary on stop"
+test_hook "sess-summary" '{}' 0 "handles empty"
+
+echo ""
+echo "max-edit-size-guard.sh:"
+cp examples/max-edit-size-guard.sh /tmp/test-max-edit.sh && chmod +x /tmp/test-max-edit.sh
+test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","old_string":"a","new_string":"b"}}' 0 "allows small edit"
+test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","old_string":"","new_string":""}}' 0 "allows empty edit"
+test_hook "max-edit" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-Edit"
+test_hook "max-edit" '{}' 0 "handles empty"
+
+echo ""
+echo "auto-approve-readonly-tools.sh:"
+cp examples/auto-approve-readonly-tools.sh /tmp/test-ro-tools.sh && chmod +x /tmp/test-ro-tools.sh
+test_hook "ro-tools" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "approves Read"
+test_hook "ro-tools" '{"tool_name":"Glob","tool_input":{"pattern":"**/*.ts"}}' 0 "approves Glob"
+test_hook "ro-tools" '{"tool_name":"Grep","tool_input":{"pattern":"TODO"}}' 0 "approves Grep"
+test_hook "ro-tools" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores Bash"
+test_hook "ro-tools" '{"tool_name":"Write","tool_input":{"file_path":"x"}}' 0 "ignores Write"
+test_hook "ro-tools" '{}' 0 "handles empty"
+
+echo ""
+echo "uncommitted-changes-stop.sh:"
+cp examples/uncommitted-changes-stop.sh /tmp/test-uncommit-stop.sh && chmod +x /tmp/test-uncommit-stop.sh
+test_hook "uncommit-stop" '{"stop_reason":"end_turn"}' 0 "warns on stop"
+test_hook "uncommit-stop" '{}' 0 "handles empty"
+
 # Token counter: edge cases
 test_hook "token-cnt" '{"tool_name":"","tool_input":{}}' 0 "counter: empty tool name"
 
