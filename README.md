@@ -49,6 +49,8 @@ A Claude Code user [lost their entire C:\Users directory](https://github.com/ant
 
 Claude Code ships with no safety hooks by default. This tool fixes that.
 
+**Works with Auto Mode.** Claude Code's [Auto Mode sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing) provides container-level isolation. cc-safe-setup adds process-level hooks as defense-in-depth — catching destructive commands even outside sandboxed environments.
+
 ## What Gets Installed
 
 | Hook | Prevents | Related Issues |
