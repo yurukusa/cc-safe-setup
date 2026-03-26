@@ -1,5 +1,11 @@
 # Changelog
 
+## [29.2.0] - 2026-03-26
+- **New**: UserPromptSubmit hook examples (prompt-length-guard, prompt-injection-detector)
+- **Fix**: --install-example now detects UserPromptSubmit trigger
+- **Fix**: Case-insensitive trigger detection (Trigger: vs TRIGGER:)
+- **Stats**: 338 examples, 1030 tests
+
 ## [29.1.0] - 2026-03-26
 - **Tests**: Trigger detection tests (verify PermissionRequest/SessionStart/PreToolUse parsing)
 - **Stats**: 1024 tests (2^10 milestone!)
