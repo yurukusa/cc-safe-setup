@@ -211,11 +211,11 @@ npx cc-health-check
 
 ## Full Kit
 
-cc-safe-setup gives you 8 essential hooks. For the complete autonomous operation toolkit:
+cc-safe-setup gives you 8 essential hooks. Want to know what else your setup needs?
 
-**[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** — 16 hooks + 5 templates + 3 exclusive tools + install.sh. Production-ready in 15 minutes.
+Run `npx cc-health-check` (free, 20 checks) to see your current score. If it's below 80, the **[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** fills the gaps — 16 hooks + 5 templates + 3 exclusive tools + install.sh. Pay What You Want.
 
-Or start with the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
+Or browse the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
 ## Examples
 
