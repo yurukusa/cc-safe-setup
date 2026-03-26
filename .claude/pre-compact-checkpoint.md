@@ -1,9 +1,9 @@
-Saved: 2026-03-26T18:41:03+09:00 | Tool call: #1
-Branch: main | Dirty files: 2
-8c64aa1 checkpoint: auto-save 18:40:56
-5d412eb checkpoint: auto-save 18:40:45
-2473462 checkpoint: auto-save 18:40:26
-f959a61 checkpoint: auto-save 18:40:21
-d7a94d3 checkpoint: auto-save 18:40:14
+Saved: 2026-03-26T18:41:33+09:00 | Tool call: #1
+Branch: main | Dirty files: 1
+f2c2ef2 test: expand example hook coverage 1076→1706 (+630 tests) Added tests for 213 previously untested example hooks: - Security/guard hooks: 34 hooks tested - Check hooks: 53 hooks tested - Auto hooks: 3 hooks tested - No-* pattern hooks: 86 hooks tested - Other: 37 hooks tested - CLI tests for --safe-mode and --uninstall All 1706 tests pass. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+b42652a test: expand example hook coverage 1076→1706 (+630 tests) Added tests for 213 previously untested example hooks: - Security/guard hooks: 34 hooks tested (kubernetes-guard, docker-volume-guard, etc.) - Check hooks: 53 hooks tested (check-cors, check-csrf, check-xss-prevention, etc.) - Auto hooks: 3 hooks tested (auto-compact-prep, auto-git-checkpoint, auto-push-worktree) - No-* pattern hooks: 86 hooks tested (no-eval, no-hardcoded-credentials, etc.) - Other: 37 hooks tested (sql-injection-detect, output-pii-detect, etc.) Also added CLI tests for --safe-mode and --uninstall. All 1706 tests pass. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+3021138 fix: update docs — 5→6 templates, remove $19 price Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+8af7d2f fix: update template count 5→6 in README CTA Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+ea4fcfe docs: add cc-health-check CTA to getting-started page Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
