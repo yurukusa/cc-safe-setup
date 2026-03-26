@@ -1852,6 +1852,24 @@ test_ex auto-approve-build.sh '{"tool_name":"Bash","tool_input":{"command":"npm 
 test_ex auto-approve-build.sh '{"tool_name":"Bash","tool_input":{"command":"cargo test"}}' 0 "cargo test approved"
 echo ""
 
+echo "block-database-wipe.sh:"
+test_ex block-database-wipe.sh '{"tool_input":{"command":"php artisan migrate:fresh"}}' 2 "blocks Laravel migrate:fresh"
+test_ex block-database-wipe.sh '{"tool_input":{"command":"rails db:drop"}}' 2 "blocks Rails db:drop"
+test_ex block-database-wipe.sh '{"tool_input":{"command":"prisma migrate reset"}}' 2 "blocks Prisma reset"
+test_ex block-database-wipe.sh '{"tool_input":{"command":"php artisan migrate"}}' 0 "allows normal migrate"
+test_ex block-database-wipe.sh '{"tool_input":{"command":"npm test"}}' 0 "ignores non-db commands"
+echo ""
+
+echo "deploy-guard.sh:"
+test_ex deploy-guard.sh '{"tool_input":{"command":"npm run build"}}' 0 "non-deploy passes"
+test_ex deploy-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "echo passes"
+echo ""
+
+echo "network-guard.sh:"
+test_ex network-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 "gh command safe"
+test_ex network-guard.sh '{"tool_input":{"command":"git push origin main"}}' 0 "git push safe"
+echo ""
+
 echo "auto-approve-python.sh:"
 test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"python -m pytest"}}' 0 "pytest approved"
 test_ex auto-approve-python.sh '{"tool_name":"Bash","tool_input":{"command":"ruff check ."}}' 0 "ruff approved"
