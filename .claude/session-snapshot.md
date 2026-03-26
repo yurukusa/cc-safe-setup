@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-26T18:51:02+09:00
+Updated: 2026-03-26T19:32:48+09:00
 
 ## Git
 - Branch: `main`
@@ -7,15 +7,15 @@ Updated: 2026-03-26T18:51:02+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d145fda checkpoint: auto-save 18:51:00
+- Last commit: 3063282 docs: add Zenn Book CTA to README
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
-./.claude/pre-compact-checkpoint.md
-./examples/checkpoint-tamper-guard.sh
 ./README.md
+./.claude/pre-compact-checkpoint.md
+./test.sh
+./examples/checkpoint-tamper-guard.sh
 ./TROUBLESHOOTING.md
 ./CHANGELOG.md
 ./examples/prompt-injection-detector.sh
