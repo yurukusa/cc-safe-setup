@@ -4952,7 +4952,7 @@ async function doctor() {
         pass('"hooks" section exists in settings.json');
 
         // 5. Check each hook trigger type
-        for (const trigger of ['PreToolUse', 'PostToolUse', 'Stop']) {
+        for (const trigger of ['PreToolUse', 'PostToolUse', 'Stop', 'Notification', 'SessionStart', 'SessionEnd', 'PreCompact', 'PermissionRequest', 'UserPromptSubmit']) {
           const entries = hooks[trigger] || [];
           if (entries.length > 0) {
             pass(trigger + ': ' + entries.length + ' hook(s) registered');
