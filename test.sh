@@ -1764,15 +1764,15 @@ test_trigger_detection() {
     local content
     content=$(cat "$EXDIR/$file")
     local detected="PreToolUse"
-    if echo "$content" | grep -qE 'TRIGGER: PermissionRequest|^#.*PermissionRequest hook'; then
+    if echo "$content" | grep -qiE 'TRIGGER: PermissionRequest|^#.*PermissionRequest hook'; then
         detected="PermissionRequest"
-    elif echo "$content" | grep -q 'TRIGGER: UserPromptSubmit'; then
+    elif echo "$content" | grep -qi 'TRIGGER: UserPromptSubmit'; then
         detected="UserPromptSubmit"
-    elif echo "$content" | grep -q 'TRIGGER: PostToolUse'; then
+    elif echo "$content" | grep -qi 'TRIGGER: PostToolUse'; then
         detected="PostToolUse"
-    elif echo "$content" | grep -q 'TRIGGER: SessionStart'; then
+    elif echo "$content" | grep -qi 'TRIGGER: SessionStart'; then
         detected="SessionStart"
-    elif echo "$content" | grep -q 'TRIGGER: Stop'; then
+    elif echo "$content" | grep -qi 'TRIGGER: Stop'; then
         detected="Stop"
     fi
     if [ "$detected" = "$expected_trigger" ]; then
