@@ -5266,6 +5266,12 @@ test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 
 test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"grep TODO src/"}}' 0 "allows code search"
 test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"cat README.md"}}' 0 "allows file reading"
 test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "allows empty command"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"cat ~/.gcloud/credentials"}}' 2 "blocks gcloud credentials"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"cat ~/.azure/config"}}' 2 "blocks azure credentials"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"set | grep -i password"}}' 2 "blocks set grep password"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"find /home -name *.pem"}}' 2 "blocks find PEM files"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "cred-exfil" '{"tool_name":"Bash","tool_input":{"command":"git log --oneline"}}' 0 "allows git log"
 
 echo ""
 echo "rm-safety-net.sh:"
@@ -5282,6 +5288,14 @@ test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf /tmp/
 test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm file.txt"}}' 0 "allows single file rm"
 test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "allows non-rm commands"
 test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "allows empty"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf build"}}' 0 "allows rm -rf build"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf __pycache__"}}' 0 "allows rm -rf __pycache__"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf .cache"}}' 0 "allows rm -rf .cache"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf /opt/data"}}' 2 "blocks rm -rf /opt"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf /root"}}' 2 "blocks rm -rf /root"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"rm -rf .env"}}' 2 "blocks rm -rf .env"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"find /usr -delete"}}' 2 "blocks find /usr -delete"
+test_hook "rm-safety" '{"tool_name":"Bash","tool_input":{"command":"find . -name *.pyc -delete"}}' 0 "allows find . -delete"
 
 echo ""
 echo "worktree-unmerged-guard.sh:"
@@ -5290,6 +5304,9 @@ test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"git worktr
 test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "passes non-worktree commands"
 test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "passes git non-worktree"
 test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "passes empty"
+test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"git worktree list"}}' 0 "passes worktree list"
+test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"git worktree add /tmp/wt feature"}}' 0 "passes worktree add"
+test_hook "wt-unmerged" '{"tool_name":"Bash","tool_input":{"command":"git worktree prune"}}' 0 "passes worktree prune (no path)"
 
 echo ""
 echo "permission-audit-log.sh:"
@@ -5298,12 +5315,19 @@ test_hook "perm-audit" '{"tool_name":"Bash","tool_input":{"command":"git status"
 test_hook "perm-audit" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.js"}}' 0 "logs write"
 test_hook "perm-audit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.js"}}' 0 "logs edit"
 test_hook "perm-audit" '{}' 0 "handles empty input"
+test_hook "perm-audit" '{"tool_name":"Glob","tool_input":{"pattern":"**/*.ts"}}' 0 "logs glob"
+test_hook "perm-audit" '{"tool_name":"Grep","tool_input":{"pattern":"TODO"}}' 0 "logs grep"
+test_hook "perm-audit" '{"tool_name":"Agent","tool_input":{"description":"research task"}}' 0 "logs agent"
+test_hook "perm-audit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x.js"}}' 0 "logs read"
 
 echo ""
 echo "session-token-counter.sh:"
 cp examples/session-token-counter.sh /tmp/test-token-cnt.sh && chmod +x /tmp/test-token-cnt.sh
 test_hook "token-cnt" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "counts tool call"
 test_hook "token-cnt" '{}' 0 "handles empty"
+test_hook "token-cnt" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x"}}' 0 "counts write"
+test_hook "token-cnt" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "counts edit"
+test_hook "token-cnt" '{"tool_name":"Agent","tool_input":{"description":"task"}}' 0 "counts agent"
 
 echo ""
 echo "file-change-tracker.sh:"
@@ -5311,6 +5335,8 @@ cp examples/file-change-tracker.sh /tmp/test-file-track.sh && chmod +x /tmp/test
 test_hook "file-track" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.js","content":"hello"}}' 0 "tracks write"
 test_hook "file-track" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.js","old_string":"a","new_string":"b"}}' 0 "tracks edit"
 test_hook "file-track" '{}' 0 "handles empty"
+test_hook "file-track" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-write tools"
+test_hook "file-track" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/long-path/deeply/nested/file.ts","content":"x"}}' 0 "tracks deep path"
 
 echo ""
 echo "classifier-fallback-allow.sh:"
@@ -5333,6 +5359,9 @@ echo "output-secret-mask.sh:"
 cp examples/output-secret-mask.sh /tmp/test-out-mask.sh && chmod +x /tmp/test-out-mask.sh
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"normal output"}}' 0 "passes clean output"
 test_hook "out-mask" '{}' 0 "handles empty"
+test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"API_KEY=abc123def456"}}' 0 "warns on API_KEY in output"
+test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"PATH=/usr/bin"}}' 0 "passes safe env var"
+test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":""}}' 0 "passes empty output"
 
     # Summary
 
