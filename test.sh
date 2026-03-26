@@ -5313,6 +5313,22 @@ test_hook "file-track" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.js
 test_hook "file-track" '{}' 0 "handles empty"
 
 echo ""
+echo "classifier-fallback-allow.sh:"
+cp examples/classifier-fallback-allow.sh /tmp/test-clf-fallback.sh && chmod +x /tmp/test-clf-fallback.sh
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"cat README.md"}}' 0 "approves cat"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"ls -la src/"}}' 0 "approves ls"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"grep TODO src/"}}' 0 "approves grep"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"git log --oneline"}}' 0 "approves git log"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "approves git status"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "approves echo"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"jq .name package.json"}}' 0 "approves jq"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' 0 "passes rm through (no approval)"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"npm install"}}' 0 "passes npm install through"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"git push"}}' 0 "passes git push through"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":"find . -delete"}}' 0 "passes find -delete through"
+test_hook "clf-fallback" '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "handles empty"
+
+echo ""
 echo "output-secret-mask.sh:"
 cp examples/output-secret-mask.sh /tmp/test-out-mask.sh && chmod +x /tmp/test-out-mask.sh
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"normal output"}}' 0 "passes clean output"
