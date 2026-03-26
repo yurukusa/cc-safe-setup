@@ -1,5 +1,17 @@
 # Changelog
 
+## [29.6.0] - 2026-03-27
+- **Improved**: worktree-unmerged-guard — python3 fallback for macOS (no jq dependency), auto-detect default branch
+- **Fix**: CI workflow — add git config for tests that require commits
+- **Stats**: 347 examples, 2,352 tests
+
+## [29.5.0] - 2026-03-26
+- **New**: 3 hooks invented and released — auto-mode-safe-commands, write-secret-guard, compound-command-allow
+- **New**: 10 example hooks — credential-exfil-guard, rm-safety-net, worktree-unmerged-guard, permission-audit-log, session-token-counter, file-change-tracker, output-secret-mask + 3 more
+- **New**: 5 hooks — git-stash-before-danger, session-summary-stop, max-edit-size-guard, auto-approve-readonly-tools, uncommitted-changes-stop
+- **Tests**: 2,352 tests (up from 1,062)
+- **Stats**: 348 examples
+
 ## [29.4.0] - 2026-03-26
 - **Tests**: 32 new tests for 10 example hooks (scope-guard, git-config-guard, path-traversal-guard, env-var-check, auto-approve-readonly/git-read/build/python, block-database-wipe, deploy-guard, network-guard)
 - **Fix**: --doctor now checks all 9 hook trigger types
