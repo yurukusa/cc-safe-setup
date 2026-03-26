@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code Force-Push to Main — cc-safe-setup</title>
+<meta name="description" content="Claude Code can force-push to main and rewrite shared branch history. Real incidents from autonomous sessions. One command to prevent it: npx cc-safe-setup.">
+<meta name="keywords" content="claude code force push, claude code git push main, claude code branch protection, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-force-push.html">
+<meta property="og:title" content="Prevent Claude Code Force-Push to Main">
+<meta property="og:description" content="Stop Claude Code from force-pushing to main during autonomous sessions.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="prevent-rm-rf.html">Prevent rm -rf</a></nav>
+
+<h1>Prevent Claude Code Force-Push to Main</h1>
+<p>In autonomous mode, Claude Code can run <code>git push --force origin main</code> and rewrite your shared branch history. This has happened to real users during overnight sessions.</p>
+
+<h2>The Problem</h2>
+<p>Claude Code has full terminal access, including git. During autonomous sessions (especially at night), it can:</p>
+<ul style="margin:1rem 0 1rem 2rem">
+<li>Push directly to main/master without a PR</li>
+<li>Force-push and overwrite commits made by other team members</li>
+<li>Push untested code to production branches</li>
+<li>Amend published commits and force-push</li>
+</ul>
+
+<div class="incident">
+<p class="incident-title">Deep night force-push to main</p>
+<p>An autonomous Claude Code session force-pushed to main at 3am while the developer was sleeping. The team discovered rewritten history the next morning.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36640">#36640</a></p>
+</div>
+
+<h2>Why CLAUDE.md Isn't Enough</h2>
+<p>You can write "never push to main" in CLAUDE.md. Claude will follow it — until the context window fills up and the rule gets compacted away. In long autonomous sessions, this happens reliably.</p>
+
+<h2>The Fix: branch-guard Hook</h2>
+
+<div class="fix">
+<p><strong>branch-guard.sh</strong> — blocks pushes to protected branches:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Block push to main/master
+if echo "$COMMAND" | grep -qE 'git\s+push.*\b(main|master)\b'; then
+  echo "BLOCKED: Push to protected branch" >&2
+  exit 2
+fi
+
+# Block force-push anywhere
+if echo "$COMMAND" | grep -qE 'git\s+push\s+.*(-f|--force)'; then
+  echo "BLOCKED: Force-push" >&2
+  exit 2
+fi
+
+exit 0</code></pre>
+</div>
+
+<p><code>exit 2</code> blocks the command at the process level. The model cannot bypass, ignore, or work around it.</p>
+
+<div class="cta">
+<h2>Install Branch Protection + 7 More Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Blocks force-push, rm -rf, secret leaks, syntax errors, and more. <span class="badge">1,712 tests</span> <span class="badge">332 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
+</div>
+
+<h2>Also Prevents</h2>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><a href="prevent-rm-rf.html">rm -rf filesystem deletion</a></li>
+<li>Secret leaks via <code>git add .env</code></li>
+<li>Syntax errors cascading through files</li>
+<li>Context window exhaustion without warning</li>
+</ul>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic for your Claude Code setup.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Open source, zero dependencies. <a href="https://github.com/yurukusa/cc-safe-setup">View source</a>.</p>
+</body>
+</html>
