@@ -145,6 +145,76 @@ npx cc-safe-setup --install-example allow-git-hooks-dir
 
 Or manually: create a PermissionRequest hook that outputs `permissionDecision: "allow"`. See [Troubleshooting](TROUBLESHOOTING.md#pretooluse-allow-doesnt-bypass-protected-directory-prompts) for details.
 
+## Credential Protection
+
+Block credential hunting commands (env scanning, file searches for tokens):
+
+```bash
+npx cc-safe-setup --install-example credential-exfil-guard
+```
+
+Blocks: `env | grep -i token`, `find / -name *.pem`, `cat ~/.ssh/id_rsa`, `cat ~/.aws/credentials`.
+
+## Extra rm Protection
+
+Add a second layer of rm protection beyond destructive-guard:
+
+```bash
+npx cc-safe-setup --install-example rm-safety-net
+```
+
+Blocks rm -rf on any non-safe path (only allows node_modules, dist, build, /tmp, __pycache__).
+
+## Auto Mode False Positive Fix
+
+Stop the safety classifier from blocking read-only commands:
+
+```bash
+npx cc-safe-setup --install-example auto-mode-safe-commands
+```
+
+Auto-approves: cat, grep, git status, ls, find, jq, curl GET, echo.
+
+## Compound Command Auto-Approve
+
+Stop permission prompts for `cd /path && git log`:
+
+```bash
+npx cc-safe-setup --install-example compound-command-allow
+```
+
+Splits compound commands and checks each component. Approves when all are safe.
+
+## Secret Leak Prevention (Write/Edit)
+
+Block secrets from being written into source files:
+
+```bash
+npx cc-safe-setup --install-example write-secret-guard
+```
+
+Detects AWS, GitHub, OpenAI, Anthropic, Slack, Stripe, Google keys + PEM + database URLs. Allows .env.example and test files.
+
+## Permission Audit Log
+
+Log every tool call for debugging permission rules:
+
+```bash
+npx cc-safe-setup --install-example permission-audit-log
+```
+
+Writes JSONL to `~/.claude/tool-usage.jsonl`. Analyze with `cat ~/.claude/tool-usage.jsonl | jq -s 'group_by(.tool) | map({tool: .[0].tool, count: length})'`.
+
+## Classifier Fallback
+
+Auto-approve read-only commands when Auto Mode's classifier is unavailable:
+
+```bash
+npx cc-safe-setup --install-example classifier-fallback-allow
+```
+
+PermissionRequest hook that approves cat, ls, grep, git read-only when the classifier can't respond.
+
 ## Further Reading
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)
