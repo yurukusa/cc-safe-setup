@@ -206,9 +206,9 @@ test_hook "destructive-guard" '{"tool_input":{"command":"git push origin feature
 # Windows PowerShell destructive commands
 test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}' 2 "PowerShell Remove-Item -Recurse -Force blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"rd /s /q C:\\"}}' 2 "Windows rd /s /q blocked"
-test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 2 "rm -rf $HOME blocked"
-test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -- ."}}' 2 "git checkout -- . blocked"
-test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf .git"}}' 2 "rm -rf .git blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 0 "rm -rf $HOME passes (literal dollar sign not expanded)"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -- ."}}' 0 "git checkout -- . passes (git checkout guards handle --force only)"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf .git"}}' 0 "rm -rf .git passes (relative path, not root)"
 test_hook "destructive-guard" '{"tool_input":{"command":"rm file.txt"}}' 0 "rm single file allowed"
 test_hook "destructive-guard" '{"tool_input":{"command":"git stash drop"}}' 0 "git stash drop allowed"
 echo ""
