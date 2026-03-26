@@ -62,6 +62,13 @@ test_hook "branch-guard" '{"tool_input":{"command":"git push -f origin feature"}
 test_hook "branch-guard" '{"tool_input":{"command":"git push --force-with-lease origin feature"}}' 2 "force-with-lease blocked"
 test_hook "branch-guard" '{"tool_input":{"command":"git status"}}' 0 "non-push git command passes"
 test_hook "branch-guard" '{"tool_input":{"command":"npm install"}}' 0 "non-git command passes"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin develop"}}' 0 "push to develop allowed"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin release/v1.0"}}' 0 "push to release branch allowed"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:main"}}' 2 "push HEAD:main blocked"
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:refs/heads/master"}}' 2 "push to refs/heads/master blocked"
+test_hook "branch-guard" '{"tool_input":{"command":"git push --force origin develop"}}' 2 "force push to develop blocked"
+test_hook "branch-guard" '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_hook "branch-guard" '{"tool_input":{"command":"echo git push origin main"}}' 0 "echo git push not blocked"
 echo ""
 
 # --- secret-guard ---
@@ -75,6 +82,15 @@ test_hook "secret-guard" '{"tool_input":{"command":"git add id_rsa"}}' 2 "git ad
 test_hook "secret-guard" '{"tool_input":{"command":"git add server.key"}}' 2 "git add .key file blocked"
 test_hook "secret-guard" '{"tool_input":{"command":"npm install"}}' 0 "non-git command passes"
 test_hook "secret-guard" '{"tool_input":{"command":"git commit -m test"}}' 0 "git commit passes"
+test_hook "secret-guard" '{"tool_input":{"command":"git add ."}}' 2 "git add . blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add -A"}}' 2 "git add -A blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .aws/credentials"}}' 2 "git add aws credentials blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add server.pem"}}' 2 "git add .pem blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add private.p12"}}' 2 "git add .p12 blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add keystore.jks"}}' 2 "git add .jks blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add package.json"}}' 0 "git add package.json allowed"
+test_hook "secret-guard" '{"tool_input":{"command":"git add README.md"}}' 0 "git add README.md allowed"
+test_hook "secret-guard" '{"tool_input":{"command":""}}' 0 "empty command passes"
 echo ""
 
 # --- comment-strip ---
