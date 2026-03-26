@@ -1,5 +1,9 @@
 # Changelog
 
+## [29.3.0] - 2026-03-26
+- **Fix**: Unified trigger detection with regex (case-insensitive `Trigger:` / `TRIGGER:`)
+- Previously, hooks with `# Trigger: X` (capitalized) would not be detected by --install-example
+
 ## [29.2.0] - 2026-03-26
 - **New**: UserPromptSubmit hook examples (prompt-length-guard, prompt-injection-detector)
 - **Fix**: --install-example now detects UserPromptSubmit trigger
