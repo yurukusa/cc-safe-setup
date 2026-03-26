@@ -147,6 +147,16 @@ Each hook exists because a real incident happened without it.
 | Maximum protection mode | `npx cc-safe-setup --safe-mode` |
 | Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
 
+## Common Pain Points (from GitHub Issues)
+
+| Problem | Issue | Fix |
+|---|---|---|
+| Claude uses `cat`/`grep`/`sed` instead of built-in Read/Edit/Grep | [#19649](https://github.com/anthropics/claude-code/issues/19649) (48👍) | Add to CLAUDE.md: "Use Read/Edit/Grep tools, not bash equivalents" |
+| `cd /path && cmd` bypasses permission allowlist | [#28240](https://github.com/anthropics/claude-code/issues/28240) (88👍) | `npx cc-safe-setup --install-example compound-command-approver` |
+| Multiline commands skip pattern matching | [#11932](https://github.com/anthropics/claude-code/issues/11932) (47👍) | Use hooks instead of allowlist patterns for complex commands |
+| No notification when Claude asks a question | [#13024](https://github.com/anthropics/claude-code/issues/13024) (52👍) | `npx cc-safe-setup --install-example notify-waiting` |
+| `allow` overrides `ask` in permissions | [#6527](https://github.com/anthropics/claude-code/issues/6527) (17👍) | Use hooks to block dangerous commands instead of `ask` rules |
+
 ## How It Works
 
 1. Writes hook scripts to `~/.claude/hooks/`
