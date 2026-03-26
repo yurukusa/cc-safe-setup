@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://yurukusa.github.io/cc-safe-setup/sitemap.xml
