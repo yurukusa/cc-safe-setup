@@ -19,7 +19,12 @@
 # }
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+# jq with python3 fallback (macOS may not have jq)
+if command -v jq &>/dev/null; then
+    COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+else
+    COMMAND=$(echo "$INPUT" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('tool_input',{}).get('command',''))" 2>/dev/null)
+fi
 
 [ -z "$COMMAND" ] && exit 0
 
@@ -48,9 +53,14 @@ if [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; then
     exit 0
 fi
 
-# Find the default branch
+# Find the default branch (portable: checks symbolic ref, then tries main/master)
 DEFAULT_BRANCH=$(git -C "$WORKTREE_PATH" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
-[ -z "$DEFAULT_BRANCH" ] && DEFAULT_BRANCH="main"
+if [ -z "$DEFAULT_BRANCH" ]; then
+    for candidate in main master; do
+        git -C "$WORKTREE_PATH" rev-parse --verify "$candidate" &>/dev/null && DEFAULT_BRANCH="$candidate" && break
+    done
+fi
+[ -z "$DEFAULT_BRANCH" ] && exit 0
 
 # Count unmerged commits
 UNMERGED=$(git -C "$WORKTREE_PATH" log --oneline "$DEFAULT_BRANCH..$BRANCH" 2>/dev/null | wc -l)
