@@ -151,7 +151,7 @@ Each hook exists because a real incident happened without it.
 
 | Problem | Issue | Fix |
 |---|---|---|
-| Claude uses `cat`/`grep`/`sed` instead of built-in Read/Edit/Grep | [#19649](https://github.com/anthropics/claude-code/issues/19649) (48👍) | Add to CLAUDE.md: "Use Read/Edit/Grep tools, not bash equivalents" |
+| Claude uses `cat`/`grep`/`sed` instead of built-in Read/Edit/Grep | [#19649](https://github.com/anthropics/claude-code/issues/19649) (48👍) | `npx cc-safe-setup --install-example prefer-builtin-tools` |
 | `cd /path && cmd` bypasses permission allowlist | [#28240](https://github.com/anthropics/claude-code/issues/28240) (88👍) | `npx cc-safe-setup --install-example compound-command-approver` |
 | Multiline commands skip pattern matching | [#11932](https://github.com/anthropics/claude-code/issues/11932) (47👍) | Use hooks instead of allowlist patterns for complex commands |
 | No notification when Claude asks a question | [#13024](https://github.com/anthropics/claude-code/issues/13024) (52👍) | `npx cc-safe-setup --install-example notify-waiting` |
