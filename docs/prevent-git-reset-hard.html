@@ -97,13 +97,18 @@ exit 0</code></pre>
 <tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git reset --hard HEAD~3</code></td><td style="padding:.5rem;color:#f85149">BLOCKED</td></tr>
 <tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git clean -fd</code></td><td style="padding:.5rem;color:#f85149">BLOCKED</td></tr>
 <tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git reset --soft HEAD~1</code></td><td style="padding:.5rem;color:#3fb950">ALLOWED</td></tr>
-<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git checkout -- file.js</code></td><td style="padding:.5rem;color:#3fb950">ALLOWED</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git checkout -- file.js</code></td><td style="padding:.5rem;color:#3fb950">ALLOWED (use <a href="#discard-guard">uncommitted-discard-guard</a> to block)</td></tr>
 </table>
+
+<h2 id="discard-guard">Also Block: git checkout -- and git restore</h2>
+<p><code>git checkout -- &lt;files&gt;</code> and <code>git restore .</code> silently discard working tree changes — no confirmation, no undo. <a href="https://github.com/anthropics/claude-code/issues/37888">#37888</a> reported 30+ files of manual edits destroyed this way.</p>
+<pre><code>npx cc-safe-setup --install-example uncommitted-discard-guard</code></pre>
+<p>Blocks <code>git checkout --</code>, <code>git checkout .</code>, <code>git restore</code> (except <code>--staged</code>), and <code>git stash drop</code>.</p>
 
 <div class="cta">
 <h2>Install All 8 Safety Hooks in 10 Seconds</h2>
 <pre><code>npx cc-safe-setup</code></pre>
-<p style="margin-top:.8rem">Blocks git reset --hard, rm -rf, force-push to main, secret leaks, and more. <span class="badge">4,491 tests</span> <span class="badge">348 examples</span></p>
+<p style="margin-top:.8rem">Blocks git reset --hard, rm -rf, force-push to main, secret leaks, and more. <span class="badge">4,506 tests</span> <span class="badge">349 examples</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
 </div>
 
