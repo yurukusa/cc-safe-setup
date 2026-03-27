@@ -1,9 +1,9 @@
-Saved: 2026-03-28T03:50:51+09:00 | Tool call: #1
+Saved: 2026-03-28T03:53:25+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+e19b2d9 checkpoint: auto-save 03:53:19
+dd6de1f checkpoint: auto-save 03:53:10
+18c5f38 feat: 2 new hooks (#386-387) — Python imports, gitignore hints - #386 python-import-check: PostToolUse detects unused imports - #387 gitignore-auto-add: PostToolUse suggests .gitignore entries 7 tests added. 4,939/4,939 passed. Hooks: 387. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+83a2bd9 checkpoint: auto-save 03:50:55
 bc71e88 checkpoint: auto-save 03:50:46
-5963809 checkpoint: auto-save 03:50:34
-739ab1c feat: 2 new hooks (#384-385) — React key warn, TypeScript strict check - #384 react-key-warn: PostToolUse detects .map() without key props in JSX - #385 typescript-strict-check: PostToolUse warns if strict:false in tsconfig 5 tests added. 4,928/4,928 passed. Hooks: 385. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-35448b1 checkpoint: auto-save 03:48:29
-d2d346c checkpoint: auto-save 03:48:17
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
