@@ -456,6 +456,7 @@ function examples() {
       'package-script-guard.sh': 'Warn when package.json scripts change',
       'lockfile-guard.sh': 'Warn when lockfiles modified in commits',
       'git-lfs-guard.sh': 'Suggest Git LFS for large files',
+      'python-ruff-on-edit.sh': 'PostToolUse: lint Python files after edit (ruff/flake8/pylint)',
     },
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
