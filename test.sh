@@ -8141,6 +8141,13 @@ test_ex cwd-reminder.sh '{"tool_input":{"command":"git status","working_director
 test_ex cwd-reminder.sh '{"tool_input":{"command":""}}' 0 "cwd-reminder: empty command passes"
 test_ex cwd-reminder.sh '{}' 0 "cwd-reminder: empty input passes"
 test_ex cwd-reminder.sh '{"tool_input":{"command":"npm test"}}' 0 "cwd-reminder: npm test passes"
+echo "tool-file-logger.sh:"
+test_ex tool-file-logger.sh '{"tool_name":"Read","tool_input":{"file_path":"/home/user/src/App.tsx"}}' 0 "file-logger: Read with file_path"
+test_ex tool-file-logger.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/output.txt"}}' 0 "file-logger: Write with file_path"
+test_ex tool-file-logger.sh '{"tool_name":"Edit","tool_input":{"file_path":"/home/user/package.json"}}' 0 "file-logger: Edit with file_path"
+test_ex tool-file-logger.sh '{"tool_name":"Read","tool_input":{}}' 0 "file-logger: Read without file_path"
+test_ex tool-file-logger.sh '{}' 0 "file-logger: empty input"
+test_ex tool-file-logger.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "file-logger: non-file tool passes"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
