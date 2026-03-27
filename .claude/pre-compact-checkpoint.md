@@ -1,9 +1,9 @@
-Saved: 2026-03-27T23:16:58+09:00 | Tool call: #1
+Saved: 2026-03-27T23:52:58+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
-68d6546 checkpoint: auto-save 23:16:52
-9aa21e5 checkpoint: auto-save 23:16:25
-f0d8958 checkpoint: auto-save 23:16:15
-d1deca5 chore: update test count 4,549→4,572 on all SEO pages 8 SEO landing pages aligned with latest test coverage milestone. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-c158c28 chore: update test count 4,549→4,572 (100% coverage) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+43fc6dd checkpoint: auto-save 23:52:52
+0149f7b docs: add social proof (1,000+ installs/day) to README hero Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+54889ce chore: update hook count 348/349→358 on all SEO/LP pages Aligned all public-facing pages with current 358 hooks count. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+c2e800d checkpoint: auto-save 23:17:20
+c4b108d checkpoint: auto-save 23:17:13
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
