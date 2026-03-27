@@ -8598,7 +8598,7 @@ test_ex no-git-amend-push.sh '{"tool_input":{"command":"git commit --amend && gi
 test_ex no-git-amend-push.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "git-amend: normal commit passes"
 test_ex no-git-amend-push.sh '{"tool_input":{"command":"echo hello"}}' 0 "git-amend: non-git passes"
 test_ex no-git-amend-push.sh '{}' 0 "git-amend: empty"
-test_ex no-install-global.sh '{"tool_input":{"command":"npm install -g some-pkg"}}' 0 "install-global: -g warns"
+test_ex no-install-global.sh '{"tool_input":{"command":"npm install -g some-pkg"}}' 2 "install-global: -g blocked"
 test_ex no-install-global.sh '{"tool_input":{"command":"npm install express"}}' 0 "install-global: local passes"
 test_ex no-install-global.sh '{"tool_input":{"command":"echo hello"}}' 0 "install-global: non-npm passes"
 test_ex no-install-global.sh '{}' 0 "install-global: empty"
