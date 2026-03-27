@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Auto Mode Safety Guide — cc-safe-setup</title>
+<meta name="description" content="Auto Mode in Claude Code runs commands without asking. Here's how to add safety hooks that block dangerous operations even in Auto Mode. One command setup.">
+<meta name="keywords" content="claude code auto mode, claude code auto mode safety, claude code autonomous, claude code hooks auto mode, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-auto-mode-safety.html">
+<meta property="og:title" content="Claude Code Auto Mode Safety Guide">
+<meta property="og:description" content="Auto Mode runs commands without confirmation. Hooks block dangerous operations even in Auto Mode.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.warning{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.warning-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Claude Code Auto Mode Safety Guide</h1>
+<p>Auto Mode in Claude Code runs tools without asking for permission. No "Allow this command?" prompts. No confirmation dialogs. This is powerful for autonomous work — and dangerous without guardrails.</p>
+
+<h2>What Auto Mode Changes</h2>
+
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem;color:#f0f6fc">Behavior</th><th style="text-align:left;padding:.5rem;color:#f0f6fc">Normal Mode</th><th style="text-align:left;padding:.5rem;color:#f0f6fc">Auto Mode</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>rm -rf /</code></td><td style="padding:.5rem">Asks for permission</td><td style="padding:.5rem;color:#f85149">Runs immediately</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git push --force</code></td><td style="padding:.5rem">Asks for permission</td><td style="padding:.5rem;color:#f85149">Runs immediately</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git add .env</code></td><td style="padding:.5rem">Asks for permission</td><td style="padding:.5rem;color:#f85149">Runs immediately</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Edit any file</td><td style="padding:.5rem">Shows diff first</td><td style="padding:.5rem;color:#f85149">Edits immediately</td></tr>
+</table>
+
+<div class="warning">
+<p class="warning-title">Auto Mode + No Hooks = No Safety Net</p>
+<p>CLAUDE.md rules are suggestions. In Auto Mode, Claude doesn't pause to reconsider rules before acting. If it decides <code>rm -rf</code> is the right approach, it executes immediately. The only thing that can stop it is a hook.</p>
+</div>
+
+<h2>How Hooks Work in Auto Mode</h2>
+<p>Hooks run at the process level, outside the model's control. They execute <strong>before</strong> (PreToolUse) or <strong>after</strong> (PostToolUse) every tool call — regardless of whether Claude is in normal mode or Auto Mode.</p>
+
+<p>This means a hook that exits with code 2 blocks the operation <strong>even in Auto Mode</strong>. The model cannot bypass hooks.</p>
+
+<div class="fix">
+<p><strong>Example: Block rm -rf in Auto Mode</strong></p>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "bash -c 'CMD=$(cat | jq -r \".tool_input.command // empty\"); echo \"$CMD\" | grep -qE \"rm\\s+-rf\\s+(/|~)\" && exit 2; exit 0'"
+      }]
+    }]
+  }
+}</code></pre>
+<p>Add this to <code>~/.claude/settings.json</code>. Claude will never be able to run <code>rm -rf /</code> or <code>rm -rf ~/</code>, even in Auto Mode.</p>
+</div>
+
+<h2>Essential Hooks for Auto Mode</h2>
+<p>If you're running Auto Mode, these 8 hooks are the minimum safety net:</p>
+
+<ol style="margin:.8rem 0 .8rem 1.5rem">
+<li><strong>destructive-guard</strong> — blocks <code>rm -rf</code>, <code>git reset --hard</code>, <code>chmod 777</code></li>
+<li><strong>branch-guard</strong> — prevents push to main, force-push</li>
+<li><strong>secret-guard</strong> — catches <code>git add .env</code>, credential files</li>
+<li><strong>syntax-check</strong> — validates files after every edit</li>
+<li><strong>context-monitor</strong> — warns before context fills up</li>
+<li><strong>npm-publish</strong> — prevents accidental publishes</li>
+<li><strong>response-budget</strong> — limits runaway sessions</li>
+<li><strong>commit-msg</strong> — enforces commit message quality</li>
+</ol>
+
+<div class="cta">
+<h2>Install All 8 in 10 Seconds</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Works in Auto Mode. Blocks dangerous operations before they execute. <span class="badge">4,491 tests</span> <span class="badge">348 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
+</div>
+
+<h2>Want More Than 8 Hooks?</h2>
+<p>Browse 348 example hooks covering security, code quality, deployment, and monitoring:</p>
+<pre><code>npx cc-safe-setup --examples</code></pre>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic. If you're using Auto Mode and your score is below 80, you have gaps.</p>
+
+<h2>Related</h2>
+<ul style="margin:.8rem 0 .8rem 1.5rem">
+<li><a href="prevent-rm-rf.html">Prevent rm -rf disasters</a></li>
+<li><a href="prevent-force-push.html">Prevent force-push to main</a></li>
+<li><a href="prevent-secret-leaks.html">Prevent secret leaks</a></li>
+<li><a href="prevent-git-reset-hard.html">Prevent git reset --hard</a></li>
+<li><a href="prevent-syntax-errors.html">Prevent cascading syntax errors</a></li>
+</ul>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup is open source, zero dependencies, and installs nothing globally. <a href="https://github.com/yurukusa/cc-safe-setup">View source on GitHub</a>.</p>
+</body>
+</html>
