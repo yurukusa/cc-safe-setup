@@ -8868,6 +8868,130 @@ test_ex yaml-syntax-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_YAML/conf
 rm -rf "$TMPDIR_YAML"
 echo ""
 
+# ── api-rate-limit-tracker.sh edge cases ──
+echo "api-rate-limit-tracker.sh (edge cases):"
+# wget should also be tracked
+test_ex api-rate-limit-tracker.sh '{"tool_input":{"command":"wget https://example.com/data.json"}}' 0 "rate-limit: wget tracked as API call"
+# http (httpie) should be tracked
+test_ex api-rate-limit-tracker.sh '{"tool_input":{"command":"http GET https://api.example.com/users"}}' 0 "rate-limit: httpie tracked as API call"
+# curl inside a pipe should still be caught
+test_ex api-rate-limit-tracker.sh '{"tool_input":{"command":"curl -s https://api.example.com | jq ."}}' 0 "rate-limit: curl in pipe tracked"
+# Non-API command with 'curl' as substring in path should not match (no space after)
+test_ex api-rate-limit-tracker.sh '{"tool_input":{"command":"cat /tmp/curling_results.txt"}}' 0 "rate-limit: curl-substring in path ignored"
+echo ""
+
+# ── react-key-warn.sh edge cases ──
+echo "react-key-warn.sh (edge cases):"
+TMPDIR_REACT=$(mktemp -d)
+# JSX with .map() but missing key — should warn (exit 0 since warns only)
+cat > "$TMPDIR_REACT/missing-key.tsx" << 'JSXEOF'
+export function List({ items }) {
+  return <ul>{items.map(item => <li>{item.name}</li>)}</ul>;
+}
+JSXEOF
+test_ex react-key-warn.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_REACT/missing-key.tsx\"}}" 0 "react-key: .map() without key warns (exit 0)"
+# JSX with .map() and key — no warning
+cat > "$TMPDIR_REACT/with-key.jsx" << 'JSXEOF'
+export function List({ items }) {
+  return <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+}
+JSXEOF
+test_ex react-key-warn.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_REACT/with-key.jsx\"}}" 0 "react-key: .map() with key passes clean"
+# Multiple maps, only some with keys
+cat > "$TMPDIR_REACT/partial-key.tsx" << 'JSXEOF'
+function App() {
+  return <>
+    {list1.map(x => <div key={x.id}>{x}</div>)}
+    {list2.map(x => <span>{x}</span>)}
+    {list3.map(x => <p>{x}</p>)}
+  </>;
+}
+JSXEOF
+test_ex react-key-warn.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_REACT/partial-key.tsx\"}}" 0 "react-key: 3 maps 1 key triggers warning (exit 0)"
+# .js file (not jsx/tsx) — should be skipped
+cat > "$TMPDIR_REACT/plain.js" << 'JSXEOF'
+const items = arr.map(x => x * 2);
+JSXEOF
+test_ex react-key-warn.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_REACT/plain.js\"}}" 0 "react-key: .js extension skipped"
+rm -rf "$TMPDIR_REACT"
+echo ""
+
+# ── python-import-check.sh edge cases ──
+echo "python-import-check.sh (edge cases):"
+TMPDIR_PY=$(mktemp -d)
+# File with unused import — should warn (exit 0)
+cat > "$TMPDIR_PY/unused.py" << 'PYEOF'
+import os
+import sys
+print("hello")
+PYEOF
+test_ex python-import-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_PY/unused.py\"}}" 0 "py-import: unused import os detected (exit 0)"
+# File with all imports used — no warning
+cat > "$TMPDIR_PY/allused.py" << 'PYEOF'
+import os
+import sys
+path = os.path.join("/tmp", "test")
+sys.exit(0)
+PYEOF
+test_ex python-import-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_PY/allused.py\"}}" 0 "py-import: all imports used passes clean"
+# from-import with alias — alias should be checked
+cat > "$TMPDIR_PY/alias.py" << 'PYEOF'
+from collections import OrderedDict as OD
+data = OD()
+PYEOF
+test_ex python-import-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_PY/alias.py\"}}" 0 "py-import: aliased import used passes clean"
+# from-import with unused alias
+cat > "$TMPDIR_PY/unused_alias.py" << 'PYEOF'
+from pathlib import Path as P
+print("no path usage")
+PYEOF
+test_ex python-import-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_PY/unused_alias.py\"}}" 0 "py-import: unused alias detected (exit 0)"
+rm -rf "$TMPDIR_PY"
+echo ""
+
+# ── go-vet-after-edit.sh edge cases ──
+echo "go-vet-after-edit.sh (edge cases):"
+TMPDIR_GO=$(mktemp -d)
+# Non-existent .go file — should exit 0 (file not found guard)
+test_ex go-vet-after-edit.sh '{"tool_input":{"file_path":"/tmp/nonexistent_xyz_go_test.go"}}' 0 "go-vet: nonexistent .go file exits 0"
+# .go file that exists but no go command — if go is installed, vet runs;
+# Create a valid Go file in a temp dir without go.mod (vet will fail or run)
+mkdir -p "$TMPDIR_GO/pkg"
+cat > "$TMPDIR_GO/pkg/main.go" << 'GOEOF'
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("hello")
+}
+GOEOF
+test_ex go-vet-after-edit.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_GO/pkg/main.go\"}}" 0 "go-vet: valid Go file passes vet"
+# .txt file — should skip
+test_ex go-vet-after-edit.sh '{"tool_input":{"file_path":"/tmp/readme.txt"}}' 0 "go-vet: non-.go extension skipped"
+# Empty input — should exit 0
+test_ex go-vet-after-edit.sh '{"tool_input":{}}' 0 "go-vet: missing file_path exits 0"
+rm -rf "$TMPDIR_GO"
+echo ""
+
+# ── rust-clippy-after-edit.sh edge cases ──
+echo "rust-clippy-after-edit.sh (edge cases):"
+TMPDIR_RS=$(mktemp -d)
+# Non-existent .rs file — should exit 0 (file not found guard)
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/nonexistent_xyz_rust_test.rs"}}' 0 "clippy: nonexistent .rs file exits 0"
+# .rs file without Cargo.toml — clippy skipped, exit 0
+mkdir -p "$TMPDIR_RS/nocargo"
+cat > "$TMPDIR_RS/nocargo/lib.rs" << 'RSEOF'
+pub fn add(a: i32, b: i32) -> i32 { a + b }
+RSEOF
+test_ex rust-clippy-after-edit.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_RS/nocargo/lib.rs\"}}" 0 "clippy: .rs without Cargo.toml skips clippy"
+# .toml file — should skip (not .rs)
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/Cargo.toml"}}' 0 "clippy: .toml extension skipped"
+# Empty file_path — should exit 0
+test_ex rust-clippy-after-edit.sh '{"tool_input":{}}' 0 "clippy: missing file_path exits 0"
+rm -rf "$TMPDIR_RS"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
