@@ -4953,7 +4953,7 @@ echo "work-hours-guard.sh:"
 cp examples/work-hours-guard.sh /tmp/test-work-hours.sh && chmod +x /tmp/test-work-hours.sh
 
 # Test by setting work hours to current hour to ensure pass, then impossible hours to ensure block
-_CUR_HOUR=$(date +%H)
+_CUR_HOUR=$(date +%-H)
 _CUR_DOW=$(date +%u)
 export CC_WORK_START=$_CUR_HOUR CC_WORK_END=$((_CUR_HOUR + 1)) CC_WORK_DAYS="$_CUR_DOW"
 test_hook "work-hours" '{"tool_input":{"command":"git push origin main"}}' 0 "allows push during work hours"
