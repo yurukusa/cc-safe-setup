@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-27T23:17:14+09:00
+Updated: 2026-03-27T23:52:50+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-27T23:17:14+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: c4b108d checkpoint: auto-save 23:17:13
+- Last commit: 0149f7b docs: add social proof (1,000+ installs/day) to README hero Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./README.md
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
-./README.md
 ./examples/dependency-install-guard.sh
 ./examples/temp-file-cleanup.sh
 ./examples/test-exit-code-verify.sh
