@@ -9122,6 +9122,15 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPD
 set -euo pipefail
 echo ""
 
+echo "session-drift-guard.sh:"
+# Clean counter before tests
+rm -f "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "drift-guard: first call passes"
+test_ex session-drift-guard.sh '{}' 0 "drift-guard: empty input"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"ls"}}' 0 "drift-guard: normal command passes"
+rm -f "/tmp/cc-drift-counter-$(whoami)"
+echo ""
+
 echo "strip-coauthored-by.sh:"
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"fix bug\""}}' 0 "strip-coauthor: normal commit passes"
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo hello"}}' 0 "strip-coauthor: non-git passes"
