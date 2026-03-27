@@ -9122,6 +9122,13 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPD
 set -euo pipefail
 echo ""
 
+echo "read-budget-guard.sh:"
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "read-budget: first read passes"
+test_ex read-budget-guard.sh '{}' 0 "read-budget: empty input"
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":""}}' 0 "read-budget: empty path"
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/another.txt"}}' 0 "read-budget: different file passes"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
