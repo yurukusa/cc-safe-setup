@@ -8151,6 +8151,10 @@ test_ex tool-file-logger.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}'
 echo "output-token-env-check.sh:"
 test_ex output-token-env-check.sh '{}' 0 "output-token: runs without error"
 test_ex output-token-env-check.sh '{"type":"notification"}' 0 "output-token: notification event"
+echo "session-quota-tracker.sh:"
+test_ex session-quota-tracker.sh '{"tool_name":"Bash"}' 0 "quota-tracker: increments counter"
+test_ex session-quota-tracker.sh '{"tool_name":"Read"}' 0 "quota-tracker: tracks read"
+test_ex session-quota-tracker.sh '{}' 0 "quota-tracker: empty input"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
