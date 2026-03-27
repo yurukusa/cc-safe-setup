@@ -1,9 +1,9 @@
-Saved: 2026-03-28T03:32:47+09:00 | Tool call: #1
+Saved: 2026-03-28T03:34:57+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+2b190e0 checkpoint: auto-save 03:34:52
+97d721c checkpoint: auto-save 03:34:42
+293d8f3 feat: 3 new hooks (#376-378) — test reminders, FIXME guard, .env check - #376 test-coverage-reminder: PostToolUse tracks edits since last test run - #377 no-fixme-ship: PreToolUse warns about FIXME/HACK in pushed code - #378 env-file-gitignore-check: Notification warns if .env not in .gitignore 14 tests added. 4,890/4,890 passed. Hooks: 378. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+d3ae63d checkpoint: auto-save 03:32:52
 46b80f5 checkpoint: auto-save 03:32:42
-3f24cb4 checkpoint: auto-save 03:32:32
-e512787 feat: 3 new hooks (#373-375) — file size, port conflicts, debug artifacts - #373 large-file-write-guard: PostToolUse warns on >100KB file writes - #374 port-conflict-check: PreToolUse detects port in use before server start - #375 no-debug-commit: PreToolUse warns about console.log/debugger in staged files 16 tests added. 4,876/4,876 passed. Hooks: 375. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-653a65c checkpoint: auto-save 03:30:14
-b00e872 checkpoint: auto-save 03:30:02
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
