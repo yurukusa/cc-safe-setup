@@ -9029,6 +9029,38 @@ test_ex auto-answer-question.sh '{"tool_input":{"question":"Can I build the proj
 test_ex auto-answer-question.sh '{"tool_input":{"question":"rm -rf everything?"}}' 0 "auto_answer: rm-rf no"
 echo ""
 
+echo "check-dependency-age.sh (edge):"
+test_ex check-dependency-age.sh '{"tool_input":{"content":"\"devDependencies\": {\"jest\": \"^29\"}"}}' 0 "check-dep-age: content field with devDeps exits 0"
+test_ex check-dependency-age.sh '{"tool_input":{"new_string":"\"moment\": \"^2.29.4\""}}' 0 "check-dep-age: known old pkg exits 0 (advisory only)"
+test_ex check-dependency-age.sh '{"tool_input":{"new_string":"import React from '\''react'\'';"}}' 0 "check-dep-age: import statement (no package.json) exits 0"
+echo ""
+
+echo "check-dependency-license.sh (edge):"
+test_ex check-dependency-license.sh '{"tool_input":{"new_string":"require('\''gpl-package'\'')"}}' 0 "check-dep-license: require statement exits 0"
+test_ex check-dependency-license.sh '{"tool_input":{"content":"\"license\": \"MIT\""}}' 0 "check-dep-license: content field with license exits 0"
+test_ex check-dependency-license.sh '{"tool_input":{"new_string":"yarn add some-pkg","command":"yarn add some-pkg"}}' 0 "check-dep-license: yarn add (not npm) exits 0"
+echo ""
+
+echo "no-default-credentials.sh (edge):"
+test_ex no-default-credentials.sh '{"tool_input":{"new_string":"password=admin"}}' 0 "no-default-creds: password=admin (no quotes) triggers warning, exit 0"
+test_ex no-default-credentials.sh '{"tool_input":{"new_string":"PASSWORD: ADMIN123"}}' 0 "no-default-creds: uppercase PASSWORD ADMIN exits 0 (case-insensitive)"
+test_ex no-default-credentials.sh '{"tool_input":{"content":"secret_key = default_value"}}' 0 "no-default-creds: content field with secret default exits 0"
+test_ex no-default-credentials.sh '{"tool_input":{"new_string":"password_hash = bcrypt(user_input)"}}' 0 "no-default-creds: hashed password reference passes clean"
+echo ""
+
+echo "sql-injection-detect.sh (edge):"
+test_ex sql-injection-detect.sh '{"tool_input":{"new_string":"cursor.execute(\"INSERT INTO t VALUES (%s)\", (val,))"}}' 0 "sql-inject: parameterized INSERT passes"
+test_ex sql-injection-detect.sh '{"tool_input":{"new_string":"query(\"DELETE FROM users WHERE id=\" + req.params.id)"}}' 0 "sql-inject: DELETE concat detected (warning, exit 0)"
+test_ex sql-injection-detect.sh '{"tool_input":{"content":"f\"UPDATE users SET name={name} WHERE id={uid}\""}}' 0 "sql-inject: content field f-string UPDATE detected"
+echo ""
+
+echo "terraform-guard.sh (edge):"
+test_ex terraform-guard.sh '{"tool_input":{"command":"terraform destroy -force"}}' 2 "terraform-guard: destroy -force blocked"
+test_ex terraform-guard.sh '{"tool_input":{"command":"  terraform  destroy  "}}' 2 "terraform-guard: destroy with extra spaces blocked"
+test_ex terraform-guard.sh '{"tool_input":{"command":"terraform apply -auto-approve -var-file=prod.tfvars"}}' 0 "terraform-guard: apply with auto-approve and var-file passes"
+test_ex terraform-guard.sh '{"tool_input":{"command":"terraform validate"}}' 0 "terraform-guard: validate allowed"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
