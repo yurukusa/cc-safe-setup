@@ -9049,6 +9049,23 @@ else
 fi
 echo ""
 
+echo "fish-shell-wrapper.sh:"
+test_ex fish-shell-wrapper.sh '{}' 0 "fish-wrapper: empty input"
+test_ex fish-shell-wrapper.sh '{"tool_input":{"command":"npm run build"}}' 0 "fish-wrapper: wraps npm command"
+test_ex fish-shell-wrapper.sh '{"tool_input":{"command":"fish -c '\''npm test'\'' "}}' 0 "fish-wrapper: skips already wrapped"
+test_ex fish-shell-wrapper.sh '{"tool_input":{"command":"echo hello"}}' 0 "fish-wrapper: skips echo builtin"
+test_ex fish-shell-wrapper.sh '{"tool_input":{"command":"cd /tmp"}}' 0 "fish-wrapper: skips cd builtin"
+# Verify wrapped output contains fish -c
+OUTPUT=$(echo '{"tool_input":{"command":"cargo build"}}' | bash "$EXDIR/fish-shell-wrapper.sh" 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.command' 2>/dev/null | grep -q 'fish -c'; then
+    echo "  PASS: fish-wrapper: output wraps in fish -c"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: fish-wrapper: output wraps in fish -c (expected fish -c in command)"
+    FAIL=$((FAIL + 1))
+fi
+echo ""
+
 echo "check-dependency-age.sh (edge):"
 test_ex check-dependency-age.sh '{"tool_input":{"content":"\"devDependencies\": {\"jest\": \"^29\"}"}}' 0 "check-dep-age: content field with devDeps exits 0"
 test_ex check-dependency-age.sh '{"tool_input":{"new_string":"\"moment\": \"^2.29.4\""}}' 0 "check-dep-age: known old pkg exits 0 (advisory only)"
