@@ -7,7 +7,7 @@ set -euo pipefail
 
 PASS=0
 FAIL=0
-EXDIR="$(dirname "$0")/examples"
+EXDIR="$(cd "$(dirname "$0")" && pwd)/examples"
 
 test_ex() {
     local script="$1" input="$2" expected_exit="$3" desc="$4"
