@@ -66,6 +66,20 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 Each hook exists because a real incident happened without it.
 
+## PermissionRequest Hooks (NEW)
+
+Override Claude Code's built-in confirmation prompts. These run **after** the built-in safety checks, so they can auto-approve prompts that `permissions.allow` cannot suppress.
+
+| Hook | What It Solves | Issue |
+|------|---------------|-------|
+| `quoted-flag-approver` | "Quoted characters in flag names" prompt on `git commit -m "msg"` | [#27957](https://github.com/anthropics/claude-code/issues/27957) |
+| `bash-heuristic-approver` | Safety heuristic prompts for `$()`, backticks, ANSI-C quoting | [#30435](https://github.com/anthropics/claude-code/issues/30435) |
+| `edit-always-allow` | Edit prompts in `.claude/skills/` despite `bypassPermissions` | [#36192](https://github.com/anthropics/claude-code/issues/36192) |
+| `allow-git-hooks-dir` | Edit prompts in `.git/hooks/` for pre-commit/pre-push setup | |
+| `allow-protected-dirs` | All protected directory prompts (CI/Docker environments) | [#36168](https://github.com/anthropics/claude-code/issues/36168) |
+
+Install any of these: `npx cc-safe-setup --install-example <name>`
+
 ## All 49 Commands
 
 | Command | What It Does |
@@ -89,7 +103,7 @@ Each hook exists because a real incident happened without it.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 365 examples |
+| `--install-example <name>` | Install from 369 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
