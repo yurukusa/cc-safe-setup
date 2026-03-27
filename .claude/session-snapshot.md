@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-27T22:16:21+09:00
+Updated: 2026-03-27T22:35:37+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-27T22:16:21+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2a5364f checkpoint: auto-save 22:16:20
+- Last commit: deb57ab checkpoint: auto-save 22:35:31
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./test.sh
-./examples/test-exit-code-verify.sh
+./examples/dependency-install-guard.sh
+./examples/temp-file-cleanup.sh
 ./.claude/pre-compact-checkpoint.md
+./examples/test-exit-code-verify.sh
 ./examples/banned-command-guard.sh
 ./examples/uncommitted-discard-guard.sh
 ./README.md
 ./examples/credential-exfil-guard.sh
-./examples/npm-publish-guard.sh
-./examples/env-source-guard.sh
 ```
 
