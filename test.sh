@@ -7870,6 +7870,33 @@ test_ex dependency-install-guard.sh '{"tool_input":{"command":""}}' 0 "dep-guard
 test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm install @types/node"}}' 0 "dep-guard: @types/ allowlisted OK"
 # --- temp-file-cleanup (#8856) ---
 test_ex temp-file-cleanup.sh '{}' 0 "temp-cleanup: runs without error"
+# --- auto-approve-test.sh ---
+test_ex auto-approve-test.sh '{"tool_input":{"command":"npm test"}}' 0 "auto-test: npm test approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"npx jest"}}' 0 "auto-test: npx jest approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"npx vitest"}}' 0 "auto-test: npx vitest approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"pytest"}}' 0 "auto-test: pytest approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"cargo test"}}' 0 "auto-test: cargo test approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"go test ./..."}}' 0 "auto-test: go test approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"bundle exec rspec"}}' 0 "auto-test: rspec approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"dotnet test"}}' 0 "auto-test: dotnet test approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"mvn test"}}' 0 "auto-test: mvn test approved"
+test_ex auto-approve-test.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "auto-test: non-test not approved (exit 0 passthrough)"
+test_ex auto-approve-test.sh '{"tool_input":{"command":""}}' 0 "auto-test: empty allowed"
+# --- auto-approve-gradle.sh ---
+test_ex auto-approve-gradle.sh '{"tool_input":{"command":"gradle build"}}' 0 "auto-gradle: build approved"
+test_ex auto-approve-gradle.sh '{"tool_input":{"command":"./gradlew test"}}' 0 "auto-gradle: gradlew test approved"
+test_ex auto-approve-gradle.sh '{"tool_input":{"command":"gradle clean"}}' 0 "auto-gradle: clean approved"
+test_ex auto-approve-gradle.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "auto-gradle: non-gradle passthrough"
+test_ex auto-approve-gradle.sh '{"tool_input":{"command":""}}' 0 "auto-gradle: empty allowed"
+# --- allow-protected-dirs.sh ---
+test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/.claude/settings.json"}}' 0 "allow-dirs: .claude/ approved"
+test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/.git/config"}}' 0 "allow-dirs: .git/ approved"
+test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/.vscode/settings.json"}}' 0 "allow-dirs: .vscode/ approved"
+test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/src/main.ts"}}' 0 "allow-dirs: non-protected passthrough"
+test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":""}}' 0 "allow-dirs: empty path OK"
+test_ex allow-protected-dirs.sh '{}' 0 "allow-dirs: no file_path OK"
+# --- notify-waiting.sh ---
+test_ex notify-waiting.sh '{}' 0 "notify-waiting: runs without error"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
