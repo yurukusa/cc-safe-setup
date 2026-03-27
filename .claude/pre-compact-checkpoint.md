@@ -1,9 +1,9 @@
-Saved: 2026-03-27T20:17:49+09:00 | Tool call: #1
+Saved: 2026-03-27T22:16:26+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+2a5364f checkpoint: auto-save 22:16:20
+cc4554b checkpoint: auto-save 22:16:11
+f8e22a5 fix: update CTA on 7 sub-pages (16 hooks→6, $19→PWYW $0+) Old CTA said "16 hooks" and "$19 pay-what-you-want" which was inconsistent with LP and actual product (6 hooks + 5 templates + 9 scripts, PWYW $0+). This inconsistency may have contributed to funnel confusion. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+f86fda5 checkpoint: auto-save 20:17:53
 e3e14cb checkpoint: auto-save 20:17:42
-9431dc7 feat: add banned-command-guard hook (solves #36413) Blocks sed -i, awk -i inplace, perl -pi — commands that edit files in-place via shell when the Edit tool should be used instead. Configurable via CC_BANNED_COMMANDS env var. Inspired by #36413 where sed from wrong CWD emptied a file. 350 hooks, 4,516 tests. 8 new tests. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-e23f977 checkpoint: auto-save 20:02:50
-9333ed0 checkpoint: auto-save 20:02:41
-3e9a79c checkpoint: auto-save 20:02:31
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
