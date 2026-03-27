@@ -8058,6 +8058,12 @@ test_ex parallel-edit-guard.sh '{"tool_input":{"file_path":""}}' 0 "parallel-edi
 test_ex pip-venv-guard.sh '{"tool_input":{"command":"pip install requests"}}' 0 "pip-venv: pip install (may warn)"
 test_ex pip-venv-guard.sh '{"tool_input":{"command":"pip3 install -r requirements.txt"}}' 0 "pip-venv: pip3 install (may warn)"
 test_ex pip-venv-guard.sh '{"tool_input":{"command":"python3 -m venv .venv"}}' 0 "pip-venv: create venv (pass)"
+test_ex git-blame-context.sh '{"tool_input":{"command":"git blame src/index.ts"}}' 0 "git-blame: blame command (may enhance)"
+test_ex git-blame-context.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "git-blame: git log (pass)"
+test_ex git-blame-context.sh '{"tool_input":{"command":"echo hello"}}' 0 "git-blame: non-git (pass)"
+test_ex git-lfs-guard.sh '{"tool_input":{"command":"git add large-model.bin"}}' 0 "git-lfs: add binary (may warn)"
+test_ex git-lfs-guard.sh '{"tool_input":{"command":"git add README.md"}}' 0 "git-lfs: add text file (pass)"
+test_ex git-lfs-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-lfs: non-git (pass)"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
