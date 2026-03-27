@@ -71,7 +71,7 @@ if echo "$COMMAND" | grep -qE '^\s*(env|printenv|set)\s*$'; then
 fi
 
 # Pattern 8: curl/wget posting credential files
-if echo "$COMMAND" | grep -qiE 'curl\s.*-d\s+@[^\s]*\.(env|pem|key|credentials|ssh)|wget\s.*--post-file[= ][^\s]*\.(env|pem|key|credentials)'; then
+if echo "$COMMAND" | grep -qiE 'curl\s.*-d\s+@[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)|wget\s.*--post-file[= ][^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)'; then
     echo "BLOCKED: Credential file exfiltration via HTTP upload" >&2
     exit 2
 fi
