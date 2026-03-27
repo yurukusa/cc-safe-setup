@@ -114,6 +114,13 @@ test_hook "secret-guard" '{"tool_input":{"command":"git add keystore.jks"}}' 0 "
 test_hook "secret-guard" '{"tool_input":{"command":"git add package.json"}}' 0 "git add package.json allowed"
 test_hook "secret-guard" '{"tool_input":{"command":"git add README.md"}}' 0 "git add README.md allowed"
 test_hook "secret-guard" '{"tool_input":{"command":""}}' 0 "empty command passes"
+# edge case tests
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.production"}}' 2 "git add .env.production blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.staging"}}' 2 "git add .env.staging blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add config/.env"}}' 2 "git add nested .env blocked"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .env.example"}}' 2 "git add .env.example blocked (matches .env pattern)"
+test_hook "secret-guard" '{"tool_input":{"command":"git add .npmrc"}}' 0 ".npmrc passes (not in default patterns)"
+test_hook "secret-guard" '{"tool_input":{"command":"git add service-account.json"}}' 0 "service-account.json passes (not in patterns)"
 echo ""
 
 # --- comment-strip ---
