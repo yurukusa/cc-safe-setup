@@ -8245,6 +8245,16 @@ test_ex yaml-syntax-check.sh '{}' 0 "yaml: empty passes"
 echo "dockerfile-lint.sh:"
 test_ex dockerfile-lint.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "dockerfile: non-dockerfile passes"
 test_ex dockerfile-lint.sh '{}' 0 "dockerfile: empty passes"
+# Edge cases: create temp Dockerfiles to test lint warnings
+printf 'FROM node:18\nRUN npm install\nUSER node\n' > /tmp/cc-test-Dockerfile-good
+test_ex dockerfile-lint.sh '{"tool_input":{"file_path":"/tmp/cc-test-Dockerfile-good"}}' 0 "dockerfile: valid Dockerfile passes"
+printf 'RUN npm install\n' > /tmp/cc-test-Dockerfile-nofrom
+test_ex dockerfile-lint.sh '{"tool_input":{"file_path":"/tmp/cc-test-Dockerfile-nofrom"}}' 0 "dockerfile: missing FROM warns (exit 0)"
+printf 'FROM node:latest\nRUN npm install\nUSER node\n' > /tmp/cc-test-Dockerfile-latest
+test_ex dockerfile-lint.sh '{"tool_input":{"file_path":"/tmp/cc-test-Dockerfile-latest"}}' 0 "dockerfile: :latest tag warns (exit 0)"
+printf 'FROM node:18\nRUN npm install\n' > /tmp/cc-test-Dockerfile-nouser
+test_ex dockerfile-lint.sh '{"tool_input":{"file_path":"/tmp/cc-test-Dockerfile-nouser"}}' 0 "dockerfile: no USER warns (exit 0)"
+rm -f /tmp/cc-test-Dockerfile-good /tmp/cc-test-Dockerfile-nofrom /tmp/cc-test-Dockerfile-latest /tmp/cc-test-Dockerfile-nouser
 echo "docker-dangerous-guard.sh:"
 test_ex docker-dangerous-guard.sh '{"tool_input":{"command":"docker system prune -a"}}' 2 "docker: prune -a blocked"
 test_ex docker-dangerous-guard.sh '{"tool_input":{"command":"docker system prune"}}' 0 "docker: prune (no -a) allowed"
@@ -8266,10 +8276,17 @@ echo "test-coverage-reminder.sh:"
 test_ex test-coverage-reminder.sh '{"tool_name":"Edit","tool_input":{"file_path":"test.js"}}' 0 "coverage: edit increments"
 test_ex test-coverage-reminder.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "coverage: test resets"
 test_ex test-coverage-reminder.sh '{}' 0 "coverage: empty passes"
+test_ex test-coverage-reminder.sh '{"tool_name":"Write","tool_input":{"file_path":"app.py","content":"x=1"}}' 0 "coverage: Write also increments"
+test_ex test-coverage-reminder.sh '{"tool_name":"Bash","tool_input":{"command":"pytest -v"}}' 0 "coverage: pytest resets counter"
+test_ex test-coverage-reminder.sh '{"tool_name":"Bash","tool_input":{"command":"cargo test"}}' 0 "coverage: cargo test resets counter"
+test_ex test-coverage-reminder.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "coverage: non-test bash no reset"
 echo "no-fixme-ship.sh:"
 test_ex no-fixme-ship.sh '{"tool_input":{"command":"git push"}}' 0 "fixme: git push checked"
 test_ex no-fixme-ship.sh '{"tool_input":{"command":"echo hello"}}' 0 "fixme: non-push passes"
 test_ex no-fixme-ship.sh '{}' 0 "fixme: empty passes"
+test_ex no-fixme-ship.sh '{"tool_input":{"command":"git push origin main"}}' 0 "fixme: git push origin main checked"
+test_ex no-fixme-ship.sh '{"tool_input":{"command":"  git push --force"}}' 0 "fixme: indented git push checked"
+test_ex no-fixme-ship.sh '{"tool_input":{"command":"git pull"}}' 0 "fixme: git pull passes (not push)"
 echo "env-file-gitignore-check.sh:"
 test_ex env-file-gitignore-check.sh '{}' 0 "env-gitignore: runs without error"
 test_ex env-file-gitignore-check.sh '{"type":"notification"}' 0 "env-gitignore: notification"
@@ -8387,10 +8404,21 @@ test_ex no-http-in-code.sh '{"tool_input":{"new_string":"fetch(\"https://api.exa
 test_ex no-http-in-code.sh '{"tool_input":{"new_string":"fetch(\"http://api.example.com\")"}}' 0 "http-code: http in new_string warns"
 test_ex no-http-in-code.sh '{"tool_input":{"content":"http://localhost:3000"}}' 0 "http-code: localhost exempt"
 test_ex no-http-in-code.sh '{"tool_input":{"content":"http://127.0.0.1:8080"}}' 0 "http-code: 127.0.0.1 exempt"
+test_ex no-http-in-code.sh '{"tool_input":{"content":"http://0.0.0.0:5000"}}' 0 "http-code: 0.0.0.0 exempt"
+test_ex no-http-in-code.sh '{"tool_input":{"content":"http://example.com and http://test.org"}}' 0 "http-code: multiple http URLs detected"
+test_ex no-http-in-code.sh '{"tool_input":{"new_string":"url = \"http://prod-server.com/api\""}}' 0 "http-code: http in new_string prod URL"
 echo "no-star-import-python.sh:"
 test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/test.py"}}' 0 "star-import: py file"
 test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "star-import: non-py"
 test_ex no-star-import-python.sh '{}' 0 "star-import: empty"
+printf 'from os import *\nimport sys\n' > /tmp/cc-test-star-import.py
+test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/cc-test-star-import.py"}}' 0 "star-import: wildcard warns (exit 0)"
+printf 'from os import path\nfrom sys import argv\n' > /tmp/cc-test-explicit-import.py
+test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/cc-test-explicit-import.py"}}' 0 "star-import: explicit imports clean"
+printf 'import os\nimport sys\n' > /tmp/cc-test-normal-import.py
+test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/cc-test-normal-import.py"}}' 0 "star-import: plain import no warning"
+test_ex no-star-import-python.sh '{"tool_input":{"file_path":"/tmp/cc-test-nonexistent.py"}}' 0 "star-import: nonexistent file passes"
+rm -f /tmp/cc-test-star-import.py /tmp/cc-test-explicit-import.py /tmp/cc-test-normal-import.py
 echo "detect-mixed-indentation.sh:"
 test_ex detect-mixed-indentation.sh '{"tool_input":{"file_path":"/tmp/test.py"}}' 0 "mixed-indent: py file"
 test_ex detect-mixed-indentation.sh '{"tool_input":{"file_path":"/tmp/Makefile"}}' 0 "mixed-indent: Makefile skipped"
