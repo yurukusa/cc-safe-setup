@@ -8753,6 +8753,51 @@ test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.py"}}' 0 "
 test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "python_ruff_on_edi: non-py skip"
 test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "python_ruff_on_edi: empty path"
 test_ex python-ruff-on-edit.sh '{}' 0 "python_ruff_on_edi: empty input"
+echo "--- Under-tested security hooks: deeper coverage ---"
+
+echo "no-self-signed-cert.sh (extended):"
+test_ex no-self-signed-cert.sh '{"tool_input":{"command":""}}' 0 "self-signed-ext: empty command"
+test_ex no-self-signed-cert.sh '{"tool_input":{"command":"curl https://example.com"}}' 0 "self-signed-ext: https url safe"
+test_ex no-self-signed-cert.sh '{"tool_input":{"command":"openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem"}}' 0 "self-signed-ext: full openssl x509 warns"
+test_ex no-self-signed-cert.sh '{"tool_input":{"command":"mkcert localhost 127.0.0.1"}}' 0 "self-signed-ext: mkcert detected"
+
+echo "no-exposed-port-in-dockerfile.sh (extended):"
+# Create a Dockerfile with dangerous port for testing
+TMPDIR_DOCK=$(mktemp -d)
+echo "FROM node:18" > "$TMPDIR_DOCK/Dockerfile"
+echo "EXPOSE 22" >> "$TMPDIR_DOCK/Dockerfile"
+echo "CMD [\"node\", \"app.js\"]" >> "$TMPDIR_DOCK/Dockerfile"
+test_ex no-exposed-port-in-dockerfile.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_DOCK/Dockerfile\"}}" 0 "exposed-port-ext: EXPOSE 22 warns"
+# Dockerfile with safe port
+echo "FROM node:18" > "$TMPDIR_DOCK/Dockerfile.safe"
+echo "EXPOSE 3000" >> "$TMPDIR_DOCK/Dockerfile.safe"
+test_ex no-exposed-port-in-dockerfile.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_DOCK/Dockerfile.safe\"}}" 0 "exposed-port-ext: EXPOSE 3000 safe"
+# Non-Dockerfile should skip
+echo "EXPOSE 22" > "$TMPDIR_DOCK/app.js"
+test_ex no-exposed-port-in-dockerfile.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_DOCK/app.js\"}}" 0 "exposed-port-ext: non-Dockerfile skips"
+# Dockerfile with multiple dangerous ports
+echo "FROM ubuntu:22.04" > "$TMPDIR_DOCK/Dockerfile.multi"
+echo "EXPOSE 3306" >> "$TMPDIR_DOCK/Dockerfile.multi"
+echo "EXPOSE 5432" >> "$TMPDIR_DOCK/Dockerfile.multi"
+test_ex no-exposed-port-in-dockerfile.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_DOCK/Dockerfile.multi\"}}" 0 "exposed-port-ext: MySQL+Postgres warns"
+rm -rf "$TMPDIR_DOCK"
+
+echo "disk-space-check.sh (extended):"
+test_ex disk-space-check.sh '{"message":"session started"}' 0 "disk-check-ext: session start msg"
+test_ex disk-space-check.sh '{"tool_input":{"command":"ls"}}' 0 "disk-check-ext: ignores tool_input"
+test_ex disk-space-check.sh '' 0 "disk-check-ext: completely empty stdin"
+
+echo "output-token-env-check.sh (extended):"
+test_ex output-token-env-check.sh '' 0 "output-token-ext: completely empty stdin"
+test_ex output-token-env-check.sh '{"tool_input":{"command":"npm test"}}' 0 "output-token-ext: passes through any input"
+test_ex output-token-env-check.sh '{"message":"hello"}' 0 "output-token-ext: arbitrary json"
+
+echo "no-debug-commit.sh (extended):"
+test_ex no-debug-commit.sh '{"tool_input":{"command":"git commit -am \"fix: remove debug\""}}' 0 "debug-commit-ext: commit -am variant"
+test_ex no-debug-commit.sh '{"tool_input":{"command":"  git commit --amend"}}' 0 "debug-commit-ext: leading spaces amend"
+test_ex no-debug-commit.sh '{"tool_input":{"command":"git push origin main"}}' 0 "debug-commit-ext: git push skips"
+test_ex no-debug-commit.sh '{"tool_input":{"command":"npm test && git commit -m done"}}' 0 "debug-commit-ext: chained non-leading skip"
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
