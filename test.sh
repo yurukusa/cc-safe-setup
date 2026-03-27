@@ -9122,6 +9122,14 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPD
 set -euo pipefail
 echo ""
 
+echo "post-compact-safety.sh:"
+rm -f "/tmp/cc-post-compact-$(whoami)" "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"echo hello"}}' 0 "post-compact: normal command passes"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"git push"}}' 0 "post-compact: git push passes (no marker)"
+test_ex post-compact-safety.sh '{}' 0 "post-compact: empty input"
+rm -f "/tmp/cc-post-compact-$(whoami)" "/tmp/cc-post-compact-count-$(whoami)"
+echo ""
+
 echo "session-drift-guard.sh:"
 # Clean counter before tests
 rm -f "/tmp/cc-drift-counter-$(whoami)"
