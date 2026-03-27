@@ -1,9 +1,9 @@
-Saved: 2026-03-28T02:45:49+09:00 | Tool call: #1
+Saved: 2026-03-28T02:48:39+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+9afac31 checkpoint: auto-save 02:48:33
+9fe1002 checkpoint: auto-save 02:48:21
+a8cd827 feat: 2 new hooks (#363 quoted-flag-approver, #364 cwd-reminder) From high-engagement GitHub Issues: - #363 quoted-flag-approver: auto-approve "quoted characters in flag   names" prompts for safe commands (#27957, 70 reactions) - #364 cwd-reminder: inject current directory before Bash commands   to prevent wrong-directory mistakes (#1669, 71 reactions) 13 tests added. 4,812/4,812 passed. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+e586d05 checkpoint: auto-save 02:45:53
 988d9ee checkpoint: auto-save 02:45:43
-83a01a8 checkpoint: auto-save 02:45:33
-8f8570a chore: update docs 361→362 hooks, 4,780→4,795 tests Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-728a3f2 feat: new hook #362 mcp-server-guard (OWASP MCP09) Blocks unauthorized MCP server additions: - Writing to .mcp.json files - Adding mcpServers to settings - Launching unknown MCP servers via npx/node/python - Allowlist for approved servers (playwright, godot-mcp) 13 tests added. 4,795/4,795 passed. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-dea5ff1 checkpoint: auto-save 02:33:38
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
