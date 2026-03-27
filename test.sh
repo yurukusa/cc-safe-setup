@@ -9106,6 +9106,17 @@ test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "ts-lint:
 test_ex typescript-lint-on-edit.sh '{}' 0 "ts-lint: empty input"
 echo ""
 
+echo "variable-expansion-guard.sh:"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"rm -rf ${LOCALAPPDATA}/"}}' 2 "var-expand: blocks rm with ${LOCALAPPDATA}"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"rm -rf $HOME/.cache"}}' 2 "var-expand: blocks rm with $HOME"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"rm -rf /tmp/test"}}' 0 "var-expand: allows rm with explicit path"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"rm -rf $(pwd)/node_modules"}}' 2 "var-expand: blocks rm with command substitution"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"ls ${HOME}"}}' 0 "var-expand: allows non-destructive with var"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"echo $PATH"}}' 0 "var-expand: allows echo with var"
+test_ex variable-expansion-guard.sh '{}' 0 "var-expand: empty input"
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"mv ${TMPDIR}/old ${TMPDIR}/new"}}' 2 "var-expand: blocks mv with vars"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
