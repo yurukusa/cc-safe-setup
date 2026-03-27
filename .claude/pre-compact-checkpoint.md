@@ -1,9 +1,9 @@
-Saved: 2026-03-27T22:35:48+09:00 | Tool call: #1
+Saved: 2026-03-27T23:10:36+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
-a4f1d85 checkpoint: auto-save 22:35:40
-deb57ab checkpoint: auto-save 22:35:31
-caed7c0 chore: update package.json (356 hooks, 4,530 tests) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-c0f234c checkpoint: auto-save 22:16:30
-2a5364f checkpoint: auto-save 22:16:20
+e1be85e checkpoint: auto-save 23:10:30
+da7c96b checkpoint: auto-save 23:10:21
+5465276 fix: update footer on 6 SEO pages (4,506→4,549 tests, 350→358 hooks) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+255b10a fix: update README example count 348→358 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+863c72f feat: add dependency-bloat + temp-file links to homepage Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
