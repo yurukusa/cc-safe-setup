@@ -14,10 +14,17 @@
 #   "hooks": {
 #     "PreToolUse": [{
 #       "matcher": "Bash",
-#       "hooks": [{ "type": "command", "command": "~/.claude/hooks/no-debug-commit.sh" }]
+#       "hooks": [{
+#         "type": "command",
+#         "if": "Bash(git commit *)",
+#         "command": "~/.claude/hooks/no-debug-commit.sh"
+#       }]
 #     }]
 #   }
 # }
+#
+# The "if" field (v2.1.85+) skips this hook for non-commit commands.
+# Without "if", the hook still works — it checks internally and exits early.
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
