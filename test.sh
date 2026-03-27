@@ -8992,6 +8992,15 @@ test_ex rust-clippy-after-edit.sh '{"tool_input":{}}' 0 "clippy: missing file_pa
 rm -rf "$TMPDIR_RS"
 echo ""
 
+echo "auto-answer-question.sh:"
+test_ex auto-answer-question.sh '{}' 0 "auto_answer: empty"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"Should I run the tests?"}}' 0 "auto_answer: test question"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"Delete all files?"}}' 0 "auto_answer: dangerous question"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"What color theme?"}}' 0 "auto_answer: unknown passes"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"Can I build the project?"}}' 0 "auto_answer: build yes"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"rm -rf everything?"}}' 0 "auto_answer: rm-rf no"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
