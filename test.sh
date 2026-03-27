@@ -9022,11 +9022,31 @@ echo ""
 
 echo "auto-answer-question.sh:"
 test_ex auto-answer-question.sh '{}' 0 "auto_answer: empty"
-test_ex auto-answer-question.sh '{"tool_input":{"question":"Should I run the tests?"}}' 0 "auto_answer: test question"
-test_ex auto-answer-question.sh '{"tool_input":{"question":"Delete all files?"}}' 0 "auto_answer: dangerous question"
-test_ex auto-answer-question.sh '{"tool_input":{"question":"What color theme?"}}' 0 "auto_answer: unknown passes"
-test_ex auto-answer-question.sh '{"tool_input":{"question":"Can I build the project?"}}' 0 "auto_answer: build yes"
-test_ex auto-answer-question.sh '{"tool_input":{"question":"rm -rf everything?"}}' 0 "auto_answer: rm-rf no"
+test_ex auto-answer-question.sh '{"tool_input":{"questions":[{"question":"Should I run the tests?"}]}}' 0 "auto_answer: test question (array)"
+test_ex auto-answer-question.sh '{"tool_input":{"questions":[{"question":"Delete all files?"}]}}' 0 "auto_answer: dangerous question (array)"
+test_ex auto-answer-question.sh '{"tool_input":{"questions":[{"question":"What color theme?"}]}}' 0 "auto_answer: unknown passes (array)"
+test_ex auto-answer-question.sh '{"tool_input":{"questions":[{"question":"Can I build the project?"}]}}' 0 "auto_answer: build yes (array)"
+test_ex auto-answer-question.sh '{"tool_input":{"questions":[{"question":"rm -rf everything?"}]}}' 0 "auto_answer: rm-rf no (array)"
+# Fallback: singular form for compatibility
+test_ex auto-answer-question.sh '{"tool_input":{"question":"Should I run the tests?"}}' 0 "auto_answer: test question (singular fallback)"
+test_ex auto-answer-question.sh '{"tool_input":{"question":"Delete all files?"}}' 0 "auto_answer: dangerous (singular fallback)"
+# Output content verification: answers object format
+OUTPUT=$(echo '{"tool_input":{"questions":[{"question":"Run tests?"}]}}' | bash "$EXDIR/auto-answer-question.sh" 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.answers["Run tests?"]' >/dev/null 2>&1; then
+    echo "  PASS: auto_answer: output uses answers object"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: auto_answer: output uses answers object (expected answers object in output)"
+    FAIL=$((FAIL + 1))
+fi
+OUTPUT=$(echo '{"tool_input":{"questions":[{"question":"Delete database?"}]}}' | bash "$EXDIR/auto-answer-question.sh" 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.answers["Delete database?"]' >/dev/null 2>&1; then
+    echo "  PASS: auto_answer: dangerous uses answers object"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: auto_answer: dangerous uses answers object (expected answers object in output)"
+    FAIL=$((FAIL + 1))
+fi
 echo ""
 
 echo "check-dependency-age.sh (edge):"

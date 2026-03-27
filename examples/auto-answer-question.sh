@@ -1,14 +1,15 @@
 #!/bin/bash
 # auto-answer-question.sh — Auto-answer AskUserQuestion for headless/autonomous mode
 #
-# NOTE: updatedInput schema (question/answer vs questions/answers array)
-# may vary. Verify with your Claude Code version before production use.
-#
 # TRIGGER: PreToolUse
 # MATCHER: AskUserQuestion
 #
-# v2.1.85+: PreToolUse hooks can satisfy AskUserQuestion by returning
-# updatedInput alongside permissionDecision: "allow".
+# v2.1.85+: PreToolUse hooks can return updatedInput with pre-filled answers
+# alongside permissionDecision: "allow" to auto-answer questions.
+#
+# AskUserQuestion schema:
+#   tool_input.questions[] = { question: string, options?: string[] }
+#   updatedInput.answers = { "question text": "answer text" }
 #
 # Usage:
 # {
@@ -28,7 +29,11 @@
 # Unknown questions → pass through to human
 
 INPUT=$(cat)
-QUESTION=$(echo "$INPUT" | jq -r '.tool_input.question // empty' 2>/dev/null)
+
+# Extract first question text from questions array
+QUESTION=$(echo "$INPUT" | jq -r '.tool_input.questions[0].question // empty' 2>/dev/null)
+# Fallback: try singular form for compatibility
+[ -z "$QUESTION" ] && QUESTION=$(echo "$INPUT" | jq -r '.tool_input.question // empty' 2>/dev/null)
 [ -z "$QUESTION" ] && exit 0
 
 # Log all auto-answered questions for audit
@@ -42,7 +47,9 @@ if echo "$QUESTION" | grep -qiE 'delete|削除|drop|truncate|destroy|remove.*all
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "allow",
-            updatedInput: { question: $q, answer: "No. This operation is too risky for unattended mode." }
+            updatedInput: {
+                answers: { ($q): "No. This operation is too risky for unattended mode." }
+            }
         }
     }'
     echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') A: NO (dangerous)" >> "$LOG_DIR/auto-answers.log"
@@ -55,7 +62,9 @@ if echo "$QUESTION" | grep -qiE 'test|テスト|build|ビルド|lint|format|chec
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "allow",
-            updatedInput: { question: $q, answer: "Yes, proceed." }
+            updatedInput: {
+                answers: { ($q): "Yes, proceed." }
+            }
         }
     }'
     echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') A: YES (safe op)" >> "$LOG_DIR/auto-answers.log"
