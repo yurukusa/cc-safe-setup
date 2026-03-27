@@ -32,7 +32,7 @@ if [[ -z "$COMMAND" ]]; then
 fi
 
 # Block direct sourcing of .env files
-if echo "$COMMAND" | grep -qE '(source|\.\s)\s+\.env'; then
+if echo "$COMMAND" | grep -qE '(source|\.)\s+\.env'; then
     echo "BLOCKED: Sourcing .env into shell environment." >&2
     echo "Command: $COMMAND" >&2
     echo "" >&2

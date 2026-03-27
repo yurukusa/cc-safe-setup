@@ -24,7 +24,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [[ -z "$COMMAND" ]] && exit 0
 
 # Detect deploy commands
-if ! echo "$COMMAND" | grep -qiE '(rsync|scp|deploy|firebase\s+deploy|vercel|netlify\s+deploy|fly\s+deploy|railway\s+up|git\s+push\s+heroku)'; then
+if ! echo "$COMMAND" | grep -qiE '(rsync|scp|deploy|firebase\s+deploy|vercel|netlify\s+deploy|fly\s+deploy|railway\s+up|git\s+push\s+heroku|kubectl\s+(apply|create|delete|rollout)|terraform\s+(apply|destroy))'; then
     exit 0
 fi
 

@@ -57,7 +57,7 @@ if echo "$COMMAND" | grep -qiE 'rake\s+db:(drop|reset)|rails\s+db:(drop|reset)';
 fi
 
 # Raw SQL destructive commands
-if echo "$COMMAND" | grep -qiE 'DROP\s+(DATABASE|TABLE|SCHEMA)|TRUNCATE\s+TABLE|DELETE\s+FROM\s+\w+\s*;?\s*$'; then
+if echo "$COMMAND" | grep -qiE 'DROP\s+(DATABASE|TABLE|SCHEMA)|TRUNCATE\s+TABLE|DELETE\s+FROM\s+\w+\s*(;|\s*$|WHERE\s+(1\s*=\s*1|true))'; then
     echo "BLOCKED: Destructive SQL command" >&2
     exit 2
 fi

@@ -8,6 +8,7 @@ if echo "$COMMAND" | grep -qE '\bkubectl\s+delete\s+(namespace|ns|node)\b'; then
     exit 2
 fi
 if echo "$COMMAND" | grep -qE '\bkubectl\s+delete\s+.*--all\b'; then
-    echo "WARNING: kubectl delete --all affects all resources in scope" >&2
+    echo "BLOCKED: kubectl delete --all affects all resources in scope" >&2
+    exit 2
 fi
 exit 0

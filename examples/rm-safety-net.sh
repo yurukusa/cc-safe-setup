@@ -41,6 +41,12 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     # Extract the target (last argument after flags)
     TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+[^;|&]*' | awk '{print $NF}')
 
+    # Block path traversal early
+    if echo "$TARGET" | grep -qF '..'; then
+        echo "BLOCKED: path traversal detected in rm target" >&2
+        exit 2
+    fi
+
     # Allow safe targets
     if echo "$TARGET" | grep -qE "^(\./)?(${SAFE_TARGETS})(/|$)"; then
         exit 0
