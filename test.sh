@@ -9122,6 +9122,14 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPD
 set -euo pipefail
 echo ""
 
+echo "bash-trace-guard.sh:"
+test_ex bash-trace-guard.sh '{"tool_input":{"command":"bash -x script.sh"}}' 2 "bash-trace: blocks bash -x"
+test_ex bash-trace-guard.sh '{"tool_input":{"command":"bash script.sh"}}' 0 "bash-trace: allows bash without -x"
+test_ex bash-trace-guard.sh '{"tool_input":{"command":"set -x"}}' 2 "bash-trace: blocks set -x"
+test_ex bash-trace-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "bash-trace: allows echo"
+test_ex bash-trace-guard.sh '{}' 0 "bash-trace: empty input"
+echo ""
+
 echo "read-budget-guard.sh:"
 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "read-budget: first read passes"
 test_ex read-budget-guard.sh '{}' 0 "read-budget: empty input"
