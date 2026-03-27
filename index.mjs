@@ -457,6 +457,7 @@ function examples() {
       'lockfile-guard.sh': 'Warn when lockfiles modified in commits',
       'git-lfs-guard.sh': 'Suggest Git LFS for large files',
       'python-ruff-on-edit.sh': 'PostToolUse: lint Python files after edit (ruff/flake8/pylint)',
+      'typescript-lint-on-edit.sh': 'PostToolUse: type check TypeScript files after edit (tsc --noEmit)',
     },
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after edits for rollback protection',
