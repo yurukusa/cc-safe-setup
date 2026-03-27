@@ -1,9 +1,9 @@
-Saved: 2026-03-28T01:55:56+09:00 | Tool call: #1
+Saved: 2026-03-28T01:58:37+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+a2207a3 checkpoint: auto-save 01:58:31
+b38d58d checkpoint: auto-save 01:58:19
+1117d34 feat: add multiline-command-approver — fix heredoc auto-approve (#11932) New hook #360: auto-approves multiline/heredoc commands by matching the first line against a whitelist of safe command prefixes. Solves the issue where auto-approve patterns fail on:   echo 'multiline\ncontent' > file   git commit -m "$(cat <<EOF\nmessage\nEOF)" 10 new tests. 4,763→4,775. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+7e5a41f checkpoint: auto-save 01:56:00
 bc19ed9 checkpoint: auto-save 01:55:50
-f5d68cb checkpoint: auto-save 01:55:40
-dd970fc feat: add hook-tamper-guard — prevent Claude from rewriting its own hooks (#32376) New hook #359: blocks Edit/Write/Bash operations on: - ~/.claude/hooks/ (hook scripts) - ~/.claude/settings.json (hook registration) - .claude/hooks/ (project-level hooks) - chmod/sed/rm commands targeting hook files Read-only access (ls, cat) is still allowed. Solves GitHub Issue #32376 "Who watches the watchmen?" 13 new tests added. 4,748→4,763 tests. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-8f9ba55 checkpoint: auto-save 01:52:35
-dda4452 checkpoint: auto-save 01:52:25
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
