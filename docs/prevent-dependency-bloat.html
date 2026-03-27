@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code from Installing Random Dependencies — cc-safe-setup</title>
+<meta name="description" content="Claude Code can run npm install, pip install, and add unwanted dependencies. Block unauthorized package installations with a PreToolUse hook.">
+<meta name="keywords" content="claude code npm install, claude code pip install, dependency guard, supply chain attack, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-dependency-bloat.html">
+<meta property="og:title" content="Prevent Claude Code from Installing Random Dependencies">
+<meta property="og:description" content="Block unauthorized npm/pip/gem/cargo installs with a single hook.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Prevent Claude Code from Installing Random Dependencies</h1>
+<p>Claude Code can run <code>npm install</code>, <code>pip install</code>, and other package managers freely. When it encounters a missing module, its natural behavior is to install it — without asking. This creates supply chain risks and dependency bloat.</p>
+
+<h2>The Problem</h2>
+
+<div class="incident">
+<p class="incident-title">Unauthorized npm install adds 300MB to node_modules</p>
+<p>Claude encountered a missing module during refactoring and ran <code>npm install lodash</code> without permission. The lockfile changed, node_modules grew by 300MB, and the CI pipeline broke because the new dependency wasn't in the approved list.</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Supply chain risk from unknown packages</p>
+<p>AI models can be manipulated into installing malicious packages through typosquatting or hallucinated package names. A <code>pip install</code> of a non-existent package name could install a malicious lookalike.</p>
+</div>
+
+<h2>What Gets Blocked</h2>
+<p>The <code>dependency-install-guard</code> hook intercepts package manager commands:</p>
+<ul style="margin:1rem 0;padding-left:1.5rem">
+<li><code>npm install &lt;package&gt;</code> / <code>npm i &lt;package&gt;</code> — blocked unless allowlisted</li>
+<li><code>pip install &lt;package&gt;</code> — blocked (use <code>pip install -r requirements.txt</code> instead)</li>
+<li><code>gem install &lt;package&gt;</code> — blocked</li>
+<li><code>cargo add &lt;package&gt;</code> — blocked</li>
+<li><code>go get &lt;package&gt;</code> — blocked</li>
+</ul>
+
+<h2>What's Allowed</h2>
+<ul style="margin:1rem 0;padding-left:1.5rem">
+<li><code>npm install</code> (no args) — installs from existing lockfile ✓</li>
+<li><code>npm ci</code> — clean install from lockfile ✓</li>
+<li><code>pip install -r requirements.txt</code> — from requirements file ✓</li>
+<li><code>pip install -e .</code> — editable install ✓</li>
+<li>Packages in your custom allowlist ✓</li>
+</ul>
+
+<h2>Quick Fix</h2>
+
+<div class="fix">
+<p><strong>Option 1:</strong> Install the full safety suite (includes dependency guard):</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p><strong>Option 2:</strong> Install just the dependency guard:</p>
+<pre><code>npx cc-safe-setup --install-example dependency-install-guard</code></pre>
+</div>
+
+<div class="cta">
+<p><strong>Check your setup</strong></p>
+<p><code>npx cc-health-check</code></p>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">20-point diagnostic. Score 80+ means production-ready.</p>
+<p style="margin-top:1rem"><a href="https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=seo&utm_medium=page&utm_campaign=prevent-dependency-bloat">Full production setup →</a></p>
+</div>
+
+<h2>Related Pages</h2>
+<p>
+<a href="prevent-rm-rf.html">Prevent rm -rf</a> ·
+<a href="prevent-force-push.html">Prevent force push</a> ·
+<a href="prevent-secret-leaks.html">Prevent secret leaks</a> ·
+<a href="prevent-git-reset-hard.html">Prevent git reset --hard</a> ·
+<a href="prevent-syntax-errors.html">Prevent syntax errors</a> ·
+<a href="prevent-temp-file-accumulation.html">Prevent temp file accumulation</a>
+</p>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup · 358 hooks · 4,549 tests · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
