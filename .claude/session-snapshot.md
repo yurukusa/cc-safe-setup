@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T02:33:27+09:00
+Updated: 2026-03-28T02:45:40+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T02:33:27+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d16f9f8 checkpoint: auto-save 02:33:26
+- Last commit: 83a01a8 checkpoint: auto-save 02:45:33
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./examples/mcp-server-guard.sh
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/cwd-reminder.sh
+./examples/quoted-flag-approver.sh
 ./README.md
+./.claude/pre-compact-checkpoint.md
+./examples/mcp-server-guard.sh
 ./examples/session-start-safety-check.sh
 ./examples/multiline-command-approver.sh
 ./examples/hook-tamper-guard.sh
-./examples/dependency-install-guard.sh
-./examples/temp-file-cleanup.sh
 ```
 
