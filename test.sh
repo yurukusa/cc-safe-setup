@@ -184,6 +184,11 @@ echo "context-monitor:"
 extract_hook "context-monitor"
 # context-monitor always exits 0 (never blocks)
 test_hook "context-monitor" '{"tool_input":{"command":"ls"}}' 0 "always exits 0 (non-blocking)"
+test_hook "context-monitor" '{}' 0 "empty input handled"
+test_hook "context-monitor" '{"tool_input":{}}' 0 "empty tool_input handled"
+test_hook "context-monitor" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}' 0 "Read tool passes"
+test_hook "context-monitor" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test"}}' 0 "Write tool passes"
+test_hook "context-monitor" '{"tool_name":"Bash","tool_input":{"command":"echo test"}}' 0 "Bash tool passes"
 echo ""
 
 # --- api-error-alert ---
@@ -192,6 +197,9 @@ extract_hook "api-error-alert"
 test_hook "api-error-alert" '{"stop_reason":"user"}' 0 "normal stop ignored"
 test_hook "api-error-alert" '{"stop_reason":"normal"}' 0 "normal reason ignored"
 test_hook "api-error-alert" '{}' 0 "empty input handled"
+test_hook "api-error-alert" '{"stop_reason":"end_turn"}' 0 "end_turn stop ignored"
+test_hook "api-error-alert" '{"stop_reason":"max_tokens"}' 0 "max_tokens handled"
+test_hook "api-error-alert" '{"stop_reason":"tool_use"}' 0 "tool_use stop handled"
 echo ""
 
 # --- syntax-check ---
