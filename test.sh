@@ -7831,6 +7831,15 @@ test_ex uncommitted-discard-guard.sh '{"tool_input":{"command":"git checkout -b 
 test_ex uncommitted-discard-guard.sh '{"tool_input":{"command":"git checkout main"}}' 0 "discard-guard: checkout branch allowed"
 test_ex uncommitted-discard-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "discard-guard: non-git allowed"
 test_ex uncommitted-discard-guard.sh '{"tool_input":{"command":""}}' 0 "discard-guard: empty command allowed"
+# --- banned-command-guard (#36413) ---
+test_ex banned-command-guard.sh '{"tool_input":{"command":"sed -i s/foo/bar/g file.txt"}}' 2 "banned-cmd: sed -i blocked"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"awk -i inplace {print} file.txt"}}' 2 "banned-cmd: awk -i inplace blocked"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"perl -pi -e s/foo/bar/ file.txt"}}' 2 "banned-cmd: perl -pi blocked"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"sed s/foo/bar/ file.txt"}}' 0 "banned-cmd: sed read-only allowed"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"cat file.txt | grep foo"}}' 0 "banned-cmd: cat|grep allowed"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "banned-cmd: ls allowed"
+test_ex banned-command-guard.sh '{"tool_input":{"command":""}}' 0 "banned-cmd: empty allowed"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"  sed  -i  s/x/y/ f"}}' 2 "banned-cmd: extra whitespace sed -i blocked"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
