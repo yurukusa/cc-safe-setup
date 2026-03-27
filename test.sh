@@ -7895,8 +7895,47 @@ test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/.vscode/
 test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":"/home/user/src/main.ts"}}' 0 "allow-dirs: non-protected passthrough"
 test_ex allow-protected-dirs.sh '{"tool_input":{"file_path":""}}' 0 "allow-dirs: empty path OK"
 test_ex allow-protected-dirs.sh '{}' 0 "allow-dirs: no file_path OK"
-# --- notify-waiting.sh ---
+# --- notify-waiting.sh (1 → +3 = 4) ---
 test_ex notify-waiting.sh '{}' 0 "notify-waiting: runs without error"
+test_ex notify-waiting.sh '{"message":"Claude needs input"}' 0 "notify-waiting: with message field (allow)"
+test_ex notify-waiting.sh '{"tool_name":"Notification"}' 0 "notify-waiting: Notification tool name (allow)"
+test_ex notify-waiting.sh '{"tool_input":{"command":"something"}}' 0 "notify-waiting: ignores tool_input (allow)"
+# --- temp-file-cleanup.sh (1 → +3 = 4) ---
+test_ex temp-file-cleanup.sh '{}' 0 "temp-cleanup: empty input runs OK"
+test_ex temp-file-cleanup.sh '{"session":"ending"}' 0 "temp-cleanup: with session field (allow)"
+test_ex temp-file-cleanup.sh '{"tool_name":"Stop"}' 0 "temp-cleanup: Stop trigger (allow)"
+# --- large-file-guard additional (2 → +3 = 5) ---
+test_ex large-file-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/etc/hostname"}}' 0 "large-file-guard: small existing file (allow)"
+test_ex large-file-guard.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "large-file-guard: empty file_path (allow)"
+test_ex large-file-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/etc/hostname"}}' 0 "large-file-guard: Edit tool skipped (allow)"
+# --- large-read-guard additional (2 → +3 = 5) ---
+test_ex large-read-guard.sh '{"tool_input":{"command":"less /tmp/cc-nonexistent-file-xyz"}}' 0 "large-read-guard: less nonexistent file (allow)"
+test_ex large-read-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "large-read-guard: echo is not read cmd (allow)"
+test_ex large-read-guard.sh '{"tool_input":{}}' 0 "large-read-guard: empty command field (allow)"
+# --- license-check additional (2 → +3 = 5) ---
+test_ex license-check.sh '{"tool_input":{"file_path":"/tmp/cc-test-license-nonexist.py"}}' 0 "license-check: nonexistent .py file (allow)"
+test_ex license-check.sh '{"tool_input":{"file_path":"/tmp/cc-test-license.md"}}' 0 "license-check: .md extension skipped (allow)"
+test_ex license-check.sh '{"tool_input":{"file_path":"/tmp/cc-test-license.css"}}' 0 "license-check: .css extension skipped (allow)"
+# --- lockfile-guard additional (2 → +3 = 5) ---
+test_ex lockfile-guard.sh '{"tool_input":{"command":"git commit -m init"}}' 0 "lockfile-guard: git commit without staged lockfiles (allow)"
+test_ex lockfile-guard.sh '{"tool_input":{}}' 0 "lockfile-guard: empty command (allow)"
+test_ex lockfile-guard.sh '{"tool_input":{"command":"git status"}}' 0 "lockfile-guard: git status not commit/add (allow)"
+# --- no-curl-upload additional (2 → +3 = 5) ---
+test_ex no-curl-upload.sh '{"tool_input":{"command":"curl https://example.com"}}' 0 "no-curl-upload: GET request no warning (allow)"
+test_ex no-curl-upload.sh '{"tool_input":{"command":"curl -X POST https://api.com -d @data.json"}}' 0 "no-curl-upload: POST with -d @ warns (allow)"
+test_ex no-curl-upload.sh '{"tool_input":{}}' 0 "no-curl-upload: empty command (allow)"
+# --- no-port-bind additional (2 → +3 = 5) ---
+test_ex no-port-bind.sh '{"tool_input":{"command":"nc -l 8080"}}' 0 "no-port-bind: nc -l warns (allow)"
+test_ex no-port-bind.sh '{"tool_input":{"command":"node server.js --listen 0.0.0.0"}}' 0 "no-port-bind: --listen 0.0.0.0 warns (allow)"
+test_ex no-port-bind.sh '{"tool_input":{}}' 0 "no-port-bind: empty command (allow)"
+# --- no-wildcard-cors additional (2 → +3 = 5) ---
+test_ex no-wildcard-cors.sh '{"tool_input":{"new_string":"Access-Control-Allow-Origin: *"}}' 0 "no-wildcard-cors: wildcard * warns (allow)"
+test_ex no-wildcard-cors.sh '{"tool_input":{"content":"res.setHeader(\"Access-Control-Allow-Origin\", \"*\")"}}' 0 "no-wildcard-cors: content field with wildcard warns (allow)"
+test_ex no-wildcard-cors.sh '{"tool_input":{}}' 0 "no-wildcard-cors: empty input no content (allow)"
+# --- overwrite-guard additional (2 → +3 = 5) ---
+test_ex overwrite-guard.sh '{"tool_input":{"file_path":"/etc/hostname"}}' 0 "overwrite-guard: existing file warns (allow)"
+test_ex overwrite-guard.sh '{"tool_input":{"file_path":"~/nonexistent-file-xyz-abc.txt"}}' 0 "overwrite-guard: tilde nonexistent (allow)"
+test_ex overwrite-guard.sh '{"tool_input":{"file_path":"/dev/null"}}' 0 "overwrite-guard: /dev/null zero-size (allow)"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
