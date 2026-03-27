@@ -87,6 +87,11 @@ test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:refs/he
 test_hook "branch-guard" '{"tool_input":{"command":"git push --force origin develop"}}' 2 "force push to develop blocked"
 test_hook "branch-guard" '{"tool_input":{"command":""}}' 0 "empty command passes"
 test_hook "branch-guard" '{"tool_input":{"command":"echo git push origin main"}}' 0 "echo git push not blocked"
+# edge case tests
+test_hook "branch-guard" '{"tool_input":{"command":"git push origin feature main"}}' 2 "push with main in refspec blocked"
+test_hook "branch-guard" '{"tool_input":{"command":"git push --set-upstream origin feature"}}' 0 "--set-upstream to feature allowed"
+test_hook "branch-guard" '{"tool_input":{"command":"git push --delete origin feature"}}' 0 "--delete feature branch allowed"
+test_hook "branch-guard" '{"tool_input":{"command":"git push --force-if-includes origin feature"}}' 2 "--force-if-includes blocked"
 echo ""
 
 # --- secret-guard ---
