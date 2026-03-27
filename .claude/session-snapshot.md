@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T03:48:18+09:00
+Updated: 2026-03-28T03:50:43+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T03:48:18+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d2d346c checkpoint: auto-save 03:48:17
+- Last commit: 5963809 checkpoint: auto-save 03:50:34
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./test.sh
+./examples/gitignore-auto-add.sh
+./examples/python-import-check.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/typescript-strict-check.sh
 ./examples/react-key-warn.sh
-./.claude/pre-compact-checkpoint.md
 ./examples/dockerfile-lint.sh
 ./examples/yaml-syntax-check.sh
 ./examples/api-rate-limit-tracker.sh
-./examples/pip-venv-required.sh
-./examples/docker-dangerous-guard.sh
 ```
 
