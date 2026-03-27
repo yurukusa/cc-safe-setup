@@ -32,16 +32,19 @@ case "$TOOL" in
 
     # Block direct MCP config file modification
     if echo "$FILE" | grep -qE '\.mcp\.json$|mcp-config\.json$'; then
-      echo '{"decision":"block","reason":"MCP09: MCP server configuration change blocked — review manually"}'
-      exit 0
+      echo "BLOCKED: MCP server configuration change detected." >&2
+      echo "  File: $FILE" >&2
+      echo "  Review MCP server changes manually outside Claude Code." >&2
+      exit 2
     fi
 
     # Block adding mcpServers to settings files
     if echo "$FILE" | grep -qE 'settings\.json$|settings\.local\.json$'; then
       CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
       if echo "$CONTENT" | grep -qiE 'mcpServers|mcp_servers'; then
-        echo '{"decision":"block","reason":"MCP09: Adding MCP server configuration blocked — review manually"}'
-        exit 0
+        echo "BLOCKED: Adding MCP server configuration to settings." >&2
+        echo "  MCP servers should be reviewed and added manually." >&2
+        exit 2
       fi
     fi
     ;;
@@ -56,8 +59,10 @@ case "$TOOL" in
       if echo "$CMD" | grep -qE '@playwright/mcp|godot-mcp'; then
         exit 0
       fi
-      echo '{"decision":"block","reason":"MCP09: Unknown MCP server launch blocked — add to allowlist if trusted"}'
-      exit 0
+      echo "BLOCKED: Unknown MCP server launch detected." >&2
+      echo "  Command: $CMD" >&2
+      echo "  Add to allowlist in mcp-server-guard.sh if trusted." >&2
+      exit 2
     fi
     ;;
 esac
