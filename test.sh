@@ -7288,7 +7288,7 @@ test_ex write-test-ratio.sh '{"tool_input":{}}' 0 "empty command exits 0"
 test_ex write-test-ratio.sh '{"tool_input":{"command":"  git commit -m \"refactor\""}}' 0 "indented git commit recognized"
 # --- verify-before-commit (bonus: related hook, distinct from verify-before-done) ---
 test_ex verify-before-commit.sh '{"tool_input":{"command":"npm test"}}' 0 "non-commit exits 0"
-test_ex verify-before-commit.sh '{"tool_input":{"command":"git commit -m \"tested\""}}' 0 "commit with fresh marker passes"
+test_ex verify-before-commit.sh '{"tool_input":{"command":"git commit -m \"tested\""}}' 2 "commit without marker blocked"
 test_ex verify-before-commit.sh '{"tool_input":{"command":"git commit -m \"no tests\""}}' 2 "commit without marker blocked"
 # --- prompt-injection-detector (UserPromptSubmit) ---
 test_ex prompt-injection-detector.sh '{"prompt":"Please fix the bug in app.js"}' 0 "normal prompt passes"
