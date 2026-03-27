@@ -71,13 +71,13 @@ if echo "$COMMAND" | grep -qE '^\s*(env|printenv|set)\s*$'; then
 fi
 
 # Pattern 8: curl/wget posting credential files
-if echo "$COMMAND" | grep -qiE 'curl\s.*-d\s+@[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)|wget\s.*--post-file[= ][^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)'; then
+if echo "$COMMAND" | grep -qiP 'curl\s.*-d\s+@[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)|wget\s.*--post-file[= ][^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)'; then
     echo "BLOCKED: Credential file exfiltration via HTTP upload" >&2
     exit 2
 fi
 
 # Pattern 9: Piping credential files to curl/wget
-if echo "$COMMAND" | grep -qiE 'cat\s+[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)\S*\s*\|.*curl|cat\s+[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)\S*\s*\|.*wget'; then
+if echo "$COMMAND" | grep -qiP 'cat\s+[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)\S*\s*\|.*curl|cat\s+[^\s]*(\.env|\.pem|\.key|credentials|\.ssh/id_)\S*\s*\|.*wget'; then
     echo "BLOCKED: Credential file piped to HTTP client" >&2
     exit 2
 fi
