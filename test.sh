@@ -7853,6 +7853,23 @@ test_ex test-exit-code-verify.sh '{"tool_input":{"command":""},"tool_result":{"e
 test_ex test-exit-code-verify.sh '{"tool_input":{"command":"bundle exec rspec"},"tool_result":{"exitCode":1,"stdout":"3 examples, 1 failure"}}' 0 "test-verify: rspec fail detected"
 test_ex test-exit-code-verify.sh '{"tool_input":{"command":"npx jest --coverage"},"tool_result":{"exitCode":0,"stdout":"Tests: 10 passed, 10 total"}}' 0 "test-verify: jest pass allowed"
 test_ex test-exit-code-verify.sh '{"tool_input":{"command":"npx vitest"},"tool_result":{"exitCode":1,"stdout":"1 test failed"}}' 0 "test-verify: vitest fail detected"
+# --- dependency-install-guard (supply chain protection) ---
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm install lodash"}}' 2 "dep-guard: npm install unknown blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm i malicious-pkg"}}' 2 "dep-guard: npm i unknown blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm install typescript"}}' 0 "dep-guard: npm install allowlisted OK"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm install"}}' 0 "dep-guard: npm install (no args) OK"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm ci"}}' 0 "dep-guard: npm ci OK"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"pip install requests"}}' 2 "dep-guard: pip install blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"pip install -r requirements.txt"}}' 0 "dep-guard: pip -r requirements OK"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"pip install -e ."}}' 0 "dep-guard: pip -e . OK"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"gem install rails"}}' 2 "dep-guard: gem install blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"cargo add serde"}}' 2 "dep-guard: cargo add blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"go get github.com/foo/bar"}}' 2 "dep-guard: go get blocked"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "dep-guard: non-install allowed"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":""}}' 0 "dep-guard: empty allowed"
+test_ex dependency-install-guard.sh '{"tool_input":{"command":"npm install @types/node"}}' 0 "dep-guard: @types/ allowlisted OK"
+# --- temp-file-cleanup (#8856) ---
+test_ex temp-file-cleanup.sh '{}' 0 "temp-cleanup: runs without error"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
