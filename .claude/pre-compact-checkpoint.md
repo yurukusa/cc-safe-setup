@@ -1,9 +1,9 @@
-Saved: 2026-03-27T20:02:46+09:00 | Tool call: #1
+Saved: 2026-03-27T20:17:49+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
+e3e14cb checkpoint: auto-save 20:17:42
+9431dc7 feat: add banned-command-guard hook (solves #36413) Blocks sed -i, awk -i inplace, perl -pi — commands that edit files in-place via shell when the Edit tool should be used instead. Configurable via CC_BANNED_COMMANDS env var. Inspired by #36413 where sed from wrong CWD emptied a file. 350 hooks, 4,516 tests. 8 new tests. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+e23f977 checkpoint: auto-save 20:02:50
 9333ed0 checkpoint: auto-save 20:02:41
 3e9a79c checkpoint: auto-save 20:02:31
-e699eb5 feat: add uncommitted-discard-guard section to git-reset-hard page + update badges - New section linking to uncommitted-discard-guard hook - References #37888 incident - All 6 SEO pages: 4,491→4,506 tests, 348→349 examples Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-ccf4539 chore: update counts 348→349 hooks, 4491→4506 tests Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-5fff293 checkpoint: auto-save 19:28:15
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
