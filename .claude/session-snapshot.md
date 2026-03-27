@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T04:02:54+09:00
+Updated: 2026-03-28T04:05:00+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T04:02:54+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 1ca214c checkpoint: auto-save 04:02:53
+- Last commit: 12a746a checkpoint: auto-save 04:04:53
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./test.sh
+./examples/no-base64-exfil.sh
+./examples/no-wget-piped-bash.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/commit-message-quality.sh
 ./examples/no-push-without-tests.sh
 ./examples/github-actions-guard.sh
-./.claude/pre-compact-checkpoint.md
 ./examples/no-hardcoded-ip.sh
 ./examples/package-lock-frozen.sh
-./examples/gitignore-auto-add.sh
-./examples/python-import-check.sh
 ```
 
