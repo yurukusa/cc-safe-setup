@@ -5442,6 +5442,9 @@ echo ""
 echo "=== Auto-generated example hook tests (214 hooks) ==="
 
 AUTOGEN_TESTS_START=1
+test_ex no-dangerouslySetInnerHTML.sh '{}' 0 "no-dangerouslySetInnerHTML: empty input"
+test_ex no-dangerouslySetInnerHTML.sh '{"tool_input":{"new_string":"const x = 1;"}}' 0 "no-dangerouslySetInnerHTML: safe code"
+test_ex no-dangerouslySetInnerHTML.sh '{"tool_input":{"new_string":"<div dangerouslySetInnerHTML={{__html: data}} />"}}' 0 "no-dangerouslySetInnerHTML: XSS pattern detected (warns, exit 0)"
 test_ex auto-approve-build.sh '{}' 0 "auto-approve-build: empty input"
 test_ex auto-approve-build.sh '{"tool_input":{"command":"npm run build"}}' 0 "auto-approve-build: npm run build approved"
 test_ex auto-approve-build.sh '{"tool_input":{"command":"yarn test"}}' 0 "auto-approve-build: yarn test approved"
