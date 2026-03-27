@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Autonomous Mode Safety — Complete Hook Setup — cc-safe-setup</title>
+<meta name="description" content="Running Claude Code unattended? 412 hooks to prevent rm -rf, force-push, secret leaks, and session drift.">
+<meta name="keywords" content="claude code autonomous, unattended safety, auto mode hooks, claude code headless, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-autonomous-safety.html">
+<meta property="og:title" content="Claude Code Autonomous Mode Safety — Complete Hook Setup">
+<meta property="og:description" content="Running Claude Code unattended? 412 hooks to prevent rm -rf, force-push, secret leaks, and session drift.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+h3{color:#c9d1d9;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="prevent-rm-rf.html">Prevent rm -rf</a></nav>
+
+<h1>Claude Code Autonomous Mode Safety — Complete Hook Setup</h1>
+<p>Running Claude Code unattended — overnight builds, CI pipelines, headless mode — means no human is watching when it decides to <code>rm -rf node_modules</code>, force-push to main, or commit your <code>.env</code> file. Hooks are the only safety layer that works without human oversight.</p>
+
+<h2>What Goes Wrong in Autonomous Mode</h2>
+<p>Claude Code in autonomous mode has full terminal access and makes decisions without asking. In attended sessions, you catch mistakes before they happen. In autonomous mode, every mistake executes.</p>
+
+<div class="incident">
+<p class="incident-title">Real autonomous mode incidents</p>
+<ul style="margin:.5rem 0 0 1.5rem">
+<li><strong>rm -rf /</strong> — Deleted system files while cleaning up a build directory</li>
+<li><strong>git push --force main</strong> — Overwrote shared history at 3am</li>
+<li><strong>git add .env</strong> — Committed API keys to a public repository</li>
+<li><strong>Infinite loop</strong> — Repeated the same failing command 50+ times, burning tokens</li>
+<li><strong>Session drift</strong> — Started working on unrelated files after context compaction</li>
+</ul>
+</div>
+
+<h2>The 5 Essential Hooks for Autonomous Mode</h2>
+
+<h3>1. Destructive Command Guard</h3>
+<p>Blocks <code>rm -rf</code>, <code>chmod 777</code>, <code>mkfs</code>, and other filesystem-destroying commands.</p>
+<pre><code># Blocks: rm -rf /, rm -r -f /home, chmod -R 777 /
+# Allows: rm temp.txt, rm -rf node_modules (configurable)</code></pre>
+
+<h3>2. Branch Protection</h3>
+<p>Blocks pushes to main/master and all force-pushes.</p>
+<pre><code># Blocks: git push origin main, git push --force
+# Allows: git push origin feature-branch</code></pre>
+
+<h3>3. Secret Leak Prevention</h3>
+<p>Blocks staging of .env files, credential files, and private keys.</p>
+<pre><code># Blocks: git add .env, git add credentials.json
+# Allows: git add .env.example</code></pre>
+
+<h3>4. Loop Detection</h3>
+<p>Detects when Claude repeats the same command 5+ times and breaks the cycle.</p>
+<pre><code># Blocks: same command repeated 5+ times
+# Prevents: infinite retry loops burning tokens</code></pre>
+
+<h3>5. Context Monitor</h3>
+<p>Warns when the context window is running low, preventing compaction-related mistakes.</p>
+<pre><code># Warns: context usage above 80%
+# Prevents: uncontrolled compaction and post-compact drift</code></pre>
+
+<h2>Install All 5 in One Command</h2>
+
+<div class="fix">
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem">Installs 8 hooks (the 5 above plus syntax checking, session handoff, and auto-approve for safe read commands). Takes 10 seconds. No dependencies.</p>
+</div>
+
+<h2>Verify Your Setup</h2>
+<pre><code># Check all hooks are installed and working
+npx cc-safe-setup --doctor
+
+# Run the audit (0-100 safety score)
+npx cc-safe-setup --audit
+
+# Full health check
+npx cc-health-check</code></pre>
+
+<div class="cta">
+<h2>Make Autonomous Mode Safe</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Process-level protection that works even when the model forgets instructions. <span class="badge">5,601 tests</span> <span class="badge">412 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
+</div>
+
+<h2>Deep Dives</h2>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><a href="prevent-rm-rf.html">rm -rf — the most common autonomous disaster</a></li>
+<li><a href="prevent-force-push.html">Force-push to main</a></li>
+<li><a href="prevent-secret-leaks.html">Secret leaks via git add .env</a></li>
+<li><a href="prevent-session-drift.html">Session drift in long sessions</a></li>
+<li><a href="prevent-compact-autonomous-push.html">Post-compaction push guard</a></li>
+<li><a href="prevent-bash-debug-leak.html">bash -x debug trace leak</a></li>
+<li><a href="prevent-token-waste.html">Token waste from loops</a></li>
+</ul>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Open source, zero dependencies. <a href="https://github.com/yurukusa/cc-safe-setup">View source</a>.</p>
+</body>
+</html>

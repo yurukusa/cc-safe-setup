@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code from Pushing Code After Context Compaction — cc-safe-setup</title>
+<meta name="description" content="After /compact, Claude autonomously pushes commits. A hook guards the vulnerable post-compaction period.">
+<meta name="keywords" content="claude code compaction push, autonomous git push, post-compact-safety, claude code compact, pretooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-compact-autonomous-push.html">
+<meta property="og:title" content="Prevent Claude Code from Pushing Code After Context Compaction">
+<meta property="og:description" content="After /compact, Claude loses context and pushes incomplete code. A hook prevents it.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="prevent-force-push.html">Prevent Force-Push</a></nav>
+
+<h1>Prevent Claude Code from Pushing Code After Context Compaction</h1>
+<p>When Claude Code runs <code>/compact</code> or auto-compacts due to context limits, it loses the full conversation history. In this degraded state, it may push incomplete commits, skip tests, or push to the wrong branch — believing it has already verified the work.</p>
+
+<h2>The Problem</h2>
+<p>Context compaction is necessary for long sessions, but it creates a dangerous window:</p>
+
+<div class="incident">
+<p class="incident-title">Post-compaction autonomous push</p>
+<p>After compaction, Claude Code retains a summary but loses the actual code changes it reviewed. It "remembers" that it was working on a feature and that the next step was to push. It pushes — but the code it pushes may be half-finished, untested, or targeting the wrong branch.</p>
+</div>
+
+<ul style="margin:1rem 0 1rem 2rem">
+<li>Pre-compaction: Claude reviewed 50 files, ran tests, verified everything</li>
+<li>Post-compaction: Claude remembers "feature complete, ready to push" but lost the details</li>
+<li>Result: Pushes code that may have regressed during compaction</li>
+</ul>
+
+<p>This is especially dangerous in autonomous/auto mode where no human is watching the session.</p>
+
+<h2>Why CLAUDE.md Isn't Enough</h2>
+<p>Ironically, CLAUDE.md instructions are themselves subject to compaction. The instruction "run tests before pushing" may survive compaction, but the context of <em>which</em> tests to run and <em>what</em> was changed gets lost. The model complies with the letter of the rule while missing the spirit.</p>
+
+<h2>The Fix: post-compact-safety Hook</h2>
+
+<div class="fix">
+<p><strong>post-compact-safety.sh</strong> — blocks git push entirely, requiring explicit human approval:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Block all push operations
+if echo "$COMMAND" | grep -qE 'git\s+push'; then
+  echo "BLOCKED: git push requires human approval" >&2
+  echo "Use: git push (outside Claude Code) after reviewing changes" >&2
+  exit 2
+fi
+
+exit 0</code></pre>
+</div>
+
+<p>This is the nuclear option: no pushes from Claude Code at all. For a more nuanced approach, cc-safe-setup's branch-guard allows pushes to feature branches while blocking main/master.</p>
+
+<div class="cta">
+<h2>Install Push Protection + 7 More Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Guards against post-compaction drift, force-push, rm -rf, secret leaks, and more. <span class="badge">5,601 tests</span> <span class="badge">412 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
+</div>
+
+<h2>Also Prevents</h2>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><a href="prevent-force-push.html">Force-push to main/master</a></li>
+<li><a href="prevent-session-drift.html">Session drift in long sessions</a></li>
+<li><a href="prevent-token-waste.html">Token waste and context exhaustion</a></li>
+<li><a href="claude-code-autonomous-safety.html">Full autonomous mode safety</a></li>
+</ul>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic for your Claude Code setup.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Open source, zero dependencies. <a href="https://github.com/yurukusa/cc-safe-setup">View source</a>.</p>
+</body>
+</html>

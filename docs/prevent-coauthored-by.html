@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remove Co-Authored-By from Claude Code Commits — cc-safe-setup</title>
+<meta name="description" content="Claude auto-appends Co-Authored-By trailers to every commit. A hook to control or strip them.">
+<meta name="keywords" content="claude code co-authored-by, remove commit trailer, strip-coauthored-by, claude code git commit, posttooluse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-coauthored-by.html">
+<meta property="og:title" content="Remove Co-Authored-By from Claude Code Commits">
+<meta property="og:description" content="Claude auto-appends Co-Authored-By trailers to every commit. A hook to control or strip them.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="prevent-force-push.html">Prevent Force-Push</a></nav>
+
+<h1>Remove Co-Authored-By from Claude Code Commits</h1>
+<p>Claude Code automatically appends <code>Co-Authored-By: Claude</code> trailers to every commit message it creates. For some teams, this is unwanted — it clutters git log, triggers CI attribution rules, or simply isn't appropriate for the project's commit style.</p>
+
+<h2>The Problem</h2>
+<p>Every time Claude Code runs <code>git commit</code>, it appends a trailer like:</p>
+
+<pre><code>fix: update login validation
+
+Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</code></pre>
+
+<p>This happens automatically, even if you didn't ask for it. The trailer:</p>
+<ul style="margin:1rem 0 1rem 2rem">
+<li>Shows up in <code>git log</code>, <code>git shortlog</code>, and GitHub contributor graphs</li>
+<li>May conflict with your team's commit message format requirements</li>
+<li>Can trigger corporate compliance tools that flag unknown email addresses</li>
+<li>Adds noise to <code>git blame</code> output</li>
+</ul>
+
+<div class="incident">
+<p class="incident-title">Why you might want to keep it</p>
+<p>Some teams and open source projects <em>require</em> AI attribution for transparency. Before stripping the trailer, check your project's contribution guidelines and your company's AI usage policy. The hook below gives you <em>control</em> — you decide whether to keep or strip.</p>
+</div>
+
+<h2>The Fix: strip-coauthored-by Hook</h2>
+
+<div class="fix">
+<p><strong>strip-coauthored-by.sh</strong> — removes the Co-Authored-By trailer after each commit:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Only act after git commit commands
+echo "$COMMAND" | grep -qE 'git\s+commit' || exit 0
+
+# Amend the last commit to remove Co-Authored-By trailer
+LAST_MSG=$(git log -1 --format='%B' 2>/dev/null)
+CLEAN_MSG=$(echo "$LAST_MSG" | sed '/^Co-Authored-By:/d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+
+if [ "$LAST_MSG" != "$CLEAN_MSG" ]; then
+  git commit --amend -m "$CLEAN_MSG" --no-verify 2>/dev/null
+fi
+
+exit 0</code></pre>
+<p style="margin-top:.5rem"><strong>Trigger:</strong> PostToolUse (runs after the commit is made)</p>
+</div>
+
+<h2>Alternative: Block the Trailer Before Commit</h2>
+<p>If you prefer to prevent the trailer from being added in the first place, use a PreToolUse hook that rewrites the commit command:</p>
+
+<pre><code># In CLAUDE.md (soft instruction, may be forgotten):
+"Do not add Co-Authored-By trailers to commits"
+
+# As a hook (enforced at process level):
+# Use cc-safe-setup's commit-message-guard example</code></pre>
+
+<div class="cta">
+<h2>Control Your Commit Messages + 7 More Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">412 example hooks including commit message control, branch protection, and more. <span class="badge">5,601 tests</span> <span class="badge">412 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
+</div>
+
+<h2>Also Prevents</h2>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><a href="prevent-force-push.html">Force-push to main/master</a></li>
+<li><a href="prevent-secret-leaks.html">Secret leaks via git add .env</a></li>
+<li><a href="prevent-compact-autonomous-push.html">Post-compaction autonomous push</a></li>
+<li><a href="claude-code-autonomous-safety.html">Full autonomous mode safety</a></li>
+</ul>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic for your Claude Code setup.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Open source, zero dependencies. <a href="https://github.com/yurukusa/cc-safe-setup">View source</a>.</p>
+</body>
+</html>

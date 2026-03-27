@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Test Claude Code Hooks — Validation Guide — cc-safe-setup</title>
+<meta name="description" content="5,601 tests for 412 hooks. How to validate your hooks work correctly before trusting them in production.">
+<meta name="keywords" content="claude code hook testing, validate hooks, cc-safe-setup verify, pretooluse hook test, hook validation, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-hooks-testing-guide.html">
+<meta property="og:title" content="How to Test Claude Code Hooks — Validation Guide">
+<meta property="og:description" content="5,601 tests for 412 hooks. Validate your hooks work before trusting them in production.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+h3{color:#c9d1d9;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hook-patterns.html">Hook Patterns</a></nav>
+
+<h1>How to Test Claude Code Hooks — Validation Guide</h1>
+<p>A hook that doesn't work is worse than no hook at all. It gives you false confidence that you're protected while dangerous commands slip through. Here's how to validate your hooks actually block what they should.</p>
+
+<h2>The Problem: Untested Hooks</h2>
+<p>Most Claude Code hook guides show you a script and say "save it." But hooks are regex-based shell scripts — the most brittle category of software. A single misplaced backslash, a missing quote, or a wrong exit code silently disables your protection.</p>
+
+<div class="incident">
+<p class="incident-title">Common failure modes</p>
+<ul style="margin:.5rem 0 0 1.5rem">
+<li><code>exit 1</code> instead of <code>exit 2</code> — allows the command instead of blocking</li>
+<li>Regex matches <code>rm -rf</code> but not <code>rm -r -f</code> (flag splitting)</li>
+<li>Hook reads stdin but jq isn't installed — silent failure, exit 0</li>
+<li>Hook blocks <code>git push --force</code> but not <code>git push -f</code></li>
+</ul>
+</div>
+
+<h2>How to Test a Hook</h2>
+
+<h3>1. Unit test with echo + pipe</h3>
+<p>Simulate what Claude Code sends to your hook:</p>
+<pre><code># Should exit 2 (blocked)
+echo '{"tool_input":{"command":"rm -rf /"}}' | bash your-hook.sh
+echo $?  # expect: 2
+
+# Should exit 0 (allowed)
+echo '{"tool_input":{"command":"rm temp.txt"}}' | bash your-hook.sh
+echo $?  # expect: 0</code></pre>
+
+<h3>2. Test edge cases</h3>
+<pre><code># Flag splitting
+echo '{"tool_input":{"command":"rm -r -f /"}}' | bash your-hook.sh
+
+# Quoted paths
+echo '{"tool_input":{"command":"rm -rf \"/important/path\""}}' | bash your-hook.sh
+
+# Compound commands
+echo '{"tool_input":{"command":"cd /tmp && rm -rf *"}}' | bash your-hook.sh</code></pre>
+
+<h3>3. Test the happy path</h3>
+<p>Verify your hook doesn't block legitimate commands:</p>
+<pre><code># Should NOT be blocked
+echo '{"tool_input":{"command":"git status"}}' | bash your-hook.sh
+echo '{"tool_input":{"command":"npm test"}}' | bash your-hook.sh
+echo '{"tool_input":{"command":"cat README.md"}}' | bash your-hook.sh</code></pre>
+
+<h2>How cc-safe-setup Tests Its Hooks</h2>
+
+<div class="fix">
+<p>cc-safe-setup ships with <strong>5,601 tests</strong> covering 412 example hooks. Every hook is tested for:</p>
+<ul style="margin:.5rem 0 0 1.5rem">
+<li>Correct blocking (exit 2) on dangerous commands</li>
+<li>Correct pass-through (exit 0) on safe commands</li>
+<li>Edge cases: flag splitting, path quoting, compound commands</li>
+<li>Missing dependencies (jq not found, etc.)</li>
+<li>Performance: each hook must complete in under 100ms</li>
+</ul>
+</div>
+
+<pre><code># Run the full test suite
+npx cc-safe-setup --test
+
+# Verify your installed hooks
+npx cc-safe-setup --doctor</code></pre>
+
+<div class="cta">
+<h2>Install 8 Tested Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Every hook validated with comprehensive tests. Zero false positives in production. <span class="badge">5,601 tests</span> <span class="badge">412 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
+</div>
+
+<h2>Related</h2>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><a href="hook-patterns.html">Hook patterns reference</a></li>
+<li><a href="common-mistakes.html">Common hook mistakes</a></li>
+<li><a href="claude-code-autonomous-safety.html">Full autonomous mode safety</a></li>
+<li><a href="troubleshooting.html">Troubleshooting guide</a></li>
+</ul>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic for your Claude Code setup.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Open source, zero dependencies. <a href="https://github.com/yurukusa/cc-safe-setup">View source</a>.</p>
+</body>
+</html>
