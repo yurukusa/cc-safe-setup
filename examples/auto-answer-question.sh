@@ -1,6 +1,9 @@
 #!/bin/bash
 # auto-answer-question.sh — Auto-answer AskUserQuestion for headless/autonomous mode
 #
+# NOTE: updatedInput schema (question/answer vs questions/answers array)
+# may vary. Verify with your Claude Code version before production use.
+#
 # TRIGGER: PreToolUse
 # MATCHER: AskUserQuestion
 #
