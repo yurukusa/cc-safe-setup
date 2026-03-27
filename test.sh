@@ -8109,6 +8109,9 @@ test_ex multiline-command-approver.sh '{"tool_input":{"command":"rm -rf /"}}' 0 
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"sudo reboot"}}' 0 "multiline-approver: sudo (passthrough)"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":""}}' 0 "multiline-approver: empty (passthrough)"
 test_ex multiline-command-approver.sh '{}' 0 "multiline-approver: no input (passthrough)"
+test_ex session-start-safety-check.sh '{}' 0 "session-start-safety: runs without error"
+test_ex session-start-safety-check.sh '{"session":"start"}' 0 "session-start-safety: with session field"
+test_ex session-start-safety-check.sh '{"tool_name":"SessionStart"}' 0 "session-start-safety: SessionStart trigger"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
