@@ -9098,6 +9098,14 @@ test_ex context-snapshot.sh '{"stop_reason":"compact"}' 0 "context-snapshot: sto
 test_ex context-snapshot.sh '{"tool_name":"Stop"}' 0 "context-snapshot: Stop tool_name exits 0"
 echo ""
 
+echo "typescript-lint-on-edit.sh:"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "ts-lint: .ts file"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.tsx"}}' 0 "ts-lint: .tsx file"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "ts-lint: .js skipped"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "ts-lint: empty path"
+test_ex typescript-lint-on-edit.sh '{}' 0 "ts-lint: empty input"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
