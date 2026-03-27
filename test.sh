@@ -9122,6 +9122,12 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPD
 set -euo pipefail
 echo ""
 
+echo "strip-coauthored-by.sh:"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"fix bug\""}}' 0 "strip-coauthor: normal commit passes"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo hello"}}' 0 "strip-coauthor: non-git passes"
+test_ex strip-coauthored-by.sh '{}' 0 "strip-coauthor: empty input"
+echo ""
+
 echo "bash-trace-guard.sh:"
 test_ex bash-trace-guard.sh '{"tool_input":{"command":"bash -x script.sh"}}' 2 "bash-trace: blocks bash -x"
 test_ex bash-trace-guard.sh '{"tool_input":{"command":"bash script.sh"}}' 0 "bash-trace: allows bash without -x"
