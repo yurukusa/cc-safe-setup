@@ -400,9 +400,10 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 ## Learn More
 
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
-- [Official Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) — Claude Code hooks documentation
+- [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
 - [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 25 recipes from real GitHub Issues ([interactive version](https://yurukusa.github.io/claude-code-hooks/))
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
+- [v2.1.85 `if` field guide (Qiita)](https://qiita.com/yurukusa/items/7079866e9dc239fcdd57) — Reduce hook overhead with conditional execution
 - [Hook Test Runner](https://github.com/yurukusa/cc-hook-test) — `npx cc-hook-test <hook.sh>` to auto-test any hook
 - [Hook Registry](https://github.com/yurukusa/cc-hook-registry) — `npx cc-hook-registry search database` ([browse online](https://yurukusa.github.io/cc-hook-registry/))
 - [Hooks Cheat Sheet](https://yurukusa.github.io/cc-safe-setup/cheatsheet.html) — printable A4 quick reference
