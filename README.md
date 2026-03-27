@@ -225,7 +225,7 @@ npx cc-health-check
 
 cc-safe-setup gives you 8 essential hooks. Want to know what else your setup needs?
 
-Run `npx cc-health-check` (free, 20 checks) to see your current score. If it's below 80, the **[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** fills the gaps — 16 hooks + 6 templates + 3 exclusive tools + install.sh. Pay What You Want.
+Run `npx cc-health-check` (free, 20 checks) to see your current score. If it's below 80, the **[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** fills the gaps — 6 hooks + 5 templates + 9 scripts + install.sh. Pay What You Want ($0+).
 
 Or browse the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
