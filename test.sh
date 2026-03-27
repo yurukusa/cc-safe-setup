@@ -8148,6 +8148,9 @@ test_ex tool-file-logger.sh '{"tool_name":"Edit","tool_input":{"file_path":"/hom
 test_ex tool-file-logger.sh '{"tool_name":"Read","tool_input":{}}' 0 "file-logger: Read without file_path"
 test_ex tool-file-logger.sh '{}' 0 "file-logger: empty input"
 test_ex tool-file-logger.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "file-logger: non-file tool passes"
+echo "output-token-env-check.sh:"
+test_ex output-token-env-check.sh '{}' 0 "output-token: runs without error"
+test_ex output-token-env-check.sh '{"type":"notification"}' 0 "output-token: notification event"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
