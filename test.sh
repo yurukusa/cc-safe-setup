@@ -6814,16 +6814,6 @@ test_ex write-test-ratio.sh '{"tool_input":{"command":"git status"}}' 0 "write-t
 test_ex write-test-ratio.sh '{"tool_input":{"command":"npm test"}}' 0 "write-test-ratio: test command"
 test_ex write-test-ratio.sh '{"tool_input":{"command":"git commit -m \"add feature\""}}' 0 "write-test-ratio: commit (checks ratio, exit 0)"
 
-echo "========================"
-TOTAL=$((PASS + FAIL))
-echo "Results: $PASS/$TOTAL passed"
-if [ "$FAIL" -gt 0 ]; then
-    echo "FAILURES: $FAIL"
-    exit 1
-else
-    echo "All tests passed!"
-fi
-
 # ============================================
 # Edge case tests for shallow-coverage hooks
 # Generated 2026-03-27 session 57
@@ -7831,3 +7821,12 @@ test_ex kubernetes-guard.sh '{"tool_input":{"command":"kubectl get pods"}}' 0 "k
 test_ex env-source-guard.sh '{"tool_input":{"command":"source .env"}}' 2 "env-source: source .env blocked"
 test_ex env-source-guard.sh '{"tool_input":{"command":". .env.production"}}' 2 "env-source: dot-source blocked"
 test_ex env-source-guard.sh '{"tool_input":{"command":"cat .env"}}' 0 "env-source: cat .env allowed"
+echo "========================"
+TOTAL=$((PASS + FAIL))
+echo "Results: $PASS/$TOTAL passed"
+if [ "$FAIL" -gt 0 ]; then
+    echo "FAILURES: $FAIL"
+    exit 1
+else
+    echo "All tests passed!"
+fi
