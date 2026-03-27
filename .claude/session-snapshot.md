@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-27T14:11:56+09:00
+Updated: 2026-03-27T14:18:18+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-27T14:11:56+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 05de551 checkpoint: auto-save 14:11:54
+- Last commit: 03661d9 checkpoint: auto-save 14:18:10
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
 ./.claude/pre-compact-checkpoint.md
+./test.sh
 ./README.md
 ./examples/prefer-builtin-tools.sh
 ./CHANGELOG.md
