@@ -466,6 +466,7 @@ function examples() {
     'UX': {
       'prompt-length-guard.sh': 'UserPromptSubmit: warn on long prompts (>5000 chars)',
       'prompt-injection-detector.sh': 'UserPromptSubmit: detect prompt injection patterns',
+      'auto-answer-question.sh': 'PreToolUse: auto-answer AskUserQuestion for headless mode (v2.1.85)',
       'notify-waiting.sh': 'Desktop notification when Claude waits for input',
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd files on session end',
       'hook-debug-wrapper.sh': 'Wrap any hook to log input/output/exit/timing',
