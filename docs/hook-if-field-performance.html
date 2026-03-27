@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Hook if Field — Reduce Hook Overhead by 90% (v2.1.85)</title>
+<meta name="description" content="Claude Code v2.1.85 adds the 'if' field to hooks. Skip hook process spawning when commands don't match. Eliminate unnecessary overhead in autonomous sessions.">
+<meta name="keywords" content="claude code hooks if field, claude code v2.1.85, hook performance, conditional hooks, pretooluse optimization, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/hook-if-field-performance.html">
+<meta property="og:title" content="Claude Code Hook if Field — Conditional Execution (v2.1.85)">
+<meta property="og:description" content="Skip hook processes when commands don't match. New in v2.1.85.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.before{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.after{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<nav><a href="index.html">cc-safe-setup</a> &gt; Hook if Field Performance</nav>
+
+<h1>Hook <code>if</code> Field — Conditional Execution</h1>
+<p>New in Claude Code <strong>v2.1.85</strong>. The <code>if</code> field lets you specify when a hook should run using permission rule syntax. If the command doesn't match, the hook process is never spawned.</p>
+
+<h2>The Problem</h2>
+<p>Without <code>if</code>, every Bash command triggers every hook with <code>"matcher": "Bash"</code>. Running <code>ls</code> spawns your git-only hook. Running <code>echo</code> spawns your npm-only hook. With 10 hooks, a simple <code>ls</code> spawns 10 processes.</p>
+
+<div class="before">
+<strong>Before (v2.1.84 and earlier):</strong>
+<pre><code>{
+  "matcher": "Bash",
+  "hooks": [{
+    "type": "command",
+    "command": "~/.claude/hooks/branch-guard.sh"
+  }]
+}</code></pre>
+<p>branch-guard.sh runs for <em>every</em> Bash command. It checks internally and exits early for non-git commands. But the process is already spawned.</p>
+</div>
+
+<h2>The Solution</h2>
+
+<div class="after">
+<strong>After (v2.1.85+):</strong>
+<pre><code>{
+  "matcher": "Bash",
+  "hooks": [{
+    "type": "command",
+    <strong>"if": "Bash(git push *)"</strong>,
+    "command": "~/.claude/hooks/branch-guard.sh"
+  }]
+}</code></pre>
+<p>branch-guard.sh only runs when the command starts with <code>git push</code>. Zero process spawning for <code>ls</code>, <code>echo</code>, <code>npm test</code>.</p>
+</div>
+
+<h2>Syntax</h2>
+<p>The <code>if</code> field uses the same syntax as <code>permissions.allow</code> / <code>permissions.deny</code>:</p>
+<pre><code>Bash(git *)         — git commands
+Bash(npm install *)  — npm install
+Bash(rm *)          — rm commands
+Edit(*.py)          — Python file edits
+Write(*.json)       — JSON file writes</code></pre>
+
+<h2>Important Details</h2>
+<ul style="margin:1rem 0;padding-left:1.5rem">
+<li>Place <code>if</code> inside the hook handler (same level as <code>type</code> and <code>command</code>), not at the matcher level</li>
+<li>Only works on tool events: PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest</li>
+<li>Invalid syntax = hook doesn't run (fail-closed)</li>
+<li>Omitting <code>if</code> preserves backward compatibility</li>
+</ul>
+
+<h2>Real Impact</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem">Command</th><th>Before (10 hooks)</th><th>After (with if)</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>ls</code></td><td style="text-align:center">10 processes</td><td style="text-align:center;color:#3fb950"><strong>0</strong></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git push</code></td><td style="text-align:center">10 processes</td><td style="text-align:center;color:#3fb950"><strong>1-2</strong></td></tr>
+<tr><td style="padding:.5rem"><code>npm test</code></td><td style="text-align:center">10 processes</td><td style="text-align:center;color:#3fb950"><strong>1</strong></td></tr>
+</table>
+
+<div class="cta">
+<p><strong>Get 406 hook examples with if-field documentation:</strong></p>
+<code>npx cc-safe-setup</code>
+<p style="margin-top:.8rem"><span class="badge">5,564 tests</span> <span class="badge">406 examples</span> <span class="badge">v2.1.85 ready</span></p>
+<p style="margin-top:1rem;font-size:.9rem"><a href="https://qiita.com/yurukusa/items/7079866e9dc239fcdd57">Japanese guide (Qiita)</a> · <a href="https://code.claude.com/docs/en/hooks">Official docs</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</div>
+
+<p style="color:#8b949e;font-size:.85rem;margin-top:2rem">cc-safe-setup · 406 hooks · 5,564 tests · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
