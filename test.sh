@@ -8726,6 +8726,10 @@ test_ex no-exposed-port-in-dockerfile.sh '{"tool_input":{"file_path":"/tmp/norma
 test_ex no-todo-in-merge.sh '{"tool_input":{"command":"echo test123"}}' 0 "no_todo_in_merge: safe cmd"
 test_ex readme-exists-check.sh '{"tool_input":{"command":"echo test123"}}' 0 "readme_exists_chec: safe cmd"
 test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"/tmp/normal.txt"}}' 0 "typescript_strict_: normal file"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.py"}}' 0 "python_ruff_on_edi: py file"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "python_ruff_on_edi: non-py skip"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "python_ruff_on_edi: empty path"
+test_ex python-ruff-on-edit.sh '{}' 0 "python_ruff_on_edi: empty input"
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
