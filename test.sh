@@ -8798,6 +8798,76 @@ test_ex no-debug-commit.sh '{"tool_input":{"command":"  git commit --amend"}}' 0
 test_ex no-debug-commit.sh '{"tool_input":{"command":"git push origin main"}}' 0 "debug-commit-ext: git push skips"
 test_ex no-debug-commit.sh '{"tool_input":{"command":"npm test && git commit -m done"}}' 0 "debug-commit-ext: chained non-leading skip"
 
+# ========== Deep tests: node-version-check.sh ==========
+echo "node-version-check.sh (deep):"
+# Always exits 0 — notification hook, no blocking
+test_ex node-version-check.sh '' 0 "node-check-deep: empty stdin"
+# The hook reads node --version from system, not from JSON input
+# Regardless of input shape it should always exit 0
+test_ex node-version-check.sh '{"message":"anything","session_id":"abc123"}' 0 "node-check-deep: arbitrary JSON fields"
+# Ensure it handles malformed JSON gracefully (stdin is ignored anyway)
+test_ex node-version-check.sh 'not-json-at-all' 0 "node-check-deep: non-JSON input"
+echo ""
+
+# ========== Deep tests: session-quota-tracker.sh ==========
+echo "session-quota-tracker.sh (deep):"
+# Counter file uses $$ so each bash invocation gets a fresh file — always count=1, exit 0
+test_ex session-quota-tracker.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.txt"}}' 0 "quota-deep: Write tool tracked"
+test_ex session-quota-tracker.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.ts"}}' 0 "quota-deep: Edit tool tracked"
+# Malformed input — hook does not parse stdin, just increments counter
+test_ex session-quota-tracker.sh '' 0 "quota-deep: empty stdin still increments"
+# Large JSON payload should not affect exit code
+test_ex session-quota-tracker.sh '{"tool_name":"Bash","tool_input":{"command":"echo a very long command string that goes on and on and on"}}' 0 "quota-deep: large payload OK"
+echo ""
+
+# ========== Deep tests: session-time-limit.sh ==========
+echo "session-time-limit.sh (deep):"
+# First call creates marker, always exits 0
+test_ex session-time-limit.sh '{"tool_name":"Bash","tool_input":{"command":"echo hi"}}' 0 "time-limit-deep: first call creates marker"
+# With CC_SESSION_LIMIT_HOURS=0, any elapsed time exceeds limit — but first call always exits 0 (creates marker)
+CC_SESSION_LIMIT_HOURS=0 test_ex session-time-limit.sh '{"tool_name":"Bash"}' 0 "time-limit-deep: zero-hour limit first call"
+# Custom env var — large limit should always pass
+CC_SESSION_LIMIT_HOURS=999 test_ex session-time-limit.sh '{"tool_name":"Read"}' 0 "time-limit-deep: very large limit OK"
+# Empty input — hook reads stdin but only uses it to consume; marker logic is PID-based
+test_ex session-time-limit.sh '' 0 "time-limit-deep: empty stdin"
+echo ""
+
+# ========== Deep tests: detect-mixed-indentation.sh ==========
+echo "detect-mixed-indentation.sh (deep):"
+TMPDIR_INDENT=$(mktemp -d)
+# File with only spaces — no warning, exit 0
+printf '  line1\n  line2\n  line3\n' > "$TMPDIR_INDENT/spaces.py"
+test_ex detect-mixed-indentation.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_INDENT/spaces.py\"}}" 0 "mixed-indent-deep: spaces-only py file"
+# File with only tabs — no warning, exit 0
+printf '\tline1\n\tline2\n' > "$TMPDIR_INDENT/tabs.js"
+test_ex detect-mixed-indentation.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_INDENT/tabs.js\"}}" 0 "mixed-indent-deep: tabs-only js file"
+# File with mixed tabs and spaces — warns but still exit 0
+printf '\tline1\n  line2\n\tline3\n  line4\n' > "$TMPDIR_INDENT/mixed.ts"
+test_ex detect-mixed-indentation.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_INDENT/mixed.ts\"}}" 0 "mixed-indent-deep: mixed tabs+spaces warns"
+# Unsupported extension (.txt) — skipped, exit 0
+printf '\tline1\n  line2\n' > "$TMPDIR_INDENT/readme.txt"
+test_ex detect-mixed-indentation.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_INDENT/readme.txt\"}}" 0 "mixed-indent-deep: .txt extension skipped"
+rm -rf "$TMPDIR_INDENT"
+echo ""
+
+# ========== Deep tests: yaml-syntax-check.sh ==========
+echo "yaml-syntax-check.sh (deep):"
+TMPDIR_YAML=$(mktemp -d)
+# Valid YAML — exit 0
+printf 'name: test\nversion: 1.0\n' > "$TMPDIR_YAML/valid.yml"
+test_ex yaml-syntax-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_YAML/valid.yml\"}}" 0 "yaml-deep: valid YAML passes"
+# Invalid YAML (bad indentation) — exit 2
+printf 'name: test\n  bad:\nindent: broken\n  - mixed\n' > "$TMPDIR_YAML/invalid.yaml"
+test_ex yaml-syntax-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_YAML/invalid.yaml\"}}" 2 "yaml-deep: invalid YAML blocked"
+# Empty YAML file — valid (null document), exit 0
+touch "$TMPDIR_YAML/empty.yml"
+test_ex yaml-syntax-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_YAML/empty.yml\"}}" 0 "yaml-deep: empty YAML passes"
+# Non-YAML extension — skipped, exit 0
+printf 'not: yaml: at: all:::' > "$TMPDIR_YAML/config.json"
+test_ex yaml-syntax-check.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_YAML/config.json\"}}" 0 "yaml-deep: .json extension skipped"
+rm -rf "$TMPDIR_YAML"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
