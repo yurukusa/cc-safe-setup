@@ -66,6 +66,20 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 Each hook exists because a real incident happened without it.
 
+### v2.1.85: `if` Field Support
+
+Hooks now support an `if` field for conditional execution. The hook process only spawns when the command matches the pattern — `ls` won't trigger a git-only hook.
+
+```json
+{
+  "type": "command",
+  "if": "Bash(git push *)",
+  "command": "~/.claude/hooks/test-before-push.sh"
+}
+```
+
+All example hooks include `if` field documentation in their headers.
+
 ## PermissionRequest Hooks (NEW)
 
 Override Claude Code's built-in confirmation prompts. These run **after** the built-in safety checks, so they can auto-approve prompts that `permissions.allow` cannot suppress.
