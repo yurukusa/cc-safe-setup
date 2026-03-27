@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code Syntax Errors Cascading — cc-safe-setup</title>
+<meta name="description" content="Claude Code can introduce syntax errors that cascade through dozens of files. A PostToolUse hook catches them immediately. npx cc-safe-setup.">
+<meta name="keywords" content="claude code syntax error, claude code breaks code, claude code validation, posttooluse hook, syntax check hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-syntax-errors.html">
+<meta property="og:title" content="Prevent Claude Code Syntax Errors From Cascading">
+<meta property="og:description" content="One broken file becomes 30. A PostToolUse hook catches syntax errors before they spread.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Prevent Claude Code Syntax Errors From Cascading</h1>
+<p>Claude Code edits files one after another. When it introduces a syntax error in file #1, it doesn't notice. It moves to file #2, which imports file #1. Now file #2 breaks. By the time it stops, 30 files have cascading errors.</p>
+
+<h2>How Syntax Errors Cascade</h2>
+
+<div class="incident">
+<p class="incident-title">The 30-file cascade</p>
+<p>Claude refactors a shared utility file. It removes a closing brace. The file is syntactically broken, but Claude moves on to the next file that imports it. Each file it touches inherits the problem. The developer returns to find 30+ files with errors traced back to one missing <code>}</code>.</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">The JSON config corruption</p>
+<p>Claude edits a <code>tsconfig.json</code> and leaves a trailing comma. Every TypeScript file in the project now fails to compile. Claude spends 20 minutes "fixing" type errors that don't actually exist.</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">The Python import chain</p>
+<p>Claude introduces an indentation error in a base module. All 15 files that import it start throwing <code>IndentationError</code>. Claude tries to fix each file individually instead of the root cause.</p>
+</div>
+
+<h2>Why This Keeps Happening</h2>
+<p>Claude doesn't run a syntax check after editing a file. It trusts its own output. When it makes a mistake — a missing bracket, wrong indentation, unclosed string — it proceeds to the next task. The error propagates silently.</p>
+
+<h2>The Fix: PostToolUse Syntax Check</h2>
+
+<div class="fix">
+<p><strong>syntax-check hook</strong> — validates every file immediately after editing:</p>
+<pre><code>#!/bin/bash
+# Runs after every Write/Edit tool use
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+[ -z "$FILE" ] && exit 0
+
+case "$FILE" in
+  *.py)  python3 -c "import ast; ast.parse(open('$FILE').read())" 2>&1 ;;
+  *.js)  node --check "$FILE" 2>&1 ;;
+  *.ts)  npx tsc --noEmit "$FILE" 2>&1 ;;
+  *.json) python3 -m json.tool "$FILE" > /dev/null 2>&1 ;;
+  *.sh)  bash -n "$FILE" 2>&1 ;;
+esac
+
+if [ $? -ne 0 ]; then
+  echo "SYNTAX ERROR in $FILE — fix before continuing" >&2
+  exit 2
+fi</code></pre>
+<p>This hook runs after every file edit. If the file has a syntax error, Claude is forced to fix it before touching anything else.</p>
+</div>
+
+<h2>Languages Supported</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem;color:#f0f6fc">Language</th><th style="text-align:left;padding:.5rem;color:#f0f6fc">Check Method</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Python</td><td style="padding:.5rem"><code>python3 -c "import ast; ast.parse(...)"</code></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">JavaScript</td><td style="padding:.5rem"><code>node --check</code></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">TypeScript</td><td style="padding:.5rem"><code>npx tsc --noEmit</code></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">JSON</td><td style="padding:.5rem"><code>python3 -m json.tool</code></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Bash</td><td style="padding:.5rem"><code>bash -n</code></td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Go, Rust, Ruby</td><td style="padding:.5rem">Supported via <code>--install-example</code></td></tr>
+</table>
+
+<div class="cta">
+<h2>Install All 8 Safety Hooks in 10 Seconds</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Catches syntax errors, blocks rm -rf, prevents force-push, stops secret leaks. <span class="badge">4,491 tests</span> <span class="badge">348 examples</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
+</div>
+
+<h2>Check Your Safety Score</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>Free 20-point diagnostic. Score below 80 means your Claude Code setup has gaps.</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup is open source, zero dependencies, and installs nothing globally. <a href="https://github.com/yurukusa/cc-safe-setup">View source on GitHub</a>.</p>
+</body>
+</html>
