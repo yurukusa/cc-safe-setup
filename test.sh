@@ -9488,6 +9488,14 @@ test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip list"}}' 0 "pip
 test_ex pip-requirements-guard.sh '{}' 0 "pip-guard: empty input"
 echo ""
 
+# --- npm-global-install-guard ---
+test_ex npm-global-install-guard.sh '{"tool_input":{"command":"npm install -g typescript"}}' 2 "npm-global: install -g blocked"
+test_ex npm-global-install-guard.sh '{"tool_input":{"command":"npm i --global eslint"}}' 2 "npm-global: i --global blocked"
+test_ex npm-global-install-guard.sh '{"tool_input":{"command":"npm install express"}}' 0 "npm-global: local install allowed"
+test_ex npm-global-install-guard.sh '{"tool_input":{"command":"npx create-react-app my-app"}}' 0 "npm-global: npx allowed"
+test_ex npm-global-install-guard.sh '{}' 0 "npm-global: empty input"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
