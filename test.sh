@@ -4256,6 +4256,8 @@ cp examples/allow-claude-settings.sh /tmp/test-allow-claude-settings.sh && chmod
 test_hook "allow-claude-settings" '{"tool_input":{"file_path":"/home/user/.claude/settings.json"}}' 0 "allows .claude/ write (PermissionRequest, exit 0 with JSON)"
 test_hook "allow-claude-settings" '{"tool_input":{"file_path":"/home/user/project/src/main.py"}}' 0 "passes through non-.claude file"
 test_hook "allow-claude-settings" '{"tool_input":{}}' 0 "handles missing file_path"
+test_hook "allow-claude-settings" '{}' 0 "handles empty JSON"
+test_hook "allow-claude-settings" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "allow-git-hooks-dir.sh:"
@@ -4264,6 +4266,8 @@ cp examples/allow-git-hooks-dir.sh /tmp/test-allow-git-hooks-dir.sh && chmod +x 
 test_hook "allow-git-hooks-dir" '{"tool_input":{"file_path":"/project/.git/hooks/pre-commit"}}' 0 "allows .git/hooks/pre-commit (PermissionRequest)"
 test_hook "allow-git-hooks-dir" '{"tool_input":{"file_path":"/project/.git/config"}}' 0 "passes through .git/config (not hooks subdir)"
 test_hook "allow-git-hooks-dir" '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "passes through normal file"
+test_hook "allow-git-hooks-dir" '{}' 0 "handles empty JSON"
+test_hook "allow-git-hooks-dir" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "allow-protected-dirs.sh:"
@@ -4337,6 +4341,8 @@ cp examples/auto-checkpoint.sh /tmp/test-auto-chkpt.sh && chmod +x /tmp/test-aut
 test_hook "auto-chkpt" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-Edit/Write tool"
 test_hook "auto-chkpt" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "ignores Read tool"
 test_hook "auto-chkpt" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "handles Edit tool (PostToolUse, exit 0)"
+test_hook "auto-chkpt" '{}' 0 "handles empty JSON"
+test_hook "auto-chkpt" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "auto-snapshot.sh:"
@@ -4345,6 +4351,8 @@ cp examples/auto-snapshot.sh /tmp/test-auto-snap.sh && chmod +x /tmp/test-auto-s
 test_hook "auto-snap" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores Bash tool"
 test_hook "auto-snap" '{"tool_name":"Edit","tool_input":{"file_path":"/nonexistent/file.py"}}' 0 "handles nonexistent file gracefully"
 test_hook "auto-snap" '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "handles empty file_path"
+test_hook "auto-snap" '{}' 0 "handles empty JSON"
+test_hook "auto-snap" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "auto-stash-before-pull.sh:"
@@ -4363,6 +4371,8 @@ cp examples/backup-before-refactor.sh /tmp/test-backup-refactor.sh && chmod +x /
 test_hook "backup-refactor" '{"tool_input":{"command":"git mv src/old.py src/new.py"}}' 0 "stashes before git mv in src (exit 0)"
 test_hook "backup-refactor" '{"tool_input":{"command":"ls -la"}}' 0 "passes through non-refactor command"
 test_hook "backup-refactor" '{"tool_input":{"command":""}}' 0 "handles empty command"
+test_hook "backup-refactor" '{}' 0 "handles empty JSON"
+test_hook "backup-refactor" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "binary-file-guard.sh:"
@@ -4390,6 +4400,8 @@ cp examples/branch-naming-convention.sh /tmp/test-branch-naming.sh && chmod +x /
 test_hook "branch-naming" '{"tool_input":{"command":"git checkout -b feat/new-feature"}}' 0 "allows feat/ prefix (exit 0)"
 test_hook "branch-naming" '{"tool_input":{"command":"git checkout -b random-name"}}' 0 "warns on non-conventional but exits 0"
 test_hook "branch-naming" '{"tool_input":{"command":"git status"}}' 0 "ignores non-checkout commands"
+test_hook "branch-naming" '{}' 0 "handles empty JSON"
+test_hook "branch-naming" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "changelog-reminder.sh:"
@@ -4417,6 +4429,8 @@ cp examples/commit-message-check.sh /tmp/test-commit-msg.sh && chmod +x /tmp/tes
 test_hook "commit-msg" '{"tool_input":{"command":"git commit -m \"feat: add login\""}}' 0 "PostToolUse: checks commit (exit 0)"
 test_hook "commit-msg" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
 test_hook "commit-msg" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
+test_hook "commit-msg" '{}' 0 "handles empty JSON"
+test_hook "commit-msg" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "commit-scope-guard.sh:"
@@ -4425,6 +4439,8 @@ cp examples/commit-scope-guard.sh /tmp/test-commit-scope.sh && chmod +x /tmp/tes
 test_hook "commit-scope" '{"tool_input":{"command":"git commit -m \"feat: small change\""}}' 0 "allows commit with few staged files"
 test_hook "commit-scope" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
 test_hook "commit-scope" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
+test_hook "commit-scope" '{}' 0 "handles empty JSON"
+test_hook "commit-scope" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "compact-reminder.sh:"
@@ -4453,6 +4469,8 @@ cp examples/conflict-marker-guard.sh /tmp/test-conflict-marker.sh && chmod +x /t
 test_hook "conflict-marker" '{"tool_input":{"command":"git commit -m \"merge fix\""}}' 0 "allows commit without conflict markers"
 test_hook "conflict-marker" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
 test_hook "conflict-marker" '{"tool_input":{"command":"ls -la"}}' 0 "ignores non-git commands"
+test_hook "conflict-marker" '{}' 0 "handles empty JSON"
+test_hook "conflict-marker" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "context-snapshot.sh:"
@@ -4490,6 +4508,8 @@ cp examples/debug-leftover-guard.sh /tmp/test-debug-leftover.sh && chmod +x /tmp
 test_hook "debug-leftover" '{"tool_input":{"command":"git commit -m \"feat: add feature\""}}' 0 "warns if debug in staged (exit 0)"
 test_hook "debug-leftover" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
 test_hook "debug-leftover" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
+test_hook "debug-leftover" '{}' 0 "handles empty JSON"
+test_hook "debug-leftover" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "dependency-audit.sh:"
@@ -4509,6 +4529,8 @@ cp examples/dependency-version-pin.sh /tmp/test-dep-pin.sh && chmod +x /tmp/test
 test_hook "dep-pin" '{"tool_input":{"file_path":"package.json","new_string":"\"express\": \"^4.18.0\""}}' 0 "warns on ^ range (PostToolUse, exit 0)"
 test_hook "dep-pin" '{"tool_input":{"file_path":"package.json","new_string":"\"express\": \"4.18.0\""}}' 0 "allows pinned version"
 test_hook "dep-pin" '{"tool_input":{"file_path":"src/index.js","new_string":"const x = 1;"}}' 0 "ignores non-package.json"
+test_hook "dep-pin" '{}' 0 "handles empty JSON"
+test_hook "dep-pin" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "diff-size-guard.sh:"
@@ -4517,6 +4539,8 @@ cp examples/diff-size-guard.sh /tmp/test-diff-size.sh && chmod +x /tmp/test-diff
 test_hook "diff-size" '{"tool_input":{"command":"git commit -m \"feat: small\""}}' 0 "allows commit (warns if large)"
 test_hook "diff-size" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit/add commands"
 test_hook "diff-size" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
+test_hook "diff-size" '{}' 0 "handles empty JSON"
+test_hook "diff-size" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "disk-space-guard.sh:"
@@ -4556,6 +4580,8 @@ cp examples/enforce-tests.sh /tmp/test-enforce-tests2.sh && chmod +x /tmp/test-e
 test_hook "enforce-tests2" '{"tool_input":{"file_path":""}}' 0 "handles empty file_path"
 test_hook "enforce-tests2" '{"tool_input":{"file_path":"/nonexistent/test_utils.py"}}' 0 "ignores test files"
 test_hook "enforce-tests2" '{"tool_input":{"file_path":"/tmp/not-a-source.txt"}}' 0 "ignores non-source files"
+test_hook "enforce-tests2" '{}' 0 "handles empty JSON"
+test_hook "enforce-tests2" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "env-drift-guard.sh:"
@@ -4564,6 +4590,8 @@ cp examples/env-drift-guard.sh /tmp/test-env-drift.sh && chmod +x /tmp/test-env-
 test_hook "env-drift" '{"tool_input":{"file_path":"src/main.py"}}' 0 "ignores non-.env.example files"
 test_hook "env-drift" '{"tool_input":{"file_path":""}}' 0 "handles empty file_path"
 test_hook "env-drift" '{"tool_input":{"file_path":".env.example"}}' 0 "checks drift on .env.example (PostToolUse, exit 0)"
+test_hook "env-drift" '{}' 0 "handles empty JSON"
+test_hook "env-drift" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "env-source-guard.sh:"
@@ -4582,6 +4610,8 @@ cp examples/error-memory-guard.sh /tmp/test-error-memory.sh && chmod +x /tmp/tes
 test_hook "error-memory" '{"tool_input":{"command":"ls"},"tool_result_exit_code":0,"tool_result":"ok"}' 0 "ignores successful commands"
 test_hook "error-memory" '{"tool_input":{"command":"failing-unique-cmd"},"tool_result_exit_code":1,"tool_result":"error"}' 0 "records first failure (exit 0)"
 test_hook "error-memory" '{"tool_input":{"command":""},"tool_result_exit_code":0}' 0 "handles empty command"
+test_hook "error-memory" '{}' 0 "handles empty JSON"
+test_hook "error-memory" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "fact-check-gate.sh:"
@@ -4616,6 +4646,8 @@ test_hook "prompt-len" '{"prompt":"short prompt"}' 0 "allows short prompt"
 _LONG_PROMPT=$(python3 -c "print('x' * 6000)")
 test_hook "prompt-len" "{\"prompt\":\"${_LONG_PROMPT}\"}" 0 "warns on long prompt but exits 0"
 test_hook "prompt-len" '{}' 0 "allows missing prompt"
+test_hook "prompt-len" '{}' 0 "handles empty JSON"
+test_hook "prompt-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== protect-claudemd tests ==========
 echo ""
@@ -4663,6 +4695,8 @@ cp examples/read-before-edit.sh /tmp/test-read-edit.sh && chmod +x /tmp/test-rea
 test_hook "read-edit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/unread-file.js"}}' 0 "warns on unread file but exits 0"
 test_hook "read-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/somefile.js"}}' 0 "allows Read tool"
 test_hook "read-edit" '{}' 0 "allows empty input"
+test_hook "read-edit" '{}' 0 "handles empty JSON"
+test_hook "read-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== reinject-claudemd tests ==========
 echo ""
@@ -4684,6 +4718,8 @@ cp examples/relative-path-guard.sh /tmp/test-rel-path.sh && chmod +x /tmp/test-r
 test_hook "rel-path" '{"tool_input":{"file_path":"src/index.js"}}' 0 "warns on relative path but exits 0"
 test_hook "rel-path" '{"tool_input":{"file_path":"/absolute/path/file.js"}}' 0 "allows absolute path"
 test_hook "rel-path" '{}' 0 "allows missing file_path"
+test_hook "rel-path" '{}' 0 "handles empty JSON"
+test_hook "rel-path" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== require-issue-ref tests ==========
 echo ""
@@ -4732,6 +4768,8 @@ cp examples/sensitive-regex-guard.sh /tmp/test-sens-regex.sh && chmod +x /tmp/te
 test_hook "sens-regex" '{"tool_input":{"new_string":"(a+)+"}}' 0 "warns on nested quantifier but exits 0"
 test_hook "sens-regex" '{"tool_input":{"new_string":"(.*)+x"}}' 0 "warns on (.*)+ but exits 0"
 test_hook "sens-regex" '{"tool_input":{"new_string":"const x = 42;"}}' 0 "allows normal code"
+test_hook "sens-regex" '{}' 0 "handles empty JSON"
+test_hook "sens-regex" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== session-checkpoint tests ==========
 echo ""
@@ -4810,6 +4848,8 @@ _TRACKER="$HOME/.claude/active-agents"
 _NOW=$(date +%s)
 for i in $(seq 1 5); do echo "${_NOW}|agent" >> "$_TRACKER"; done
 test_hook "subagent-bud" '{"tool_name":"Agent","tool_input":{}}' 2 "blocks when max agents reached"
+test_hook "subagent-bud" '{}' 0 "handles empty JSON"
+test_hook "subagent-bud" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -f "$_TRACKER"
 
 # ========== subagent-scope-guard tests ==========
@@ -4834,6 +4874,8 @@ cp examples/symlink-guard.sh /tmp/test-symlink-gd.sh && chmod +x /tmp/test-symli
 test_hook "symlink-gd" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-rm command"
 test_hook "symlink-gd" '{"tool_input":{"command":"rm -rf /nonexistent-path-xyzzy"}}' 0 "allows rm on nonexistent path"
 test_hook "symlink-gd" '{"tool_input":{"command":"echo hello"}}' 0 "allows echo"
+test_hook "symlink-gd" '{}' 0 "handles empty JSON"
+test_hook "symlink-gd" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== terraform-guard tests ==========
 echo ""
@@ -4887,6 +4929,8 @@ cp examples/test-deletion-guard.sh /tmp/test-del-guard.sh && chmod +x /tmp/test-
 test_hook "del-guard" '{"tool_input":{"file_path":"src/app.test.js","old_string":"it(\"should work\", () => { expect(1).toBe(1); });","new_string":"// removed"}}' 0 "warns on test deletion but exits 0"
 test_hook "del-guard" '{"tool_input":{"file_path":"src/app.test.js","old_string":"it(\"should work\", () => {","new_string":"it(\"should work correctly\", () => {"}}' 0 "allows test rename"
 test_hook "del-guard" '{"tool_input":{"file_path":"src/app.js","old_string":"const x = 1;","new_string":"const x = 2;"}}' 0 "allows edit to non-test file"
+test_hook "del-guard" '{}' 0 "handles empty JSON"
+test_hook "del-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== timeout-guard tests ==========
 echo ""
@@ -4909,6 +4953,8 @@ cp examples/timezone-guard.sh /tmp/test-tz-guard.sh && chmod +x /tmp/test-tz-gua
 test_hook "tz-guard" '{"tool_input":{"command":"TZ=America/New_York date"}}' 0 "notes non-UTC timezone but exits 0"
 test_hook "tz-guard" '{"tool_input":{"command":"TZ=UTC date"}}' 0 "allows UTC timezone"
 test_hook "tz-guard" '{"tool_input":{"command":"date"}}' 0 "allows command without timezone"
+test_hook "tz-guard" '{}' 0 "handles empty JSON"
+test_hook "tz-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== todo-check tests ==========
 echo ""
@@ -4951,6 +4997,8 @@ cp examples/typescript-strict-guard.sh /tmp/test-ts-strict.sh && chmod +x /tmp/t
 test_hook "ts-strict" '{"tool_input":{"file_path":"tsconfig.json","new_string":"\"strict\": false"}}' 0 "warns on strict:false but exits 0"
 test_hook "ts-strict" '{"tool_input":{"file_path":"tsconfig.json","new_string":"\"strict\": true"}}' 0 "allows strict:true"
 test_hook "ts-strict" '{"tool_input":{"file_path":"src/index.ts","new_string":"const x = 1;"}}' 0 "allows non-tsconfig file"
+test_hook "ts-strict" '{}' 0 "handles empty JSON"
+test_hook "ts-strict" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== typosquat-guard tests ==========
 echo ""
@@ -5030,6 +5078,8 @@ test_hook "work-hours" '{"tool_input":{"command":"git push origin main"}}' 0 "al
 export CC_WORK_START=99 CC_WORK_END=99 CC_WORK_DAYS="0"
 test_hook "work-hours" '{"tool_input":{"command":"git push origin main"}}' 2 "blocks push outside work hours"
 test_hook "work-hours" '{"tool_input":{"command":"ls -la"}}' 0 "allows safe command outside work hours"
+test_hook "work-hours" '{}' 0 "handles empty JSON"
+test_hook "work-hours" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 unset CC_WORK_START CC_WORK_END CC_WORK_DAYS
 
 # ========== worktree-cleanup-guard tests ==========
@@ -5041,6 +5091,8 @@ cp examples/worktree-cleanup-guard.sh /tmp/test-wt-cleanup.sh && chmod +x /tmp/t
 test_hook "wt-cleanup" '{"tool_input":{"command":"git worktree remove /tmp/wt"}}' 0 "warns on worktree remove but exits 0"
 test_hook "wt-cleanup" '{"tool_input":{"command":"git worktree prune"}}' 0 "warns on worktree prune but exits 0"
 test_hook "wt-cleanup" '{"tool_input":{"command":"git status"}}' 0 "allows non-worktree command"
+test_hook "wt-cleanup" '{}' 0 "handles empty JSON"
+test_hook "wt-cleanup" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 # ========== worktree-guard tests ==========
 echo ""
@@ -5051,6 +5103,8 @@ cp examples/worktree-guard.sh /tmp/test-wt-guard.sh && chmod +x /tmp/test-wt-gua
 test_hook "wt-guard" '{"tool_input":{"command":"git clean -fd"}}' 0 "warns on git clean in worktree but exits 0"
 test_hook "wt-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-destructive git command"
 test_hook "wt-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-git command"
+test_hook "wt-guard" '{}' 0 "handles empty JSON"
+test_hook "wt-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 
 echo ""
 echo "file-size-limit.sh:"
@@ -5060,6 +5114,8 @@ _FSL_LARGE=$(python3 -c "print('x' * 1048577)")
 test_hook "file-size-limit" "{\"tool_input\":{\"content\":\"$_FSL_LARGE\",\"file_path\":\"/tmp/x.txt\"}}" 2 "blocks content exceeding 1MB"
 unset _FSL_LARGE
 test_hook "file-size-limit" '{"tool_input":{"command":"ls"}}' 0 "allows command without content"
+test_hook "file-size-limit" '{}' 0 "handles empty JSON"
+test_hook "file-size-limit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "git-blame-context.sh:"
@@ -5076,6 +5132,8 @@ cp examples/git-lfs-guard.sh /tmp/test-git-lfs-guard.sh && chmod +x /tmp/test-gi
 test_hook "git-lfs-guard" '{"tool_input":{"command":"git add README.md"}}' 0 "allows git add of normal file"
 test_hook "git-lfs-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows non-git command"
 test_hook "git-lfs-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-add git command"
+test_hook "git-lfs-guard" '{}' 0 "handles empty JSON"
+test_hook "git-lfs-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "git-tag-guard.sh:"
@@ -5153,6 +5211,8 @@ cp examples/import-cycle-warn.sh /tmp/test-import-cycle.sh && chmod +x /tmp/test
 test_hook "import-cycle" '{"tool_input":{"file_path":"/tmp/nonexistent.js","new_string":"import x from '\''./utils'\''"}}' 0 "allows edit (PostToolUse, exit 0)"
 test_hook "import-cycle" '{"tool_input":{"file_path":"/tmp/test.js","new_string":"const x = 1;"}}' 0 "allows edit without imports"
 test_hook "import-cycle" '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "allows empty new_string"
+test_hook "import-cycle" '{}' 0 "handles empty JSON"
+test_hook "import-cycle" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "large-file-guard.sh:"
@@ -5161,6 +5221,8 @@ test_hook "large-file-guard" '{"tool_name":"Write","tool_input":{"file_path":"/t
 echo "small" > /tmp/test-small-file.txt
 test_hook "large-file-guard" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test-small-file.txt"}}' 0 "allows small file"
 test_hook "large-file-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-small-file.txt"}}' 0 "ignores non-Write tool"
+test_hook "large-file-guard" '{}' 0 "handles empty JSON"
+test_hook "large-file-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -f /tmp/test-small-file.txt
 echo ""
 echo ""
@@ -5169,6 +5231,8 @@ cp examples/large-read-guard.sh /tmp/test-large-read-guard.sh && chmod +x /tmp/t
 test_hook "large-read-guard" '{"tool_input":{"command":"cat /tmp/small.txt"}}' 0 "allows cat of small/nonexistent file"
 test_hook "large-read-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-read command"
 test_hook "large-read-guard" '{"tool_input":{"command":"grep pattern file.txt"}}' 0 "allows grep (not cat/less/more)"
+test_hook "large-read-guard" '{}' 0 "handles empty JSON"
+test_hook "large-read-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "license-check.sh:"
@@ -5178,6 +5242,8 @@ test_hook "license-check" '{"tool_input":{"file_path":"/tmp/test-no-license.js"}
 echo "// MIT License" > /tmp/test-with-license.js
 test_hook "license-check" '{"tool_input":{"file_path":"/tmp/test-with-license.js"}}' 0 "allows file with license header"
 test_hook "license-check" '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "ignores non-source files"
+test_hook "license-check" '{}' 0 "handles empty JSON"
+test_hook "license-check" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -f /tmp/test-no-license.js /tmp/test-with-license.js
 echo ""
 echo ""
@@ -5186,6 +5252,8 @@ cp examples/lockfile-guard.sh /tmp/test-lockfile-guard.sh && chmod +x /tmp/test-
 test_hook "lockfile-guard" '{"tool_input":{"command":"git commit -m test"}}' 0 "allows git commit (exit 0, warns if lockfiles staged)"
 test_hook "lockfile-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows non-git command"
 test_hook "lockfile-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-commit/add git command"
+test_hook "lockfile-guard" '{}' 0 "handles empty JSON"
+test_hook "lockfile-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "loop-detector.sh:"
@@ -5218,6 +5286,8 @@ test_hook "max-line-len" '{"tool_input":{"file_path":"/tmp/test-short-lines.txt"
 python3 -c "print('x' * 200)" > /tmp/test-long-lines.txt
 test_hook "max-line-len" '{"tool_input":{"file_path":"/tmp/test-long-lines.txt"}}' 0 "allows file with long lines (exit 0, just warns)"
 test_hook "max-line-len" '{"tool_input":{"file_path":"/tmp/nonexistent-xyz.txt"}}' 0 "allows nonexistent file"
+test_hook "max-line-len" '{}' 0 "handles empty JSON"
+test_hook "max-line-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -f /tmp/test-short-lines.txt /tmp/test-long-lines.txt
 echo ""
 echo ""
@@ -5263,6 +5333,8 @@ cp examples/no-git-amend-push.sh /tmp/test-no-amend-push.sh && chmod +x /tmp/tes
 test_hook "no-amend-push" '{"tool_input":{"command":"git commit --amend"}}' 0 "allows amend (exit 0, may warn)"
 test_hook "no-amend-push" '{"tool_input":{"command":"git commit -m '\''fix: bug'\''"}}' 0 "allows normal commit"
 test_hook "no-amend-push" '{"tool_input":{"command":"npm test"}}' 0 "allows non-git command"
+test_hook "no-amend-push" '{}' 0 "handles empty JSON"
+test_hook "no-amend-push" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "no-install-global.sh:"
@@ -5313,6 +5385,8 @@ cp examples/no-wildcard-cors.sh /tmp/test-no-wildcard-cors.sh && chmod +x /tmp/t
 test_hook "no-wildcard-cors" '{"tool_input":{"new_string":"Access-Control-Allow-Origin: *"}}' 0 "warns on wildcard CORS (exit 0)"
 test_hook "no-wildcard-cors" '{"tool_input":{"new_string":"Access-Control-Allow-Origin: https://example.com"}}' 0 "allows specific CORS origin"
 test_hook "no-wildcard-cors" '{"tool_input":{"new_string":"const x = 1;"}}' 0 "allows normal code"
+test_hook "no-wildcard-cors" '{}' 0 "handles empty JSON"
+test_hook "no-wildcard-cors" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "no-wildcard-import.sh:"
@@ -5328,6 +5402,8 @@ cp examples/node-version-guard.sh /tmp/test-node-version.sh && chmod +x /tmp/tes
 test_hook "node-version" '{"tool_input":{"command":"npm install"}}' 0 "allows npm install (exit 0)"
 test_hook "node-version" '{"tool_input":{"command":"python3 test.py"}}' 0 "allows non-node command"
 test_hook "node-version" '{"tool_input":{"command":"node app.js"}}' 0 "allows node command (exit 0)"
+test_hook "node-version" '{}' 0 "handles empty JSON"
+test_hook "node-version" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "notify-waiting.sh:"
@@ -5341,6 +5417,8 @@ cp examples/npm-publish-guard.sh /tmp/test-npm-publish.sh && chmod +x /tmp/test-
 test_hook "npm-publish" '{"tool_input":{"command":"npm publish"}}' 2 "blocks npm publish"
 test_hook "npm-publish" '{"tool_input":{"command":"npm install"}}' 0 "allows non-publish command"
 test_hook "npm-publish" '{"tool_input":{"command":"npm publish --dry-run"}}' 0 "allows npm publish dry-run"
+test_hook "npm-publish" '{}' 0 "handles empty JSON"
+test_hook "npm-publish" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "output-length-guard.sh:"
@@ -5350,6 +5428,8 @@ _OLG_LARGE=$(python3 -c "print('x' * 60000)")
 test_hook "output-len" "{\"tool_result\":\"$_OLG_LARGE\"}" 0 "warns on large output (exit 0)"
 unset _OLG_LARGE
 test_hook "output-len" '{}' 0 "allows empty tool_result"
+test_hook "output-len" '{}' 0 "handles empty JSON"
+test_hook "output-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "overwrite-guard.sh:"
@@ -5358,6 +5438,8 @@ echo "existing content" > /tmp/test-existing-file.txt
 test_hook "overwrite-guard" '{"tool_input":{"file_path":"/tmp/test-existing-file.txt"}}' 0 "warns on overwriting existing file (exit 0)"
 test_hook "overwrite-guard" '{"tool_input":{"file_path":"/tmp/nonexistent-overwrite-test.txt"}}' 0 "allows writing new file"
 test_hook "overwrite-guard" '{"tool_input":{}}' 0 "allows empty file_path"
+test_hook "overwrite-guard" '{}' 0 "handles empty JSON"
+test_hook "overwrite-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -f /tmp/test-existing-file.txt
 echo ""
 echo ""
@@ -5383,6 +5465,8 @@ rm -rf /tmp/cc-edit-locks
 test_hook "parallel-edit" '{"tool_input":{"file_path":"/tmp/test-parallel-a.txt"}}' 0 "allows first edit to file"
 test_hook "parallel-edit" '{"tool_input":{"file_path":"/tmp/test-parallel-b.txt"}}' 0 "allows edit to different file"
 test_hook "parallel-edit" '{"tool_input":{}}' 0 "allows empty file_path"
+test_hook "parallel-edit" '{}' 0 "handles empty JSON"
+test_hook "parallel-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 rm -rf /tmp/cc-edit-locks
 echo ""
 echo ""
@@ -5391,6 +5475,8 @@ cp examples/pip-venv-guard.sh /tmp/test-pip-venv.sh && chmod +x /tmp/test-pip-ve
 test_hook "pip-venv" '{"tool_input":{"command":"pip install flask"}}' 0 "warns on pip install outside venv (exit 0)"
 test_hook "pip-venv" '{"tool_input":{"command":"npm install express"}}' 0 "allows non-pip command"
 test_hook "pip-venv" '{"tool_input":{"command":"pip --version"}}' 0 "allows pip non-install command"
+test_hook "pip-venv" '{}' 0 "handles empty JSON"
+test_hook "pip-venv" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
 echo ""
 echo ""
 echo "pr-description-check.sh:"
