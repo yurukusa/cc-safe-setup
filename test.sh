@@ -9907,6 +9907,28 @@ if [ "$_VEG6" -eq 0 ]; then echo "  PASS: var-expand: explicit rm path passes"; 
 set -euo pipefail
 echo ""
 
+# --- resume-context-guard ---
+echo "resume-context-guard.sh:"
+test_ex resume-context-guard.sh '{"type":"session_start"}' 0 "resume-guard: session start passes"
+test_ex resume-context-guard.sh '{}' 0 "resume-guard: empty input"
+test_ex resume-context-guard.sh '{"type":"notification","message":"hello"}' 0 "resume-guard: notification passes"
+test_ex resume-context-guard.sh '{"type":""}' 0 "resume-guard: empty type"
+test_ex resume-context-guard.sh '{"tool_name":"Bash"}' 0 "resume-guard: non-event passes"
+test_ex resume-context-guard.sh '{"type":"session_start","session_id":"abc123"}' 0 "resume-guard: new session (no state file)"
+test_ex resume-context-guard.sh '{"type":"progress"}' 0 "resume-guard: progress event passes"
+echo ""
+
+# --- output-explosion-detector ---
+echo "output-explosion-detector.sh:"
+test_ex output-explosion-detector.sh '{"tool_name":"Bash","tool_output":"hello world"}' 0 "output-explosion: small output passes"
+test_ex output-explosion-detector.sh '{}' 0 "output-explosion: empty input"
+test_ex output-explosion-detector.sh '{"tool_name":"Read","tool_output":""}' 0 "output-explosion: empty output"
+test_ex output-explosion-detector.sh '{"tool_name":"Bash"}' 0 "output-explosion: no output field"
+test_ex output-explosion-detector.sh '{"tool_output":"short"}' 0 "output-explosion: no tool name"
+test_ex output-explosion-detector.sh '{"tool_name":"Write","tool_output":"ok"}' 0 "output-explosion: write output passes"
+test_ex output-explosion-detector.sh '{"tool_name":"Bash","tool_output":"x"}' 0 "output-explosion: tiny output"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
