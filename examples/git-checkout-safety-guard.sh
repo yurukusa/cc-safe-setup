@@ -38,8 +38,8 @@ if echo "$COMMAND" | grep -qE 'git\s+(checkout|switch)\s+[a-zA-Z]'; then
     fi
 fi
 
-# === Check 2: git branch -D (force delete) ===
-if echo "$COMMAND" | grep -qE 'git\s+branch\s+-[dD]\s'; then
+# === Check 2: git branch -D (force delete — uppercase only) ===
+if echo "$COMMAND" | grep -qE 'git\s+branch\s+-D\s'; then
     BRANCH=$(echo "$COMMAND" | grep -oE 'git\s+branch\s+-[dD]\s+(\S+)' | awk '{print $NF}')
     echo "BLOCKED: Destructive branch deletion: $BRANCH" >&2
     echo "  Use 'git branch -d' (lowercase) for safe deletion (checks merge status)." >&2
