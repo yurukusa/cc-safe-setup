@@ -9918,6 +9918,28 @@ test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":""}}' 0 "lock-cleanu
 test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"echo git"}}' 0 "lock-cleanup: echo git passes"
 echo ""
 
+# --- api-overload-backoff ---
+echo "api-overload-backoff.sh:"
+test_ex api-overload-backoff.sh '{"tool_output":"success"}' 0 "overload: normal output passes"
+test_ex api-overload-backoff.sh '{"tool_output":"Error 529 overloaded"}' 0 "overload: 529 detected (warns, exit 0)"
+test_ex api-overload-backoff.sh '{"tool_output":"overloaded_error"}' 0 "overload: overloaded_error detected"
+test_ex api-overload-backoff.sh '{"tool_output":"rate limit exceeded"}' 0 "overload: rate limit detected"
+test_ex api-overload-backoff.sh '{}' 0 "overload: empty input"
+test_ex api-overload-backoff.sh '{"tool_output":""}' 0 "overload: empty output"
+test_ex api-overload-backoff.sh '{"tool_output":"all good"}' 0 "overload: clean output"
+echo ""
+
+# --- usage-cache-local ---
+echo "usage-cache-local.sh:"
+test_ex usage-cache-local.sh '{"tool_name":"Bash"}' 0 "usage-cache: bash call"
+test_ex usage-cache-local.sh '{"tool_name":"Read"}' 0 "usage-cache: read call"
+test_ex usage-cache-local.sh '{"tool_name":"Edit"}' 0 "usage-cache: edit call"
+test_ex usage-cache-local.sh '{"tool_name":"Write"}' 0 "usage-cache: write call"
+test_ex usage-cache-local.sh '{}' 0 "usage-cache: empty input"
+test_ex usage-cache-local.sh '{"tool_name":""}' 0 "usage-cache: empty tool name"
+test_ex usage-cache-local.sh '{"tool_name":"Agent"}' 0 "usage-cache: agent call"
+echo ""
+
 # --- resume-context-guard ---
 echo "resume-context-guard.sh:"
 test_ex resume-context-guard.sh '{"type":"session_start"}' 0 "resume-guard: session start passes"
