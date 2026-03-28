@@ -11225,6 +11225,30 @@ test_ex edit-retry-loop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"l
 test_ex edit-retry-loop-guard.sh '{}' 0 "edit-retry-loop-guard: empty input passes"
 test_ex edit-retry-loop-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "edit-retry-loop-guard: empty file path passes"
 
+echo "plan-mode-enforcer.sh (with state file):"
+# Create state file to activate plan mode
+touch /tmp/.cc-plan-mode-active
+test_ex plan-mode-enforcer.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 2 "plan-mode-enforcer: blocks Edit in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Write","tool_input":{"file_path":"new.ts"}}' 2 "plan-mode-enforcer: blocks Write in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 2 "plan-mode-enforcer: blocks npm install in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"git commit -m fix"}}' 2 "plan-mode-enforcer: blocks git commit in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"rm -rf node_modules"}}' 2 "plan-mode-enforcer: blocks rm in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Agent","tool_input":{}}' 2 "plan-mode-enforcer: blocks Agent in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "plan-mode-enforcer: allows Read in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Glob","tool_input":{"pattern":"**/*.ts"}}' 0 "plan-mode-enforcer: allows Glob in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Grep","tool_input":{"pattern":"TODO"}}' 0 "plan-mode-enforcer: allows Grep in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"cat src/main.ts"}}' 0 "plan-mode-enforcer: allows cat in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "plan-mode-enforcer: allows git status in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"git log --oneline"}}' 0 "plan-mode-enforcer: allows git log in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la src/"}}' 0 "plan-mode-enforcer: allows ls in plan mode"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"grep -r TODO src/"}}' 0 "plan-mode-enforcer: allows grep in plan mode"
+test_ex plan-mode-enforcer.sh '{}' 0 "plan-mode-enforcer: empty input passes"
+rm -f /tmp/.cc-plan-mode-active
+
+echo "plan-mode-enforcer.sh (without state file):"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "plan-mode-enforcer: allows Edit when plan mode inactive"
+test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 0 "plan-mode-enforcer: allows install when plan mode inactive"
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then

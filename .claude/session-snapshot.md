@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T04:13:19+09:00
+Updated: 2026-03-29T04:14:08+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-03-29T04:13:19+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 46aff4f checkpoint: auto-save 04:13:18
+- Last commit: 2f8b87c checkpoint: auto-save 04:13:28
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./examples/hook-permission-fixer.sh
 ./examples/protect-dotfiles.sh
 ./examples/plan-mode-enforcer.sh
@@ -20,6 +21,5 @@ Updated: 2026-03-29T04:13:19+09:00
 ./docs/README.ja.md
 ./COOKBOOK.md
 ./README.md
-./.claude/pre-compact-checkpoint.md
 ```
 
