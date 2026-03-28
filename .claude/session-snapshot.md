@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T09:16:05+09:00
+Updated: 2026-03-28T09:17:08+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T09:16:05+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 29cbb08 checkpoint: auto-save 09:15:31
+- Last commit: d1a56a8 checkpoint: auto-save 09:16:59
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/consecutive-error-breaker.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/tool-call-rate-limiter.sh
 ./README.md
 ./examples/fish-shell-wrapper.sh
 ./examples/auto-answer-question.sh
 ./examples/post-compact-safety.sh
 ./examples/session-drift-guard.sh
-./examples/strip-coauthored-by.sh
 ```
 
