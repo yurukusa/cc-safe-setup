@@ -9341,6 +9341,18 @@ test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"curl https://api.exam
 test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "api-key-url: non-http allowed"
 test_ex api-key-in-url-guard.sh '{"tool_input":{"command":""}}' 0 "api-key-url: empty command"
 test_ex api-key-in-url-guard.sh '{}' 0 "api-key-url: empty input"
+# --- gh-cli-destructive-guard ---
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh issue close 123"}}' 2 "gh-guard: issue close blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh pr merge 456"}}' 2 "gh-guard: pr merge blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh pr close 789"}}' 2 "gh-guard: pr close blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh repo delete myrepo"}}' 2 "gh-guard: repo delete blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh release delete v1.0"}}' 2 "gh-guard: release delete blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh api repos/foo/bar -X DELETE"}}' 2 "gh-guard: API DELETE blocked"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh issue view 123"}}' 0 "gh-guard: issue view allowed"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 "gh-guard: pr list allowed"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh issue create --title test"}}' 0 "gh-guard: issue create allowed"
+test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "gh-guard: non-gh allowed"
+test_ex gh-cli-destructive-guard.sh '{}' 0 "gh-guard: empty input"
 echo ""
 
 echo "========================"
