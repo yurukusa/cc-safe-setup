@@ -9384,6 +9384,18 @@ test_ex firewall-guard.sh '{"tool_input":{"command":"iptables -L"}}' 0 "firewall
 test_ex firewall-guard.sh '{"tool_input":{"command":"ufw status"}}' 0 "firewall: ufw status allowed"
 test_ex firewall-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "firewall: non-firewall allowed"
 test_ex firewall-guard.sh '{}' 0 "firewall: empty input"
+# --- db-connect-guard (#36183, #33183, #27063) ---
+test_ex db-connect-guard.sh '{"tool_input":{"command":"mysql -h db.production.com -u admin"}}' 2 "db-guard: mysql remote blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"psql -h 10.0.1.5 -U postgres"}}' 2 "db-guard: psql remote blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"mongo --host mongodb.cluster.com"}}' 2 "db-guard: mongo remote blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"redis-cli -h redis.prod.internal"}}' 2 "db-guard: redis remote blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"prisma db push"}}' 2 "db-guard: prisma push blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"prisma migrate reset"}}' 2 "db-guard: prisma migrate reset blocked"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"mysql"}}' 0 "db-guard: local mysql allowed"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"psql mydb"}}' 0 "db-guard: local psql allowed"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"prisma generate"}}' 0 "db-guard: prisma generate allowed"
+test_ex db-connect-guard.sh '{"tool_input":{"command":"ls"}}' 0 "db-guard: non-db allowed"
+test_ex db-connect-guard.sh '{}' 0 "db-guard: empty input"
 echo ""
 
 echo "========================"
