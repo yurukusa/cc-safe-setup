@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T08:05:18+09:00
+Updated: 2026-03-29T08:06:08+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-29T08:05:18+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 737b00a checkpoint: pre-compact auto-save (1 files, 20260328-230516)
+- Last commit: 26e4fff checkpoint: auto-save 08:05:29
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
 ./.claude/pre-compact-checkpoint.md
+./test.sh
 ./examples/mcp-data-boundary.sh
 ./examples/mcp-config-freeze.sh
 ./examples/windows-path-guard.sh
