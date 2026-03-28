@@ -9428,6 +9428,17 @@ test_ex registry-publish-guard.sh '{"tool_input":{"command":"gem install rails"}
 test_ex registry-publish-guard.sh '{"tool_input":{"command":"docker pull nginx"}}' 0 "registry-guard: docker pull allowed"
 test_ex registry-publish-guard.sh '{"tool_input":{"command":"cargo build"}}' 0 "registry-guard: cargo build allowed"
 test_ex registry-publish-guard.sh '{}' 0 "registry-guard: empty input"
+# --- git-history-rewrite-guard ---
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git filter-branch --force HEAD"}}' 2 "history-guard: filter-branch blocked"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git filter-repo --path src/"}}' 2 "history-guard: filter-repo blocked"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git rebase -i HEAD~5"}}' 2 "history-guard: interactive rebase blocked"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git reset --hard HEAD~3"}}' 2 "history-guard: reset --hard HEAD~ blocked"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git reflog expire --all"}}' 2 "history-guard: reflog expire blocked"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git reset --soft HEAD~1"}}' 0 "history-guard: reset --soft allowed"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git rebase main"}}' 0 "history-guard: non-interactive rebase allowed"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git reflog"}}' 0 "history-guard: reflog view allowed"
+test_ex git-history-rewrite-guard.sh '{"tool_input":{"command":"git log"}}' 0 "history-guard: log allowed"
+test_ex git-history-rewrite-guard.sh '{}' 0 "history-guard: empty input"
 echo ""
 
 echo "========================"
