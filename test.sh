@@ -9323,6 +9323,11 @@ test_ex plan-mode-edit-guard.sh '{"tool_name":"Write","tool_input":{"file_path":
 test_ex plan-mode-edit-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"task_plan.md"}}' 0 "plan-guard: plan file always pass"
 test_ex plan-mode-edit-guard.sh '{}' 0 "plan-guard: empty input"
 test_ex plan-mode-edit-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "plan-guard: non-edit tool pass"
+# --- file-edit-backup (#37478, #32938) ---
+test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"/nonexistent/file.txt"}}' 0 "file-backup: nonexistent file passes"
+test_ex file-edit-backup.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "file-backup: empty path passes"
+test_ex file-edit-backup.sh '{}' 0 "file-backup: empty input"
+test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-backup-target.txt"}}' 0 "file-backup: existing file passes (creates backup)"
 echo ""
 
 echo "========================"
