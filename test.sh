@@ -11247,6 +11247,17 @@ test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"grep
 test_ex plan-mode-enforcer.sh '{}' 0 "plan-mode-enforcer: empty input passes"
 rm -f /tmp/.cc-plan-mode-active
 
+echo "git-checkout-safety-guard.sh:"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git branch -D feature"}}' 2 "git-checkout-safety-guard: blocks branch -D"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git branch -d feature"}}' 0 "git-checkout-safety-guard: allows branch -d (safe)"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git checkout -- ."}}' 2 "git-checkout-safety-guard: blocks checkout -- ."
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git checkout master && git branch -D feature"}}' 2 "git-checkout-safety-guard: blocks checkout+delete combo"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git status"}}' 0 "git-checkout-safety-guard: allows git status"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"git log"}}' 0 "git-checkout-safety-guard: allows git log"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "git-checkout-safety-guard: allows non-git"
+test_ex git-checkout-safety-guard.sh '{"tool_input":{"command":""}}' 0 "git-checkout-safety-guard: empty passes"
+test_ex git-checkout-safety-guard.sh '{}' 0 "git-checkout-safety-guard: empty input passes"
+
 echo "shell-wrapper-guard.sh:"
 test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"sh -c \"rm -rf /\""}}' 2 "shell-wrapper-guard: blocks sh -c rm -rf"
 test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"bash -c \"git reset --hard\""}}' 2 "shell-wrapper-guard: blocks bash -c git reset"
