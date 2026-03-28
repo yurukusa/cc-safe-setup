@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Approve Hooks for Claude Code — Skip Permission Prompts Safely</title>
+<meta name="description" content="Stop clicking 'Allow' for every tool call. Auto-approve read-only commands, build tools, git operations, and more with Claude Code hooks. Copy-paste configs included.">
+<meta property="og:title" content="Auto-Approve Hooks for Claude Code">
+<meta property="og:description" content="Skip permission prompts safely with PreToolUse and PermissionRequest hooks.">
+<style>
+  :root { --bg: #0d1117; --fg: #c9d1d9; --accent: #58a6ff; --green: #3fb950; --border: #30363d; --card: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem 1rem; max-width: 800px; margin: 0 auto; }
+  h1 { color: #fff; font-size: 1.8rem; margin-bottom: .5rem; }
+  h2 { color: var(--accent); font-size: 1.3rem; margin-top: 2rem; margin-bottom: .5rem; border-bottom: 1px solid var(--border); padding-bottom: .3rem; }
+  h3 { color: #fff; margin-top: 1.2rem; margin-bottom: .3rem; }
+  p { margin: .5rem 0; }
+  pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .85rem; margin: .5rem 0; position: relative; }
+  code { font-family: 'SF Mono', Monaco, Consolas, monospace; }
+  .badge { display: inline-block; background: var(--green); color: #000; padding: 2px 8px; border-radius: 12px; font-size: .75rem; font-weight: 600; }
+  .warn { background: #3d2800; border-left: 3px solid #d29922; padding: .8rem; margin: .5rem 0; border-radius: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: .8rem 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; margin: .5rem 0; }
+  th, td { border: 1px solid var(--border); padding: .5rem; text-align: left; font-size: .85rem; }
+  th { background: var(--card); }
+  .copy { position: absolute; top: .5rem; right: .5rem; background: var(--border); border: none; color: var(--fg); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: .75rem; }
+  .install { display: inline-block; background: var(--green); color: #000; padding: .6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 1rem; margin: .5rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Auto-Approve Hooks for Claude Code</h1>
+<p>Stop clicking "Allow" for every <code>cat</code>, <code>ls</code>, and <code>git status</code>. Use hooks to auto-approve safe commands while keeping dangerous operations gated.</p>
+<p><span class="badge">511 hooks</span> <span class="badge">7,385 tests</span></p>
+
+<h2>The Problem</h2>
+<p>Claude Code prompts for every tool call by default. For read-only commands like <code>cat</code>, <code>ls</code>, <code>grep</code>, and <code>git status</code>, this is unnecessary friction. But you don't want to use <code>--dangerously-skip-permissions</code> and lose ALL safety checks.</p>
+<p>Hooks let you auto-approve the safe commands while keeping prompts for dangerous ones.</p>
+
+<h2>Quick Start: Auto-Approve Read-Only Commands</h2>
+<pre><code>npx cc-safe-setup --install-example auto-approve-readonly</code><button class="copy" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example auto-approve-readonly');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></pre>
+<p>This installs a PreToolUse hook on Bash that auto-approves: <code>cat</code>, <code>ls</code>, <code>grep</code>, <code>find</code>, <code>git status</code>, <code>git log</code>, <code>git diff</code>, <code>npm list</code>, <code>pip list</code>, and 40+ more read-only commands.</p>
+
+<h2>Available Auto-Approve Hooks</h2>
+<table>
+<tr><th>Hook</th><th>What it auto-approves</th><th>Install</th></tr>
+<tr><td>auto-approve-readonly</td><td>cat, ls, grep, find, git read commands</td><td><code>--install-example auto-approve-readonly</code></td></tr>
+<tr><td>auto-approve-readonly-tools</td><td>Read, Glob, Grep tools (PermissionRequest)</td><td><code>--install-example auto-approve-readonly-tools</code></td></tr>
+<tr><td>auto-approve-build</td><td>npm run, make, cargo build</td><td><code>--install-example auto-approve-build</code></td></tr>
+<tr><td>auto-approve-test</td><td>npm test, pytest, cargo test, go test</td><td><code>--install-example auto-approve-test</code></td></tr>
+<tr><td>auto-approve-python</td><td>python, pip list, pip show</td><td><code>--install-example auto-approve-python</code></td></tr>
+<tr><td>auto-approve-docker</td><td>docker ps, docker logs, docker inspect</td><td><code>--install-example auto-approve-docker</code></td></tr>
+<tr><td>auto-approve-go</td><td>go build, go test, go vet</td><td><code>--install-example auto-approve-go</code></td></tr>
+<tr><td>auto-approve-cargo</td><td>cargo build, cargo test, cargo clippy</td><td><code>--install-example auto-approve-cargo</code></td></tr>
+<tr><td>auto-approve-git-read</td><td>git log, git blame, git show</td><td><code>--install-example auto-approve-git-read</code></td></tr>
+<tr><td>auto-approve-compound-git</td><td>cd && git log, cd && git status (PermissionRequest)</td><td><code>--install-example auto-approve-compound-git</code></td></tr>
+<tr><td>auto-approve-ssh</td><td>ssh-keygen -l, ssh-add -l</td><td><code>--install-example auto-approve-ssh</code></td></tr>
+</table>
+
+<h2>PermissionRequest: Bypass Protected Directory Prompts</h2>
+<p>Claude Code has built-in checks for protected directories (<code>.claude/</code>, <code>.git/hooks/</code>). PreToolUse hooks can't bypass these — they run <em>before</em> the built-in checks. Use <strong>PermissionRequest</strong> hooks instead:</p>
+
+<div class="card">
+<h3>Auto-approve all tool calls (replaces broken bypassPermissions)</h3>
+<pre><code>{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PermissionRequest\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"auto-approved\"}}'"
+        }]
+      }
+    ]
+  }
+}</code></pre>
+<div class="warn">⚠ This approves EVERYTHING. Use only in disposable environments (Docker, CI). For targeted bypass, use the hooks above.</div>
+</div>
+
+<div class="card">
+<h3>Auto-approve .git/hooks/ directory only</h3>
+<pre><code>npx cc-safe-setup --install-example allow-git-hooks-dir</code><button class="copy" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example allow-git-hooks-dir');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></pre>
+</div>
+
+<div class="card">
+<h3>Auto-approve .claude/settings.json edits</h3>
+<pre><code>npx cc-safe-setup --install-example allow-claude-settings</code><button class="copy" onclick="navigator.clipboard.writeText('npx cc-safe-setup --install-example allow-claude-settings');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></pre>
+</div>
+
+<h2>Hook Execution Order</h2>
+<p>Understanding why PermissionRequest exists:</p>
+<table>
+<tr><th>Step</th><th>Hook Type</th><th>Purpose</th></tr>
+<tr><td>1</td><td>PreToolUse</td><td>Block dangerous actions (exit 2 = block)</td></tr>
+<tr><td>2</td><td>Built-in checks</td><td>Protected directory prompts (not hookable)</td></tr>
+<tr><td>3</td><td>PermissionRequest</td><td>Auto-approve prompts from step 2</td></tr>
+</table>
+<p><strong>Rule of thumb:</strong> PreToolUse = block dangerous. PermissionRequest = allow trusted.</p>
+
+<h2>Install Everything</h2>
+<button class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</button>
+<p style="color:#8b949e;font-size:.85rem">Installs 8 safety hooks + project-specific recommendations. 511 example hooks available. 7,385 tests.</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> · <a href="https://yurukusa.github.io/cc-safe-setup/">All Tools</a></p>
+
+</body>
+</html>
