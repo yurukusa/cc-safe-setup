@@ -11247,6 +11247,20 @@ test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"grep
 test_ex plan-mode-enforcer.sh '{}' 0 "plan-mode-enforcer: empty input passes"
 rm -f /tmp/.cc-plan-mode-active
 
+echo "shell-wrapper-guard.sh:"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"sh -c \"rm -rf /\""}}' 2 "shell-wrapper-guard: blocks sh -c rm -rf"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"bash -c \"git reset --hard\""}}' 2 "shell-wrapper-guard: blocks bash -c git reset"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"bash -c \"git clean -fd\""}}' 2 "shell-wrapper-guard: blocks bash -c git clean"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"python3 -c \"import os; os.system(\\\"rm -rf /\\\")\""}}' 2 "shell-wrapper-guard: blocks python os.system rm"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"perl -e \"system(\\\"rm -rf /\\\")\""}}' 2 "shell-wrapper-guard: blocks perl system rm"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"node -e \"require(\\\"child_process\\\").execSync(\\\"rm -rf /\\\")\""}}' 2 "shell-wrapper-guard: blocks node execSync rm"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"sh -c \"bash -c \\\"rm -rf /\\\"\""}}' 2 "shell-wrapper-guard: blocks nested wrapper"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"sh -c \"echo hello\""}}' 0 "shell-wrapper-guard: allows safe sh -c"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"python3 -c \"print(42)\""}}' 0 "shell-wrapper-guard: allows safe python"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "shell-wrapper-guard: allows normal command"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":""}}' 0 "shell-wrapper-guard: empty command passes"
+test_ex shell-wrapper-guard.sh '{}' 0 "shell-wrapper-guard: empty input passes"
+
 echo "plan-mode-enforcer.sh (without state file):"
 test_ex plan-mode-enforcer.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "plan-mode-enforcer: allows Edit when plan mode inactive"
 test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 0 "plan-mode-enforcer: allows install when plan mode inactive"
