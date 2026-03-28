@@ -4300,6 +4300,7 @@ test_hook "api-endpoint-guard" '{"tool_input":{"command":"curl http://169.254.16
 test_hook "api-endpoint-guard" '{"tool_input":{"command":"wget http://metadata.google.internal/"}}' 2 "blocks GCP metadata endpoint"
 test_hook "api-endpoint-guard" '{"tool_input":{"command":"curl https://api.example.com/data"}}' 0 "allows normal API request"
 test_hook "api-endpoint-guard" '{"tool_input":{"command":"ls -la"}}' 0 "passes through non-curl command"
+test_hook "api-endpoint-guard" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "auto-approve-compound-git.sh:"
@@ -4392,6 +4393,7 @@ test_hook "branch-name-chk" '{"tool_input":{"command":"git checkout -b feature/a
 test_hook "branch-name-chk" '{"tool_input":{"command":"git checkout -b my-random-branch"}}' 0 "warns on non-conventional but exits 0"
 test_hook "branch-name-chk" '{"tool_input":{"command":"git status"}}' 0 "ignores non-branch commands"
 test_hook "branch-name-chk" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
+test_hook "branch-name-chk" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "branch-naming-convention.sh:"
@@ -4421,6 +4423,7 @@ test_hook "ci-skip" '{"tool_input":{"command":"git commit -m \"fix: [skip ci] qu
 test_hook "ci-skip" '{"tool_input":{"command":"git commit --no-verify -m fix"}}' 0 "warns on --no-verify but exits 0"
 test_hook "ci-skip" '{"tool_input":{"command":"git commit -m \"feat: add login\""}}' 0 "allows normal commit"
 test_hook "ci-skip" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
+test_hook "ci-skip" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "commit-message-check.sh:"
@@ -4500,6 +4503,7 @@ test_hook "crontab" '{"tool_input":{"command":"crontab -r"}}' 0 "warns on cronta
 test_hook "crontab" '{"tool_input":{"command":"crontab -e"}}' 0 "warns on crontab -e but exits 0"
 test_hook "crontab" '{"tool_input":{"command":"crontab -l"}}' 0 "allows crontab -l (read-only)"
 test_hook "crontab" '{"tool_input":{"command":"ls"}}' 0 "ignores non-crontab commands"
+test_hook "crontab" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "debug-leftover-guard.sh:"
@@ -4560,6 +4564,7 @@ test_hook "docker-prune" '{"tool_input":{"command":"docker system prune"}}' 0 "w
 test_hook "docker-prune" '{"tool_input":{"command":"docker system prune -a"}}' 0 "warns on prune -a (exit 0)"
 test_hook "docker-prune" '{"tool_input":{"command":"docker ps"}}' 0 "ignores docker ps"
 test_hook "docker-prune" '{"tool_input":{"command":"ls"}}' 0 "ignores non-docker commands"
+test_hook "docker-prune" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "edit-guard.sh:"
@@ -4621,6 +4626,7 @@ test_hook "fact-check" '{"tool_input":{"file_path":"README.md","new_string":"See
 test_hook "fact-check" '{"tool_input":{"file_path":"src/main.py","new_string":"x = 1"}}' 0 "ignores non-doc files"
 test_hook "fact-check" '{"tool_input":{"file_path":"README.md","new_string":"Simple text without code refs"}}' 0 "allows doc without source refs"
 test_hook "fact-check" '{"tool_input":{"file_path":""}}' 0 "handles empty file_path"
+test_hook "fact-check" '{}' 0 "handles empty JSON"
 
 # ========== prompt-injection-guard tests ==========
 echo ""
@@ -4708,6 +4714,7 @@ test_hook "reinject-cmd" '{}' 0 "exits 0 on session start"
 test_hook "reinject-cmd" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "reinject-cmd" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "reinject-cmd" '{"prompt":"hello"}' 0 "exits 0 with prompt"
+test_hook "reinject-cmd" '{}' 0 "handles empty JSON"
 
 # ========== relative-path-guard tests ==========
 echo ""
@@ -4731,6 +4738,7 @@ test_hook "issue-ref" '{"tool_input":{"command":"git commit -m \"fix: update par
 test_hook "issue-ref" '{"tool_input":{"command":"git commit -m \"fix: update parser #123\""}}' 0 "allows commit with issue ref"
 test_hook "issue-ref" '{"tool_input":{"command":"git commit -m \"PROJ-456 fix parser\""}}' 0 "allows commit with JIRA ref"
 test_hook "issue-ref" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit command"
+test_hook "issue-ref" '{}' 0 "handles empty JSON"
 
 # ========== response-budget-guard tests ==========
 echo ""
@@ -4758,6 +4766,7 @@ test_hook "revert-help" '{}' 0 "exits 0 on stop event"
 test_hook "revert-help" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "revert-help" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "revert-help" '{"tool_output":"done"}' 0 "exits 0 with output"
+test_hook "revert-help" '{}' 0 "handles empty JSON"
 
 # ========== sensitive-regex-guard tests ==========
 echo ""
@@ -4793,6 +4802,7 @@ test_hook "sess-hand" '{}' 0 "exits 0 on stop"
 test_hook "sess-hand" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "sess-hand" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "sess-hand" '{"tool_output":"done"}' 0 "exits 0 with output"
+test_hook "sess-hand" '{}' 0 "handles empty JSON"
 
 # ========== stale-branch-guard tests ==========
 echo ""
@@ -4804,6 +4814,7 @@ test_hook "stale-branch" '{}' 0 "exits 0 (warning only)"
 test_hook "stale-branch" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "stale-branch" '{"tool_input":{"command":"git branch"}}' 0 "exits 0 on git branch"
 test_hook "stale-branch" '{"tool_input":{"command":"ls -la"}}' 0 "exits 0 on ls"
+test_hook "stale-branch" '{}' 0 "handles empty JSON"
 
 # ========== stale-env-guard tests ==========
 echo ""
@@ -4886,6 +4897,7 @@ test_hook "tf-guard" '{"tool_input":{"command":"terraform destroy"}}' 2 "blocks 
 test_hook "tf-guard" '{"tool_input":{"command":"terraform apply"}}' 0 "warns on terraform apply but exits 0"
 test_hook "tf-guard" '{"tool_input":{"command":"terraform plan"}}' 0 "allows terraform plan"
 test_hook "tf-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-terraform command"
+test_hook "tf-guard" '{}' 0 "handles empty JSON"
 
 # ========== test-before-push tests ==========
 echo ""
@@ -4907,6 +4919,7 @@ test_hook "before-push" '{"tool_input":{"command":"git status"}}' 0 "allows non-
 test_hook "before-push" '{"tool_input":{"command":"git log --oneline"}}' 0 "allows git log"
 test_hook "before-push" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "before-push" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "before-push" '{}' 0 "handles empty JSON"
 
 # ========== test-coverage-guard tests ==========
 echo ""
@@ -5031,6 +5044,7 @@ test_hook "uncommit-gd" '{"tool_input":{"command":"git status"}}' 0 "allows non-
 test_hook "uncommit-gd" '{"tool_input":{"command":"git log"}}' 0 "allows git log"
 test_hook "uncommit-gd" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "uncommit-gd" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "uncommit-gd" '{}' 0 "handles empty JSON"
 rm -rf "$_UCG_DIR"
 
 # ========== verify-before-commit tests ==========
@@ -5051,6 +5065,7 @@ test_hook "verify-commit" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-co
 test_hook "verify-commit" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 test_hook "verify-commit" '{"tool_input":{"command":"git log"}}' 0 "allows git log"
 test_hook "verify-commit" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "verify-commit" '{}' 0 "handles empty JSON"
 rm -rf "$_VBC_DIR"
 
 # ========== verify-before-done tests ==========
@@ -5204,6 +5219,7 @@ test_hook "hook-perm-fixer" '{}' 0 "exits 0 (SessionStart hook)"
 test_hook "hook-perm-fixer" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "hook-perm-fixer" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "hook-perm-fixer" '{"prompt":"hello"}' 0 "exits 0 with prompt"
+test_hook "hook-perm-fixer" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "import-cycle-warn.sh:"
@@ -5307,6 +5323,7 @@ test_hook "memory-write" '{"tool_input":{"file_path":"/home/user/.claude/memory/
 test_hook "memory-write" '{"tool_input":{"file_path":"/tmp/normal-file.txt"}}' 0 "allows write to normal path"
 test_hook "memory-write" '{"tool_input":{"file_path":"/home/user/.claude/settings.json"}}' 0 "allows write to settings (exit 0, extra warning)"
 test_hook "memory-write" '{"tool_input":{}}' 0 "allows empty file_path"
+test_hook "memory-write" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "no-curl-upload.sh:"
@@ -5315,6 +5332,7 @@ test_hook "no-curl-upload" '{"tool_input":{"command":"curl -X POST https://api.e
 test_hook "no-curl-upload" '{"tool_input":{"command":"curl https://example.com"}}' 0 "allows curl GET"
 test_hook "no-curl-upload" '{"tool_input":{"command":"curl --upload-file data.bin https://example.com"}}' 0 "warns on curl upload-file (exit 0)"
 test_hook "no-curl-upload" '{"tool_input":{"command":"wget https://example.com"}}' 0 "allows non-curl command"
+test_hook "no-curl-upload" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "no-deploy-friday.sh:"
@@ -5325,6 +5343,7 @@ _EXPECTED_DEPLOY=0
 [ "$(date +%u)" = "5" ] && _EXPECTED_DEPLOY=2
 test_hook "no-deploy-fri" '{"tool_input":{"command":"firebase deploy"}}' "$_EXPECTED_DEPLOY" "deploy command respects current day (DOW=$(date +%u))"
 test_hook "no-deploy-fri" '{"tool_input":{"command":"vercel --prod"}}' "$_EXPECTED_DEPLOY" "vercel deploy respects current day"
+test_hook "no-deploy-fri" '{}' 0 "handles empty JSON"
 unset _EXPECTED_DEPLOY
 echo ""
 echo ""
@@ -5353,6 +5372,7 @@ test_hook "no-port-bind" '{"tool_input":{"command":"node server.js --port 3000"}
 test_hook "no-port-bind" '{"tool_input":{"command":"nc -l 8080"}}' 0 "warns on nc -l (exit 0)"
 test_hook "no-port-bind" '{"tool_input":{"command":"python3 -c '\''print(1)'\''"}}' 0 "allows safe command"
 test_hook "no-port-bind" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "no-port-bind" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "no-secrets-in-logs.sh:"
@@ -5361,6 +5381,7 @@ test_hook "no-secrets-logs" '{"tool_result":"command output: all good"}' 0 "allo
 test_hook "no-secrets-logs" '{"tool_result":"Error: password=abc123 leaked"}' 0 "warns on password in output (exit 0)"
 test_hook "no-secrets-logs" '{"tool_result":"bearer eyJhbGciOiJIUzI1NiJ9"}' 0 "warns on bearer token in output (exit 0)"
 test_hook "no-secrets-logs" '{}' 0 "allows empty input"
+test_hook "no-secrets-logs" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "no-sudo-guard.sh:"
@@ -5369,6 +5390,7 @@ test_hook "no-sudo-guard" '{"tool_input":{"command":"sudo rm -rf /home"}}' 2 "bl
 test_hook "no-sudo-guard" '{"tool_input":{"command":"sudo apt install jq"}}' 2 "blocks sudo apt install"
 test_hook "no-sudo-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-sudo command"
 test_hook "no-sudo-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows npm install"
+test_hook "no-sudo-guard" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "no-todo-ship.sh:"
@@ -5395,6 +5417,7 @@ test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"from os import *"}}' 0
 test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"import * from '\''lodash'\''"}}' 0 "warns on JS wildcard import (exit 0)"
 test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"from os import path"}}' 0 "allows specific import"
 test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"const x = 1;"}}' 0 "allows normal code"
+test_hook "no-wildcard-imp" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "node-version-guard.sh:"
@@ -5449,6 +5472,7 @@ test_hook "pkg-json-guard" '{"tool_input":{"command":"rm package.json"}}' 2 "blo
 test_hook "pkg-json-guard" '{"tool_input":{"command":"rm -f package.json"}}' 2 "blocks rm -f package.json"
 test_hook "pkg-json-guard" '{"tool_input":{"command":"cat package.json"}}' 0 "allows cat package.json"
 test_hook "pkg-json-guard" '{"tool_input":{"command":"rm old-file.txt"}}' 0 "allows rm of other files"
+test_hook "pkg-json-guard" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "package-script-guard.sh:"
@@ -5457,6 +5481,7 @@ test_hook "pkg-script-guard" '{"tool_input":{"file_path":"package.json","old_str
 test_hook "pkg-script-guard" '{"tool_input":{"file_path":"package.json","old_string":"\"name\"","new_string":"\"name\""}}' 0 "allows non-scripts edit"
 test_hook "pkg-script-guard" '{"tool_input":{"file_path":"src/index.js","old_string":"x","new_string":"y"}}' 0 "ignores non-package.json"
 test_hook "pkg-script-guard" '{"tool_input":{"file_path":"package.json","old_string":"\"dependencies\"","new_string":"\"dependencies\""}}' 0 "warns on dependencies edit (exit 0)"
+test_hook "pkg-script-guard" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "parallel-edit-guard.sh:"
@@ -5485,6 +5510,7 @@ test_hook "pr-desc-check" '{"tool_input":{"command":"gh pr create --title test"}
 test_hook "pr-desc-check" '{"tool_input":{"command":"gh pr create --title test --body desc"}}' 0 "allows PR with --body"
 test_hook "pr-desc-check" '{"tool_input":{"command":"gh pr list"}}' 0 "allows non-create command"
 test_hook "pr-desc-check" '{"tool_input":{"command":"npm test"}}' 0 "allows non-gh command"
+test_hook "pr-desc-check" '{}' 0 "handles empty JSON"
 echo ""
 echo ""
 echo "prompt-injection-detector.sh:"
@@ -5665,6 +5691,7 @@ test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","old_
 test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","old_string":"","new_string":""}}' 0 "allows empty edit"
 test_hook "max-edit" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-Edit"
 test_hook "max-edit" '{}' 0 "handles empty"
+test_hook "max-edit" '{}' 0 "handles empty JSON"
 
 echo ""
 echo "auto-approve-readonly-tools.sh:"
