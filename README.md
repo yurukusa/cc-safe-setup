@@ -117,7 +117,7 @@ Install any of these: `npx cc-safe-setup --install-example <name>`
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 425 examples |
+| `--install-example <name>` | Install from 442 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
