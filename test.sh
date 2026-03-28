@@ -9396,6 +9396,17 @@ test_ex db-connect-guard.sh '{"tool_input":{"command":"psql mydb"}}' 0 "db-guard
 test_ex db-connect-guard.sh '{"tool_input":{"command":"prisma generate"}}' 0 "db-guard: prisma generate allowed"
 test_ex db-connect-guard.sh '{"tool_input":{"command":"ls"}}' 0 "db-guard: non-db allowed"
 test_ex db-connect-guard.sh '{}' 0 "db-guard: empty input"
+# --- cloud-cli-guard ---
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"gcloud compute instances delete my-vm"}}' 2 "cloud-guard: gcloud delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"gcloud sql instances delete mydb"}}' 2 "cloud-guard: gcloud sql delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"gcloud projects delete my-project"}}' 2 "cloud-guard: gcloud project delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"az vm delete --name myvm"}}' 2 "cloud-guard: az vm delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"az group delete --name mygroup"}}' 2 "cloud-guard: az group delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"az storage account delete --name mystorage"}}' 2 "cloud-guard: az storage delete blocked"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"gcloud compute instances list"}}' 0 "cloud-guard: gcloud list allowed"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"az vm list"}}' 0 "cloud-guard: az list allowed"
+test_ex cloud-cli-guard.sh '{"tool_input":{"command":"ls"}}' 0 "cloud-guard: non-cloud allowed"
+test_ex cloud-cli-guard.sh '{}' 0 "cloud-guard: empty input"
 echo ""
 
 echo "========================"
