@@ -9049,6 +9049,23 @@ else
 fi
 echo ""
 
+echo "tool-call-rate-limiter.sh:"
+# Clean up rate file before tests
+RATE_TEST_FILE="$HOME/.claude/rate-limiter.log"
+rm -f "$RATE_TEST_FILE" 2>/dev/null
+test_ex tool-call-rate-limiter.sh '{}' 0 "rate-limiter: first call passes"
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Bash"}' 0 "rate-limiter: normal rate passes"
+# Test rate limit exceeded
+rm -f "$RATE_TEST_FILE" 2>/dev/null
+for i in $(seq 1 35); do echo "$(date +%s)" >> "$RATE_TEST_FILE"; done
+CC_RATE_LIMIT_MAX=30 CC_RATE_LIMIT_WINDOW=60 test_ex tool-call-rate-limiter.sh '{}' 2 "rate-limiter: blocks when over limit"
+# Test with custom limit
+rm -f "$RATE_TEST_FILE" 2>/dev/null
+for i in $(seq 1 5); do echo "$(date +%s)" >> "$RATE_TEST_FILE"; done
+CC_RATE_LIMIT_MAX=10 CC_RATE_LIMIT_WINDOW=60 test_ex tool-call-rate-limiter.sh '{}' 0 "rate-limiter: within custom limit"
+rm -f "$RATE_TEST_FILE" 2>/dev/null
+echo ""
+
 echo "fish-shell-wrapper.sh:"
 test_ex fish-shell-wrapper.sh '{}' 0 "fish-wrapper: empty input"
 test_ex fish-shell-wrapper.sh '{"tool_input":{"command":"npm run build"}}' 0 "fish-wrapper: wraps npm command"
