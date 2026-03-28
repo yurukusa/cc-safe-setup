@@ -9328,6 +9328,10 @@ test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"/non
 test_ex file-edit-backup.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "file-backup: empty path passes"
 test_ex file-edit-backup.sh '{}' 0 "file-backup: empty input"
 test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-backup-target.txt"}}' 0 "file-backup: existing file passes (creates backup)"
+# --- unicode-corruption-check (#38765) ---
+test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/nonexistent.txt"}}' 0 "unicode-check: nonexistent file passes"
+test_ex unicode-corruption-check.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "unicode-check: empty path passes"
+test_ex unicode-corruption-check.sh '{}' 0 "unicode-check: empty input"
 echo ""
 
 echo "========================"
