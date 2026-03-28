@@ -11634,14 +11634,32 @@ echo ""
 # ========== hook-stdout-sanitizer (#40262) ==========
 echo "hook-stdout-sanitizer.sh:"
 test_ex hook-stdout-sanitizer.sh '{}' 0 "stdout-sanitizer: no target hook (usage)"
-echo '#!/bin/bash' > /tmp/test-noop-hook.sh && echo 'exit 0' >> /tmp/test-noop-hook.sh && chmod +x /tmp/test-noop-hook.sh
-echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-noop-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: noop hook passes" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: noop hook passes" && FAIL=$((FAIL+1)))
-echo '#!/bin/bash' > /tmp/test-stderr-hook.sh && echo 'echo "warning" >&2; exit 0' >> /tmp/test-stderr-hook.sh && chmod +x /tmp/test-stderr-hook.sh
-echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-stderr-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: stderr hook passes" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: stderr hook passes" && FAIL=$((FAIL+1)))
-echo '#!/bin/bash' > /tmp/test-block-hook.sh && echo 'echo "BLOCKED" >&2; exit 2' >> /tmp/test-block-hook.sh && chmod +x /tmp/test-block-hook.sh
-echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-block-hook.sh > /dev/null 2>/dev/null; [ $? -eq 2 ] && echo "  PASS: stdout-sanitizer: block hook exits 2" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: block hook exits 2" && FAIL=$((FAIL+1)))
-echo '#!/bin/bash' > /tmp/test-json-hook.sh && echo 'echo '"'"'{"hookSpecificOutput":{"permissionDecision":"allow"}}'"'"'; exit 0' >> /tmp/test-json-hook.sh && chmod +x /tmp/test-json-hook.sh
-echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-json-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: JSON output forwarded" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: JSON output forwarded" && FAIL=$((FAIL+1)))
+# Create test hooks for sanitizer
+echo '#!/bin/bash
+exit 0' > /tmp/test-noop-hook.sh && chmod +x /tmp/test-noop-hook.sh
+echo '#!/bin/bash
+echo "warning" >&2; exit 0' > /tmp/test-stderr-hook.sh && chmod +x /tmp/test-stderr-hook.sh
+echo '#!/bin/bash
+echo "BLOCKED" >&2; exit 2' > /tmp/test-block-hook.sh && chmod +x /tmp/test-block-hook.sh
+echo '#!/bin/bash
+echo '"'"'{"hookSpecificOutput":{"permissionDecision":"allow"}}'"'"'; exit 0' > /tmp/test-json-hook.sh && chmod +x /tmp/test-json-hook.sh
+
+sanitizer_test() {
+    local hook="$1" expected="$2" desc="$3"
+    local actual=0
+    echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" "$hook" > /dev/null 2>/dev/null || actual=$?
+    if [ "$actual" -eq "$expected" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected $expected, got $actual)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+sanitizer_test /tmp/test-noop-hook.sh 0 "stdout-sanitizer: noop hook passes"
+sanitizer_test /tmp/test-stderr-hook.sh 0 "stdout-sanitizer: stderr hook passes"
+sanitizer_test /tmp/test-block-hook.sh 2 "stdout-sanitizer: block hook exits 2"
+sanitizer_test /tmp/test-json-hook.sh 0 "stdout-sanitizer: JSON output forwarded"
 rm -f /tmp/test-noop-hook.sh /tmp/test-stderr-hook.sh /tmp/test-block-hook.sh /tmp/test-json-hook.sh
 echo ""
 
