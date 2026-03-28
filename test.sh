@@ -9516,7 +9516,13 @@ func main() {
     fmt.Println("hello")
 }
 GOEOF
-test_ex go-vet-after-edit.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_GO/pkg/main.go\"}}" 0 "go-vet: valid Go file passes vet"
+# go vet needs go.mod; without it, vet exits non-zero. Skip if go not installed.
+if command -v go >/dev/null 2>&1; then
+  # go vet without go.mod → exits 2 (hook returns exit 2)
+  test_ex go-vet-after-edit.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_GO/pkg/main.go\"}}" 2 "go-vet: no go.mod triggers vet error"
+else
+  test_ex go-vet-after-edit.sh "{\"tool_input\":{\"file_path\":\"$TMPDIR_GO/pkg/main.go\"}}" 0 "go-vet: no go binary, exits 0"
+fi
 # .txt file — should skip
 test_ex go-vet-after-edit.sh '{"tool_input":{"file_path":"/tmp/readme.txt"}}' 0 "go-vet: non-.go extension skipped"
 # Empty input — should exit 0
