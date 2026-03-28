@@ -10347,6 +10347,16 @@ test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/
 test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/__tests__/foo.ts"}}' 0 "test-after-edit: __tests__ dir triggers note"
 test_ex test-after-edit.sh '{"tool_input":{}}' 0 "test-after-edit: empty tool_input"
 test_ex test-after-edit.sh '{}' 0 "test-after-edit: empty input"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod 777 /tmp/file"}}' 2 "chmod-guard: chmod 777 blocked"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod 666 secrets.txt"}}' 2 "chmod-guard: chmod 666 blocked"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod a+w /tmp/file"}}' 2 "chmod-guard: chmod a+w blocked"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod o+w /tmp/file"}}' 2 "chmod-guard: chmod o+w blocked"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod +x script.sh"}}' 0 "chmod-guard: chmod +x passes"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod 755 /tmp/dir"}}' 0 "chmod-guard: chmod 755 passes"
+test_ex chmod-guard.sh '{"tool_input":{"command":"chmod 644 file.txt"}}' 0 "chmod-guard: chmod 644 passes"
+test_ex chmod-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "chmod-guard: non-chmod passes"
+test_ex chmod-guard.sh '{"tool_input":{}}' 0 "chmod-guard: empty command"
+test_ex chmod-guard.sh '{}' 0 "chmod-guard: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
