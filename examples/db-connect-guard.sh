@@ -32,7 +32,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Block remote database connections
-if echo "$COMMAND" | grep -qE '\b(mysql|psql|mongosh?)\s+.*(-h\s+|--host[= ])'; then
+if echo "$COMMAND" | grep -qE '\b(mysql|psql|mongo(sh)?)\s+.*(-h\s+|--host[= ])'; then
     echo "BLOCKED: Direct remote database connection detected." >&2
     echo "  Remote DB connections should use application code, not CLI." >&2
     echo "  Command: $COMMAND" >&2
