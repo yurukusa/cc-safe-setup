@@ -10697,6 +10697,12 @@ test_ex no-global-install.sh '{"tool_input":{"command":"npm install --global esl
 test_ex no-global-install.sh '{"tool_input":{"command":"npm install express"}}' 0 "no-global-install: npm local passes"
 test_ex no-global-install.sh '{"tool_input":{"command":"npm ci"}}' 0 "no-global-install: npm ci passes"
 test_ex no-global-install.sh '{"tool_input":{"command":"sudo gem install rails"}}' 2 "no-global-install: sudo gem blocked"
+# --- file-reference-check ---
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/nonexistent.ts"}}' 0 "file-reference-check: missing file passes"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.md"}}' 0 "file-reference-check: markdown skipped"
+test_ex file-reference-check.sh '{"tool_input":{}}' 0 "file-reference-check: no file passes"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":""}}' 0 "file-reference-check: empty path passes"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.json"}}' 0 "file-reference-check: json passes"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
