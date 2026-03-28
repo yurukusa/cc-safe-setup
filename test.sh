@@ -9477,6 +9477,15 @@ test_ex disk-partition-guard.sh '{"tool_input":{"command":"parted /dev/sda"}}' 2
 test_ex disk-partition-guard.sh '{"tool_input":{"command":"df -h"}}' 0 "disk-guard: df allowed"
 test_ex disk-partition-guard.sh '{"tool_input":{"command":"lsblk"}}' 0 "disk-guard: lsblk allowed"
 test_ex disk-partition-guard.sh '{}' 0 "disk-guard: empty input"
+# --- pip-requirements-guard ---
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip install requests"}}' 2 "pip-guard: direct install blocked"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip3 install flask"}}' 2 "pip-guard: pip3 direct blocked"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"python -m pip install numpy"}}' 2 "pip-guard: python -m pip blocked"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip install -r requirements.txt"}}' 0 "pip-guard: requirements file allowed"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip install -e ."}}' 0 "pip-guard: editable install allowed"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip install --upgrade pip"}}' 0 "pip-guard: pip self-upgrade allowed"
+test_ex pip-requirements-guard.sh '{"tool_input":{"command":"pip list"}}' 0 "pip-guard: pip list allowed"
+test_ex pip-requirements-guard.sh '{}' 0 "pip-guard: empty input"
 echo ""
 
 echo "========================"
