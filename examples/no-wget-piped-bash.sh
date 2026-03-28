@@ -12,7 +12,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Detect curl/wget piped to sh/bash
-if echo "$COMMAND" | grep -qE '(curl|wget)\s.*\|\s*(bash|sh|zsh|source|eval)'; then
+if echo "$COMMAND" | grep -qE '(curl|wget)\s.*\|\s*(sudo\s+)?(bash|sh|zsh|source|eval)'; then
   echo "BLOCKED: Piping remote script directly to shell is dangerous." >&2
   echo "  Download first, review, then execute:" >&2
   echo "  curl -o script.sh URL && cat script.sh && bash script.sh" >&2
