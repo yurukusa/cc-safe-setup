@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T00:21:13+09:00
+Updated: 2026-03-29T00:32:39+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T00:21:13+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: bd08157 checkpoint: auto-save 00:20:36
+- Last commit: f7bdf71 checkpoint: auto-save 00:32:31
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./examples/api-rate-limit-guard.sh
+./examples/git-stash-before-checkout.sh
 ./.claude/pre-compact-checkpoint.md
 ./README.md
 ./examples/chown-guard.sh
 ./examples/chmod-guard.sh
-./test.sh
 ./examples/five-hundred-milestone.sh
 ./examples/max-function-length.sh
-./examples/no-dangling-await.sh
-./examples/no-eval-template.sh
 ```
 
