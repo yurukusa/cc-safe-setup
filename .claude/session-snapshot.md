@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T22:08:01+09:00
+Updated: 2026-03-28T22:09:13+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T22:08:01+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 6a37626 checkpoint: auto-save 22:07:25
+- Last commit: bebba78 checkpoint: auto-save 22:09:05
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/cargo-publish-guard.sh
+./examples/gem-push-guard.sh
+./examples/pip-publish-guard.sh
+./examples/expo-eject-guard.sh
+./examples/go-mod-tidy-warn.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/nuxt-config-guard.sh
 ./examples/spring-profile-guard.sh
-./examples/laravel-artisan-guard.sh
-./examples/redis-flushall-guard.sh
-./examples/vue-lint-on-edit.sh
-./examples/flask-debug-guard.sh
-./examples/django-migrate-guard.sh
 ```
 
