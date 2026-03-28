@@ -10357,6 +10357,13 @@ test_ex chmod-guard.sh '{"tool_input":{"command":"chmod 644 file.txt"}}' 0 "chmo
 test_ex chmod-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "chmod-guard: non-chmod passes"
 test_ex chmod-guard.sh '{"tool_input":{}}' 0 "chmod-guard: empty command"
 test_ex chmod-guard.sh '{}' 0 "chmod-guard: empty input"
+test_ex chown-guard.sh '{"tool_input":{"command":"chown root /tmp/file"}}' 2 "chown-guard: chown root blocked"
+test_ex chown-guard.sh '{"tool_input":{"command":"chown -R root:root /var/log"}}' 2 "chown-guard: chown -R root blocked"
+test_ex chown-guard.sh '{"tool_input":{"command":"chown -R user /etc"}}' 2 "chown-guard: chown -R /etc blocked"
+test_ex chown-guard.sh '{"tool_input":{"command":"chown user:group project/file.txt"}}' 0 "chown-guard: project file passes"
+test_ex chown-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "chown-guard: non-chown passes"
+test_ex chown-guard.sh '{"tool_input":{}}' 0 "chown-guard: empty command"
+test_ex chown-guard.sh '{}' 0 "chown-guard: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
