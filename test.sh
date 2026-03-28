@@ -10318,6 +10318,16 @@ test_ex edit-error-counter.sh '{"tool_name":"Edit","tool_input":{"file_path":"/t
 test_ex edit-error-counter.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "edit-error-counter: non-Edit tool passes"
 test_ex edit-error-counter.sh '{"tool_input":{}}' 0 "edit-error-counter: empty tool_input"
 test_ex edit-error-counter.sh '{"tool_name":"Edit"}' 0 "edit-error-counter: missing tool_input passes"
+test_ex parallel-session-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "parallel-session-guard: edit passes"
+test_ex parallel-session-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x"}}' 0 "parallel-session-guard: write passes"
+test_ex parallel-session-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "parallel-session-guard: read passes (not guarded)"
+test_ex parallel-session-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "parallel-session-guard: bash passes (not guarded)"
+test_ex parallel-session-guard.sh '{"tool_input":{}}' 0 "parallel-session-guard: empty tool_input"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"ls"}}' 0 "env-inherit-guard: ls passes (skipped)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "env-inherit-guard: npm test passes (no prod env)"
+test_ex env-inherit-guard.sh '{"tool_input":{}}' 0 "env-inherit-guard: empty tool_input"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":""}}' 0 "env-inherit-guard: empty command"
+test_ex env-inherit-guard.sh '{}' 0 "env-inherit-guard: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
