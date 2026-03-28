@@ -1,9 +1,9 @@
-Saved: 2026-03-29T03:13:47+09:00 | Tool call: #1
+Saved: 2026-03-29T04:13:24+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
-ac561d9 checkpoint: auto-save 03:13:40
-5bf2cc2 checkpoint: auto-save 03:13:29
-45b2612 chore: SEO pages update (511 hooks / 7,349 tests) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-62adef5 chore: v29.6.28 — 511 hooks / 7,349 tests Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-6913031 checkpoint: auto-save 02:56:41
+46aff4f checkpoint: auto-save 04:13:18
+6fe599a checkpoint: auto-save 04:13:06
+b8c1c2c docs: CHANGELOG update for v29.6.28 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+8a10320 docs: overhaul examples/README (38→511 hooks, add categories + guides) This page gets 14v/8u from GitHub traffic. Updated to reflect actual 511 hooks with category table, popular hooks, and guide links. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+4116efa docs: overhaul Japanese README (36→511 hooks, add new features) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
