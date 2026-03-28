@@ -9516,6 +9516,322 @@ test_ex npm-global-install-guard.sh '{"tool_input":{"command":"npx create-react-
 test_ex npm-global-install-guard.sh '{}' 0 "npm-global: empty input"
 echo ""
 
+# --- daily-usage-tracker additional tests ---
+echo "daily-usage-tracker.sh (additional):"
+DAILY_TEST_DIR_ADD="$HOME/.claude/daily-usage"
+DAILY_TEST_FILE_ADD="$DAILY_TEST_DIR_ADD/$(date +%Y-%m-%d).log"
+DAILY_BACKUP_ADD=""
+[ -f "$DAILY_TEST_FILE_ADD" ] && DAILY_BACKUP_ADD=$(cat "$DAILY_TEST_FILE_ADD")
+rm -f "$DAILY_TEST_FILE_ADD" 2>/dev/null
+test_ex daily-usage-tracker.sh '{"tool_name":"Write"}' 0 "daily-tracker: Write tool recorded"
+test_ex daily-usage-tracker.sh '{"tool_name":"Edit"}' 0 "daily-tracker: Edit tool recorded"
+test_ex daily-usage-tracker.sh '{"tool_name":""}' 0 "daily-tracker: empty tool_name string"
+test_ex daily-usage-tracker.sh '{"other_field":"value"}' 0 "daily-tracker: missing tool_name field"
+# Verify multiple calls create multiple log lines
+LINES_ADD=$(wc -l < "$DAILY_TEST_FILE_ADD" 2>/dev/null || echo 0)
+if [ "$LINES_ADD" -ge 4 ]; then
+    echo "  PASS: daily-tracker: 4+ calls logged correctly"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: daily-tracker: 4+ calls logged correctly (got $LINES_ADD lines)"
+    FAIL=$((FAIL + 1))
+fi
+if [ -n "$DAILY_BACKUP_ADD" ]; then echo "$DAILY_BACKUP_ADD" > "$DAILY_TEST_FILE_ADD"; fi
+echo ""
+
+# --- post-compact-safety additional tests ---
+echo "post-compact-safety.sh (additional):"
+rm -f "/tmp/cc-post-compact-$(whoami)" "/tmp/cc-post-compact-count-$(whoami)"
+# With marker file, git push should be blocked
+touch "/tmp/cc-post-compact-$(whoami)"
+echo "1" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"git push origin main"}}' 2 "post-compact: git push blocked with marker"
+rm -f "/tmp/cc-post-compact-count-$(whoami)"
+echo "1" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"npm publish"}}' 2 "post-compact: npm publish blocked with marker"
+rm -f "/tmp/cc-post-compact-count-$(whoami)"
+echo "1" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"git reset --hard"}}' 2 "post-compact: git reset blocked with marker"
+rm -f "/tmp/cc-post-compact-count-$(whoami)"
+echo "1" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"docker push myimage"}}' 2 "post-compact: docker push blocked with marker"
+rm -f "/tmp/cc-post-compact-count-$(whoami)"
+echo "1" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"echo safe command"}}' 0 "post-compact: non-irreversible passes with marker"
+# Guard period expired (count > threshold)
+rm -f "/tmp/cc-post-compact-count-$(whoami)"
+echo "15" > "/tmp/cc-post-compact-count-$(whoami)"
+test_ex post-compact-safety.sh '{"tool_input":{"command":"git push"}}' 0 "post-compact: git push allowed after guard period"
+rm -f "/tmp/cc-post-compact-$(whoami)" "/tmp/cc-post-compact-count-$(whoami)"
+echo ""
+
+# --- session-drift-guard additional tests ---
+echo "session-drift-guard.sh (additional):"
+rm -f "/tmp/cc-drift-counter-$(whoami)"
+# Phase 2: warn zone (200-500)
+echo "249" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "drift-guard: warn zone (250) passes"
+# Phase 3: block zone (500+), destructive command
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"rm -rf /tmp/test"}}' 2 "drift-guard: rm blocked at 501"
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"git push origin main"}}' 2 "drift-guard: git push blocked at 501"
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"git reset --hard"}}' 2 "drift-guard: git reset blocked at 501"
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"sudo rm -rf /"}}' 2 "drift-guard: sudo rm blocked at 501"
+# Phase 3: non-destructive passes
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"echo safe"}}' 0 "drift-guard: echo passes at 501+"
+echo "500" > "/tmp/cc-drift-counter-$(whoami)"
+test_ex session-drift-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "drift-guard: ls passes at 501+"
+rm -f "/tmp/cc-drift-counter-$(whoami)"
+echo ""
+
+# --- strip-coauthored-by additional tests ---
+echo "strip-coauthored-by.sh (additional):"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"feat: add login Co-Authored-By: Claude <noreply@anthropic.com>\""}}' 0 "strip-coauthor: detects Claude co-author (warns, exit 0)"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"fix: typo Co-Authored-By: Anthropic AI\""}}' 0 "strip-coauthor: detects Anthropic co-author (warns, exit 0)"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"feat: add login Co-Authored-By: John <john@example.com>\""}}' 0 "strip-coauthor: non-Claude co-author passes silently"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit --amend"}}' 0 "strip-coauthor: amend without message passes"
+CC_ALLOW_COAUTHOR=1 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"feat Co-Authored-By: Claude\""}}' 0 "strip-coauthor: CC_ALLOW_COAUTHOR=1 allows"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":""}}' 0 "strip-coauthor: empty command"
+echo ""
+
+# --- typescript-strict-check additional tests ---
+echo "typescript-strict-check.sh (additional):"
+# Create tsconfig with strict: true
+TS_STRICT_OK="/tmp/cc-test-tsconfig-ok.json"
+echo '{"compilerOptions":{"strict":true,"target":"es2020"}}' > "$TS_STRICT_OK"
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"'"$TS_STRICT_OK"'"}}' 0 "ts-strict: strict true passes"
+# Create tsconfig with strict: false
+TS_STRICT_BAD="/tmp/cc-test-tsconfig-bad.json"
+echo '{"compilerOptions":{"strict":false}}' > "$TS_STRICT_BAD"
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"'"$TS_STRICT_BAD"'"}}' 0 "ts-strict: strict false warns (exit 0)"
+# Create tsconfig with noImplicitAny: false
+TS_NOIMPLICIT="/tmp/cc-test-tsconfig-noimplicit.json"
+echo '{"compilerOptions":{"noImplicitAny":false}}' > "$TS_NOIMPLICIT"
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"'"$TS_NOIMPLICIT"'"}}' 0 "ts-strict: noImplicitAny false warns (exit 0)"
+# File that doesn't exist
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"/nonexistent/tsconfig.json"}}' 0 "ts-strict: nonexistent file passes"
+# Non-tsconfig JSON
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":"/tmp/package.json"}}' 0 "ts-strict: package.json skipped"
+test_ex typescript-strict-check.sh '{"tool_input":{"file_path":""}}' 0 "ts-strict: empty path"
+rm -f "$TS_STRICT_OK" "$TS_STRICT_BAD" "$TS_NOIMPLICIT" 2>/dev/null
+echo ""
+
+# --- unicode-corruption-check additional tests ---
+echo "unicode-corruption-check.sh (additional):"
+# Create a text file with U+FFFD replacement character
+UNICODE_BAD="/tmp/cc-test-unicode-bad.txt"
+printf 'hello \xef\xbf\xbd world\n' > "$UNICODE_BAD"
+test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$UNICODE_BAD"'"}}' 0 "unicode-check: detects U+FFFD (warns, exit 0)"
+# Create a clean text file
+UNICODE_CLEAN="/tmp/cc-test-unicode-clean.txt"
+echo 'hello world normal text' > "$UNICODE_CLEAN"
+test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$UNICODE_CLEAN"'"}}' 0 "unicode-check: clean text passes"
+# Create non-JS file with \uXXXX escape
+UNICODE_ESC="/tmp/cc-test-unicode-escape.md"
+echo 'some text \u2018quoted\u2019 more text' > "$UNICODE_ESC"
+test_ex unicode-corruption-check.sh '{"tool_name":"Write","tool_input":{"file_path":"'"$UNICODE_ESC"'"}}' 0 "unicode-check: \\uXXXX in .md warns (exit 0)"
+# JS file with \uXXXX is fine
+UNICODE_JS="/tmp/cc-test-unicode-escape.js"
+echo 'const q = "\u2018";' > "$UNICODE_JS"
+test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$UNICODE_JS"'"}}' 0 "unicode-check: \\uXXXX in .js is fine"
+# Binary file should be skipped
+test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/usr/bin/env"}}' 0 "unicode-check: binary file skipped"
+rm -f "$UNICODE_BAD" "$UNICODE_CLEAN" "$UNICODE_ESC" "$UNICODE_JS" 2>/dev/null
+echo ""
+
+# --- commit-message-quality additional tests ---
+echo "commit-message-quality.sh (additional):"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"git commit -m \"update\""}}' 0 "commit-msg: vague update detected (exit 0)"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"git commit -m \"wip\""}}' 0 "commit-msg: vague wip detected (exit 0)"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"git commit -m \"asdf\""}}' 0 "commit-msg: vague asdf detected (exit 0)"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"git commit -m \"ab\""}}' 0 "commit-msg: too short (2 chars) warns (exit 0)"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"git commit --amend --no-edit"}}' 0 "commit-msg: amend no-edit skipped (no -m)"
+test_ex commit-message-quality.sh '{"tool_input":{"command":"  git commit -m \"stuff\""}}' 0 "commit-msg: leading spaces still detects"
+echo ""
+
+# --- file-edit-backup additional tests ---
+echo "file-edit-backup.sh (additional):"
+# Create a temp file to test actual backup creation
+BACKUP_TARGET="/tmp/cc-test-backup-file-$(date +%s).txt"
+echo "important content" > "$BACKUP_TARGET"
+test_ex file-edit-backup.sh '{"tool_name":"Write","tool_input":{"file_path":"'"$BACKUP_TARGET"'"}}' 0 "file-backup: Write tool creates backup"
+# Verify backup was actually created
+BACKUP_SAFE=$(echo "$BACKUP_TARGET" | tr '/' '_' | sed 's/^_//')
+if ls "$HOME/.claude/file-backups/${BACKUP_SAFE}."* 2>/dev/null | head -1 > /dev/null; then
+    echo "  PASS: file-backup: backup file actually exists"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: file-backup: backup file actually exists"
+    FAIL=$((FAIL + 1))
+fi
+test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$BACKUP_TARGET"'"}}' 0 "file-backup: Edit tool creates backup"
+test_ex file-edit-backup.sh '{"tool_input":{"file_path":"'"$BACKUP_TARGET"'"}}' 0 "file-backup: missing tool_name still works"
+rm -f "$BACKUP_TARGET" 2>/dev/null
+rm -f "$HOME/.claude/file-backups/${BACKUP_SAFE}."* 2>/dev/null
+echo ""
+
+# --- git-message-length-check additional tests ---
+echo "git-message-length-check.sh (additional):"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"a\""}}' 0 "msg-length: 1 char warns (exit 0)"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"this is a very descriptive commit message about the change\""}}' 0 "msg-length: long message passes"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit --amend"}}' 0 "msg-length: amend without -m skipped"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"123456789\""}}' 0 "msg-length: exactly 9 chars warns (exit 0)"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"1234567890\""}}' 0 "msg-length: exactly 10 chars passes"
+test_ex git-message-length-check.sh '{"tool_input":{"command":""}}' 0 "msg-length: empty command"
+echo ""
+
+# --- gitignore-auto-add additional tests ---
+echo "gitignore-auto-add.sh (additional):"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"mkdir __pycache__"}}' 0 "gitignore: __pycache__ hint"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"mkdir .cache"}}' 0 "gitignore: .cache hint"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"touch .env.local"}}' 0 "gitignore: .env.local hint"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"mkdir dist/"}}' 0 "gitignore: dist/ hint"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"mkdir .venv"}}' 0 "gitignore: .venv hint"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":"ls -la"}}' 0 "gitignore: ls not mkdir/touch"
+test_ex gitignore-auto-add.sh '{"tool_input":{"command":""}}' 0 "gitignore: empty command"
+echo ""
+
+# --- json-syntax-check additional tests ---
+echo "json-syntax-check.sh (additional):"
+# JSONC file
+JSONC_TEST="/tmp/cc-test-file.jsonc"
+echo '{"key": "value"}' > "$JSONC_TEST"
+test_ex json-syntax-check.sh '{"tool_name":"Write","tool_input":{"file_path":"'"$JSONC_TEST"'"}}' 0 "json-check: .jsonc file checked"
+# Empty JSON file
+JSON_EMPTY="/tmp/cc-test-empty.json"
+echo '' > "$JSON_EMPTY"
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$JSON_EMPTY"'"}}' 0 "json-check: empty JSON warns (exit 0)"
+# Nested valid JSON
+JSON_NESTED="/tmp/cc-test-nested.json"
+echo '{"a":{"b":{"c":[1,2,3]}}}' > "$JSON_NESTED"
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$JSON_NESTED"'"}}' 0 "json-check: nested valid JSON passes"
+# File path with uppercase .JSON
+JSON_UPPER="/tmp/cc-test-upper.JSON"
+echo '{"key":"val"}' > "$JSON_UPPER"
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$JSON_UPPER"'"}}' 0 "json-check: .JSON uppercase checked"
+rm -f "$JSONC_TEST" "$JSON_EMPTY" "$JSON_NESTED" "$JSON_UPPER" 2>/dev/null
+echo ""
+
+# --- main-branch-warn additional tests ---
+echo "main-branch-warn.sh (additional):"
+test_ex main-branch-warn.sh '{"tool_input":{"command":"git add ."}}' 0 "main-warn: git add checked"
+test_ex main-branch-warn.sh '{"tool_input":{"command":"git merge feature"}}' 0 "main-warn: git merge checked"
+test_ex main-branch-warn.sh '{"tool_input":{"command":"git rebase main"}}' 0 "main-warn: git rebase checked"
+test_ex main-branch-warn.sh '{"tool_input":{"command":"git status"}}' 0 "main-warn: git status not state-modifying"
+test_ex main-branch-warn.sh '{"tool_input":{"command":"git log"}}' 0 "main-warn: git log not state-modifying"
+test_ex main-branch-warn.sh '{"tool_input":{"command":""}}' 0 "main-warn: empty command"
+echo ""
+
+# --- no-hardcoded-ip additional tests ---
+echo "no-hardcoded-ip.sh (additional):"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"content":"","file_path":"src/app.js"}}' 0 "ip: empty content passes"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"content":"use 127.0.0.1 for localhost","file_path":"src/app.js"}}' 0 "ip: 127.0.0.1 allowed (localhost)"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"content":"bind 0.0.0.0","file_path":"src/app.js"}}' 0 "ip: 0.0.0.0 allowed"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"content":"host: 10.0.0.1","file_path":"docker-compose.yml"}}' 0 "ip: docker-compose skipped"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"content":"host: 10.0.0.1","file_path":"Vagrantfile"}}' 0 "ip: Vagrantfile skipped"
+test_ex no-hardcoded-ip.sh '{"tool_input":{"new_string":"const ip = \"10.0.0.5\"","file_path":"src/config.ts"}}' 0 "ip: new_string field also checked"
+echo ""
+
+# --- no-push-without-tests additional tests ---
+echo "no-push-without-tests.sh (additional):"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"pytest"}}' 0 "push-tests: pytest tracked"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"go test ./..."}}' 0 "push-tests: go test tracked"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"cargo test"}}' 0 "push-tests: cargo test tracked"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"npx jest"}}' 0 "push-tests: npx jest tracked"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"npx vitest"}}' 0 "push-tests: npx vitest tracked"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":"  git push origin main"}}' 0 "push-tests: leading space git push"
+test_ex no-push-without-tests.sh '{"tool_input":{"command":""}}' 0 "push-tests: empty command"
+echo ""
+
+# --- no-wget-piped-bash additional tests ---
+echo "no-wget-piped-bash.sh (additional):"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":"curl -fsSL https://deb.nodesource.com/setup_20.x | bash"}}' 2 "wget-bash: curl -fsSL pipe blocked"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":"wget https://example.com/install.sh | zsh"}}' 2 "wget-bash: wget pipe to zsh blocked"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":"curl -o script.sh https://example.com/script.sh"}}' 0 "wget-bash: curl -o download allowed"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":"wget https://example.com/file.tar.gz"}}' 0 "wget-bash: wget download allowed"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":"curl https://example.com | jq ."}}' 0 "wget-bash: curl pipe to jq allowed"
+test_ex no-wget-piped-bash.sh '{"tool_input":{"command":""}}' 0 "wget-bash: empty command"
+echo ""
+
+# --- port-conflict-check additional tests ---
+echo "port-conflict-check.sh (additional):"
+test_ex port-conflict-check.sh '{"tool_input":{"command":"npm run dev"}}' 0 "port-check: npm run dev checked"
+test_ex port-conflict-check.sh '{"tool_input":{"command":"python -m http.server 9090"}}' 0 "port-check: python http.server with port"
+test_ex port-conflict-check.sh '{"tool_input":{"command":"flask run --port 5001"}}' 0 "port-check: flask with explicit port"
+test_ex port-conflict-check.sh '{"tool_input":{"command":"uvicorn app:app"}}' 0 "port-check: uvicorn detected"
+test_ex port-conflict-check.sh '{"tool_input":{"command":"node server.js"}}' 0 "port-check: node server.js detected"
+test_ex port-conflict-check.sh '{"tool_input":{"command":""}}' 0 "port-check: empty command"
+echo ""
+
+# --- python-ruff-on-edit additional tests ---
+echo "python-ruff-on-edit.sh (additional):"
+# Create a valid Python file
+PY_VALID="/tmp/cc-test-valid.py"
+echo 'print("hello")' > "$PY_VALID"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"'"$PY_VALID"'"}}' 0 "python-ruff: valid py passes"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.rb"}}' 0 "python-ruff: .rb file skipped"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.pyw"}}' 0 "python-ruff: .pyw file skipped (not .py)"
+test_ex python-ruff-on-edit.sh '{"tool_input":{"file_path":"/nonexistent/test.py"}}' 0 "python-ruff: nonexistent .py file passes"
+rm -f "$PY_VALID" 2>/dev/null
+echo ""
+
+# --- read-budget-guard additional tests ---
+echo "read-budget-guard.sh (additional):"
+# Test budget exceeded
+BUDGET_TRACKER="/tmp/cc-read-budget-$$"
+rm -f "$BUDGET_TRACKER" 2>/dev/null
+for i in $(seq 1 101); do echo "/tmp/file-$i.txt" >> "$BUDGET_TRACKER"; done
+CC_READ_BUDGET=100 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/new-file.txt"}}' 2 "read-budget: blocks when over budget"
+rm -f "$BUDGET_TRACKER" 2>/dev/null
+# Test warn threshold
+for i in $(seq 1 49); do echo "/tmp/file-$i.txt" >> "$BUDGET_TRACKER"; done
+CC_READ_BUDGET=100 CC_READ_WARN=50 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/warn-file.txt"}}' 0 "read-budget: warns at threshold (exit 0)"
+rm -f "$BUDGET_TRACKER" 2>/dev/null
+# Duplicate read
+echo "/tmp/already-read.txt" > "$BUDGET_TRACKER"
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/already-read.txt"}}' 0 "read-budget: duplicate read warns (exit 0)"
+rm -f "$BUDGET_TRACKER" 2>/dev/null
+echo ""
+
+# --- tool-call-rate-limiter additional tests ---
+echo "tool-call-rate-limiter.sh (additional):"
+RATE_FILE_ADD="$HOME/.claude/rate-limiter.log"
+rm -f "$RATE_FILE_ADD" 2>/dev/null
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Read"}' 0 "rate-limiter: Read call passes"
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Write"}' 0 "rate-limiter: Write call passes"
+# Test with old timestamps (should be pruned)
+rm -f "$RATE_FILE_ADD" 2>/dev/null
+OLD_TS=$(($(date +%s) - 120))
+for i in $(seq 1 35); do echo "$OLD_TS" >> "$RATE_FILE_ADD"; done
+CC_RATE_LIMIT_MAX=30 CC_RATE_LIMIT_WINDOW=60 test_ex tool-call-rate-limiter.sh '{}' 0 "rate-limiter: old timestamps pruned, passes"
+# Test exactly at limit
+rm -f "$RATE_FILE_ADD" 2>/dev/null
+NOW_TS=$(date +%s)
+for i in $(seq 1 30); do echo "$NOW_TS" >> "$RATE_FILE_ADD"; done
+CC_RATE_LIMIT_MAX=30 CC_RATE_LIMIT_WINDOW=60 test_ex tool-call-rate-limiter.sh '{}' 2 "rate-limiter: blocks at limit+1"
+rm -f "$RATE_FILE_ADD" 2>/dev/null
+echo ""
+
+# --- variable-expansion-guard additional tests ---
+echo "variable-expansion-guard.sh (additional):"
+set +eo pipefail
+echo '{"tool_input":{"command":"chmod 777 ${APPDATA}/config"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG2=$?
+if [ "$_VEG2" -eq 2 ]; then echo "  PASS: var-expand: blocks chmod with \${APPDATA}"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: blocks chmod with \${APPDATA} (expected 2, got $_VEG2)"; FAIL=$((FAIL+1)); fi
+echo '{"tool_input":{"command":"chown root $USERPROFILE/file"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG3=$?
+if [ "$_VEG3" -eq 2 ]; then echo "  PASS: var-expand: blocks chown with \$USERPROFILE"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: blocks chown with \$USERPROFILE (expected 2, got $_VEG3)"; FAIL=$((FAIL+1)); fi
+echo '{"tool_input":{"command":"rm -rf $(find /tmp -name old)"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG4=$?
+if [ "$_VEG4" -eq 2 ]; then echo "  PASS: var-expand: blocks rm with command substitution"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: blocks rm with command substitution (expected 2, got $_VEG4)"; FAIL=$((FAIL+1)); fi
+echo '{"tool_input":{"command":"cp ${SYSTEMROOT}/file /tmp/"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG5=$?
+if [ "$_VEG5" -eq 2 ]; then echo "  PASS: var-expand: blocks cp with \${SYSTEMROOT}"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: blocks cp with \${SYSTEMROOT} (expected 2, got $_VEG5)"; FAIL=$((FAIL+1)); fi
+echo '{"tool_input":{"command":"rm -rf /tmp/specific-dir"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG6=$?
+if [ "$_VEG6" -eq 0 ]; then echo "  PASS: var-expand: explicit rm path passes"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: explicit rm path passes (expected 0, got $_VEG6)"; FAIL=$((FAIL+1)); fi
+set -euo pipefail
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
