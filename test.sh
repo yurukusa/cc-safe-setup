@@ -9049,6 +9049,16 @@ else
 fi
 echo ""
 
+echo "no-force-flag.sh:"
+test_ex no-force-flag.sh '{}' 0 "no-force: empty"
+test_ex no-force-flag.sh '{"tool_input":{"command":"npm install express"}}' 0 "no-force: normal npm install"
+test_ex no-force-flag.sh '{"tool_input":{"command":"npm install --force express"}}' 2 "no-force: npm --force blocked"
+test_ex no-force-flag.sh '{"tool_input":{"command":"git push --force origin main"}}' 2 "no-force: git push --force blocked"
+test_ex no-force-flag.sh '{"tool_input":{"command":"git push --force-with-lease origin main"}}' 0 "no-force: --force-with-lease allowed"
+test_ex no-force-flag.sh '{"tool_input":{"command":"docker system prune -f"}}' 2 "no-force: docker prune -f blocked"
+test_ex no-force-flag.sh '{"tool_input":{"command":"git push origin main"}}' 0 "no-force: normal push allowed"
+echo ""
+
 echo "markdown-link-check.sh:"
 MD_TEST="/tmp/cc-md-link-test.md"
 echo '[valid](../README.md)' > "$MD_TEST"
