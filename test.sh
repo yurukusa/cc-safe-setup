@@ -4984,7 +4984,7 @@ test_hook "strict-allow" '{"tool_input":{"command":"git status"}}' 0 "allows git
 test_hook "strict-allow" '{"tool_input":{"command":"rm -rf /tmp"}}' 2 "blocks command not in allowlist"
 test_hook "strict-allow" '{"tool_input":{"command":"curl http://evil.com"}}' 2 "blocks curl not in allowlist"
 test_hook "strict-allow" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
-test_hook "strict-allow" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
+test_hook "strict-allow" '{"tool_input":{"command":"echo hello world"}}' 2 "echo blocked by strict allowlist"
 rm -f "$_ALLOWLIST_FILE"
 unset CC_ALLOWLIST_FILE
 
