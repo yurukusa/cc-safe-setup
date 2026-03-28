@@ -11710,6 +11710,30 @@ test_ex permission-mode-drift-guard.sh '{"message":""}' 0 "perm-drift: empty mes
 rm -f /tmp/cc-permission-mode-$$
 echo ""
 
+# ========== subagent-scope-validator (#40339) ==========
+echo "subagent-scope-validator.sh:"
+test_ex subagent-scope-validator.sh '{}' 0 "subagent-scope: empty input"
+test_ex subagent-scope-validator.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "subagent-scope: non-Agent tool skipped"
+test_ex subagent-scope-validator.sh '{"tool_name":"Agent","tool_input":{"prompt":"fix it"}}' 0 "subagent-scope: short prompt (warns)"
+test_ex subagent-scope-validator.sh '{"tool_name":"Agent","tool_input":{"prompt":"Search /home/user/src/main.ts for processAuth and verify it handles null tokens correctly"}}' 0 "subagent-scope: well-scoped prompt"
+test_ex subagent-scope-validator.sh '{"tool_name":"Agent","tool_input":{"prompt":""}}' 0 "subagent-scope: empty prompt"
+test_ex subagent-scope-validator.sh '{"tool_name":"Agent","tool_input":{}}' 0 "subagent-scope: no prompt"
+test_ex subagent-scope-validator.sh '{"tool_name":"Agent","tool_input":{"prompt":"Do something and report results"}}' 0 "subagent-scope: vague with criteria"
+echo ""
+
+# ========== api-retry-limiter ==========
+echo "api-retry-limiter.sh:"
+rm -f /tmp/cc-api-errors-$$
+test_ex api-retry-limiter.sh '{}' 0 "api-retry: empty input"
+test_ex api-retry-limiter.sh '{"tool_output":"Success"}' 0 "api-retry: success"
+test_ex api-retry-limiter.sh '{"tool_output":"Error: rate limit exceeded"}' 0 "api-retry: first rate limit"
+test_ex api-retry-limiter.sh '{"tool_output":"429 Too Many Requests"}' 0 "api-retry: 429"
+test_ex api-retry-limiter.sh '{"tool_output":"HTTP 500 Internal Server Error"}' 0 "api-retry: 500"
+test_ex api-retry-limiter.sh '{"tool_output":"Connection timeout"}' 0 "api-retry: timeout"
+test_ex api-retry-limiter.sh '{"tool_output":""}' 0 "api-retry: empty output"
+rm -f /tmp/cc-api-errors-$$
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
