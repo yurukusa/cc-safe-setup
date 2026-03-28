@@ -1,6 +1,6 @@
 # Example Hooks
 
-511 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 7,385 tests.
+514 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 7,564 tests.
 
 ```bash
 npx cc-safe-setup --install-example <name>   # install one

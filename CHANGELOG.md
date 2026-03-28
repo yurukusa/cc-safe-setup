@@ -7,7 +7,7 @@
 - **Docs**: examples/README overhaul (38→511), Japanese README overhaul (36→511)
 - **Tests**: 36 new tests for new hooks
 - **Tests**: Trigger detection tests (verify PermissionRequest/SessionStart/PreToolUse parsing)
-- **Stats**: 511 examples, 7,385 tests, 51 SEO pages
+- **Stats**: 514 examples, 7,564 tests, 51 SEO pages
 
 ## [29.6.0] - 2026-03-27
 - **Improved**: worktree-unmerged-guard — python3 fallback for macOS (no jq dependency), auto-detect default branch
