@@ -9468,6 +9468,15 @@ test_ex user-account-guard.sh '{"tool_input":{"command":"usermod -aG sudo attack
 test_ex user-account-guard.sh '{"tool_input":{"command":"whoami"}}' 0 "user-guard: whoami allowed"
 test_ex user-account-guard.sh '{"tool_input":{"command":"id"}}' 0 "user-guard: id allowed"
 test_ex user-account-guard.sh '{}' 0 "user-guard: empty input"
+# --- disk-partition-guard ---
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"fdisk /dev/sda"}}' 2 "disk-guard: fdisk blocked"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"mkfs.ext4 /dev/sdb1"}}' 2 "disk-guard: mkfs blocked"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"dd if=/dev/zero of=/dev/sda"}}' 2 "disk-guard: dd blocked"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"swapon /dev/sda2"}}' 2 "disk-guard: swapon blocked"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"parted /dev/sda"}}' 2 "disk-guard: parted blocked"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"df -h"}}' 0 "disk-guard: df allowed"
+test_ex disk-partition-guard.sh '{"tool_input":{"command":"lsblk"}}' 0 "disk-guard: lsblk allowed"
+test_ex disk-partition-guard.sh '{}' 0 "disk-guard: empty input"
 echo ""
 
 echo "========================"
