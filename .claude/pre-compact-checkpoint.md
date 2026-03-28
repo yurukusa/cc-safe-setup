@@ -1,9 +1,9 @@
-Saved: 2026-03-28T13:30:20+09:00 | Tool call: #1
+Saved: 2026-03-28T13:32:57+09:00 | Tool call: #1
 Branch: main | Dirty files: 1
-71706d1 checkpoint: auto-save 13:30:13
-640cb8d checkpoint: auto-save 13:30:02
-c1d7c40 feat: #433 sensitive-file-read-guard — block reading private keys/creds Blocks Read tool access to private keys (.ssh/id_rsa), AWS/GCP/Azure credentials, /etc/shadow, .gnupg/, and .env.production files. Allows public keys and SSH config. 10 tests added. 5,789/5,789 passed. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-c651089 checkpoint: auto-save 13:28:12
-215f03d checkpoint: auto-save 13:28:01
+a136622 checkpoint: auto-save 13:32:50
+9c307fe checkpoint: auto-save 13:32:39
+916176a chore: v29.6.15 — 434 hooks / 5,800 tests Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+fa49d52 feat: #434 registry-publish-guard — block gem/pip/cargo/docker/nuget publish Blocks publishing to RubyGems, PyPI, crates.io, Docker Hub, NuGet. Complements npm-publish-guard for multi-registry coverage. 🎯 5,800 tests milestone! 9 tests added. 5,800/5,800 passed. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+8824aad checkpoint: auto-save 13:30:25
 Read this file to understand what you were working on before context was compacted.
 Check git status and git log for current state. Continue from the last commit.
