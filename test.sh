@@ -11734,6 +11734,19 @@ test_ex api-retry-limiter.sh '{"tool_output":""}' 0 "api-retry: empty output"
 rm -f /tmp/cc-api-errors-$$
 echo ""
 
+# ========== concurrent-edit-lock (#35682) ==========
+echo "concurrent-edit-lock.sh:"
+rm -rf "$HOME/.claude/locks" 2>/dev/null
+test_ex concurrent-edit-lock.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-concurrent.txt"}}' 0 "concurrent-lock: first edit acquires lock"
+test_ex concurrent-edit-lock.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-concurrent.txt"}}' 0 "concurrent-lock: same session re-acquires"
+test_ex concurrent-edit-lock.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test-concurrent2.txt"}}' 0 "concurrent-lock: different file ok"
+test_ex concurrent-edit-lock.sh '{}' 0 "concurrent-lock: empty input"
+test_ex concurrent-edit-lock.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "concurrent-lock: empty path"
+test_ex concurrent-edit-lock.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test.txt"}}' 0 "concurrent-lock: Read tool skipped"
+test_ex concurrent-edit-lock.sh '{"tool_name":"Edit","tool_input":{}}' 0 "concurrent-lock: no file_path"
+rm -rf "$HOME/.claude/locks" 2>/dev/null
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
