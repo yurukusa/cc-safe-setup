@@ -9049,6 +9049,14 @@ else
 fi
 echo ""
 
+echo "output-credential-scan.sh:"
+test_ex output-credential-scan.sh '{}' 0 "cred-scan: empty"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"hello world"}}' 0 "cred-scan: clean output"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"KEY=sk-abc123456789012345678901234567890123"}}' 0 "cred-scan: detects sk- key (exit 0 warn)"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123456789"}}' 0 "cred-scan: detects ghp_ token (exit 0 warn)"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"AWS_KEY=AKIAIOSFODNN7EXAMPLE"}}' 0 "cred-scan: detects AWS key (exit 0 warn)"
+echo ""
+
 echo "no-force-flag.sh:"
 test_ex no-force-flag.sh '{}' 0 "no-force: empty"
 test_ex no-force-flag.sh '{"tool_input":{"command":"npm install express"}}' 0 "no-force: normal npm install"
