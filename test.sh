@@ -11578,6 +11578,48 @@ test_ex dotenv-watch.sh '{"file_path":""}' 0 "dotenv-watch: empty path"
 test_ex dotenv-watch.sh '{"file_path":"/app/.env","event":"unknown"}' 0 "dotenv-watch: unknown event"
 echo ""
 
+# ========== plan-mode-strict-guard (#40324) ==========
+echo "plan-mode-strict-guard.sh:"
+# Without plan mode lock, everything passes
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.py"}}' 0 "plan-strict: edit allowed (no plan mode)"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.py"}}' 0 "plan-strict: write allowed (no plan mode)"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm install foo"}}' 0 "plan-strict: bash allowed (no plan mode)"
+test_ex plan-mode-strict-guard.sh '{}' 0 "plan-strict: empty input"
+test_ex plan-mode-strict-guard.sh '{"tool_name":""}' 0 "plan-strict: empty tool name"
+# With plan mode lock, writes are blocked
+touch "$HOME/.claude/plan-mode.lock"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.py"}}' 2 "plan-strict: edit BLOCKED in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.py"}}' 2 "plan-strict: write BLOCKED in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm install foo"}}' 2 "plan-strict: write bash BLOCKED in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "plan-strict: ls allowed in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "plan-strict: git status allowed in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"cat /tmp/file"}}' 0 "plan-strict: cat allowed in plan mode"
+test_ex plan-mode-strict-guard.sh '{"tool_name":"Bash","tool_input":{"command":"grep pattern file"}}' 0 "plan-strict: grep allowed in plan mode"
+rm -f "$HOME/.claude/plan-mode.lock"
+echo ""
+
+# ========== compaction-transcript-guard (#40352) ==========
+echo "compaction-transcript-guard.sh:"
+test_ex compaction-transcript-guard.sh '{}' 0 "compaction-guard: empty input"
+test_ex compaction-transcript-guard.sh '{"event":"compact"}' 0 "compaction-guard: compact event"
+test_ex compaction-transcript-guard.sh '{"reason":"auto"}' 0 "compaction-guard: auto reason"
+test_ex compaction-transcript-guard.sh '{"context_percentage":10}' 0 "compaction-guard: low context"
+test_ex compaction-transcript-guard.sh '{"reason":"user","context_percentage":20}' 0 "compaction-guard: user + context"
+test_ex compaction-transcript-guard.sh '{"reason":"critical"}' 0 "compaction-guard: critical"
+test_ex compaction-transcript-guard.sh '{"context_percentage":5}' 0 "compaction-guard: very low context"
+echo ""
+
+# ========== session-resume-guard (#40319) ==========
+echo "session-resume-guard.sh:"
+test_ex session-resume-guard.sh '{}' 0 "session-resume: empty input"
+test_ex session-resume-guard.sh '{"event":"session_start"}' 0 "session-resume: session start"
+test_ex session-resume-guard.sh '{"event":"SessionStart"}' 0 "session-resume: SessionStart"
+test_ex session-resume-guard.sh '{"event":"session_end"}' 0 "session-resume: session end"
+test_ex session-resume-guard.sh '{"event":"Stop"}' 0 "session-resume: Stop"
+test_ex session-resume-guard.sh '{"event":"other"}' 0 "session-resume: unknown event"
+test_ex session-resume-guard.sh '{"event":""}' 0 "session-resume: empty event"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
