@@ -1,26 +1,44 @@
 # Example Hooks
 
-38 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation.
+511 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 7,385 tests.
 
 ```bash
-npx cc-safe-setup --install-example <name>
-npx cc-safe-setup --examples  # list all
+npx cc-safe-setup --install-example <name>   # install one
+npx cc-safe-setup --examples                  # list all
+npx cc-safe-setup --examples safety           # filter by category
+npx cc-safe-setup --shield                    # install recommended set
 ```
 
-## Safety Guards (13)
-allowlist, block-database-wipe, case-sensitive-guard, compound-command-approver, deploy-guard, env-var-check, git-config-guard, network-guard, path-traversal-guard, protect-dotfiles, scope-guard, test-before-push, timeout-guard
+## Categories
 
-## Auto-Approve (5)
-auto-approve-build, auto-approve-docker, auto-approve-git-read, auto-approve-python, auto-approve-ssh
+| Category | Count | Examples |
+|----------|-------|---------|
+| Destructive Command Prevention | 12 | `destructive-guard`, `branch-guard`, `no-sudo-guard`, `symlink-guard` |
+| Data Protection | 5 | `block-database-wipe`, `secret-guard`, `hardcoded-secret-detector` |
+| Git Safety | 11 | `git-config-guard`, `no-verify-blocker`, `push-requires-test-pass` |
+| Auto-Approve (PreToolUse) | 11 | `auto-approve-readonly`, `auto-approve-build`, `auto-approve-docker` |
+| Auto-Approve (PermissionRequest) | 7 | `allow-git-hooks-dir`, `allow-protected-dirs`, `edit-always-allow` |
+| Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |
+| Security | 10 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard` |
+| Deploy | 4 | `deploy-guard`, `no-deploy-friday`, `work-hours-guard` |
+| Monitoring & Cost | 13 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter` |
+| Utility | 17 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard` |
 
-## Quality (8)
-branch-name-check, commit-message-check, commit-quality-gate, edit-guard, enforce-tests, large-file-guard, todo-check, verify-before-commit
+## Popular Hooks
 
-## Recovery (3)
-auto-checkpoint, auto-snapshot, session-checkpoint
+- **`auto-approve-readonly`** — Skip prompts for `cat`, `ls`, `grep`, `git status`
+- **`destructive-guard`** — Block `rm -rf`, `git reset --hard`
+- **`credential-file-cat-guard`** — Block reading `.netrc`, `.npmrc`, `.cargo/credentials`
+- **`push-requires-test-pass`** — Block `git push main` without passing tests
+- **`context-monitor`** — Warn at 40/25/20/15% context remaining
 
-## UX (9)
-cost-tracker, dependency-audit, diff-size-guard, hook-debug-wrapper, loop-detector, notify-waiting, read-before-edit, session-handoff, tmp-cleanup
+## Guides
+
+- [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html)
+- [Credential Protection](https://yurukusa.github.io/cc-safe-setup/prevent-credential-leak.html)
+- [OWASP MCP Top 10 Defense](https://yurukusa.github.io/cc-safe-setup/owasp-mcp-hooks.html)
+- [COOKBOOK](../COOKBOOK.md)
 
 ## Write Your Own
+
 See [CONTRIBUTING.md](../CONTRIBUTING.md).
