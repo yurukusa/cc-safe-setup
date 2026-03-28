@@ -9049,6 +9049,26 @@ else
 fi
 echo ""
 
+echo "daily-usage-tracker.sh:"
+DAILY_TEST_DIR="$HOME/.claude/daily-usage"
+DAILY_TEST_FILE="$DAILY_TEST_DIR/$(date +%Y-%m-%d).log"
+DAILY_BACKUP=""
+[ -f "$DAILY_TEST_FILE" ] && DAILY_BACKUP=$(cat "$DAILY_TEST_FILE")
+rm -f "$DAILY_TEST_FILE" 2>/dev/null
+test_ex daily-usage-tracker.sh '{"tool_name":"Bash"}' 0 "daily-tracker: records call"
+test_ex daily-usage-tracker.sh '{"tool_name":"Read"}' 0 "daily-tracker: records second call"
+if [ -f "$DAILY_TEST_FILE" ] && [ "$(wc -l < "$DAILY_TEST_FILE")" -ge 2 ]; then
+    echo "  PASS: daily-tracker: log file has entries"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: daily-tracker: log file has entries"
+    FAIL=$((FAIL + 1))
+fi
+test_ex daily-usage-tracker.sh '{}' 0 "daily-tracker: empty tool name"
+# Restore original file if it existed
+if [ -n "$DAILY_BACKUP" ]; then echo "$DAILY_BACKUP" > "$DAILY_TEST_FILE"; fi
+echo ""
+
 echo "consecutive-error-breaker.sh:"
 rm -f /tmp/cc-error-streak 2>/dev/null
 test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"0"}}' 0 "error-breaker: success resets streak"
