@@ -10691,6 +10691,12 @@ test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/README.md"}}' 0 "
 test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "check-test-exists: json skipped"
 test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/style.css"}}' 0 "check-test-exists: css skipped"
 test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/test_utils.py"}}' 0 "check-test-exists: python test skipped"
+# --- no-global-install ---
+test_ex no-global-install.sh '{"tool_input":{"command":"npm install -g typescript"}}' 2 "no-global-install: npm -g blocked"
+test_ex no-global-install.sh '{"tool_input":{"command":"npm install --global eslint"}}' 2 "no-global-install: npm --global blocked"
+test_ex no-global-install.sh '{"tool_input":{"command":"npm install express"}}' 0 "no-global-install: npm local passes"
+test_ex no-global-install.sh '{"tool_input":{"command":"npm ci"}}' 0 "no-global-install: npm ci passes"
+test_ex no-global-install.sh '{"tool_input":{"command":"sudo gem install rails"}}' 2 "no-global-install: sudo gem blocked"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
