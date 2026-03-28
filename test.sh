@@ -10368,7 +10368,7 @@ test_ex system-package-guard.sh '{"tool_input":{"command":"apt-get install nginx
 test_ex system-package-guard.sh '{"tool_input":{"command":"brew install node"}}' 2 "system-package-guard: brew blocked"
 test_ex system-package-guard.sh '{"tool_input":{"command":"yum install httpd"}}' 2 "system-package-guard: yum blocked"
 test_ex system-package-guard.sh '{"tool_input":{"command":"snap install code"}}' 2 "system-package-guard: snap blocked"
-test_ex system-package-guard.sh '{"tool_input":{"command":"pacman -S vim"}}' 0 "system-package-guard: pacman -S not matched (no install)"
+test_ex system-package-guard.sh '{"tool_input":{"command":"pacman -S vim"}}' 2 "system-package-guard: pacman -S blocked"
 test_ex system-package-guard.sh '{"tool_input":{"command":"npm install express"}}' 0 "system-package-guard: npm passes"
 test_ex system-package-guard.sh '{"tool_input":{"command":"pip install flask"}}' 0 "system-package-guard: pip passes"
 test_ex system-package-guard.sh '{"tool_input":{"command":"ls"}}' 0 "system-package-guard: ls passes"

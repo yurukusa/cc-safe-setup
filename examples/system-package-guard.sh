@@ -28,7 +28,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [[ -z "$COMMAND" ]] && exit 0
 
 # Detect system package manager install commands
-if echo "$COMMAND" | grep -qE '(apt-get|apt|yum|dnf|pacman|zypper|apk|snap|brew)\s+(install|add)\b'; then
+if echo "$COMMAND" | grep -qE '(apt-get|apt|yum|dnf|zypper|apk|snap|brew)\s+(install|add)\b|pacman\s+-S\b'; then
     PKG_MGR=$(echo "$COMMAND" | grep -oE '(apt-get|apt|yum|dnf|pacman|zypper|apk|snap|brew)')
     echo "BLOCKED: System package installation detected ($PKG_MGR)." >&2
     echo "Command: $COMMAND" >&2
