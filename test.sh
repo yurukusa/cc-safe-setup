@@ -9049,6 +9049,22 @@ else
 fi
 echo ""
 
+echo "json-syntax-check.sh:"
+# Create valid JSON test file
+JSON_TEST="/tmp/cc-json-test-valid.json"
+echo '{"key": "value"}' > "$JSON_TEST"
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$JSON_TEST"'"}}' 0 "json-check: valid JSON passes"
+# Create invalid JSON test file
+JSON_BAD="/tmp/cc-json-test-bad.json"
+echo '{"key": invalid}' > "$JSON_BAD"
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$JSON_BAD"'"}}' 0 "json-check: invalid JSON warns (exit 0)"
+# Non-JSON file should be skipped
+test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.txt"}}' 0 "json-check: non-JSON skipped"
+# Empty input
+test_ex json-syntax-check.sh '{}' 0 "json-check: empty input"
+rm -f "$JSON_TEST" "$JSON_BAD" 2>/dev/null
+echo ""
+
 echo "daily-usage-tracker.sh:"
 DAILY_TEST_DIR="$HOME/.claude/daily-usage"
 DAILY_TEST_FILE="$DAILY_TEST_DIR/$(date +%Y-%m-%d).log"
