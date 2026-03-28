@@ -11676,6 +11676,19 @@ test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "pat
 unset CC_DENIED_PATHS
 echo ""
 
+# ========== sandbox-write-verify (#40321) ==========
+echo "sandbox-write-verify.sh:"
+rm -f /tmp/cc-sandbox-writes-$$
+test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/nonexistent-test-file.txt"}}' 0 "sandbox-write: new file allowed"
+test_ex sandbox-write-verify.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/nonexistent-test-file.txt"}}' 0 "sandbox-write: edit new file allowed"
+test_ex sandbox-write-verify.sh '{}' 0 "sandbox-write: empty input"
+test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "sandbox-write: empty path"
+test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":"/etc/hosts"}}' 0 "sandbox-write: existing file (single write ok)"
+test_ex sandbox-write-verify.sh '{"tool_name":"Edit","tool_input":{}}' 0 "sandbox-write: no file_path"
+test_ex sandbox-write-verify.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}' 0 "sandbox-write: Read tool skipped"
+rm -f /tmp/cc-sandbox-writes-$$
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
