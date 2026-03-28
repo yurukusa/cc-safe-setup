@@ -11758,6 +11758,41 @@ test_ex context-warning-verifier.sh '{"tool_output":"20% context remaining","con
 test_ex context-warning-verifier.sh '{"tool_output":""}' 0 "context-verifier: empty output"
 echo ""
 
+# ========== cross-session-error-log (#40383) ==========
+echo "cross-session-error-log.sh:"
+rm -f "$HOME/.claude/error-history.log"
+test_ex cross-session-error-log.sh '{"event":"SessionStart"}' 0 "cross-session: session start (no history)"
+test_ex cross-session-error-log.sh '{"tool_name":"Bash","tool_output":"Success"}' 0 "cross-session: success output"
+test_ex cross-session-error-log.sh '{"tool_name":"Bash","tool_output":"Error: command failed"}' 0 "cross-session: error logged"
+test_ex cross-session-error-log.sh '{"tool_name":"Edit","tool_output":"BLOCKED: permission denied"}' 0 "cross-session: blocked logged"
+test_ex cross-session-error-log.sh '{}' 0 "cross-session: empty input"
+test_ex cross-session-error-log.sh '{"tool_output":""}' 0 "cross-session: empty output"
+test_ex cross-session-error-log.sh '{"event":"session_start"}' 0 "cross-session: session start (with history)"
+rm -f "$HOME/.claude/error-history.log"
+echo ""
+
+# ========== no-git-amend ==========
+echo "no-git-amend.sh:"
+test_ex no-git-amend.sh '{"tool_input":{"command":"git commit --amend"}}' 2 "no-amend: git commit --amend BLOCKED"
+test_ex no-git-amend.sh '{"tool_input":{"command":"git commit --amend -m fix"}}' 2 "no-amend: amend with message BLOCKED"
+test_ex no-git-amend.sh '{"tool_input":{"command":"git commit -m \"fix: bug\""}}' 0 "no-amend: normal commit allowed"
+test_ex no-git-amend.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "no-amend: git log allowed"
+test_ex no-git-amend.sh '{}' 0 "no-amend: empty input"
+test_ex no-git-amend.sh '{"tool_input":{"command":"echo amend"}}' 0 "no-amend: echo with amend word"
+test_ex no-git-amend.sh '{"tool_input":{"command":""}}' 0 "no-amend: empty command"
+echo ""
+
+# ========== windows-path-guard (#36339) ==========
+echo "windows-path-guard.sh:"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"rm -rf node_modules"}}' 0 "win-path: rm node_modules allowed"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "win-path: non-rm command passes"
+test_ex windows-path-guard.sh '{}' 0 "win-path: empty input"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"rm -rf /mnt/c/Users"}}' 2 "win-path: rm Windows Users BLOCKED"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"rm -rf /mnt/c/Windows"}}' 2 "win-path: rm Windows dir BLOCKED"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"rm -rf /mnt/c/Program Files"}}' 2 "win-path: rm Program Files BLOCKED"
+test_ex windows-path-guard.sh '{"tool_input":{"command":"rm temp.txt"}}' 0 "win-path: rm single file allowed"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
