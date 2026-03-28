@@ -11793,6 +11793,28 @@ test_ex windows-path-guard.sh '{"tool_input":{"command":"rm -rf /mnt/c/Program F
 test_ex windows-path-guard.sh '{"tool_input":{"command":"rm temp.txt"}}' 0 "win-path: rm single file allowed"
 echo ""
 
+# ========== mcp-config-freeze (OWASP MCP09) ==========
+echo "mcp-config-freeze.sh:"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":"/project/.mcp.json"}}' 2 "mcp-freeze: .mcp.json BLOCKED"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":"/home/user/mcp-config.json"}}' 2 "mcp-freeze: mcp-config.json BLOCKED"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":"/project/src/main.ts"}}' 0 "mcp-freeze: non-MCP file allowed"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":"/home/.claude/settings.json","new_string":"mcpServers"}}' 2 "mcp-freeze: settings.json with mcpServers BLOCKED"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":"/home/.claude/settings.json","new_string":"hooks"}}' 0 "mcp-freeze: settings.json without MCP allowed"
+test_ex mcp-config-freeze.sh '{}' 0 "mcp-freeze: empty input"
+test_ex mcp-config-freeze.sh '{"tool_input":{"file_path":""}}' 0 "mcp-freeze: empty path"
+echo ""
+
+# ========== mcp-data-boundary (OWASP MCP01+MCP10) ==========
+echo "mcp-data-boundary.sh:"
+test_ex mcp-data-boundary.sh '{}' 0 "mcp-boundary: empty input"
+test_ex mcp-data-boundary.sh '{"tool_name":"Bash","tool_output":"hello"}' 0 "mcp-boundary: non-MCP tool skipped"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__tool","tool_output":"result: ok"}' 0 "mcp-boundary: clean MCP output"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__tool","tool_output":"read /etc/passwd"}' 0 "mcp-boundary: sensitive path detected (warns)"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__tool","tool_output":"key: sk-abc123def456ghi789jkl012mno345"}' 0 "mcp-boundary: secret in output (warns)"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__tool","tool_output":""}' 0 "mcp-boundary: empty output"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__read","tool_output":"contents of ~/.ssh/id_rsa"}' 0 "mcp-boundary: ssh key path (warns)"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
