@@ -9353,6 +9353,16 @@ test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 
 test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"gh issue create --title test"}}' 0 "gh-guard: issue create allowed"
 test_ex gh-cli-destructive-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "gh-guard: non-gh allowed"
 test_ex gh-cli-destructive-guard.sh '{}' 0 "gh-guard: empty input"
+# --- kill-process-guard ---
+test_ex kill-process-guard.sh '{"tool_input":{"command":"kill -9 1234"}}' 2 "kill-guard: kill -9 blocked"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"kill -KILL 5678"}}' 2 "kill-guard: kill -KILL blocked"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"killall node"}}' 2 "kill-guard: killall blocked"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"pkill python"}}' 2 "kill-guard: pkill blocked"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"kill 1234"}}' 0 "kill-guard: graceful kill allowed"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"kill -15 1234"}}' 0 "kill-guard: SIGTERM allowed"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"kill -INT 1234"}}' 0 "kill-guard: SIGINT allowed"
+test_ex kill-process-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "kill-guard: non-kill allowed"
+test_ex kill-process-guard.sh '{}' 0 "kill-guard: empty input"
 echo ""
 
 echo "========================"
