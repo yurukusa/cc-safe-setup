@@ -1,6 +1,6 @@
 # Example Hooks
 
-517 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 7,591 tests.
+518 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 7,603 tests.
 
 ```bash
 npx cc-safe-setup --install-example <name>   # install one
@@ -13,7 +13,7 @@ npx cc-safe-setup --shield                    # install recommended set
 
 | Category | Count | Examples |
 |----------|-------|---------|
-| Destructive Command Prevention | 12 | `destructive-guard`, `branch-guard`, `no-sudo-guard`, `symlink-guard` |
+| Destructive Command Prevention | 14 | `destructive-guard`, `branch-guard`, `no-sudo-guard`, `symlink-guard`, `shell-wrapper-guard`, `compound-inject-guard` |
 | Data Protection | 5 | `block-database-wipe`, `secret-guard`, `hardcoded-secret-detector` |
 | Git Safety | 11 | `git-config-guard`, `no-verify-blocker`, `push-requires-test-pass` |
 | Auto-Approve (PreToolUse) | 11 | `auto-approve-readonly`, `auto-approve-build`, `auto-approve-docker` |
@@ -21,8 +21,8 @@ npx cc-safe-setup --shield                    # install recommended set
 | Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |
 | Security | 10 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard` |
 | Deploy | 4 | `deploy-guard`, `no-deploy-friday`, `work-hours-guard` |
-| Monitoring & Cost | 13 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter` |
-| Utility | 17 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard` |
+| Monitoring & Cost | 14 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter`, `dotenv-watch` |
+| Utility | 20 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard`, `direnv-auto-reload`, `pre-compact-checkpoint` |
 
 ## Popular Hooks
 
