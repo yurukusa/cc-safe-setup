@@ -26,13 +26,14 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 [[ -z "$COMMAND" ]] && exit 0
 
-# Only check chmod commands
-if ! echo "$COMMAND" | grep -qE '\bchmod\b'; then
+# Only check actual chmod commands (not inside echo/printf/comments)
+ACTUAL_CMD=$(echo "$COMMAND" | sed 's/echo .*//; s/printf .*//; s/#.*//')
+if ! echo "$ACTUAL_CMD" | grep -qE '\bchmod\b'; then
     exit 0
 fi
 
 # Block world-writable permissions
-if echo "$COMMAND" | grep -qE 'chmod\s+(777|666|a\+[rwx]*w|o\+[rwx]*w)'; then
+if echo "$ACTUAL_CMD" | grep -qE 'chmod\s+(777|666|a\+[rwx]*w|o\+[rwx]*w)'; then
     echo "BLOCKED: World-writable permissions detected." >&2
     echo "Command: $COMMAND" >&2
     echo "" >&2
