@@ -29,7 +29,6 @@ test_hook() {
 }
 
 echo "cc-safe-setup hook tests"
-echo "========================"
 echo ""
 
 # --- destructive-guard ---
@@ -9365,6 +9364,17 @@ test_ex kill-process-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "kill-guar
 test_ex kill-process-guard.sh '{}' 0 "kill-guard: empty input"
 echo ""
 
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl stop nginx"}}' 2 "systemd-guard: stop blocked"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl restart postgresql"}}' 2 "systemd-guard: restart blocked"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl disable docker"}}' 2 "systemd-guard: disable blocked"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl mask sshd"}}' 2 "systemd-guard: mask blocked"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"service nginx stop"}}' 2 "systemd-guard: legacy stop blocked"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl status nginx"}}' 0 "systemd-guard: status allowed"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl start nginx"}}' 0 "systemd-guard: start allowed"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"journalctl -u nginx"}}' 0 "systemd-guard: journalctl allowed"
+test_ex systemd-service-guard.sh '{"tool_input":{"command":"ls"}}' 0 "systemd-guard: non-systemctl allowed"
+test_ex systemd-service-guard.sh '{}' 0 "systemd-guard: empty input"
+echo ""
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
