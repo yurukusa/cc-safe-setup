@@ -9374,7 +9374,18 @@ test_ex systemd-service-guard.sh '{"tool_input":{"command":"systemctl start ngin
 test_ex systemd-service-guard.sh '{"tool_input":{"command":"journalctl -u nginx"}}' 0 "systemd-guard: journalctl allowed"
 test_ex systemd-service-guard.sh '{"tool_input":{"command":"ls"}}' 0 "systemd-guard: non-systemctl allowed"
 test_ex systemd-service-guard.sh '{}' 0 "systemd-guard: empty input"
+# --- firewall-guard ---
+test_ex firewall-guard.sh '{"tool_input":{"command":"iptables -A INPUT -p tcp --dport 80 -j ACCEPT"}}' 2 "firewall: iptables add blocked"
+test_ex firewall-guard.sh '{"tool_input":{"command":"iptables -F"}}' 2 "firewall: iptables flush blocked"
+test_ex firewall-guard.sh '{"tool_input":{"command":"ufw allow 22"}}' 2 "firewall: ufw allow blocked"
+test_ex firewall-guard.sh '{"tool_input":{"command":"ufw deny 3306"}}' 2 "firewall: ufw deny blocked"
+test_ex firewall-guard.sh '{"tool_input":{"command":"nft add rule inet filter input tcp dport 80 accept"}}' 2 "firewall: nft add blocked"
+test_ex firewall-guard.sh '{"tool_input":{"command":"iptables -L"}}' 0 "firewall: iptables list allowed"
+test_ex firewall-guard.sh '{"tool_input":{"command":"ufw status"}}' 0 "firewall: ufw status allowed"
+test_ex firewall-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "firewall: non-firewall allowed"
+test_ex firewall-guard.sh '{}' 0 "firewall: empty input"
 echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
