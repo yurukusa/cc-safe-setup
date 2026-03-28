@@ -10673,6 +10673,18 @@ test_ex swift-build-on-edit.sh '{"tool_name":"Write","tool_input":{"file_path":"
 test_ex swift-build-on-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/App.swift"}}' 0 "swift-build-on-edit: edit swift"
 test_ex vue-lint-on-edit.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/App.vue"}}' 0 "vue-lint-on-edit: write vue"
 test_ex vue-lint-on-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/Page.vue"}}' 0 "vue-lint-on-edit: edit vue"
+# --- git-stash-before-checkout ---
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-stash-before-checkout: non-git passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git checkout -b feature/new"}}' 0 "git-stash-before-checkout: checkout -b passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "git-stash-before-checkout: git log passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git status"}}' 0 "git-stash-before-checkout: git status passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"npm install"}}' 0 "git-stash-before-checkout: npm passes"
+# --- api-rate-limit-guard ---
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "api-rate-limit-guard: non-curl passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "api-rate-limit-guard: npm passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"git status"}}' 0 "api-rate-limit-guard: git passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"curl -s https://example.com"}}' 0 "api-rate-limit-guard: curl passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"wget https://example.com"}}' 0 "api-rate-limit-guard: wget passes"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
