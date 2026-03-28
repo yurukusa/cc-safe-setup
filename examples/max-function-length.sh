@@ -1,5 +1,9 @@
-#!/bin/bash
-CONTENT=$(cat | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
-[ -z "$CONTENT" ] && exit 0
-LINES=$(echo "$CONTENT" | wc -l); [ "$LINES" -gt 100 ] && echo "NOTE: Edit adds 100+ lines — consider splitting" >&2
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+[[ -z "$FILE" ]] && exit 0
+[[ ! -f "$FILE" ]] && exit 0
+LINES=$(wc -l < "$FILE" 2>/dev/null)
+if [[ "$LINES" -gt 500 ]]; then
+    echo "NOTE: $(basename "$FILE") is $LINES lines. Consider splitting." >&2
+fi
 exit 0
