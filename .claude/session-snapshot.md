@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T22:01:20+09:00
+Updated: 2026-03-28T22:02:06+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-03-28T22:01:20+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: fd4c4a8 checkpoint: auto-save 22:01:18
+- Last commit: 7ba3354 checkpoint: auto-save 22:01:29
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/turbo-cache-guard.sh
 ./examples/drizzle-migrate-guard.sh
@@ -19,7 +20,6 @@ Updated: 2026-03-28T22:01:20+09:00
 ./examples/hallucination-url-check.sh
 ./examples/monorepo-scope-guard.sh
 ./README.md
-./.claude/pre-compact-checkpoint.md
 ./examples/dotnet-build-on-edit.sh
 ```
 
