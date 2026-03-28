@@ -9418,6 +9418,16 @@ test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.ss
 test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/src/main.ts"}}' 0 "sensitive-read: normal file allowed"
 test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":".env"}}' 0 "sensitive-read: .env allowed (not prod)"
 test_ex sensitive-file-read-guard.sh '{}' 0 "sensitive-read: empty input"
+# --- registry-publish-guard ---
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"gem push my-gem-1.0.gem"}}' 2 "registry-guard: gem push blocked"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"twine upload dist/*"}}' 2 "registry-guard: twine upload blocked"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"cargo publish"}}' 2 "registry-guard: cargo publish blocked"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"docker push myimage:latest"}}' 2 "registry-guard: docker push blocked"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"dotnet nuget push pkg.nupkg"}}' 2 "registry-guard: nuget push blocked"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"gem install rails"}}' 0 "registry-guard: gem install allowed"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"docker pull nginx"}}' 0 "registry-guard: docker pull allowed"
+test_ex registry-publish-guard.sh '{"tool_input":{"command":"cargo build"}}' 0 "registry-guard: cargo build allowed"
+test_ex registry-publish-guard.sh '{}' 0 "registry-guard: empty input"
 echo ""
 
 echo "========================"
