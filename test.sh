@@ -9962,6 +9962,20 @@ test_ex output-explosion-detector.sh '{"tool_name":"Write","tool_output":"ok"}' 
 test_ex output-explosion-detector.sh '{"tool_name":"Bash","tool_output":"x"}' 0 "output-explosion: tiny output"
 echo ""
 
+# --- plan-repo-sync ---
+echo "plan-repo-sync.sh:"
+test_ex plan-repo-sync.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.md"}}' 0 "plan-sync: non-Write ignored"
+test_ex plan-repo-sync.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/regular-file.md"}}' 0 "plan-sync: non-plan path ignored"
+test_ex plan-repo-sync.sh '{"tool_name":"Write","tool_input":{"file_path":"/home/user/.claude/plans/abc.md"}}' 0 "plan-sync: plan path (no git repo, graceful)"
+test_ex plan-repo-sync.sh '{}' 0 "plan-sync: empty input"
+test_ex plan-repo-sync.sh '{"tool_name":"Write"}' 0 "plan-sync: no file_path"
+test_ex plan-repo-sync.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "plan-sync: empty file_path"
+test_ex plan-repo-sync.sh '{"tool_name":"Read","tool_input":{"file_path":"/home/user/.claude/plans/x.md"}}' 0 "plan-sync: Read tool ignored"
+test_ex plan-repo-sync.sh '{"tool_name":"Write","tool_input":{"file_path":"/home/user/project/src/main.ts"}}' 0 "plan-sync: non-plan write ignored"
+test_ex plan-repo-sync.sh '{"tool_name":"Bash","tool_input":{"command":"echo hi"}}' 0 "plan-sync: Bash ignored"
+test_ex plan-repo-sync.sh '{"tool_name":"Write","tool_input":{"file_path":"/home/user/.claude/plan-notes.md"}}' 0 "plan-sync: plan in .claude (no git repo, graceful)"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
