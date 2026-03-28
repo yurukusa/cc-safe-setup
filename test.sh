@@ -11279,6 +11279,231 @@ echo "plan-mode-enforcer.sh (without state file):"
 test_ex plan-mode-enforcer.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "plan-mode-enforcer: allows Edit when plan mode inactive"
 test_ex plan-mode-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 0 "plan-mode-enforcer: allows install when plan mode inactive"
 
+# ================================================================
+# Edge case tests for hooks that had only 5 tests
+# Security-critical hooks first, then others
+# ================================================================
+
+# --- no-global-install edge cases ---
+test_ex no-global-install.sh '{"tool_input":{"command":"npm  install   -g   prettier"}}' 2 "no-global-install: extra spaces before -g blocked"
+test_ex no-global-install.sh '{"tool_input":{"command":"npx create-react-app my-app"}}' 0 "no-global-install: npx passes (false positive check)"
+test_ex no-global-install.sh '{"tool_input":{"command":"npm install --save-dev eslint"}}' 0 "no-global-install: --save-dev passes"
+test_ex no-global-install.sh '{"tool_input":{"command":"sudo gem install bundler"}}' 2 "no-global-install: sudo gem install bundler blocked"
+test_ex no-global-install.sh '{"tool_input":{"command":"gem install rails"}}' 0 "no-global-install: gem without sudo passes"
+test_ex no-global-install.sh '{"tool_input":{"command":"pip install requests"}}' 0 "no-global-install: pip outside venv warns but exit 0"
+test_ex no-global-install.sh '{"tool_input":{"command":""}}' 0 "no-global-install: empty command passes"
+test_ex no-global-install.sh '{}' 0 "no-global-install: empty input passes"
+
+# --- no-console-log-commit edge cases ---
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git commit -m \"fix: remove console.log\""}}' 0 "no-console-log-commit: commit msg mentioning console.log passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git commit --amend --no-edit"}}' 0 "no-console-log-commit: amend passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"  git  commit -m \"test\""}}' 0 "no-console-log-commit: leading spaces in git commit"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git add . && git commit -m test"}}' 0 "no-console-log-commit: chained git add+commit (no staged match)"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":""}}' 0 "no-console-log-commit: empty command passes"
+test_ex no-console-log-commit.sh '{}' 0 "no-console-log-commit: empty input passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git diff --cached"}}' 0 "no-console-log-commit: git diff passes"
+
+# --- git-stash-before-checkout edge cases ---
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git restore -- src/app.ts"}}' 2 "git-stash-before-checkout: git restore -- blocked"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git checkout -b new-branch"}}' 0 "git-stash-before-checkout: checkout -b passes (new branch)"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git restore src/app.ts"}}' 0 "git-stash-before-checkout: git restore without -- passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":""}}' 0 "git-stash-before-checkout: empty command passes"
+test_ex git-stash-before-checkout.sh '{}' 0 "git-stash-before-checkout: empty input passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git stash"}}' 0 "git-stash-before-checkout: git stash passes"
+test_ex git-stash-before-checkout.sh '{"tool_input":{"command":"git diff HEAD"}}' 0 "git-stash-before-checkout: git diff passes"
+
+# --- api-rate-limit-guard edge cases ---
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"http https://api.example.com/data"}}' 0 "api-rate-limit-guard: httpie passes (exit 0 always)"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"curl -X POST https://api.example.com"}}' 0 "api-rate-limit-guard: curl POST passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"echo curl is not a real command"}}' 0 "api-rate-limit-guard: curl in echo not matched (not leading)"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":""}}' 0 "api-rate-limit-guard: empty command passes"
+test_ex api-rate-limit-guard.sh '{}' 0 "api-rate-limit-guard: empty input passes"
+test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"  curl https://example.com"}}' 0 "api-rate-limit-guard: leading space curl passes (exit 0)"
+
+# --- env-inherit-guard edge cases ---
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "env-inherit-guard: pwd skipped (readonly)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"find . -name test"}}' 0 "env-inherit-guard: find skipped (readonly)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"python manage.py migrate"}}' 0 "env-inherit-guard: django command checked (exit 0 no env)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"node server.js"}}' 0 "env-inherit-guard: node command checked (exit 0 no env)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"which python"}}' 0 "env-inherit-guard: which skipped (readonly)"
+test_ex env-inherit-guard.sh '{"tool_input":{"command":"wc -l file.txt"}}' 0 "env-inherit-guard: wc skipped (readonly)"
+
+# --- check-test-exists edge cases ---
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/app.spec.ts"}}' 0 "check-test-exists: spec file skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/utils.go"}}' 0 "check-test-exists: go file (exit 0 warn only)"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/style.scss"}}' 0 "check-test-exists: scss skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/logo.svg"}}' 0 "check-test-exists: svg skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/config.yaml"}}' 0 "check-test-exists: yaml skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":""}}' 0 "check-test-exists: empty path passes"
+test_ex check-test-exists.sh '{}' 0 "check-test-exists: empty input passes"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/UserTest.java"}}' 0 "check-test-exists: Java test file skipped"
+
+# --- file-reference-check edge cases ---
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/app.py"}}' 0 "file-reference-check: py file (no imports, passes)"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.css"}}' 0 "file-reference-check: css not checked"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.go"}}' 0 "file-reference-check: go not checked (unknown ext)"
+test_ex file-reference-check.sh '{}' 0 "file-reference-check: empty JSON passes"
+test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.yaml"}}' 0 "file-reference-check: yaml not checked"
+
+# --- no-secrets-in-args edge cases ---
+test_ex no-secrets-in-args.sh '{"tool_input":{"command":"mysql --password=MyS3cretPa55 -u root"}}' 0 "no-secrets-in-args: --password= with long value warns (exit 0)"
+test_ex no-secrets-in-args.sh '{"tool_input":{"command":"--token short"}}' 0 "no-secrets-in-args: short value not matched (< 8 chars)"
+test_ex no-secrets-in-args.sh '{"tool_input":{"command":"git push origin main"}}' 0 "no-secrets-in-args: git push passes"
+test_ex no-secrets-in-args.sh '{"tool_input":{"command":""}}' 0 "no-secrets-in-args: empty command passes"
+test_ex no-secrets-in-args.sh '{"tool_input":{"command":"docker run --env TOKEN=abc"}}' 0 "no-secrets-in-args: docker --env not matched"
+
+# --- sensitive-log-guard edge cases ---
+TMP_SENSLOG="/tmp/test-senslog-$$.ts"
+echo 'console.log("password:", password)' > "$TMP_SENSLOG"
+test_ex sensitive-log-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_SENSLOG\"}}" 0 "sensitive-log-guard: detects password in log (exit 0 warn)"
+echo 'const x = 42;' > "$TMP_SENSLOG"
+test_ex sensitive-log-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_SENSLOG\"}}" 0 "sensitive-log-guard: clean file passes"
+echo 'log.debug("token:", token)' > "$TMP_SENSLOG"
+test_ex sensitive-log-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_SENSLOG\"}}" 0 "sensitive-log-guard: log.debug token warns (exit 0)"
+rm -f "$TMP_SENSLOG"
+
+# --- no-http-url edge cases ---
+TMP_HTTP="/tmp/test-http-$$.ts"
+echo 'const url = "http://example.com/api"' > "$TMP_HTTP"
+test_ex no-http-url.sh "{\"tool_input\":{\"file_path\":\"$TMP_HTTP\"}}" 0 "no-http-url: example.com excluded (exit 0)"
+echo 'const url = "http://localhost:3000/api"' > "$TMP_HTTP"
+test_ex no-http-url.sh "{\"tool_input\":{\"file_path\":\"$TMP_HTTP\"}}" 0 "no-http-url: localhost excluded"
+echo 'const url = "https://secure.example.com"' > "$TMP_HTTP"
+test_ex no-http-url.sh "{\"tool_input\":{\"file_path\":\"$TMP_HTTP\"}}" 0 "no-http-url: https passes clean"
+echo 'const url = "http://production.api.com/data"' > "$TMP_HTTP"
+test_ex no-http-url.sh "{\"tool_input\":{\"file_path\":\"$TMP_HTTP\"}}" 0 "no-http-url: production http warns (exit 0)"
+rm -f "$TMP_HTTP"
+
+# --- no-cors-wildcard edge cases ---
+TMP_CORS="/tmp/test-cors-$$.ts"
+echo 'app.use(cors())' > "$TMP_CORS"
+test_ex no-cors-wildcard.sh "{\"tool_input\":{\"file_path\":\"$TMP_CORS\"}}" 0 "no-cors-wildcard: cors() detected warns (exit 0)"
+echo 'app.use(cors({ origin: "https://myapp.com" }))' > "$TMP_CORS"
+test_ex no-cors-wildcard.sh "{\"tool_input\":{\"file_path\":\"$TMP_CORS\"}}" 0 "no-cors-wildcard: specific origin passes"
+echo 'res.setHeader("Access-Control-Allow-Origin", "*")' > "$TMP_CORS"
+test_ex no-cors-wildcard.sh "{\"tool_input\":{\"file_path\":\"$TMP_CORS\"}}" 0 "no-cors-wildcard: wildcard header warns (exit 0)"
+rm -f "$TMP_CORS"
+
+# --- no-eval-template edge cases ---
+TMP_EVAL="/tmp/test-eval-$$.ts"
+echo 'const result = eval(`code ${input}`)' > "$TMP_EVAL"
+test_ex no-eval-template.sh "{\"tool_input\":{\"file_path\":\"$TMP_EVAL\"}}" 0 "no-eval-template: eval with template literal warns (exit 0)"
+echo 'const fn = new Function(`return ${expr}`)' > "$TMP_EVAL"
+test_ex no-eval-template.sh "{\"tool_input\":{\"file_path\":\"$TMP_EVAL\"}}" 0 "no-eval-template: new Function template warns (exit 0)"
+echo 'const x = JSON.parse(input)' > "$TMP_EVAL"
+test_ex no-eval-template.sh "{\"tool_input\":{\"file_path\":\"$TMP_EVAL\"}}" 0 "no-eval-template: JSON.parse passes (no eval)"
+rm -f "$TMP_EVAL"
+
+# --- no-root-user-docker edge cases ---
+TMP_DOCK="/tmp/Dockerfile-test-$$"
+echo -e 'FROM node:18\nRUN npm install' > "$TMP_DOCK"
+test_ex no-root-user-docker.sh "{\"tool_input\":{\"file_path\":\"$TMP_DOCK\"}}" 0 "no-root-user-docker: no USER warns (exit 0)"
+echo -e 'FROM node:18\nUSER node\nRUN npm install' > "$TMP_DOCK"
+test_ex no-root-user-docker.sh "{\"tool_input\":{\"file_path\":\"$TMP_DOCK\"}}" 0 "no-root-user-docker: has USER passes clean"
+rm -f "$TMP_DOCK"
+
+# --- dockerfile-latest-guard edge cases ---
+TMP_DLATEST="/tmp/Dockerfile-latest-$$"
+echo 'FROM node:latest' > "$TMP_DLATEST"
+test_ex dockerfile-latest-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_DLATEST\"}}" 0 "dockerfile-latest-guard: :latest warns (exit 0)"
+echo 'FROM node:18-alpine' > "$TMP_DLATEST"
+test_ex dockerfile-latest-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_DLATEST\"}}" 0 "dockerfile-latest-guard: pinned version passes"
+echo -e 'FROM node:18\nFROM python:latest' > "$TMP_DLATEST"
+test_ex dockerfile-latest-guard.sh "{\"tool_input\":{\"file_path\":\"$TMP_DLATEST\"}}" 0 "dockerfile-latest-guard: multi-stage latest warns (exit 0)"
+rm -f "$TMP_DLATEST"
+
+# --- flask-debug-guard edge cases ---
+test_ex flask-debug-guard.sh '{"tool_input":{"command":"FLASK_ENV=development flask run"}}' 0 "flask-debug-guard: FLASK_ENV=development warns (exit 0)"
+test_ex flask-debug-guard.sh '{"tool_input":{"command":"flask run --host 0.0.0.0"}}' 0 "flask-debug-guard: no debug flag passes"
+test_ex flask-debug-guard.sh '{"tool_input":{"command":"python -m flask run"}}' 0 "flask-debug-guard: python -m flask without debug passes"
+
+# --- no-any-typescript edge cases ---
+TMP_ANY="/tmp/test-any-$$.ts"
+echo 'const x: any = getValue()' > "$TMP_ANY"
+test_ex no-any-typescript.sh "{\"tool_input\":{\"file_path\":\"$TMP_ANY\"}}" 0 "no-any-typescript: explicit any warns (exit 0)"
+echo 'const x: unknown = getValue()' > "$TMP_ANY"
+test_ex no-any-typescript.sh "{\"tool_input\":{\"file_path\":\"$TMP_ANY\"}}" 0 "no-any-typescript: unknown passes clean"
+echo '// eslint-disable-next-line @typescript-eslint/no-explicit-any\nconst x: any = y' > "$TMP_ANY"
+test_ex no-any-typescript.sh "{\"tool_input\":{\"file_path\":\"$TMP_ANY\"}}" 0 "no-any-typescript: eslint-disable excluded"
+rm -f "$TMP_ANY"
+
+# --- no-deep-relative-import edge cases ---
+TMP_DEEP="/tmp/test-deep-$$.ts"
+echo "import { foo } from '../../../utils/helper'" > "$TMP_DEEP"
+test_ex no-deep-relative-import.sh "{\"tool_input\":{\"file_path\":\"$TMP_DEEP\"}}" 0 "no-deep-relative-import: 3-level deep warns (exit 0)"
+echo "import { foo } from '../utils'" > "$TMP_DEEP"
+test_ex no-deep-relative-import.sh "{\"tool_input\":{\"file_path\":\"$TMP_DEEP\"}}" 0 "no-deep-relative-import: 1-level passes clean"
+echo "import { foo } from '@/utils/helper'" > "$TMP_DEEP"
+test_ex no-deep-relative-import.sh "{\"tool_input\":{\"file_path\":\"$TMP_DEEP\"}}" 0 "no-deep-relative-import: alias import passes"
+rm -f "$TMP_DEEP"
+
+# --- no-dangling-await edge cases ---
+TMP_DANGLE="/tmp/test-dangle-$$.ts"
+echo '  fetchData.then(console.log)' > "$TMP_DANGLE"
+test_ex no-dangling-await.sh "{\"tool_input\":{\"file_path\":\"$TMP_DANGLE\"}}" 0 "no-dangling-await: floating .then warns (exit 0)"
+echo '  const result = await fetchData()' > "$TMP_DANGLE"
+test_ex no-dangling-await.sh "{\"tool_input\":{\"file_path\":\"$TMP_DANGLE\"}}" 0 "no-dangling-await: awaited call passes"
+echo '  return promise.then(fn).catch(err)' > "$TMP_DANGLE"
+test_ex no-dangling-await.sh "{\"tool_input\":{\"file_path\":\"$TMP_DANGLE\"}}" 0 "no-dangling-await: return prefixed excluded"
+rm -f "$TMP_DANGLE"
+
+# --- no-inline-styles edge cases ---
+TMP_INLINE="/tmp/test-inline-$$.tsx"
+printf 'style={{}}\nstyle={{}}\nstyle={{}}\nstyle={{}}\n' > "$TMP_INLINE"
+test_ex no-inline-styles.sh "{\"tool_input\":{\"file_path\":\"$TMP_INLINE\"}}" 0 "no-inline-styles: 4 inline styles warns (exit 0)"
+echo '<div className="container">' > "$TMP_INLINE"
+test_ex no-inline-styles.sh "{\"tool_input\":{\"file_path\":\"$TMP_INLINE\"}}" 0 "no-inline-styles: className passes clean"
+rm -f "$TMP_INLINE"
+
+# --- console-log-count edge cases ---
+TMP_CLOG="/tmp/test-clog-$$.ts"
+printf 'console.log(1)\nconsole.log(2)\nconsole.log(3)\nconsole.log(4)\nconsole.log(5)\nconsole.log(6)\n' > "$TMP_CLOG"
+test_ex console-log-count.sh "{\"tool_input\":{\"file_path\":\"$TMP_CLOG\"}}" 0 "console-log-count: 6 logs warns (exit 0)"
+echo 'const x = 1' > "$TMP_CLOG"
+test_ex console-log-count.sh "{\"tool_input\":{\"file_path\":\"$TMP_CLOG\"}}" 0 "console-log-count: no logs passes clean"
+rm -f "$TMP_CLOG"
+
+# --- magic-number-warn edge cases ---
+TMP_MAGIC="/tmp/test-magic-$$.ts"
+echo 'const timeout = 86400' > "$TMP_MAGIC"
+test_ex magic-number-warn.sh "{\"tool_input\":{\"file_path\":\"$TMP_MAGIC\"}}" 0 "magic-number-warn: 86400 warns (exit 0)"
+echo 'const port = 8080' > "$TMP_MAGIC"
+test_ex magic-number-warn.sh "{\"tool_input\":{\"file_path\":\"$TMP_MAGIC\"}}" 0 "magic-number-warn: 8080 excluded (well-known port)"
+echo 'const x = 42' > "$TMP_MAGIC"
+test_ex magic-number-warn.sh "{\"tool_input\":{\"file_path\":\"$TMP_MAGIC\"}}" 0 "magic-number-warn: small number not matched (< 4 digits)"
+rm -f "$TMP_MAGIC"
+
+# --- drizzle-migrate-guard edge cases ---
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"npx drizzle-kit drop"}}' 2 "drizzle-migrate-guard: npx drizzle-kit drop blocked"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit push"}}' 0 "drizzle-migrate-guard: push passes"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit studio"}}' 0 "drizzle-migrate-guard: studio passes"
+
+# --- turbo-cache-guard edge cases ---
+test_ex turbo-cache-guard.sh '{"tool_input":{"command":"turbo daemon clean"}}' 0 "turbo-cache-guard: daemon clean warns (exit 0)"
+test_ex turbo-cache-guard.sh '{"tool_input":{"command":"turbo run build --filter=web"}}' 0 "turbo-cache-guard: filtered build passes"
+test_ex turbo-cache-guard.sh '{"tool_input":{"command":"rm -rf node_modules/.turbo"}}' 0 "turbo-cache-guard: rm .turbo in subdir warns (exit 0)"
+
+# --- monorepo-scope-guard edge cases ---
+test_ex monorepo-scope-guard.sh '{"tool_input":{"file_path":""}}' 0 "monorepo-scope-guard: empty path passes"
+test_ex monorepo-scope-guard.sh '{"tool_input":{"file_path":"/nonexistent/deep/path/file.ts"}}' 0 "monorepo-scope-guard: deep nonexistent path passes"
+
+# --- nextjs-env-guard edge cases ---
+test_ex nextjs-env-guard.sh '{"tool_input":{"file_path":"/tmp/test.py"}}' 0 "nextjs-env-guard: non-tsx/jsx passes"
+test_ex nextjs-env-guard.sh '{"tool_input":{"file_path":""}}' 0 "nextjs-env-guard: empty path passes"
+
+# --- five-hundred-milestone edge cases ---
+test_ex five-hundred-milestone.sh '{"tool_input":{"command":"ls"}}' 0 "five-hundred-milestone: bash command passes"
+test_ex five-hundred-milestone.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.ts"}}' 0 "five-hundred-milestone: write passes"
+
+# --- svelte-lint-on-edit edge cases ---
+test_ex svelte-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.ts"}}' 0 "svelte-lint-on-edit: ts skipped"
+test_ex svelte-lint-on-edit.sh '{"tool_input":{}}' 0 "svelte-lint-on-edit: empty tool_input"
+
+# --- typescript-lint-on-edit edge cases ---
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.py"}}' 0 "typescript-lint-on-edit: py skipped"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/nonexist.ts"}}' 0 "typescript-lint-on-edit: nonexistent ts passes"
+test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "typescript-lint-on-edit: json skipped"
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
