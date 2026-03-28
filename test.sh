@@ -10364,6 +10364,16 @@ test_ex chown-guard.sh '{"tool_input":{"command":"chown user:group project/file.
 test_ex chown-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "chown-guard: non-chown passes"
 test_ex chown-guard.sh '{"tool_input":{}}' 0 "chown-guard: empty command"
 test_ex chown-guard.sh '{}' 0 "chown-guard: empty input"
+test_ex system-package-guard.sh '{"tool_input":{"command":"apt-get install nginx"}}' 2 "system-package-guard: apt-get blocked"
+test_ex system-package-guard.sh '{"tool_input":{"command":"brew install node"}}' 2 "system-package-guard: brew blocked"
+test_ex system-package-guard.sh '{"tool_input":{"command":"yum install httpd"}}' 2 "system-package-guard: yum blocked"
+test_ex system-package-guard.sh '{"tool_input":{"command":"snap install code"}}' 2 "system-package-guard: snap blocked"
+test_ex system-package-guard.sh '{"tool_input":{"command":"pacman -S vim"}}' 0 "system-package-guard: pacman -S not matched (no install)"
+test_ex system-package-guard.sh '{"tool_input":{"command":"npm install express"}}' 0 "system-package-guard: npm passes"
+test_ex system-package-guard.sh '{"tool_input":{"command":"pip install flask"}}' 0 "system-package-guard: pip passes"
+test_ex system-package-guard.sh '{"tool_input":{"command":"ls"}}' 0 "system-package-guard: ls passes"
+test_ex system-package-guard.sh '{"tool_input":{}}' 0 "system-package-guard: empty command"
+test_ex system-package-guard.sh '{}' 0 "system-package-guard: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
