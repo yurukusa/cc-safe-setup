@@ -9049,6 +9049,13 @@ else
 fi
 echo ""
 
+echo "git-message-length-check.sh:"
+test_ex git-message-length-check.sh '{}' 0 "msg-length: empty"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"fix typo in README\""}}' 0 "msg-length: good message"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"fix\""}}' 0 "msg-length: short warns (exit 0)"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"ls -la"}}' 0 "msg-length: non-git skipped"
+echo ""
+
 echo "output-credential-scan.sh:"
 test_ex output-credential-scan.sh '{}' 0 "cred-scan: empty"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"hello world"}}' 0 "cred-scan: clean output"
