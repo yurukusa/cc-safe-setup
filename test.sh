@@ -11531,6 +11531,17 @@ test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.py"}}' 
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/nonexist.ts"}}' 0 "typescript-lint-on-edit: nonexistent ts passes"
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "typescript-lint-on-edit: json skipped"
 
+# ========== pre-compact-checkpoint (PreCompact event) ==========
+echo "pre-compact-checkpoint.sh:"
+test_ex pre-compact-checkpoint.sh '{}' 0 "pre-compact-checkpoint: empty input"
+test_ex pre-compact-checkpoint.sh '{"event":"compact"}' 0 "pre-compact-checkpoint: compact event"
+test_ex pre-compact-checkpoint.sh '{"context_percentage":15}' 0 "pre-compact-checkpoint: low context"
+test_ex pre-compact-checkpoint.sh '{"context_percentage":50}' 0 "pre-compact-checkpoint: mid context"
+test_ex pre-compact-checkpoint.sh '{"reason":"auto"}' 0 "pre-compact-checkpoint: auto reason"
+test_ex pre-compact-checkpoint.sh '{"reason":"user"}' 0 "pre-compact-checkpoint: user reason"
+test_ex pre-compact-checkpoint.sh '{"context_percentage":5,"reason":"critical"}' 0 "pre-compact-checkpoint: critical context"
+echo ""
+
 # ========== direnv-auto-reload (CwdChanged event) ==========
 echo "direnv-auto-reload.sh:"
 test_ex direnv-auto-reload.sh '{"old_cwd":"/tmp/a","new_cwd":"/tmp/b"}' 0 "direnv-auto-reload: normal dir change"
