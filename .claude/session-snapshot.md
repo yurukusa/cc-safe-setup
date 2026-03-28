@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T07:28:24+09:00
+Updated: 2026-03-29T07:29:13+09:00
 
 ## Git
 - Branch: `main`
@@ -7,15 +7,15 @@ Updated: 2026-03-29T07:28:24+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ae0cae9 checkpoint: pre-compact auto-save (1 files, 20260328-222822)
+- Last commit: 2ddd15c checkpoint: auto-save 07:28:33
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/permission-mode-drift-guard.sh
 ./examples/heredoc-backtick-approver.sh
-./.claude/pre-compact-checkpoint.md
 ./examples/sandbox-write-verify.sh
 ./examples/path-deny-bash-guard.sh
 ./examples/hook-stdout-sanitizer.sh
