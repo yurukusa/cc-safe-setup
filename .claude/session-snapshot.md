@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T21:39:28+09:00
+Updated: 2026-03-28T21:43:05+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T21:39:28+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4a99b20 checkpoint: auto-save 21:38:52
+- Last commit: 0546ebf checkpoint: auto-save 21:42:58
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/composer-guard.sh
+./examples/rails-migration-guard.sh
+./examples/swift-build-on-edit.sh
+./examples/php-lint-on-edit.sh
+./examples/ruby-lint-on-edit.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/system-package-guard.sh
 ./examples/chown-guard.sh
-./examples/chmod-guard.sh
-./examples/test-after-edit.sh
-./README.md
-./examples/bash-timeout-guard.sh
-./examples/env-inherit-guard.sh
 ```
 
