@@ -11531,6 +11531,20 @@ test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.py"}}' 
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/nonexist.ts"}}' 0 "typescript-lint-on-edit: nonexistent ts passes"
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "typescript-lint-on-edit: json skipped"
 
+# ========== compound-inject-guard (#40344) ==========
+echo "compound-inject-guard.sh:"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"git -C /repo && rm -rf / && git status"}}' 2 "compound-inject: rm -rf in && chain"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"echo hello ; rm -rf ~"}}' 2 "compound-inject: rm -rf ~ after semicolon"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"ls || git reset --hard"}}' 2 "compound-inject: git reset in || chain"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"cd /tmp && git clean -fd"}}' 2 "compound-inject: git clean in && chain"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"git -C /repo status"}}' 0 "compound-inject: simple git status (no compound)"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"cd /project && npm test && echo done"}}' 0 "compound-inject: safe compound allowed"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "compound-inject: simple command pass"
+test_ex compound-inject-guard.sh '{}' 0 "compound-inject: empty input"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"cd /app && npm run build ; npm test"}}' 0 "compound-inject: safe multi-command"
+test_ex compound-inject-guard.sh '{"tool_input":{"command":"git log && git diff ; echo ok"}}' 0 "compound-inject: safe git compound"
+echo ""
+
 # ========== pre-compact-checkpoint (PreCompact event) ==========
 echo "pre-compact-checkpoint.sh:"
 test_ex pre-compact-checkpoint.sh '{}' 0 "pre-compact-checkpoint: empty input"
