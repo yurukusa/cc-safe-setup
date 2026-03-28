@@ -11663,6 +11663,19 @@ sanitizer_test /tmp/test-json-hook.sh 0 "stdout-sanitizer: JSON output forwarded
 rm -f /tmp/test-noop-hook.sh /tmp/test-stderr-hook.sh /tmp/test-block-hook.sh /tmp/test-json-hook.sh
 echo ""
 
+# ========== path-deny-bash-guard (#39987) ==========
+echo "path-deny-bash-guard.sh:"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"cat /etc/passwd"}}' 0 "path-deny: no deny config"
+test_ex path-deny-bash-guard.sh '{}' 0 "path-deny: empty input"
+export CC_DENIED_PATHS="/secret/data:/private/keys"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"cat /secret/data/file.txt"}}' 2 "path-deny: cat denied path BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"grep pattern /secret/data/"}}' 2 "path-deny: grep denied path BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"head /private/keys/id_rsa"}}' 2 "path-deny: head denied path BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"ls /home/user/projects"}}' 0 "path-deny: safe path allowed"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "path-deny: no path in command"
+unset CC_DENIED_PATHS
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
