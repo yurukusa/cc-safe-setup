@@ -11259,6 +11259,9 @@ test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"sh -c \"echo hello\""}
 test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"python3 -c \"print(42)\""}}' 0 "shell-wrapper-guard: allows safe python"
 test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "shell-wrapper-guard: allows normal command"
 test_ex shell-wrapper-guard.sh '{"tool_input":{"command":""}}' 0 "shell-wrapper-guard: empty command passes"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"echo rm -rf / | sh"}}' 2 "shell-wrapper-guard: blocks pipe to sh"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"bash <<< \"rm -rf /\""}}' 2 "shell-wrapper-guard: blocks here-string"
+test_ex shell-wrapper-guard.sh '{"tool_input":{"command":"echo hello | sh"}}' 0 "shell-wrapper-guard: allows safe pipe to sh"
 test_ex shell-wrapper-guard.sh '{}' 0 "shell-wrapper-guard: empty input passes"
 
 echo "plan-mode-enforcer.sh (without state file):"

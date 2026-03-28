@@ -66,4 +66,31 @@ if echo "$COMMAND" | grep -qE '(sh|bash)\s+-c\s+.*(sh|bash)\s+-c'; then
     fi
 fi
 
+# === Check 6: Pipe to shell (echo "rm -rf /" | sh) ===
+if echo "$COMMAND" | grep -qE '\|\s*(sh|bash|zsh)\s*$'; then
+    # Extract the piped content
+    PIPED=$(echo "$COMMAND" | sed -E 's/\s*\|\s*(sh|bash|zsh)\s*$//')
+    if echo "$PIPED" | grep -qE "$DESTRUCT_PATTERN"; then
+        echo "BLOCKED: Destructive command piped to shell" >&2
+        exit 2
+    fi
+fi
+
+# === Check 7: Here-string to shell (bash <<< "rm -rf /") ===
+if echo "$COMMAND" | grep -qE '(sh|bash|zsh)\s+<<<\s+'; then
+    INNER=$(echo "$COMMAND" | sed -E "s/.*(sh|bash|zsh)\s+<<<\s+['\"]?//" | sed "s/['\"]?\s*$//")
+    if echo "$INNER" | grep -qE "$DESTRUCT_PATTERN"; then
+        echo "BLOCKED: Destructive command via here-string" >&2
+        exit 2
+    fi
+fi
+
+# === Check 8: env-based bypass (env VAR=val sh -c "$VAR") ===
+if echo "$COMMAND" | grep -qE '^\s*env\s+.*\s+(sh|bash)\s+-c'; then
+    if echo "$COMMAND" | grep -qE "$DESTRUCT_PATTERN"; then
+        echo "BLOCKED: Destructive command via env wrapper" >&2
+        exit 2
+    fi
+fi
+
 exit 0
