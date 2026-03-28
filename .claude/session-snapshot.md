@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T07:17:29+09:00
+Updated: 2026-03-29T07:18:19+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-29T07:17:29+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: c068c7c checkpoint: pre-compact auto-save (1 files, 20260328-221726)
+- Last commit: 59287aa checkpoint: auto-save 07:17:39
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/path-deny-bash-guard.sh
-./.claude/pre-compact-checkpoint.md
 ./examples/hook-stdout-sanitizer.sh
 ./examples/context-threshold-alert.sh
 ./examples/plan-mode-strict-guard.sh
