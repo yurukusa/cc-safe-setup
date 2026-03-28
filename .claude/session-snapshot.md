@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T22:15:05+09:00
+Updated: 2026-03-28T22:38:25+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T22:15:05+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d4642ac checkpoint: auto-save 22:14:28
+- Last commit: d2e7361 checkpoint: auto-save 22:38:17
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./README.md
+./.claude/pre-compact-checkpoint.md
 ./examples/five-hundred-milestone.sh
 ./examples/max-function-length.sh
 ./examples/no-dangling-await.sh
 ./examples/no-eval-template.sh
 ./examples/no-cors-wildcard.sh
 ./examples/no-hardcoded-port.sh
-./examples/no-root-user-docker.sh
 ```
 
