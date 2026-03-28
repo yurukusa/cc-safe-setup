@@ -11823,7 +11823,8 @@ test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{"prompt":"t
 test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{"prompt":"task 3"}}' 0 "max-agents: third allowed"
 test_ex max-concurrent-agents.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "max-agents: non-Agent skipped"
 test_ex max-concurrent-agents.sh '{}' 0 "max-agents: empty input"
-test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{}}' 0 "max-agents: no prompt"
+rm -f /tmp/cc-agent-count-$$
+test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{}}' 0 "max-agents: no prompt (reset counter)"
 rm -f /tmp/cc-agent-count-$$
 echo ""
 
