@@ -27,7 +27,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 echo "$COMMAND" | grep -qE '\b(curl|wget|http|fetch)\b' || exit 0
 
 # Check for API key patterns in URLs
-if echo "$COMMAND" | grep -qiE '[?&](api[_-]?key|token|secret|password|auth|access[_-]?key|client[_-]?secret)=[^$\s&"'\'']{8,}'; then
+if echo "$COMMAND" | grep -qiP '[?&](api[_-]?key|token|secret|password|auth|access[_-]?key|client[_-]?secret)=[^$\s&"'\'']{8,}'; then
     echo "BLOCKED: API key detected in URL query parameter." >&2
     echo "" >&2
     echo "Command: $(echo "$COMMAND" | head -1)" >&2
