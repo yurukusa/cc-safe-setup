@@ -10400,6 +10400,14 @@ test_ex composer-guard.sh '{"tool_input":{"command":"composer install"}}' 0 "com
 test_ex composer-guard.sh '{"tool_input":{"command":"ls"}}' 0 "composer-guard: non-composer passes"
 test_ex composer-guard.sh '{"tool_input":{}}' 0 "composer-guard: empty command"
 test_ex composer-guard.sh '{}' 0 "composer-guard: empty input"
+test_ex java-compile-on-edit.sh '{"tool_input":{"file_path":"/tmp/App.java"}}' 0 "java-compile-on-edit: java file passes"
+test_ex java-compile-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.ts"}}' 0 "java-compile-on-edit: non-java passes"
+test_ex java-compile-on-edit.sh '{"tool_input":{}}' 0 "java-compile-on-edit: empty tool_input"
+test_ex java-compile-on-edit.sh '{}' 0 "java-compile-on-edit: empty input"
+test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":"/tmp/Program.cs"}}' 0 "dotnet-build-on-edit: cs file passes"
+test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.ts"}}' 0 "dotnet-build-on-edit: non-cs passes"
+test_ex dotnet-build-on-edit.sh '{"tool_input":{}}' 0 "dotnet-build-on-edit: empty tool_input"
+test_ex dotnet-build-on-edit.sh '{}' 0 "dotnet-build-on-edit: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
