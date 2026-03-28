@@ -14,7 +14,7 @@ case "$TOOL" in
     Bash)
         CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
         [ -z "$CMD" ] && exit 0
-        if echo "$CMD" | grep -qE '(echo|cat|tee|sed|awk).*(/etc/hosts|/etc/resolv\.conf|/etc/nsswitch)'; then
+        if echo "$CMD" | grep -qE '(echo|tee|sed|awk).*(/etc/hosts|/etc/resolv\.conf|/etc/nsswitch)'; then
             echo "BLOCKED: DNS configuration modification detected." >&2
             exit 2
         fi
