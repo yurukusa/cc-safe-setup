@@ -10328,6 +10328,15 @@ test_ex env-inherit-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "env-inhe
 test_ex env-inherit-guard.sh '{"tool_input":{}}' 0 "env-inherit-guard: empty tool_input"
 test_ex env-inherit-guard.sh '{"tool_input":{"command":""}}' 0 "env-inherit-guard: empty command"
 test_ex env-inherit-guard.sh '{}' 0 "env-inherit-guard: empty input"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"ls"}}' 0 "bash-timeout-guard: ls passes"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "bash-timeout-guard: npm test passes"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"timeout 30 npm start"}}' 0 "bash-timeout-guard: already has timeout"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"npm start"}}' 0 "bash-timeout-guard: npm start warns (exit 0)"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"tail -f /var/log/syslog"}}' 0 "bash-timeout-guard: tail -f warns (exit 0)"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"while true; do echo x; done"}}' 0 "bash-timeout-guard: infinite loop warns (exit 0)"
+test_ex bash-timeout-guard.sh '{"tool_input":{"command":"python app.py"}}' 0 "bash-timeout-guard: python server warns (exit 0)"
+test_ex bash-timeout-guard.sh '{"tool_input":{}}' 0 "bash-timeout-guard: empty command"
+test_ex bash-timeout-guard.sh '{}' 0 "bash-timeout-guard: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
