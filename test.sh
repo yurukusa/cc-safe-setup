@@ -9308,6 +9308,14 @@ test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "r
 test_ex read-budget-guard.sh '{}' 0 "read-budget: empty input"
 test_ex read-budget-guard.sh '{"tool_input":{"file_path":""}}' 0 "read-budget: empty path"
 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/another.txt"}}' 0 "read-budget: different file passes"
+# --- git-checkout-uncommitted-guard (#39394) ---
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git checkout -b new-feature"}}' 0 "checkout-uncommitted: -b allowed (creates branch)"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git checkout -B fix-branch"}}' 0 "checkout-uncommitted: -B allowed (creates branch)"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git switch -c new-feature"}}' 0 "checkout-uncommitted: switch -c allowed (creates branch)"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git checkout -- src/main.ts"}}' 0 "checkout-uncommitted: -- files deferred to discard-guard"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "checkout-uncommitted: non-git allowed"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":""}}' 0 "checkout-uncommitted: empty command"
+test_ex git-checkout-uncommitted-guard.sh '{}' 0 "checkout-uncommitted: empty input"
 echo ""
 
 echo "========================"
