@@ -9781,20 +9781,14 @@ echo ""
 
 # --- read-budget-guard additional tests ---
 echo "read-budget-guard.sh (additional):"
-# Test budget exceeded
-BUDGET_TRACKER="/tmp/cc-read-budget-$$"
-rm -f "$BUDGET_TRACKER" 2>/dev/null
-for i in $(seq 1 101); do echo "/tmp/file-$i.txt" >> "$BUDGET_TRACKER"; done
-CC_READ_BUDGET=100 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/new-file.txt"}}' 2 "read-budget: blocks when over budget"
-rm -f "$BUDGET_TRACKER" 2>/dev/null
-# Test warn threshold
-for i in $(seq 1 49); do echo "/tmp/file-$i.txt" >> "$BUDGET_TRACKER"; done
-CC_READ_BUDGET=100 CC_READ_WARN=50 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/warn-file.txt"}}' 0 "read-budget: warns at threshold (exit 0)"
-rm -f "$BUDGET_TRACKER" 2>/dev/null
-# Duplicate read
-echo "/tmp/already-read.txt" > "$BUDGET_TRACKER"
-test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/already-read.txt"}}' 0 "read-budget: duplicate read warns (exit 0)"
-rm -f "$BUDGET_TRACKER" 2>/dev/null
+# Note: tracker uses $$ (PID), so each test_ex invocation gets its own tracker.
+# Budget exceeded must be tested inline.
+_RB_RESULT=$(echo '{"tool_input":{"file_path":"/tmp/test.txt"}}' | CC_READ_BUDGET=0 bash "$EXDIR/read-budget-guard.sh" 2>/dev/null; echo $?)
+_RB_EXIT=$(echo "$_RB_RESULT" | tail -1)
+if [ "$_RB_EXIT" = "2" ]; then echo "  PASS: read-budget: blocks when budget is 0"; PASS=$((PASS+1)); else echo "  FAIL: read-budget: blocks when budget is 0 (expected 2, got $_RB_EXIT)"; FAIL=$((FAIL+1)); fi
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/a.txt"}}' 0 "read-budget: single read within default budget"
+CC_READ_BUDGET=1000 test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/tmp/b.txt"}}' 0 "read-budget: custom high budget passes"
+test_ex read-budget-guard.sh '{"tool_input":{"file_path":"/some/deep/nested/path/file.txt"}}' 0 "read-budget: deep path passes"
 echo ""
 
 # --- tool-call-rate-limiter additional tests ---
