@@ -9049,6 +9049,28 @@ else
 fi
 echo ""
 
+echo "consecutive-error-breaker.sh:"
+rm -f /tmp/cc-error-streak 2>/dev/null
+test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"0"}}' 0 "error-breaker: success resets streak"
+test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"1"}}' 0 "error-breaker: single error passes"
+test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"1"}}' 0 "error-breaker: second error passes"
+# Simulate streak of 5 errors
+rm -f /tmp/cc-error-streak 2>/dev/null
+echo "4" > /tmp/cc-error-streak
+test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"1","stderr":"syntax error"}}' 0 "error-breaker: 5th error warns (exit 0)"
+# Reset on success
+test_ex consecutive-error-breaker.sh '{"tool_result":{"exit_code":"0"}}' 0 "error-breaker: success after streak resets"
+STREAK=$(cat /tmp/cc-error-streak 2>/dev/null)
+if [ "$STREAK" = "0" ]; then
+    echo "  PASS: error-breaker: streak counter reset to 0"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: error-breaker: streak counter reset to 0 (got $STREAK)"
+    FAIL=$((FAIL + 1))
+fi
+rm -f /tmp/cc-error-streak 2>/dev/null
+echo ""
+
 echo "tool-call-rate-limiter.sh:"
 # Clean up rate file before tests
 RATE_TEST_FILE="$HOME/.claude/rate-limiter.log"
