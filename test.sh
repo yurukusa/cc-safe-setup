@@ -4707,10 +4707,10 @@ test_hook "resp-budget" '{}' 0 "allows first tool call"
 # Simulate hitting 2x limit (default 50, block at 100)
 echo "100" > "/tmp/cc-response-budget-$(echo "$PWD" | md5sum | cut -c1-8)"
 test_hook "resp-budget" '{}' 2 "blocks at 2x limit (101 calls)"
-test_hook "resp-budget" '{}' 0 "handles empty input"
+rm -f /tmp/cc-response-budget-*
+test_hook "resp-budget" '{}' 0 "handles empty input after reset"
 test_hook "resp-budget" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "resp-budget" '{"tool_output":"result"}' 0 "exits 0 with output"
-rm -f /tmp/cc-response-budget-*
 
 # ========== revert-helper tests ==========
 echo ""
