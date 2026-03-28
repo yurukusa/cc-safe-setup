@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T07:35:28+09:00
+Updated: 2026-03-29T07:37:22+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T07:35:28+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 26427d5 checkpoint: auto-save 07:34:47
+- Last commit: 8c425c1 checkpoint: auto-save 07:37:15
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/context-warning-verifier.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/concurrent-edit-lock.sh
 ./examples/api-retry-limiter.sh
 ./examples/subagent-scope-validator.sh
 ./examples/permission-mode-drift-guard.sh
 ./examples/heredoc-backtick-approver.sh
 ./examples/sandbox-write-verify.sh
-./examples/path-deny-bash-guard.sh
 ```
 
