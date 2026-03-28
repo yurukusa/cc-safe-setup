@@ -9316,6 +9316,13 @@ test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git checkou
 test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "checkout-uncommitted: non-git allowed"
 test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":""}}' 0 "checkout-uncommitted: empty command"
 test_ex git-checkout-uncommitted-guard.sh '{}' 0 "checkout-uncommitted: empty input"
+# --- plan-mode-edit-guard (#38255) ---
+# Without flag file, everything should pass
+test_ex plan-mode-edit-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/src/main.ts"}}' 0 "plan-guard: no flag file = pass"
+test_ex plan-mode-edit-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/src/app.js"}}' 0 "plan-guard: write without flag = pass"
+test_ex plan-mode-edit-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"task_plan.md"}}' 0 "plan-guard: plan file always pass"
+test_ex plan-mode-edit-guard.sh '{}' 0 "plan-guard: empty input"
+test_ex plan-mode-edit-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "plan-guard: non-edit tool pass"
 echo ""
 
 echo "========================"
