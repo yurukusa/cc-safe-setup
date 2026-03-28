@@ -4432,6 +4432,9 @@ cp examples/compact-reminder.sh /tmp/test-compact-remind.sh && chmod +x /tmp/tes
 
 test_hook "compact-remind" '{"stop_reason":"end_turn"}' 0 "Stop hook always exits 0"
 test_hook "compact-remind" '{}' 0 "handles empty input"
+test_hook "compact-remind" '{"stop_reason":"tool_use"}' 0 "exits 0 on tool_use stop"
+test_hook "compact-remind" '{"session_id":"test"}' 0 "exits 0 with session_id"
+test_hook "compact-remind" '{"tool_output":"result"}' 0 "exits 0 with output"
 
 echo ""
 echo "compound-command-approver.sh:"
@@ -4457,6 +4460,9 @@ cp examples/context-snapshot.sh /tmp/test-ctx-snapshot.sh && chmod +x /tmp/test-
 
 test_hook "ctx-snapshot" '{"stop_reason":"end_turn"}' 0 "Stop hook always exits 0"
 test_hook "ctx-snapshot" '{}' 0 "handles empty input"
+test_hook "ctx-snapshot" '{"stop_reason":"tool_use"}' 0 "exits 0 on tool_use"
+test_hook "ctx-snapshot" '{"session_id":"test123"}' 0 "exits 0 with session"
+test_hook "ctx-snapshot" '{"tool_name":"Bash"}' 0 "exits 0 with tool"
 
 echo ""
 echo "cost-tracker.sh:"
@@ -4464,6 +4470,9 @@ cp examples/cost-tracker.sh /tmp/test-cost-tracker2.sh && chmod +x /tmp/test-cos
 
 test_hook "cost-tracker2" '{"tool_input":{"command":"ls"}}' 0 "PostToolUse always exits 0"
 test_hook "cost-tracker2" '{}' 0 "handles empty input"
+test_hook "cost-tracker2" '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "tracks npm test"
+test_hook "cost-tracker2" '{"tool_name":"Edit","tool_input":{"file_path":"test.js"}}' 0 "tracks edit"
+test_hook "cost-tracker2" '{"tool_name":"Write","tool_input":{"file_path":"new.js"}}' 0 "tracks write"
 
 echo ""
 echo "crontab-guard.sh:"
@@ -4515,6 +4524,9 @@ cp examples/disk-space-guard.sh /tmp/test-disk-space.sh && chmod +x /tmp/test-di
 
 test_hook "disk-space" '{"tool_input":{"command":"ls"}}' 0 "advisory only (always exits 0)"
 test_hook "disk-space" '{"tool_name":"Write","tool_input":{"file_path":"test.txt","content":"data"}}' 0 "checks disk on Write (exit 0)"
+test_hook "disk-space" '{}' 0 "handles empty input"
+test_hook "disk-space" '{"tool_name":"Bash","tool_input":{"command":"npm install"}}' 0 "exits 0 on npm install"
+test_hook "disk-space" '{"tool_name":"Edit","tool_input":{"file_path":"x.js"}}' 0 "exits 0 on edit"
 
 echo ""
 echo "docker-prune-guard.sh:"
@@ -4638,6 +4650,9 @@ cp examples/rate-limit-guard.sh /tmp/test-rate-limit.sh && chmod +x /tmp/test-ra
 # Always exits 0 (warning only)
 test_hook "rate-limit" '{"tool_input":{"command":"ls"}}' 0 "allows any command (warning only)"
 test_hook "rate-limit" '{}' 0 "allows empty input"
+test_hook "rate-limit" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "rate-limit" '{}' 0 "handles empty input"
+test_hook "rate-limit" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 
 # ========== read-before-edit tests ==========
 echo ""
@@ -4656,6 +4671,9 @@ cp examples/reinject-claudemd.sh /tmp/test-reinject-cmd.sh && chmod +x /tmp/test
 
 # SessionStart hook — always exits 0
 test_hook "reinject-cmd" '{}' 0 "exits 0 on session start"
+test_hook "reinject-cmd" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
+test_hook "reinject-cmd" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "reinject-cmd" '{"prompt":"hello"}' 0 "exits 0 with prompt"
 
 # ========== relative-path-guard tests ==========
 echo ""
@@ -4689,6 +4707,9 @@ test_hook "resp-budget" '{}' 0 "allows first tool call"
 # Simulate hitting 2x limit (default 50, block at 100)
 echo "100" > "/tmp/cc-response-budget-$(echo "$PWD" | md5sum | cut -c1-8)"
 test_hook "resp-budget" '{}' 2 "blocks at 2x limit (101 calls)"
+test_hook "resp-budget" '{}' 0 "handles empty input"
+test_hook "resp-budget" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
+test_hook "resp-budget" '{"tool_output":"result"}' 0 "exits 0 with output"
 rm -f /tmp/cc-response-budget-*
 
 # ========== revert-helper tests ==========
@@ -4698,6 +4719,9 @@ cp examples/revert-helper.sh /tmp/test-revert-help.sh && chmod +x /tmp/test-reve
 
 # Stop hook — always exits 0
 test_hook "revert-help" '{}' 0 "exits 0 on stop event"
+test_hook "revert-help" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
+test_hook "revert-help" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "revert-help" '{"tool_output":"done"}' 0 "exits 0 with output"
 
 # ========== sensitive-regex-guard tests ==========
 echo ""
@@ -4717,6 +4741,9 @@ cp examples/session-checkpoint.sh /tmp/test-sess-ckpt.sh && chmod +x /tmp/test-s
 # Stop hook — always exits 0
 test_hook "sess-ckpt" '{"stop_reason":"user"}' 0 "exits 0 on stop"
 test_hook "sess-ckpt" '{}' 0 "exits 0 with no reason"
+test_hook "sess-ckpt" '{}' 0 "handles empty input"
+test_hook "sess-ckpt" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
+test_hook "sess-ckpt" '{"session_id":"test"}' 0 "exits 0 with session"
 
 # ========== session-handoff tests ==========
 echo ""
@@ -4725,6 +4752,9 @@ cp examples/session-handoff.sh /tmp/test-sess-hand.sh && chmod +x /tmp/test-sess
 
 # Stop hook — always exits 0
 test_hook "sess-hand" '{}' 0 "exits 0 on stop"
+test_hook "sess-hand" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
+test_hook "sess-hand" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "sess-hand" '{"tool_output":"done"}' 0 "exits 0 with output"
 
 # ========== stale-branch-guard tests ==========
 echo ""
@@ -4733,6 +4763,9 @@ cp examples/stale-branch-guard.sh /tmp/test-stale-branch.sh && chmod +x /tmp/tes
 
 # PostToolUse — always exits 0 (checks every 20 calls, warning only)
 test_hook "stale-branch" '{}' 0 "exits 0 (warning only)"
+test_hook "stale-branch" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "stale-branch" '{"tool_input":{"command":"git branch"}}' 0 "exits 0 on git branch"
+test_hook "stale-branch" '{"tool_input":{"command":"ls -la"}}' 0 "exits 0 on ls"
 
 # ========== stale-env-guard tests ==========
 echo ""
@@ -4742,6 +4775,9 @@ cp examples/stale-env-guard.sh /tmp/test-stale-env.sh && chmod +x /tmp/test-stal
 # PreToolUse Bash — always exits 0 (warning only)
 test_hook "stale-env" '{"tool_input":{"command":"source .env && deploy"}}' 0 "warns on stale .env but exits 0"
 test_hook "stale-env" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-env command"
+test_hook "stale-env" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "stale-env" '{}' 0 "handles empty input"
+test_hook "stale-env" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 
 # ========== strict-allowlist tests ==========
 echo ""
@@ -4826,6 +4862,9 @@ if [ "$_EXIT" -eq 0 ]; then echo "  PASS: allows push with fresh test marker"; P
 rm -rf "$_TBP_DIR" "/tmp/cc-tests-passed-$(echo "$_TBP_DIR" | md5sum | cut -c1-8)"
 
 test_hook "before-push" '{"tool_input":{"command":"git status"}}' 0 "allows non-push command"
+test_hook "before-push" '{"tool_input":{"command":"git log --oneline"}}' 0 "allows git log"
+test_hook "before-push" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "before-push" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 
 # ========== test-coverage-guard tests ==========
 echo ""
@@ -4835,6 +4874,9 @@ cp examples/test-coverage-guard.sh /tmp/test-cov-guard.sh && chmod +x /tmp/test-
 # PreToolUse Bash — always exits 0 (warning only)
 test_hook "cov-guard" '{"tool_input":{"command":"git commit -m \"feat: add feature\""}}' 0 "warns on commit without tests but exits 0"
 test_hook "cov-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit command"
+test_hook "cov-guard" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "cov-guard" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "cov-guard" '{}' 0 "handles empty input"
 
 # ========== test-deletion-guard tests ==========
 echo ""
@@ -4876,6 +4918,9 @@ cp examples/todo-check.sh /tmp/test-todo-chk.sh && chmod +x /tmp/test-todo-chk.s
 # PostToolUse Bash — always exits 0 (warning only)
 test_hook "todo-chk" '{"tool_input":{"command":"git commit -m \"feat: add feature\""}}' 0 "exits 0 after commit (warning only)"
 test_hook "todo-chk" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit command"
+test_hook "todo-chk" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "todo-chk" '{}' 0 "handles empty input"
+test_hook "todo-chk" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 
 # ========== token-budget-guard tests ==========
 echo ""
@@ -4891,6 +4936,9 @@ echo "14000" > "/tmp/cc-token-budget-$(echo "$PWD" | md5sum | cut -c1-8)"
 test_hook "token-bud" '{"tool_result":"x"}' 2 "blocks when token budget exceeded"
 rm -f /tmp/cc-token-budget-*
 test_hook "token-bud" '{"tool_result":"short output"}' 0 "allows normal output"
+test_hook "token-bud" '{}' 0 "handles empty input"
+test_hook "token-bud" '{"tool_name":"Bash"}' 0 "exits 0 on Bash"
+test_hook "token-bud" '{"tool_output":"result"}' 0 "exits 0 with output"
 rm -f /tmp/cc-token-budget-*
 unset CC_TOKEN_BLOCK
 
@@ -4932,6 +4980,9 @@ if [ "$_EXIT" -eq 2 ]; then echo "  PASS: blocks git reset --hard on dirty repo"
 _EXIT=0; (cd "$_UCG_DIR" && echo '{"tool_input":{"command":"git checkout -- ."}}' | bash /tmp/test-uncommit-gd.sh >/dev/null 2>/dev/null) || _EXIT=$?
 if [ "$_EXIT" -eq 2 ]; then echo "  PASS: blocks git checkout -- . on dirty repo"; PASS=$((PASS+1)); else echo "  FAIL: blocks git checkout -- . on dirty repo (expected 2, got $_EXIT)"; FAIL=$((FAIL+1)); fi
 test_hook "uncommit-gd" '{"tool_input":{"command":"git status"}}' 0 "allows non-destructive git command"
+test_hook "uncommit-gd" '{"tool_input":{"command":"git log"}}' 0 "allows git log"
+test_hook "uncommit-gd" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "uncommit-gd" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 rm -rf "$_UCG_DIR"
 
 # ========== verify-before-commit tests ==========
@@ -4949,6 +5000,9 @@ touch "/tmp/cc-tests-passed-$(echo "$_VBC_DIR" | md5sum | cut -c1-8)"
 _EXIT=0; (cd "$_VBC_DIR" && echo '{"tool_input":{"command":"git commit -m \"fix\""}}' | bash /tmp/test-verify-commit.sh >/dev/null 2>/dev/null) || _EXIT=$?
 if [ "$_EXIT" -eq 0 ]; then echo "  PASS: allows commit with fresh test marker"; PASS=$((PASS+1)); else echo "  FAIL: allows commit with fresh test marker (expected 0, got $_EXIT)"; FAIL=$((FAIL+1)); fi
 test_hook "verify-commit" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit command"
+test_hook "verify-commit" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "verify-commit" '{"tool_input":{"command":"git log"}}' 0 "allows git log"
+test_hook "verify-commit" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 rm -rf "$_VBC_DIR"
 
 # ========== verify-before-done tests ==========
@@ -4959,6 +5013,9 @@ cp examples/verify-before-done.sh /tmp/test-verify-done.sh && chmod +x /tmp/test
 # PreToolUse Bash — always exits 0 (warning only)
 test_hook "verify-done" '{"tool_input":{"command":"git commit -m \"fix: resolved\""}}' 0 "warns on commit without tests but exits 0"
 test_hook "verify-done" '{"tool_input":{"command":"npm test"}}' 0 "allows test command"
+test_hook "verify-done" '{}' 0 "handles empty input"
+test_hook "verify-done" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
+test_hook "verify-done" '{"session_id":"test"}' 0 "exits 0 with session"
 
 # ========== work-hours-guard tests ==========
 echo ""
@@ -5009,6 +5066,9 @@ echo "git-blame-context.sh:"
 cp examples/git-blame-context.sh /tmp/test-git-blame-ctx.sh && chmod +x /tmp/test-git-blame-ctx.sh
 test_hook "git-blame-ctx" '{"tool_input":{"file_path":"/tmp/nonexistent-abc.py","old_string":"line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\nline11"}}' 0 "allows edit of non-existent file (exits 0)"
 test_hook "git-blame-ctx" '{"tool_input":{"file_path":"/tmp/test.py","old_string":"short"}}' 0 "allows small edit (< 10 lines)"
+test_hook "git-blame-ctx" '{"tool_name":"Bash","tool_input":{"command":"git log"}}' 0 "allows git log"
+test_hook "git-blame-ctx" '{}' 0 "handles empty input"
+test_hook "git-blame-ctx" '{"tool_name":"Read","tool_input":{"file_path":"test.js"}}' 0 "allows read"
 echo ""
 echo ""
 echo "git-lfs-guard.sh:"
@@ -5083,6 +5143,9 @@ echo ""
 echo "hook-permission-fixer.sh:"
 cp examples/hook-permission-fixer.sh /tmp/test-hook-perm-fixer.sh && chmod +x /tmp/test-hook-perm-fixer.sh
 test_hook "hook-perm-fixer" '{}' 0 "exits 0 (SessionStart hook)"
+test_hook "hook-perm-fixer" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
+test_hook "hook-perm-fixer" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "hook-perm-fixer" '{"prompt":"hello"}' 0 "exits 0 with prompt"
 echo ""
 echo ""
 echo "import-cycle-warn.sh:"
@@ -5142,6 +5205,9 @@ cp examples/max-file-count-guard.sh /tmp/test-max-file-count.sh && chmod +x /tmp
 rm -f /tmp/cc-new-files-count
 test_hook "max-file-count" '{"tool_input":{"file_path":"/tmp/new-file-1.txt"}}' 0 "allows file creation (exit 0, always)"
 test_hook "max-file-count" '{"tool_input":{}}' 0 "allows empty file_path"
+test_hook "max-file-count" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "max-file-count" '{}' 0 "handles empty input"
+test_hook "max-file-count" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 rm -f /tmp/cc-new-files-count
 echo ""
 echo ""
@@ -5160,6 +5226,9 @@ cp examples/max-session-duration.sh /tmp/test-max-session.sh && chmod +x /tmp/te
 rm -f /tmp/cc-session-start-*
 test_hook "max-session" '{}' 0 "allows first call (creates state file)"
 test_hook "max-session" '{}' 0 "allows subsequent calls (exit 0, just warns if exceeded)"
+test_hook "max-session" '{}' 0 "handles empty input"
+test_hook "max-session" '{"session_id":"test"}' 0 "exits 0 with session"
+test_hook "max-session" '{"tool_name":"Bash"}' 0 "exits 0 with tool"
 echo ""
 echo ""
 echo "memory-write-guard.sh:"
@@ -5234,6 +5303,9 @@ echo "no-todo-ship.sh:"
 cp examples/no-todo-ship.sh /tmp/test-no-todo-ship.sh && chmod +x /tmp/test-no-todo-ship.sh
 test_hook "no-todo-ship" '{"tool_input":{"command":"git commit -m fix"}}' 0 "allows git commit (exit 0, warns if TODOs)"
 test_hook "no-todo-ship" '{"tool_input":{"command":"npm test"}}' 0 "allows non-git command"
+test_hook "no-todo-ship" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "no-todo-ship" '{}' 0 "handles empty input"
+test_hook "no-todo-ship" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 echo ""
 echo ""
 echo "no-wildcard-cors.sh:"
@@ -5496,6 +5568,9 @@ echo "session-summary-stop.sh:"
 cp examples/session-summary-stop.sh /tmp/test-sess-summary.sh && chmod +x /tmp/test-sess-summary.sh
 test_hook "sess-summary" '{"stop_reason":"end_turn"}' 0 "outputs summary on stop"
 test_hook "sess-summary" '{}' 0 "handles empty"
+test_hook "sess-summary" '{}' 0 "handles empty input"
+test_hook "sess-summary" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
+test_hook "sess-summary" '{"session_id":"test"}' 0 "exits 0 with session"
 
 echo ""
 echo "max-edit-size-guard.sh:"
@@ -5520,6 +5595,9 @@ echo "uncommitted-changes-stop.sh:"
 cp examples/uncommitted-changes-stop.sh /tmp/test-uncommit-stop.sh && chmod +x /tmp/test-uncommit-stop.sh
 test_hook "uncommit-stop" '{"stop_reason":"end_turn"}' 0 "warns on stop"
 test_hook "uncommit-stop" '{}' 0 "handles empty"
+test_hook "uncommit-stop" '{}' 0 "handles empty input"
+test_hook "uncommit-stop" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
+test_hook "uncommit-stop" '{"session_id":"test"}' 0 "exits 0 with session"
 
 # Token counter: edge cases
 test_hook "token-cnt" '{"tool_name":"","tool_input":{}}' 0 "counter: empty tool name"
