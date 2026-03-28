@@ -27,4 +27,24 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-coauthored-by.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-hooks-testing-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/hook-if-field-performance.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-auto-mode-safety.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-autonomous-safety.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claudemd-best-practices.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/by-example.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/builder.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/autonomous-checklist.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/hooks-cheatsheet.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/settings-reference.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/migration-guide.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/troubleshooting.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/exit-codes.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/hook-patterns.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/matchers.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/which-hook.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/wizard.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/ecosystem.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/preflight.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/permission-checker.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/matrix.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/events.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
 </urlset>
