@@ -13,4 +13,18 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-force-push.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-secret-leaks.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-no-verify-bypass.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-cost-explosion.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-syntax-errors.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-bash-debug-leak.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-git-reset-hard.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-session-drift.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-token-waste.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-dependency-bloat.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-temp-file-accumulation.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-variable-expansion.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-compact-autonomous-push.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-coauthored-by.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-hooks-testing-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/hook-if-field-performance.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
 </urlset>
