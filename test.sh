@@ -4305,6 +4305,8 @@ test_hook "allow-claude-settings" '{"tool_input":{"file_path":"/home/user/projec
 test_hook "allow-claude-settings" '{"tool_input":{}}' 0 "handles missing file_path"
 test_hook "allow-claude-settings" '{}' 0 "handles empty JSON"
 test_hook "allow-claude-settings" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "allow-claude-settings" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "allow-claude-settings" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "allow-git-hooks-dir.sh:"
@@ -4315,6 +4317,8 @@ test_hook "allow-git-hooks-dir" '{"tool_input":{"file_path":"/project/.git/confi
 test_hook "allow-git-hooks-dir" '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "passes through normal file"
 test_hook "allow-git-hooks-dir" '{}' 0 "handles empty JSON"
 test_hook "allow-git-hooks-dir" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "allow-git-hooks-dir" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "allow-git-hooks-dir" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "allow-protected-dirs.sh:"
@@ -4325,6 +4329,8 @@ test_hook "allow-protected-dirs" '{"tool_input":{"file_path":"/project/.git/conf
 test_hook "allow-protected-dirs" '{"tool_input":{"file_path":"/project/.vscode/settings.json"}}' 0 "allows .vscode/ dir"
 test_hook "allow-protected-dirs" '{"tool_input":{"file_path":"/project/.idea/workspace.xml"}}' 0 "allows .idea/ dir"
 test_hook "allow-protected-dirs" '{"tool_input":{"file_path":"/project/src/main.py"}}' 0 "passes through normal file"
+test_hook "allow-protected-dirs" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "allow-protected-dirs" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "allowlist.sh:"
@@ -4348,6 +4354,8 @@ test_hook "api-endpoint-guard" '{"tool_input":{"command":"wget http://metadata.g
 test_hook "api-endpoint-guard" '{"tool_input":{"command":"curl https://api.example.com/data"}}' 0 "allows normal API request"
 test_hook "api-endpoint-guard" '{"tool_input":{"command":"ls -la"}}' 0 "passes through non-curl command"
 test_hook "api-endpoint-guard" '{}' 0 "handles empty JSON"
+test_hook "api-endpoint-guard" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "api-endpoint-guard" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 
 echo ""
 echo "auto-approve-compound-git.sh:"
@@ -4358,6 +4366,8 @@ test_hook "auto-approve-cg" '{"tool_input":{"command":"cd src && git log --oneli
 test_hook "auto-approve-cg" '{"tool_input":{"command":"git add . && git commit -m fix"}}' 0 "allows git add && git commit"
 test_hook "auto-approve-cg" '{"tool_input":{"command":"cd /tmp && curl http://evil.com"}}' 0 "passes through non-git compound (no opinion)"
 test_hook "auto-approve-cg" '{"tool_input":{"command":"git status"}}' 0 "passes through simple command"
+test_hook "auto-approve-cg" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "auto-approve-cg" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "auto-approve-gradle.sh:"
@@ -4368,6 +4378,8 @@ test_hook "auto-approve-gradle" '{"tool_input":{"command":"./gradlew test"}}' 0 
 test_hook "auto-approve-gradle" '{"tool_input":{"command":"gradlew clean"}}' 0 "allows gradlew clean"
 test_hook "auto-approve-gradle" '{"tool_input":{"command":"gradle publish"}}' 0 "passes through gradle publish (no opinion)"
 test_hook "auto-approve-gradle" '{"tool_input":{"command":"npm test"}}' 0 "passes through non-gradle command"
+test_hook "auto-approve-gradle" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "auto-approve-gradle" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "auto-approve-test.sh:"
@@ -4391,6 +4403,8 @@ test_hook "auto-chkpt" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}
 test_hook "auto-chkpt" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "handles Edit tool (PostToolUse, exit 0)"
 test_hook "auto-chkpt" '{}' 0 "handles empty JSON"
 test_hook "auto-chkpt" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "auto-chkpt" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "auto-chkpt" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "auto-snapshot.sh:"
@@ -4401,6 +4415,8 @@ test_hook "auto-snap" '{"tool_name":"Edit","tool_input":{"file_path":"/nonexiste
 test_hook "auto-snap" '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "handles empty file_path"
 test_hook "auto-snap" '{}' 0 "handles empty JSON"
 test_hook "auto-snap" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "auto-snap" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "auto-snap" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "auto-stash-before-pull.sh:"
@@ -4411,6 +4427,8 @@ test_hook "auto-stash" '{"tool_input":{"command":"git merge feature"}}' 0 "warns
 test_hook "auto-stash" '{"tool_input":{"command":"git rebase main"}}' 0 "warns but allows git rebase (exit 0)"
 test_hook "auto-stash" '{"tool_input":{"command":"git status"}}' 0 "passes through non-pull/merge"
 test_hook "auto-stash" '{"tool_input":{"command":"ls -la"}}' 0 "passes through non-git command"
+test_hook "auto-stash" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "auto-stash" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "backup-before-refactor.sh:"
@@ -4421,6 +4439,8 @@ test_hook "backup-refactor" '{"tool_input":{"command":"ls -la"}}' 0 "passes thro
 test_hook "backup-refactor" '{"tool_input":{"command":""}}' 0 "handles empty command"
 test_hook "backup-refactor" '{}' 0 "handles empty JSON"
 test_hook "backup-refactor" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "backup-refactor" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "backup-refactor" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "binary-file-guard.sh:"
@@ -4431,6 +4451,8 @@ test_hook "binary-guard" '{"tool_input":{"file_path":"archive.zip","content":"da
 test_hook "binary-guard" '{"tool_input":{"file_path":"music.mp3","content":"data"}}' 0 "warns on .mp3 but exits 0"
 test_hook "binary-guard" '{"tool_input":{"file_path":"script.js","content":"const x = 1;"}}' 0 "allows .js file"
 test_hook "binary-guard" '{"tool_input":{"file_path":"","content":"data"}}' 0 "handles empty file_path"
+test_hook "binary-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "binary-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "branch-name-check.sh:"
@@ -4441,6 +4463,8 @@ test_hook "branch-name-chk" '{"tool_input":{"command":"git checkout -b my-random
 test_hook "branch-name-chk" '{"tool_input":{"command":"git status"}}' 0 "ignores non-branch commands"
 test_hook "branch-name-chk" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
 test_hook "branch-name-chk" '{}' 0 "handles empty JSON"
+test_hook "branch-name-chk" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "branch-name-chk" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "branch-naming-convention.sh:"
@@ -4451,6 +4475,8 @@ test_hook "branch-naming" '{"tool_input":{"command":"git checkout -b random-name
 test_hook "branch-naming" '{"tool_input":{"command":"git status"}}' 0 "ignores non-checkout commands"
 test_hook "branch-naming" '{}' 0 "handles empty JSON"
 test_hook "branch-naming" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "branch-naming" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "branch-naming" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "changelog-reminder.sh:"
@@ -4461,6 +4487,8 @@ test_hook "changelog" '{"tool_input":{"command":"cargo set-version 1.0.0"}}' 0 "
 test_hook "changelog" '{"tool_input":{"command":"poetry version minor"}}' 0 "reminds on poetry version"
 test_hook "changelog" '{"tool_input":{"command":"git status"}}' 0 "ignores non-version commands"
 test_hook "changelog" '{"tool_input":{"command":""}}' 0 "handles empty command"
+test_hook "changelog" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "changelog" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "ci-skip-guard.sh:"
@@ -4471,6 +4499,8 @@ test_hook "ci-skip" '{"tool_input":{"command":"git commit --no-verify -m fix"}}'
 test_hook "ci-skip" '{"tool_input":{"command":"git commit -m \"feat: add login\""}}' 0 "allows normal commit"
 test_hook "ci-skip" '{"tool_input":{"command":"git status"}}' 0 "ignores non-commit commands"
 test_hook "ci-skip" '{}' 0 "handles empty JSON"
+test_hook "ci-skip" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "ci-skip" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "commit-message-check.sh:"
@@ -4481,6 +4511,8 @@ test_hook "commit-msg" '{"tool_input":{"command":"git status"}}' 0 "ignores non-
 test_hook "commit-msg" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
 test_hook "commit-msg" '{}' 0 "handles empty JSON"
 test_hook "commit-msg" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "commit-msg" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "commit-msg" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "commit-scope-guard.sh:"
@@ -4491,6 +4523,8 @@ test_hook "commit-scope" '{"tool_input":{"command":"git status"}}' 0 "ignores no
 test_hook "commit-scope" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
 test_hook "commit-scope" '{}' 0 "handles empty JSON"
 test_hook "commit-scope" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "commit-scope" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "commit-scope" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "compact-reminder.sh:"
@@ -4501,6 +4535,8 @@ test_hook "compact-remind" '{}' 0 "handles empty input"
 test_hook "compact-remind" '{"stop_reason":"tool_use"}' 0 "exits 0 on tool_use stop"
 test_hook "compact-remind" '{"session_id":"test"}' 0 "exits 0 with session_id"
 test_hook "compact-remind" '{"tool_output":"result"}' 0 "exits 0 with output"
+test_hook "compact-remind" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "compact-remind" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "compound-command-approver.sh:"
@@ -4511,6 +4547,8 @@ test_hook "compound-approver" '{"tool_input":{"command":"cd src && ls -la && git
 test_hook "compound-approver" '{"tool_input":{"command":"npm test && npm run build"}}' 0 "auto-approves npm test && build"
 test_hook "compound-approver" '{"tool_input":{"command":"git status"}}' 0 "passes through simple command (no compound)"
 test_hook "compound-approver" '{"tool_input":{"command":""}}' 0 "handles empty command"
+test_hook "compound-approver" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "compound-approver" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "conflict-marker-guard.sh:"
@@ -4521,6 +4559,8 @@ test_hook "conflict-marker" '{"tool_input":{"command":"git status"}}' 0 "ignores
 test_hook "conflict-marker" '{"tool_input":{"command":"ls -la"}}' 0 "ignores non-git commands"
 test_hook "conflict-marker" '{}' 0 "handles empty JSON"
 test_hook "conflict-marker" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "conflict-marker" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "conflict-marker" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "context-snapshot.sh:"
@@ -4531,6 +4571,8 @@ test_hook "ctx-snapshot" '{}' 0 "handles empty input"
 test_hook "ctx-snapshot" '{"stop_reason":"tool_use"}' 0 "exits 0 on tool_use"
 test_hook "ctx-snapshot" '{"session_id":"test123"}' 0 "exits 0 with session"
 test_hook "ctx-snapshot" '{"tool_name":"Bash"}' 0 "exits 0 with tool"
+test_hook "ctx-snapshot" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "ctx-snapshot" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "cost-tracker.sh:"
@@ -4541,6 +4583,8 @@ test_hook "cost-tracker2" '{}' 0 "handles empty input"
 test_hook "cost-tracker2" '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "tracks npm test"
 test_hook "cost-tracker2" '{"tool_name":"Edit","tool_input":{"file_path":"test.js"}}' 0 "tracks edit"
 test_hook "cost-tracker2" '{"tool_name":"Write","tool_input":{"file_path":"new.js"}}' 0 "tracks write"
+test_hook "cost-tracker2" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "cost-tracker2" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "crontab-guard.sh:"
@@ -4551,6 +4595,8 @@ test_hook "crontab" '{"tool_input":{"command":"crontab -e"}}' 0 "warns on cronta
 test_hook "crontab" '{"tool_input":{"command":"crontab -l"}}' 0 "allows crontab -l (read-only)"
 test_hook "crontab" '{"tool_input":{"command":"ls"}}' 0 "ignores non-crontab commands"
 test_hook "crontab" '{}' 0 "handles empty JSON"
+test_hook "crontab" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "crontab" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "debug-leftover-guard.sh:"
@@ -4561,6 +4607,8 @@ test_hook "debug-leftover" '{"tool_input":{"command":"git status"}}' 0 "ignores 
 test_hook "debug-leftover" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
 test_hook "debug-leftover" '{}' 0 "handles empty JSON"
 test_hook "debug-leftover" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "debug-leftover" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "debug-leftover" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "dependency-audit.sh:"
@@ -4582,6 +4630,8 @@ test_hook "dep-pin" '{"tool_input":{"file_path":"package.json","new_string":"\"e
 test_hook "dep-pin" '{"tool_input":{"file_path":"src/index.js","new_string":"const x = 1;"}}' 0 "ignores non-package.json"
 test_hook "dep-pin" '{}' 0 "handles empty JSON"
 test_hook "dep-pin" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "dep-pin" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "dep-pin" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "diff-size-guard.sh:"
@@ -4592,6 +4642,8 @@ test_hook "diff-size" '{"tool_input":{"command":"git status"}}' 0 "ignores non-c
 test_hook "diff-size" '{"tool_input":{"command":"ls"}}' 0 "ignores non-git commands"
 test_hook "diff-size" '{}' 0 "handles empty JSON"
 test_hook "diff-size" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "diff-size" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "diff-size" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "disk-space-guard.sh:"
@@ -4602,6 +4654,8 @@ test_hook "disk-space" '{"tool_name":"Write","tool_input":{"file_path":"test.txt
 test_hook "disk-space" '{}' 0 "handles empty input"
 test_hook "disk-space" '{"tool_name":"Bash","tool_input":{"command":"npm install"}}' 0 "exits 0 on npm install"
 test_hook "disk-space" '{"tool_name":"Edit","tool_input":{"file_path":"x.js"}}' 0 "exits 0 on edit"
+test_hook "disk-space" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "disk-space" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "docker-prune-guard.sh:"
@@ -4612,6 +4666,8 @@ test_hook "docker-prune" '{"tool_input":{"command":"docker system prune -a"}}' 0
 test_hook "docker-prune" '{"tool_input":{"command":"docker ps"}}' 0 "ignores docker ps"
 test_hook "docker-prune" '{"tool_input":{"command":"ls"}}' 0 "ignores non-docker commands"
 test_hook "docker-prune" '{}' 0 "handles empty JSON"
+test_hook "docker-prune" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "docker-prune" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "edit-guard.sh:"
@@ -4634,6 +4690,8 @@ test_hook "enforce-tests2" '{"tool_input":{"file_path":"/nonexistent/test_utils.
 test_hook "enforce-tests2" '{"tool_input":{"file_path":"/tmp/not-a-source.txt"}}' 0 "ignores non-source files"
 test_hook "enforce-tests2" '{}' 0 "handles empty JSON"
 test_hook "enforce-tests2" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "enforce-tests2" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "enforce-tests2" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "env-drift-guard.sh:"
@@ -4644,6 +4702,8 @@ test_hook "env-drift" '{"tool_input":{"file_path":""}}' 0 "handles empty file_pa
 test_hook "env-drift" '{"tool_input":{"file_path":".env.example"}}' 0 "checks drift on .env.example (PostToolUse, exit 0)"
 test_hook "env-drift" '{}' 0 "handles empty JSON"
 test_hook "env-drift" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "env-drift" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "env-drift" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "env-source-guard.sh:"
@@ -4654,6 +4714,8 @@ test_hook "env-source" '{"tool_input":{"command":"source .env.local"}}' 2 "block
 test_hook "env-source" '{"tool_input":{"command":"export $(cat .env)"}}' 2 "blocks export cat .env pattern"
 test_hook "env-source" '{"tool_input":{"command":"cat .env"}}' 0 "allows cat .env (read-only)"
 test_hook "env-source" '{"tool_input":{"command":"ls"}}' 0 "allows non-env commands"
+test_hook "env-source" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "env-source" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 
 echo ""
 echo "error-memory-guard.sh:"
@@ -4664,6 +4726,8 @@ test_hook "error-memory" '{"tool_input":{"command":"failing-unique-cmd"},"tool_r
 test_hook "error-memory" '{"tool_input":{"command":""},"tool_result_exit_code":0}' 0 "handles empty command"
 test_hook "error-memory" '{}' 0 "handles empty JSON"
 test_hook "error-memory" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "error-memory" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "error-memory" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "fact-check-gate.sh:"
@@ -4674,6 +4738,8 @@ test_hook "fact-check" '{"tool_input":{"file_path":"src/main.py","new_string":"x
 test_hook "fact-check" '{"tool_input":{"file_path":"README.md","new_string":"Simple text without code refs"}}' 0 "allows doc without source refs"
 test_hook "fact-check" '{"tool_input":{"file_path":""}}' 0 "handles empty file_path"
 test_hook "fact-check" '{}' 0 "handles empty JSON"
+test_hook "fact-check" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "fact-check" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== prompt-injection-guard tests ==========
 echo ""
@@ -4701,6 +4767,8 @@ test_hook "prompt-len" "{\"prompt\":\"${_LONG_PROMPT}\"}" 0 "warns on long promp
 test_hook "prompt-len" '{}' 0 "allows missing prompt"
 test_hook "prompt-len" '{}' 0 "handles empty JSON"
 test_hook "prompt-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "prompt-len" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "prompt-len" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== protect-claudemd tests ==========
 echo ""
@@ -4712,6 +4780,8 @@ test_hook "protect-cmd" '{"tool_name":"Write","tool_input":{"file_path":"/home/u
 test_hook "protect-cmd" '{"tool_name":"Write","tool_input":{"file_path":"/home/user/project/settings.json"}}' 2 "blocks Write to settings.json"
 test_hook "protect-cmd" '{"tool_name":"Edit","tool_input":{"file_path":"/home/user/project/src/index.js"}}' 0 "allows Edit to normal file"
 test_hook "protect-cmd" '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "allows non-Edit/Write tools"
+test_hook "protect-cmd" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "protect-cmd" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 
 # ========== protect-dotfiles tests ==========
 echo ""
@@ -4738,6 +4808,8 @@ test_hook "rate-limit" '{}' 0 "allows empty input"
 test_hook "rate-limit" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "rate-limit" '{}' 0 "handles empty input"
 test_hook "rate-limit" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "rate-limit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "rate-limit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== read-before-edit tests ==========
 echo ""
@@ -4750,6 +4822,8 @@ test_hook "read-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/somef
 test_hook "read-edit" '{}' 0 "allows empty input"
 test_hook "read-edit" '{}' 0 "handles empty JSON"
 test_hook "read-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "read-edit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "read-edit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== reinject-claudemd tests ==========
 echo ""
@@ -4762,6 +4836,8 @@ test_hook "reinject-cmd" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "reinject-cmd" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "reinject-cmd" '{"prompt":"hello"}' 0 "exits 0 with prompt"
 test_hook "reinject-cmd" '{}' 0 "handles empty JSON"
+test_hook "reinject-cmd" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "reinject-cmd" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== relative-path-guard tests ==========
 echo ""
@@ -4774,6 +4850,8 @@ test_hook "rel-path" '{"tool_input":{"file_path":"/absolute/path/file.js"}}' 0 "
 test_hook "rel-path" '{}' 0 "allows missing file_path"
 test_hook "rel-path" '{}' 0 "handles empty JSON"
 test_hook "rel-path" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "rel-path" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "rel-path" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== require-issue-ref tests ==========
 echo ""
@@ -4786,6 +4864,8 @@ test_hook "issue-ref" '{"tool_input":{"command":"git commit -m \"fix: update par
 test_hook "issue-ref" '{"tool_input":{"command":"git commit -m \"PROJ-456 fix parser\""}}' 0 "allows commit with JIRA ref"
 test_hook "issue-ref" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit command"
 test_hook "issue-ref" '{}' 0 "handles empty JSON"
+test_hook "issue-ref" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "issue-ref" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== response-budget-guard tests ==========
 echo ""
@@ -4802,6 +4882,8 @@ rm -f /tmp/cc-response-budget-*
 test_hook "resp-budget" '{}' 0 "handles empty input after reset"
 test_hook "resp-budget" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "resp-budget" '{"tool_output":"result"}' 0 "exits 0 with output"
+test_hook "resp-budget" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "resp-budget" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 
 # ========== revert-helper tests ==========
 echo ""
@@ -4814,6 +4896,8 @@ test_hook "revert-help" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "revert-help" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "revert-help" '{"tool_output":"done"}' 0 "exits 0 with output"
 test_hook "revert-help" '{}' 0 "handles empty JSON"
+test_hook "revert-help" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "revert-help" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== sensitive-regex-guard tests ==========
 echo ""
@@ -4826,6 +4910,8 @@ test_hook "sens-regex" '{"tool_input":{"new_string":"(.*)+x"}}' 0 "warns on (.*)
 test_hook "sens-regex" '{"tool_input":{"new_string":"const x = 42;"}}' 0 "allows normal code"
 test_hook "sens-regex" '{}' 0 "handles empty JSON"
 test_hook "sens-regex" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "sens-regex" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "sens-regex" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== session-checkpoint tests ==========
 echo ""
@@ -4838,6 +4924,8 @@ test_hook "sess-ckpt" '{}' 0 "exits 0 with no reason"
 test_hook "sess-ckpt" '{}' 0 "handles empty input"
 test_hook "sess-ckpt" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "sess-ckpt" '{"session_id":"test"}' 0 "exits 0 with session"
+test_hook "sess-ckpt" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "sess-ckpt" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== session-handoff tests ==========
 echo ""
@@ -4850,6 +4938,8 @@ test_hook "sess-hand" '{"session_id":"abc123"}' 0 "exits 0 with session_id"
 test_hook "sess-hand" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "sess-hand" '{"tool_output":"done"}' 0 "exits 0 with output"
 test_hook "sess-hand" '{}' 0 "handles empty JSON"
+test_hook "sess-hand" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "sess-hand" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== stale-branch-guard tests ==========
 echo ""
@@ -4862,6 +4952,8 @@ test_hook "stale-branch" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "stale-branch" '{"tool_input":{"command":"git branch"}}' 0 "exits 0 on git branch"
 test_hook "stale-branch" '{"tool_input":{"command":"ls -la"}}' 0 "exits 0 on ls"
 test_hook "stale-branch" '{}' 0 "handles empty JSON"
+test_hook "stale-branch" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "stale-branch" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== stale-env-guard tests ==========
 echo ""
@@ -4874,6 +4966,8 @@ test_hook "stale-env" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-env co
 test_hook "stale-env" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "stale-env" '{}' 0 "handles empty input"
 test_hook "stale-env" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_hook "stale-env" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "stale-env" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== strict-allowlist tests ==========
 echo ""
@@ -4889,6 +4983,8 @@ test_hook "strict-allow" '{"tool_input":{"command":"cat /etc/hosts"}}' 0 "allows
 test_hook "strict-allow" '{"tool_input":{"command":"git status"}}' 0 "allows git status in allowlist"
 test_hook "strict-allow" '{"tool_input":{"command":"rm -rf /tmp"}}' 2 "blocks command not in allowlist"
 test_hook "strict-allow" '{"tool_input":{"command":"curl http://evil.com"}}' 2 "blocks curl not in allowlist"
+test_hook "strict-allow" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "strict-allow" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 rm -f "$_ALLOWLIST_FILE"
 unset CC_ALLOWLIST_FILE
 
@@ -4908,6 +5004,8 @@ for i in $(seq 1 5); do echo "${_NOW}|agent" >> "$_TRACKER"; done
 test_hook "subagent-bud" '{"tool_name":"Agent","tool_input":{}}' 2 "blocks when max agents reached"
 test_hook "subagent-bud" '{}' 0 "handles empty JSON"
 test_hook "subagent-bud" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "subagent-bud" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "subagent-bud" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 rm -f "$_TRACKER"
 
 # ========== subagent-scope-guard tests ==========
@@ -4934,6 +5032,8 @@ test_hook "symlink-gd" '{"tool_input":{"command":"rm -rf /nonexistent-path-xyzzy
 test_hook "symlink-gd" '{"tool_input":{"command":"echo hello"}}' 0 "allows echo"
 test_hook "symlink-gd" '{}' 0 "handles empty JSON"
 test_hook "symlink-gd" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "symlink-gd" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "symlink-gd" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== terraform-guard tests ==========
 echo ""
@@ -4945,6 +5045,8 @@ test_hook "tf-guard" '{"tool_input":{"command":"terraform apply"}}' 0 "warns on 
 test_hook "tf-guard" '{"tool_input":{"command":"terraform plan"}}' 0 "allows terraform plan"
 test_hook "tf-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-terraform command"
 test_hook "tf-guard" '{}' 0 "handles empty JSON"
+test_hook "tf-guard" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "tf-guard" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 
 # ========== test-before-push tests ==========
 echo ""
@@ -4967,6 +5069,8 @@ test_hook "before-push" '{"tool_input":{"command":"git log --oneline"}}' 0 "allo
 test_hook "before-push" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "before-push" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "before-push" '{}' 0 "handles empty JSON"
+test_hook "before-push" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "before-push" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== test-coverage-guard tests ==========
 echo ""
@@ -4979,6 +5083,8 @@ test_hook "cov-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit
 test_hook "cov-guard" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
 test_hook "cov-guard" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "cov-guard" '{}' 0 "handles empty input"
+test_hook "cov-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "cov-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== test-deletion-guard tests ==========
 echo ""
@@ -4991,6 +5097,8 @@ test_hook "del-guard" '{"tool_input":{"file_path":"src/app.test.js","old_string"
 test_hook "del-guard" '{"tool_input":{"file_path":"src/app.js","old_string":"const x = 1;","new_string":"const x = 2;"}}' 0 "allows edit to non-test file"
 test_hook "del-guard" '{}' 0 "handles empty JSON"
 test_hook "del-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "del-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "del-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== timeout-guard tests ==========
 echo ""
@@ -5003,6 +5111,8 @@ test_hook "timeout-gd" '{"tool_input":{"command":"npm start","run_in_background"
 test_hook "timeout-gd" '{"tool_input":{"command":"python -m http.server"}}' 0 "warns on http.server but exits 0"
 test_hook "timeout-gd" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "timeout-gd" '{"tool_input":{"command":"tail -f /var/log/syslog"}}' 0 "warns on tail -f but exits 0"
+test_hook "timeout-gd" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "timeout-gd" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== timezone-guard tests ==========
 echo ""
@@ -5015,6 +5125,8 @@ test_hook "tz-guard" '{"tool_input":{"command":"TZ=UTC date"}}' 0 "allows UTC ti
 test_hook "tz-guard" '{"tool_input":{"command":"date"}}' 0 "allows command without timezone"
 test_hook "tz-guard" '{}' 0 "handles empty JSON"
 test_hook "tz-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "tz-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "tz-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== todo-check tests ==========
 echo ""
@@ -5027,6 +5139,8 @@ test_hook "todo-chk" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-commit 
 test_hook "todo-chk" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "todo-chk" '{}' 0 "handles empty input"
 test_hook "todo-chk" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "todo-chk" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "todo-chk" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== token-budget-guard tests ==========
 echo ""
@@ -5045,6 +5159,8 @@ test_hook "token-bud" '{"tool_result":"short output"}' 0 "allows normal output"
 test_hook "token-bud" '{}' 0 "handles empty input"
 test_hook "token-bud" '{"tool_name":"Bash"}' 0 "exits 0 on Bash"
 test_hook "token-bud" '{"tool_output":"result"}' 0 "exits 0 with output"
+test_hook "token-bud" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "token-bud" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 rm -f /tmp/cc-token-budget-*
 unset CC_TOKEN_BLOCK
 
@@ -5059,6 +5175,8 @@ test_hook "ts-strict" '{"tool_input":{"file_path":"tsconfig.json","new_string":"
 test_hook "ts-strict" '{"tool_input":{"file_path":"src/index.ts","new_string":"const x = 1;"}}' 0 "allows non-tsconfig file"
 test_hook "ts-strict" '{}' 0 "handles empty JSON"
 test_hook "ts-strict" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "ts-strict" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "ts-strict" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== typosquat-guard tests ==========
 echo ""
@@ -5071,6 +5189,8 @@ test_hook "typosquat" '{"tool_input":{"command":"npm install expresss"}}' 0 "war
 test_hook "typosquat" '{"tool_input":{"command":"npm install lodash"}}' 0 "allows correct package name"
 test_hook "typosquat" '{"tool_input":{"command":"pip install recat"}}' 0 "warns on react typo via pip but exits 0"
 test_hook "typosquat" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-install command"
+test_hook "typosquat" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "typosquat" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== uncommitted-work-guard tests ==========
 echo ""
@@ -5092,6 +5212,8 @@ test_hook "uncommit-gd" '{"tool_input":{"command":"git log"}}' 0 "allows git log
 test_hook "uncommit-gd" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "uncommit-gd" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "uncommit-gd" '{}' 0 "handles empty JSON"
+test_hook "uncommit-gd" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "uncommit-gd" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -rf "$_UCG_DIR"
 
 # ========== verify-before-commit tests ==========
@@ -5113,6 +5235,8 @@ test_hook "verify-commit" '{"tool_input":{"command":"git status"}}' 0 "allows gi
 test_hook "verify-commit" '{"tool_input":{"command":"git log"}}' 0 "allows git log"
 test_hook "verify-commit" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "verify-commit" '{}' 0 "handles empty JSON"
+test_hook "verify-commit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "verify-commit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -rf "$_VBC_DIR"
 
 # ========== verify-before-done tests ==========
@@ -5126,6 +5250,8 @@ test_hook "verify-done" '{"tool_input":{"command":"npm test"}}' 0 "allows test c
 test_hook "verify-done" '{}' 0 "handles empty input"
 test_hook "verify-done" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "verify-done" '{"session_id":"test"}' 0 "exits 0 with session"
+test_hook "verify-done" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "verify-done" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== work-hours-guard tests ==========
 echo ""
@@ -5142,6 +5268,8 @@ test_hook "work-hours" '{"tool_input":{"command":"git push origin main"}}' 2 "bl
 test_hook "work-hours" '{"tool_input":{"command":"ls -la"}}' 0 "allows safe command outside work hours"
 test_hook "work-hours" '{}' 0 "handles empty JSON"
 test_hook "work-hours" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "work-hours" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "work-hours" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 unset CC_WORK_START CC_WORK_END CC_WORK_DAYS
 
 # ========== worktree-cleanup-guard tests ==========
@@ -5155,6 +5283,8 @@ test_hook "wt-cleanup" '{"tool_input":{"command":"git worktree prune"}}' 0 "warn
 test_hook "wt-cleanup" '{"tool_input":{"command":"git status"}}' 0 "allows non-worktree command"
 test_hook "wt-cleanup" '{}' 0 "handles empty JSON"
 test_hook "wt-cleanup" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "wt-cleanup" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "wt-cleanup" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== worktree-guard tests ==========
 echo ""
@@ -5167,6 +5297,8 @@ test_hook "wt-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-des
 test_hook "wt-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-git command"
 test_hook "wt-guard" '{}' 0 "handles empty JSON"
 test_hook "wt-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "wt-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "wt-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "file-size-limit.sh:"
@@ -5178,6 +5310,8 @@ unset _FSL_LARGE
 test_hook "file-size-limit" '{"tool_input":{"command":"ls"}}' 0 "allows command without content"
 test_hook "file-size-limit" '{}' 0 "handles empty JSON"
 test_hook "file-size-limit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "file-size-limit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "file-size-limit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "git-blame-context.sh:"
@@ -5187,6 +5321,8 @@ test_hook "git-blame-ctx" '{"tool_input":{"file_path":"/tmp/test.py","old_string
 test_hook "git-blame-ctx" '{"tool_name":"Bash","tool_input":{"command":"git log"}}' 0 "allows git log"
 test_hook "git-blame-ctx" '{}' 0 "handles empty input"
 test_hook "git-blame-ctx" '{"tool_name":"Read","tool_input":{"file_path":"test.js"}}' 0 "allows read"
+test_hook "git-blame-ctx" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "git-blame-ctx" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "git-lfs-guard.sh:"
@@ -5196,6 +5332,8 @@ test_hook "git-lfs-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows n
 test_hook "git-lfs-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-add git command"
 test_hook "git-lfs-guard" '{}' 0 "handles empty JSON"
 test_hook "git-lfs-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "git-lfs-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "git-lfs-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "git-tag-guard.sh:"
@@ -5205,6 +5343,8 @@ test_hook "git-tag-guard" '{"tool_input":{"command":"git push origin --tags"}}' 
 test_hook "git-tag-guard" '{"tool_input":{"command":"git tag -a v1.0.0"}}' 0 "allows creating tag (warning only)"
 test_hook "git-tag-guard" '{"tool_input":{"command":"git push origin v1.0.0"}}' 0 "allows pushing specific tag"
 test_hook "git-tag-guard" '{"tool_input":{"command":"git status"}}' 0 "allows unrelated git command"
+test_hook "git-tag-guard" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "git-tag-guard" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 echo ""
 echo ""
 echo "hardcoded-secret-detector.sh:"
@@ -5267,6 +5407,8 @@ test_hook "hook-perm-fixer" '{"session_id":"abc123"}' 0 "exits 0 with session_id
 test_hook "hook-perm-fixer" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
 test_hook "hook-perm-fixer" '{"prompt":"hello"}' 0 "exits 0 with prompt"
 test_hook "hook-perm-fixer" '{}' 0 "handles empty JSON"
+test_hook "hook-perm-fixer" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "hook-perm-fixer" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "import-cycle-warn.sh:"
@@ -5276,6 +5418,8 @@ test_hook "import-cycle" '{"tool_input":{"file_path":"/tmp/test.js","new_string"
 test_hook "import-cycle" '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "allows empty new_string"
 test_hook "import-cycle" '{}' 0 "handles empty JSON"
 test_hook "import-cycle" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "import-cycle" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "import-cycle" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "large-file-guard.sh:"
@@ -5286,6 +5430,8 @@ test_hook "large-file-guard" '{"tool_name":"Write","tool_input":{"file_path":"/t
 test_hook "large-file-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test-small-file.txt"}}' 0 "ignores non-Write tool"
 test_hook "large-file-guard" '{}' 0 "handles empty JSON"
 test_hook "large-file-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "large-file-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "large-file-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -f /tmp/test-small-file.txt
 echo ""
 echo ""
@@ -5296,6 +5442,8 @@ test_hook "large-read-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non
 test_hook "large-read-guard" '{"tool_input":{"command":"grep pattern file.txt"}}' 0 "allows grep (not cat/less/more)"
 test_hook "large-read-guard" '{}' 0 "handles empty JSON"
 test_hook "large-read-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "large-read-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "large-read-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "license-check.sh:"
@@ -5307,6 +5455,8 @@ test_hook "license-check" '{"tool_input":{"file_path":"/tmp/test-with-license.js
 test_hook "license-check" '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "ignores non-source files"
 test_hook "license-check" '{}' 0 "handles empty JSON"
 test_hook "license-check" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "license-check" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "license-check" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -f /tmp/test-no-license.js /tmp/test-with-license.js
 echo ""
 echo ""
@@ -5317,6 +5467,8 @@ test_hook "lockfile-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows 
 test_hook "lockfile-guard" '{"tool_input":{"command":"git status"}}' 0 "allows non-commit/add git command"
 test_hook "lockfile-guard" '{}' 0 "handles empty JSON"
 test_hook "lockfile-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "lockfile-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "lockfile-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "loop-detector.sh:"
@@ -5332,6 +5484,8 @@ rm -f /tmp/cc-loop-detector-history
 test_hook "loop-detector" '{"tool_input":{"command":"echo unique_after_reset"}}' 0 "allows new cmd after reset"
 test_hook "loop-detector" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "loop-detector" '{}' 0 "handles empty input"
+test_hook "loop-detector" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "loop-detector" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 rm -f /tmp/cc-loop-detector-history
 echo ""
 echo ""
@@ -5343,6 +5497,8 @@ test_hook "max-file-count" '{"tool_input":{}}' 0 "allows empty file_path"
 test_hook "max-file-count" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "max-file-count" '{}' 0 "handles empty input"
 test_hook "max-file-count" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "max-file-count" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "max-file-count" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -f /tmp/cc-new-files-count
 echo ""
 echo ""
@@ -5355,6 +5511,8 @@ test_hook "max-line-len" '{"tool_input":{"file_path":"/tmp/test-long-lines.txt"}
 test_hook "max-line-len" '{"tool_input":{"file_path":"/tmp/nonexistent-xyz.txt"}}' 0 "allows nonexistent file"
 test_hook "max-line-len" '{}' 0 "handles empty JSON"
 test_hook "max-line-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "max-line-len" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "max-line-len" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -f /tmp/test-short-lines.txt /tmp/test-long-lines.txt
 echo ""
 echo ""
@@ -5366,6 +5524,8 @@ test_hook "max-session" '{}' 0 "allows subsequent calls (exit 0, just warns if e
 test_hook "max-session" '{}' 0 "handles empty input"
 test_hook "max-session" '{"session_id":"test"}' 0 "exits 0 with session"
 test_hook "max-session" '{"tool_name":"Bash"}' 0 "exits 0 with tool"
+test_hook "max-session" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "max-session" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "memory-write-guard.sh:"
@@ -5375,6 +5535,8 @@ test_hook "memory-write" '{"tool_input":{"file_path":"/tmp/normal-file.txt"}}' 0
 test_hook "memory-write" '{"tool_input":{"file_path":"/home/user/.claude/settings.json"}}' 0 "allows write to settings (exit 0, extra warning)"
 test_hook "memory-write" '{"tool_input":{}}' 0 "allows empty file_path"
 test_hook "memory-write" '{}' 0 "handles empty JSON"
+test_hook "memory-write" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "memory-write" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-curl-upload.sh:"
@@ -5384,6 +5546,8 @@ test_hook "no-curl-upload" '{"tool_input":{"command":"curl https://example.com"}
 test_hook "no-curl-upload" '{"tool_input":{"command":"curl --upload-file data.bin https://example.com"}}' 0 "warns on curl upload-file (exit 0)"
 test_hook "no-curl-upload" '{"tool_input":{"command":"wget https://example.com"}}' 0 "allows non-curl command"
 test_hook "no-curl-upload" '{}' 0 "handles empty JSON"
+test_hook "no-curl-upload" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-curl-upload" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-deploy-friday.sh:"
@@ -5395,6 +5559,8 @@ _EXPECTED_DEPLOY=0
 test_hook "no-deploy-fri" '{"tool_input":{"command":"firebase deploy"}}' "$_EXPECTED_DEPLOY" "deploy command respects current day (DOW=$(date +%u))"
 test_hook "no-deploy-fri" '{"tool_input":{"command":"vercel --prod"}}' "$_EXPECTED_DEPLOY" "vercel deploy respects current day"
 test_hook "no-deploy-fri" '{}' 0 "handles empty JSON"
+test_hook "no-deploy-fri" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-deploy-fri" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 unset _EXPECTED_DEPLOY
 echo ""
 echo ""
@@ -5405,6 +5571,8 @@ test_hook "no-amend-push" '{"tool_input":{"command":"git commit -m '\''fix: bug'
 test_hook "no-amend-push" '{"tool_input":{"command":"npm test"}}' 0 "allows non-git command"
 test_hook "no-amend-push" '{}' 0 "handles empty JSON"
 test_hook "no-amend-push" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "no-amend-push" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-amend-push" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-install-global.sh:"
@@ -5424,6 +5592,8 @@ test_hook "no-port-bind" '{"tool_input":{"command":"nc -l 8080"}}' 0 "warns on n
 test_hook "no-port-bind" '{"tool_input":{"command":"python3 -c '\''print(1)'\''"}}' 0 "allows safe command"
 test_hook "no-port-bind" '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
 test_hook "no-port-bind" '{}' 0 "handles empty JSON"
+test_hook "no-port-bind" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-port-bind" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-secrets-in-logs.sh:"
@@ -5433,6 +5603,8 @@ test_hook "no-secrets-logs" '{"tool_result":"Error: password=abc123 leaked"}' 0 
 test_hook "no-secrets-logs" '{"tool_result":"bearer eyJhbGciOiJIUzI1NiJ9"}' 0 "warns on bearer token in output (exit 0)"
 test_hook "no-secrets-logs" '{}' 0 "allows empty input"
 test_hook "no-secrets-logs" '{}' 0 "handles empty JSON"
+test_hook "no-secrets-logs" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-secrets-logs" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-sudo-guard.sh:"
@@ -5442,6 +5614,8 @@ test_hook "no-sudo-guard" '{"tool_input":{"command":"sudo apt install jq"}}' 2 "
 test_hook "no-sudo-guard" '{"tool_input":{"command":"ls -la"}}' 0 "allows non-sudo command"
 test_hook "no-sudo-guard" '{"tool_input":{"command":"npm install"}}' 0 "allows npm install"
 test_hook "no-sudo-guard" '{}' 0 "handles empty JSON"
+test_hook "no-sudo-guard" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "no-sudo-guard" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 echo ""
 echo ""
 echo "no-todo-ship.sh:"
@@ -5451,6 +5625,8 @@ test_hook "no-todo-ship" '{"tool_input":{"command":"npm test"}}' 0 "allows non-g
 test_hook "no-todo-ship" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
 test_hook "no-todo-ship" '{}' 0 "handles empty input"
 test_hook "no-todo-ship" '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_hook "no-todo-ship" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-todo-ship" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-wildcard-cors.sh:"
@@ -5460,6 +5636,8 @@ test_hook "no-wildcard-cors" '{"tool_input":{"new_string":"Access-Control-Allow-
 test_hook "no-wildcard-cors" '{"tool_input":{"new_string":"const x = 1;"}}' 0 "allows normal code"
 test_hook "no-wildcard-cors" '{}' 0 "handles empty JSON"
 test_hook "no-wildcard-cors" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "no-wildcard-cors" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-wildcard-cors" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "no-wildcard-import.sh:"
@@ -5469,6 +5647,8 @@ test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"import * from '\''loda
 test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"from os import path"}}' 0 "allows specific import"
 test_hook "no-wildcard-imp" '{"tool_input":{"new_string":"const x = 1;"}}' 0 "allows normal code"
 test_hook "no-wildcard-imp" '{}' 0 "handles empty JSON"
+test_hook "no-wildcard-imp" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "no-wildcard-imp" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "node-version-guard.sh:"
@@ -5478,6 +5658,8 @@ test_hook "node-version" '{"tool_input":{"command":"python3 test.py"}}' 0 "allow
 test_hook "node-version" '{"tool_input":{"command":"node app.js"}}' 0 "allows node command (exit 0)"
 test_hook "node-version" '{}' 0 "handles empty JSON"
 test_hook "node-version" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "node-version" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "node-version" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "notify-waiting.sh:"
@@ -5493,6 +5675,8 @@ test_hook "npm-publish" '{"tool_input":{"command":"npm install"}}' 0 "allows non
 test_hook "npm-publish" '{"tool_input":{"command":"npm publish --dry-run"}}' 0 "allows npm publish dry-run"
 test_hook "npm-publish" '{}' 0 "handles empty JSON"
 test_hook "npm-publish" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "npm-publish" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "npm-publish" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 echo ""
 echo ""
 echo "output-length-guard.sh:"
@@ -5504,6 +5688,8 @@ unset _OLG_LARGE
 test_hook "output-len" '{}' 0 "allows empty tool_result"
 test_hook "output-len" '{}' 0 "handles empty JSON"
 test_hook "output-len" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "output-len" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "output-len" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "overwrite-guard.sh:"
@@ -5514,6 +5700,8 @@ test_hook "overwrite-guard" '{"tool_input":{"file_path":"/tmp/nonexistent-overwr
 test_hook "overwrite-guard" '{"tool_input":{}}' 0 "allows empty file_path"
 test_hook "overwrite-guard" '{}' 0 "handles empty JSON"
 test_hook "overwrite-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "overwrite-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "overwrite-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -f /tmp/test-existing-file.txt
 echo ""
 echo ""
@@ -5524,6 +5712,8 @@ test_hook "pkg-json-guard" '{"tool_input":{"command":"rm -f package.json"}}' 2 "
 test_hook "pkg-json-guard" '{"tool_input":{"command":"cat package.json"}}' 0 "allows cat package.json"
 test_hook "pkg-json-guard" '{"tool_input":{"command":"rm old-file.txt"}}' 0 "allows rm of other files"
 test_hook "pkg-json-guard" '{}' 0 "handles empty JSON"
+test_hook "pkg-json-guard" '{"tool_input":{"command":"cat README.md"}}' 0 "safe cat passes"
+test_hook "pkg-json-guard" '{"tool_input":{"command":"echo hello world"}}' 0 "safe echo passes"
 echo ""
 echo ""
 echo "package-script-guard.sh:"
@@ -5533,6 +5723,8 @@ test_hook "pkg-script-guard" '{"tool_input":{"file_path":"package.json","old_str
 test_hook "pkg-script-guard" '{"tool_input":{"file_path":"src/index.js","old_string":"x","new_string":"y"}}' 0 "ignores non-package.json"
 test_hook "pkg-script-guard" '{"tool_input":{"file_path":"package.json","old_string":"\"dependencies\"","new_string":"\"dependencies\""}}' 0 "warns on dependencies edit (exit 0)"
 test_hook "pkg-script-guard" '{}' 0 "handles empty JSON"
+test_hook "pkg-script-guard" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "pkg-script-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "parallel-edit-guard.sh:"
@@ -5543,6 +5735,8 @@ test_hook "parallel-edit" '{"tool_input":{"file_path":"/tmp/test-parallel-b.txt"
 test_hook "parallel-edit" '{"tool_input":{}}' 0 "allows empty file_path"
 test_hook "parallel-edit" '{}' 0 "handles empty JSON"
 test_hook "parallel-edit" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "parallel-edit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "parallel-edit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 rm -rf /tmp/cc-edit-locks
 echo ""
 echo ""
@@ -5553,6 +5747,8 @@ test_hook "pip-venv" '{"tool_input":{"command":"npm install express"}}' 0 "allow
 test_hook "pip-venv" '{"tool_input":{"command":"pip --version"}}' 0 "allows pip non-install command"
 test_hook "pip-venv" '{}' 0 "handles empty JSON"
 test_hook "pip-venv" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/safe.txt"}}' 0 "allows safe read"
+test_hook "pip-venv" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "pip-venv" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "pr-description-check.sh:"
@@ -5562,6 +5758,8 @@ test_hook "pr-desc-check" '{"tool_input":{"command":"gh pr create --title test -
 test_hook "pr-desc-check" '{"tool_input":{"command":"gh pr list"}}' 0 "allows non-create command"
 test_hook "pr-desc-check" '{"tool_input":{"command":"npm test"}}' 0 "allows non-gh command"
 test_hook "pr-desc-check" '{}' 0 "handles empty JSON"
+test_hook "pr-desc-check" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "pr-desc-check" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 echo ""
 echo ""
 echo "prompt-injection-detector.sh:"
@@ -5661,6 +5859,8 @@ test_hook "file-track" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.js
 test_hook "file-track" '{}' 0 "handles empty"
 test_hook "file-track" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-write tools"
 test_hook "file-track" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/long-path/deeply/nested/file.ts","content":"x"}}' 0 "tracks deep path"
+test_hook "file-track" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "file-track" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "classifier-fallback-allow.sh:"
@@ -5686,6 +5886,8 @@ test_hook "out-mask" '{}' 0 "handles empty"
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"API_KEY=abc123def456"}}' 0 "warns on API_KEY in output"
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":"PATH=/usr/bin"}}' 0 "passes safe env var"
 test_hook "out-mask" '{"tool_name":"Bash","tool_result":{"stdout":""}}' 0 "passes empty output"
+test_hook "out-mask" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "out-mask" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # ========== Edge case tests for robustness ==========
 echo ""
@@ -5734,6 +5936,8 @@ test_hook "sess-summary" '{}' 0 "handles empty"
 test_hook "sess-summary" '{}' 0 "handles empty input"
 test_hook "sess-summary" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "sess-summary" '{"session_id":"test"}' 0 "exits 0 with session"
+test_hook "sess-summary" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "sess-summary" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "max-edit-size-guard.sh:"
@@ -5743,6 +5947,8 @@ test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"x.js","old_
 test_hook "max-edit" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "ignores non-Edit"
 test_hook "max-edit" '{}' 0 "handles empty"
 test_hook "max-edit" '{}' 0 "handles empty JSON"
+test_hook "max-edit" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "max-edit" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 echo ""
 echo "auto-approve-readonly-tools.sh:"
@@ -5762,6 +5968,8 @@ test_hook "uncommit-stop" '{}' 0 "handles empty"
 test_hook "uncommit-stop" '{}' 0 "handles empty input"
 test_hook "uncommit-stop" '{"stop_reason":"end_turn"}' 0 "exits 0 on stop"
 test_hook "uncommit-stop" '{"session_id":"test"}' 0 "exits 0 with session"
+test_hook "uncommit-stop" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "uncommit-stop" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 
 # Token counter: edge cases
 test_hook "token-cnt" '{"tool_name":"","tool_input":{}}' 0 "counter: empty tool name"
@@ -7536,6 +7744,8 @@ test_ex no-xml-external-entity.sh '{"tool_input":{"new_string":"<!ENTITY foo \"b
 test_hook "notify-waiting" '{"message":"Claude is waiting for your response"}' 0 "notification with message text (allow)"
 test_hook "notify-waiting" '{}' 0 "empty JSON (allow)"
 test_hook "notify-waiting" '' 0 "empty input (allow)"
+test_hook "notify-waiting" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
+test_hook "notify-waiting" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
 # --- npm-audit-warn ---
 test_ex npm-audit-warn.sh '{"tool_input":{"command":"npm install --save-dev jest"}}' 0 "npm install --save-dev (allow with note)"
 test_ex npm-audit-warn.sh '{"tool_input":{"command":"  npm install"}}' 0 "npm install with leading spaces (allow with note)"
