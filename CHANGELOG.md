@@ -1,5 +1,14 @@
 # Changelog
 
+## [29.6.28] - 2026-03-29
+- **New**: 4 hooks — credential-file-cat-guard (#34819), push-requires-test-pass (#36673), push-requires-test-pass-record, edit-retry-loop-guard (#35576)
+- **New**: 3 SEO pages — auto-approve-guide, prevent-credential-leak, owasp-mcp-hooks
+- **Docs**: COOKBOOK recipes for credential guard and push-requires-test
+- **Docs**: examples/README overhaul (38→511), Japanese README overhaul (36→511)
+- **Tests**: 36 new tests for new hooks
+- **Tests**: Trigger detection tests (verify PermissionRequest/SessionStart/PreToolUse parsing)
+- **Stats**: 511 examples, 7,385 tests, 51 SEO pages
+
 ## [29.6.0] - 2026-03-27
 - **Improved**: worktree-unmerged-guard — python3 fallback for macOS (no jq dependency), auto-detect default branch
 - **Fix**: CI workflow — add git config for tests that require commits
