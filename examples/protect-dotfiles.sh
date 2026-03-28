@@ -42,9 +42,14 @@ if [[ "$TOOL" == "Edit" || "$TOOL" == "Write" ]]; then
             exit 2
         fi
     done
-    # Block writing to any ~/.ssh/ or ~/.aws/ files
+    # Block writing to any ~/.ssh/ or ~/.aws/ or project .kiro/ files
     if [[ "$FILE" == "${HOME_DIR}/.ssh/"* || "$FILE" == "${HOME_DIR}/.aws/"* ]]; then
         echo "BLOCKED: Cannot modify files in ${FILE%/*}/" >&2
+        exit 2
+    fi
+    # Protect .kiro/ directory (#40139 — Claude runtime silently deletes .kiro/)
+    if [[ "$FILE" == *"/.kiro/"* ]]; then
+        echo "BLOCKED: Cannot modify .kiro/ directory" >&2
         exit 2
     fi
 fi

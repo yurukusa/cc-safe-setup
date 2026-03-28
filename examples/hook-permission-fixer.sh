@@ -9,6 +9,8 @@
 #
 #   Without this, hooks fail with "Permission denied" errors.
 #   See: github.com/anthropics/claude-code/issues/38901
+#        github.com/anthropics/claude-code/issues/39777
+#        github.com/anthropics/claude-code/issues/39798
 #
 # TRIGGER: SessionStart  MATCHER: ""
 # ================================================================
