@@ -11689,6 +11689,27 @@ test_ex sandbox-write-verify.sh '{"tool_name":"Read","tool_input":{"file_path":"
 rm -f /tmp/cc-sandbox-writes-$$
 echo ""
 
+# ========== heredoc-backtick-approver (#35183) ==========
+echo "heredoc-backtick-approver.sh:"
+test_ex heredoc-backtick-approver.sh '{}' 0 "heredoc-backtick: empty input"
+test_ex heredoc-backtick-approver.sh '{"message":"normal prompt"}' 0 "heredoc-backtick: non-backtick message"
+test_ex heredoc-backtick-approver.sh '{"message":"contains backtick warning","tool_input":{"command":"echo hello"}}' 0 "heredoc-backtick: backtick but no heredoc"
+test_ex heredoc-backtick-approver.sh '{"message":"Command contains backticks","tool_input":{"command":"git commit -m \"$(cat <<'"'"'EOF'"'"'\nfix: update `method`\nEOF\n)\""}}' 0 "heredoc-backtick: quoted heredoc with backtick"
+test_ex heredoc-backtick-approver.sh '{"message":"","tool_input":{"command":"ls"}}' 0 "heredoc-backtick: empty message"
+test_ex heredoc-backtick-approver.sh '{"message":"backtick","tool_input":{}}' 0 "heredoc-backtick: no command"
+test_ex heredoc-backtick-approver.sh '{"message":"other warning","tool_input":{"command":"echo `date`"}}' 0 "heredoc-backtick: non-backtick warning type"
+echo ""
+
+# ========== permission-mode-drift-guard (#39057) ==========
+echo "permission-mode-drift-guard.sh:"
+rm -f /tmp/cc-permission-mode-$$
+test_ex permission-mode-drift-guard.sh '{"message":"Allow this?"}' 0 "perm-drift: first prompt (init)"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow write?"}' 0 "perm-drift: second prompt"
+test_ex permission-mode-drift-guard.sh '{}' 0 "perm-drift: empty input"
+test_ex permission-mode-drift-guard.sh '{"message":""}' 0 "perm-drift: empty message"
+rm -f /tmp/cc-permission-mode-$$
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
