@@ -10703,6 +10703,12 @@ test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.md"}}' 0 
 test_ex file-reference-check.sh '{"tool_input":{}}' 0 "file-reference-check: no file passes"
 test_ex file-reference-check.sh '{"tool_input":{"file_path":""}}' 0 "file-reference-check: empty path passes"
 test_ex file-reference-check.sh '{"tool_input":{"file_path":"/tmp/test.json"}}' 0 "file-reference-check: json passes"
+# --- no-console-log-commit ---
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"ls -la"}}' 0 "no-console-log-commit: non-git passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git status"}}' 0 "no-console-log-commit: git status passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git push origin main"}}' 0 "no-console-log-commit: git push passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"npm test"}}' 0 "no-console-log-commit: npm test passes"
+test_ex no-console-log-commit.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "no-console-log-commit: git log passes"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
