@@ -9459,6 +9459,15 @@ test_ex network-interface-guard.sh '{"tool_input":{"command":"ip route del defau
 test_ex network-interface-guard.sh '{"tool_input":{"command":"ifconfig eth0"}}' 0 "net-guard: ifconfig view allowed"
 test_ex network-interface-guard.sh '{"tool_input":{"command":"ip addr show"}}' 0 "net-guard: ip addr show allowed"
 test_ex network-interface-guard.sh '{}' 0 "net-guard: empty input"
+# --- user-account-guard ---
+test_ex user-account-guard.sh '{"tool_input":{"command":"useradd backdoor"}}' 2 "user-guard: useradd blocked"
+test_ex user-account-guard.sh '{"tool_input":{"command":"userdel admin"}}' 2 "user-guard: userdel blocked"
+test_ex user-account-guard.sh '{"tool_input":{"command":"passwd root"}}' 2 "user-guard: passwd blocked"
+test_ex user-account-guard.sh '{"tool_input":{"command":"visudo"}}' 2 "user-guard: visudo blocked"
+test_ex user-account-guard.sh '{"tool_input":{"command":"usermod -aG sudo attacker"}}' 2 "user-guard: usermod blocked"
+test_ex user-account-guard.sh '{"tool_input":{"command":"whoami"}}' 0 "user-guard: whoami allowed"
+test_ex user-account-guard.sh '{"tool_input":{"command":"id"}}' 0 "user-guard: id allowed"
+test_ex user-account-guard.sh '{}' 0 "user-guard: empty input"
 echo ""
 
 echo "========================"

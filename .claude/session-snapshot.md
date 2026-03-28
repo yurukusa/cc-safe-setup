@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T13:36:43+09:00
+Updated: 2026-03-28T13:37:29+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-28T13:36:43+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: a20ed2d checkpoint: auto-save 13:36:41
+- Last commit: 21284a3 checkpoint: auto-save 13:36:53
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./examples/dns-config-guard.sh
 ./.claude/pre-compact-checkpoint.md
+./examples/dns-config-guard.sh
 ./test.sh
 ./examples/network-interface-guard.sh
 ./examples/log-truncation-guard.sh
