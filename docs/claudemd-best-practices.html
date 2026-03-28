@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md Best Practices — Templates, Tips, and Common Mistakes</title>
+<meta name="description" content="How to write an effective CLAUDE.md for Claude Code. 5 templates for different use cases, common mistakes to avoid, and how hooks enforce your rules.">
+<meta name="keywords" content="claude code CLAUDE.md, CLAUDE.md template, CLAUDE.md best practices, claude code configuration, claude code settings, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claudemd-best-practices.html">
+<meta property="og:title" content="CLAUDE.md Best Practices">
+<meta property="og:description" content="How to write an effective CLAUDE.md. 5 templates, common mistakes, hook enforcement.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+h3{color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.tip{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.warn{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+nav{margin-bottom:2rem;font-size:.9rem}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #30363d;font-size:.85rem;color:#8b949e}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{border:1px solid #30363d;padding:.5rem .8rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← cc-safe-setup</a> · <a href="hub.html">All Guides</a></nav>
+
+<h1>CLAUDE.md Best Practices</h1>
+<p>CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. Get it right and Claude follows your rules. Get it wrong and Claude ignores everything.</p>
+
+<h2>The Golden Rule: Keep It Short</h2>
+
+<div class="warn">
+<p><strong>Problem:</strong> CLAUDE.md files over 100 lines cause Claude to miss important rules. The longer the file, the more likely critical instructions are ignored.</p>
+</div>
+
+<div class="tip">
+<p><strong>Solution:</strong> Keep CLAUDE.md under 50 lines. Move detailed instructions to <code>.claude/skills/</code> files (loaded on demand, saving tokens).</p>
+</div>
+
+<h2>5 Templates by Use Case</h2>
+
+<table>
+<tr><th>Use Case</th><th>Lines</th><th>Safety</th><th>Focus</th></tr>
+<tr><td>Beginner</td><td>14</td><td>★★</td><td>Basic safety rules</td></tr>
+<tr><td>Autonomous</td><td>24</td><td>★★★★</td><td>Long-running, unattended</td></tr>
+<tr><td>Team</td><td>26</td><td>★★★</td><td>Shared repo conventions</td></tr>
+<tr><td>Production</td><td>22</td><td>★★★★★</td><td>Zero-tolerance safety</td></tr>
+<tr><td>Learning</td><td>14</td><td>★</td><td>Explanations, minimal constraints</td></tr>
+</table>
+
+<h3>Minimal Safety (14 lines)</h3>
+<pre><code># Project Rules
+## Safety
+- Never use rm -rf, git reset --hard, or git push --force
+- Never commit .env files or API keys
+- Always create a new branch before making changes
+- Run tests before committing
+## Code Style
+- Follow existing code conventions
+- Keep functions under 50 lines</code></pre>
+
+<h3>Autonomous Operation (24 lines)</h3>
+<pre><code># Autonomous Operation Rules
+## Critical Safety
+- NEVER delete files without explicit backup first
+- NEVER push to main/master directly
+- Stop and report if the same error occurs 3 times in a row
+## Work Pattern
+- Create a git branch for each task
+- Commit after each meaningful change
+- Run tests after every code change
+## Context Management
+- Save work state before context compaction
+- Keep TODO items in tasks/todo.md</code></pre>
+
+<h2>Common Mistakes</h2>
+
+<div class="warn">
+<p><strong>100+ line CLAUDE.md:</strong> Claude Code struggles with long instruction files. Split into CLAUDE.md (principles) + Skills (procedures).</p>
+</div>
+
+<div class="warn">
+<p><strong>Contradictory rules:</strong> "Write tests for everything" + "Move fast" without priority. Always state which wins.</p>
+</div>
+
+<div class="warn">
+<p><strong>Code snippets in CLAUDE.md:</strong> Wastes tokens on every turn. Put code in Skills files instead.</p>
+</div>
+
+<h2>CLAUDE.md + Hooks = Enforcement</h2>
+
+<p>CLAUDE.md <em>tells</em> Claude the rules. Hooks <em>enforce</em> them at the process level.</p>
+
+<pre><code># CLAUDE.md says "never rm -rf"
+# This hook BLOCKS it:
+npx cc-safe-setup --install-example destructive-guard</code></pre>
+
+<div class="cta">
+<p>Auto-generate CLAUDE.md from your project:</p>
+<p><code>npx cc-safe-setup --scan --apply</code></p>
+<p style="margin-top:.5rem;font-size:.9rem">Detects your tech stack and creates appropriate rules + hooks</p>
+</div>
+
+<h2>Related</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="claude-code-auto-mode-safety.html">Auto mode safety guide</a></li>
+<li><a href="prevent-cost-explosion.html">Prevent cost explosion</a></li>
+<li><a href="hook-if-field-performance.html">Hook if field performance</a></li>
+<li><a href="prevent-rm-rf.html">Prevent rm -rf disasters</a></li>
+</ul>
+
+<footer>
+<p>Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 421 example hooks · 5,668 tests · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</footer>
+</body>
+</html>
