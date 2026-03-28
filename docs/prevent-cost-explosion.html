@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code Cost Explosion — Rate Limit & Loop Protection</title>
+<meta name="description" content="Claude Code can burn through your entire quota in minutes due to runaway loops. Real incidents from GitHub Issues. Prevent it with tool-call-rate-limiter and consecutive-error-breaker hooks.">
+<meta name="keywords" content="claude code cost explosion, claude code rate limit, claude code runaway loop, claude code quota, tool call rate limiter, claude code billing, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-cost-explosion.html">
+<meta property="og:title" content="Prevent Claude Code Cost Explosion">
+<meta property="og:description" content="Stop runaway loops from burning your quota. Rate limiting and error detection hooks.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #30363d;font-size:.85rem;color:#8b949e}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← cc-safe-setup</a> · <a href="hub.html">All Guides</a></nav>
+
+<h1>Prevent Claude Code Cost Explosion</h1>
+<p>Claude Code can burn through your entire quota in minutes when it gets stuck in a loop. This page shows the real problem and the hooks that prevent it.</p>
+
+<h2>The Problem: Runaway Loops</h2>
+
+<div class="incident">
+<p class="incident-title">Real Incident: 80% quota consumed in minutes</p>
+<p>GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a> (80+ reactions): Users reported their Max plan session limits exhausting abnormally fast — sometimes 80% consumed within minutes of starting a session.</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Real Incident: Usage explosion</p>
+<p>GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/37917">#37917</a>: Extreme token consumption where a simple task consumed the entire session budget.</p>
+</div>
+
+<p>Common causes:</p>
+<ul style="margin:1rem 0;padding-left:1.5rem">
+<li>Claude gets stuck retrying a failing command</li>
+<li>A build/test loop that never converges</li>
+<li>Subagent spawning that cascades</li>
+<li>Context compaction cycles</li>
+</ul>
+
+<h2>Solution 1: Tool Call Rate Limiter</h2>
+
+<div class="fix">
+<p>The <code>tool-call-rate-limiter</code> hook blocks tool calls when the frequency exceeds a threshold (default: 30 calls per 60 seconds).</p>
+</div>
+
+<pre><code>#!/bin/bash
+# tool-call-rate-limiter.sh — PreToolUse hook
+RATE_FILE="${HOME}/.claude/rate-limiter.log"
+MAX_CALLS="${CC_RATE_LIMIT_MAX:-30}"
+WINDOW="${CC_RATE_LIMIT_WINDOW:-60}"
+
+mkdir -p "$(dirname "$RATE_FILE")"
+NOW=$(date +%s)
+CUTOFF=$((NOW - WINDOW))
+
+echo "$NOW" >> "$RATE_FILE"
+RECENT=$(awk -v cutoff="$CUTOFF" '$1 >= cutoff' "$RATE_FILE" | wc -l)
+
+awk -v cutoff="$CUTOFF" '$1 >= cutoff' "$RATE_FILE" > "${RATE_FILE}.tmp"
+mv "${RATE_FILE}.tmp" "$RATE_FILE"
+
+if [ "$RECENT" -gt "$MAX_CALLS" ]; then
+    echo "BLOCKED: $RECENT calls in ${WINDOW}s (max: $MAX_CALLS)" >&2
+    exit 2
+fi
+exit 0</code></pre>
+
+<h2>Solution 2: Consecutive Error Breaker</h2>
+
+<div class="fix">
+<p>The <code>consecutive-error-breaker</code> hook warns after N consecutive non-zero exit codes (default: 5), detecting stuck retry loops.</p>
+</div>
+
+<pre><code>#!/bin/bash
+# consecutive-error-breaker.sh — PostToolUse hook
+EXIT_CODE=$(echo "$(cat)" | jq -r '.tool_result.exit_code // "0"')
+STATE_FILE="/tmp/cc-error-streak"
+MAX="${CC_ERROR_STREAK_MAX:-5}"
+
+if [ "$EXIT_CODE" = "0" ]; then
+    echo "0" > "$STATE_FILE"; exit 0
+fi
+
+CURRENT=$(cat "$STATE_FILE" 2>/dev/null || echo "0")
+echo $((CURRENT + 1)) > "$STATE_FILE"
+
+if [ $((CURRENT + 1)) -ge "$MAX" ]; then
+    echo "⚠ $((CURRENT + 1)) consecutive errors. Try a different approach." >&2
+fi
+exit 0</code></pre>
+
+<h2>Solution 3: Daily Usage Tracker</h2>
+
+<div class="fix">
+<p>The <code>daily-usage-tracker</code> hook records every tool call and warns at milestones (100/250/500/1000 calls per day).</p>
+</div>
+
+<h2>Install All Three</h2>
+
+<div class="cta">
+<p>One command installs 416 example hooks including all cost protection hooks:</p>
+<p><code>npx cc-safe-setup --install-example tool-call-rate-limiter</code></p>
+<p><code>npx cc-safe-setup --install-example consecutive-error-breaker</code></p>
+<p><code>npx cc-safe-setup --install-example daily-usage-tracker</code></p>
+<p style="margin-top:1rem">Or install everything: <code>npx cc-safe-setup --shield</code></p>
+</div>
+
+<h2>Related Hooks</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><code>loop-detector</code> — Detects repeated identical commands</li>
+<li><code>token-budget-guard</code> — Hard cap on token spending</li>
+<li><code>session-quota-tracker</code> — Tracks session quota usage</li>
+<li><code>subagent-budget-guard</code> — Limits concurrent subagents</li>
+<li><code>error-memory-guard</code> — Remembers errors to avoid repetition</li>
+</ul>
+
+<h2>Related Pages</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="prevent-rm-rf.html">Prevent rm -rf disasters</a></li>
+<li><a href="prevent-force-push.html">Prevent force push accidents</a></li>
+<li><a href="claude-code-auto-mode-safety.html">Auto mode safety guide</a></li>
+<li><a href="prevent-session-drift.html">Prevent session drift</a></li>
+</ul>
+
+<footer>
+<p>Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 416 example hooks · 5,633 tests · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</footer>
+</body>
+</html>
