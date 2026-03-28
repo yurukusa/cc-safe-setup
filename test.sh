@@ -10340,6 +10340,13 @@ test_ex bash-timeout-guard.sh '{"tool_input":{"command":"while true; do echo x; 
 test_ex bash-timeout-guard.sh '{"tool_input":{"command":"python app.py"}}' 0 "bash-timeout-guard: python server warns (exit 0)"
 test_ex bash-timeout-guard.sh '{"tool_input":{}}' 0 "bash-timeout-guard: empty command"
 test_ex bash-timeout-guard.sh '{}' 0 "bash-timeout-guard: empty input"
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/app.test.ts"}}' 0 "test-after-edit: test file triggers note (exit 0)"
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/app.ts"}}' 0 "test-after-edit: non-test file passes silently"
+test_ex test-after-edit.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/foo.spec.js"}}' 0 "test-after-edit: spec file triggers note (exit 0)"
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/utils.py"}}' 0 "test-after-edit: regular py passes"
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/__tests__/foo.ts"}}' 0 "test-after-edit: __tests__ dir triggers note"
+test_ex test-after-edit.sh '{"tool_input":{}}' 0 "test-after-edit: empty tool_input"
+test_ex test-after-edit.sh '{}' 0 "test-after-edit: empty input"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
