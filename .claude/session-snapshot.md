@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T05:25:37+09:00
+Updated: 2026-03-29T05:43:56+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T05:25:37+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 31e29b6 checkpoint: auto-save 05:24:57
+- Last commit: 2338ea0 chore: sync public-facing numbers (514 hooks / 7,564 tests) Update SEO pages, README, package.json to reflect latest hook/test counts. Bump to v29.6.29 for npm publish. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./CHANGELOG.md
+./README.md
+./docs/README.ja.md
+./examples/README.md
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/git-checkout-safety-guard.sh
 ./examples/shell-wrapper-guard.sh
 ./examples/hook-permission-fixer.sh
-./examples/protect-dotfiles.sh
-./examples/plan-mode-enforcer.sh
-./CHANGELOG.md
-./examples/README.md
 ```
 
