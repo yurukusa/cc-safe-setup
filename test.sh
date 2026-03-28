@@ -9332,6 +9332,15 @@ test_ex file-edit-backup.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp
 test_ex unicode-corruption-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/nonexistent.txt"}}' 0 "unicode-check: nonexistent file passes"
 test_ex unicode-corruption-check.sh '{"tool_name":"Write","tool_input":{"file_path":""}}' 0 "unicode-check: empty path passes"
 test_ex unicode-corruption-check.sh '{}' 0 "unicode-check: empty input"
+# --- api-key-in-url-guard ---
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"curl https://api.example.com?api_key=sk_live_abcdef123456"}}' 2 "api-key-url: key in query blocked"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"curl https://api.example.com?token=ghp_xxxxxxxxxxxxxxxxxxxx"}}' 2 "api-key-url: token in query blocked"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"wget \"https://api.example.com?secret=mysecretvalue123\""}}' 2 "api-key-url: wget secret blocked"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"curl -H \"Authorization: Bearer $TOKEN\" https://api.example.com"}}' 0 "api-key-url: header auth allowed"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"curl https://api.example.com"}}' 0 "api-key-url: no key allowed"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "api-key-url: non-http allowed"
+test_ex api-key-in-url-guard.sh '{"tool_input":{"command":""}}' 0 "api-key-url: empty command"
+test_ex api-key-in-url-guard.sh '{}' 0 "api-key-url: empty input"
 echo ""
 
 echo "========================"
