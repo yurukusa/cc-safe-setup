@@ -143,6 +143,43 @@ else
     echo "  FAIL: should pass through without modification"
     FAIL=$((FAIL + 1))
 fi
+# Additional comment-strip tests
+local_exit=0
+result3=$(echo '{"tool_input":{"command":"# line1\n# line2\nnpm test"}}' | bash /tmp/test-comment-strip.sh 2>/dev/null) || local_exit=$?
+if [ "$local_exit" -eq 0 ] && echo "$result3" | python3 -c "import json,sys; d=json.load(sys.stdin); assert 'npm test' in d['hookSpecificOutput']['updatedInput']['command']" 2>/dev/null; then
+    echo "  PASS: strips multiple comment lines"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: multiple comment stripping"
+    FAIL=$((FAIL + 1))
+fi
+local_exit=0
+result4=$(echo '{"tool_input":{"command":"# only comments"}}' | bash /tmp/test-comment-strip.sh 2>/dev/null) || local_exit=$?
+if [ "$local_exit" -eq 0 ] && [ -z "$result4" ]; then
+    echo "  PASS: all-comment command returns empty (no modification)"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: all-comment handling"
+    FAIL=$((FAIL + 1))
+fi
+local_exit=0
+result5=$(echo '{}' | bash /tmp/test-comment-strip.sh 2>/dev/null) || local_exit=$?
+if [ "$local_exit" -eq 0 ]; then
+    echo "  PASS: empty input exits 0"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: empty input"
+    FAIL=$((FAIL + 1))
+fi
+local_exit=0
+result6=$(echo '{"tool_input":{"command":""}}' | bash /tmp/test-comment-strip.sh 2>/dev/null) || local_exit=$?
+if [ "$local_exit" -eq 0 ]; then
+    echo "  PASS: empty command exits 0"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: empty command"
+    FAIL=$((FAIL + 1))
+fi
 echo ""
 
 # --- cd-git-allow ---
@@ -188,6 +225,10 @@ test_hook "context-monitor" '{"tool_input":{}}' 0 "empty tool_input handled"
 test_hook "context-monitor" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}' 0 "Read tool passes"
 test_hook "context-monitor" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test"}}' 0 "Write tool passes"
 test_hook "context-monitor" '{"tool_name":"Bash","tool_input":{"command":"echo test"}}' 0 "Bash tool passes"
+test_hook "context-monitor" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.js","old_string":"a","new_string":"b"}}' 0 "Edit tool passes"
+test_hook "context-monitor" '{"tool_name":"Grep","tool_input":{"pattern":"test"}}' 0 "Grep tool passes"
+test_hook "context-monitor" '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "Glob tool passes"
+test_hook "context-monitor" '{"tool_name":"Agent","tool_input":{"prompt":"research"}}' 0 "Agent tool passes"
 echo ""
 
 # --- api-error-alert ---
@@ -227,6 +268,12 @@ rm -f /tmp/test-valid.sh /tmp/test-invalid.sh
 # Non-checkable files
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/image.png"}}' 0 "non-checkable file passes"
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/readme.md"}}' 0 "markdown file passes"
+test_hook "syntax-check" '{}' 0 "empty input passes"
+test_hook "syntax-check" '{"tool_input":{}}' 0 "no file_path passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":""}}' 0 "empty file_path passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test.css"}}' 0 "CSS file passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test.html"}}' 0 "HTML file passes"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/.gitignore"}}' 0 "dotfile passes"
 echo ""
 
 # --- destructive-guard edge cases ---
@@ -8104,6 +8151,12 @@ test_hook "destructive-guard" '{"tool_input":{"command":"  rm   -rf   /"}}' 2 "d
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -r -f /"}}' 2 "destructive-guard: split flags bypass blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"sudo rm -rf /"}}' 2 "destructive-guard: sudo prefix bypass blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf ~"}}' 2 "destructive-guard: tilde home bypass blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 2 "destructive-guard: $HOME var bypass blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"find / -type f -delete"}}' 2 "destructive-guard: find -delete bypass blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"chmod -R 777 /"}}' 2 "destructive-guard: chmod 777 root blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -- ."}}' 2 "destructive-guard: git checkout -- . blocked"
+test_hook "destructive-guard" '{"tool_input":{"command":"echo rm -rf /"}}' 0 "destructive-guard: echo safe"
+test_hook "destructive-guard" '{"tool_input":{"command":"grep rm -rf file.txt"}}' 0 "destructive-guard: grep safe"
 test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:main"}}' 2 "branch-guard: HEAD:main bypass blocked"
 test_hook "branch-guard" '{"tool_input":{"command":"git push origin HEAD:refs/heads/main"}}' 2 "branch-guard: refs/heads/main bypass blocked"
 test_hook "branch-guard" '{"tool_input":{"command":"git push --force origin main"}}' 2 "branch-guard: --force flag bypass blocked"
