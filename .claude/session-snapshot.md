@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T16:03:08+09:00
+Updated: 2026-03-28T16:26:40+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T16:03:08+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 66b4838 checkpoint: auto-save 16:02:32
+- Last commit: 418d66a checkpoint: auto-save 16:26:33
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/output-explosion-detector.sh
+./examples/resume-context-guard.sh
+./.claude/pre-compact-checkpoint.md
 ./README.md
 ./examples/no-verify-blocker.sh
 ./examples/npm-global-install-guard.sh
 ./examples/pip-requirements-guard.sh
 ./examples/disk-partition-guard.sh
-./examples/user-account-guard.sh
-./examples/dns-config-guard.sh
 ```
 
