@@ -11620,6 +11620,31 @@ test_ex session-resume-guard.sh '{"event":"other"}' 0 "session-resume: unknown e
 test_ex session-resume-guard.sh '{"event":""}' 0 "session-resume: empty event"
 echo ""
 
+# ========== context-threshold-alert (#40256) ==========
+echo "context-threshold-alert.sh:"
+test_ex context-threshold-alert.sh '{}' 0 "context-threshold: empty input"
+test_ex context-threshold-alert.sh '{"context_window":{"remaining_percentage":80}}' 0 "context-threshold: 20% used (below warn)"
+test_ex context-threshold-alert.sh '{"context_window":{"remaining_percentage":40}}' 0 "context-threshold: 60% used (above warn)"
+test_ex context-threshold-alert.sh '{"context_window":{"remaining_percentage":20}}' 0 "context-threshold: 80% used (above alert)"
+test_ex context-threshold-alert.sh '{"context_window":{"remaining_percentage":5}}' 0 "context-threshold: 95% used (critical, log mode)"
+test_ex context-threshold-alert.sh '{"context_window":{}}' 0 "context-threshold: no percentage"
+test_ex context-threshold-alert.sh '{"tool_name":"Bash"}' 0 "context-threshold: no context data"
+echo ""
+
+# ========== hook-stdout-sanitizer (#40262) ==========
+echo "hook-stdout-sanitizer.sh:"
+test_ex hook-stdout-sanitizer.sh '{}' 0 "stdout-sanitizer: no target hook (usage)"
+echo '#!/bin/bash' > /tmp/test-noop-hook.sh && echo 'exit 0' >> /tmp/test-noop-hook.sh && chmod +x /tmp/test-noop-hook.sh
+echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-noop-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: noop hook passes" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: noop hook passes" && FAIL=$((FAIL+1)))
+echo '#!/bin/bash' > /tmp/test-stderr-hook.sh && echo 'echo "warning" >&2; exit 0' >> /tmp/test-stderr-hook.sh && chmod +x /tmp/test-stderr-hook.sh
+echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-stderr-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: stderr hook passes" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: stderr hook passes" && FAIL=$((FAIL+1)))
+echo '#!/bin/bash' > /tmp/test-block-hook.sh && echo 'echo "BLOCKED" >&2; exit 2' >> /tmp/test-block-hook.sh && chmod +x /tmp/test-block-hook.sh
+echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-block-hook.sh > /dev/null 2>/dev/null; [ $? -eq 2 ] && echo "  PASS: stdout-sanitizer: block hook exits 2" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: block hook exits 2" && FAIL=$((FAIL+1)))
+echo '#!/bin/bash' > /tmp/test-json-hook.sh && echo 'echo '"'"'{"hookSpecificOutput":{"permissionDecision":"allow"}}'"'"'; exit 0' >> /tmp/test-json-hook.sh && chmod +x /tmp/test-json-hook.sh
+echo '{}' | bash "$EXDIR/hook-stdout-sanitizer.sh" /tmp/test-json-hook.sh > /dev/null 2>/dev/null; [ $? -eq 0 ] && echo "  PASS: stdout-sanitizer: JSON output forwarded" && PASS=$((PASS+1)) || (echo "  FAIL: stdout-sanitizer: JSON output forwarded" && FAIL=$((FAIL+1)))
+rm -f /tmp/test-noop-hook.sh /tmp/test-stderr-hook.sh /tmp/test-block-hook.sh /tmp/test-json-hook.sh
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
