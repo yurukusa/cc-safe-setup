@@ -27,7 +27,7 @@ case "$FILENAME" in
     settings.json|settings.local.json)
         # Check if the edit adds mcpServers
         CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
-        if echo "$CONTENT" | grep -qiE '"mcpServers"|"mcp_servers"'; then
+        if echo "$CONTENT" | grep -qiE 'mcpServers|mcp_servers'; then
             echo "BLOCKED: MCP server configuration change detected" >&2
             echo "  File: $FILE" >&2
             echo "  MCP server additions require manual approval." >&2
