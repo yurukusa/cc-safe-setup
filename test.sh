@@ -9049,6 +9049,19 @@ else
 fi
 echo ""
 
+echo "markdown-link-check.sh:"
+MD_TEST="/tmp/cc-md-link-test.md"
+echo '[valid](../README.md)' > "$MD_TEST"
+test_ex markdown-link-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$MD_TEST"'"}}' 0 "md-link: valid link passes"
+echo '[broken](nonexistent-file.md)' > "$MD_TEST"
+test_ex markdown-link-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$MD_TEST"'"}}' 0 "md-link: broken link warns (exit 0)"
+echo '[url](https://example.com)' > "$MD_TEST"
+test_ex markdown-link-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"'"$MD_TEST"'"}}' 0 "md-link: URL skipped"
+test_ex markdown-link-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.js"}}' 0 "md-link: non-markdown skipped"
+test_ex markdown-link-check.sh '{}' 0 "md-link: empty input"
+rm -f "$MD_TEST" 2>/dev/null
+echo ""
+
 echo "json-syntax-check.sh:"
 # Create valid JSON test file
 JSON_TEST="/tmp/cc-json-test-valid.json"
