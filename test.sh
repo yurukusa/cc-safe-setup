@@ -11531,6 +11531,28 @@ test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.py"}}' 
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/nonexist.ts"}}' 0 "typescript-lint-on-edit: nonexistent ts passes"
 test_ex typescript-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "typescript-lint-on-edit: json skipped"
 
+# ========== direnv-auto-reload (CwdChanged event) ==========
+echo "direnv-auto-reload.sh:"
+test_ex direnv-auto-reload.sh '{"old_cwd":"/tmp/a","new_cwd":"/tmp/b"}' 0 "direnv-auto-reload: normal dir change"
+test_ex direnv-auto-reload.sh '{"old_cwd":"/tmp","new_cwd":"'"$HOME"'"}' 0 "direnv-auto-reload: change to home"
+test_ex direnv-auto-reload.sh '{}' 0 "direnv-auto-reload: empty input"
+test_ex direnv-auto-reload.sh '{"new_cwd":""}' 0 "direnv-auto-reload: empty new_cwd"
+test_ex direnv-auto-reload.sh '{"old_cwd":"/a"}' 0 "direnv-auto-reload: missing new_cwd"
+test_ex direnv-auto-reload.sh '{"new_cwd":"/tmp"}' 0 "direnv-auto-reload: missing old_cwd"
+test_ex direnv-auto-reload.sh '{"old_cwd":"/a","new_cwd":"/nonexistent/path"}' 0 "direnv-auto-reload: nonexistent path"
+echo ""
+
+# ========== dotenv-watch (FileChanged event) ==========
+echo "dotenv-watch.sh:"
+test_ex dotenv-watch.sh '{"file_path":"/app/.env","event":"modified"}' 0 "dotenv-watch: .env modified"
+test_ex dotenv-watch.sh '{"file_path":"/app/.env","event":"created"}' 0 "dotenv-watch: .env created"
+test_ex dotenv-watch.sh '{"file_path":"/app/.env","event":"deleted"}' 0 "dotenv-watch: .env deleted"
+test_ex dotenv-watch.sh '{"file_path":"/app/.env.local","event":"modified"}' 0 "dotenv-watch: .env.local modified"
+test_ex dotenv-watch.sh '{}' 0 "dotenv-watch: empty input"
+test_ex dotenv-watch.sh '{"file_path":""}' 0 "dotenv-watch: empty path"
+test_ex dotenv-watch.sh '{"file_path":"/app/.env","event":"unknown"}' 0 "dotenv-watch: unknown event"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
