@@ -10685,6 +10685,12 @@ test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "api-r
 test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"git status"}}' 0 "api-rate-limit-guard: git passes"
 test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"curl -s https://example.com"}}' 0 "api-rate-limit-guard: curl passes"
 test_ex api-rate-limit-guard.sh '{"tool_input":{"command":"wget https://example.com"}}' 0 "api-rate-limit-guard: wget passes"
+# --- check-test-exists ---
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/app.test.ts"}}' 0 "check-test-exists: test file skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/README.md"}}' 0 "check-test-exists: markdown skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/config.json"}}' 0 "check-test-exists: json skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/style.css"}}' 0 "check-test-exists: css skipped"
+test_ex check-test-exists.sh '{"tool_input":{"file_path":"/tmp/test_utils.py"}}' 0 "check-test-exists: python test skipped"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
