@@ -48,11 +48,20 @@ case "$TOOL" in
         [ -z "$CMD" ] && exit 0
 
         # Allow read-only commands in plan mode
-        SAFE_CMDS="ls|cat|head|tail|grep|find|wc|diff|git status|git log|git diff|git branch|git show|pwd|echo|date|which|type|file|tree|du|df|env|printenv|node -v|python3 -V|npm list|pip list"
-        FIRST_CMD=$(echo "$CMD" | sed 's/[;&|].*//' | awk '{print $1}')
+        # Strip compound operators to get the first command
+        FIRST_PART=$(echo "$CMD" | sed 's/[;&|].*//' | sed 's/^\s*//')
 
-        # Check if it's a safe read-only command
-        if echo "$FIRST_CMD" | grep -qxE "$SAFE_CMDS"; then
+        # Single-word safe commands
+        FIRST_WORD=$(echo "$FIRST_PART" | awk '{print $1}')
+        SAFE_SINGLE="ls|cat|head|tail|grep|find|wc|diff|pwd|echo|date|which|type|file|tree|du|df|env|printenv"
+        if echo "$FIRST_WORD" | grep -qxE "$SAFE_SINGLE"; then
+            exit 0
+        fi
+
+        # Two-word safe commands (git, npm, etc.)
+        FIRST_TWO=$(echo "$FIRST_PART" | awk '{print $1, $2}')
+        SAFE_TWO="git status|git log|git diff|git branch|git show|git rev-parse|git tag|node -v|python3 -V|npm list|npm outdated|pip list|pip show"
+        if echo "$FIRST_TWO" | grep -qxE "$SAFE_TWO"; then
             exit 0
         fi
 
