@@ -19,36 +19,25 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 # Only check rm commands
 echo "$COMMAND" | grep -qE '^\s*rm\s|;\s*rm\s|&&\s*rm\s' || exit 0
 
-# Extract rm targets (simplified — handles common patterns)
-TARGETS=$(echo "$COMMAND" | grep -oE 'rm\s+[^ ;|&]+(\s+[^ ;|&-]+)*' | sed 's/^rm\s*//' | sed 's/-[rfvid]*\s*//g')
+# Check the entire command for Windows system paths
+# This catches both direct paths and quoted paths with spaces
+WINDOWS_SYSTEM='/mnt/[a-z]/(Users|Windows|Program Files|Program)'
+if echo "$COMMAND" | grep -qiE "$WINDOWS_SYSTEM"; then
+    echo "BLOCKED: rm targets Windows system directory" >&2
+    echo "  Command contains a Windows system path reference." >&2
+    echo "  This could destroy system files via NTFS junction traversal." >&2
+    echo "  Reference: GitHub Issue #36339" >&2
+    exit 2
+fi
 
-for target in $TARGETS; do
-    [ -z "$target" ] && continue
-
-    # Resolve the real path
-    REAL_PATH=$(readlink -f "$target" 2>/dev/null)
-    [ -z "$REAL_PATH" ] && continue
-
-    # Check if target is a symlink/junction pointing elsewhere
-    if [ -L "$target" ] || [ -L "$(dirname "$target")" ]; then
-        # The path contains a symlink — check where it leads
-        LINK_TARGET=$(readlink -f "$target" 2>/dev/null)
-
-        # Block if the symlink leads to system directories
-        if echo "$LINK_TARGET" | grep -qiE '^/(mnt/[a-z]/Users|mnt/[a-z]/Windows|mnt/[a-z]/Program|home$|etc$|usr$|var$|boot$)'; then
-            echo "BLOCKED: rm would traverse symlink/junction to system directory" >&2
-            echo "  Target: $target" >&2
-            echo "  Resolves to: $LINK_TARGET" >&2
-            echo "  This could destroy Windows system files (NTFS junction traversal)." >&2
-            echo "  Reference: GitHub Issue #36339" >&2
-            exit 2
-        fi
-    fi
-
-    # Also block rm on Windows system mount points directly
-    if echo "$REAL_PATH" | grep -qiE '^/mnt/[a-z]/(Users|Windows|Program Files)'; then
-        echo "BLOCKED: rm targets Windows system directory" >&2
-        echo "  Path: $REAL_PATH" >&2
+# Check if any rm target is a symlink pointing to system directories
+for target in $(echo "$COMMAND" | grep -oE '/[^ ";\|&]+' | head -10); do
+    [ -L "$target" ] || [ -L "$(dirname "$target" 2>/dev/null)" ] || continue
+    LINK_TARGET=$(readlink -f "$target" 2>/dev/null)
+    [ -z "$LINK_TARGET" ] && continue
+    if echo "$LINK_TARGET" | grep -qiE "^/(mnt/[a-z]/(Users|Windows|Program)|home$|etc$|usr$|var$)"; then
+        echo "BLOCKED: rm would traverse symlink/junction to system directory" >&2
+        echo "  Target: $target → $LINK_TARGET" >&2
         exit 2
     fi
 done
