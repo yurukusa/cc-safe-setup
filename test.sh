@@ -9407,6 +9407,17 @@ test_ex cloud-cli-guard.sh '{"tool_input":{"command":"gcloud compute instances l
 test_ex cloud-cli-guard.sh '{"tool_input":{"command":"az vm list"}}' 0 "cloud-guard: az list allowed"
 test_ex cloud-cli-guard.sh '{"tool_input":{"command":"ls"}}' 0 "cloud-guard: non-cloud allowed"
 test_ex cloud-cli-guard.sh '{}' 0 "cloud-guard: empty input"
+# --- sensitive-file-read-guard ---
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.ssh/id_rsa"}}' 2 "sensitive-read: private key blocked"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.ssh/id_ed25519"}}' 2 "sensitive-read: ed25519 key blocked"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.aws/credentials"}}' 2 "sensitive-read: aws creds blocked"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/etc/shadow"}}' 2 "sensitive-read: shadow blocked"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/app/.env.production"}}' 2 "sensitive-read: env.production blocked"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.ssh/id_rsa.pub"}}' 0 "sensitive-read: public key allowed"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/home/user/.ssh/config"}}' 0 "sensitive-read: ssh config allowed"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":"/src/main.ts"}}' 0 "sensitive-read: normal file allowed"
+test_ex sensitive-file-read-guard.sh '{"tool_input":{"file_path":".env"}}' 0 "sensitive-read: .env allowed (not prod)"
+test_ex sensitive-file-read-guard.sh '{}' 0 "sensitive-read: empty input"
 echo ""
 
 echo "========================"
