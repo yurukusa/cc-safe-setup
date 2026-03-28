@@ -5282,6 +5282,10 @@ for i in 1 2 3 4; do
 done
 test_hook "loop-detector" '{"tool_input":{"command":"echo repeated_loop_test"}}' 2 "blocks after 5 repeats"
 rm -f /tmp/cc-loop-detector-history
+test_hook "loop-detector" '{"tool_input":{"command":"echo unique_after_reset"}}' 0 "allows new cmd after reset"
+test_hook "loop-detector" '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_hook "loop-detector" '{}' 0 "handles empty input"
+rm -f /tmp/cc-loop-detector-history
 echo ""
 echo ""
 echo "max-file-count-guard.sh:"
