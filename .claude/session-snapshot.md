@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T17:26:51+09:00
+Updated: 2026-03-28T17:57:32+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-28T17:26:51+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 7572eb4 checkpoint: auto-save 17:26:50
+- Last commit: 9c4d03d checkpoint: auto-save 17:57:31
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./test.sh
-./examples/plan-repo-sync.sh
+./examples/bulk-file-delete-guard.sh
+./examples/staged-secret-scan.sh
 ./.claude/pre-compact-checkpoint.md
+./README.md
+./examples/plan-repo-sync.sh
 ./examples/usage-cache-local.sh
 ./examples/api-overload-backoff.sh
-./README.md
 ./examples/git-index-lock-cleanup.sh
-./examples/output-explosion-detector.sh
-./examples/resume-context-guard.sh
 ```
 
