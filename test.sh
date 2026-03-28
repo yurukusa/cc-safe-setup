@@ -11198,6 +11198,8 @@ test_ex credential-file-cat-guard.sh '{"tool_input":{"command":""}}' 0 "credenti
 test_ex credential-file-cat-guard.sh '{}' 0 "credential-file-cat-guard: empty input passes"
 
 echo "push-requires-test-pass.sh:"
+# Clean state from record tests
+rm -f /tmp/.cc-test-pass-* 2>/dev/null
 test_ex push-requires-test-pass.sh '{"tool_input":{"command":"git push origin main"}}' 2 "push-requires-test-pass: blocks push to main without tests"
 test_ex push-requires-test-pass.sh '{"tool_input":{"command":"git push origin master"}}' 2 "push-requires-test-pass: blocks push to master without tests"
 test_ex push-requires-test-pass.sh '{"tool_input":{"command":"git push origin production"}}' 2 "push-requires-test-pass: blocks push to production without tests"
