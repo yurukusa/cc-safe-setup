@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-28T13:22:15+09:00
+Updated: 2026-03-28T13:23:16+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-28T13:22:15+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2bacdf1 checkpoint: auto-save 13:21:38
+- Last commit: 7dccae3 checkpoint: auto-save 13:23:09
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./examples/db-connect-guard.sh
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
-./examples/db-connect-guard.sh
 ./examples/firewall-guard.sh
 ./examples/systemd-service-guard.sh
 ./examples/kill-process-guard.sh
