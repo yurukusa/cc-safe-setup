@@ -1,5 +1,12 @@
 # Changelog
 
+## [29.6.31] - 2026-03-29
+- **New**: 3 hooks using v2.1.83 hook events — direnv-auto-reload (CwdChanged), dotenv-watch (FileChanged), pre-compact-checkpoint (PreCompact)
+- **New**: 3 hooks — plan-mode-enforcer, shell-wrapper-guard, git-checkout-safety-guard
+- **Improved**: destructive-guard built-in — shell wrapper bypass detection (sh -c, python -c, pipe-to-shell)
+- **Tests**: 27 new tests for new hooks
+- **Stats**: 517 examples, 7,591 tests, 51 SEO pages
+
 ## [29.6.28] - 2026-03-29
 - **New**: 4 hooks — credential-file-cat-guard (#34819), push-requires-test-pass (#36673), push-requires-test-pass-record, edit-retry-loop-guard (#35576)
 - **New**: 3 SEO pages — auto-approve-guide, prevent-credential-leak, owasp-mcp-hooks
