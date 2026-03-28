@@ -184,6 +184,7 @@ Install any of these: `npx cc-safe-setup --install-example <name>`
 | Multiline commands skip pattern matching | [#11932](https://github.com/anthropics/claude-code/issues/11932) (47👍) | Use hooks instead of allowlist patterns for complex commands |
 | No notification when Claude asks a question | [#13024](https://github.com/anthropics/claude-code/issues/13024) (52👍) | `npx cc-safe-setup --install-example notify-waiting` |
 | `allow` overrides `ask` in permissions | [#6527](https://github.com/anthropics/claude-code/issues/6527) (17👍) | Use hooks to block dangerous commands instead of `ask` rules |
+| Plans stored in `~/.claude/` with random names | [#12619](https://github.com/anthropics/claude-code/issues/12619) (163👍) | `npx cc-safe-setup --install-example plan-repo-sync` |
 
 ## How It Works
 
