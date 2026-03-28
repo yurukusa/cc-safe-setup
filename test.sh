@@ -10312,6 +10312,12 @@ test_ex token-budget-guard.sh '{"tool_input":{}}' 0 "token-budget-guard: empty t
 test_ex tool-file-logger.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-file-logger: bash ls passes"
 test_ex tool-file-logger.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "tool-file-logger: read passes"
 test_ex tool-file-logger.sh '{"tool_input":{}}' 0 "tool-file-logger: empty tool_input"
+test_ex edit-error-counter.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"},"tool_error":""}' 0 "edit-error-counter: no error passes"
+test_ex edit-error-counter.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}' 0 "edit-error-counter: no error field passes"
+test_ex edit-error-counter.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"},"tool_error":"String to replace not found in file"}' 0 "edit-error-counter: single error passes (no block)"
+test_ex edit-error-counter.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' 0 "edit-error-counter: non-Edit tool passes"
+test_ex edit-error-counter.sh '{"tool_input":{}}' 0 "edit-error-counter: empty tool_input"
+test_ex edit-error-counter.sh '{"tool_name":"Edit"}' 0 "edit-error-counter: missing tool_input passes"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
