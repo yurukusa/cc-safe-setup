@@ -11815,6 +11815,44 @@ test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__tool","tool_output":""}
 test_ex mcp-data-boundary.sh '{"tool_name":"mcp__server__read","tool_output":"contents of ~/.ssh/id_rsa"}' 0 "mcp-boundary: ssh key path (warns)"
 echo ""
 
+# ========== max-concurrent-agents ==========
+echo "max-concurrent-agents.sh:"
+rm -f /tmp/cc-agent-count-$$
+test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{"prompt":"task 1"}}' 0 "max-agents: first agent allowed"
+test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{"prompt":"task 2"}}' 0 "max-agents: second allowed"
+test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{"prompt":"task 3"}}' 0 "max-agents: third allowed"
+test_ex max-concurrent-agents.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "max-agents: non-Agent skipped"
+test_ex max-concurrent-agents.sh '{}' 0 "max-agents: empty input"
+test_ex max-concurrent-agents.sh '{"tool_name":"Agent","tool_input":{}}' 0 "max-agents: no prompt"
+rm -f /tmp/cc-agent-count-$$
+echo ""
+
+# ========== file-age-guard ==========
+echo "file-age-guard.sh:"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"/tmp/nonexistent-age-test.txt"}}' 0 "file-age: nonexistent file ok"
+test_ex file-age-guard.sh '{}' 0 "file-age: empty input"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":""}}' 0 "file-age: empty path"
+# Create a recent file (should not warn)
+touch /tmp/file-age-test-recent.txt
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"/tmp/file-age-test-recent.txt"}}' 0 "file-age: recent file no warn"
+rm -f /tmp/file-age-test-recent.txt
+# Create an old file (should warn but not block)
+touch -t 202501010000 /tmp/file-age-test-old.txt 2>/dev/null
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"/tmp/file-age-test-old.txt"}}' 0 "file-age: old file warns but passes"
+rm -f /tmp/file-age-test-old.txt
+echo ""
+
+# ========== binary-upload-guard ==========
+echo "binary-upload-guard.sh:"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"git add src/main.ts"}}' 0 "binary-upload: ts file allowed"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"git add dist/app.zip"}}' 2 "binary-upload: zip BLOCKED"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"git add data.tar.gz"}}' 2 "binary-upload: tar.gz BLOCKED"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "binary-upload: commit without binary ok"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "binary-upload: non-git command"
+test_ex binary-upload-guard.sh '{}' 0 "binary-upload: empty input"
+test_ex binary-upload-guard.sh '{"tool_input":{"command":"git add README.md"}}' 0 "binary-upload: md file allowed"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
