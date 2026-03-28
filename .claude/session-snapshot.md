@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T08:00:47+09:00
+Updated: 2026-03-29T08:01:37+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-29T08:00:47+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: db8ae9b checkpoint: pre-compact auto-save (1 files, 20260328-230044)
+- Last commit: 8a7afe1 checkpoint: auto-save 08:00:57
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./examples/windows-path-guard.sh
 ./.claude/pre-compact-checkpoint.md
+./examples/windows-path-guard.sh
 ./test.sh
 ./examples/no-git-amend.sh
 ./examples/cross-session-error-log.sh
