@@ -11747,6 +11747,17 @@ test_ex concurrent-edit-lock.sh '{"tool_name":"Edit","tool_input":{}}' 0 "concur
 rm -rf "$HOME/.claude/locks" 2>/dev/null
 echo ""
 
+# ========== context-warning-verifier (#35357) ==========
+echo "context-warning-verifier.sh:"
+test_ex context-warning-verifier.sh '{}' 0 "context-verifier: empty input"
+test_ex context-warning-verifier.sh '{"tool_output":"File saved successfully"}' 0 "context-verifier: normal output"
+test_ex context-warning-verifier.sh '{"tool_output":"WARNING: context running out, only 15% remaining"}' 0 "context-verifier: warning without actual data"
+test_ex context-warning-verifier.sh '{"tool_output":"context is low at 10% remaining","context_window":{"remaining_percentage":80}}' 0 "context-verifier: fabricated warning detected"
+test_ex context-warning-verifier.sh '{"tool_output":"context is critical","context_window":{"remaining_percentage":10}}' 0 "context-verifier: genuine warning"
+test_ex context-warning-verifier.sh '{"tool_output":"20% context remaining","context_window":{"remaining_percentage":20}}' 0 "context-verifier: borderline genuine"
+test_ex context-warning-verifier.sh '{"tool_output":""}' 0 "context-verifier: empty output"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
