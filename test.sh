@@ -9907,6 +9907,17 @@ if [ "$_VEG6" -eq 0 ]; then echo "  PASS: var-expand: explicit rm path passes"; 
 set -euo pipefail
 echo ""
 
+# --- git-index-lock-cleanup ---
+echo "git-index-lock-cleanup.sh:"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"git status"}}' 0 "lock-cleanup: git status passes"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "lock-cleanup: git commit passes"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"ls -la"}}' 0 "lock-cleanup: non-git passes"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"npm test"}}' 0 "lock-cleanup: npm passes"
+test_ex git-index-lock-cleanup.sh '{}' 0 "lock-cleanup: empty input"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":""}}' 0 "lock-cleanup: empty command"
+test_ex git-index-lock-cleanup.sh '{"tool_input":{"command":"echo git"}}' 0 "lock-cleanup: echo git passes"
+echo ""
+
 # --- resume-context-guard ---
 echo "resume-context-guard.sh:"
 test_ex resume-context-guard.sh '{"type":"session_start"}' 0 "resume-guard: session start passes"
