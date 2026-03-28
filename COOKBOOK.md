@@ -215,9 +215,32 @@ npx cc-safe-setup --install-example classifier-fallback-allow
 
 PermissionRequest hook that approves cat, ls, grep, git read-only when the classifier can't respond.
 
+## Block Reading Credential Files
+
+Prevent the agent from displaying tokens in conversations by reading package manager credential files:
+
+```bash
+npx cc-safe-setup --install-example credential-file-cat-guard
+```
+
+Blocks `cat`, `head`, `tail`, `grep` on `~/.netrc`, `~/.npmrc`, `~/.cargo/credentials`, `~/.docker/config.json`, `~/.kube/config`, and more. Complements `credential-exfil-guard` which blocks hunting patterns. See [#34819](https://github.com/anthropics/claude-code/issues/34819).
+
+## Require Tests Before Push
+
+Block `git push` to protected branches unless tests have passed in the current session:
+
+```bash
+npx cc-safe-setup --install-example push-requires-test-pass
+npx cc-safe-setup --install-example push-requires-test-pass-record
+```
+
+Two-hook system: the PostToolUse `record` hook detects successful test runs (`npm test`, `pytest`, `cargo test`, etc.) and saves a timestamp. The PreToolUse hook blocks push to main/master/production if no recent test pass exists (30-minute window). See [#36673](https://github.com/anthropics/claude-code/issues/36673).
+
 ## Further Reading
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)
 - [Common Mistakes](https://yurukusa.github.io/cc-safe-setup/common-mistakes.html)
+- [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html)
+- [Credential Protection](https://yurukusa.github.io/cc-safe-setup/prevent-credential-leak.html)
 - [Troubleshooting](TROUBLESHOOTING.md)
 - [Settings Reference](SETTINGS_REFERENCE.md)
