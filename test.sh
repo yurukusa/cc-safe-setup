@@ -2134,6 +2134,20 @@ test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git commit -m test"}
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "non-git passes"
 echo ""
 
+# --- no-verify-blocker ---
+echo "no-verify-blocker.sh:"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit --no-verify -m fix"}}' 2 "--no-verify blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git push --no-verify origin main"}}' 2 "push --no-verify blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git merge --no-verify feature"}}' 2 "merge --no-verify blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit -m test"}}' 0 "normal commit allowed"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git push origin main"}}' 0 "normal push allowed"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"npm test"}}' 0 "non-git allowed"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"echo git commit --no-verify"}}' 2 "--no-verify in any context blocked (safe side)"
+test_ex no-verify-blocker.sh '{}' 0 "empty input allowed"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":""}}' 0 "empty command allowed"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit -n"}}' 2 "git commit -n blocked"
+echo ""
+
 # --- git-merge-conflict-prevent ---
 echo "git-merge-conflict-prevent.sh:"
 test_ex git-merge-conflict-prevent.sh '{"tool_input":{"command":"git merge feature","new_string":"some content"}}' 0 "git merge notes (exit 0)"
@@ -6328,6 +6342,12 @@ test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git commit --no-veri
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git push --no-verify origin main"}}' 0 "git-hook-bypass-guard: push --no-verify warns (exit 0)"
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git merge --no-verify feature"}}' 0 "git-hook-bypass-guard: merge --no-verify warns (exit 0)"
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":""}}' 0 "git-hook-bypass-guard: empty command"
+test_ex no-verify-blocker.sh '{}' 0 "no-verify-blocker: empty input"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "no-verify-blocker: normal commit"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit --no-verify -m fix"}}' 2 "no-verify-blocker: --no-verify blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git push --no-verify origin main"}}' 2 "no-verify-blocker: push --no-verify blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":"git commit -n"}}' 2 "no-verify-blocker: commit -n blocked"
+test_ex no-verify-blocker.sh '{"tool_input":{"command":""}}' 0 "no-verify-blocker: empty command"
 test_ex git-merge-conflict-prevent.sh '{}' 0 "git-merge-conflict-prevent: empty input"
 test_ex git-merge-conflict-prevent.sh '{"tool_input":{"new_string":"normal code","command":"echo hello"}}' 0 "git-merge-conflict-prevent: non-merge command"
 test_ex git-merge-conflict-prevent.sh '{"tool_input":{"new_string":"code","command":"git merge feature"}}' 0 "git-merge-conflict-prevent: merge warns (exit 0)"
