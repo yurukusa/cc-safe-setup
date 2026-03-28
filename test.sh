@@ -10004,6 +10004,28 @@ test_ex bulk-file-delete-guard.sh '{"tool_input":{"command":"cat file"}}' 0 "bul
 test_ex bulk-file-delete-guard.sh '{"tool_name":"Edit"}' 0 "bulk-delete: non-Bash tool ignored"
 echo ""
 
+# --- file-change-monitor ---
+echo "file-change-monitor.sh:"
+test_ex file-change-monitor.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.ts"}}' 0 "file-monitor: Edit tracked"
+test_ex file-change-monitor.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/new.ts"}}' 0 "file-monitor: Write tracked"
+test_ex file-change-monitor.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/read.ts"}}' 0 "file-monitor: Read ignored"
+test_ex file-change-monitor.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "file-monitor: Bash ignored"
+test_ex file-change-monitor.sh '{}' 0 "file-monitor: empty input"
+test_ex file-change-monitor.sh '{"tool_name":"Edit"}' 0 "file-monitor: no file_path"
+test_ex file-change-monitor.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "file-monitor: empty file_path"
+test_ex file-change-monitor.sh '{"tool_name":"Write","tool_input":{"file_path":"/home/user/src/main.ts"}}' 0 "file-monitor: absolute path"
+echo ""
+
+# --- long-session-reminder ---
+echo "long-session-reminder.sh:"
+test_ex long-session-reminder.sh '{"tool_name":"Bash"}' 0 "session-reminder: first call (creates flag)"
+test_ex long-session-reminder.sh '{"tool_name":"Edit"}' 0 "session-reminder: subsequent call"
+test_ex long-session-reminder.sh '{}' 0 "session-reminder: empty input"
+test_ex long-session-reminder.sh '{"tool_name":"Read"}' 0 "session-reminder: read tool"
+test_ex long-session-reminder.sh '{"tool_name":"Write"}' 0 "session-reminder: write tool"
+test_ex long-session-reminder.sh '{"tool_name":"Agent"}' 0 "session-reminder: agent tool"
+echo ""
+
 echo "========================"
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
