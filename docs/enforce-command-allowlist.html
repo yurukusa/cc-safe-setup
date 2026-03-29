@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enforce Command Allowlist in Claude Code — cc-safe-setup</title>
+<meta name="description" content="Claude Code's permissions.allow rules don't always work. Enforce a strict command allowlist with a PreToolUse hook that can't be bypassed, even in bypassPermissions mode.">
+<meta name="keywords" content="claude code allowlist, claude code permissions allow, claude code command whitelist, pretooluse hook enforce, cc-safe-setup, bypass permissions">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/enforce-command-allowlist.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}p{margin:.8rem 0}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}pre code{background:none;padding:0}.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}nav{margin-bottom:2rem;font-size:.9rem}nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Enforce a Command Allowlist</h1>
+<p>Claude Code's <code>permissions.allow</code> rules are <a href="https://github.com/anthropics/claude-code/issues/30519">fundamentally broken</a> in many configurations. Wildcard matching fails, compound commands bypass rules, and <code>bypassPermissions</code> ignores allowlists entirely.</p>
+
+<p>A PreToolUse hook enforces allowlists at the process level. The model cannot bypass hooks.</p>
+
+<h2>The Hook</h2>
+<div class="fix">
+<p><strong>allowlist.sh</strong> — only approved commands can execute:</p>
+<pre><code>#!/bin/bash
+# TRIGGER: PreToolUse | MATCHER: "Bash"
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[[ -z "$COMMAND" ]] &amp;&amp; exit 0
+
+ALLOWED=(
+    "^\\s*git (add|commit|diff|log|status|show|stash|branch)"
+    "^\\s*npm (test|run|install|ci|ls)"
+    "^\\s*python3? -m (pytest|py_compile)"
+    "^\\s*(cat|head|tail|wc|sort|grep|find|ls|pwd)"
+)
+
+for pattern in "${ALLOWED[@]}"; do
+    echo "$COMMAND" | grep -qE "$pattern" &amp;&amp; exit 0
+done
+
+echo "BLOCKED: Not in allowlist" &gt;&amp;2
+exit 2</code></pre>
+</div>
+
+<h2>Why Hooks Beat Permissions</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem">Feature</th><th>permissions.allow</th><th>Hook allowlist</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Compound commands</td><td style="color:#f85149">Broken</td><td style="color:#3fb950">Works</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Wildcard matching</td><td style="color:#f85149">Inconsistent</td><td style="color:#3fb950">Full regex</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">bypassPermissions</td><td style="color:#f85149">Ignored</td><td style="color:#3fb950">Still enforced</td></tr>
+<tr><td style="padding:.5rem">Background agents</td><td style="color:#f85149">Often broken</td><td style="color:#3fb950">Always works</td></tr>
+</table>
+
+<p>Related issues: <a href="https://github.com/anthropics/claude-code/issues/6850">#6850</a> (settings not respected), <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (permissions fundamentally broken), <a href="https://github.com/anthropics/claude-code/issues/40343">#40343</a> (bypassPermissions ignores allowlist).</p>
+
+<div class="cta">
+<h2>Install the Allowlist Hook</h2>
+<pre><code>npx cc-safe-setup --install-example allowlist</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">591 hooks. 8,872 tests.</p>
+</div>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
