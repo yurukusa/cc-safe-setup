@@ -13982,7 +13982,7 @@ fi
 
 if [ -f "$EXDIR/compact-blocker.sh" ]; then
     EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/compact-blocker.sh" >/dev/null 2>/dev/null || EXIT=$?
-    [ "$EXIT" -le 1 ] && { echo "  PASS: compact-blocker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: compact-blocker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: compact-blocker blocks as expected"; PASS=$((PASS+1)); } || { echo "  FAIL: compact-blocker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
 fi
 
 if [ -f "$EXDIR/compaction-transcript-guard.sh" ]; then
