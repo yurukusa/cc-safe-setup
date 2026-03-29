@@ -12951,6 +12951,43 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "git-show-flag-sanitizer.sh:"
+test_ex git-show-flag-sanitizer.sh '{}' 0 "git-show-sanitizer: empty input"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show HEAD --no-stat"}}' 0 "git-show-sanitizer: strips --no-stat from HEAD"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show abc123 --no-stat"}}' 0 "git-show-sanitizer: strips --no-stat from ref"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show HEAD"}}' 0 "git-show-sanitizer: no-op when no --no-stat"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "git-show-sanitizer: ignores non-show commands"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-show-sanitizer: ignores non-git commands"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show --no-stat HEAD -- file.txt"}}' 0 "git-show-sanitizer: strips mid-command --no-stat"
+# Verify rewritten command has --no-stat removed
+OUTPUT=$(echo '{"tool_input":{"command":"git show HEAD --no-stat"}}' | bash "$EXDIR/git-show-flag-sanitizer.sh" 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.command' 2>/dev/null | grep -qv 'no-stat'; then
+    echo "  PASS: git-show-sanitizer: output has --no-stat removed"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: git-show-sanitizer: output has --no-stat removed (still contains --no-stat)"
+    FAIL=$((FAIL + 1))
+fi
+# Verify rewritten command is valid
+REWRITTEN=$(echo '{"tool_input":{"command":"git show abc123 --no-stat"}}' | bash "$EXDIR/git-show-flag-sanitizer.sh" 2>/dev/null | jq -r '.hookSpecificOutput.updatedInput.command // empty')
+if [ "$REWRITTEN" = "git show abc123" ]; then
+    echo "  PASS: git-show-sanitizer: rewritten command is correct"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: git-show-sanitizer: rewritten command is correct (got: $REWRITTEN)"
+    FAIL=$((FAIL + 1))
+fi
+# Verify passthrough returns empty JSON (no updatedInput)
+PASSTHROUGH=$(echo '{"tool_input":{"command":"git show HEAD"}}' | bash "$EXDIR/git-show-flag-sanitizer.sh" 2>/dev/null)
+if [ -z "$PASSTHROUGH" ] || [ "$PASSTHROUGH" = "" ]; then
+    echo "  PASS: git-show-sanitizer: passthrough returns nothing"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: git-show-sanitizer: passthrough returns nothing (got: $PASSTHROUGH)"
+    FAIL=$((FAIL + 1))
+fi
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
