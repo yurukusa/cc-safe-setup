@@ -13517,6 +13517,23 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- no-output-truncation ---
+echo "no-output-truncation.sh:"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"npm test 2>&1 | tail -3"}}' 2 "blocks npm test | tail"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"npm run build | tail -5"}}' 2 "blocks npm build | tail"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"pytest | head -10"}}' 2 "blocks pytest | head"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"node script.js | tail -3"}}' 2 "blocks node | tail"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"cargo test 2>&1 | tail -20"}}' 2 "blocks cargo test | tail"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"python script.py | tail -5"}}' 2 "blocks python | tail"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"make | head -10"}}' 2 "blocks make | head"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"ls -la | tail -5"}}' 0 "allows ls | tail (safe)"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"cat file.txt | head -20"}}' 0 "allows cat | head (safe)"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"npm test"}}' 0 "allows npm test without pipe"
+test_ex no-output-truncation.sh '{"tool_input":{"command":"echo hello"}}' 0 "allows echo"
+test_ex no-output-truncation.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex no-output-truncation.sh '{}' 0 "empty input passes"
+echo ""
+
 # --- secret-file-read-guard ---
 echo "secret-file-read-guard.sh:"
 test_ex secret-file-read-guard.sh '{"tool_name":"Read","tool_input":{"file_path":".env"}}' 2 "blocks .env read"
