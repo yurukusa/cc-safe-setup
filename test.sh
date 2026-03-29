@@ -13576,6 +13576,21 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- polyglot-rm-guard ---
+echo "polyglot-rm-guard.sh:"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"python3 -c \"import os; os.remove(\\\"file.txt\\\")\" "}}' 2 "blocks Python os.remove"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"python -c \"import shutil; shutil.rmtree(\\\"dir\\\")\" "}}' 2 "blocks Python shutil.rmtree"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"node -e \"fs.unlinkSync(\\\"file\\\")\" "}}' 2 "blocks Node unlinkSync"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"ruby -e \"File.delete(\\\"f\\\")\" "}}' 2 "blocks Ruby File.delete"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"perl -e \"unlink \\\"file\\\"\" "}}' 2 "blocks Perl unlink"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"python3 -c \"print(42)\""}}' 0 "allows Python non-delete"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"node -e \"console.log(1)\""}}' 0 "allows Node non-delete"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "allows echo"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_ex polyglot-rm-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex polyglot-rm-guard.sh '{}' 0 "empty input passes"
+echo ""
+
 # --- plugin-process-cleanup ---
 echo "plugin-process-cleanup.sh:"
 test_ex plugin-process-cleanup.sh '{}' 0 "empty input passes"
