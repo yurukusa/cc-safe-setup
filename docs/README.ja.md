@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 539個のexample hook · 7,789テスト · 1,000+ インストール/日
+**Claude Codeを安全にするワンコマンドツール。** 564個のexample hook · 8,212テスト · 1,000+ インストール/日
 
 ```bash
 npx cc-safe-setup
