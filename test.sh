@@ -12951,6 +12951,19 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "session-error-rate-monitor.sh:"
+test_ex session-error-rate-monitor.sh '{}' 0 "error-rate-monitor: empty input"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"0"}}' 0 "error-rate-monitor: success exit code"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"1"}}' 0 "error-rate-monitor: error exit code (advisory only)"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"2"}}' 0 "error-rate-monitor: blocked exit code"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Read","tool_result":{"exit_code":"0"}}' 0 "error-rate-monitor: non-Bash tool ignored"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Edit","tool_result":{"exit_code":"1"}}' 0 "error-rate-monitor: non-Bash error ignored"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash"}' 0 "error-rate-monitor: no exit code defaults to 0"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{}}' 0 "error-rate-monitor: empty result"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"127"}}' 0 "error-rate-monitor: command not found"
+test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"128"}}' 0 "error-rate-monitor: signal exit"
+echo ""
+
 echo "--- Edge case tests for 28 hooks ---"
 # cargo-publish-guard.sh edge cases
 test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo   publish"}}' 2 "cargo-publish-guard: multi-space publish blocked"
