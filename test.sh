@@ -3244,6 +3244,9 @@ if [ -f "$EXDIR/no-git-rebase-public.sh" ]; then
     test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git rebase main"}}' 0 "git rebase warns if pushed (exit 0)"
     test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git status"}}' 0 "non-rebase command ignored"
     test_ex no-git-rebase-public.sh '{"tool_input":{"command":""}}' 0 "empty command ignored"
+    test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git rebase -i HEAD~3"}}' 0 "interactive rebase warns"
+    test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git pull --rebase"}}' 0 "pull rebase passes"
+    test_ex no-git-rebase-public.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3254,6 +3257,9 @@ if [ -f "$EXDIR/no-large-commit.sh" ]; then
     test_ex no-large-commit.sh '{"tool_input":{"command":"git commit -m \"big change\""}}' 0 "git commit warns on many files (exit 0)"
     test_ex no-large-commit.sh '{"tool_input":{"command":"npm test"}}' 0 "non-commit command ignored"
     test_ex no-large-commit.sh '{"tool_input":{"command":""}}' 0 "empty command ignored"
+    test_ex no-large-commit.sh '{"tool_input":{"command":"git add ."}}' 0 "git add passes"
+    test_ex no-large-commit.sh '{"tool_input":{"command":"git diff"}}' 0 "git diff passes"
+    test_ex no-large-commit.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -10269,7 +10275,10 @@ else
     echo "  FAIL: daily-tracker: 4+ calls logged correctly (got $LINES_ADD lines)"
     FAIL=$((FAIL + 1))
 fi
-if [ -n "$DAILY_BACKUP_ADD" ]; then echo "$DAILY_BACKUP_ADD" > "$DAILY_TEST_FILE_ADD"; fi
+if [ -n "$DAILY_BACKUP_ADD" ]; then echo "$DAILY_BACKUP_ADD" > "$DAILY_TEST_FILE_ADD";     test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m "test""}}' 0 "normal commit passes"
+    test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-git passes"
+    test_ex strip-coauthored-by.sh '{}' 0 "empty input passes"
+fi
 echo ""
 
 # --- post-compact-safety additional tests ---
