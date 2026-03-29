@@ -12827,6 +12827,46 @@ test_ex schema-migration-guard.sh '{}' 0 "schema-mig: empty input"
 test_ex schema-migration-guard.sh '{"tool_input":{"command":""}}' 0 "schema-mig: empty command"
 test_ex schema-migration-guard.sh '{"tool_input":{"command":"alembic upgrade head"}}' 0 "schema-mig: alembic upgrade"
 
+# ========== token-budget-per-task ==========
+echo "token-budget-per-task.sh:"
+rm -f /tmp/claude-token-budget-$$
+test_ex token-budget-per-task.sh '{"tool_name":"Bash","tool_result":"output"}' 0 "token-budget: bash call"
+test_ex token-budget-per-task.sh '{"tool_name":"Read","tool_result":"file content"}' 0 "token-budget: read call"
+test_ex token-budget-per-task.sh '{"tool_name":"Agent","tool_result":"done"}' 0 "token-budget: agent call"
+test_ex token-budget-per-task.sh '{"tool_name":"Edit","tool_result":"ok"}' 0 "token-budget: edit call"
+test_ex token-budget-per-task.sh '{}' 0 "token-budget: empty"
+test_ex token-budget-per-task.sh '{"tool_name":"Glob","tool_result":"files"}' 0 "token-budget: glob call"
+test_ex token-budget-per-task.sh '{"tool_name":"Write","tool_result":"ok"}' 0 "token-budget: write call"
+rm -f /tmp/claude-token-budget-$$
+
+# ========== mcp-server-allowlist ==========
+echo "mcp-server-allowlist.sh:"
+test_ex mcp-server-allowlist.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "mcp-allow: non-MCP tool passes"
+test_ex mcp-server-allowlist.sh '{"tool_name":"Read","tool_input":{"file_path":"x"}}' 0 "mcp-allow: Read passes"
+test_ex mcp-server-allowlist.sh '{}' 0 "mcp-allow: empty"
+test_ex mcp-server-allowlist.sh '{"tool_name":"mcp__github__list_repos"}' 0 "mcp-allow: no allowlist = pass"
+export CC_MCP_ALLOWED="github:filesystem"
+test_ex mcp-server-allowlist.sh '{"tool_name":"mcp__github__list_repos"}' 0 "mcp-allow: github allowed"
+test_ex mcp-server-allowlist.sh '{"tool_name":"mcp__filesystem__read_file"}' 0 "mcp-allow: filesystem allowed"
+test_ex mcp-server-allowlist.sh '{"tool_name":"mcp__evil__steal_data"}' 2 "mcp-allow: evil server BLOCKED"
+test_ex mcp-server-allowlist.sh '{"tool_name":"mcp__slack__send_message"}' 2 "mcp-allow: slack not in list BLOCKED"
+test_ex mcp-server-allowlist.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "mcp-allow: Bash still passes with allowlist"
+unset CC_MCP_ALLOWED
+
+# ========== mcp-tool-audit-log ==========
+echo "mcp-tool-audit-log.sh:"
+export CC_MCP_AUDIT_LOG="/tmp/test-mcp-audit-$$.log"
+rm -f "$CC_MCP_AUDIT_LOG"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"mcp__github__list_repos","tool_result":{"exitCode":"0"}}' 0 "mcp-audit: logs github call"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "mcp-audit: skips non-MCP"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"mcp__filesystem__read_file"}' 0 "mcp-audit: logs filesystem"
+test_ex mcp-tool-audit-log.sh '{}' 0 "mcp-audit: empty"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"Read","tool_input":{"file_path":"x"}}' 0 "mcp-audit: skips Read"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"mcp__slack__send","tool_result":{"exitCode":"1"}}' 0 "mcp-audit: logs failed call"
+test_ex mcp-tool-audit-log.sh '{"tool_name":"Edit","tool_input":{"file_path":"x"}}' 0 "mcp-audit: skips Edit"
+rm -f "$CC_MCP_AUDIT_LOG"
+unset CC_MCP_AUDIT_LOG
+
 # ========== Final push: all hooks to 7+ tests ==========
 test_ex hook-stdout-sanitizer.sh '{"tool_input":{"command":"echo test"}}' 0 "stdout-sanitizer: echo cmd"
 test_ex hook-stdout-sanitizer.sh '{"tool_name":"Read","tool_input":{"file_path":"x.ts"}}' 0 "stdout-sanitizer: read passthru"
