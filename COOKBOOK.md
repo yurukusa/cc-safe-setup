@@ -276,6 +276,36 @@ echo "pm" > .claude/current-role.txt
 
 Restricts tools based on agent role. PM can only read and delegate (no Edit/Write/Bash). Architect can design but not execute. Reviewer is read-only. Developer has full access. Switch roles: `echo "developer" > .claude/current-role.txt`. See [#40425](https://github.com/anthropics/claude-code/issues/40425).
 
+## Recipe: Fix git show --no-stat Bug
+
+Claude Code frequently runs `git show <ref> --no-stat`, which fails because `--no-stat` is not a valid git-show flag. This wastes context on error output. The hook silently rewrites the command.
+
+```bash
+npx cc-safe-setup --install-example git-show-flag-sanitizer
+```
+
+Install in `.claude/settings.json` as a PreToolUse hook with matcher `Bash`. The hook detects `git show` + `--no-stat`, strips the invalid flag, and returns the corrected command via `updatedInput`. See [#13071](https://github.com/anthropics/claude-code/issues/13071).
+
+## Recipe: Disable Auto-Compaction
+
+Power users who manage context manually can block auto-compaction entirely:
+
+```bash
+npx cc-safe-setup --install-example compact-blocker
+```
+
+Install as a PreCompact hook (no matcher needed). Exit code 2 blocks compaction. For conditional control, add a guard: `[ -f /tmp/allow-compact ] && exit 0`. See [#6689](https://github.com/anthropics/claude-code/issues/6689).
+
+## Recipe: WebFetch Domain Allowlist
+
+`WebFetch(domain:*)` in settings.json fails in sandbox mode. This hook auto-approves WebFetch requests by domain:
+
+```bash
+npx cc-safe-setup --install-example webfetch-domain-allow
+```
+
+Install as a PreToolUse hook with matcher `WebFetch`. By default allows all domains. Set `CC_WEBFETCH_ALLOW_DOMAINS=github.com,docs.anthropic.com` for specific domains. See [#9329](https://github.com/anthropics/claude-code/issues/9329).
+
 ## Further Reading
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)
