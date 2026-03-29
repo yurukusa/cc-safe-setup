@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T17:20:37+09:00
+Updated: 2026-03-29T17:30:19+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T17:20:37+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 33e5659 checkpoint: auto-save 17:19:55
+- Last commit: 0a2c8e5 checkpoint: auto-save 17:30:12
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./README.md
+./docs/README.ja.md
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/pre-compact-transcript-export.sh
-./README.md
 ./examples/todo-deadline-warn.sh
 ./examples/dotenv-example-sync.sh
 ./examples/session-error-rate-monitor.sh
-./docs/README.ja.md
 ./COOKBOOK.md
 ```
 
