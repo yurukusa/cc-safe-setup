@@ -12951,6 +12951,18 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "dotenv-example-sync.sh:"
+test_ex dotenv-example-sync.sh '{}' 0 "dotenv-sync: empty input"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "dotenv-sync: non-env file ignored"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/.env"}}' 0 "dotenv-sync: .env without .env.example passes"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/.env.local"}}' 0 "dotenv-sync: .env.local triggers"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/.env.production"}}' 0 "dotenv-sync: .env.production triggers"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/.env.example"}}' 0 "dotenv-sync: .env.example itself ignored"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/src/.env"}}' 0 "dotenv-sync: nested .env"
+test_ex dotenv-example-sync.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/.env"}}' 0 "dotenv-sync: read tool passes"
+test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":""}}' 0 "dotenv-sync: empty path"
+echo ""
+
 echo "session-error-rate-monitor.sh:"
 test_ex session-error-rate-monitor.sh '{}' 0 "error-rate-monitor: empty input"
 test_ex session-error-rate-monitor.sh '{"tool_name":"Bash","tool_result":{"exit_code":"0"}}' 0 "error-rate-monitor: success exit code"
