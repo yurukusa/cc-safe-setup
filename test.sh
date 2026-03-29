@@ -13466,14 +13466,15 @@ echo ""
 # --- session-end-logger ---
 echo "session-end-logger.sh:"
 _ORIG_DIR="$(pwd)"
+_ABS_EXDIR="$(cd "$EXDIR" && pwd)"
 _TMP_REPO=$(mktemp -d)
 cd "$_TMP_REPO" && git init -q && git commit --allow-empty -m "init" -q
 # Run directly (not via test_ex since we need cwd)
-EXIT=0; echo '{}' | bash "$EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
+EXIT=0; echo '{}' | bash "$_ABS_EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
 [ "$EXIT" -eq 0 ] && echo "  PASS: empty input passes" && PASS=$((PASS+1)) || { echo "  FAIL: empty input passes (exit $EXIT)"; FAIL=$((FAIL+1)); }
-EXIT=0; echo '{"session_id":"test-123"}' | bash "$EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
+EXIT=0; echo '{"session_id":"test-123"}' | bash "$_ABS_EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
 [ "$EXIT" -eq 0 ] && echo "  PASS: with session_id passes" && PASS=$((PASS+1)) || { echo "  FAIL: with session_id passes (exit $EXIT)"; FAIL=$((FAIL+1)); }
-EXIT=0; echo '{"session_id":"abc","tool_input":{}}' | bash "$EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
+EXIT=0; echo '{"session_id":"abc","tool_input":{}}' | bash "$_ABS_EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
 [ "$EXIT" -eq 0 ] && echo "  PASS: with extra fields passes" && PASS=$((PASS+1)) || { echo "  FAIL: with extra fields passes (exit $EXIT)"; FAIL=$((FAIL+1)); }
 # Verify log file was created
 if [ -f ".claude/session-logs/$(date '+%Y-%m-%d').md" ]; then
