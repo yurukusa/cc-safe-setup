@@ -13517,6 +13517,14 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- plugin-process-cleanup ---
+echo "plugin-process-cleanup.sh:"
+test_ex plugin-process-cleanup.sh '{}' 0 "empty input passes"
+test_ex plugin-process-cleanup.sh '{"session_id":"test"}' 0 "session end passes"
+test_ex plugin-process-cleanup.sh '{"stop_reason":"user_exit"}' 0 "user exit passes"
+test_ex plugin-process-cleanup.sh '{"event":"SessionEnd"}' 0 "SessionEnd event passes"
+echo ""
+
 # --- tmp-output-size-guard ---
 echo "tmp-output-size-guard.sh:"
 test_ex tmp-output-size-guard.sh '{}' 0 "empty input passes"
