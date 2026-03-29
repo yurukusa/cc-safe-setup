@@ -12331,6 +12331,185 @@ test_ex session-permission-reset-guard.sh '{"tool_input":{"command":""}}' 0 "per
 test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "perm-reset: git log allowed"
 test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git add ."}}' 0 "perm-reset: git add allowed"
 
+# ========== Edge case tests for low-coverage hooks (4-test hooks → 7+) ==========
+
+# --- no-callback-hell ---
+echo "no-callback-hell.sh (edge cases):"
+test_ex no-callback-hell.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "callback-hell: simple code"
+test_ex no-callback-hell.sh '{"tool_input":{"new_string":""}}' 0 "callback-hell: empty"
+test_ex no-callback-hell.sh '{"tool_input":{"content":"function a(function b(function c(function d(function e(){}))))"}}' 0 "callback-hell: deep nest warns"
+test_ex no-callback-hell.sh '{}' 0 "callback-hell: no input"
+test_ex no-callback-hell.sh '{"tool_input":{"new_string":"const fn = () => {}"}}' 0 "callback-hell: arrow function"
+test_ex no-callback-hell.sh '{"tool_input":{"new_string":"function single() { return 1 }"}}' 0 "callback-hell: single function ok"
+
+# --- no-commit-fixup ---
+echo "no-commit-fixup.sh (edge cases):"
+test_ex no-commit-fixup.sh '{"tool_input":{"command":"git push origin main"}}' 0 "commit-fixup: push checks"
+test_ex no-commit-fixup.sh '{"tool_input":{"command":"git status"}}' 0 "commit-fixup: non-push ignored"
+test_ex no-commit-fixup.sh '{"tool_input":{"command":"ls -la"}}' 0 "commit-fixup: non-git ignored"
+test_ex no-commit-fixup.sh '{"tool_input":{"command":""}}' 0 "commit-fixup: empty"
+test_ex no-commit-fixup.sh '{}' 0 "commit-fixup: no input"
+test_ex no-commit-fixup.sh '{"tool_input":{"command":"git push --force origin dev"}}' 0 "commit-fixup: force push"
+
+# --- no-console-assert ---
+echo "no-console-assert.sh (edge cases):"
+test_ex no-console-assert.sh '{"tool_input":{"new_string":"console.assert(true)"}}' 0 "console-assert: detected warns"
+test_ex no-console-assert.sh '{"tool_input":{"new_string":"console.log(\"hello\")"}}' 0 "console-assert: log ok"
+test_ex no-console-assert.sh '{"tool_input":{"new_string":""}}' 0 "console-assert: empty"
+test_ex no-console-assert.sh '{}' 0 "console-assert: no input"
+test_ex no-console-assert.sh '{"tool_input":{"content":"// console.assert in comment"}}' 0 "console-assert: in comment"
+test_ex no-console-assert.sh '{"tool_input":{"new_string":"console.error(\"fail\")"}}' 0 "console-assert: error ok"
+
+# --- no-console-error-swallow ---
+echo "no-console-error-swallow.sh (edge cases):"
+test_ex no-console-error-swallow.sh '{"tool_input":{"new_string":"try { x() } catch(e) { }"}}' 0 "error-swallow: empty catch warns"
+test_ex no-console-error-swallow.sh '{"tool_input":{"new_string":"try { x() } catch(e) { log(e) }"}}' 0 "error-swallow: logged ok"
+test_ex no-console-error-swallow.sh '{"tool_input":{"new_string":""}}' 0 "error-swallow: empty"
+test_ex no-console-error-swallow.sh '{}' 0 "error-swallow: no input"
+test_ex no-console-error-swallow.sh '{"tool_input":{"content":"except:\n    pass"}}' 0 "error-swallow: python pass warns"
+test_ex no-console-error-swallow.sh '{"tool_input":{"content":"except Exception as e:\n    logger.error(e)"}}' 0 "error-swallow: python logged ok"
+
+# --- no-deep-nesting ---
+echo "no-deep-nesting.sh (edge cases):"
+test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"if (x) { if (y) { if (z) { if (w) { if (v) { } } } } }"}}' 0 "deep-nesting: 5 levels warns"
+test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"if (x) { return }"}}' 0 "deep-nesting: 1 level ok"
+test_ex no-deep-nesting.sh '{"tool_input":{"new_string":""}}' 0 "deep-nesting: empty"
+test_ex no-deep-nesting.sh '{}' 0 "deep-nesting: no input"
+test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"const obj = {a: {b: {c: 1}}}"}}' 0 "deep-nesting: object literal"
+test_ex no-deep-nesting.sh '{"tool_input":{"content":"function f() { return 1 }"}}' 0 "deep-nesting: flat function"
+
+# --- no-document-write ---
+echo "no-document-write.sh (edge cases):"
+test_ex no-document-write.sh '{"tool_input":{"new_string":"document.write(\"hello\")"}}' 0 "doc-write: detected warns"
+test_ex no-document-write.sh '{"tool_input":{"new_string":"document.getElementById(\"x\")"}}' 0 "doc-write: getElementById ok"
+test_ex no-document-write.sh '{"tool_input":{"new_string":""}}' 0 "doc-write: empty"
+test_ex no-document-write.sh '{}' 0 "doc-write: no input"
+test_ex no-document-write.sh '{"tool_input":{"content":"// document.write in comment"}}' 0 "doc-write: in comment"
+test_ex no-document-write.sh '{"tool_input":{"new_string":"document.writeln(\"test\")"}}' 0 "doc-write: writeln"
+
+# --- no-empty-function ---
+echo "no-empty-function.sh (edge cases):"
+test_ex no-empty-function.sh '{"tool_input":{"new_string":"function noop() { }"}}' 0 "empty-func: detected warns"
+test_ex no-empty-function.sh '{"tool_input":{"new_string":"function impl() { return 1 }"}}' 0 "empty-func: has body ok"
+test_ex no-empty-function.sh '{"tool_input":{"new_string":""}}' 0 "empty-func: empty"
+test_ex no-empty-function.sh '{}' 0 "empty-func: no input"
+test_ex no-empty-function.sh '{"tool_input":{"new_string":"const fn = () => { }"}}' 0 "empty-func: arrow empty warns"
+test_ex no-empty-function.sh '{"tool_input":{"new_string":"const fn = () => { return x }"}}' 0 "empty-func: arrow with body"
+
+# --- no-exec-user-input ---
+echo "no-exec-user-input.sh (edge cases):"
+test_ex no-exec-user-input.sh '{"tool_input":{"new_string":"exec(req.body.cmd)"}}' 0 "exec-input: detected warns"
+test_ex no-exec-user-input.sh '{"tool_input":{"new_string":"exec(\"ls -la\")"}}' 0 "exec-input: literal ok"
+test_ex no-exec-user-input.sh '{"tool_input":{"new_string":""}}' 0 "exec-input: empty"
+test_ex no-exec-user-input.sh '{}' 0 "exec-input: no input"
+test_ex no-exec-user-input.sh '{"tool_input":{"content":"spawn(req.query.cmd)"}}' 0 "exec-input: spawn warns"
+test_ex no-exec-user-input.sh '{"tool_input":{"new_string":"spawn(\"node\", [\"app.js\"])"}}' 0 "exec-input: spawn literal ok"
+
+# --- no-git-rebase-public ---
+echo "no-git-rebase-public.sh (edge cases):"
+test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git rebase main"}}' 0 "rebase-public: rebase checks"
+test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git status"}}' 0 "rebase-public: non-rebase ignored"
+test_ex no-git-rebase-public.sh '{"tool_input":{"command":"ls"}}' 0 "rebase-public: non-git ignored"
+test_ex no-git-rebase-public.sh '{"tool_input":{"command":""}}' 0 "rebase-public: empty"
+test_ex no-git-rebase-public.sh '{}' 0 "rebase-public: no input"
+test_ex no-git-rebase-public.sh '{"tool_input":{"command":"git rebase --abort"}}' 0 "rebase-public: abort ok"
+
+# --- no-http-without-https ---
+echo "no-http-without-https.sh (edge cases):"
+test_ex no-http-without-https.sh '{"tool_input":{"new_string":"fetch(\"http://api.example.com\")"}}' 0 "http-https: http warns"
+test_ex no-http-without-https.sh '{"tool_input":{"new_string":"fetch(\"https://api.example.com\")"}}' 0 "http-https: https ok"
+test_ex no-http-without-https.sh '{"tool_input":{"new_string":"fetch(\"http://localhost:3000\")"}}' 0 "http-https: localhost ok"
+test_ex no-http-without-https.sh '{"tool_input":{"new_string":""}}' 0 "http-https: empty"
+test_ex no-http-without-https.sh '{}' 0 "http-https: no input"
+test_ex no-http-without-https.sh '{"tool_input":{"content":"// http://example.com in comment"}}' 0 "http-https: in comment"
+
+# --- no-large-commit ---
+echo "no-large-commit.sh (edge cases):"
+test_ex no-large-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "large-commit: commit checks"
+test_ex no-large-commit.sh '{"tool_input":{"command":"git status"}}' 0 "large-commit: non-commit ignored"
+test_ex no-large-commit.sh '{"tool_input":{"command":"ls"}}' 0 "large-commit: non-git ignored"
+test_ex no-large-commit.sh '{"tool_input":{"command":""}}' 0 "large-commit: empty"
+test_ex no-large-commit.sh '{}' 0 "large-commit: no input"
+test_ex no-large-commit.sh '{"tool_input":{"command":"git commit --amend"}}' 0 "large-commit: amend checks"
+
+# --- no-nested-ternary ---
+echo "no-nested-ternary.sh (edge cases):"
+test_ex no-nested-ternary.sh '{"tool_input":{"new_string":"x ? (y ? a : b) : c"}}' 0 "nested-ternary: nested warns"
+test_ex no-nested-ternary.sh '{"tool_input":{"new_string":"x ? a : b"}}' 0 "nested-ternary: single ok"
+test_ex no-nested-ternary.sh '{"tool_input":{"new_string":""}}' 0 "nested-ternary: empty"
+test_ex no-nested-ternary.sh '{}' 0 "nested-ternary: no input"
+test_ex no-nested-ternary.sh '{"tool_input":{"new_string":"const val = condition ? true : false"}}' 0 "nested-ternary: simple ternary"
+test_ex no-nested-ternary.sh '{"tool_input":{"content":"return a > b ? a : b"}}' 0 "nested-ternary: math ternary ok"
+
+# --- no-sensitive-log ---
+echo "no-sensitive-log.sh (edge cases):"
+test_ex no-sensitive-log.sh '{"tool_input":{"new_string":"console.log(password)"}}' 0 "sensitive-log: password warns"
+test_ex no-sensitive-log.sh '{"tool_input":{"new_string":"console.log(\"hello\")"}}' 0 "sensitive-log: safe log ok"
+test_ex no-sensitive-log.sh '{"tool_input":{"new_string":""}}' 0 "sensitive-log: empty"
+test_ex no-sensitive-log.sh '{}' 0 "sensitive-log: no input"
+test_ex no-sensitive-log.sh '{"tool_input":{"content":"print(token)"}}' 0 "sensitive-log: python token warns"
+test_ex no-sensitive-log.sh '{"tool_input":{"new_string":"console.log(username)"}}' 0 "sensitive-log: username ok"
+
+# --- test-before-commit ---
+echo "test-before-commit.sh (edge cases):"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "test-before-commit: commit checks"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git status"}}' 0 "test-before-commit: non-commit ignored"
+test_ex test-before-commit.sh '{"tool_input":{"command":"ls"}}' 0 "test-before-commit: non-git ignored"
+test_ex test-before-commit.sh '{"tool_input":{"command":""}}' 0 "test-before-commit: empty"
+test_ex test-before-commit.sh '{}' 0 "test-before-commit: no input"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit --allow-empty"}}' 0 "test-before-commit: allow-empty checks"
+
+# --- tool-call-rate-limiter ---
+echo "tool-call-rate-limiter.sh (edge cases):"
+rm -f ~/.claude/rate-limiter.log
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "rate-limiter: first call ok"
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Edit","tool_input":{"file_path":"x.ts"}}' 0 "rate-limiter: second call ok"
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Read","tool_input":{"file_path":"x.ts"}}' 0 "rate-limiter: third call ok"
+test_ex tool-call-rate-limiter.sh '{}' 0 "rate-limiter: empty input"
+test_ex tool-call-rate-limiter.sh '{"tool_name":"Write","tool_input":{"file_path":"x.ts"}}' 0 "rate-limiter: fourth call ok"
+rm -f ~/.claude/rate-limiter.log
+
+# --- auto-git-checkpoint ---
+echo "auto-git-checkpoint.sh (edge cases):"
+test_ex auto-git-checkpoint.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "checkpoint: edit triggers"
+test_ex auto-git-checkpoint.sh '{"tool_name":"Write","tool_input":{"file_path":"src/new.ts"}}' 0 "checkpoint: write triggers"
+test_ex auto-git-checkpoint.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "checkpoint: read ignored"
+test_ex auto-git-checkpoint.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "checkpoint: bash ignored"
+test_ex auto-git-checkpoint.sh '{}' 0 "checkpoint: empty input"
+test_ex auto-git-checkpoint.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "checkpoint: empty path"
+
+# --- check-semantic-versioning ---
+echo "check-semantic-versioning.sh (edge cases):"
+test_ex check-semantic-versioning.sh '{"tool_input":{"new_string":"\"version\": \"1.2.3\""}}' 0 "semver: valid semver ok"
+test_ex check-semantic-versioning.sh '{"tool_input":{"new_string":"\"version\": \"v1.2.3\""}}' 0 "semver: v-prefix warns"
+test_ex check-semantic-versioning.sh '{"tool_input":{"new_string":""}}' 0 "semver: empty"
+test_ex check-semantic-versioning.sh '{}' 0 "semver: no input"
+test_ex check-semantic-versioning.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "semver: no version field"
+test_ex check-semantic-versioning.sh '{"tool_input":{"content":"\"version\": \"alpha\""}}' 0 "semver: non-numeric warns"
+
+# --- gitignore-check ---
+echo "gitignore-check.sh (edge cases):"
+test_ex gitignore-check.sh '{"tool_input":{"command":"git add ."}}' 0 "gitignore: git add checks"
+test_ex gitignore-check.sh '{"tool_input":{"command":"git status"}}' 0 "gitignore: non-add ignored"
+test_ex gitignore-check.sh '{"tool_input":{"command":"ls"}}' 0 "gitignore: non-git ignored"
+test_ex gitignore-check.sh '{"tool_input":{"command":""}}' 0 "gitignore: empty"
+test_ex gitignore-check.sh '{}' 0 "gitignore: no input"
+test_ex gitignore-check.sh '{"tool_input":{"command":"git add src/main.ts"}}' 0 "gitignore: specific file add"
+
+# --- check-abort-controller (stub) ---
+echo "check-abort-controller.sh (edge cases):"
+test_ex check-abort-controller.sh '{"tool_input":{"new_string":"fetch(url)"}}' 0 "abort-ctrl: fetch warns"
+test_ex check-abort-controller.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "abort-ctrl: no fetch ok"
+test_ex check-abort-controller.sh '{"tool_input":{"new_string":""}}' 0 "abort-ctrl: empty"
+test_ex check-abort-controller.sh '{}' 0 "abort-ctrl: no input"
+test_ex check-abort-controller.sh '{"tool_input":{"content":"fetch(url, {signal})"}}' 0 "abort-ctrl: with signal"
+test_ex check-abort-controller.sh '{"tool_input":{"new_string":"axios.get(url)"}}' 0 "abort-ctrl: axios ok"
+
+# --- hook-stdout-sanitizer ---
+echo "hook-stdout-sanitizer.sh (edge cases):"
+test_ex hook-stdout-sanitizer.sh '{}' 0 "sanitizer: no target = usage msg"
+test_ex hook-stdout-sanitizer.sh '' 0 "sanitizer: empty input"
+
 echo ""
 
 TOTAL=$((PASS + FAIL))
