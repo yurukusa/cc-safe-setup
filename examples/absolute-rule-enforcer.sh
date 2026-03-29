@@ -26,7 +26,7 @@ done
 [ -z "$CLAUDEMD" ] && exit 0
 
 # Extract absolute rules (lines containing ABSOLUTE, MUST NEVER, NEVER, 絶対)
-RULES=$(grep -iE '(ABSOLUTE|MUST NEVER|NEVER|絶対|禁止)' "$CLAUDEMD" 2>/dev/null | head -10)
+RULES=$(grep -iE '(ABSOLUTE|MUST NEVER|NEVER|絶対|禁止)' "$CLAUDEMD" 2>/dev/null | head -10 || true)
 
 if [ -z "$RULES" ]; then
   exit 0

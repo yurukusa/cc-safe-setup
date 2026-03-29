@@ -15,7 +15,7 @@
 # TRIGGER: PreToolUse
 # MATCHER: "Bash"
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

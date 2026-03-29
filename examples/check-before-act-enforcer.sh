@@ -19,8 +19,14 @@ set -euo pipefail
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
+# Only enforce for Edit and Write
+case "$TOOL" in
+  Edit|Write) ;;
+  *) exit 0 ;;
+esac
+
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$FILE" ] && exit 0
 
 # Skip new file creation (Write to non-existent file)
