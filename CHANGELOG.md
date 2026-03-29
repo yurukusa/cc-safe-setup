@@ -1,5 +1,20 @@
 # Changelog
 
+## [29.6.33] - 2026-03-29
+- **New**: 23 hooks in 6 new categories:
+  - CI/CD: github-actions-secret-guard, ci-workflow-guard, gitops-drift-guard, dotenv-commit-guard
+  - Cloud/Infra: k8s-production-guard, schema-migration-guard, network-exfil-guard
+  - MCP Security: mcp-server-allowlist, mcp-tool-audit-log
+  - Role-based: role-tool-guard (#40425)
+  - Session: session-resume-env-fix (#40391), pre-compact-knowledge-save, headless-empty-result-guard (#40432)
+  - Process: spec-file-scope-guard (#40383), read-all-files-enforcer (#40389), permission-entry-validator (#40382), self-modify-bypass-guard (#40463), subagent-claudemd-inject (#40459), system-message-workaround (#40380)
+  - Safety: cron-modification-guard (#40421), deploy-path-verify-guard (#40421), edit-counter-test-gate (#40401), session-permission-reset-guard (#40384), token-budget-per-task, cwd-project-boundary-guard, file-change-undo-tracker
+- **Docs**: TRIGGER/MATCHER comments added to 308 hooks (585/585 now documented)
+- **Tests**: +591 tests (8,139→8,730), all hooks 7+ test coverage
+- **SEO**: 27 pages updated to 585/8,730
+- **Issue answers**: 13 GitHub Issues answered with hook workarounds
+- **Stats**: 585 examples, 8,730 tests, 51 SEO pages
+
 ## [29.6.31] - 2026-03-29
 - **New**: 3 hooks using v2.1.83 hook events — direnv-auto-reload (CwdChanged), dotenv-watch (FileChanged), pre-compact-checkpoint (PreCompact)
 - **New**: 3 hooks — plan-mode-enforcer, shell-wrapper-guard, git-checkout-safety-guard

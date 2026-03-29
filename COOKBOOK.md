@@ -236,6 +236,46 @@ npx cc-safe-setup --install-example push-requires-test-pass-record
 
 Two-hook system: the PostToolUse `record` hook detects successful test runs (`npm test`, `pytest`, `cargo test`, etc.) and saves a timestamp. The PreToolUse hook blocks push to main/master/production if no recent test pass exists (30-minute window). See [#36673](https://github.com/anthropics/claude-code/issues/36673).
 
+## Recipe: Protect CI/CD Pipelines
+
+```bash
+npx cc-safe-setup --install-example github-actions-secret-guard
+npx cc-safe-setup --install-example ci-workflow-guard
+npx cc-safe-setup --install-example gitops-drift-guard
+```
+
+Three-hook system: `github-actions-secret-guard` (PostToolUse) detects hardcoded secrets in workflow files. `ci-workflow-guard` (PostToolUse) flags `--no-verify`, remote script execution, and broad write permissions. `gitops-drift-guard` (PreToolUse) warns when editing infrastructure files on protected branches.
+
+## Recipe: Kubernetes Production Safety
+
+```bash
+npx cc-safe-setup --install-example k8s-production-guard
+# Set production contexts/namespaces:
+export CC_K8S_PROD_CONTEXTS="prod:production"
+export CC_K8S_PROD_NAMESPACES="production:prod"
+```
+
+Blocks `kubectl delete`, `scale --replicas=0`, `drain`, and `helm uninstall` on production namespaces/contexts. Safe operations (get, logs, describe) are always allowed.
+
+## Recipe: MCP Server Allowlist
+
+```bash
+npx cc-safe-setup --install-example mcp-server-allowlist
+npx cc-safe-setup --install-example mcp-tool-audit-log
+export CC_MCP_ALLOWED="github:filesystem:memory"
+```
+
+Only allows MCP tool calls from whitelisted servers. Blocks calls from unknown/synced servers that may cause OOM crashes ([#20412](https://github.com/anthropics/claude-code/issues/20412)). The audit log records all MCP tool calls for security review (OWASP MCP09 compliance).
+
+## Recipe: Role-Based Agent Teams
+
+```bash
+npx cc-safe-setup --install-example role-tool-guard
+echo "pm" > .claude/current-role.txt
+```
+
+Restricts tools based on agent role. PM can only read and delegate (no Edit/Write/Bash). Architect can design but not execute. Reviewer is read-only. Developer has full access. Switch roles: `echo "developer" > .claude/current-role.txt`. See [#40425](https://github.com/anthropics/claude-code/issues/40425).
+
 ## Further Reading
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)
