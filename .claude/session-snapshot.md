@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T19:59:43+09:00
+Updated: 2026-03-29T20:22:20+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T19:59:43+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0372161 checkpoint: auto-save 19:59:00
+- Last commit: d133254 checkpoint: auto-save 20:22:13
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./examples/session-health-monitor.sh
+./examples/prefer-dedicated-tools.sh
 ./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-03-29.md
-./test.sh
 ./examples/polyglot-rm-guard.sh
 ./examples/plugin-process-cleanup.sh
 ./examples/tmp-output-size-guard.sh
 ./examples/no-output-truncation.sh
-./examples/npm-supply-chain-guard.sh
-./examples/bash-secret-output-detector.sh
 ```
 
