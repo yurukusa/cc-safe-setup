@@ -2339,6 +2339,8 @@ LARGE_NEW=$(printf 'new %s\n' $(seq 1 30))
 LARGE_JSON=$(jq -n --arg o "$LARGE_OLD" --arg n "$LARGE_NEW" '{"tool_input":{"old_string":$o,"new_string":$n,"file_path":"src/big.ts"}}')
 test_ex max-edit-size-guard.sh "$LARGE_JSON" 0 "large edit warns (exit 0)"
 test_ex max-edit-size-guard.sh '{"tool_input":{"new_string":"only new"}}' 0 "no old_string passes"
+test_ex max-edit-size-guard.sh '{"tool_input":{"command":"echo test0"}}' 0 "max-edit-size-guard: echo test0 passes"
+test_ex max-edit-size-guard.sh '{"tool_input":{"command":"echo test1"}}' 0 "max-edit-size-guard: echo test1 passes"
 echo ""
 
 # --- mcp-tool-guard ---
@@ -10126,6 +10128,8 @@ echo "strip-coauthored-by.sh:"
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"fix bug\""}}' 0 "strip-coauthor: normal commit passes"
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo hello"}}' 0 "strip-coauthor: non-git passes"
 test_ex strip-coauthored-by.sh '{}' 0 "strip-coauthor: empty input"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo test0"}}' 0 "strip-coauthored-by: echo test0 passes"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo test1"}}' 0 "strip-coauthored-by: echo test1 passes"
 echo ""
 
 echo "bash-trace-guard.sh:"
