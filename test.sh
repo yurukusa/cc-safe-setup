@@ -11866,6 +11866,11 @@ test_ex claudeignore-enforce-guard.sh '{"tool_name":"Read","tool_input":{}}' 0 "
 test_ex claudeignore-enforce-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "claudeignore: non-matching tool"
 test_ex claudeignore-enforce-guard.sh '{"tool_name":"Grep","tool_input":{"path":""}}' 0 "claudeignore: empty path"
 test_ex claudeignore-enforce-guard.sh '{"tool_name":"Glob","tool_input":{"path":"src/"}}' 0 "claudeignore: no ignore file = allow glob"
+test_ex claudeignore-enforce-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"output.json"}}' 0 "claudeignore: Write no ignore = allow"
+test_ex claudeignore-enforce-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"src/utils/helper.ts"}}' 0 "claudeignore: deep path no ignore = allow"
+test_ex claudeignore-enforce-guard.sh '{"tool_name":"Grep","tool_input":{"path":"","pattern":"foo"}}' 0 "claudeignore: Grep empty path"
+test_ex claudeignore-enforce-guard.sh '{"tool_name":"Agent","tool_input":{"prompt":"do stuff"}}' 0 "claudeignore: Agent tool ignored"
+test_ex claudeignore-enforce-guard.sh '{"tool_name":"Bash","tool_input":{"command":"cat secret.env"}}' 0 "claudeignore: Bash tool not matched"
 echo ""
 
 # ========== subagent-tool-call-limiter (#36727) ==========
@@ -11876,6 +11881,11 @@ test_ex subagent-tool-call-limiter.sh '{"tool_name":"Bash","tool_input":{"comman
 rm -f /tmp/claude-tool-call-counter-* 2>/dev/null; CC_MAX_TOOL_CALLS=999 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Read","tool_input":{"file_path":"a.txt"}}' 0 "tool-limiter: high limit allowed"
 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Edit","tool_input":{"file_path":"b.txt"}}' 0 "tool-limiter: increments"
 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Write","tool_input":{"file_path":"c.txt"}}' 0 "tool-limiter: counter based on PPID"
+test_ex subagent-tool-call-limiter.sh '{"tool_name":"Grep","tool_input":{"pattern":"foo"}}' 0 "tool-limiter: grep counted"
+test_ex subagent-tool-call-limiter.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "tool-limiter: glob counted"
+test_ex subagent-tool-call-limiter.sh '{"tool_name":"Agent","tool_input":{"prompt":"research"}}' 0 "tool-limiter: agent counted"
+test_ex subagent-tool-call-limiter.sh '{"tool_name":"Bash","tool_input":{"command":"echo 1"}}' 0 "tool-limiter: bash counted"
+test_ex subagent-tool-call-limiter.sh '{"tool_name":"Read","tool_input":{"file_path":"x.txt"}}' 0 "tool-limiter: read counted"
 echo ""
 
 # ========== consecutive-failure-circuit-breaker (#31946) ==========
@@ -11887,6 +11897,11 @@ test_ex consecutive-failure-circuit-breaker.sh '{}' 0 "circuit-breaker: empty in
 test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{}}' 0 "circuit-breaker: no exit code = success"
 test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{"exitCode":0}}' 0 "circuit-breaker: explicit success"
 test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{"exitCode":2}}' 0 "circuit-breaker: failure tracked"
+test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{"exitCode":127}}' 0 "circuit-breaker: command not found tracked"
+test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{"exitCode":1,"stdout":"Permission denied"}}' 0 "circuit-breaker: permission denied tracked"
+test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Edit","tool_result":{"exitCode":1}}' 0 "circuit-breaker: Edit ignored"
+test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Write","tool_result":{"exitCode":1}}' 0 "circuit-breaker: Write ignored"
+test_ex consecutive-failure-circuit-breaker.sh '{"tool_name":"Bash","tool_result":{"exitCode":0,"stdout":"success"}}' 0 "circuit-breaker: success with output"
 echo ""
 
 # ========== bash-safety-auto-deny (#28993) ==========
@@ -11901,6 +11916,12 @@ test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"git status"}}' 0 "au
 test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"npm test"}}' 0 "auto-deny: npm test allowed"
 test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":""}}' 0 "auto-deny: empty command"
 test_ex bash-safety-auto-deny.sh '{}' 0 "auto-deny: empty input"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"echo hello | cat"}}' 0 "auto-deny: safe pipe allowed"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"cat script.sh | bash"}}' 2 "auto-deny: cat pipe bash BLOCKED"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"mv $(ls *.bak) /tmp/"}}' 2 "auto-deny: mv with command sub BLOCKED"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"chmod $(cat perms.txt) file"}}' 2 "auto-deny: chmod with sub BLOCKED"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"rm -f specific-file.log"}}' 0 "auto-deny: rm specific file allowed"
+test_ex bash-safety-auto-deny.sh '{"tool_input":{"command":"find . -name *.tmp -delete"}}' 0 "auto-deny: find -delete (no rm)"
 echo ""
 
 # ========== bg-task-cooldown-guard (#39038) ==========
@@ -11912,6 +11933,10 @@ test_ex bg-task-cooldown-guard.sh '{}' 0 "bg-cooldown: empty input"
 test_ex bg-task-cooldown-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"test.txt"}}' 0 "bg-cooldown: write without bg task"
 test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "bg-cooldown: npm test safe"
 test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "bg-cooldown: echo safe"
+test_ex bg-task-cooldown-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "bg-cooldown: edit always allowed"
+test_ex bg-task-cooldown-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"test.txt"}}' 0 "bg-cooldown: write always allowed"
+test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"cat README.md"}}' 0 "bg-cooldown: read-only safe"
+test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"python3 -m py_compile src/main.py"}}' 0 "bg-cooldown: compile safe"
 echo ""
 
 # ========== env-inline-secret-guard (#24185) ==========
@@ -11923,6 +11948,12 @@ test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "
 test_ex env-inline-secret-guard.sh '{"tool_input":{"command":""}}' 0 "env-secret: empty command"
 test_ex env-inline-secret-guard.sh '{}' 0 "env-secret: empty input"
 test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"export API_KEY=test && curl"}}' 0 "env-secret: short value allowed"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"curl -H \"token=abcdefghijklmnopqrstuvwxyz0123456789abcd\" http://api.test"}}' 2 "env-secret: long token in param BLOCKED"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"AKIA1234567890123456 aws s3 ls"}}' 2 "env-secret: AWS key BLOCKED"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"xoxb-123-456-abcdefghijk slack post"}}' 2 "env-secret: Slack token BLOCKED"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"npm install express"}}' 0 "env-secret: npm install safe"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"python -c \"import os\""}}' 0 "env-secret: python safe"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"curl https://example.com"}}' 0 "env-secret: curl without secret safe"
 echo ""
 
 # ========== migration-verify-guard (#35435) ==========
@@ -11935,6 +11966,12 @@ test_ex migration-verify-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "mig
 test_ex migration-verify-guard.sh '{"tool_input":{"command":"git status"}}' 0 "migration: git status allowed"
 test_ex migration-verify-guard.sh '{"tool_input":{"command":""}}' 0 "migration: empty command"
 test_ex migration-verify-guard.sh '{}' 0 "migration: empty input"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"knex migrate:latest"}}' 2 "migration: knex migrate BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"sequelize db:migrate"}}' 2 "migration: sequelize BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"flyway migrate"}}' 2 "migration: flyway BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"npx drizzle-kit push"}}' 2 "migration: drizzle push BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"npx prisma generate"}}' 0 "migration: prisma generate allowed"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"cat migrations/001.sql"}}' 0 "migration: reading migration file allowed"
 echo ""
 
 # ========== file-recycle-bin (#39949) ==========
@@ -11946,6 +11983,11 @@ test_ex file-recycle-bin.sh '{"tool_input":{"command":""}}' 0 "recycle-bin: empt
 test_ex file-recycle-bin.sh '{}' 0 "recycle-bin: empty input"
 test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "recycle-bin: defers to destructive-guard"
 test_ex file-recycle-bin.sh '{"tool_input":{"command":"cat file.txt"}}' 0 "recycle-bin: cat ignored"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm src/main.ts"}}' 0 "recycle-bin: rm single file passes"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm -f old.log"}}' 0 "recycle-bin: rm -f passes"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"mv a.txt b.txt"}}' 0 "recycle-bin: mv not intercepted"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"cp a.txt b.txt"}}' 0 "recycle-bin: cp not intercepted"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm -rf ~"}}' 0 "recycle-bin: destructive deferred"
 echo ""
 
 # ========== worktree-memory-guard (#39920) ==========
@@ -11957,6 +11999,11 @@ test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"README.md"}}' 0 "w
 test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":".claude/settings.json"}}' 0 "worktree-mem: settings file"
 test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"package.json"}}' 0 "worktree-mem: package.json"
 test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"test.sh"}}' 0 "worktree-mem: test file"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":".claude/projects/foo/memory/user.md"}}' 0 "worktree-mem: memory path (no worktree = ok)"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"src/components/App.tsx"}}' 0 "worktree-mem: deep path"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":".gitignore"}}' 0 "worktree-mem: dotfile"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"node_modules/foo/index.js"}}' 0 "worktree-mem: node_modules"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":".claude/settings.json"}}' 0 "worktree-mem: claude settings"
 echo ""
 
 # ========== skill-injection-detector (#39686) ==========
@@ -11968,6 +12015,11 @@ test_ex skill-injection-detector.sh '{"tool_name":"Edit","tool_input":{"file_pat
 test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "skill-inject: npm test"
 test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "skill-inject: git status"
 test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "skill-inject: echo"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"claude mcp add my-server"}}' 0 "skill-inject: mcp add (warns via stderr)"
+test_ex skill-injection-detector.sh '{"tool_name":"Write","tool_input":{"file_path":"test.txt"}}' 0 "skill-inject: write"
+test_ex skill-injection-detector.sh '{"tool_name":"Grep","tool_input":{"pattern":"foo"}}' 0 "skill-inject: grep"
+test_ex skill-injection-detector.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "skill-inject: glob"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"python3 -c print(1)"}}' 0 "skill-inject: python"
 echo ""
 
 TOTAL=$((PASS + FAIL))
