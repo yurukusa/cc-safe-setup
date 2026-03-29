@@ -13517,6 +13517,13 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- tmp-output-size-guard ---
+echo "tmp-output-size-guard.sh:"
+test_ex tmp-output-size-guard.sh '{}' 0 "empty input passes"
+test_ex tmp-output-size-guard.sh '{"session_id":"test"}' 0 "session start passes"
+test_ex tmp-output-size-guard.sh '{"event":"SessionStart"}' 0 "SessionStart event passes"
+echo ""
+
 # --- no-output-truncation ---
 echo "no-output-truncation.sh:"
 test_ex no-output-truncation.sh '{"tool_input":{"command":"npm test 2>&1 | tail -3"}}' 2 "blocks npm test | tail"
