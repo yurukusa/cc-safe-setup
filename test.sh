@@ -12958,6 +12958,10 @@ test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"h
 test_ex webfetch-domain-allow.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "webfetch-allow: ignores non-WebFetch"
 test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{}}' 0 "webfetch-allow: no URL passthrough"
 test_ex webfetch-domain-allow.sh '{"tool_name":"Read","tool_input":{"file_path":"test.txt"}}' 0 "webfetch-allow: ignores Read tool"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://api.example.com:8080/data"}}' 0 "webfetch-allow: handles port in URL"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"http://localhost/test"}}' 0 "webfetch-allow: handles http URL"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://sub.domain.example.com/path?q=1"}}' 0 "webfetch-allow: handles subdomain+query"
+test_ex webfetch-domain-allow.sh '{"tool_name":"Edit","tool_input":{"file_path":"test"}}' 0 "webfetch-allow: ignores Edit tool"
 # Verify allow decision is emitted
 OUTPUT=$(echo '{"tool_name":"WebFetch","tool_input":{"url":"https://example.com/page"}}' | bash "$EXDIR/webfetch-domain-allow.sh" 2>/dev/null)
 if echo "$OUTPUT" | jq -e '.hookSpecificOutput.permissionDecision' 2>/dev/null | grep -q 'allow'; then
@@ -13005,6 +13009,11 @@ test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show HEAD"}}' 
 test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "git-show-sanitizer: ignores non-show commands"
 test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-show-sanitizer: ignores non-git commands"
 test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show --no-stat HEAD -- file.txt"}}' 0 "git-show-sanitizer: strips mid-command --no-stat"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show HEAD~3 --no-stat --format=oneline"}}' 0 "git-show-sanitizer: strips with other flags"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git diff --no-stat HEAD"}}' 0 "git-show-sanitizer: ignores git diff --no-stat"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show v1.0.0 --no-stat"}}' 0 "git-show-sanitizer: strips from tag ref"
+test_ex git-show-flag-sanitizer.sh '{"tool_name":"Read","tool_input":{"file_path":"test"}}' 0 "git-show-sanitizer: ignores non-Bash tool"
+test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"echo git show --no-stat"}}' 0 "git-show-sanitizer: ignores echo wrapping"
 # Verify rewritten command has --no-stat removed
 OUTPUT=$(echo '{"tool_input":{"command":"git show HEAD --no-stat"}}' | bash "$EXDIR/git-show-flag-sanitizer.sh" 2>/dev/null)
 if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.command' 2>/dev/null | grep -qv 'no-stat'; then
