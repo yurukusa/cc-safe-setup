@@ -12361,6 +12361,13 @@ test_ex edit-counter-test-gate.sh '{"tool_name":"Bash","tool_input":{"command":"
 test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/after.ts"}}' 0 "edit-gate: after reset ok"
 test_ex edit-counter-test-gate.sh '{"tool_name":"Write","tool_input":{"file_path":"src/new.ts"}}' 0 "edit-gate: write counts"
 test_ex edit-counter-test-gate.sh '{}' 0 "edit-gate: empty input"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "edit-gate: Read ignored"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "edit-gate: Glob ignored"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Grep","tool_input":{"pattern":"TODO"}}' 0 "edit-gate: Grep ignored"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"a.ts"}}' 0 "edit-gate: edit 1 (new sequence)"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"b.ts"}}' 0 "edit-gate: edit 2"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"c.ts"}}' 0 "edit-gate: edit 3 (warns)"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"d.ts"}}' 0 "edit-gate: edit 4 (warns again)"
 rm -f /tmp/claude-edit-test-gate-$$
 
 # ========== session-permission-reset-guard (#40384) ==========
