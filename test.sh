@@ -2000,6 +2000,7 @@ test_ex git-config-guard.sh '{"tool_input":{"command":"git config --global user.
 test_ex git-config-guard.sh '{"tool_input":{"command":"git config --system core.editor vim"}}' 2 "blocks --system"
 test_ex git-config-guard.sh '{"tool_input":{"command":"git config --local user.name test"}}' 0 "allows --local"
 test_ex git-config-guard.sh '{"tool_input":{"command":"git status"}}' 0 "ignores non-config"
+test_ex git-config-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "git-config-guard: pwd passes"
 echo ""
 
 echo "path-traversal-guard.sh:"
@@ -2032,6 +2033,7 @@ test_ex auto-approve-readonly.sh '{"tool_input":{"command":"cat README.md"}}' 0 
 test_ex auto-approve-readonly.sh '{"tool_input":{"command":"ls -la src/"}}' 0 "ls approved"
 test_ex auto-approve-readonly.sh '{"tool_input":{"command":"grep -r TODO src/"}}' 0 "grep approved"
 test_ex auto-approve-readonly.sh '{"tool_input":{"command":"wc -l file.txt"}}' 0 "wc approved"
+test_ex auto-approve-readonly.sh '{"tool_input":{"command":"pwd"}}' 0 "auto-approve-readonly: pwd passes"
 echo ""
 
 echo "auto-approve-git-read.sh:"
@@ -2082,6 +2084,7 @@ test_ex network-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 "gh command
 test_ex network-guard.sh '{"tool_input":{"command":"git push origin main"}}' 0 "git push safe"
 test_ex network-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-network passes"
 test_ex network-guard.sh '{}' 0 "empty passes"
+test_ex network-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "network-guard: pwd passes"
 echo ""
 
 echo "auto-approve-python.sh:"
@@ -2163,6 +2166,7 @@ test_ex aws-region-guard.sh '{"tool_input":{"command":"aws s3 ls --region us-wes
 test_ex aws-region-guard.sh '{"tool_input":{"command":"aws s3 ls --region us-east-1"}}' 0 "aws default region passes"
 test_ex aws-region-guard.sh '{"tool_input":{"command":"aws s3 ls"}}' 0 "aws without --region passes"
 test_ex aws-region-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-aws command passes"
+test_ex aws-region-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "aws-region-guard: pwd passes"
 echo ""
 
 # --- case-sensitive-guard ---
@@ -2201,6 +2205,7 @@ test_ex docker-volume-guard.sh '{"tool_input":{"command":"docker volume rm mydat
 test_ex docker-volume-guard.sh '{"tool_input":{"command":"docker volume prune"}}' 0 "docker volume prune warns (exit 0)"
 test_ex docker-volume-guard.sh '{"tool_input":{"command":"docker volume ls"}}' 0 "docker volume ls passes"
 test_ex docker-volume-guard.sh '{"tool_input":{"command":"docker run hello"}}' 0 "non-volume command passes"
+test_ex docker-volume-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "docker-volume-guard: pwd passes"
 echo ""
 
 # --- encoding-guard ---
@@ -2242,6 +2247,7 @@ test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git commit --no-veri
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git push --no-verify"}}' 0 "push --no-verify warns (exit 0)"
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git commit -m test"}}' 0 "normal commit passes"
 test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "non-git passes"
+test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "git-hook-bypass-guard: pwd passes"
 echo ""
 
 # --- no-verify-blocker ---
@@ -2301,6 +2307,7 @@ test_ex git-submodule-guard.sh '{"tool_input":{"command":"git submodule deinit l
 test_ex git-submodule-guard.sh '{"tool_input":{"command":"git submodule rm libs/core"}}' 0 "submodule rm warns (exit 0)"
 test_ex git-submodule-guard.sh '{"tool_input":{"command":"git submodule add https://example.com/lib"}}' 0 "submodule add passes"
 test_ex git-submodule-guard.sh '{"tool_input":{"command":"git status"}}' 0 "non-submodule passes"
+test_ex git-submodule-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "git-submodule-guard: pwd passes"
 echo ""
 
 # --- kubernetes-guard ---
@@ -2320,6 +2327,7 @@ test_ex log-level-guard.sh '{"tool_input":{"file_path":"src/app.js","new_string"
 test_ex log-level-guard.sh '{"tool_input":{"file_path":"test/app.test.js","new_string":"log.debug(\"test\")"}}' 0 "debug log in test file passes"
 test_ex log-level-guard.sh '{"tool_input":{"file_path":"src/app.js","new_string":"log.info(\"ok\")"}}' 0 "info log passes"
 test_ex log-level-guard.sh '{"tool_input":{}}' 0 "empty input passes"
+test_ex log-level-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "log-level-guard: pwd passes"
 echo ""
 
 # --- max-edit-size-guard ---
@@ -2344,6 +2352,7 @@ EXIT=0; echo '{"tool_name":"mcp__evil__hack","tool_input":{}}' | CC_MCP_BLOCKED_
 [ "$EXIT" -eq 2 ] && echo "  PASS: mcp-tool-guard blocks matching CC_MCP_BLOCKED_TOOLS" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should block (got $EXIT)"; FAIL=$((FAIL+1)); }
 EXIT=0; echo '{"tool_name":"mcp__server__read","tool_input":{}}' | CC_MCP_BLOCKED_TOOLS="evil" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
 [ "$EXIT" -eq 0 ] && echo "  PASS: mcp-tool-guard allows non-blocked MCP tool" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should allow (got $EXIT)"; FAIL=$((FAIL+1)); }
+test_ex mcp-tool-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "mcp-tool-guard: pwd passes"
 echo ""
 
 
@@ -9838,6 +9847,7 @@ test_ex git-message-length-check.sh '{}' 0 "msg-length: empty"
 test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"fix typo in README\""}}' 0 "msg-length: good message"
 test_ex git-message-length-check.sh '{"tool_input":{"command":"git commit -m \"fix\""}}' 0 "msg-length: short warns (exit 0)"
 test_ex git-message-length-check.sh '{"tool_input":{"command":"ls -la"}}' 0 "msg-length: non-git skipped"
+test_ex git-message-length-check.sh '{"tool_input":{"command":"pwd"}}' 0 "git-message-length-check: pwd passes"
 echo ""
 
 echo "output-credential-scan.sh:"
@@ -9890,6 +9900,7 @@ test_ex json-syntax-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tm
 # Empty input
 test_ex json-syntax-check.sh '{}' 0 "json-check: empty input"
 rm -f "$JSON_TEST" "$JSON_BAD" 2>/dev/null
+test_ex json-syntax-check.sh '{"tool_input":{"command":"pwd"}}' 0 "json-syntax-check: pwd passes"
 echo ""
 
 echo "daily-usage-tracker.sh:"
@@ -9966,6 +9977,7 @@ rm -f "$RATE_TEST_FILE" 2>/dev/null
 for i in $(seq 1 5); do echo "$(date +%s)" >> "$RATE_TEST_FILE"; done
 CC_RATE_LIMIT_MAX=10 CC_RATE_LIMIT_WINDOW=60 test_ex tool-call-rate-limiter.sh '{}' 0 "rate-limiter: within custom limit"
 rm -f "$RATE_TEST_FILE" 2>/dev/null
+test_ex tool-call-rate-limiter.sh '{"tool_input":{"command":"pwd"}}' 0 "tool-call-rate-limiter: pwd passes"
 echo ""
 
 echo "fish-shell-wrapper.sh:"
@@ -10079,6 +10091,7 @@ if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks rm with \$HOME"
 echo '{"tool_input":{"command":"mv ${TMPDIR}/old /tmp/new"}}' | bash examples/variable-expansion-guard.sh > /dev/null 2>/dev/null; _VEG_EXIT=$?
 if [ "$_VEG_EXIT" -eq 2 ]; then echo "  PASS: var-expand: blocks mv with \${TMPDIR}"; PASS=$((PASS+1)); else echo "  FAIL: var-expand: blocks mv with \${TMPDIR} (expected 2, got $_VEG_EXIT)"; FAIL=$((FAIL+1)); fi
 set -euo pipefail
+test_ex variable-expansion-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "variable-expansion-guard: pwd passes"
 echo ""
 
 echo "post-compact-safety.sh:"
@@ -13638,6 +13651,7 @@ test_ex tmp-output-size-guard.sh '{}' 0 "empty input passes"
 test_ex tmp-output-size-guard.sh '{"session_id":"test"}' 0 "session start passes"
 test_ex tmp-output-size-guard.sh '{"event":"SessionStart"}' 0 "SessionStart event passes"
 test_ex tmp-output-size-guard.sh '{"tool_name":"Bash"}' 0 "Bash tool passes"
+test_ex tmp-output-size-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "tmp-output-size-guard: pwd passes"
 echo ""
 
 # --- no-output-truncation ---
