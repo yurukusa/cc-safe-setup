@@ -13697,6 +13697,7 @@ test_ex headless-stop-guard.sh '{}' 0 "non-headless passes (runs through)"
 CC_HEADLESS=1 test_ex headless-stop-guard.sh '{}' 0 "CC_HEADLESS=1 exits immediately"
 test_ex headless-stop-guard.sh '{"session_id":"test"}' 0 "with session_id passes"
 test_ex headless-stop-guard.sh '{"tool_input":{}}' 0 "with tool_input passes"
+CC_HEADLESS=0 test_ex headless-stop-guard.sh '{}' 0 "CC_HEADLESS=0 passes through"
 echo ""
 
 TOTAL=$((PASS + FAIL))
