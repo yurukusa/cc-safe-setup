@@ -2021,6 +2021,10 @@ echo ""
 echo "env-var-check.sh:"
 test_ex env-var-check.sh '{"tool_input":{"command":"export PATH=/usr/bin"}}' 0 "PATH export passes"
 test_ex env-var-check.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-export passes"
+test_ex env-var-check.sh '{"tool_input":{"command":"export NODE_ENV=production"}}' 0 "NODE_ENV export passes"
+test_ex env-var-check.sh '{"tool_input":{"command":"unset PATH"}}' 0 "unset passes"
+test_ex env-var-check.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex env-var-check.sh '{}' 0 "empty input passes"
 echo ""
 
 echo "auto-approve-readonly.sh:"
@@ -2130,11 +2134,22 @@ echo ""
 
 echo "auto-approve-ssh.sh:"
 test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":"ssh user@host uptime"}}' 0 "ssh uptime approved"
+test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":"ssh -i key.pem user@host ls"}}' 0 "ssh with key approved"
+test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":"scp file.txt user@host:/tmp/"}}' 0 "scp approved"
+test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "non-ssh passes"
+test_ex auto-approve-ssh.sh '{"tool_name":"Bash","tool_input":{"command":""}}' 0 "empty command passes"
+test_ex auto-approve-ssh.sh '{}' 0 "empty input passes"
 echo ""
 
 echo "commit-quality-gate.sh:"
 test_ex commit-quality-gate.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "vague commit warns (exit 0)"
 test_ex commit-quality-gate.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-commit passes"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"git commit -m \"Add user authentication flow\""}}' 0 "descriptive commit passes"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"git commit -m update"}}' 0 "vague update warns"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"git commit -m wip"}}' 0 "wip commit warns"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":"git status"}}' 0 "non-commit git passes"
+test_ex commit-quality-gate.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex commit-quality-gate.sh '{}' 0 "empty input passes"
 echo ""
 
 # --- aws-region-guard ---
@@ -2156,12 +2171,19 @@ echo ""
 echo "cors-star-warn.sh:"
 test_ex cors-star-warn.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-cors command passes"
 test_ex cors-star-warn.sh '{"tool_input":{"command":"ls"}}' 0 "simple command passes"
+test_ex cors-star-warn.sh '{"tool_input":{"command":"npm start"}}' 0 "npm start passes"
+test_ex cors-star-warn.sh '{"tool_input":{"command":"git status"}}' 0 "git status passes"
+test_ex cors-star-warn.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex cors-star-warn.sh '{}' 0 "empty input passes"
 echo ""
 
 # --- dangling-process-guard ---
 echo "dangling-process-guard.sh:"
 test_ex dangling-process-guard.sh '{}' 0 "Stop hook always exits 0"
 test_ex dangling-process-guard.sh '{"tool_input":{}}' 0 "empty input exits 0"
+test_ex dangling-process-guard.sh '{"tool_input":{"command":"echo test"}}' 0 "with command exits 0"
+test_ex dangling-process-guard.sh '{"tool_name":"Bash","tool_input":{"command":"sleep 1"}}' 0 "sleep command exits 0"
+test_ex dangling-process-guard.sh '{"tool_name":"Bash","tool_input":{"command":"node server.js &"}}' 0 "background process exits 0"
 echo ""
 
 # --- docker-volume-guard ---
@@ -3183,6 +3205,10 @@ if [ -f "$EXDIR/no-debug-in-commit.sh" ]; then
     # Warns on git commit if staged files contain debugger/pdb; always exits 0
     test_ex no-debug-in-commit.sh '{"tool_input":{"command":"git commit -m \"test\""}}' 0 "git commit warns on debug (exit 0)"
     test_ex no-debug-in-commit.sh '{"tool_input":{"command":"npm install"}}' 0 "non-commit command ignored"
+    test_ex no-debug-in-commit.sh '{"tool_input":{"command":"git status"}}' 0 "git status passes"
+    test_ex no-debug-in-commit.sh '{"tool_input":{"command":"git diff"}}' 0 "git diff passes"
+    test_ex no-debug-in-commit.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex no-debug-in-commit.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3258,6 +3284,9 @@ if [ -f "$EXDIR/session-budget-alert.sh" ]; then
     # SessionStart hook, reads /tmp state files; always exits 0
     test_ex session-budget-alert.sh '{}' 0 "empty input passes"
     test_ex session-budget-alert.sh '{"session_id":"test"}' 0 "session start passes"
+    test_ex session-budget-alert.sh '{"session_id":"abc123","tool_input":{}}' 0 "session with tool_input passes"
+    test_ex session-budget-alert.sh '{"tool_name":"Bash"}' 0 "Bash tool passes"
+    test_ex session-budget-alert.sh '{"tool_name":"Edit"}' 0 "Edit tool passes"
 fi
 echo ""
 
@@ -3397,6 +3426,9 @@ if [ -f "$EXDIR/max-subagent-count.sh" ]; then
     rm -f /tmp/cc-subagent-count
     test_ex max-subagent-count.sh '{"tool_input":{"command":"ls"}}' 0 "first call passes"
     test_ex max-subagent-count.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex max-subagent-count.sh '{"tool_input":{"command":"git status"}}' 0 "git status passes"
+    test_ex max-subagent-count.sh '{}' 0 "empty input passes"
+    test_ex max-subagent-count.sh '{"tool_name":"Agent"}' 0 "Agent tool passes"
     rm -f /tmp/cc-subagent-count
 fi
 echo ""
@@ -3538,6 +3570,9 @@ if [ -f "$EXDIR/no-deprecated-api.sh" ]; then
     # Always warns (placeholder); always exits 0
     test_ex no-deprecated-api.sh '{"tool_input":{"new_string":"require(\"url\").parse(x)"}}' 0 "deprecated API warns (exit 0)"
     test_ex no-deprecated-api.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-deprecated-api.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "normal code passes"
+    test_ex no-deprecated-api.sh '{}' 0 "empty input passes"
+    test_ex no-deprecated-api.sh '{"tool_input":{"new_string":"import fs from \"fs\""}}' 0 "modern import passes"
 fi
 echo ""
 
