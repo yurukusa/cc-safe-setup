@@ -3222,6 +3222,8 @@ if [ -f "$EXDIR/git-message-length.sh" ]; then
     test_ex log-level-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-log passes"
     test_ex log-level-guard.sh '{}' 0 "empty input passes"
     test_ex log-level-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex max-edit-size-guard.sh '{}' 0 "empty input passes"
+    test_ex max-edit-size-guard.sh '{"tool_input":{"old_string":"a","new_string":"a"}}' 0 "no-change passes"
 fi
 echo ""
 
@@ -3308,6 +3310,8 @@ if [ -f "$EXDIR/test-before-commit.sh" ]; then
     cd "$ORIG_DIR"
     [ "$EXIT" -eq 0 ] && echo "  PASS: allows commit with recent test marker" && PASS=$((PASS+1)) || { echo "  FAIL: should allow commit with recent test marker (got $EXIT)"; FAIL=$((FAIL+1)); }
     rm -rf "$TBC_TMP"
+    test_ex test-before-commit.sh '{}' 0 "empty input passes"
+    test_ex test-before-commit.sh '{"tool_input":{"command":"git status"}}' 0 "non-commit git passes"
 fi
 echo ""
 
