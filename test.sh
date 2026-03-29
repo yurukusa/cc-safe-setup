@@ -11142,6 +11142,13 @@ test_ex go-mod-tidy-warn.sh '{"tool_input":{"command":"go mod    tidy -v"}}' 0 "
 test_ex hallucination-url-check.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.json"}}' 0 "hallucination-url-check: json no file"
 test_ex hallucination-url-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.yaml"}}' 0 "hallucination-url-check: yaml no file"
 test_ex hallucination-url-check.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/app.py"}}' 0 "hallucination-url-check: python file skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.tsx"}}' 0 "hallucination-url-check: tsx skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/test.rs"}}' 0 "hallucination-url-check: rust skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/go.sum"}}' 0 "hallucination-url-check: go.sum skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.css"}}' 0 "hallucination-url-check: css skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.html"}}' 0 "hallucination-url-check: html skipped"
+test_ex hallucination-url-check.sh '{"tool_name":"Bash","tool_input":{"command":"echo hi"}}' 0 "hallucination-url-check: bash tool ignored"
+test_ex hallucination-url-check.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x.md"}}' 0 "hallucination-url-check: read tool ignored"
 test_ex hardcoded-ip-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.go"}}' 0 "hardcoded-ip-guard: go no file"
 test_ex hardcoded-ip-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.java"}}' 0 "hardcoded-ip-guard: java no file"
 test_ex hardcoded-ip-guard.sh '{"tool_input":{"file_path":"/tmp/readme.txt"}}' 0 "hardcoded-ip-guard: txt file skipped"
@@ -11710,6 +11717,14 @@ test_ex permission-mode-drift-guard.sh '{"message":"Allow this?"}' 0 "perm-drift
 test_ex permission-mode-drift-guard.sh '{"message":"Allow write?"}' 0 "perm-drift: second prompt"
 test_ex permission-mode-drift-guard.sh '{}' 0 "perm-drift: empty input"
 test_ex permission-mode-drift-guard.sh '{"message":""}' 0 "perm-drift: empty message"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow read access?"}' 0 "perm-drift: read prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Approve this action?"}' 0 "perm-drift: approve prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Permission to delete?"}' 0 "perm-drift: delete prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow bash command?"}' 0 "perm-drift: bash prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Continue?"}' 0 "perm-drift: short prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow tool call to Edit src/main.ts?"}' 0 "perm-drift: edit prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow tool call to Write new-file.txt?"}' 0 "perm-drift: write prompt"
+test_ex permission-mode-drift-guard.sh '{"message":"Allow git push origin main?"}' 0 "perm-drift: push prompt"
 rm -f /tmp/cc-permission-mode-$$
 echo ""
 
@@ -11844,6 +11859,13 @@ rm -f /tmp/file-age-test-recent.txt
 touch -t 202501010000 /tmp/file-age-test-old.txt 2>/dev/null
 test_ex file-age-guard.sh '{"tool_input":{"file_path":"/tmp/file-age-test-old.txt"}}' 0 "file-age: old file warns but passes"
 rm -f /tmp/file-age-test-old.txt
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "file-age: src file (may not exist)"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"package.json"}}' 0 "file-age: package.json"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"README.md"}}' 0 "file-age: README"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":".gitignore"}}' 0 "file-age: dotfile"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"node_modules/foo/index.js"}}' 0 "file-age: node_modules"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"/etc/passwd"}}' 0 "file-age: system file (warns)"
+test_ex file-age-guard.sh '{"tool_input":{"file_path":"test.sh"}}' 0 "file-age: test.sh"
 echo ""
 
 # ========== binary-upload-guard ==========
