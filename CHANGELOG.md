@@ -1,5 +1,16 @@
 # Changelog
 
+## [29.6.34] - 2026-03-29
+- **New**: 3 hooks addressing top GitHub Issues (132 combined reactions):
+  - git-show-flag-sanitizer (#13071, 44r): strips invalid --no-stat from git show via PreToolUse rewrite
+  - compact-blocker (#6689, 42r): blocks auto-compaction via PreCompact exit 2
+  - webfetch-domain-allow (#9329, 46r): auto-approves WebFetch by domain allowlist
+- **Tests**: +40 tests (8,730→8,770), 10 edge case tests for new hooks
+- **SEO**: 27 pages updated to 588/8,761
+- **Docs**: Zenn Book ch9 catalog updated with 3 new categories
+- **Issue answers**: 3 GitHub Issues answered with tested hook workarounds
+- **Stats**: 588 examples, 8,770 tests, 51 SEO pages
+
 ## [29.6.33] - 2026-03-29
 - **New**: 23 hooks in 6 new categories:
   - CI/CD: github-actions-secret-guard, ci-workflow-guard, gitops-drift-guard, dotenv-commit-guard
