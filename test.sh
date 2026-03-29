@@ -3387,6 +3387,9 @@ if [ -f "$EXDIR/dotenv-validate.sh" ]; then
     echo "badline no equals" > /tmp/test-dotenv-invalid.env
     test_ex dotenv-validate.sh '{"tool_input":{"file_path":"/tmp/test-dotenv-invalid.env"}}' 0 "invalid .env warns (exit 0)"
     rm -f /tmp/test-dotenv-valid.env /tmp/test-dotenv-invalid.env
+    test_ex dotenv-validate.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-env command passes"
+    test_ex dotenv-validate.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex dotenv-validate.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3421,6 +3424,9 @@ if [ -f "$EXDIR/env-naming-convention.sh" ]; then
     test_ex env-naming-convention.sh '{"tool_input":{"new_string":"process.env.API_KEY"}}' 0 "UPPER_CASE env var passes"
     test_ex env-naming-convention.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no env var passes"
     test_ex env-naming-convention.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex env-naming-convention.sh '{"tool_input":{"new_string":"const API_KEY = process.env.API_KEY"}}' 0 "standard env naming passes"
+    test_ex env-naming-convention.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex env-naming-convention.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -9855,7 +9861,10 @@ else
 fi
 test_ex daily-usage-tracker.sh '{}' 0 "daily-tracker: empty tool name"
 # Restore original file if it existed
-if [ -n "$DAILY_BACKUP" ]; then echo "$DAILY_BACKUP" > "$DAILY_TEST_FILE"; fi
+if [ -n "$DAILY_BACKUP" ]; then echo "$DAILY_BACKUP" > "$DAILY_TEST_FILE";     test_ex git-message-length-check.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-commit passes"
+    test_ex git-message-length-check.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex git-message-length-check.sh '{}' 0 "empty input passes"
+fi
 echo ""
 
 echo "consecutive-error-breaker.sh:"
