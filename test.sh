@@ -11971,7 +11971,7 @@ test_ex migration-verify-guard.sh '{"tool_input":{"command":"sequelize db:migrat
 test_ex migration-verify-guard.sh '{"tool_input":{"command":"flyway migrate"}}' 2 "migration: flyway BLOCKED"
 test_ex migration-verify-guard.sh '{"tool_input":{"command":"npx drizzle-kit push"}}' 2 "migration: drizzle push BLOCKED"
 test_ex migration-verify-guard.sh '{"tool_input":{"command":"npx prisma generate"}}' 0 "migration: prisma generate allowed"
-test_ex migration-verify-guard.sh '{"tool_input":{"command":"cat migrations/001.sql"}}' 0 "migration: reading migration file allowed"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"cat schema.sql"}}' 0 "migration: reading SQL file allowed"
 echo ""
 
 # ========== file-recycle-bin (#39949) ==========
