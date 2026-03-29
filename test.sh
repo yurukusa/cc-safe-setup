@@ -12951,6 +12951,18 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "todo-deadline-warn.sh:"
+test_ex todo-deadline-warn.sh '{}' 0 "todo-deadline: empty input"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "todo-deadline: ts file (no file, passes)"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.md"}}' 0 "todo-deadline: markdown skipped"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.json"}}' 0 "todo-deadline: json skipped"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.yaml"}}' 0 "todo-deadline: yaml skipped"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":""}}' 0 "todo-deadline: empty path"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/nonexist.py"}}' 0 "todo-deadline: nonexistent file"
+test_ex todo-deadline-warn.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x.py"}}' 0 "todo-deadline: read tool passes"
+test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.css"}}' 0 "todo-deadline: css skipped"
+echo ""
+
 echo "dotenv-example-sync.sh:"
 test_ex dotenv-example-sync.sh '{}' 0 "dotenv-sync: empty input"
 test_ex dotenv-example-sync.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "dotenv-sync: non-env file ignored"
