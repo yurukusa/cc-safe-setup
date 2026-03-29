@@ -15300,6 +15300,12 @@ if [ -f "$EXDIR/terminal-state-restore.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: terminal-state-restore exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: terminal-state-restore unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
     TOTAL=$((TOTAL+1))
 fi
+
+if [ -f "$EXDIR/worktree-project-unify.sh" ]; then
+    EXIT=0; echo '{}' | bash "$EXDIR/worktree-project-unify.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-project-unify exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-project-unify unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+    TOTAL=$((TOTAL+1))
+fi
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
