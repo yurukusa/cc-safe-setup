@@ -12951,6 +12951,16 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "compact-blocker.sh:"
+test_ex compact-blocker.sh '{}' 2 "compact-blocker: blocks with empty input"
+test_ex compact-blocker.sh '{"event":"PreCompact"}' 2 "compact-blocker: blocks PreCompact event"
+test_ex compact-blocker.sh '{"transcript_path":"/tmp/transcript.jsonl"}' 2 "compact-blocker: blocks with transcript path"
+test_ex compact-blocker.sh '{"session_id":"abc123"}' 2 "compact-blocker: blocks with session id"
+test_ex compact-blocker.sh '{"tool_input":{}}' 2 "compact-blocker: blocks with tool_input"
+test_ex compact-blocker.sh '{"summary":"context window at 80%"}' 2 "compact-blocker: blocks with summary"
+test_ex compact-blocker.sh '{"reason":"threshold reached"}' 2 "compact-blocker: blocks with reason"
+echo ""
+
 echo "git-show-flag-sanitizer.sh:"
 test_ex git-show-flag-sanitizer.sh '{}' 0 "git-show-sanitizer: empty input"
 test_ex git-show-flag-sanitizer.sh '{"tool_input":{"command":"git show HEAD --no-stat"}}' 0 "git-show-sanitizer: strips --no-stat from HEAD"
