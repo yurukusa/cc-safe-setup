@@ -11914,6 +11914,62 @@ test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"
 test_ex bg-task-cooldown-guard.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "bg-cooldown: echo safe"
 echo ""
 
+# ========== env-inline-secret-guard (#24185) ==========
+echo "env-inline-secret-guard.sh:"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"curl -H \"Authorization: Bearer sk-abcdefghijklmnopqrstuvwx\" https://api.openai.com"}}' 2 "env-secret: OpenAI key BLOCKED"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"gh auth login --with-token ghp_abcdefghijklmnopqrstuvwxyz0123456789"}}' 2 "env-secret: GitHub token BLOCKED"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"aws s3 ls"}}' 0 "env-secret: no secret allowed"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "env-secret: simple echo allowed"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":""}}' 0 "env-secret: empty command"
+test_ex env-inline-secret-guard.sh '{}' 0 "env-secret: empty input"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"export API_KEY=test && curl"}}' 0 "env-secret: short value allowed"
+echo ""
+
+# ========== migration-verify-guard (#35435) ==========
+echo "migration-verify-guard.sh:"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"npx prisma migrate deploy"}}' 2 "migration: prisma migrate BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"rails db:migrate"}}' 2 "migration: rails migrate BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"python manage.py migrate"}}' 2 "migration: django migrate BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"alembic upgrade head"}}' 2 "migration: alembic BLOCKED"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "migration: non-migration allowed"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":"git status"}}' 0 "migration: git status allowed"
+test_ex migration-verify-guard.sh '{"tool_input":{"command":""}}' 0 "migration: empty command"
+test_ex migration-verify-guard.sh '{}' 0 "migration: empty input"
+echo ""
+
+# ========== file-recycle-bin (#39949) ==========
+echo "file-recycle-bin.sh:"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm test.txt"}}' 0 "recycle-bin: rm passes (backup attempted)"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"ls -la"}}' 0 "recycle-bin: non-rm ignored"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"git status"}}' 0 "recycle-bin: git ignored"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":""}}' 0 "recycle-bin: empty command"
+test_ex file-recycle-bin.sh '{}' 0 "recycle-bin: empty input"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "recycle-bin: defers to destructive-guard"
+test_ex file-recycle-bin.sh '{"tool_input":{"command":"cat file.txt"}}' 0 "recycle-bin: cat ignored"
+echo ""
+
+# ========== worktree-memory-guard (#39920) ==========
+echo "worktree-memory-guard.sh:"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "worktree-mem: non-memory file"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":""}}' 0 "worktree-mem: empty path"
+test_ex worktree-memory-guard.sh '{}' 0 "worktree-mem: empty input"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"README.md"}}' 0 "worktree-mem: regular file"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":".claude/settings.json"}}' 0 "worktree-mem: settings file"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"package.json"}}' 0 "worktree-mem: package.json"
+test_ex worktree-memory-guard.sh '{"tool_input":{"file_path":"test.sh"}}' 0 "worktree-mem: test file"
+echo ""
+
+# ========== skill-injection-detector (#39686) ==========
+echo "skill-injection-detector.sh:"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "skill-inject: normal bash"
+test_ex skill-injection-detector.sh '{"tool_name":"Read","tool_input":{"file_path":"test.txt"}}' 0 "skill-inject: normal read"
+test_ex skill-injection-detector.sh '{}' 0 "skill-inject: empty input"
+test_ex skill-injection-detector.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "skill-inject: normal edit"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "skill-inject: npm test"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "skill-inject: git status"
+test_ex skill-injection-detector.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "skill-inject: echo"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
