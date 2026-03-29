@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix Claude Code WebFetch Domain Matching — cc-safe-setup</title>
+<meta name="description" content="WebFetch(domain:*) doesn't work in Claude Code sandbox mode. Fix it with a PreToolUse hook that auto-approves domains from your allowlist.">
+<meta name="keywords" content="claude code webfetch, webfetch domain wildcard, claude code sandbox permissions, pretooluse hook, cc-safe-setup, webfetch allow">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/webfetch-domain-allowlist.html">
+<meta property="og:title" content="Fix Claude Code WebFetch Domain Matching">
+<meta property="og:description" content="WebFetch(domain:*) broken in sandbox? Fix it with a domain allowlist hook.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Fix Claude Code WebFetch Domain Matching</h1>
+<p><code>WebFetch(domain:*)</code> in settings.json is supposed to allow all domains. It doesn't work reliably, especially in sandbox mode. Every domain still triggers a permission prompt.</p>
+
+<h2>The Problem</h2>
+<p>46 reactions on <a href="https://github.com/anthropics/claude-code/issues/9329">#9329</a>. The native wildcard matching silently fails. Users add <code>WebFetch(domain:*)</code> and still get prompted for every URL. Subdomain patterns like <code>*.example.com</code> also fail.</p>
+
+<h2>The Fix: PreToolUse Hook</h2>
+<p>A <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">PreToolUse hook</a> extracts the domain from the URL and auto-approves if it matches your allowlist. Works in sandbox mode.</p>
+
+<div class="fix">
+<p><strong>webfetch-domain-allow.sh</strong>:</p>
+<pre><code>#!/bin/bash
+# TRIGGER: PreToolUse | MATCHER: "WebFetch"
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+[[ "$TOOL" != "WebFetch" ]] && exit 0
+
+URL=$(echo "$INPUT" | jq -r '.tool_input.url // empty')
+[ -z "$URL" ] && exit 0
+
+DOMAIN=$(echo "$URL" | sed -E 's|^https?://||' | sed 's|/.*||' | sed 's|:.*||')
+[ -z "$DOMAIN" ] && exit 0
+
+# Allow all domains (replace with specific list for tighter control)
+jq -n '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "allow"
+  }
+}'</code></pre>
+</div>
+
+<h2>Domain-Specific Mode</h2>
+<p>Set <code>CC_WEBFETCH_ALLOW_DOMAINS</code> environment variable:</p>
+<pre><code>export CC_WEBFETCH_ALLOW_DOMAINS="github.com,docs.anthropic.com,developer.mozilla.org"</code></pre>
+<p>The hook reads this list and only approves matching domains. Non-matching domains fall through to the normal permission prompt.</p>
+
+<h2>Install</h2>
+<pre><code>npx cc-safe-setup --install-example webfetch-domain-allow</code></pre>
+<p>Or add to <code>.claude/settings.json</code>:</p>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "WebFetch",
+      "hooks": [{
+        "type": "command",
+        "command": "bash /path/to/webfetch-domain-allow.sh"
+      }]
+    }]
+  }
+}</code></pre>
+
+<div class="cta">
+<h2>Install All Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">8 safety hooks + 588 examples. 8,761 tests.</p>
+</div>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup &middot; 588 hooks &middot; 8,761 tests &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>

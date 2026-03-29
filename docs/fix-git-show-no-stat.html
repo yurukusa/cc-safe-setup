@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix Claude Code git show --no-stat Error — cc-safe-setup</title>
+<meta name="description" content="Claude Code runs git show with invalid --no-stat flag, causing exit code 128 errors. Fix it automatically with a PreToolUse hook that strips the bad flag.">
+<meta name="keywords" content="claude code git show no-stat, git show --no-stat error, claude code bash error, pretooluse hook rewrite, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/fix-git-show-no-stat.html">
+<meta property="og:title" content="Fix Claude Code git show --no-stat Error">
+<meta property="og:description" content="Automatic fix for the git show --no-stat bug that wastes context. One hook, zero manual intervention.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Fix Claude Code git show --no-stat Error</h1>
+<p>Claude Code frequently runs <code>git show HEAD --no-stat</code>, but <code>--no-stat</code> is not a valid git-show flag. This causes exit code 128 errors and wastes context on retries.</p>
+
+<div class="incident">
+<p class="incident-title">Known bug since v2.0.58 — still present in v2.1.87</p>
+<p>44 reactions on <a href="https://github.com/anthropics/claude-code/issues/13071">#13071</a>. Adding <code>--no-stat</code> to CLAUDE.md doesn't help — Claude ignores it.</p>
+</div>
+
+<h2>The Error</h2>
+<pre><code>$ git show HEAD --no-stat
+fatal: unrecognized argument: --no-stat</code></pre>
+<p>Each failure burns context tokens on the error message and Claude's retry attempt.</p>
+
+<h2>The Fix: PreToolUse Hook</h2>
+<p>A <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">PreToolUse hook</a> intercepts the command before execution and strips the invalid flag via <code>updatedInput</code>. Claude never sees the error.</p>
+
+<div class="fix">
+<p><strong>git-show-flag-sanitizer.sh</strong>:</p>
+<pre><code>#!/bin/bash
+# TRIGGER: PreToolUse | MATCHER: "Bash"
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$COMMAND" ] && exit 0
+
+case "$COMMAND" in
+  *git\ show*--no-stat*) ;;
+  *) exit 0 ;;
+esac
+
+NEW_COMMAND=$(echo "$COMMAND" | sed 's/ --no-stat//' | sed 's/  */ /g')
+
+jq -n --arg cmd "$NEW_COMMAND" '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "allow",
+    updatedInput: { command: $cmd }
+  }
+}'</code></pre>
+</div>
+
+<h2>Install</h2>
+<pre><code>npx cc-safe-setup --install-example git-show-flag-sanitizer</code></pre>
+<p>Or add manually to <code>.claude/settings.json</code>:</p>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "bash /path/to/git-show-flag-sanitizer.sh"
+      }]
+    }]
+  }
+}</code></pre>
+
+<div class="cta">
+<h2>Install All Safety Hooks</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">8 safety hooks + 588 examples. 8,761 tests.</p>
+</div>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup &middot; 588 hooks &middot; 8,761 tests &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
