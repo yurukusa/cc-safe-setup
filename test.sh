@@ -3213,6 +3213,15 @@ if [ -f "$EXDIR/git-message-length.sh" ]; then
     test_ex git-submodule-guard.sh '{"tool_input":{"command":"git status"}}' 0 "non-submodule passes"
     test_ex git-submodule-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
     test_ex git-submodule-guard.sh '{}' 0 "empty input passes"
+    test_ex network-guard.sh '{"tool_input":{"command":"ls"}}' 0 "non-network passes"
+    test_ex network-guard.sh '{}' 0 "empty input passes"
+    test_ex network-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex mcp-tool-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-mcp passes"
+    test_ex mcp-tool-guard.sh '{}' 0 "empty input passes"
+    test_ex mcp-tool-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex log-level-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-log passes"
+    test_ex log-level-guard.sh '{}' 0 "empty input passes"
+    test_ex log-level-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
 fi
 echo ""
 
@@ -3451,6 +3460,9 @@ if [ -f "$EXDIR/max-file-delete-count.sh" ]; then
     test_ex max-file-delete-count.sh '{"tool_input":{"command":"npm install"}}' 0 "non-rm command passes"
     test_ex max-file-delete-count.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
     test_ex max-file-delete-count.sh '{"tool_input":{"command":"rm a b c d e f g h i j"}}' 0 "many file delete warns (exit 0)"
+    test_ex max-file-delete-count.sh '{"tool_input":{"command":"rm file.txt"}}' 0 "single delete passes"
+    test_ex max-file-delete-count.sh '{}' 0 "empty input passes"
+    test_ex max-file-delete-count.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-rm passes"
 fi
 echo ""
 
@@ -3517,6 +3529,8 @@ if [ -f "$EXDIR/no-absolute-import.sh" ]; then
     test_ex no-absolute-import.sh '{"tool_input":{"new_string":"require(\"/absolute/path\")"}}' 0 "warns on absolute require (exit 0)"
     test_ex no-absolute-import.sh '{"tool_input":{"new_string":"import React from \"react\""}}' 0 "relative import passes"
     test_ex no-absolute-import.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-absolute-import.sh '{"tool_input":{"new_string":"import x from "./local""}}' 0 "relative import passes"
+    test_ex no-absolute-import.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3528,6 +3542,8 @@ if [ -f "$EXDIR/no-anonymous-default-export.sh" ]; then
     test_ex no-anonymous-default-export.sh '{"tool_input":{"new_string":"export default function myFunc() { return 1; }"}}' 0 "named export passes"
     test_ex no-anonymous-default-export.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no export passes"
     test_ex no-anonymous-default-export.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-anonymous-default-export.sh '{"tool_input":{"new_string":"export default function App() {}"}}' 0 "named export passes"
+    test_ex no-anonymous-default-export.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3539,6 +3555,8 @@ if [ -f "$EXDIR/no-any-type.sh" ]; then
     test_ex no-any-type.sh '{"tool_input":{"new_string":"const x: Array<any> = []"}}' 0 "warns on <any> (exit 0)"
     test_ex no-any-type.sh '{"tool_input":{"new_string":"const x: string = \"hello\""}}' 0 "proper type passes"
     test_ex no-any-type.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-any-type.sh '{"tool_input":{"new_string":"const x: string = "hi""}}' 0 "typed code passes"
+    test_ex no-any-type.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3550,6 +3568,8 @@ if [ -f "$EXDIR/no-assignment-in-condition.sh" ]; then
     test_ex no-assignment-in-condition.sh '{"tool_input":{"new_string":"if (x === 5) {"}}' 0 "comparison passes"
     test_ex no-assignment-in-condition.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no condition passes"
     test_ex no-assignment-in-condition.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-assignment-in-condition.sh '{"tool_input":{"new_string":"if (x === 1) {}"}}' 0 "comparison passes"
+    test_ex no-assignment-in-condition.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3610,6 +3630,9 @@ if [ -f "$EXDIR/no-cleartext-storage.sh" ]; then
     test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":"localStorage.setItem(\"password\", pw)"}}' 0 "warns on localStorage password (exit 0)"
     test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":"sessionStorage.setItem(\"token\", t)"}}' 0 "warns on sessionStorage token (exit 0)"
     test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":"localStorage.setItem(\"theme\", \"dark\")"}}' 0 "safe localStorage passes"
+    test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "normal code passes"
+    test_ex no-cleartext-storage.sh '{}' 0 "empty input passes"
     test_ex no-cleartext-storage.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
 fi
 echo ""
