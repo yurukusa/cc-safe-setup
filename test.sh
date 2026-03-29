@@ -12951,6 +12951,16 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "pre-compact-transcript-export.sh:"
+test_ex pre-compact-transcript-export.sh '{}' 0 "transcript-export: empty input"
+test_ex pre-compact-transcript-export.sh '{"transcript_path":"/tmp/nonexist.jsonl"}' 0 "transcript-export: nonexistent transcript"
+test_ex pre-compact-transcript-export.sh '{"event":"PreCompact"}' 0 "transcript-export: PreCompact event"
+test_ex pre-compact-transcript-export.sh '{"session_id":"test123"}' 0 "transcript-export: session id"
+test_ex pre-compact-transcript-export.sh '{"reason":"context threshold"}' 0 "transcript-export: reason field"
+test_ex pre-compact-transcript-export.sh '{"tool_input":{}}' 0 "transcript-export: empty tool input"
+test_ex pre-compact-transcript-export.sh '{"transcript_path":""}' 0 "transcript-export: empty path"
+echo ""
+
 echo "todo-deadline-warn.sh:"
 test_ex todo-deadline-warn.sh '{}' 0 "todo-deadline: empty input"
 test_ex todo-deadline-warn.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "todo-deadline: ts file (no file, passes)"
