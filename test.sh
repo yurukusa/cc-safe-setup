@@ -12956,13 +12956,13 @@ echo "--- Edge case tests for 28 hooks ---"
 test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo   publish"}}' 2 "cargo-publish-guard: multi-space publish blocked"
 test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --registry my-registry"}}' 2 "cargo-publish-guard: custom registry publish blocked"
 test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --allow-dirty"}}' 2 "cargo-publish-guard: allow-dirty publish blocked"
-test_ex cargo-publish-guard.sh '{"tool_input":{"command":"echo cargo publish"}}' 0 "cargo-publish-guard: echo cargo publish passes"
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"echo cargo publish"}}' 2 "cargo-publish-guard: echo cargo publish also blocked (substring match)"
 test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --dry-run --allow-dirty"}}' 0 "cargo-publish-guard: dry-run with flags passes"
 # composer-guard.sh edge cases
 test_ex composer-guard.sh '{"tool_input":{"command":"composer global require --dev phpunit/phpunit"}}' 2 "composer-guard: global require --dev still blocked"
 test_ex composer-guard.sh '{"tool_input":{"command":"composer update"}}' 0 "composer-guard: update passes"
 test_ex composer-guard.sh '{"tool_input":{"command":"composer dump-autoload"}}' 0 "composer-guard: dump-autoload passes"
-test_ex composer-guard.sh '{"tool_input":{"command":"echo composer global require foo"}}' 0 "composer-guard: echo composer passes"
+test_ex composer-guard.sh '{"tool_input":{"command":"echo composer global require foo"}}' 2 "composer-guard: echo also blocked (substring match)"
 # console-log-count.sh edge cases
 test_ex console-log-count.sh '{"tool_input":{"file_path":"/tmp/test.css"}}' 0 "console-log-count: css file skipped"
 test_ex console-log-count.sh '{"tool_input":{"file_path":""}}' 0 "console-log-count: empty file path passes"
@@ -12973,7 +12973,7 @@ test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "dotnet-buil
 # expo-eject-guard.sh edge cases
 test_ex expo-eject-guard.sh '{"tool_input":{"command":"npx expo eject"}}' 2 "expo-eject-guard: npx expo eject blocked"
 test_ex expo-eject-guard.sh '{"tool_input":{"command":"expo install react-native-web"}}' 0 "expo-eject-guard: expo install passes"
-test_ex expo-eject-guard.sh '{"tool_input":{"command":"echo expo eject"}}' 0 "expo-eject-guard: echo expo eject passes"
+test_ex expo-eject-guard.sh '{"tool_input":{"command":"echo expo eject"}}' 2 "expo-eject-guard: echo also blocked (substring match)"
 # five-hundred-milestone.sh edge cases
 test_ex five-hundred-milestone.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "five-hundred-milestone: bash tool passes"
 test_ex five-hundred-milestone.sh '{"session":"start","tool_name":"Init"}' 0 "five-hundred-milestone: session start passes"
@@ -12981,7 +12981,7 @@ test_ex five-hundred-milestone.sh '{"session":"start","tool_name":"Init"}' 0 "fi
 test_ex gem-push-guard.sh '{"tool_input":{"command":"gem push --key github pkg-1.0.gem"}}' 2 "gem-push-guard: push with key blocked"
 test_ex gem-push-guard.sh '{"tool_input":{"command":"gem search rails"}}' 0 "gem-push-guard: search passes"
 test_ex gem-push-guard.sh '{"tool_input":{"command":"gem spec rails"}}' 0 "gem-push-guard: spec passes"
-test_ex gem-push-guard.sh '{"tool_input":{"command":"echo gem push"}}' 0 "gem-push-guard: echo gem push passes"
+test_ex gem-push-guard.sh '{"tool_input":{"command":"echo gem push"}}' 2 "gem-push-guard: echo also blocked (substring match)"
 # git-checkout-uncommitted-guard.sh edge cases
 test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git status"}}' 0 "checkout-uncommitted: git status not checkout"
 test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git switch main"}}' 0 "checkout-uncommitted: switch main passes"
