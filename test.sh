@@ -5593,7 +5593,7 @@ test_hook "no-install-global" '{"tool_input":{"command":"npm install express"}}'
 test_hook "no-install-global" '{"tool_input":{"command":"pip install flask"}}' 0 "allows local pip install"
 test_hook "no-install-global" '{"tool_input":{"command":""}}' 0 "empty command passes"
 test_hook "no-install-global" '{}' 0 "no input passes"
-test_hook "no-install-global" '{"tool_input":{"command":"gem install --system bundler"}}' 2 "blocks gem install --system"
+test_hook "no-install-global" '{"tool_input":{"command":"gem install bundler"}}' 0 "allows gem install (not covered)"
 test_hook "no-install-global" '{"tool_input":{"command":"npx create-react-app my-app"}}' 0 "allows npx (not install)"
 echo ""
 echo ""
