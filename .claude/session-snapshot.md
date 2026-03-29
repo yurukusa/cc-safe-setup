@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T11:51:57+09:00
+Updated: 2026-03-29T12:14:52+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T11:51:57+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: a11ca2b checkpoint: auto-save 11:51:16
+- Last commit: 36e1137 checkpoint: auto-save 12:14:44
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./docs/README.ja.md
+./README.md
 ./.claude/pre-compact-checkpoint.md
 ./examples/cron-modification-guard.sh
-./test.sh
 ./examples/session-permission-reset-guard.sh
 ./examples/edit-counter-test-gate.sh
 ./examples/deploy-path-verify-guard.sh
 ./examples/role-tool-guard.sh
-./examples/write-overwrite-confirm.sh
-./examples/mcp-orphan-process-guard.sh
 ```
 
