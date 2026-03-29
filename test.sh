@@ -13782,6 +13782,1518 @@ CC_HEADLESS=0 test_ex headless-stop-guard.sh '{}' 0 "CC_HEADLESS=0 passes throug
 echo ""
 
 TOTAL=$((PASS + FAIL))
+
+# === Auto-generated tests for 302 untested hooks ===
+
+if [ -f "$EXDIR/absolute-rule-enforcer.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/absolute-rule-enforcer.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: absolute-rule-enforcer allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: absolute-rule-enforcer unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/allow-claude-settings.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/allow-claude-settings.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: allow-claude-settings allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: allow-claude-settings unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/allow-git-hooks-dir.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/allow-git-hooks-dir.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: allow-git-hooks-dir allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: allow-git-hooks-dir unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/allow-protected-dirs.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/allow-protected-dirs.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: allow-protected-dirs allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: allow-protected-dirs unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/ansible-vault-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/ansible-vault-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: ansible-vault-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: ansible-vault-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/api-key-in-url-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/api-key-in-url-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: api-key-in-url-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: api-key-in-url-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/api-overload-backoff.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/api-overload-backoff.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: api-overload-backoff allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: api-overload-backoff unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/api-rate-limit-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/api-rate-limit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: api-rate-limit-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: api-rate-limit-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/api-rate-limit-tracker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/api-rate-limit-tracker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: api-rate-limit-tracker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: api-rate-limit-tracker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/api-retry-limiter.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/api-retry-limiter.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: api-retry-limiter allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: api-retry-limiter unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/auto-approve-compound-git.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/auto-approve-compound-git.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: auto-approve-compound-git allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-compound-git unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/auto-approve-readonly-tools.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/auto-approve-readonly-tools.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: auto-approve-readonly-tools allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-readonly-tools unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/auto-approve-test.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/auto-approve-test.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: auto-approve-test allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-approve-test unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/auto-mode-safe-commands.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/auto-mode-safe-commands.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: auto-mode-safe-commands allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: auto-mode-safe-commands unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/aws-production-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/aws-production-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: aws-production-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: aws-production-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/aws-region-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/aws-region-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: aws-region-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: aws-region-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/banned-command-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/banned-command-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: banned-command-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: banned-command-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-domain-allowlist.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bash-domain-allowlist.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-domain-allowlist allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-domain-allowlist unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-heuristic-approver.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bash-heuristic-approver.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-heuristic-approver allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-heuristic-approver unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-safety-auto-deny.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bash-safety-auto-deny.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-safety-auto-deny allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-safety-auto-deny unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-secret-output-detector.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/bash-secret-output-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-secret-output-detector allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-secret-output-detector unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-timeout-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bash-timeout-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-timeout-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-timeout-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bash-trace-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bash-trace-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bash-trace-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bash-trace-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bg-task-cooldown-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bg-task-cooldown-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bg-task-cooldown-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bg-task-cooldown-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/binary-upload-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/binary-upload-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: binary-upload-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: binary-upload-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/branch-name-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/branch-name-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: branch-name-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: branch-name-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/bulk-file-delete-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/bulk-file-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: bulk-file-delete-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: bulk-file-delete-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cargo-publish-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/cargo-publish-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cargo-publish-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cargo-publish-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/case-sensitive-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/case-sensitive-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: case-sensitive-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: case-sensitive-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/check-before-act-enforcer.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/check-before-act-enforcer.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: check-before-act-enforcer allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: check-before-act-enforcer unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/check-test-exists.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/check-test-exists.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: check-test-exists allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: check-test-exists unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/chmod-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/chmod-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: chmod-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: chmod-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/chown-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/chown-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: chown-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: chown-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/ci-workflow-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/ci-workflow-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: ci-workflow-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: ci-workflow-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/classifier-fallback-allow.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/classifier-fallback-allow.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: classifier-fallback-allow allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: classifier-fallback-allow unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/claudeignore-enforce-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/claudeignore-enforce-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: claudeignore-enforce-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: claudeignore-enforce-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cloud-cli-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/cloud-cli-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cloud-cli-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cloud-cli-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/commit-message-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/commit-message-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: commit-message-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: commit-message-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/commit-message-quality.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/commit-message-quality.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: commit-message-quality allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: commit-message-quality unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/compact-blocker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/compact-blocker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: compact-blocker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: compact-blocker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/compaction-transcript-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/compaction-transcript-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: compaction-transcript-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: compaction-transcript-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/composer-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/composer-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: composer-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: composer-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/compound-command-allow.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/compound-command-allow.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: compound-command-allow allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: compound-command-allow unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/compound-inject-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/compound-inject-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: compound-inject-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: compound-inject-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/concurrent-edit-lock.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/concurrent-edit-lock.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: concurrent-edit-lock allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: concurrent-edit-lock unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/consecutive-error-breaker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/consecutive-error-breaker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: consecutive-error-breaker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: consecutive-error-breaker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/consecutive-failure-circuit-breaker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/consecutive-failure-circuit-breaker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: consecutive-failure-circuit-breaker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: consecutive-failure-circuit-breaker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/console-log-count.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/console-log-count.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: console-log-count allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: console-log-count unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/context-threshold-alert.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/context-threshold-alert.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: context-threshold-alert allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: context-threshold-alert unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/context-warning-verifier.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/context-warning-verifier.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: context-warning-verifier allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: context-warning-verifier unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cors-star-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/cors-star-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cors-star-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cors-star-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/credential-exfil-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/credential-exfil-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: credential-exfil-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: credential-exfil-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/credential-file-cat-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/credential-file-cat-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: credential-file-cat-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: credential-file-cat-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cron-modification-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/cron-modification-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cron-modification-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cron-modification-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cross-session-error-log.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/cross-session-error-log.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cross-session-error-log allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cross-session-error-log unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cwd-project-boundary-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/cwd-project-boundary-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cwd-project-boundary-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cwd-project-boundary-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/cwd-reminder.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/cwd-reminder.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: cwd-reminder allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: cwd-reminder unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/daily-usage-tracker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/daily-usage-tracker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: daily-usage-tracker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: daily-usage-tracker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dangling-process-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/dangling-process-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dangling-process-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dangling-process-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/db-connect-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/db-connect-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: db-connect-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: db-connect-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/denied-action-retry-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/denied-action-retry-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: denied-action-retry-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: denied-action-retry-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dependency-install-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/dependency-install-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dependency-install-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dependency-install-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/deploy-path-verify-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/deploy-path-verify-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: deploy-path-verify-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: deploy-path-verify-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/detect-mixed-indentation.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/detect-mixed-indentation.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: detect-mixed-indentation allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: detect-mixed-indentation unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/direnv-auto-reload.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/direnv-auto-reload.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: direnv-auto-reload allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: direnv-auto-reload unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/disk-partition-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/disk-partition-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: disk-partition-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: disk-partition-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/disk-space-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/disk-space-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: disk-space-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: disk-space-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/django-migrate-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/django-migrate-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: django-migrate-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: django-migrate-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dns-config-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/dns-config-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dns-config-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dns-config-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/docker-dangerous-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/docker-dangerous-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: docker-dangerous-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: docker-dangerous-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/docker-volume-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/docker-volume-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: docker-volume-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: docker-volume-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dockerfile-latest-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/dockerfile-latest-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dockerfile-latest-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dockerfile-latest-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dockerfile-lint.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/dockerfile-lint.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dockerfile-lint allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dockerfile-lint unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dotenv-commit-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/dotenv-commit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dotenv-commit-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dotenv-commit-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dotenv-example-sync.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/dotenv-example-sync.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dotenv-example-sync allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dotenv-example-sync unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dotenv-watch.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/dotenv-watch.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dotenv-watch allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dotenv-watch unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/dotnet-build-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/dotnet-build-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: dotnet-build-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: dotnet-build-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/drizzle-migrate-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/drizzle-migrate-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: drizzle-migrate-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: drizzle-migrate-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/edit-always-allow.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/edit-always-allow.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: edit-always-allow allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-always-allow unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/edit-counter-test-gate.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/edit-counter-test-gate.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: edit-counter-test-gate allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-counter-test-gate unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/edit-error-counter.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/edit-error-counter.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: edit-error-counter allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-error-counter unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/edit-retry-loop-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/edit-retry-loop-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: edit-retry-loop-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-retry-loop-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/encoding-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/encoding-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: encoding-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: encoding-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/env-file-gitignore-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/env-file-gitignore-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: env-file-gitignore-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-file-gitignore-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/env-inherit-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/env-inherit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: env-inherit-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-inherit-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/env-inline-secret-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/env-inline-secret-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: env-inline-secret-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-inline-secret-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/env-prod-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/env-prod-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: env-prod-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-prod-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/env-var-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/env-var-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: env-var-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-var-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/expo-eject-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/expo-eject-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: expo-eject-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: expo-eject-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/export-overwrite-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/export-overwrite-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: export-overwrite-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: export-overwrite-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-age-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/file-age-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-age-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-age-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-change-monitor.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/file-change-monitor.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-change-monitor allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-change-monitor unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-change-tracker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/file-change-tracker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-change-tracker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-change-tracker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-change-undo-tracker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/file-change-undo-tracker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-change-undo-tracker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-change-undo-tracker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-edit-backup.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/file-edit-backup.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-edit-backup allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-edit-backup unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-recycle-bin.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/file-recycle-bin.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-recycle-bin allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-recycle-bin unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/file-reference-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/file-reference-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: file-reference-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: file-reference-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/firewall-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/firewall-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: firewall-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: firewall-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/five-hundred-milestone.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/five-hundred-milestone.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: five-hundred-milestone allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: five-hundred-milestone unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/flask-debug-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/flask-debug-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: flask-debug-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: flask-debug-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/gem-push-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/gem-push-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: gem-push-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: gem-push-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/gh-cli-destructive-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/gh-cli-destructive-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: gh-cli-destructive-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: gh-cli-destructive-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-author-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-author-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-author-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-author-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-checkout-safety-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-checkout-safety-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-checkout-safety-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-checkout-safety-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-checkout-uncommitted-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-checkout-uncommitted-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-checkout-uncommitted-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-checkout-uncommitted-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-config-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-config-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-config-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-config-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-history-rewrite-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-history-rewrite-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-history-rewrite-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-history-rewrite-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-hook-bypass-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-hook-bypass-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-hook-bypass-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-hook-bypass-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-index-lock-cleanup.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-index-lock-cleanup.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-index-lock-cleanup allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-index-lock-cleanup unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-merge-conflict-prevent.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-merge-conflict-prevent.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-merge-conflict-prevent allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-merge-conflict-prevent unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-message-length-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-message-length-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-message-length-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-message-length-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-remote-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-remote-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-remote-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-remote-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-signed-commit-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-signed-commit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-signed-commit-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-signed-commit-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-stash-before-checkout.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-stash-before-checkout.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-stash-before-checkout allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-stash-before-checkout unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-stash-before-danger.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-stash-before-danger.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-stash-before-danger allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-stash-before-danger unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/git-submodule-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/git-submodule-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: git-submodule-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: git-submodule-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/github-actions-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/github-actions-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: github-actions-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: github-actions-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/github-actions-secret-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/github-actions-secret-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: github-actions-secret-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: github-actions-secret-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/gitignore-auto-add.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/gitignore-auto-add.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: gitignore-auto-add allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: gitignore-auto-add unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/gitops-drift-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/gitops-drift-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: gitops-drift-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: gitops-drift-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/go-mod-tidy-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/go-mod-tidy-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: go-mod-tidy-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: go-mod-tidy-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/go-vet-after-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/go-vet-after-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: go-vet-after-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: go-vet-after-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/hallucination-url-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/hallucination-url-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: hallucination-url-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: hallucination-url-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/hardcoded-ip-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/hardcoded-ip-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: hardcoded-ip-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: hardcoded-ip-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/headless-empty-result-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/headless-empty-result-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: headless-empty-result-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: headless-empty-result-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/headless-stop-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/headless-stop-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: headless-stop-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: headless-stop-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/helm-install-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/helm-install-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: helm-install-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: helm-install-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/heredoc-backtick-approver.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/heredoc-backtick-approver.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: heredoc-backtick-approver allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: heredoc-backtick-approver unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/hook-tamper-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/hook-tamper-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: hook-tamper-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: hook-tamper-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/issue-draft-redact-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/issue-draft-redact-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: issue-draft-redact-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: issue-draft-redact-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/java-compile-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/java-compile-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: java-compile-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: java-compile-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/json-syntax-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/json-syntax-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: json-syntax-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: json-syntax-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/k8s-production-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/k8s-production-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: k8s-production-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: k8s-production-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/kill-process-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/kill-process-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: kill-process-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: kill-process-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/kubernetes-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/kubernetes-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: kubernetes-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: kubernetes-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/laravel-artisan-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/laravel-artisan-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: laravel-artisan-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: laravel-artisan-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/large-file-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/large-file-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: large-file-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: large-file-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/large-file-write-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/large-file-write-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: large-file-write-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: large-file-write-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/log-level-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/log-level-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: log-level-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: log-level-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/log-truncation-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/log-truncation-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: log-truncation-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: log-truncation-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/long-session-reminder.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/long-session-reminder.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: long-session-reminder allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: long-session-reminder unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/magic-number-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/magic-number-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: magic-number-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: magic-number-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/main-branch-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/main-branch-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: main-branch-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: main-branch-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/markdown-link-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/markdown-link-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: markdown-link-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: markdown-link-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/max-concurrent-agents.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/max-concurrent-agents.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: max-concurrent-agents allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: max-concurrent-agents unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/max-edit-size-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/max-edit-size-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: max-edit-size-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: max-edit-size-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-config-freeze.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/mcp-config-freeze.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-config-freeze allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-config-freeze unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-data-boundary.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/mcp-data-boundary.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-data-boundary allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-data-boundary unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-orphan-process-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/mcp-orphan-process-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-orphan-process-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-orphan-process-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-server-allowlist.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/mcp-server-allowlist.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-server-allowlist allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-server-allowlist unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-server-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/mcp-server-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-server-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-server-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/mcp-tool-audit-log.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/mcp-tool-audit-log.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: mcp-tool-audit-log allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: mcp-tool-audit-log unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/migration-verify-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/migration-verify-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: migration-verify-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: migration-verify-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/monorepo-scope-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/monorepo-scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: monorepo-scope-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: monorepo-scope-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/multiline-command-approver.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/multiline-command-approver.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: multiline-command-approver allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: multiline-command-approver unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/network-exfil-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/network-exfil-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: network-exfil-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: network-exfil-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/network-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/network-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: network-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: network-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/network-interface-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/network-interface-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: network-interface-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: network-interface-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/nextjs-env-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/nextjs-env-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: nextjs-env-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: nextjs-env-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-any-typescript.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-any-typescript.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-any-typescript allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-any-typescript unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-ask-human.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-ask-human.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-ask-human allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-ask-human unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-base64-exfil.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-base64-exfil.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-base64-exfil allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-base64-exfil unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-console-log-commit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-console-log-commit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-console-log-commit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-console-log-commit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-cors-wildcard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-cors-wildcard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-cors-wildcard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-cors-wildcard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-dangerouslySetInnerHTML.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-dangerouslySetInnerHTML.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-dangerouslySetInnerHTML allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-dangerouslySetInnerHTML unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-dangling-await.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-dangling-await.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-dangling-await allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-dangling-await unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-debug-commit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-debug-commit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-debug-commit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-debug-commit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-deep-relative-import.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-deep-relative-import.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-deep-relative-import allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-deep-relative-import unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-eval-template.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-eval-template.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-eval-template allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-eval-template unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-exposed-port-in-dockerfile.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-exposed-port-in-dockerfile.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-exposed-port-in-dockerfile allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-exposed-port-in-dockerfile unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-fixme-ship.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-fixme-ship.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-fixme-ship allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-fixme-ship unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-force-flag.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-force-flag.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-force-flag allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-force-flag unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-git-amend.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-git-amend.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-git-amend allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-git-amend unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-global-install.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-global-install.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-global-install allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-global-install unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-hardcoded-ip.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-hardcoded-ip.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-hardcoded-ip allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-hardcoded-ip unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-http-in-code.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-http-in-code.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-http-in-code allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-http-in-code unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-http-url.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-http-url.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-http-url allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-http-url unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-inline-styles.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-inline-styles.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-inline-styles allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-inline-styles unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-output-truncation.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-output-truncation.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-output-truncation allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-output-truncation unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-push-without-tests.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-push-without-tests.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-push-without-tests allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-push-without-tests unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-root-user-docker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-root-user-docker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-root-user-docker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-user-docker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-secrets-in-args.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-secrets-in-args.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-secrets-in-args allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-secrets-in-args unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-self-signed-cert.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-self-signed-cert.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-self-signed-cert allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-self-signed-cert unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-star-import-python.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-star-import-python.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-star-import-python allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-star-import-python unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-todo-in-production.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/no-todo-in-production.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-todo-in-production allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-todo-in-production unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-verify-blocker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-verify-blocker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-verify-blocker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-verify-blocker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/no-wget-piped-bash.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/no-wget-piped-bash.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: no-wget-piped-bash allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-wget-piped-bash unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/node-version-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/node-version-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: node-version-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: node-version-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/npm-global-install-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/npm-global-install-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: npm-global-install-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: npm-global-install-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/npm-supply-chain-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/npm-supply-chain-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: npm-supply-chain-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: npm-supply-chain-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/nuxt-config-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/nuxt-config-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: nuxt-config-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: nuxt-config-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/output-credential-scan.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/output-credential-scan.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: output-credential-scan allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: output-credential-scan unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/output-explosion-detector.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/output-explosion-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: output-explosion-detector allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: output-explosion-detector unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/output-secret-mask.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/output-secret-mask.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: output-secret-mask allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: output-secret-mask unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/output-token-env-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/output-token-env-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: output-token-env-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: output-token-env-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/package-lock-frozen.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/package-lock-frozen.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: package-lock-frozen allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: package-lock-frozen unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/parallel-session-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/parallel-session-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: parallel-session-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: parallel-session-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/path-deny-bash-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/path-deny-bash-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: path-deny-bash-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: path-deny-bash-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/path-traversal-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/path-traversal-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: path-traversal-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: path-traversal-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/permission-audit-log.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/permission-audit-log.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: permission-audit-log allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: permission-audit-log unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/permission-entry-validator.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/permission-entry-validator.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: permission-entry-validator allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: permission-entry-validator unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/permission-mode-drift-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/permission-mode-drift-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: permission-mode-drift-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: permission-mode-drift-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/php-lint-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/php-lint-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: php-lint-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: php-lint-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pip-publish-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/pip-publish-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pip-publish-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pip-publish-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pip-requirements-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/pip-requirements-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pip-requirements-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pip-requirements-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pip-venv-required.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/pip-venv-required.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pip-venv-required allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pip-venv-required unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plain-language-danger-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/plain-language-danger-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plain-language-danger-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plain-language-danger-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plan-mode-edit-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/plan-mode-edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plan-mode-edit-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plan-mode-edit-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plan-mode-enforcer.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/plan-mode-enforcer.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plan-mode-enforcer allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plan-mode-enforcer unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plan-mode-strict-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/plan-mode-strict-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plan-mode-strict-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plan-mode-strict-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plan-repo-sync.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/plan-repo-sync.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plan-repo-sync allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plan-repo-sync unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/plugin-process-cleanup.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/plugin-process-cleanup.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: plugin-process-cleanup allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: plugin-process-cleanup unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/polyglot-rm-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/polyglot-rm-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: polyglot-rm-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: polyglot-rm-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/port-conflict-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/port-conflict-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: port-conflict-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: port-conflict-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/post-compact-safety.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/post-compact-safety.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: post-compact-safety allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: post-compact-safety unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pre-compact-checkpoint.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/pre-compact-checkpoint.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pre-compact-checkpoint allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pre-compact-checkpoint unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pre-compact-knowledge-save.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/pre-compact-knowledge-save.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pre-compact-knowledge-save allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pre-compact-knowledge-save unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/pre-compact-transcript-export.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/pre-compact-transcript-export.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: pre-compact-transcript-export allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: pre-compact-transcript-export unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/prefer-builtin-tools.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/prefer-builtin-tools.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: prefer-builtin-tools allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: prefer-builtin-tools unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/prefer-dedicated-tools.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/prefer-dedicated-tools.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: prefer-dedicated-tools allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: prefer-dedicated-tools unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/prisma-migrate-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/prisma-migrate-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: prisma-migrate-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: prisma-migrate-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/prompt-injection-detector.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/prompt-injection-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: prompt-injection-detector allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: prompt-injection-detector unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/prompt-length-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/prompt-length-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: prompt-length-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: prompt-length-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/protect-dotfiles.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/protect-dotfiles.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: protect-dotfiles allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-dotfiles unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/public-repo-push-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/public-repo-push-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: public-repo-push-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: public-repo-push-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/push-requires-test-pass.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/push-requires-test-pass.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: push-requires-test-pass allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: push-requires-test-pass unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/push-requires-test-pass-record.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/push-requires-test-pass-record.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: push-requires-test-pass-record allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: push-requires-test-pass-record unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/python-import-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/python-import-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: python-import-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: python-import-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/python-ruff-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/python-ruff-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: python-ruff-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: python-ruff-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/quoted-flag-approver.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/quoted-flag-approver.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: quoted-flag-approver allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: quoted-flag-approver unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/rails-migration-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/rails-migration-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: rails-migration-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: rails-migration-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/react-key-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/react-key-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: react-key-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: react-key-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/read-all-files-enforcer.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/read-all-files-enforcer.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: read-all-files-enforcer allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: read-all-files-enforcer unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/redis-flushall-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/redis-flushall-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: redis-flushall-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: redis-flushall-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/registry-publish-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/registry-publish-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: registry-publish-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: registry-publish-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/resume-context-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/resume-context-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: resume-context-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: resume-context-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/rm-safety-net.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/rm-safety-net.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: rm-safety-net allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: rm-safety-net unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/role-tool-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/role-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: role-tool-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: role-tool-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/ruby-lint-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/ruby-lint-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: ruby-lint-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: ruby-lint-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/rust-clippy-after-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/rust-clippy-after-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: rust-clippy-after-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: rust-clippy-after-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/sandbox-write-verify.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/sandbox-write-verify.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: sandbox-write-verify allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: sandbox-write-verify unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/schema-migration-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/schema-migration-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: schema-migration-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: schema-migration-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/secret-file-read-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/secret-file-read-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: secret-file-read-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: secret-file-read-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/self-modify-bypass-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/self-modify-bypass-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: self-modify-bypass-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: self-modify-bypass-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/sensitive-file-read-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/sensitive-file-read-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: sensitive-file-read-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: sensitive-file-read-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/sensitive-log-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/sensitive-log-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: sensitive-log-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: sensitive-log-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-drift-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/session-drift-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-drift-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-drift-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-end-logger.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-end-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-end-logger allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-end-logger unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-error-rate-monitor.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-error-rate-monitor.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-error-rate-monitor allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-error-rate-monitor unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-health-monitor.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-health-monitor.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-health-monitor allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-health-monitor unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-permission-reset-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/session-permission-reset-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-permission-reset-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-permission-reset-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-quota-tracker.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-quota-tracker.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-quota-tracker allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-quota-tracker unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-resume-env-fix.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-resume-env-fix.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-resume-env-fix allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-resume-env-fix unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-resume-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-resume-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-resume-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-resume-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-start-safety-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-start-safety-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-start-safety-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-start-safety-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-summary-stop.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-summary-stop.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-summary-stop allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-summary-stop unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-time-limit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-time-limit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-time-limit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-time-limit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/session-token-counter.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/session-token-counter.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: session-token-counter allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: session-token-counter unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/shell-wrapper-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/shell-wrapper-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: shell-wrapper-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: shell-wrapper-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/skill-injection-detector.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/skill-injection-detector.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: skill-injection-detector allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: skill-injection-detector unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/spec-file-scope-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/spec-file-scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: spec-file-scope-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: spec-file-scope-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/spring-profile-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/spring-profile-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: spring-profile-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: spring-profile-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/staged-secret-scan.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/staged-secret-scan.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: staged-secret-scan allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: staged-secret-scan unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/strip-coauthored-by.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/strip-coauthored-by.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: strip-coauthored-by allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: strip-coauthored-by unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/subagent-claudemd-inject.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/subagent-claudemd-inject.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: subagent-claudemd-inject allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: subagent-claudemd-inject unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/subagent-scope-validator.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/subagent-scope-validator.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: subagent-scope-validator allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: subagent-scope-validator unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/subagent-tool-call-limiter.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/subagent-tool-call-limiter.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: subagent-tool-call-limiter allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: subagent-tool-call-limiter unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/svelte-lint-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/svelte-lint-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: svelte-lint-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: svelte-lint-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/swift-build-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/swift-build-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: swift-build-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: swift-build-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/system-message-workaround.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/system-message-workaround.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: system-message-workaround allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: system-message-workaround unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/system-package-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/system-package-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: system-package-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: system-package-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/systemd-service-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/systemd-service-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: systemd-service-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: systemd-service-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/temp-file-cleanup.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/temp-file-cleanup.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: temp-file-cleanup allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: temp-file-cleanup unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/test-after-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/test-after-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: test-after-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: test-after-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/test-before-push.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/test-before-push.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: test-before-push allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: test-before-push unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/test-coverage-reminder.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/test-coverage-reminder.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: test-coverage-reminder allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: test-coverage-reminder unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/test-exit-code-verify.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/test-exit-code-verify.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: test-exit-code-verify allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: test-exit-code-verify unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/timeout-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/timeout-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: timeout-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: timeout-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/tmp-output-size-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/tmp-output-size-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: tmp-output-size-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: tmp-output-size-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/todo-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/todo-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: todo-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: todo-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/todo-deadline-warn.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/todo-deadline-warn.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: todo-deadline-warn allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: todo-deadline-warn unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/token-budget-per-task.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/token-budget-per-task.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: token-budget-per-task allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: token-budget-per-task unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/tool-call-rate-limiter.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/tool-call-rate-limiter.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: tool-call-rate-limiter allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: tool-call-rate-limiter unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/tool-file-logger.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/tool-file-logger.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: tool-file-logger allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: tool-file-logger unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/turbo-cache-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/turbo-cache-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: turbo-cache-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: turbo-cache-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/typescript-lint-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/typescript-lint-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: typescript-lint-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: typescript-lint-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/typescript-strict-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/typescript-strict-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: typescript-strict-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: typescript-strict-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/uncommitted-changes-stop.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/uncommitted-changes-stop.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: uncommitted-changes-stop allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: uncommitted-changes-stop unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/uncommitted-discard-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/uncommitted-discard-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: uncommitted-discard-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: uncommitted-discard-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/uncommitted-work-shield.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/uncommitted-work-shield.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: uncommitted-work-shield allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: uncommitted-work-shield unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/unicode-corruption-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/unicode-corruption-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: unicode-corruption-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: unicode-corruption-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/usage-cache-local.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/usage-cache-local.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: usage-cache-local allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: usage-cache-local unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/user-account-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/user-account-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: user-account-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: user-account-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/variable-expansion-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/variable-expansion-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: variable-expansion-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: variable-expansion-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/verify-before-commit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/verify-before-commit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: verify-before-commit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: verify-before-commit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/vue-lint-on-edit.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/vue-lint-on-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: vue-lint-on-edit allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: vue-lint-on-edit unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/windows-path-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/windows-path-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: windows-path-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: windows-path-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/worktree-memory-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/worktree-memory-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: worktree-memory-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-memory-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/worktree-unmerged-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/worktree-unmerged-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: worktree-unmerged-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-unmerged-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/write-overwrite-confirm.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Read", "tool_input": {"file_path": "test.txt"}}' | bash "$EXDIR/write-overwrite-confirm.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: write-overwrite-confirm allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: write-overwrite-confirm unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/write-secret-guard.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/write-secret-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: write-secret-guard allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: write-secret-guard unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
+
+if [ -f "$EXDIR/yaml-syntax-check.sh" ]; then
+    EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/yaml-syntax-check.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -le 1 ] && { echo "  PASS: yaml-syntax-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: yaml-syntax-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+fi
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
