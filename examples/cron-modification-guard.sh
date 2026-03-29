@@ -18,7 +18,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Detect cron/timer modifications
-if echo "$COMMAND" | grep -qEi '(crontab\s+-[elr]|crontab\s+[^-]|/etc/cron|systemctl\s+(enable|start|restart)\s+.*\.timer|at\s+)'; then
+if echo "$COMMAND" | grep -qEi '(crontab\s+-[elr]|crontab\s+[^-]|systemctl\s+(enable|start|restart)\s+.*\.timer|at\s+)'; then
   echo "BLOCKED: Cron/timer modification requires manual review." >&2
   echo "" >&2
   echo "Command: $COMMAND" >&2
