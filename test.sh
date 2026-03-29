@@ -12242,6 +12242,95 @@ test_ex write-overwrite-confirm.sh '{"tool_input":{"file_path":"Makefile","conte
 test_ex write-overwrite-confirm.sh '{"tool_input":{"file_path":"dist/out.js","content":"var x=1"}}' 0 "write-oc: dist file"
 test_ex write-overwrite-confirm.sh '{"tool_input":{"file_path":"index.mjs","content":"#!/usr/bin/env node"}}' 0 "write-oc: index.mjs (warns)"
 test_ex write-overwrite-confirm.sh '{"tool_input":{"file_path":"CHANGELOG.md","content":"# Changes"}}' 0 "write-oc: changelog (warns)"
+
+# ========== role-tool-guard (#40425) ==========
+echo "role-tool-guard.sh:"
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: no role file = allow"
+test_ex role-tool-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "role-guard: no role file bash"
+test_ex role-tool-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"test.txt"}}' 0 "role-guard: no role file write"
+test_ex role-tool-guard.sh '{"tool_name":"Agent","tool_input":{}}' 0 "role-guard: no role file agent"
+mkdir -p .claude
+echo "pm" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 2 "role-guard: PM blocked from Edit"
+test_ex role-tool-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts"}}' 2 "role-guard: PM blocked from Write"
+test_ex role-tool-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 2 "role-guard: PM blocked from Bash"
+test_ex role-tool-guard.sh '{"tool_name":"NotebookEdit","tool_input":{}}' 2 "role-guard: PM blocked from NotebookEdit"
+test_ex role-tool-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: PM allowed Read"
+test_ex role-tool-guard.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "role-guard: PM allowed Glob"
+echo "architect" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"docs/arch.md"}}' 0 "role-guard: Architect allowed Edit"
+test_ex role-tool-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 2 "role-guard: Architect blocked from Bash"
+test_ex role-tool-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"docs/spec.md"}}' 0 "role-guard: Architect allowed Write"
+echo "developer" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: Developer allowed Edit"
+test_ex role-tool-guard.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "role-guard: Developer allowed Bash"
+test_ex role-tool-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: Developer allowed Write"
+echo "reviewer" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 2 "role-guard: Reviewer blocked from Edit"
+test_ex role-tool-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts"}}' 2 "role-guard: Reviewer blocked from Write"
+test_ex role-tool-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "role-guard: Reviewer allowed Bash"
+test_ex role-tool-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: Reviewer allowed Read"
+echo "qa" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: Unknown role = allow"
+echo "" > .claude/current-role.txt
+test_ex role-tool-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "role-guard: Empty role = allow"
+rm -f .claude/current-role.txt
+
+# ========== cron-modification-guard (#40421) ==========
+echo "cron-modification-guard.sh:"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"crontab -e"}}' 2 "cron-guard: crontab -e blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"crontab -l"}}' 2 "cron-guard: crontab -l blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"crontab /tmp/cron.txt"}}' 2 "cron-guard: crontab file blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"echo \"*/10 * * * * /usr/bin/check\" > /etc/cron.d/check"}}' 2 "cron-guard: write to cron.d blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"systemctl enable check.timer"}}' 2 "cron-guard: systemd timer blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"systemctl start check.timer"}}' 2 "cron-guard: systemd start timer blocked"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "cron-guard: ls allowed"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "cron-guard: npm test allowed"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"cat /etc/cron.d/readme"}}' 0 "cron-guard: read cron.d allowed"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"systemctl status check.timer"}}' 0 "cron-guard: status allowed"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":""}}' 0 "cron-guard: empty allowed"
+test_ex cron-modification-guard.sh '{"tool_input":{"command":"grep cron /var/log/syslog"}}' 0 "cron-guard: grep cron allowed"
+
+# ========== deploy-path-verify-guard (#40421) ==========
+echo "deploy-path-verify-guard.sh:"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/srv/index.html","content":"<html>"}}' 0 "deploy-path: /srv write warns"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/var/www/html/index.html","content":"<html>"}}' 0 "deploy-path: /var/www warns"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/opt/app/index.html","content":"<html>"}}' 0 "deploy-path: /opt warns"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts","content":"export {}"}}' 0 "deploy-path: src no warn"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"data"}}' 0 "deploy-path: tmp no warn"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Bash","tool_input":{"command":"cp index.html /srv/"}}' 0 "deploy-path: bash cp to /srv"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la /srv/"}}' 0 "deploy-path: bash ls safe"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Bash","tool_input":{"command":"echo hi"}}' 0 "deploy-path: bash safe"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"/srv/index.html"}}' 0 "deploy-path: Read pass-through"
+test_ex deploy-path-verify-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"","content":""}}' 0 "deploy-path: empty path"
+
+# ========== edit-counter-test-gate (#40401) ==========
+echo "edit-counter-test-gate.sh:"
+rm -f /tmp/claude-edit-test-gate-$$
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "edit-gate: first edit ok"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/util.ts"}}' 0 "edit-gate: second edit ok"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/types.ts"}}' 0 "edit-gate: third edit warns"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "edit-gate: bash resets counter"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/after.ts"}}' 0 "edit-gate: after reset ok"
+test_ex edit-counter-test-gate.sh '{"tool_name":"Write","tool_input":{"file_path":"src/new.ts"}}' 0 "edit-gate: write counts"
+test_ex edit-counter-test-gate.sh '{}' 0 "edit-gate: empty input"
+rm -f /tmp/claude-edit-test-gate-$$
+
+# ========== session-permission-reset-guard (#40384) ==========
+echo "session-permission-reset-guard.sh:"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git commit -m fix"}}' 2 "perm-reset: git commit blocked"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git push origin main"}}' 2 "perm-reset: git push blocked"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"npm publish"}}' 2 "perm-reset: npm publish blocked"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"cargo install ripgrep"}}' 2 "perm-reset: cargo install blocked"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"pip install requests"}}' 2 "perm-reset: pip install blocked"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "perm-reset: ls allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git status"}}' 0 "perm-reset: git status allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git diff HEAD"}}' 0 "perm-reset: git diff allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "perm-reset: npm test allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":""}}' 0 "perm-reset: empty allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git log --oneline"}}' 0 "perm-reset: git log allowed"
+test_ex session-permission-reset-guard.sh '{"tool_input":{"command":"git add ."}}' 0 "perm-reset: git add allowed"
+
 echo ""
 
 TOTAL=$((PASS + FAIL))
