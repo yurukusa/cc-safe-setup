@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T13:23:26+09:00
+Updated: 2026-03-29T13:24:09+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-29T13:23:26+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0af77dd checkpoint: auto-save 13:22:42
+- Last commit: 8babaa4 checkpoint: auto-save 13:24:01
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./examples/dotenv-commit-guard.sh
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
-./examples/dotenv-commit-guard.sh
 ./examples/network-exfil-guard.sh
 ./examples/mcp-tool-audit-log.sh
 ./examples/mcp-server-allowlist.sh
