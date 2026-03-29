@@ -1,3 +1,5 @@
+#
+# TRIGGER: PreToolUse  MATCHER: "Edit|Write"
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 [ "$TOOL" != "Edit" ] && exit 0

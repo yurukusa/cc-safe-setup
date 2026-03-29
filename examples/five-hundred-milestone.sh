@@ -1,3 +1,5 @@
+#
+# TRIGGER: Notification  MATCHER: ""
 INPUT=$(cat)
 SETTINGS="$HOME/.claude/settings.local.json"
 [[ ! -f "$SETTINGS" ]] && exit 0
