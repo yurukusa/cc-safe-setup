@@ -12951,6 +12951,105 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "--- Edge case tests for 28 hooks ---"
+# cargo-publish-guard.sh edge cases
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo   publish"}}' 2 "cargo-publish-guard: multi-space publish blocked"
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --registry my-registry"}}' 2 "cargo-publish-guard: custom registry publish blocked"
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --allow-dirty"}}' 2 "cargo-publish-guard: allow-dirty publish blocked"
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"echo cargo publish"}}' 0 "cargo-publish-guard: echo cargo publish passes"
+test_ex cargo-publish-guard.sh '{"tool_input":{"command":"cargo publish --dry-run --allow-dirty"}}' 0 "cargo-publish-guard: dry-run with flags passes"
+# composer-guard.sh edge cases
+test_ex composer-guard.sh '{"tool_input":{"command":"composer global require --dev phpunit/phpunit"}}' 2 "composer-guard: global require --dev still blocked"
+test_ex composer-guard.sh '{"tool_input":{"command":"composer update"}}' 0 "composer-guard: update passes"
+test_ex composer-guard.sh '{"tool_input":{"command":"composer dump-autoload"}}' 0 "composer-guard: dump-autoload passes"
+test_ex composer-guard.sh '{"tool_input":{"command":"echo composer global require foo"}}' 0 "composer-guard: echo composer passes"
+# console-log-count.sh edge cases
+test_ex console-log-count.sh '{"tool_input":{"file_path":"/tmp/test.css"}}' 0 "console-log-count: css file skipped"
+test_ex console-log-count.sh '{"tool_input":{"file_path":""}}' 0 "console-log-count: empty file path passes"
+# dotnet-build-on-edit.sh edge cases
+test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":"/tmp/App.vb"}}' 0 "dotnet-build-on-edit: vb not cs/fs passes"
+test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":"/tmp/project.csproj"}}' 0 "dotnet-build-on-edit: csproj not cs/fs passes"
+test_ex dotnet-build-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "dotnet-build-on-edit: empty file path passes"
+# expo-eject-guard.sh edge cases
+test_ex expo-eject-guard.sh '{"tool_input":{"command":"npx expo eject"}}' 2 "expo-eject-guard: npx expo eject blocked"
+test_ex expo-eject-guard.sh '{"tool_input":{"command":"expo install react-native-web"}}' 0 "expo-eject-guard: expo install passes"
+test_ex expo-eject-guard.sh '{"tool_input":{"command":"echo expo eject"}}' 0 "expo-eject-guard: echo expo eject passes"
+# five-hundred-milestone.sh edge cases
+test_ex five-hundred-milestone.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "five-hundred-milestone: bash tool passes"
+test_ex five-hundred-milestone.sh '{"session":"start","tool_name":"Init"}' 0 "five-hundred-milestone: session start passes"
+# gem-push-guard.sh edge cases
+test_ex gem-push-guard.sh '{"tool_input":{"command":"gem push --key github pkg-1.0.gem"}}' 2 "gem-push-guard: push with key blocked"
+test_ex gem-push-guard.sh '{"tool_input":{"command":"gem search rails"}}' 0 "gem-push-guard: search passes"
+test_ex gem-push-guard.sh '{"tool_input":{"command":"gem spec rails"}}' 0 "gem-push-guard: spec passes"
+test_ex gem-push-guard.sh '{"tool_input":{"command":"echo gem push"}}' 0 "gem-push-guard: echo gem push passes"
+# git-checkout-uncommitted-guard.sh edge cases
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git status"}}' 0 "checkout-uncommitted: git status not checkout"
+test_ex git-checkout-uncommitted-guard.sh '{"tool_input":{"command":"git switch main"}}' 0 "checkout-uncommitted: switch main passes"
+# go-mod-tidy-warn.sh edge cases
+test_ex go-mod-tidy-warn.sh '{"tool_input":{"command":"go mod init mymod"}}' 0 "go-mod-tidy-warn: mod init passes"
+test_ex go-mod-tidy-warn.sh '{"tool_input":{"command":"go vet ./..."}}' 0 "go-mod-tidy-warn: vet passes"
+test_ex go-mod-tidy-warn.sh '{"tool_input":{"command":"go mod edit -require=foo@v1.0"}}' 0 "go-mod-tidy-warn: mod edit passes"
+# helm-install-guard.sh edge cases
+test_ex helm-install-guard.sh '{"tool_input":{"command":"helm template app chart"}}' 0 "helm-install-guard: template passes (dry render)"
+test_ex helm-install-guard.sh '{"tool_input":{"command":"helm rollback app 1 -n production"}}' 0 "helm-install-guard: rollback not install/upgrade passes"
+# java-compile-on-edit.sh edge cases
+test_ex java-compile-on-edit.sh '{"tool_input":{"file_path":"/tmp/Test.groovy"}}' 0 "java-compile-on-edit: groovy not java passes"
+test_ex java-compile-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "java-compile-on-edit: empty path passes"
+# log-truncation-guard.sh edge cases
+test_ex log-truncation-guard.sh '{"tool_input":{"command":"less /var/log/syslog"}}' 0 "log-guard: less log allowed"
+test_ex log-truncation-guard.sh '{"tool_input":{"command":"journalctl -u nginx"}}' 0 "log-guard: journalctl allowed"
+# monorepo-scope-guard.sh edge cases
+test_ex monorepo-scope-guard.sh '{"tool_input":{"file_path":"relative/path.ts"}}' 0 "monorepo-scope-guard: relative path passes"
+# network-interface-guard.sh edge cases
+test_ex network-interface-guard.sh '{"tool_input":{"command":"ip route show"}}' 0 "net-guard: ip route show allowed"
+test_ex network-interface-guard.sh '{"tool_input":{"command":"nmcli connection show"}}' 0 "net-guard: nmcli show allowed"
+# nextjs-env-guard.sh edge cases
+test_ex nextjs-env-guard.sh '{"tool_input":{"file_path":"/tmp/app.ts"}}' 0 "nextjs-env-guard: ts file passes"
+test_ex nextjs-env-guard.sh '{"tool_input":{"file_path":""}}' 0 "nextjs-env-guard: empty path passes"
+# no-ask-human.sh edge cases
+test_ex no-ask-human.sh '{"tool_input":{"command":"nano /etc/hosts"}}' 2 "no-ask-human: nano blocked"
+test_ex no-ask-human.sh '{"tool_input":{"command":"emacs config.yml"}}' 2 "no-ask-human: emacs blocked"
+test_ex no-ask-human.sh '{"tool_input":{"command":"pico notes.txt"}}' 2 "no-ask-human: pico blocked"
+test_ex no-ask-human.sh '{"tool_input":{"command":"git add --interactive"}}' 2 "no-ask-human: --interactive blocked"
+test_ex no-ask-human.sh '{"tool_input":{"command":"select opt in a b c; do echo $opt; done"}}' 2 "no-ask-human: select blocked"
+# no-root-user-docker.sh edge cases
+test_ex no-root-user-docker.sh '{"tool_input":{"file_path":"/tmp/docker-compose.yml"}}' 0 "no-root-user-docker: compose file skipped"
+test_ex no-root-user-docker.sh '{"tool_input":{"file_path":"/tmp/Dockerfile.prod"}}' 0 "no-root-user-docker: Dockerfile.prod (no file)"
+# no-todo-in-production.sh edge cases
+test_ex no-todo-in-production.sh '{"tool_input":{"file_path":""}}' 0 "no-todo-in-production: empty path passes"
+test_ex no-todo-in-production.sh '{"tool_input":{"file_path":"/tmp/nonexist/deep/path.ts"}}' 0 "no-todo-in-production: deep nonexistent passes"
+# nuxt-config-guard.sh edge cases
+test_ex nuxt-config-guard.sh '{"tool_input":{"file_path":"/tmp/nuxt.json"}}' 0 "nuxt-config-guard: nuxt.json not config"
+test_ex nuxt-config-guard.sh '{"tool_input":{"file_path":""}}' 0 "nuxt-config-guard: empty path passes"
+# php-lint-on-edit.sh edge cases
+test_ex php-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.php3"}}' 0 "php-lint-on-edit: php3 not .php passes"
+test_ex php-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "php-lint-on-edit: empty path passes"
+# pip-publish-guard.sh edge cases
+test_ex pip-publish-guard.sh '{"tool_input":{"command":"twine check dist/*"}}' 0 "pip-publish-guard: twine check passes"
+test_ex pip-publish-guard.sh '{"tool_input":{"command":"python setup.py sdist"}}' 0 "pip-publish-guard: sdist passes"
+# ruby-lint-on-edit.sh edge cases
+test_ex ruby-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.erb"}}' 0 "ruby-lint-on-edit: erb not .rb passes"
+test_ex ruby-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "ruby-lint-on-edit: empty path passes"
+# session-start-safety-check.sh edge cases
+test_ex session-start-safety-check.sh '{"session":"start","context":"test"}' 0 "session-start-safety: start with context"
+test_ex session-start-safety-check.sh '{"session":""}' 0 "session-start-safety: empty session field"
+# spring-profile-guard.sh edge cases
+test_ex spring-profile-guard.sh '{"tool_input":{"command":"java -Dspring.profiles.active=test -jar app.jar"}}' 0 "spring-profile-guard: test profile passes"
+test_ex spring-profile-guard.sh '{"tool_input":{"command":"mvn spring-boot:run"}}' 0 "spring-profile-guard: no profile mvn passes"
+# svelte-lint-on-edit.sh edge cases
+test_ex svelte-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/app.svx"}}' 0 "svelte-lint-on-edit: svx not .svelte passes"
+test_ex svelte-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "svelte-lint-on-edit: empty path passes"
+# swift-build-on-edit.sh edge cases
+test_ex swift-build-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.h"}}' 0 "swift-build-on-edit: header not swift passes"
+test_ex swift-build-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "swift-build-on-edit: empty path passes"
+# test-after-edit.sh edge cases
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/app.config.ts"}}' 0 "test-after-edit: config file passes silently"
+test_ex test-after-edit.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/app.test.rb"}}' 0 "test-after-edit: ruby test file triggers note"
+# vue-lint-on-edit.sh edge cases
+test_ex vue-lint-on-edit.sh '{"tool_input":{"file_path":"/tmp/test.tsx"}}' 0 "vue-lint-on-edit: tsx not .vue passes"
+test_ex vue-lint-on-edit.sh '{"tool_input":{"file_path":""}}' 0 "vue-lint-on-edit: empty path passes"
+echo ""
+
 echo "webfetch-domain-allow.sh:"
 test_ex webfetch-domain-allow.sh '{}' 0 "webfetch-allow: empty input"
 test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://docs.anthropic.com/api"}}' 0 "webfetch-allow: allows anthropic docs"
