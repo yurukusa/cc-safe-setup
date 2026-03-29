@@ -12951,6 +12951,42 @@ test_ex usage-warn.sh '{"tool_input":{"command":"echo test"}}' 0 "usage-warn: ec
 
 echo ""
 
+echo "webfetch-domain-allow.sh:"
+test_ex webfetch-domain-allow.sh '{}' 0 "webfetch-allow: empty input"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://docs.anthropic.com/api"}}' 0 "webfetch-allow: allows anthropic docs"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://github.com/anthropics/claude-code"}}' 0 "webfetch-allow: allows github"
+test_ex webfetch-domain-allow.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' 0 "webfetch-allow: ignores non-WebFetch"
+test_ex webfetch-domain-allow.sh '{"tool_name":"WebFetch","tool_input":{}}' 0 "webfetch-allow: no URL passthrough"
+test_ex webfetch-domain-allow.sh '{"tool_name":"Read","tool_input":{"file_path":"test.txt"}}' 0 "webfetch-allow: ignores Read tool"
+# Verify allow decision is emitted
+OUTPUT=$(echo '{"tool_name":"WebFetch","tool_input":{"url":"https://example.com/page"}}' | bash "$EXDIR/webfetch-domain-allow.sh" 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.permissionDecision' 2>/dev/null | grep -q 'allow'; then
+    echo "  PASS: webfetch-allow: emits allow decision"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: webfetch-allow: emits allow decision (got: $OUTPUT)"
+    FAIL=$((FAIL + 1))
+fi
+# Verify specific domain mode (not wildcard)
+OUTPUT=$(CC_WEBFETCH_ALLOW_DOMAINS="github.com,docs.anthropic.com" bash -c 'echo '\''{"tool_name":"WebFetch","tool_input":{"url":"https://github.com/test"}}'\'' | bash "'$EXDIR'/webfetch-domain-allow.sh"' 2>/dev/null)
+if echo "$OUTPUT" | jq -e '.hookSpecificOutput.permissionDecision' 2>/dev/null | grep -q 'allow'; then
+    echo "  PASS: webfetch-allow: env var domain match"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: webfetch-allow: env var domain match (got: $OUTPUT)"
+    FAIL=$((FAIL + 1))
+fi
+# Verify non-matching domain with env var returns nothing (passthrough)
+OUTPUT=$(CC_WEBFETCH_ALLOW_DOMAINS="github.com" bash -c 'echo '\''{"tool_name":"WebFetch","tool_input":{"url":"https://evil.com/hack"}}'\'' | bash "'$EXDIR'/webfetch-domain-allow.sh"' 2>/dev/null)
+if [ -z "$OUTPUT" ] || ! echo "$OUTPUT" | jq -e '.hookSpecificOutput.permissionDecision' 2>/dev/null >/dev/null; then
+    echo "  PASS: webfetch-allow: non-matching domain passthrough"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: webfetch-allow: non-matching domain passthrough (got: $OUTPUT)"
+    FAIL=$((FAIL + 1))
+fi
+echo ""
+
 echo "compact-blocker.sh:"
 test_ex compact-blocker.sh '{}' 2 "compact-blocker: blocks with empty input"
 test_ex compact-blocker.sh '{"event":"PreCompact"}' 2 "compact-blocker: blocks PreCompact event"
