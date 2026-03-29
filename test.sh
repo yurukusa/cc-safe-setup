@@ -12892,6 +12892,37 @@ test_ex dotenv-commit-guard.sh '{"tool_input":{"command":"ls"}}' 0 "dotenv: non-
 test_ex dotenv-commit-guard.sh '{}' 0 "dotenv: empty"
 test_ex dotenv-commit-guard.sh '{"tool_input":{"command":""}}' 0 "dotenv: empty command"
 
+# ========== cwd-project-boundary-guard (CwdChanged) ==========
+echo "cwd-project-boundary-guard.sh:"
+test_ex cwd-project-boundary-guard.sh '{"cwd":"/home/user/project/src"}' 0 "cwd-boundary: inside project"
+test_ex cwd-project-boundary-guard.sh '{"cwd":"/etc"}' 0 "cwd-boundary: system dir warns"
+test_ex cwd-project-boundary-guard.sh '{"cwd":""}' 0 "cwd-boundary: empty cwd"
+test_ex cwd-project-boundary-guard.sh '{}' 0 "cwd-boundary: no input"
+test_ex cwd-project-boundary-guard.sh '{"cwd":"/tmp"}' 0 "cwd-boundary: tmp dir"
+test_ex cwd-project-boundary-guard.sh '{"cwd":"/home/user/other-project"}' 0 "cwd-boundary: other project warns"
+test_ex cwd-project-boundary-guard.sh '{"cwd":"."}' 0 "cwd-boundary: relative dot"
+
+# ========== file-change-undo-tracker (FileChanged) ==========
+echo "file-change-undo-tracker.sh:"
+test_ex file-change-undo-tracker.sh '{"file":"src/main.ts","event":"modified"}' 0 "undo-track: modified file"
+test_ex file-change-undo-tracker.sh '{"file":"src/new.ts","event":"created"}' 0 "undo-track: created file"
+test_ex file-change-undo-tracker.sh '{"file":"","event":"modified"}' 0 "undo-track: empty file"
+test_ex file-change-undo-tracker.sh '{}' 0 "undo-track: no input"
+test_ex file-change-undo-tracker.sh '{"file":"test.sh","event":"deleted"}' 0 "undo-track: deleted file"
+test_ex file-change-undo-tracker.sh '{"file":"package.json"}' 0 "undo-track: no event type"
+test_ex file-change-undo-tracker.sh '{"event":"modified"}' 0 "undo-track: no file"
+
+# ========== pre-compact-knowledge-save (PreCompact) ==========
+echo "pre-compact-knowledge-save.sh:"
+test_ex pre-compact-knowledge-save.sh '{}' 0 "compact-save: creates checkpoint"
+test_ex pre-compact-knowledge-save.sh '{"session_id":"abc123"}' 0 "compact-save: with session id"
+test_ex pre-compact-knowledge-save.sh '' 0 "compact-save: empty input"
+test_ex pre-compact-knowledge-save.sh '{"context_size":100000}' 0 "compact-save: with context size"
+test_ex pre-compact-knowledge-save.sh '{"reason":"auto"}' 0 "compact-save: auto compact"
+test_ex pre-compact-knowledge-save.sh '{"reason":"manual"}' 0 "compact-save: manual compact"
+test_ex pre-compact-knowledge-save.sh '{"tool_name":"Bash"}' 0 "compact-save: tool context"
+rm -f .claude/pre-compact-checkpoint.md
+
 # ========== Final push: all hooks to 7+ tests ==========
 test_ex hook-stdout-sanitizer.sh '{"tool_input":{"command":"echo test"}}' 0 "stdout-sanitizer: echo cmd"
 test_ex hook-stdout-sanitizer.sh '{"tool_name":"Read","tool_input":{"file_path":"x.ts"}}' 0 "stdout-sanitizer: read passthru"
