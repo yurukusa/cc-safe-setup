@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T10:04:40+09:00
+Updated: 2026-03-29T10:20:53+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T10:04:40+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0632751 checkpoint: auto-save 10:03:59
+- Last commit: d2ca594 checkpoint: auto-save 10:20:44
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/skill-injection-detector.sh
+./examples/worktree-memory-guard.sh
+./examples/file-recycle-bin.sh
+./examples/migration-verify-guard.sh
+./examples/env-inline-secret-guard.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/bg-task-cooldown-guard.sh
 ./examples/bash-safety-auto-deny.sh
-./examples/consecutive-failure-circuit-breaker.sh
-./examples/subagent-tool-call-limiter.sh
-./examples/claudeignore-enforce-guard.sh
-./examples/banned-command-guard.sh
-./docs/README.ja.md
 ```
 
