@@ -15294,6 +15294,12 @@ if [ -f "$EXDIR/yaml-syntax-check.sh" ]; then
     EXIT=0; echo '{"tool_name": "Bash", "tool_input": {"command": "echo hello"}}' | bash "$EXDIR/yaml-syntax-check.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -le 1 ] && { echo "  PASS: yaml-syntax-check allows safe input"; PASS=$((PASS+1)); } || { echo "  FAIL: yaml-syntax-check unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
 fi
+
+if [ -f "$EXDIR/terminal-state-restore.sh" ]; then
+    EXIT=0; echo '{}' | bash "$EXDIR/terminal-state-restore.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: terminal-state-restore exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: terminal-state-restore unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+    TOTAL=$((TOTAL+1))
+fi
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
