@@ -47,4 +47,7 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/permission-checker.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/matrix.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/events.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/fix-git-show-no-stat.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/disable-auto-compaction.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/webfetch-domain-allowlist.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>
