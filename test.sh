@@ -15306,6 +15306,12 @@ if [ -f "$EXDIR/worktree-project-unify.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-project-unify exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-project-unify unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
     TOTAL=$((TOTAL+1))
 fi
+
+if [ -f "$EXDIR/claude-cache-gc.sh" ]; then
+    EXIT=0; CC_GC_DRY_RUN=1 echo '{}' | bash "$EXDIR/claude-cache-gc.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: claude-cache-gc exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: claude-cache-gc unexpected exit $EXIT"; FAIL=$((FAIL+1)); }
+    TOTAL=$((TOTAL+1))
+fi
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
