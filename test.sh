@@ -12736,6 +12736,38 @@ test_ex headless-empty-result-guard.sh '{"stop_reason":"end_turn"}' 0 "headless:
 test_ex headless-empty-result-guard.sh '{"stop_reason":"tool_use"}' 0 "headless: tool_use only"
 test_ex headless-empty-result-guard.sh '{"result":""}' 0 "headless: empty result string"
 
+# ========== self-modify-bypass-guard (#40463) ==========
+echo "self-modify-bypass-guard.sh:"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":".claude/hooks/my-hook.sh"}}' 0 "self-modify: .claude hook edit"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Write","tool_input":{"file_path":".claude/lib/util.sh"}}' 0 "self-modify: .claude lib write"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "self-modify: non-.claude skipped"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Read","tool_input":{"file_path":".claude/hooks/x.sh"}}' 0 "self-modify: Read skipped"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "self-modify: Bash skipped"
+test_ex self-modify-bypass-guard.sh '{}' 0 "self-modify: empty input"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "self-modify: empty path"
+test_ex self-modify-bypass-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":".claude/settings.json"}}' 0 "self-modify: settings.json not auto-allowed"
+
+# ========== subagent-claudemd-inject (#40459) ==========
+echo "subagent-claudemd-inject.sh:"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Agent","tool_input":{"prompt":"fix bug"}}' 0 "claudemd-inject: agent call"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "claudemd-inject: non-agent skipped"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Edit","tool_input":{"file_path":"x.ts"}}' 0 "claudemd-inject: edit skipped"
+test_ex subagent-claudemd-inject.sh '{}' 0 "claudemd-inject: empty input"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Agent","tool_input":{}}' 0 "claudemd-inject: agent no prompt"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Read","tool_input":{"file_path":"x"}}' 0 "claudemd-inject: read skipped"
+test_ex subagent-claudemd-inject.sh '{"tool_name":"Agent","tool_input":{"description":"explore"}}' 0 "claudemd-inject: agent with desc"
+
+# ========== system-message-workaround (#40380) ==========
+echo "system-message-workaround.sh:"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"ls -la"}}' 0 "sys-msg: safe command"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"curl -X DELETE https://api.example.com/users/1"}}' 0 "sys-msg: DELETE warns"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"echo DROP TABLE users"}}' 0 "sys-msg: DROP TABLE warns"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"npm test"}}' 0 "sys-msg: npm test safe"
+test_ex system-message-workaround.sh '{"tool_input":{"command":""}}' 0 "sys-msg: empty command"
+test_ex system-message-workaround.sh '{}' 0 "sys-msg: empty input"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"curl https://api.example.com/data"}}' 0 "sys-msg: GET request safe"
+test_ex system-message-workaround.sh '{"tool_input":{"command":"TRUNCATE TABLE logs"}}' 0 "sys-msg: TRUNCATE warns"
+
 # ========== Final push: all hooks to 7+ tests ==========
 test_ex hook-stdout-sanitizer.sh '{"tool_input":{"command":"echo test"}}' 0 "stdout-sanitizer: echo cmd"
 test_ex hook-stdout-sanitizer.sh '{"tool_name":"Read","tool_input":{"file_path":"x.ts"}}' 0 "stdout-sanitizer: read passthru"
