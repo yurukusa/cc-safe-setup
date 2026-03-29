@@ -12684,6 +12684,58 @@ test_ex no-magic-number.sh '{}' 0 "no-magic-number: no input"
 test_ex no-md5-sha1.sh '{"tool_input":{"new_string":""}}' 0 "no-md5-sha1: empty str"
 test_ex no-md5-sha1.sh '{}' 0 "no-md5-sha1: no input"
 
+# ========== session-resume-env-fix (#40391) ==========
+echo "session-resume-env-fix.sh:"
+test_ex session-resume-env-fix.sh '{"source":"startup","session_id":"abc123"}' 0 "env-fix: startup source skipped"
+test_ex session-resume-env-fix.sh '{"source":"resume","session_id":""}' 0 "env-fix: empty session_id"
+test_ex session-resume-env-fix.sh '{}' 0 "env-fix: empty input"
+test_ex session-resume-env-fix.sh '{"source":"resume","session_id":"abc123"}' 0 "env-fix: resume without env file"
+test_ex session-resume-env-fix.sh '{"source":"new","session_id":"abc123"}' 0 "env-fix: new source skipped"
+test_ex session-resume-env-fix.sh '{"source":"resume"}' 0 "env-fix: resume missing session_id"
+test_ex session-resume-env-fix.sh '{"session_id":"abc123"}' 0 "env-fix: missing source"
+test_ex session-resume-env-fix.sh '{"source":"startup"}' 0 "env-fix: startup no session"
+
+# ========== permission-entry-validator (#40382) ==========
+echo "permission-entry-validator.sh:"
+test_ex permission-entry-validator.sh '{}' 0 "perm-validate: no settings file"
+test_ex permission-entry-validator.sh '{"tool_name":"Bash"}' 0 "perm-validate: basic input"
+test_ex permission-entry-validator.sh '{"session_id":"test"}' 0 "perm-validate: session context"
+test_ex permission-entry-validator.sh '' 0 "perm-validate: empty"
+test_ex permission-entry-validator.sh '{"result":"success"}' 0 "perm-validate: result input"
+test_ex permission-entry-validator.sh '{"stop_reason":"end_turn"}' 0 "perm-validate: stop reason"
+test_ex permission-entry-validator.sh '{"tool_name":"Write"}' 0 "perm-validate: write tool"
+
+# ========== spec-file-scope-guard (#40383) ==========
+echo "spec-file-scope-guard.sh:"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "spec-scope: no spec file = allow"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/new.ts"}}' 0 "spec-scope: write no spec = allow"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "spec-scope: read tool skipped"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "spec-scope: bash skipped"
+test_ex spec-file-scope-guard.sh '{}' 0 "spec-scope: empty input"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":""}}' 0 "spec-scope: empty path"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Edit","tool_input":{}}' 0 "spec-scope: no file_path"
+test_ex spec-file-scope-guard.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "spec-scope: glob skipped"
+
+# ========== read-all-files-enforcer (#40389) ==========
+echo "read-all-files-enforcer.sh:"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Read","tool_input":{"file_path":"src/main.ts"}}' 0 "read-enforce: read without tracking"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/main.ts"}}' 0 "read-enforce: edit skipped"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Write","tool_input":{"file_path":"src/new.ts"}}' 0 "read-enforce: write skipped"
+test_ex read-all-files-enforcer.sh '{}' 0 "read-enforce: empty input"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Read","tool_input":{"file_path":""}}' 0 "read-enforce: empty path"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"cat x"}}' 0 "read-enforce: bash skipped"
+test_ex read-all-files-enforcer.sh '{"tool_name":"Read","tool_input":{}}' 0 "read-enforce: no file_path"
+
+# ========== headless-empty-result-guard (#40432) ==========
+echo "headless-empty-result-guard.sh:"
+test_ex headless-empty-result-guard.sh '{"stop_reason":"end_turn","result":"output"}' 0 "headless: normal completion"
+test_ex headless-empty-result-guard.sh '{"stop_reason":"tool_use","result":""}' 0 "headless: empty result (interactive)"
+test_ex headless-empty-result-guard.sh '{}' 0 "headless: empty input"
+test_ex headless-empty-result-guard.sh '{"result":"some text"}' 0 "headless: has result"
+test_ex headless-empty-result-guard.sh '{"stop_reason":"end_turn"}' 0 "headless: end_turn no result"
+test_ex headless-empty-result-guard.sh '{"stop_reason":"tool_use"}' 0 "headless: tool_use only"
+test_ex headless-empty-result-guard.sh '{"result":""}' 0 "headless: empty result string"
+
 # ========== Final push: all hooks to 7+ tests ==========
 test_ex hook-stdout-sanitizer.sh '{"tool_input":{"command":"echo test"}}' 0 "stdout-sanitizer: echo cmd"
 test_ex hook-stdout-sanitizer.sh '{"tool_name":"Read","tool_input":{"file_path":"x.ts"}}' 0 "stdout-sanitizer: read passthru"
