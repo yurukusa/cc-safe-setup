@@ -61,7 +61,7 @@ Claude Codeを再起動。完了。
 - [トラブルシューティング](../TROUBLESHOOTING.md) — 動かない時の対処法
 - [Web版ツール](https://yurukusa.github.io/cc-safe-setup/hub.html) — 全ツール一覧
 
-📘 [Claude Codeを本番品質にする実践ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（Zenn Book・14章）
+📘 **[Claude Codeを本番品質にする実践ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)**（¥800 / [第2章を無料で読む](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/2-safety-guards)）— 700+時間の自律稼働から生まれた14章の実践ガイド。hookの設計パターン、テスト戦略、実際のインシデント事後分析。
 
 ## 必要なもの
 
