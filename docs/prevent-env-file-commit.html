@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevent Claude Code from Committing .env Files — cc-safe-setup</title>
+<meta name="description" content="Claude Code can git add .env and commit your API keys. A PreToolUse hook blocks .env from being staged, even with git add . or git add -A. Instant protection.">
+<meta name="keywords" content="claude code env file, claude code git add env, claude code api key commit, secret guard hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-env-file-commit.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}p{margin:.8rem 0}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}pre code{background:none;padding:0}.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}nav{margin-bottom:2rem;font-size:.9rem}nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Prevent .env File Commits</h1>
+<p>Claude Code runs <code>git add .</code> or <code>git add -A</code> and your <code>.env</code> with API keys gets staged. If followed by <code>git commit</code> and <code>git push</code>, your secrets are public.</p>
+
+<div class="incident">
+<p><a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a> — "Claude repeatedly ignores CLAUDE.md security guidelines and exposes API keys to version control"</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/401">#401</a> — "Claude loads my projects .env into its bash environment"</p>
+</div>
+
+<h2>The Fix: secret-guard Hook</h2>
+<p>The <code>secret-guard</code> hook (included in cc-safe-setup) blocks <code>git add</code> when it would stage sensitive files:</p>
+
+<div class="fix">
+<pre><code>#!/bin/bash
+# Blocks: git add .env, git add -A (when .env exists), git add .
+CMD=$(cat | jq -r '.tool_input.command // empty')
+[ -z "$CMD" ] && exit 0
+
+if echo "$CMD" | grep -qE 'git\s+add.*\.env'; then
+    echo "BLOCKED: Cannot stage .env files" &gt;&amp;2
+    exit 2
+fi
+
+# Block git add . / git add -A when .env exists
+if echo "$CMD" | grep -qE 'git\s+add\s+(\.|--all|-A)' && [ -f .env ]; then
+    echo "BLOCKED: git add would include .env. Use git add &lt;specific-files&gt;" &gt;&amp;2
+    exit 2
+fi
+exit 0</code></pre>
+</div>
+
+<h2>Install</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>The <code>secret-guard</code> hook is one of the 8 hooks installed by default. It also catches <code>.env.local</code>, <code>.env.production</code>, SSH keys, and other credential files.</p>
+
+<div class="cta">
+<h2>Protect Your Secrets</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">592 hooks. 8,881 tests. secret-guard included by default.</p>
+</div>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
