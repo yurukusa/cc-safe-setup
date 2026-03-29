@@ -5893,7 +5893,9 @@ echo "notify-waiting.sh:"
 cp examples/notify-waiting.sh /tmp/test-notify-waiting.sh && chmod +x /tmp/test-notify-waiting.sh
 test_hook "notify-waiting" '{}' 0 "exits 0 (notification hook)"
 test_hook "notify-waiting" '{"message":"waiting for input"}' 0 "exits 0 with message"
-echo ""
+test_hook "notify-waiting" '{"session_id":"test"}' 0 "exits 0 with session_id"
+test_hook "notify-waiting" '{"tool_name":"Bash"}' 0 "exits 0 with tool_name"
+test_hook "notify-waiting" '{"event":"permission_prompt"}' 0 "exits 0 with event"
 echo ""
 echo "npm-publish-guard.sh:"
 cp examples/npm-publish-guard.sh /tmp/test-npm-publish.sh && chmod +x /tmp/test-npm-publish.sh
