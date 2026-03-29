@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T09:07:00+09:00
+Updated: 2026-03-29T09:35:12+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-03-29T09:07:00+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ee0b192 checkpoint: auto-save 09:06:19
+- Last commit: 1401772 checkpoint: auto-save 09:35:04
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./examples/banned-command-guard.sh
 ./.claude/pre-compact-checkpoint.md
 ./docs/README.ja.md
 ./README.md
@@ -20,6 +21,5 @@ Updated: 2026-03-29T09:07:00+09:00
 ./examples/file-age-guard.sh
 ./examples/max-concurrent-agents.sh
 ./examples/mcp-config-freeze.sh
-./examples/mcp-data-boundary.sh
 ```
 
