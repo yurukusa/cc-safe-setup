@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T19:51:06+09:00
+Updated: 2026-03-29T19:52:00+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-29T19:51:06+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 147a38a checkpoint: auto-save 19:51:05
+- Last commit: fe2033d checkpoint: auto-save 19:51:17
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-03-29.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-03-29.md
 ./test.sh
 ./examples/polyglot-rm-guard.sh
 ./examples/plugin-process-cleanup.sh
