@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T14:41:58+09:00
+Updated: 2026-03-29T14:42:03+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-03-29T14:41:58+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 9b572ff checkpoint: auto-save 14:41:49
+- Last commit: c8a1d5d checkpoint: pre-compact auto-save (1 files, 20260329-054200)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/compact-blocker.sh
 ./examples/git-show-flag-sanitizer.sh
@@ -20,6 +21,5 @@ Updated: 2026-03-29T14:41:58+09:00
 ./examples/auto-approve-readonly-tools.sh
 ./examples/console-log-count.sh
 ./examples/five-hundred-milestone.sh
-./examples/hardcoded-ip-guard.sh
 ```
 
