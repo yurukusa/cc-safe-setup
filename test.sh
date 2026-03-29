@@ -3224,6 +3224,15 @@ if [ -f "$EXDIR/git-message-length.sh" ]; then
     test_ex log-level-guard.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
     test_ex max-edit-size-guard.sh '{}' 0 "empty input passes"
     test_ex max-edit-size-guard.sh '{"tool_input":{"old_string":"a","new_string":"a"}}' 0 "no-change passes"
+    test_ex auto-approve-readonly.sh '{"tool_input":{"command":"find . -name test"}}' 0 "find approved"
+    test_ex auto-approve-readonly.sh '{}' 0 "empty input passes"
+    test_ex aws-region-guard.sh '{"tool_input":{"command":"aws s3 ls"}}' 0 "aws s3 passes"
+    test_ex docker-volume-guard.sh '{"tool_input":{"command":"docker ps"}}' 0 "docker ps passes"
+    test_ex git-config-guard.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
+    test_ex git-hook-bypass-guard.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
+    test_ex git-submodule-guard.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
+    test_ex log-level-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "npm test passes"
+    test_ex mcp-tool-guard.sh '{"tool_input":{"command":"npm start"}}' 0 "npm start passes"
 fi
 echo ""
 
@@ -3480,6 +3489,9 @@ if [ -f "$EXDIR/max-function-length.sh" ]; then
     LONG_CONTENT=$(python3 -c "print('\\n'.join(['line ' + str(i) for i in range(101)]))")
     EXIT=0; echo "{\"tool_input\":{\"new_string\":\"$LONG_CONTENT\"}}" | bash "$EXDIR/max-function-length.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && echo "  PASS: max-function-length warns on 101 lines (exit 0)" && PASS=$((PASS+1)) || { echo "  FAIL: max-function-length should exit 0 (got $EXIT)"; FAIL=$((FAIL+1)); }
+    test_ex max-function-length.sh '{}' 0 "empty input passes"
+    test_ex max-function-length.sh '{"tool_input":{"new_string":"x"}}' 0 "tiny content passes"
+    test_ex max-function-length.sh '{"tool_name":"Bash"}' 0 "Bash tool ignored"
 fi
 echo ""
 
@@ -3493,6 +3505,9 @@ if [ -f "$EXDIR/max-import-count.sh" ]; then
     MANY_IMPORTS=$(python3 -c "print('\\n'.join(['import mod' + str(i) + ' from \"pkg\"' for i in range(21)]))")
     EXIT=0; printf '{"tool_input":{"new_string":"%s"}}' "$MANY_IMPORTS" | bash "$EXDIR/max-import-count.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && echo "  PASS: max-import-count warns on 21 imports (exit 0)" && PASS=$((PASS+1)) || { echo "  FAIL: max-import-count should exit 0 (got $EXIT)"; FAIL=$((FAIL+1)); }
+    test_ex max-import-count.sh '{}' 0 "empty input passes"
+    test_ex max-import-count.sh '{"tool_name":"Bash"}' 0 "Bash tool ignored"
+    test_ex max-import-count.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no imports passes"
 fi
 echo ""
 
@@ -9890,6 +9905,10 @@ test_ex daily-usage-tracker.sh '{}' 0 "daily-tracker: empty tool name"
 # Restore original file if it existed
 if [ -n "$DAILY_BACKUP" ]; then echo "$DAILY_BACKUP" > "$DAILY_TEST_FILE";     test_ex git-message-length-check.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-commit passes"
     test_ex git-message-length-check.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex git-message-length-check.sh '{}' 0 "empty input passes"
+    test_ex json-syntax-check.sh '{"tool_input":{"file_path":"test.json"}}' 0 "json file passes"
+    test_ex json-syntax-check.sh '{}' 0 "empty input passes"
+    test_ex git-message-length-check.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
     test_ex git-message-length-check.sh '{}' 0 "empty input passes"
 fi
 echo ""
