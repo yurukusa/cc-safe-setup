@@ -13463,6 +13463,34 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- session-end-logger ---
+echo "session-end-logger.sh:"
+_ORIG_DIR="$(pwd)"
+_TMP_REPO=$(mktemp -d)
+cd "$_TMP_REPO" && git init -q && git commit --allow-empty -m "init" -q
+test_ex session-end-logger.sh '{}' 0 "empty input passes"
+test_ex session-end-logger.sh '{"session_id":"test-123"}' 0 "with session_id passes"
+test_ex session-end-logger.sh '{"session_id":"abc","tool_input":{}}' 0 "with extra fields passes"
+# Verify log file was created
+if [ -f ".claude/session-logs/$(date '+%Y-%m-%d').md" ]; then
+    echo "  PASS: session log file created"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: session log file not created"
+    FAIL=$((FAIL + 1))
+fi
+cd "$_ORIG_DIR"
+rm -rf "$_TMP_REPO"
+echo ""
+
+# --- headless-stop-guard ---
+echo "headless-stop-guard.sh:"
+test_ex headless-stop-guard.sh '{}' 0 "non-headless passes (runs through)"
+CC_HEADLESS=1 test_ex headless-stop-guard.sh '{}' 0 "CC_HEADLESS=1 exits immediately"
+test_ex headless-stop-guard.sh '{"session_id":"test"}' 0 "with session_id passes"
+test_ex headless-stop-guard.sh '{"tool_input":{}}' 0 "with tool_input passes"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
