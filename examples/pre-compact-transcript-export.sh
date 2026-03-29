@@ -20,8 +20,6 @@
 # See: https://github.com/anthropics/claude-code/issues/27242
 # ================================================================
 
-set -euo pipefail
-
 # Find the current session transcript
 SESSION_DIR="${HOME}/.claude/projects"
 TRANSCRIPT=""
