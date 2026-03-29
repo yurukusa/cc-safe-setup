@@ -11724,6 +11724,12 @@ test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"grep pattern /secret/
 test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"head /private/keys/id_rsa"}}' 2 "path-deny: head denied path BLOCKED"
 test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"ls /home/user/projects"}}' 0 "path-deny: safe path allowed"
 test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "path-deny: no path in command"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"cp /secret/data/x /tmp/"}}' 2 "path-deny: cp from denied BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"tar czf /tmp/backup.tar.gz /private/keys/"}}' 2 "path-deny: tar denied path BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"find /secret/data -name *.txt"}}' 2 "path-deny: find in denied BLOCKED"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"cat /home/user/secret-recipe.txt"}}' 0 "path-deny: similar name but safe"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "path-deny: ls no path"
+test_ex path-deny-bash-guard.sh '{"tool_input":{"command":""}}' 0 "path-deny: empty command with config"
 unset CC_DENIED_PATHS
 echo ""
 
@@ -11737,6 +11743,11 @@ test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":
 test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":"/etc/hosts"}}' 0 "sandbox-write: existing file (single write ok)"
 test_ex sandbox-write-verify.sh '{"tool_name":"Edit","tool_input":{}}' 0 "sandbox-write: no file_path"
 test_ex sandbox-write-verify.sh '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}' 0 "sandbox-write: Read tool skipped"
+test_ex sandbox-write-verify.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "sandbox-write: Bash tool skipped"
+test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":"/home/user/project/src/main.ts"}}' 0 "sandbox-write: project file"
+test_ex sandbox-write-verify.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "sandbox-write: Glob skipped"
+test_ex sandbox-write-verify.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test-sandbox-x.txt","content":"data"}}' 0 "sandbox-write: tmp file with content"
+test_ex sandbox-write-verify.sh '{"tool_name":"NotebookEdit","tool_input":{}}' 0 "sandbox-write: NotebookEdit"
 rm -f /tmp/cc-sandbox-writes-$$
 echo ""
 
