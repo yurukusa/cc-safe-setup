@@ -52,4 +52,6 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/webfetch-domain-allowlist.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-denied-action-retry.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/background-agent-write-fix.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-pipe-mode-safety.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/session-quality-degradation.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>

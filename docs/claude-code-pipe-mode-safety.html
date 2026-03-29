@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Pipe Mode Safety — Hooks Don't Fire in -p Mode</title>
+<meta name="description" content="PreToolUse hooks don't fire in Claude Code pipe mode (claude -p). Learn the workarounds: CLAUDE.md rules, output validation scripts, and wrapper approaches.">
+<meta name="keywords" content="claude code pipe mode, claude -p hooks, claude code headless, non-interactive mode safety, claude code automation">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-pipe-mode-safety.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}p{margin:.8rem 0}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}pre code{background:none;padding:0}.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}.warning{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}nav{margin-bottom:2rem;font-size:.9rem}nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Claude Code Pipe Mode Safety</h1>
+<p>Hooks don't fire in pipe mode (<code>claude -p</code>). This means your safety guards — destructive-guard, secret-guard, branch-guard — are all inactive when running headless.</p>
+
+<div class="warning">
+<p><strong>Known limitation</strong> (<a href="https://github.com/anthropics/claude-code/issues/40506">#40506</a>, <a href="https://github.com/anthropics/claude-code/issues/35646">#35646</a>): PreToolUse, PostToolUse, and PermissionRequest hooks do not execute in <code>claude -p</code> mode.</p>
+</div>
+
+<h2>Hook Support by Mode</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem">Mode</th><th>PreToolUse</th><th>PostToolUse</th><th>PermissionRequest</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Interactive (TUI)</td><td style="color:#3fb950">Yes</td><td style="color:#3fb950">Yes</td><td style="color:#3fb950">Yes</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem">Pipe (<code>claude -p</code>)</td><td style="color:#f85149">No</td><td style="color:#f85149">No</td><td style="color:#f85149">No</td></tr>
+<tr><td style="padding:.5rem">Pipe + <code>--dangerously-skip-permissions</code></td><td style="color:#f85149">No</td><td style="color:#f85149">No</td><td style="color:#f85149">No</td></tr>
+</table>
+
+<h2>Workarounds</h2>
+
+<div class="fix">
+<p><strong>1. CLAUDE.md safety rules</strong> — the only safety layer in pipe mode:</p>
+<pre><code># ABSOLUTE RULES (no hooks in pipe mode)
+- NEVER run rm -rf, git reset --hard, or git push --force
+- NEVER commit .env files
+- ALWAYS confirm file paths before destructive operations</code></pre>
+</div>
+
+<div class="fix">
+<p><strong>2. Wrapper script</strong> — validate output before executing:</p>
+<pre><code>#!/bin/bash
+OUTPUT=$(claude -p "fix the bug in src/main.ts" 2>&amp;1)
+# Check for dangerous commands before applying
+if echo "$OUTPUT" | grep -qE 'rm -rf|git reset --hard'; then
+    echo "DANGEROUS: Output contains destructive commands" &gt;&amp;2
+    exit 1
+fi
+echo "$OUTPUT"</code></pre>
+</div>
+
+<div class="fix">
+<p><strong>3. Use interactive mode instead</strong> — if hooks are critical, avoid <code>-p</code> mode and use the TUI with <code>--dangerously-skip-permissions</code> for automation.</p>
+</div>
+
+<div class="cta">
+<h2>Interactive Mode Safety</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">591 hooks for interactive mode. 8,872 tests.</p>
+</div>
+
+<p style="margin-top:2rem;font-size:.85rem;color:#8b949e">cc-safe-setup &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</body>
+</html>
