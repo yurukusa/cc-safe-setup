@@ -3233,6 +3233,8 @@ if [ -f "$EXDIR/git-message-length.sh" ]; then
     test_ex git-submodule-guard.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
     test_ex log-level-guard.sh '{"tool_input":{"command":"npm test"}}' 0 "npm test passes"
     test_ex mcp-tool-guard.sh '{"tool_input":{"command":"npm start"}}' 0 "npm start passes"
+    test_ex network-guard.sh '{"tool_input":{"command":"git status"}}' 0 "git status passes"
+    test_ex max-edit-size-guard.sh '{"tool_input":{"file_path":"test.ts"}}' 0 "file path only passes"
 fi
 echo ""
 
@@ -3668,6 +3670,7 @@ if [ -f "$EXDIR/no-commented-code.sh" ]; then
     [ "$EXIT" -eq 0 ] && echo "  PASS: no-commented-code warns on large comment block (exit 0)" && PASS=$((PASS+1)) || { echo "  FAIL: should exit 0 (got $EXIT)"; FAIL=$((FAIL+1)); }
     test_ex no-commented-code.sh '{"tool_input":{"new_string":"// TODO: fix this"}}' 0 "single comment passes"
     test_ex no-commented-code.sh '{}' 0 "empty input passes"
+    test_ex no-commented-code.sh '{"tool_input":{"new_string":"function x() { return 1; }"}}' 0 "normal function passes"
 fi
 echo ""
 
@@ -3730,6 +3733,7 @@ if [ -f "$EXDIR/no-eval.sh" ]; then
     test_ex no-eval.sh '{"tool_input":{"file_path":"app.js","new_string":"const x = 1"}}' 0 "clean code passes"
     test_ex no-eval.sh '{"tool_input":{"file_path":"app.js","new_string":""}}' 0 "empty content passes"
     test_ex no-eval.sh '{"tool_input":{"file_path":"app.js","content":"eval(\"code\")"}}' 0 "content field also checked (exit 0)"
+    test_ex no-eval.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3753,6 +3757,7 @@ if [ -f "$EXDIR/no-nested-ternary.sh" ]; then
     test_ex no-nested-ternary.sh '{"tool_input":{"new_string":"x ? a : b"}}' 0 "single ternary passes"
     test_ex no-nested-ternary.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no ternary passes"
     test_ex no-nested-ternary.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-nested-ternary.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -9824,6 +9829,7 @@ if echo "$OUTPUT" | jq -e '.hookSpecificOutput.updatedInput.answers["Delete data
 else
     echo "  FAIL: auto_answer: dangerous uses answers object (expected answers object in output)"
     FAIL=$((FAIL + 1))
+    test_ex notify-waiting.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -10351,6 +10357,9 @@ fi
 if [ -n "$DAILY_BACKUP_ADD" ]; then echo "$DAILY_BACKUP_ADD" > "$DAILY_TEST_FILE_ADD";     test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m "test""}}' 0 "normal commit passes"
     test_ex strip-coauthored-by.sh '{"tool_input":{"command":"echo hello"}}' 0 "non-git passes"
     test_ex strip-coauthored-by.sh '{}' 0 "empty input passes"
+    test_ex tool-call-rate-limiter.sh '{"tool_name":"Read"}' 0 "Read tool passes"
+    test_ex variable-expansion-guard.sh '{}' 0 "empty input passes"
+    test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git log"}}' 0 "git log passes"
 fi
 echo ""
 
@@ -13620,6 +13629,7 @@ test_ex plugin-process-cleanup.sh '{}' 0 "empty input passes"
 test_ex plugin-process-cleanup.sh '{"session_id":"test"}' 0 "session end passes"
 test_ex plugin-process-cleanup.sh '{"stop_reason":"user_exit"}' 0 "user exit passes"
 test_ex plugin-process-cleanup.sh '{"event":"SessionEnd"}' 0 "SessionEnd event passes"
+test_ex plugin-process-cleanup.sh '{"tool_name":"Bash"}' 0 "Bash tool passes"
 echo ""
 
 # --- tmp-output-size-guard ---
@@ -13627,6 +13637,7 @@ echo "tmp-output-size-guard.sh:"
 test_ex tmp-output-size-guard.sh '{}' 0 "empty input passes"
 test_ex tmp-output-size-guard.sh '{"session_id":"test"}' 0 "session start passes"
 test_ex tmp-output-size-guard.sh '{"event":"SessionStart"}' 0 "SessionStart event passes"
+test_ex tmp-output-size-guard.sh '{"tool_name":"Bash"}' 0 "Bash tool passes"
 echo ""
 
 # --- no-output-truncation ---
