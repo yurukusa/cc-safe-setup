@@ -91,6 +91,9 @@ Override Claude Code's built-in confirmation prompts. These run **after** the bu
 | `edit-always-allow` | Edit prompts in `.claude/skills/` despite `bypassPermissions` | [#36192](https://github.com/anthropics/claude-code/issues/36192) |
 | `allow-git-hooks-dir` | Edit prompts in `.git/hooks/` for pre-commit/pre-push setup | |
 | `allow-protected-dirs` | All protected directory prompts (CI/Docker environments) | [#36168](https://github.com/anthropics/claude-code/issues/36168) |
+| `git-show-flag-sanitizer` | Strips invalid `--no-stat` from `git show` (wastes context on error) | [#13071](https://github.com/anthropics/claude-code/issues/13071) |
+| `compact-blocker` | Blocks auto-compaction via PreCompact (preserves full context) | [#6689](https://github.com/anthropics/claude-code/issues/6689) |
+| `webfetch-domain-allow` | Auto-approves WebFetch by domain (fixes broken `domain:*` wildcard) | [#9329](https://github.com/anthropics/claude-code/issues/9329) |
 
 Install any of these: `npx cc-safe-setup --install-example <name>`
 
