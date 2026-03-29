@@ -50,4 +50,6 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/fix-git-show-no-stat.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/disable-auto-compaction.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/webfetch-domain-allowlist.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/prevent-denied-action-retry.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/background-agent-write-fix.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>
