@@ -12452,12 +12452,12 @@ test_ex no-sensitive-log.sh '{"tool_input":{"new_string":"console.log(username)"
 
 # --- test-before-commit ---
 echo "test-before-commit.sh (edge cases):"
-test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "test-before-commit: commit checks"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 2 "test-before-commit: commit blocks (no recent test)"
 test_ex test-before-commit.sh '{"tool_input":{"command":"git status"}}' 0 "test-before-commit: non-commit ignored"
 test_ex test-before-commit.sh '{"tool_input":{"command":"ls"}}' 0 "test-before-commit: non-git ignored"
 test_ex test-before-commit.sh '{"tool_input":{"command":""}}' 0 "test-before-commit: empty"
 test_ex test-before-commit.sh '{}' 0 "test-before-commit: no input"
-test_ex test-before-commit.sh '{"tool_input":{"command":"git commit --allow-empty"}}' 0 "test-before-commit: allow-empty checks"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit --allow-empty"}}' 2 "test-before-commit: allow-empty also blocked"
 
 # --- tool-call-rate-limiter ---
 echo "tool-call-rate-limiter.sh (edge cases):"
