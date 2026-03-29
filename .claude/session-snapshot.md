@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T13:31:51+09:00
+Updated: 2026-03-29T13:39:59+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T13:31:51+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: aeedef2 checkpoint: auto-save 13:31:08
+- Last commit: 3bc531d checkpoint: auto-save 13:39:50
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
-./test.sh
-./examples/pre-compact-knowledge-save.sh
-./examples/file-change-undo-tracker.sh
-./examples/cwd-project-boundary-guard.sh
-./examples/dotenv-commit-guard.sh
-./examples/network-exfil-guard.sh
-./examples/mcp-tool-audit-log.sh
-./examples/mcp-server-allowlist.sh
+./examples/readme-exists-check.sh
+./examples/rm-safety-net.sh
+./examples/ruby-lint-on-edit.sh
+./examples/scope-guard.sh
+./examples/session-checkpoint.sh
+./examples/session-state-saver.sh
+./examples/session-summary-stop.sh
+./examples/session-summary.sh
+./examples/session-token-counter.sh
 ```
 
