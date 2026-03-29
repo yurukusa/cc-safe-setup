@@ -13627,6 +13627,33 @@ CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"
 CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
 echo ""
 
+# --- prefer-dedicated-tools ---
+echo "prefer-dedicated-tools.sh:"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"cat README.md"}}' 2 "blocks cat for file reading"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"head -20 src/main.ts"}}' 2 "blocks head for file reading"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"tail -10 log.txt"}}' 2 "blocks tail for file reading"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"grep -r TODO src/"}}' 2 "blocks grep for searching"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"find . -name \"*.ts\""}}' 2 "blocks find for file discovery"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"cat file.txt | grep pattern"}}' 0 "allows piped cat|grep"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"echo hello | head -5"}}' 0 "allows piped echo|head"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"npm test"}}' 0 "allows npm test"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"git status"}}' 0 "allows git status"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":"ls -la"}}' 0 "allows ls"
+test_ex prefer-dedicated-tools.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex prefer-dedicated-tools.sh '{}' 0 "empty input passes"
+echo ""
+
+# --- session-health-monitor ---
+echo "session-health-monitor.sh:"
+rm -f /tmp/cc-health-$$
+test_ex session-health-monitor.sh '{"tool_name":"Bash","tool_input":{"command":"echo test"}}' 0 "first call passes"
+test_ex session-health-monitor.sh '{"tool_name":"Read","tool_input":{"file_path":"test.ts"}}' 0 "second call passes"
+test_ex session-health-monitor.sh '{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}' 0 "third call passes"
+test_ex session-health-monitor.sh '{}' 0 "empty input passes"
+test_ex session-health-monitor.sh '{"tool_name":"Grep"}' 0 "Grep call passes"
+rm -f /tmp/cc-health-$$
+echo ""
+
 # --- polyglot-rm-guard ---
 echo "polyglot-rm-guard.sh:"
 test_ex polyglot-rm-guard.sh '{"tool_input":{"command":"python3 -c \"import os; os.remove(\\\"file.txt\\\")\" "}}' 2 "blocks Python os.remove"
