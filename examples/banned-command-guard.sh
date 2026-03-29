@@ -13,13 +13,13 @@
 # Default banned commands (configurable via CC_BANNED_COMMANDS):
 #   sed -i (in-place file editing — use Edit tool instead)
 #   awk -i inplace (same reason)
-#   perl -pi -e (same reason)
+#   perl -i / perl -pi (same reason — covers -i -pe, -pi -e, etc.)
 #
 # TRIGGER: PreToolUse  MATCHER: "Bash"
 #
 # Configuration:
 #   CC_BANNED_COMMANDS — colon-separated list of regex patterns to block
-#   Default: "sed -i:awk -i inplace:perl -pi"
+#   Default: "sed -i:awk -i inplace:perl -pi:perl .*-i"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
@@ -27,7 +27,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Configurable banned patterns (colon-separated)
-BANNED="${CC_BANNED_COMMANDS:-sed\s+-i:awk\s+-i\s+inplace:perl\s+-pi}"
+BANNED="${CC_BANNED_COMMANDS:-sed\s+-i:awk\s+-i\s+inplace:perl\s+-pi:perl\s+.*-i}"
 
 # Check each banned pattern
 IFS=':' read -ra PATTERNS <<< "$BANNED"
