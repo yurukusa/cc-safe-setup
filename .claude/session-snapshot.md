@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T11:16:02+09:00
+Updated: 2026-03-29T11:24:42+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-03-29T11:16:02+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 93530db checkpoint: auto-save 11:15:21
+- Last commit: e038eee checkpoint: auto-save 11:24:35
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
+./examples/write-overwrite-confirm.sh
+./examples/mcp-orphan-process-guard.sh
+./examples/uncommitted-work-shield.sh
+./examples/plain-language-danger-warn.sh
+./examples/export-overwrite-guard.sh
+./.claude/pre-compact-checkpoint.md
 ./examples/public-repo-push-guard.sh
 ./examples/check-before-act-enforcer.sh
-./examples/absolute-rule-enforcer.sh
-./examples/issue-draft-redact-guard.sh
-./examples/denied-action-retry-guard.sh
-./examples/skill-injection-detector.sh
-./examples/worktree-memory-guard.sh
 ```
 
