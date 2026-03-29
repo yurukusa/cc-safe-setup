@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T03:01:38+09:00
+Updated: 2026-03-30T03:01:43+09:00
 
 ## Git
 - Branch: `main`
@@ -7,15 +7,15 @@ Updated: 2026-03-30T03:01:38+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 69509fc checkpoint: auto-save 03:01:30
+- Last commit: 78871f0 checkpoint: auto-save 03:01:42
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
-./examples/worktree-project-unify.sh
 ./.claude/session-logs/2026-03-30.md
 ./.claude/pre-compact-checkpoint.md
+./test.sh
+./examples/worktree-project-unify.sh
 ./examples/terminal-state-restore.sh
 ./docs/README.ja.md
 ./README.md
