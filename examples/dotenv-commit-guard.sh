@@ -17,6 +17,10 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Check for git add with .env files
+# Allow .env.example, .env.sample, .env.template
+if echo "$COMMAND" | grep -qE 'git\s+add\s+.*\.env\.(example|sample|template)'; then
+    exit 0
+fi
 if echo "$COMMAND" | grep -qE 'git\s+add\s+.*\.env'; then
     echo "BLOCKED: Adding .env file to git staging." >&2
     echo "  .env files contain secrets and should not be committed." >&2
