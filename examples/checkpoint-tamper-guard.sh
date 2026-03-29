@@ -3,6 +3,8 @@
 # Trigger: PreToolUse (Bash, Edit, Write)
 # Prevents the model from bypassing hooks by editing their state files
 # See: https://github.com/anthropics/claude-code/issues/38841
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

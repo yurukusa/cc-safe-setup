@@ -21,6 +21,8 @@
 #   }
 # }
 # ================================================================
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

@@ -14,6 +14,8 @@
 #
 # See: https://github.com/anthropics/claude-code/issues/30519
 # See: https://github.com/anthropics/claude-code/issues/16561
+#
+# TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

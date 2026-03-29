@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 echo "$TOOL" | grep -q '^mcp__' || exit 0

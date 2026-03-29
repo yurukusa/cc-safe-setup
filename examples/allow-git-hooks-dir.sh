@@ -9,6 +9,8 @@
 #
 # WARNING: Only allow specific subdirectories you trust.
 # Never blanket-allow all of .git/ — that exposes HEAD, config, etc.
+#
+# TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)

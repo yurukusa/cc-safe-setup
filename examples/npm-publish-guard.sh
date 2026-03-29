@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 if echo "$COMMAND" | grep -qE '^\s*(npm\s+publish|npx\s+npm\s+publish)' && ! echo "$COMMAND" | grep -qE '\-\-dry-run'; then

@@ -13,6 +13,8 @@
 # It bypasses ALL built-in file protection. Do NOT use in shared or
 # production environments. Prefer allow-git-hooks-dir.sh or
 # allow-claude-settings.sh for targeted bypass.
+#
+# TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)

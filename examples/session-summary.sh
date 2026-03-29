@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 echo "" >&2
 echo "=== Session Summary ===" >&2
 BRANCH=$(git branch --show-current 2>/dev/null)

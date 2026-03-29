@@ -21,6 +21,8 @@
 # }
 
 # Count before cleanup
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 COUNT=$(find /tmp -maxdepth 1 -name "claude-*" -type f 2>/dev/null | wc -l)
 
 if [ "$COUNT" -eq 0 ]; then

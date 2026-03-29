@@ -17,6 +17,8 @@
 # }
 
 # Linux (notify-send) — skip on WSL2 where D-Bus may not be running
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 if command -v notify-send &>/dev/null && [ -z "$WSL_DISTRO_NAME" ]; then
     notify-send "Claude Code" "Waiting for your input" --urgency=normal 2>/dev/null && exit 0
 fi

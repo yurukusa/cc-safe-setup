@@ -24,6 +24,8 @@
 #   CC_TOOL_WARN_100  — threshold 1 (default: 100)
 #   CC_TOOL_WARN_200  — threshold 2 (default: 200)
 #   CC_TOOL_WARN_500  — threshold 3 (default: 500)
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

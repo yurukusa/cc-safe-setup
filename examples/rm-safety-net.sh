@@ -30,6 +30,8 @@
 #
 # Note: This hook checks rm, find -delete, and shred. Do NOT add an "if" field
 # (v2.1.85) because "if" only supports one pattern and would miss the others.
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

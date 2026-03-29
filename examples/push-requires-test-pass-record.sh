@@ -5,6 +5,8 @@
 # The PreToolUse companion then checks this record before allowing git push.
 #
 # Detected test commands: npm test, pytest, cargo test, go test, make test, etc.
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

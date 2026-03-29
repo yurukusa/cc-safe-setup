@@ -6,6 +6,8 @@
 # Warns when a user prompt exceeds a character threshold.
 # Very long prompts can consume excessive context and tokens.
 # Adjust THRESHOLD to match your comfort level.
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)

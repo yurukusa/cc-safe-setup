@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 INPUT=$(cat)
 CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
 [ -z "$CONTENT" ] && exit 0

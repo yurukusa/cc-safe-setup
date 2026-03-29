@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 COUNTER="${HOME}/.claude/session-tool-count"
 COUNT=$(cat "$COUNTER" 2>/dev/null || echo 0)
 COUNT=$((COUNT + 1))

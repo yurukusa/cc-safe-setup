@@ -6,6 +6,8 @@
 #
 # Tracks consecutive Edit failures on the same file. After 3 failures,
 # warns the model to verify the file path.
+#
+# TRIGGER: PreToolUse  MATCHER: "Edit|Write"
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

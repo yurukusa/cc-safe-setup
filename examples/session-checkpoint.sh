@@ -19,6 +19,8 @@
 #
 # Recovery: Add to CLAUDE.md:
 #   "If ~/.claude/checkpoints/ has a file for this project, read it first."
+#
+# TRIGGER: Stop  MATCHER: ""
 
 INPUT=$(cat)
 REASON=$(echo "$INPUT" | jq -r '.stop_reason // empty' 2>/dev/null)

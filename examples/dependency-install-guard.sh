@@ -16,6 +16,8 @@
 # - Packages in ALLOWLIST (customize below)
 #
 # Usage: Add to settings.json as a PreToolUse hook on "Bash"
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

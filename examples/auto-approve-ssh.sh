@@ -8,6 +8,8 @@
 #
 # Usage: Add to settings.json as a PreToolUse hook on "Bash"
 # Customize SAFE_COMMANDS for your use case.
+#
+# TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

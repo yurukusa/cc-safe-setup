@@ -17,6 +17,8 @@
 #     }]
 #   }
 # }
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 # jq with python3 fallback (macOS may not have jq)

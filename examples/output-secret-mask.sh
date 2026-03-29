@@ -22,6 +22,8 @@
 #     }]
 #   }
 # }
+#
+# TRIGGER: PostToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 OUTPUT=$(echo "$INPUT" | jq -r '.tool_result.stdout // empty' 2>/dev/null)

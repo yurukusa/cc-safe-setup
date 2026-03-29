@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PostToolUse  MATCHER: "Bash"
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

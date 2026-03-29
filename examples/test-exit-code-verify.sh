@@ -17,6 +17,8 @@
 #
 # Why stderr: PostToolUse hook stderr is shown to Claude as feedback.
 # This forces Claude to acknowledge test failures instead of fabricating results.
+#
+# TRIGGER: PostToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 

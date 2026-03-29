@@ -17,6 +17,8 @@
 #     }]
 #   }
 # }
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 

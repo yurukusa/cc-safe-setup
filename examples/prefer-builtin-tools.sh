@@ -6,6 +6,8 @@
 # Claude Code has built-in Read, Edit, Grep, Glob tools that are faster and safer
 # than bash equivalents. But Claude often reaches for sed, grep, cat instead.
 # This hook denies those commands with a pointer to the correct built-in tool.
+#
+# TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

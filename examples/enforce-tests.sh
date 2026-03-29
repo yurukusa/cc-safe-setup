@@ -8,6 +8,8 @@
 # Usage: Add to settings.json as a PostToolUse hook on "Edit|Write"
 #
 # Customize TEST_PATTERN for your project's test file naming convention.
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)

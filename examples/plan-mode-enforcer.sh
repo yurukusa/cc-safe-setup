@@ -27,6 +27,8 @@
 #     }]
 #   }
 # }
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 STATE_FILE="/tmp/.cc-plan-mode-active"
 [ -f "$STATE_FILE" ] || exit 0

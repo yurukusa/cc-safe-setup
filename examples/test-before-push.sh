@@ -23,6 +23,8 @@
 #
 # The "if" field (v2.1.85+) eliminates process spawning for non-push commands.
 # Without "if", the hook still works — it checks internally and exits early.
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

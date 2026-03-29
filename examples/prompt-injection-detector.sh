@@ -8,6 +8,8 @@
 # (API, shared sessions, automated pipelines).
 #
 # See: https://github.com/anthropics/claude-code/issues/34895
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)

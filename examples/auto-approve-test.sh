@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# TRIGGER: PreToolUse  MATCHER: "Bash"
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 if echo "$COMMAND" | grep -qE '^\s*(npm\s+test|npm\s+run\s+test|npx\s+(jest|vitest|mocha|ava|tap|playwright\s+test|cypress\s+run)|yarn\s+test|pnpm\s+test|bun\s+test)\b'; then
