@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-29T15:42:03+09:00
+Updated: 2026-03-29T16:02:04+09:00
 
 ## Git
 - Branch: `main`
@@ -7,15 +7,15 @@ Updated: 2026-03-29T15:42:03+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e14e5e0 checkpoint: auto-save 15:41:23
+- Last commit: da1b07e checkpoint: auto-save 16:01:56
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./test.sh
-./docs/README.ja.md
+./examples/session-error-rate-monitor.sh
 ./README.md
+./docs/README.ja.md
 ./COOKBOOK.md
 ./CHANGELOG.md
 ./examples/webfetch-domain-allow.sh
