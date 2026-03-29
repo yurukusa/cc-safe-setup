@@ -3205,6 +3205,9 @@ if [ -f "$EXDIR/gitignore-check.sh" ]; then
     test_ex gitignore-check.sh '{"tool_input":{"command":"git add src/index.js"}}' 0 "git add warns if no .gitignore (exit 0)"
     test_ex gitignore-check.sh '{"tool_input":{"command":"npm install"}}' 0 "non-git-add command ignored"
     test_ex gitignore-check.sh '{"tool_input":{"command":""}}' 0 "empty command ignored"
+    test_ex gitignore-check.sh '{"tool_input":{"command":"git add ."}}' 0 "git add warns (exit 0)"
+    test_ex gitignore-check.sh '{"tool_input":{"command":"git status"}}' 0 "git status passes"
+    test_ex gitignore-check.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3215,6 +3218,9 @@ if [ -f "$EXDIR/no-commit-fixup.sh" ]; then
     test_ex no-commit-fixup.sh '{"tool_input":{"command":"git push origin feature"}}' 0 "git push warns on fixup commits (exit 0)"
     test_ex no-commit-fixup.sh '{"tool_input":{"command":"git status"}}' 0 "non-push command ignored"
     test_ex no-commit-fixup.sh '{"tool_input":{"command":""}}' 0 "empty command ignored"
+    test_ex no-commit-fixup.sh '{"tool_input":{"command":"git commit -m "Add feature""}}' 0 "normal commit passes"
+    test_ex no-commit-fixup.sh '{"tool_input":{"command":"git status"}}' 0 "non-commit passes"
+    test_ex no-commit-fixup.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3294,6 +3300,9 @@ if [ -f "$EXDIR/no-sensitive-log.sh" ]; then
     test_ex no-sensitive-log.sh '{"tool_input":{"command":"echo hello"}}' 0 "safe command passes"
     test_ex no-sensitive-log.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
     test_ex no-sensitive-log.sh '{"tool_input":{"command":"print secret"}}' 0 "print secret warns (exit 0)"
+    test_ex no-sensitive-log.sh '{"tool_input":{"command":"echo hello"}}' 0 "safe echo passes"
+    test_ex no-sensitive-log.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
+    test_ex no-sensitive-log.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3398,6 +3407,9 @@ if [ -f "$EXDIR/env-required-check.sh" ]; then
     test_ex env-required-check.sh '{"tool_input":{"new_string":"process.env.DB_HOST!"}}' 0 "warns on env var without default (exit 0)"
     test_ex env-required-check.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no env var passes"
     test_ex env-required-check.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex env-required-check.sh '{"tool_input":{"new_string":"process.env.NODE_ENV"}}' 0 "env reference passes"
+    test_ex env-required-check.sh '{}' 0 "empty input passes"
+    test_ex env-required-check.sh '{"tool_input":{"command":"echo test"}}' 0 "bash input passes"
 fi
 echo ""
 
@@ -3518,6 +3530,9 @@ if [ -f "$EXDIR/no-callback-hell.sh" ]; then
     test_ex no-callback-hell.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "no callbacks passes"
     test_ex no-callback-hell.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
     test_ex no-callback-hell.sh '{"tool_input":{"new_string":"function () {\nfunction () {\nfunction () {\nfunction () {\n"}}' 0 "deep callbacks warns (exit 0)"
+    test_ex no-callback-hell.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "simple code passes"
+    test_ex no-callback-hell.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-callback-hell.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3537,6 +3552,9 @@ if [ -f "$EXDIR/no-circular-dependency.sh" ]; then
     test_ex no-circular-dependency.sh '{"tool_input":{"file_path":"src/index.js","new_string":"import x"}}' 0 "non-package.json ignored"
     test_ex no-circular-dependency.sh '{"tool_input":{"file_path":"package.json","new_string":"\"peerDependencies\": {}"}}' 0 "warns on peerDependencies (exit 0)"
     test_ex no-circular-dependency.sh '{"tool_input":{"file_path":"package.json","new_string":"\"dependencies\": {}"}}' 0 "no peerDeps passes"
+    test_ex no-circular-dependency.sh '{"tool_input":{"new_string":"import x from "y""}}' 0 "normal import passes"
+    test_ex no-circular-dependency.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-circular-dependency.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3580,6 +3598,9 @@ if [ -f "$EXDIR/no-deep-nesting.sh" ]; then
     test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "flat code passes"
     test_ex no-deep-nesting.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
     test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"{ { { { { } } } } }"}}' 0 "deep nesting warns (exit 0)"
+    test_ex no-deep-nesting.sh '{"tool_input":{"new_string":"if (x) { return 1; }"}}' 0 "shallow nesting passes"
+    test_ex no-deep-nesting.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-deep-nesting.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3602,6 +3623,9 @@ if [ -f "$EXDIR/no-document-write.sh" ]; then
     test_ex no-document-write.sh '{"tool_input":{"new_string":"document.write(\"<h1>Hello</h1>\")"}}' 0 "warns on document.write (exit 0)"
     test_ex no-document-write.sh '{"tool_input":{"new_string":"document.getElementById(\"x\")"}}' 0 "safe DOM passes"
     test_ex no-document-write.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-document-write.sh '{"tool_input":{"new_string":"document.getElementById("app")"}}' 0 "safe DOM access passes"
+    test_ex no-document-write.sh '{}' 0 "empty input passes"
+    test_ex no-document-write.sh '{"tool_input":{"new_string":"const x = 1"}}' 0 "normal code passes"
 fi
 echo ""
 
@@ -3612,6 +3636,9 @@ if [ -f "$EXDIR/no-empty-function.sh" ]; then
     test_ex no-empty-function.sh '{"tool_input":{"new_string":"function foo() { return 1; }"}}' 0 "function with body passes"
     test_ex no-empty-function.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
     test_ex no-empty-function.sh '{"tool_input":{"new_string":"() => {}"}}' 0 "warns on empty arrow function (exit 0)"
+    test_ex no-empty-function.sh '{"tool_input":{"new_string":"function foo() { return 1; }"}}' 0 "non-empty function passes"
+    test_ex no-empty-function.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-empty-function.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
