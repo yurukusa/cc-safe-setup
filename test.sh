@@ -3542,6 +3542,9 @@ if [ -f "$EXDIR/no-catch-all-route.sh" ]; then
     # Always warns (placeholder); always exits 0
     test_ex no-catch-all-route.sh '{"tool_input":{"new_string":"app.get(\"*\", handler)"}}' 0 "catch-all route warns (exit 0)"
     test_ex no-catch-all-route.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-catch-all-route.sh '{"tool_input":{"new_string":"app.get("/api/users", handler)"}}' 0 "specific route passes"
+    test_ex no-catch-all-route.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-catch-all-route.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3564,6 +3567,9 @@ if [ -f "$EXDIR/no-class-in-functional.sh" ]; then
     # Always warns (placeholder); always exits 0
     test_ex no-class-in-functional.sh '{"tool_input":{"new_string":"class MyComponent extends React.Component"}}' 0 "class warns (exit 0)"
     test_ex no-class-in-functional.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-class-in-functional.sh '{"tool_input":{"new_string":"const App = () => {}"}}' 0 "functional component passes"
+    test_ex no-class-in-functional.sh '{"tool_input":{"new_string":""}}' 0 "empty content passes"
+    test_ex no-class-in-functional.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
@@ -3588,6 +3594,8 @@ if [ -f "$EXDIR/no-commented-code.sh" ]; then
     COMMENTED="// if (x) {\n// for (i=0;i<10;i++) {\n// while (true) {\n// function foo() {\n// const bar = 1\n// let baz = 2"
     EXIT=0; printf '{"tool_input":{"new_string":"%s"}}' "$COMMENTED" | bash "$EXDIR/no-commented-code.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && echo "  PASS: no-commented-code warns on large comment block (exit 0)" && PASS=$((PASS+1)) || { echo "  FAIL: should exit 0 (got $EXIT)"; FAIL=$((FAIL+1)); }
+    test_ex no-commented-code.sh '{"tool_input":{"new_string":"// TODO: fix this"}}' 0 "single comment passes"
+    test_ex no-commented-code.sh '{}' 0 "empty input passes"
 fi
 echo ""
 
