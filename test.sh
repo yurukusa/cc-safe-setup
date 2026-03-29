@@ -8444,6 +8444,9 @@ test_ex banned-command-guard.sh '{"tool_input":{"command":"cat file.txt | grep f
 test_ex banned-command-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "banned-cmd: ls allowed"
 test_ex banned-command-guard.sh '{"tool_input":{"command":""}}' 0 "banned-cmd: empty allowed"
 test_ex banned-command-guard.sh '{"tool_input":{"command":"  sed  -i  s/x/y/ f"}}' 2 "banned-cmd: extra whitespace sed -i blocked"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"perl -i -pe s/foo/bar/ file.py"}}' 2 "banned-cmd: perl -i -pe blocked (#40408)"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"perl -p -i -e s/foo/bar/ file.py"}}' 2 "banned-cmd: perl -p -i -e blocked (#40408)"
+test_ex banned-command-guard.sh '{"tool_input":{"command":"perl -e print 42"}}' 0 "banned-cmd: perl -e read-only allowed"
 # --- test-exit-code-verify (#1501: false test results) ---
 test_ex test-exit-code-verify.sh '{"tool_input":{"command":"npm test"},"tool_result":{"exitCode":1,"stdout":"1 failing"}}' 0 "test-verify: npm test fail detected (exit 0, warns via stderr)"
 test_ex test-exit-code-verify.sh '{"tool_input":{"command":"npm test"},"tool_result":{"exitCode":0,"stdout":"5 passing (200ms)"}}' 0 "test-verify: npm test pass allowed"
