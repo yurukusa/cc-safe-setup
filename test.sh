@@ -15887,6 +15887,48 @@ WARN_OUT=$(echo '{"tool_input":{"prompt":"This is a sufficiently long prompt tha
 echo "$WARN_OUT" | grep -q "WARNING" && { echo "  FAIL: subagent-guard: false warning for long prompt"; FAIL=$((FAIL+1)); } || { echo "  PASS: subagent-guard: no warning for long prompt"; PASS=$((PASS+1)); }; TOTAL=$((TOTAL+1))
 echo ""
 
+# ========== edit-old-string-validator (#22264) ==========
+echo "edit-old-string-validator.sh:"
+# Create a temp test file
+echo "hello world" > /tmp/test-edit-validator.txt
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator.txt","old_string":"hello world"}}' 0 "edit-validator: existing string passes"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator.txt","old_string":"nonexistent text"}}' 2 "edit-validator: missing string blocked"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/nonexistent-file.txt","old_string":"anything"}}' 0 "edit-validator: nonexistent file passes (Edit handles it)"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator.txt","old_string":""}}' 0 "edit-validator: empty old_string passes"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"","old_string":"test"}}' 0 "edit-validator: empty file_path passes"
+test_ex edit-old-string-validator.sh '{"tool_input":{}}' 0 "edit-validator: missing fields passes"
+test_ex edit-old-string-validator.sh '{}' 0 "edit-validator: empty input passes"
+rm -f /tmp/test-edit-validator.txt
+echo ""
+
+# ========== virtual-cwd-helper (#3473) ==========
+echo "virtual-cwd-helper.sh:"
+# Test without virtual-cwd file
+rm -f ~/.claude/virtual-cwd
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"ls -la"}}' 0 "vcwd: no vcwd file passes"
+# Test with virtual-cwd file
+echo "/tmp/test-vcwd" > ~/.claude/virtual-cwd
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"ls -la"}}' 0 "vcwd: warns about CWD (exit 0)"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"cd /tmp/test-vcwd && ls"}}' 0 "vcwd: already cd passes"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"cd /other/dir"}}' 0 "vcwd: cd command passes"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":""}}' 0 "vcwd: empty command passes"
+test_ex virtual-cwd-helper.sh '{}' 0 "vcwd: empty input passes"
+rm -f ~/.claude/virtual-cwd
+echo ""
+
+# ========== cwd-drift-detector (#1669) ==========
+echo "cwd-drift-detector.sh:"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"ls -la"}}' 0 "cwd-drift: safe command passes"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"git status"}}' 0 "cwd-drift: git status passes"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"git reset --hard"}}' 0 "cwd-drift: destructive in project root (exit 0, warns only)"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "cwd-drift: rm -rf warns but passes (warning only)"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"git clean -fd"}}' 0 "cwd-drift: git clean warns but passes"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"DROP TABLE users"}}' 0 "cwd-drift: DROP TABLE warns but passes"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":"echo git reset --hard"}}' 0 "cwd-drift: git reset in echo not triggered"
+test_ex cwd-drift-detector.sh '{"tool_input":{"command":""}}' 0 "cwd-drift: empty command passes"
+test_ex cwd-drift-detector.sh '{}' 0 "cwd-drift: empty input passes"
+echo ""
+
 # ========== Batch: empty input safety for ALL example hooks ==========
 echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
