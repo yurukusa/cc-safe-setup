@@ -17617,6 +17617,173 @@ test_ex pip-requirements-guard.sh '{"tool_input":{"command":""}}' 0 "pip-req: em
 test_ex pip-requirements-guard.sh '{"tool_input":{}}' 0 "pip-req: empty input passes"
 echo ""
 
+# ========== Batch: additional coverage for low-test hooks (session 80) ==========
+
+# --- claudemd-violation-detector.sh (PostToolUse, "") ---
+echo "claudemd-violation-detector.sh (extended):"
+# Counter at 59 → becomes 60 → triggers (60 % 20 == 0)
+echo "59" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{"tool_name":"Bash"}' 0 "claudemd-detector: triggers at 60"
+# Counter at 99 → becomes 100 → triggers
+echo "99" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{"tool_name":"Read"}' 0 "claudemd-detector: triggers at 100"
+# Counter at 10 → becomes 11 → skip
+echo "10" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{"tool_name":"Edit"}' 0 "claudemd-detector: skips at 11"
+# Large counter value
+echo "999" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: large counter triggers at 1000"
+# Fresh counter (file deleted)
+rm -f /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: missing counter file exits 0"
+echo ""
+
+# --- headless-stop-guard.sh (Stop, "") ---
+echo "headless-stop-guard.sh (extended):"
+CC_HEADLESS=1 test_ex headless-stop-guard.sh '{"stop_reason":"user_exit"}' 0 "headless-guard: CC_HEADLESS=1 + stop_reason"
+CC_HEADLESS=1 test_ex headless-stop-guard.sh '{"session_id":"abc","stop_reason":"max_tokens"}' 0 "headless-guard: CC_HEADLESS=1 + max_tokens"
+test_ex headless-stop-guard.sh '{"stop_reason":"error"}' 0 "headless-guard: non-headless error stop passes"
+test_ex headless-stop-guard.sh '{"stop_reason":"max_tokens"}' 0 "headless-guard: non-headless max_tokens passes"
+CC_HEADLESS="" test_ex headless-stop-guard.sh '{}' 0 "headless-guard: CC_HEADLESS empty passes through"
+echo ""
+
+# --- plugin-process-cleanup.sh (SessionEnd, "") ---
+echo "plugin-process-cleanup.sh (extended):"
+test_ex plugin-process-cleanup.sh '{"stop_reason":"max_tokens"}' 0 "plugin-cleanup: max_tokens passes"
+test_ex plugin-process-cleanup.sh '{"session_id":"","stop_reason":""}' 0 "plugin-cleanup: empty fields passes"
+test_ex plugin-process-cleanup.sh '{"tool_input":{"command":"echo test"}}' 0 "plugin-cleanup: tool_input passes"
+test_ex plugin-process-cleanup.sh '{"event":"SessionEnd","session_id":"xyz"}' 0 "plugin-cleanup: combined fields passes"
+test_ex plugin-process-cleanup.sh 'not json at all' 0 "plugin-cleanup: garbage input passes"
+echo ""
+
+# --- session-health-monitor.sh (PreToolUse, "") ---
+echo "session-health-monitor.sh (extended):"
+test_ex session-health-monitor.sh '{"tool_name":"Write","tool_input":{"file_path":"x.ts","content":"test"}}' 0 "health-monitor: Write call passes"
+test_ex session-health-monitor.sh '{"tool_name":"Bash","tool_input":{"command":"npm test"}}' 0 "health-monitor: Bash npm test passes"
+test_ex session-health-monitor.sh '{"tool_name":"Agent","tool_input":{"prompt":"do stuff"}}' 0 "health-monitor: Agent call passes"
+test_ex session-health-monitor.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "health-monitor: Glob passes"
+test_ex session-health-monitor.sh '{"session_id":"test-session"}' 0 "health-monitor: session_id only passes"
+echo ""
+
+# --- subagent-context-size-guard.sh (PreToolUse, "Agent") ---
+echo "subagent-context-size-guard.sh (extended):"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-guard: 1-char prompt warns but exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"Investigate the root cause of the failing test in src/auth/login.test.ts. The test started failing after commit abc123. Check the git diff and the test expectations."}}' 0 "subagent-guard: 200+ char prompt passes silently"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"a]b[c{d}e"}}' 0 "subagent-guard: special chars in prompt exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"Check the file at /tmp/test with spaces and special chars !@#$%"}}' 0 "subagent-guard: prompt with symbols exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_name":"Agent","tool_input":{"prompt":"do"}}' 0 "subagent-guard: very short prompt with tool_name exits 0"
+echo ""
+
+# --- tmp-output-size-guard.sh (SessionStart, "") ---
+echo "tmp-output-size-guard.sh (extended):"
+test_ex tmp-output-size-guard.sh '{"event":"Notification"}' 0 "tmp-output: Notification event passes"
+test_ex tmp-output-size-guard.sh '{"session_id":"abc","event":"SessionStart"}' 0 "tmp-output: combined SessionStart passes"
+CC_TMP_THRESHOLD_MB=999999 test_ex tmp-output-size-guard.sh '{}' 0 "tmp-output: huge threshold passes"
+test_ex tmp-output-size-guard.sh '{"tool_input":{"command":"echo hi"}}' 0 "tmp-output: tool_input passes"
+test_ex tmp-output-size-guard.sh '{"stop_reason":"error"}' 0 "tmp-output: stop_reason passes"
+echo ""
+
+# --- virtual-cwd-helper.sh (PreToolUse, "Bash") ---
+echo "virtual-cwd-helper.sh (extended):"
+# Test with vcwd file pointing to nonexistent directory
+echo "/tmp/test-vcwd-nonexistent-dir-xyz" > "${HOME}/.claude/virtual-cwd"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"ls -la /tmp"}}' 0 "vcwd: warns for non-cd command"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"git status"}}' 0 "vcwd: warns for git status"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"cd /tmp/test-vcwd-nonexistent-dir-xyz && ls"}}' 0 "vcwd: cd to vcwd passes silently"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"cd /other && pwd"}}' 0 "vcwd: cd to other dir passes"
+rm -f "${HOME}/.claude/virtual-cwd"
+test_ex virtual-cwd-helper.sh '{"tool_input":{"command":"pwd"}}' 0 "vcwd: no vcwd file after removal passes"
+echo ""
+
+# --- compact-blocker.sh (PreCompact, no matcher) ---
+echo "compact-blocker.sh (extended):"
+test_ex compact-blocker.sh '{"transcript_path":"/tmp/t.jsonl","session_id":"xyz"}' 2 "compact-blocker: combined fields blocks"
+test_ex compact-blocker.sh '{"context_window_percent":80}' 2 "compact-blocker: context percent blocks"
+test_ex compact-blocker.sh '{"context_window_percent":0}' 2 "compact-blocker: zero percent blocks"
+test_ex compact-blocker.sh 'not json' 2 "compact-blocker: non-JSON input still blocks"
+test_ex compact-blocker.sh '' 2 "compact-blocker: empty stdin blocks"
+echo ""
+
+# --- edit-old-string-validator.sh (PreToolUse, "Edit") ---
+echo "edit-old-string-validator.sh (extended):"
+# Create test file with known content
+echo -e "line one\nline two\nline three" > /tmp/test-edit-validator-ext.txt
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"line two"}}' 0 "edit-validator-ext: exact line match passes"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"line one\nline two"}}' 0 "edit-validator-ext: multiline match passes"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"DOES NOT EXIST"}}' 2 "edit-validator-ext: nonexistent string blocks"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"LINE ONE"}}' 2 "edit-validator-ext: case mismatch blocks"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/dev/null","old_string":"anything"}}' 2 "edit-validator-ext: /dev/null file blocks (empty file)"
+rm -f /tmp/test-edit-validator-ext.txt
+echo ""
+
+# --- loop-detector.sh (PreToolUse, "Bash") ---
+echo "loop-detector.sh (extended):"
+rm -f /tmp/cc-loop-detector-history
+test_ex loop-detector.sh '{"tool_input":{"command":"echo unique_cmd_for_loop_test_A"}}' 0 "loop-detector-ext: first unique cmd A passes"
+test_ex loop-detector.sh '{"tool_input":{"command":"echo unique_cmd_for_loop_test_B"}}' 0 "loop-detector-ext: different cmd B passes"
+test_ex loop-detector.sh '{"tool_input":{"command":"echo unique_cmd_for_loop_test_C"}}' 0 "loop-detector-ext: different cmd C passes"
+test_ex loop-detector.sh '{"tool_input":{"command":"  echo   spaced  "}}' 0 "loop-detector-ext: whitespace-heavy cmd passes"
+# Test near-block threshold: repeat same cmd 5 times (default block=5)
+rm -f /tmp/cc-loop-detector-history
+for i in 1 2 3 4; do echo '{"tool_input":{"command":"echo repeated_block_test"}}' | bash examples/loop-detector.sh >/dev/null 2>/dev/null; done
+test_ex loop-detector.sh '{"tool_input":{"command":"echo repeated_block_test"}}' 2 "loop-detector-ext: 5th repeat blocks"
+rm -f /tmp/cc-loop-detector-history
+echo ""
+
+# --- permission-pattern-auto-allow.sh (PreToolUse, "Bash") ---
+echo "permission-pattern-auto-allow.sh (extended):"
+# Create temp pattern file
+PERM_TMPDIR=$(mktemp -d)
+ORIG_HOME="$HOME"
+export HOME="$PERM_TMPDIR"
+mkdir -p "$PERM_TMPDIR/.claude"
+echo '^cargo (build|test|run|check)' > "$PERM_TMPDIR/.claude/allowed-patterns.txt"
+echo '^python3?\s' >> "$PERM_TMPDIR/.claude/allowed-patterns.txt"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"cargo test"}}' 0 "perm-allow-ext: cargo test matches pattern"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"cargo build --release"}}' 0 "perm-allow-ext: cargo build matches"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"python3 script.py"}}' 0 "perm-allow-ext: python3 matches"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"ruby script.rb"}}' 0 "perm-allow-ext: unmatched ruby passes (exit 0)"
+# Test with comment lines in pattern file
+echo '# This is a comment' > "$PERM_TMPDIR/.claude/allowed-patterns.txt"
+echo '' >> "$PERM_TMPDIR/.claude/allowed-patterns.txt"
+echo '^make' >> "$PERM_TMPDIR/.claude/allowed-patterns.txt"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"make build"}}' 0 "perm-allow-ext: pattern after comment works"
+export HOME="$ORIG_HOME"
+rm -rf "$PERM_TMPDIR"
+echo ""
+
+# --- rust-clippy-after-edit.sh (PostToolUse, "Write|Edit") ---
+echo "rust-clippy-after-edit.sh (extended):"
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/test.js"}}' 0 "clippy-ext: .js file skipped"
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/test.go"}}' 0 "clippy-ext: .go file skipped"
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/test.ts"}}' 0 "clippy-ext: .ts file skipped"
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":""}}' 0 "clippy-ext: empty file_path skipped"
+test_ex rust-clippy-after-edit.sh '{"tool_input":{"file_path":"/tmp/some/deep/path/mod.rs"}}' 0 "clippy-ext: deep .rs path (no Cargo.toml) exits 0"
+echo ""
+
+# --- uncommitted-changes-stop.sh (Stop, "") ---
+echo "uncommitted-changes-stop.sh (extended):"
+test_ex uncommitted-changes-stop.sh '{"stop_reason":"context_full"}' 0 "uncommitted-stop-ext: context_full passes"
+test_ex uncommitted-changes-stop.sh '{"session_id":"abc123"}' 0 "uncommitted-stop-ext: session_id passes"
+test_ex uncommitted-changes-stop.sh '{"stop_reason":"user_exit","session_id":"xyz"}' 0 "uncommitted-stop-ext: combined fields passes"
+test_ex uncommitted-changes-stop.sh '{"event":"Stop"}' 0 "uncommitted-stop-ext: Stop event passes"
+test_ex uncommitted-changes-stop.sh '{"tool_name":"Bash"}' 0 "uncommitted-stop-ext: tool_name field passes"
+echo ""
+
+# --- work-hours-guard.sh (PreToolUse, "Bash") ---
+echo "work-hours-guard.sh (extended):"
+# Force within work hours: set start=0, end=24, days=1234567
+CC_WORK_START=0 CC_WORK_END=24 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"git push origin main"}}' 0 "work-hours-ext: git push during work hours passes"
+CC_WORK_START=0 CC_WORK_END=24 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"npm publish"}}' 0 "work-hours-ext: npm publish during work hours passes"
+CC_WORK_START=0 CC_WORK_END=24 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"deploy --prod"}}' 0 "work-hours-ext: deploy during work hours passes"
+# Force outside work hours: set start=25, end=26 (never in range)
+CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"git push origin main"}}' 2 "work-hours-ext: git push outside hours blocks"
+CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"npm publish --access public"}}' 2 "work-hours-ext: npm publish outside hours blocks"
+CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"docker push myimage"}}' 2 "work-hours-ext: docker push outside hours blocks"
+CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"cat README.md"}}' 0 "work-hours-ext: safe read-only outside hours passes"
+CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "work-hours-ext: ls outside hours passes"
+echo ""
+
 # ========== Batch: empty input safety for ALL example hooks ==========
 echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
