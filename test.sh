@@ -15908,6 +15908,15 @@ test_ex permission-pattern-auto-allow.sh '{}' 0 "perm-allow: empty input passes"
 rm -f ~/.claude/allowed-patterns.txt
 echo ""
 
+# ========== token-spike-alert (#40524, #38029) ==========
+echo "token-spike-alert.sh:"
+test_ex token-spike-alert.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "token-spike: normal tool call passes"
+test_ex token-spike-alert.sh '{"tool_name":"Edit","tool_input":{"file_path":"x"}}' 0 "token-spike: edit passes"
+test_ex token-spike-alert.sh '{"tool_name":"Read","tool_input":{"file_path":"x"}}' 0 "token-spike: read passes"
+test_ex token-spike-alert.sh '{}' 0 "token-spike: empty input passes"
+test_ex token-spike-alert.sh '{"tool_name":""}' 0 "token-spike: empty tool_name passes"
+echo ""
+
 # ========== git-crypt-worktree-guard (#38538) ==========
 echo "git-crypt-worktree-guard.sh:"
 test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git worktree add ../feature-branch"}}' 0 "git-crypt-guard: worktree add in non-crypt repo passes"
