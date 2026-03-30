@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T22:14:53+09:00
+Updated: 2026-03-30T22:15:21+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-30T22:14:53+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e9580dec README: 11,772→11,845 tests Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+- Last commit: 2a1c6340 recovery: pre-compact checkpoint (1 files, 20260330-131520)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./README.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-03-30.md
+./.claude/pre-compact-checkpoint.md
+./README.md
 ./test.sh
 ./examples/permission-pattern-auto-allow.sh
 ./examples/cwd-drift-detector.sh
