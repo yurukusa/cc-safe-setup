@@ -7607,7 +7607,7 @@ test_ex ssh-key-protect.sh '{"tool_input":{"command":"ssh user@host"}}' 0 "ssh-k
 test_ex test-before-commit.sh '{}' 0 "test-before-commit: empty input"
 test_ex test-before-commit.sh '{"tool_input":{"command":"git status"}}' 0 "test-before-commit: non-commit command"
 test_ex test-before-commit.sh '{"tool_input":{"command":"npm test"}}' 0 "test-before-commit: test command (not commit)"
-test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m \"test\""}}' 2 "test-before-commit: commit without recent tests blocked"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m \"test\""}}' 0 "test-before-commit: commit without recent tests warns"
 test_ex tmp-cleanup.sh '{}' 0 "tmp-cleanup: empty input"
 test_ex tmp-cleanup.sh '{"event":"stop"}' 0 "tmp-cleanup: stop event"
 test_ex tmp-cleanup.sh '{"stop_reason":"compact"}' 0 "tmp-cleanup: compact stop reason cleans stale files"
@@ -12754,12 +12754,12 @@ test_ex no-sensitive-log.sh '{"tool_input":{"new_string":"console.log(username)"
 
 # --- test-before-commit ---
 echo "test-before-commit.sh (edge cases):"
-test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 2 "test-before-commit: commit blocks (no recent test)"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m fix"}}' 0 "test-before-commit: warns on commit (no recent test)"
 test_ex test-before-commit.sh '{"tool_input":{"command":"git status"}}' 0 "test-before-commit: non-commit ignored"
 test_ex test-before-commit.sh '{"tool_input":{"command":"ls"}}' 0 "test-before-commit: non-git ignored"
 test_ex test-before-commit.sh '{"tool_input":{"command":""}}' 0 "test-before-commit: empty"
 test_ex test-before-commit.sh '{}' 0 "test-before-commit: no input"
-test_ex test-before-commit.sh '{"tool_input":{"command":"git commit --allow-empty"}}' 2 "test-before-commit: allow-empty also blocked"
+test_ex test-before-commit.sh '{"tool_input":{"command":"git commit --allow-empty"}}' 0 "test-before-commit: allow-empty warns"
 
 # --- tool-call-rate-limiter ---
 echo "tool-call-rate-limiter.sh (edge cases):"
