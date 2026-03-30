@@ -15867,7 +15867,8 @@ echo "0" > /tmp/claudemd-reminder-counter
 test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: skips at count 1"
 # No CLAUDE.md in /tmp — should still exit 0
 echo "19" > /tmp/claudemd-reminder-counter
-(cd /tmp && echo '{}' | bash "$EXDIR/claudemd-violation-detector.sh" >/dev/null 2>/dev/null); EXIT=$?
+FULL_EXDIR="$(cd "$EXDIR" && pwd)"
+EXIT=0; (cd /tmp && echo '{}' | bash "$FULL_EXDIR/claudemd-violation-detector.sh" >/dev/null 2>/dev/null) || EXIT=$?
 [ "$EXIT" -eq 0 ] && { echo "  PASS: claudemd-detector: no CLAUDE.md exits 0"; PASS=$((PASS+1)); } || { echo "  FAIL: claudemd-detector: no CLAUDE.md (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 echo ""
 
