@@ -17712,7 +17712,7 @@ test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit
 test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"line one\nline two"}}' 0 "edit-validator-ext: multiline match passes"
 test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"DOES NOT EXIST"}}' 2 "edit-validator-ext: nonexistent string blocks"
 test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/tmp/test-edit-validator-ext.txt","old_string":"LINE ONE"}}' 2 "edit-validator-ext: case mismatch blocks"
-test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/dev/null","old_string":"anything"}}' 2 "edit-validator-ext: /dev/null file blocks (empty file)"
+test_ex edit-old-string-validator.sh '{"tool_input":{"file_path":"/dev/null","old_string":"anything"}}' 0 "edit-validator-ext: /dev/null passes (not a regular file)"
 rm -f /tmp/test-edit-validator-ext.txt
 echo ""
 
