@@ -15908,6 +15908,14 @@ test_ex permission-pattern-auto-allow.sh '{}' 0 "perm-allow: empty input passes"
 rm -f ~/.claude/allowed-patterns.txt
 echo ""
 
+# ========== settings-mutation-detector ==========
+echo "settings-mutation-detector.sh:"
+test_ex settings-mutation-detector.sh '{"tool_name":"Edit","tool_input":{"file_path":"x"}}' 0 "settings-mutation: first run passes (baseline)"
+test_ex settings-mutation-detector.sh '{"tool_name":"Edit","tool_input":{"file_path":"x"}}' 0 "settings-mutation: second run passes (no change)"
+test_ex settings-mutation-detector.sh '{}' 0 "settings-mutation: empty input passes"
+test_ex settings-mutation-detector.sh '{"tool_name":""}' 0 "settings-mutation: empty tool passes"
+echo ""
+
 # ========== worktree-path-validator (#36182) ==========
 echo "worktree-path-validator.sh:"
 test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "wt-path: non-git path passes"
