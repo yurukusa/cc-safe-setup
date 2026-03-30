@@ -3625,7 +3625,7 @@ function issues() {
     { hook: 'deploy-guard', issues: ['#37314 Deploy without commit'] },
     { hook: 'protect-dotfiles', issues: ['#37478 .bashrc destroyed (3r)'] },
     { hook: 'scope-guard', issues: ['#36233 Files deleted outside project (67r)'] },
-    { hook: 'env-source-guard', issues: ['#401 .env loaded into bash environment (54r)'] },
+    { hook: 'env-source-guard', issues: ['#401 .env loaded into bash environment (54r)', '#40730 Shell builtins bypass deny patterns with absolute paths'] },
     { hook: 'diff-size-guard', issues: ['Unreviable mega-commits'] },
     { hook: 'dependency-audit', issues: ['Supply chain risk from unknown packages'] },
     { hook: 'read-before-edit', issues: ['old_string mismatch from editing unread files'] },
@@ -3641,6 +3641,7 @@ function issues() {
     { hook: 'read-only-mode', issues: ['#41063 Claude ignores read-only instructions during test tasks (0r)'] },
     { hook: 'task-integrity-guard', issues: ['#41109 Agent deleted open tasks to hide unfinished work (0r)'] },
     { hook: 'permission-denial-enforcer', issues: ['#41103 Sandbox bypass after user denied Write permission (0r)'] },
+    { hook: 'no-git-amend-push', issues: ['#41162 Creates new commit even when instructed to amend/squash'] },
   ];
 
   console.log();
