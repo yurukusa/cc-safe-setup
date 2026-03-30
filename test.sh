@@ -15727,6 +15727,59 @@ if [ -f "$EXDIR/enforce-tests.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: enforce-tests empty"; PASS=$((PASS+1)); } || { echo "  FAIL: enforce-tests empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- write-shrink-guard ---
+if [ -f "$EXDIR/write-shrink-guard.sh" ]; then
+    # Should allow Write to new file (file doesn't exist)
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/nonexistent-test.js","content":"hello"}}' | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: write-shrink allows new file"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink new (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow non-Write tools
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"test.js"}}' | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: write-shrink ignores Edit"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink Edit (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow small files
+    echo "small" > /tmp/write-shrink-test.txt
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/write-shrink-test.txt","content":"x"}}' | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: write-shrink allows small file"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink small (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block 90%+ shrink on large file
+    python3 -c "print('x' * 5000)" > /tmp/write-shrink-large.txt
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/write-shrink-large.txt","content":"tiny"}}' | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: write-shrink blocks 90%+ reduction"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink block (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow same-size write
+    EXIT=0; echo "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"/tmp/write-shrink-large.txt\",\"content\":\"$(python3 -c "print('y' * 5000)")\"}}" | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: write-shrink allows same-size"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink same-size (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/write-shrink-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: write-shrink empty"; PASS=$((PASS+1)); } || { echo "  FAIL: write-shrink empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    rm -f /tmp/write-shrink-test.txt /tmp/write-shrink-large.txt
+fi
+
+# --- worktree-delete-guard ---
+if [ -f "$EXDIR/worktree-delete-guard.sh" ]; then
+    # Should block git worktree remove
+    EXIT=0; echo '{"tool_input":{"command":"git worktree remove /tmp/wt-test"}}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: worktree-delete blocks remove"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete remove (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block git worktree prune
+    EXIT=0; echo '{"tool_input":{"command":"git worktree prune"}}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: worktree-delete blocks prune"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete prune (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow git worktree list
+    EXIT=0; echo '{"tool_input":{"command":"git worktree list"}}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-delete allows list"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete list (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow git worktree add
+    EXIT=0; echo '{"tool_input":{"command":"git worktree add /tmp/new-wt feature"}}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-delete allows add"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete add (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow non-git commands
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-delete allows ls"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete ls (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/worktree-delete-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-delete empty"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-delete empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- settings-auto-backup ---
+if [ -f "$EXDIR/settings-auto-backup.sh" ]; then
+    EXIT=0; echo '{}' | bash "$EXDIR/settings-auto-backup.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: settings-auto-backup exits cleanly"; PASS=$((PASS+1)); } || { echo "  FAIL: settings-auto-backup (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 # ========== Batch: empty input safety for ALL example hooks ==========
 echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
