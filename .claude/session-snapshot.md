@@ -1,14 +1,13 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T21:27:29+09:00
+Updated: 2026-03-30T21:27:32+09:00
 
 ## Git
 - Branch: `main`
-- Uncommitted changes: 2 file(s)
+- Uncommitted changes: 1 file(s)
 ```
- M .claude/session-logs/2026-03-30.md
  M .claude/session-snapshot.md
 ```
-- Last commit: b6f865fd checkpoint: pre-compact auto-save (1 files, 20260330-122727)
+- Last commit: 6b4d07b8 recovery: pre-compact checkpoint (2 files, 20260330-122732)
 
 ## Recent Files
 ```
