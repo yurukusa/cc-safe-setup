@@ -3642,6 +3642,10 @@ function issues() {
     { hook: 'task-integrity-guard', issues: ['#41109 Agent deleted open tasks to hide unfinished work (0r)'] },
     { hook: 'permission-denial-enforcer', issues: ['#41103 Sandbox bypass after user denied Write permission (0r)'] },
     { hook: 'no-git-amend-push', issues: ['#41162 Creates new commit even when instructed to amend/squash'] },
+    { hook: 'auto-approve-nix', issues: ['#34007 Command parsing for permissions incorrectly handles # (6r)'] },
+    { hook: 'git-operations-require-approval', issues: ['#40695 CLAUDE.md git rules ignored', '#39924 Branch switches on new session'] },
+    { hook: 'token-budget-guard', issues: ['#41046 Account suspension from extension background activity', '#38826 Session limit tracking (2r)'] },
+    { hook: 'windows-path-guard', issues: ['#38890 Path rewrite to fabricated Windows path (1r)', '#40164 Worktree fails on Windows'] },
   ];
 
   console.log();
