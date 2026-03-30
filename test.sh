@@ -15540,6 +15540,62 @@ if [ -f "$EXDIR/worktree-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- deploy-guard ---
+if [ -f "$EXDIR/deploy-guard.sh" ]; then
+    # Should pass non-deploy commands
+    EXIT=0; echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/deploy-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: deploy-guard allows npm test"; PASS=$((PASS+1)); } || { echo "  FAIL: deploy-guard npm test (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should pass git push to regular remote
+    EXIT=0; echo '{"tool_input":{"command":"git push origin feature"}}' | bash "$EXDIR/deploy-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: deploy-guard allows git push origin"; PASS=$((PASS+1)); } || { echo "  FAIL: deploy-guard git push (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/deploy-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: deploy-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: deploy-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- diff-size-guard ---
+if [ -f "$EXDIR/diff-size-guard.sh" ]; then
+    # Should pass non-git commands
+    EXIT=0; echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/diff-size-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: diff-size-guard allows non-git cmd"; PASS=$((PASS+1)); } || { echo "  FAIL: diff-size non-git (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/diff-size-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: diff-size-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: diff-size empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should pass git log (not commit)
+    EXIT=0; echo '{"tool_input":{"command":"git log --oneline -5"}}' | bash "$EXDIR/diff-size-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: diff-size-guard allows git log"; PASS=$((PASS+1)); } || { echo "  FAIL: diff-size git log (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- parallel-edit-guard ---
+if [ -f "$EXDIR/parallel-edit-guard.sh" ]; then
+    # Should pass with no lock
+    EXIT=0; echo '{"tool_input":{"file_path":"src/test.js"}}' | bash "$EXDIR/parallel-edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: parallel-edit-guard no conflict"; PASS=$((PASS+1)); } || { echo "  FAIL: parallel-edit no conflict (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/parallel-edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: parallel-edit-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: parallel-edit empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- debug-leftover-guard ---
+if [ -f "$EXDIR/debug-leftover-guard.sh" ]; then
+    # Should pass non-commit commands
+    EXIT=0; echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/debug-leftover-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: debug-leftover-guard allows non-commit"; PASS=$((PASS+1)); } || { echo "  FAIL: debug-leftover non-commit (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/debug-leftover-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: debug-leftover-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: debug-leftover empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- max-file-count-guard ---
+if [ -f "$EXDIR/max-file-count-guard.sh" ]; then
+    # Should pass with file path
+    EXIT=0; echo '{"tool_input":{"file_path":"src/new.js"}}' | bash "$EXDIR/max-file-count-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-count-guard passes"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-count (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/max-file-count-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-count-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-count empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
