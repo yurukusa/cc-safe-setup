@@ -1,5 +1,21 @@
 # Changelog
 
+## [29.6.35] - 2026-03-30
+- **New**: 7 hooks addressing top GitHub Issues (454+ combined reactions):
+  - clear-command-confirm-guard (#40931): blocks accidental /clear, suggests /compact
+  - claudemd-violation-detector (#40930): periodic CLAUDE.md rules reminder
+  - subagent-context-size-guard (#40929, 3r): warns on thin Agent prompts (<100 chars)
+  - edit-old-string-validator (#22264, 38r): pre-validates Edit old_string to prevent cascade failures
+  - virtual-cwd-helper (#3473, 52r): virtual CWD for mid-session directory switching
+  - cwd-drift-detector (#1669, 72r): warns on destructive commands outside project root
+  - permission-pattern-auto-allow (#819, 40r): regex-based command auto-approval
+- **Tests**: +1,339 tests (10,506→11,845), all passing
+- **Issue answers**: 13 GitHub Issues answered with tested hook workarounds
+  - High-impact: #17428(85r), #7490(90r), #5512(74r), #1669(72r), #3473(52r)
+- **SEO**: 23 pages updated to 629/11,845
+- **Zenn Book**: All chapters updated to 629 hooks / 11,845 tests
+- **Stats**: 629 examples, 11,845 tests, 23 SEO pages
+
 ## [29.6.34] - 2026-03-29
 - **New**: 3 hooks addressing top GitHub Issues (132 combined reactions):
   - git-show-flag-sanitizer (#13071, 44r): strips invalid --no-stat from git show via PreToolUse rewrite
