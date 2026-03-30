@@ -1,20 +1,17 @@
 #!/bin/bash
-#
-# TRIGGER: PreToolUse  MATCHER: "Bash"
-COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
-echo "$COMMAND" | grep -qE '^\s*git\s+commit' || exit 0
-RECENT=0
-TIMEOUT=${CC_TEST_TIMEOUT:-600}
-NOW=$(date +%s)
-for marker in coverage/.last-run.json test-results .nyc_output junit.xml; do
-    [ -e "$marker" ] || continue
-    MTIME=$(stat -c %Y "$marker" 2>/dev/null || echo 0)
-    [ $((NOW - MTIME)) -lt "$TIMEOUT" ] && RECENT=1 && break
-done
-if [ "$RECENT" -eq 0 ]; then
-    echo "BLOCKED: No recent test results (within $((TIMEOUT/60)) min)" >&2
-    echo "Run your test suite first, then commit." >&2
-    exit 2
+STATE="/tmp/cc-tests-ran-$$"
+if echo "$COMMAND" | grep -qE '^\s*(npm\s+test|npx\s+jest|pytest|python\s+-m\s+pytest|cargo\s+test|go\s+test|make\s+test|bundle\s+exec\s+rspec|mix\s+test)'; then
+    echo "1" > "$STATE"
+    exit 0
+fi
+if echo "$COMMAND" | grep -qE '^\s*git\s+commit'; then
+    if [ ! -f "$STATE" ] || [ "$(cat "$STATE" 2>/dev/null)" != "1" ]; then
+        echo "WARNING: No test commands detected since last commit." >&2
+        echo "  Run tests before committing to verify your changes." >&2
+    fi
+    rm -f "$STATE"
 fi
 exit 0
