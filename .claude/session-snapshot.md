@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T23:28:19+09:00
+Updated: 2026-03-30T23:28:34+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-30T23:28:19+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: fada2085 recovery: pre-compact checkpoint (2 files, 20260330-142819)
+- Last commit: 3fd20cf8 checkpoint: auto-save 23:28:26
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-03-30.md
+./.claude/pre-compact-checkpoint.md
+./test.sh
 ./examples/settings-mutation-detector.sh
 ./examples/worktree-path-validator.sh
 ./examples/token-spike-alert.sh
