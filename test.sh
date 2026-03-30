@@ -17951,6 +17951,33 @@ test_hook "subagent-context-size-guard" '{"tool_input":null}' 0 "subagent-guard:
 
 echo ""
 
+# ========== read-only-mode (example) ==========
+echo "read-only-mode.sh (example):"
+# Without CLAUDE_READONLY, all commands pass
+test_ex read-only-mode.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"}}' 0 "Write allowed when CLAUDE_READONLY unset"
+test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"rm -rf /tmp/foo"}}' 0 "rm allowed when CLAUDE_READONLY unset"
+test_ex read-only-mode.sh '{"tool_name":"Edit","tool_input":{"file_path":"foo.py","old_string":"a","new_string":"b"}}' 0 "Edit allowed when CLAUDE_READONLY unset"
+# With CLAUDE_READONLY=1, write tools are blocked
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"}}' 2 "Write blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Edit","tool_input":{"file_path":"foo.py","old_string":"a","new_string":"b"}}' 2 "Edit blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"NotebookEdit","tool_input":{}}' 2 "NotebookEdit blocked in read-only mode"
+# With CLAUDE_READONLY=1, read commands pass
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "ls allowed in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"git log --oneline"}}' 0 "git log allowed in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"cat README.md"}}' 0 "cat allowed in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"grep -r TODO src/"}}' 0 "grep allowed in read-only mode"
+# With CLAUDE_READONLY=1, destructive commands are blocked
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"ALTER TABLE users ADD COLUMN age INT"}}' 2 "SQL ALTER blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"docker restart myapp"}}' 2 "docker restart blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"rm -rf node_modules"}}' 2 "rm blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 2 "npm install blocked in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_name":"Bash","tool_input":{"command":"sed -i s/old/new/ file.txt"}}' 2 "sed -i blocked in read-only mode"
+# Empty/null input safety
+test_ex read-only-mode.sh '{}' 0 "empty input safe"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{}' 0 "empty input safe in read-only mode"
+CLAUDE_READONLY=1 test_ex read-only-mode.sh '{"tool_input":{}}' 0 "empty tool_input safe in read-only mode"
+echo ""
+
 # ========== Batch: null tool_input safety for ALL example hooks ==========
 echo "--- Batch null tool_input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
