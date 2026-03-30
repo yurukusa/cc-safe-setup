@@ -4,7 +4,7 @@
  *
  * Scans examples/*.sh to generate the CATEGORIES object for index.mjs --examples.
  *
- * Why: The manual CATEGORIES list falls behind (147 of 629 hooks registered).
+ * Why: The manual CATEGORIES list falls behind (147 of 634 hooks registered).
  * This script auto-generates from the actual files so --examples always shows all hooks.
  *
  * Usage:
