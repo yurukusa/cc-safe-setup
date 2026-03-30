@@ -15596,6 +15596,62 @@ if [ -f "$EXDIR/max-file-count-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-count-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-count empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- no-root-write ---
+if [ -f "$EXDIR/no-root-write.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"/etc/passwd"}}' | bash "$EXDIR/no-root-write.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: no-root-write blocks /etc"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-write /etc (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"/usr/bin/test"}}' | bash "$EXDIR/no-root-write.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: no-root-write blocks /usr/bin"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-write /usr/bin (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"/boot/grub.cfg"}}' | bash "$EXDIR/no-root-write.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: no-root-write blocks /boot"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-write /boot (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"src/app.js"}}' | bash "$EXDIR/no-root-write.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-root-write allows project files"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-write project (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/no-root-write.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-root-write empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-root-write empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- no-wildcard-delete ---
+if [ -f "$EXDIR/no-wildcard-delete.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"rm *.log"}}' | bash "$EXDIR/no-wildcard-delete.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-wildcard-delete warns on rm *.log"; PASS=$((PASS+1)); } || { echo "  FAIL: no-wildcard-delete rm *.log (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"command":"ls *.js"}}' | bash "$EXDIR/no-wildcard-delete.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-wildcard-delete allows ls wildcard"; PASS=$((PASS+1)); } || { echo "  FAIL: no-wildcard-delete ls (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"command":"rm specific-file.txt"}}' | bash "$EXDIR/no-wildcard-delete.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-wildcard-delete allows specific rm"; PASS=$((PASS+1)); } || { echo "  FAIL: no-wildcard-delete specific rm (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/no-wildcard-delete.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-wildcard-delete empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-wildcard-delete empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- no-write-outside-src ---
+if [ -f "$EXDIR/no-write-outside-src.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"file_path":"src/app.js"}}' | bash "$EXDIR/no-write-outside-src.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-write-outside-src allows src/"; PASS=$((PASS+1)); } || { echo "  FAIL: no-write-outside-src src (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"tests/test.js"}}' | bash "$EXDIR/no-write-outside-src.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-write-outside-src allows tests/"; PASS=$((PASS+1)); } || { echo "  FAIL: no-write-outside-src tests (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"file_path":"README.md"}}' | bash "$EXDIR/no-write-outside-src.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-write-outside-src allows .md"; PASS=$((PASS+1)); } || { echo "  FAIL: no-write-outside-src .md (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/no-write-outside-src.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-write-outside-src empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-write-outside-src empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- max-file-delete-count ---
+if [ -f "$EXDIR/max-file-delete-count.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"rm file1.txt"}}' | bash "$EXDIR/max-file-delete-count.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-delete allows single rm"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-delete single (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/max-file-delete-count.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-delete allows non-rm"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-delete non-rm (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/max-file-delete-count.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: max-file-delete empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: max-file-delete empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- no-git-rebase-public ---
+if [ -f "$EXDIR/no-git-rebase-public.sh" ]; then
+    EXIT=0; echo '{"tool_input":{"command":"git status"}}' | bash "$EXDIR/no-git-rebase-public.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-git-rebase allows git status"; PASS=$((PASS+1)); } || { echo "  FAIL: no-git-rebase status (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/no-git-rebase-public.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: no-git-rebase empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: no-git-rebase empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
