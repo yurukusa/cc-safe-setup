@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-31T03:00:42+09:00
+Updated: 2026-03-31T03:00:47+09:00
 
 ## Git
 - Branch: `main`
@@ -7,15 +7,15 @@ Updated: 2026-03-31T03:00:42+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: b507d770 README: link to Permission Troubleshooting Flowchart gist Step-by-step diagnosis for the most common permission issues (300+ reactions across related GitHub Issues) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+- Last commit: 9920f3f2 checkpoint: auto-save 03:00:46
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./README.md
-./docs/README.ja.md
 ./.claude/session-logs/2026-03-31.md
 ./.claude/pre-compact-checkpoint.md
+./README.md
+./docs/README.ja.md
 ./test.sh
 ./CHANGELOG.md
 ./.claude/session-logs/2026-03-30.md
