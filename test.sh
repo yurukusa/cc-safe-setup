@@ -3320,8 +3320,8 @@ if [ -f "$EXDIR/test-before-commit.sh" ]; then
     # BLOCKS (exit 2) git commit if no recent test results
     test_ex test-before-commit.sh '{"tool_input":{"command":"npm install"}}' 0 "non-commit command passes"
     test_ex test-before-commit.sh '{"tool_input":{"command":""}}' 0 "empty command passes"
-    # git commit without recent test markers should block
-    test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m \"test\""}}' 2 "blocks commit without recent tests"
+    # git commit without recent test markers should warn (exit 0, warning on stderr)
+    test_ex test-before-commit.sh '{"tool_input":{"command":"git commit -m \"test\""}}' 0 "warns on commit without recent tests"
     # Create a fresh test marker in current dir, then commit should pass
     ORIG_DIR="$(pwd)"
     TBC_TMP=$(mktemp -d)
