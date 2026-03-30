@@ -15441,6 +15441,60 @@ if [ -f "$EXDIR/no-default-credentials.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: no-default-credentials warns on default secret"; PASS=$((PASS+1)); } || { echo "  FAIL: no-default-credentials default secret"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- protect-claudemd ---
+if [ -f "$EXDIR/protect-claudemd.sh" ]; then
+    # Should block editing CLAUDE.md
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"/home/user/project/CLAUDE.md","old_string":"x","new_string":"y"}}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: protect-claudemd blocks CLAUDE.md edit"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd CLAUDE.md (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block writing settings.json
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":".claude/settings.json","content":"test"}}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: protect-claudemd blocks settings.json"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd settings.json (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block .claude/hooks/ modifications
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":".claude/hooks/guard.sh","content":"exit 0"}}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: protect-claudemd blocks .claude/hooks"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd hooks dir (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow editing normal source files
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"src/index.js","old_string":"x","new_string":"y"}}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: protect-claudemd allows src edit"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd src edit (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/protect-claudemd.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: protect-claudemd empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: protect-claudemd empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- env-source-guard ---
+if [ -f "$EXDIR/env-source-guard.sh" ]; then
+    # Should block source .env
+    EXIT=0; echo '{"tool_input":{"command":"source .env"}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: env-source-guard blocks source .env"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard source .env (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block . .env.local
+    EXIT=0; echo '{"tool_input":{"command":". .env.local"}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: env-source-guard blocks dot .env.local"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard dot .env.local (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block export $(cat .env)
+    EXIT=0; echo '{"tool_input":{"command":"export $(cat .env)"}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: env-source-guard blocks export cat .env"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard export cat (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow reading .env with cat (not sourcing)
+    EXIT=0; echo '{"tool_input":{"command":"cat .env"}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: env-source-guard allows cat .env"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard cat .env (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow python dotenv
+    EXIT=0; echo '{"tool_input":{"command":"python3 -c \"from dotenv import load_dotenv; load_dotenv()\""}}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: env-source-guard allows python dotenv"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard python dotenv (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/env-source-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: env-source-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: env-source-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- scope-guard ---
+if [ -f "$EXDIR/scope-guard.sh" ]; then
+    # Should allow commands in project dir
+    EXIT=0; echo '{"tool_input":{"command":"ls src/"}}' | bash "$EXDIR/scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: scope-guard allows project commands"; PASS=$((PASS+1)); } || { echo "  FAIL: scope-guard project cmd (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: scope-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: scope-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow npm test
+    EXIT=0; echo '{"tool_input":{"command":"npm test"}}' | bash "$EXDIR/scope-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: scope-guard allows npm test"; PASS=$((PASS+1)); } || { echo "  FAIL: scope-guard npm test (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
