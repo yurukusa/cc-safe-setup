@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T23:59:49+09:00
+Updated: 2026-03-30T23:59:54+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-30T23:59:49+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 94ac591f recovery: pre-compact checkpoint (1 files, 20260330-145948)
+- Last commit: d738977b recovery: pre-compact checkpoint (1 files, 20260330-145954)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-03-30.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./README.md
 ./examples/settings-mutation-detector.sh
