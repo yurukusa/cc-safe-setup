@@ -15841,6 +15841,51 @@ test_ex deployment-verify-guard.sh '{"tool_input":{"command":""}}' 0 "deploy-ver
 test_ex deployment-verify-guard.sh '{}' 0 "deploy-verify: empty input passes"
 echo ""
 
+# ========== clear-command-confirm-guard (#40931) ==========
+echo "clear-command-confirm-guard.sh:"
+test_ex clear-command-confirm-guard.sh '{"prompt":"/clear"}' 2 "clear-guard: /clear blocked"
+test_ex clear-command-confirm-guard.sh '{"prompt":"/compact"}' 0 "clear-guard: /compact allowed"
+test_ex clear-command-confirm-guard.sh '{"prompt":"/commit"}' 0 "clear-guard: /commit allowed"
+test_ex clear-command-confirm-guard.sh '{"prompt":"please clear the screen"}' 0 "clear-guard: natural language not blocked"
+test_ex clear-command-confirm-guard.sh '{"prompt":"/clear all"}' 0 "clear-guard: /clear all not matched (not exact)"
+test_ex clear-command-confirm-guard.sh '{"prompt":""}' 0 "clear-guard: empty prompt passes"
+test_ex clear-command-confirm-guard.sh '{}' 0 "clear-guard: empty input passes"
+echo ""
+
+# ========== claudemd-violation-detector (#40930) ==========
+echo "claudemd-violation-detector.sh:"
+# Reset counter to force trigger (set to 19 so next call = 20 = triggers)
+echo "19" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: exits 0 on trigger"
+# Counter is now 20, next will be 21 (not divisible by 20 → skip)
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: skips when not at interval"
+# Reset to 39 to trigger again
+echo "39" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: triggers at 40"
+# Test with counter at 0 (not divisible by 20 → skip, count becomes 1)
+echo "0" > /tmp/claudemd-reminder-counter
+test_ex claudemd-violation-detector.sh '{}' 0 "claudemd-detector: skips at count 1"
+# No CLAUDE.md in /tmp — should still exit 0
+echo "19" > /tmp/claudemd-reminder-counter
+(cd /tmp && echo '{}' | bash "$EXDIR/claudemd-violation-detector.sh" >/dev/null 2>/dev/null); EXIT=$?
+[ "$EXIT" -eq 0 ] && { echo "  PASS: claudemd-detector: no CLAUDE.md exits 0"; PASS=$((PASS+1)); } || { echo "  FAIL: claudemd-detector: no CLAUDE.md (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+echo ""
+
+# ========== subagent-context-size-guard (#40929) ==========
+echo "subagent-context-size-guard.sh:"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"fix bug"}}' 0 "subagent-guard: short prompt warns but exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":"This is a sufficiently long prompt that provides enough context for the subagent to work independently and understand what needs to be done in this task"}}' 0 "subagent-guard: long prompt exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_input":{"prompt":""}}' 0 "subagent-guard: empty prompt exits 0"
+test_ex subagent-context-size-guard.sh '{"tool_input":{}}' 0 "subagent-guard: missing prompt exits 0"
+test_ex subagent-context-size-guard.sh '{}' 0 "subagent-guard: empty input exits 0"
+# Verify warning is actually emitted for short prompts
+WARN_OUT=$(echo '{"tool_input":{"prompt":"fix bug"}}' | bash "$EXDIR/subagent-context-size-guard.sh" 2>&1 >/dev/null)
+echo "$WARN_OUT" | grep -q "WARNING" && { echo "  PASS: subagent-guard: warning emitted for short prompt"; PASS=$((PASS+1)); } || { echo "  FAIL: subagent-guard: no warning for short prompt"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+# Verify no warning for long prompts
+WARN_OUT=$(echo '{"tool_input":{"prompt":"This is a sufficiently long prompt that provides enough context for the subagent to work independently and understand what needs to be done in this task"}}' | bash "$EXDIR/subagent-context-size-guard.sh" 2>&1 >/dev/null)
+echo "$WARN_OUT" | grep -q "WARNING" && { echo "  FAIL: subagent-guard: false warning for long prompt"; FAIL=$((FAIL+1)); } || { echo "  PASS: subagent-guard: no warning for long prompt"; PASS=$((PASS+1)); }; TOTAL=$((TOTAL+1))
+echo ""
+
 # ========== Batch: empty input safety for ALL example hooks ==========
 echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
