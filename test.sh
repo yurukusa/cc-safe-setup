@@ -15940,7 +15940,7 @@ test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"/home/user/proje
 test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"../../../etc/passwd"}}' 0 "wt-path: traversal path passes in non-worktree"
 test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"/path/with spaces/file.ts"}}' 0 "wt-path: path with spaces passes"
 test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"$(whoami)/file.ts"}}' 0 "wt-path: injection in file_path passes safely"
-test_ex worktree-path-validator.sh 'not-json' 0 "wt-path: non-JSON input passes"
+test_ex worktree-path-validator.sh 'not-json' 5 "wt-path: non-JSON input rejected"
 echo ""
 
 # ========== token-spike-alert (#40524, #38029) ==========
