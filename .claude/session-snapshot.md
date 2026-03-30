@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T21:59:40+09:00
+Updated: 2026-03-30T22:00:41+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-03-30T21:59:40+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d0578747 recovery: pre-compact checkpoint (1 files, 20260330-125940)
+- Last commit: 69337fae 629 hooks / 11,845 tests — all passing Fixed deploy-guard and edit-validator test expectations Test-writer agent additions integrated Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-03-30.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./README.md
 ./examples/permission-pattern-auto-allow.sh
