@@ -15732,7 +15732,8 @@ echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
     HOOK_NAME=$(basename "$HOOK_FILE" .sh)
     EXIT=0; echo '{}' | bash "$HOOK_FILE" >/dev/null 2>/dev/null || EXIT=$?
-    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ]; then
+    # exit 0=pass, 1=modified(ok), 2=block(ok for blocker hooks like compact-blocker)
+    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ] || [ "$EXIT" -eq 2 ]; then
         echo "  PASS: ${HOOK_NAME} empty input safe"
         PASS=$((PASS+1))
     else
