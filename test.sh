@@ -17883,6 +17883,74 @@ CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh
 CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "work-hours-ext: ls outside hours passes"
 echo ""
 
+# ========== Built-in: comment-strip ==========
+echo "comment-strip (built-in):"
+extract_hook "comment-strip"
+
+test_hook "comment-strip" '{"tool_input":{"command":"# check the diff\ngit diff HEAD~1"}}' 0 "comment-strip: strips leading comment line"
+test_hook "comment-strip" '{"tool_input":{"command":"git status"}}' 0 "comment-strip: passes clean command"
+test_hook "comment-strip" '{"tool_input":{"command":"# just a comment"}}' 0 "comment-strip: handles comment-only input"
+test_hook "comment-strip" '{"tool_input":{"command":"echo hello # inline comment"}}' 0 "comment-strip: preserves inline comment"
+test_hook "comment-strip" '{"tool_input":{"command":""}}' 0 "comment-strip: handles empty command"
+test_hook "comment-strip" '{}' 0 "comment-strip: handles empty JSON"
+test_hook "comment-strip" '{"tool_input":{"command":"# line1\n# line2\nls -la"}}' 0 "comment-strip: strips multiple comment lines"
+test_hook "comment-strip" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "comment-strip: passes npm build"
+test_hook "comment-strip" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/a.txt","old_string":"a","new_string":"b"}}' 0 "comment-strip: passes edit"
+test_hook "comment-strip" '{"tool_input":{"command":"  # indented comment\n  git log"}}' 0 "comment-strip: handles indented comments"
+
+echo ""
+
+# ========== Built-in: clear-command-confirm-guard ==========
+echo "clear-command-confirm-guard (built-in):"
+extract_hook "clear-command-confirm-guard"
+
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":"/clear"}}' 2 "clear-confirm: blocks /clear"
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":"/compact"}}' 0 "clear-confirm: allows /compact"
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":"clear"}}' 0 "clear-confirm: allows bare clear (not slash)"
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":"npm run clear"}}' 0 "clear-confirm: allows clear in other context"
+test_hook "clear-command-confirm-guard" '{}' 0 "clear-confirm: handles empty JSON"
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":""}}' 0 "clear-confirm: handles empty command"
+test_hook "clear-command-confirm-guard" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "clear-confirm: passes normal command"
+test_hook "clear-command-confirm-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/a.txt"}}' 0 "clear-confirm: passes read"
+test_hook "clear-command-confirm-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/a.txt","old_string":"a","new_string":"b"}}' 0 "clear-confirm: passes edit"
+test_hook "clear-command-confirm-guard" '{"tool_input":{"command":"/c"}}' 0 "clear-confirm: allows /c (not /clear)"
+
+echo ""
+
+# ========== Built-in: claudemd-violation-detector ==========
+echo "claudemd-violation-detector (built-in):"
+extract_hook "claudemd-violation-detector"
+
+test_hook "claudemd-violation-detector" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "violation-detector: passes normal command"
+test_hook "claudemd-violation-detector" '{}' 0 "violation-detector: handles empty JSON"
+test_hook "claudemd-violation-detector" '{"tool_input":{"command":""}}' 0 "violation-detector: handles empty command"
+test_hook "claudemd-violation-detector" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/a.txt","old_string":"a","new_string":"b"}}' 0 "violation-detector: passes edit"
+test_hook "claudemd-violation-detector" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/a.txt"}}' 0 "violation-detector: passes read"
+test_hook "claudemd-violation-detector" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/a.txt","content":"hello"}}' 0 "violation-detector: passes write"
+test_hook "claudemd-violation-detector" '{"tool_name":"Bash","tool_input":{"command":"git push origin main"}}' 0 "violation-detector: passes git push"
+test_hook "claudemd-violation-detector" '{"tool_name":"Bash","tool_input":{"command":"npm publish"}}' 0 "violation-detector: passes npm publish"
+test_hook "claudemd-violation-detector" '{"tool_input":null}' 0 "violation-detector: handles null tool_input"
+test_hook "claudemd-violation-detector" '{"tool_name":"Agent","tool_input":{"prompt":"do something"}}' 0 "violation-detector: passes agent"
+
+echo ""
+
+# ========== Built-in: subagent-context-size-guard ==========
+echo "subagent-context-size-guard (built-in):"
+extract_hook "subagent-context-size-guard"
+
+test_hook "subagent-context-size-guard" '{"tool_name":"Agent","tool_input":{"prompt":"a"}}' 0 "subagent-guard: short prompt passes (warns only)"
+test_hook "subagent-context-size-guard" '{"tool_name":"Agent","tool_input":{"prompt":"This is a detailed prompt with enough context to perform the task well and produce good results for the user"}}' 0 "subagent-guard: long prompt passes"
+test_hook "subagent-context-size-guard" '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "subagent-guard: non-agent passes"
+test_hook "subagent-context-size-guard" '{}' 0 "subagent-guard: handles empty JSON"
+test_hook "subagent-context-size-guard" '{"tool_input":{"command":"git status"}}' 0 "subagent-guard: handles missing tool_name"
+test_hook "subagent-context-size-guard" '{"tool_name":"Agent","tool_input":{"prompt":""}}' 0 "subagent-guard: empty prompt passes"
+test_hook "subagent-context-size-guard" '{"tool_name":"Agent","tool_input":{}}' 0 "subagent-guard: missing prompt passes"
+test_hook "subagent-context-size-guard" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/a.txt"}}' 0 "subagent-guard: passes read"
+test_hook "subagent-context-size-guard" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/a.txt","old_string":"a","new_string":"b"}}' 0 "subagent-guard: passes edit"
+test_hook "subagent-context-size-guard" '{"tool_input":null}' 0 "subagent-guard: handles null tool_input"
+
+echo ""
+
 # ========== Batch: null tool_input safety for ALL example hooks ==========
 echo "--- Batch null tool_input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
