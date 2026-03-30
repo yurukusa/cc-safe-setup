@@ -15908,6 +15908,15 @@ test_ex permission-pattern-auto-allow.sh '{}' 0 "perm-allow: empty input passes"
 rm -f ~/.claude/allowed-patterns.txt
 echo ""
 
+# ========== worktree-path-validator (#36182) ==========
+echo "worktree-path-validator.sh:"
+test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"/tmp/test.txt"}}' 0 "wt-path: non-git path passes"
+test_ex worktree-path-validator.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "wt-path: relative path passes"
+test_ex worktree-path-validator.sh '{"tool_input":{"file_path":""}}' 0 "wt-path: empty path passes"
+test_ex worktree-path-validator.sh '{"tool_input":{}}' 0 "wt-path: no file_path passes"
+test_ex worktree-path-validator.sh '{}' 0 "wt-path: empty input passes"
+echo ""
+
 # ========== token-spike-alert (#40524, #38029) ==========
 echo "token-spike-alert.sh:"
 test_ex token-spike-alert.sh '{"tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "token-spike: normal tool call passes"
