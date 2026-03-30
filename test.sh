@@ -15495,6 +15495,51 @@ if [ -f "$EXDIR/scope-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: scope-guard allows npm test"; PASS=$((PASS+1)); } || { echo "  FAIL: scope-guard npm test (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- edit-guard ---
+if [ -f "$EXDIR/edit-guard.sh" ]; then
+    # Should block .env editing
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":".env","old_string":"x","new_string":"y"}}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: edit-guard blocks .env"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard .env (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block credentials file
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"config/credentials.json","content":"test"}}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: edit-guard blocks credentials"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard credentials (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should block .pem files
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"cert.pem","content":"test"}}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && { echo "  PASS: edit-guard blocks .pem"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard .pem (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should allow normal source file
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{"file_path":"src/app.js","old_string":"x","new_string":"y"}}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: edit-guard allows source file"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard source (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should ignore Bash tool
+    EXIT=0; echo '{"tool_name":"Bash","tool_input":{"command":"cat .env"}}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: edit-guard ignores Bash"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard Bash (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/edit-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: edit-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: edit-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- token-budget-guard ---
+if [ -f "$EXDIR/token-budget-guard.sh" ]; then
+    # Should pass with small output
+    EXIT=0; echo '{"tool_result":"ok"}' | bash "$EXDIR/token-budget-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: token-budget-guard passes small output"; PASS=$((PASS+1)); } || { echo "  FAIL: token-budget small (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/token-budget-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: token-budget-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: token-budget empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- worktree-guard ---
+if [ -f "$EXDIR/worktree-guard.sh" ]; then
+    # Should pass safe commands
+    EXIT=0; echo '{"tool_input":{"command":"git status"}}' | bash "$EXDIR/worktree-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-guard allows git status"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-guard status (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should pass non-git commands
+    EXIT=0; echo '{"tool_input":{"command":"ls -la"}}' | bash "$EXDIR/worktree-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-guard allows ls"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-guard ls (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/worktree-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: worktree-guard empty input"; PASS=$((PASS+1)); } || { echo "  FAIL: worktree-guard empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
