@@ -17883,6 +17883,51 @@ CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh
 CC_WORK_START=25 CC_WORK_END=26 CC_WORK_DAYS=1234567 test_ex work-hours-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "work-hours-ext: ls outside hours passes"
 echo ""
 
+# ========== Batch: null tool_input safety for ALL example hooks ==========
+echo "--- Batch null tool_input tests ---"
+for HOOK_FILE in "$EXDIR"/*.sh; do
+    HOOK_NAME=$(basename "$HOOK_FILE" .sh)
+    EXIT=0; echo '{"tool_input":null}' | bash "$HOOK_FILE" >/dev/null 2>/dev/null || EXIT=$?
+    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ] || [ "$EXIT" -eq 2 ]; then
+        echo "  PASS: ${HOOK_NAME} null tool_input safe"
+        PASS=$((PASS+1))
+    else
+        echo "  FAIL: ${HOOK_NAME} null tool_input (exit=$EXIT)"
+        FAIL=$((FAIL+1))
+    fi
+    TOTAL=$((TOTAL+1))
+done
+
+# ========== Batch: unicode input safety for ALL example hooks ==========
+echo "--- Batch unicode input tests ---"
+for HOOK_FILE in "$EXDIR"/*.sh; do
+    HOOK_NAME=$(basename "$HOOK_FILE" .sh)
+    EXIT=0; echo '{"tool_name":"Bash","tool_input":{"command":"echo 日本語テスト","file_path":"/tmp/テスト.txt"}}' | bash "$HOOK_FILE" >/dev/null 2>/dev/null || EXIT=$?
+    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ] || [ "$EXIT" -eq 2 ]; then
+        echo "  PASS: ${HOOK_NAME} unicode input safe"
+        PASS=$((PASS+1))
+    else
+        echo "  FAIL: ${HOOK_NAME} unicode input (exit=$EXIT)"
+        FAIL=$((FAIL+1))
+    fi
+    TOTAL=$((TOTAL+1))
+done
+
+# ========== Batch: nested empty object safety for ALL example hooks ==========
+echo "--- Batch nested empty object tests ---"
+for HOOK_FILE in "$EXDIR"/*.sh; do
+    HOOK_NAME=$(basename "$HOOK_FILE" .sh)
+    EXIT=0; echo '{"tool_name":"","tool_input":{"command":"","file_path":"","old_string":"","new_string":""}}' | bash "$HOOK_FILE" >/dev/null 2>/dev/null || EXIT=$?
+    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ] || [ "$EXIT" -eq 2 ]; then
+        echo "  PASS: ${HOOK_NAME} nested empty safe"
+        PASS=$((PASS+1))
+    else
+        echo "  FAIL: ${HOOK_NAME} nested empty (exit=$EXIT)"
+        FAIL=$((FAIL+1))
+    fi
+    TOTAL=$((TOTAL+1))
+done
+
 # ========== Batch: empty input safety for ALL example hooks ==========
 echo "--- Batch empty input tests ---"
 for HOOK_FILE in "$EXDIR"/*.sh; do
