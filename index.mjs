@@ -3638,6 +3638,9 @@ function issues() {
     { hook: 'protect-claudemd', issues: ['AI modifying its own config files'] },
     { hook: 'git-tag-guard', issues: ['Accidental tag push'] },
     { hook: 'npm-publish-guard', issues: ['Accidental publish without version check'] },
+    { hook: 'read-only-mode', issues: ['#41063 Claude ignores read-only instructions during test tasks (0r)'] },
+    { hook: 'task-integrity-guard', issues: ['#41109 Agent deleted open tasks to hide unfinished work (0r)'] },
+    { hook: 'permission-denial-enforcer', issues: ['#41103 Sandbox bypass after user denied Write permission (0r)'] },
   ];
 
   console.log();
