@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 610個のexample hook · 9,677テスト · 1,000+ インストール/日
+**Claude Codeを安全にするワンコマンドツール。** 634個のexample hook · 13,835テスト · 1,000+ インストール/日
 
 ```bash
 npx cc-safe-setup
@@ -14,7 +14,7 @@ npx cc-safe-setup
 |---|---|
 | `npx cc-safe-setup` | 8個の安全フックをインストール |
 | `--shield` | 最大安全（スタック検出+推奨hook自動選択） |
-| `--install-example <name>` | 511個のexampleから個別インストール |
+| `--install-example <name>` | 634個のexampleから個別インストール |
 | `--examples` | 全exampleを一覧表示 |
 | `--create "説明"` | 自然言語でカスタムフック生成 |
 | `--verify` | 各フックの動作確認 |
@@ -61,7 +61,7 @@ Claude Codeを再起動。完了。
 - [トラブルシューティング](../TROUBLESHOOTING.md) — 動かない時の対処法
 - [Web版ツール](https://yurukusa.github.io/cc-safe-setup/hub.html) — 全ツール一覧
 
-📘 **[Claude Codeを本番品質にする実践ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)**（¥800 / [第2章を無料で読む](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/2-safety-guards)）— 700+時間の自律稼働から生まれた14章の実践ガイド。hookの設計パターン、テスト戦略、実際のインシデント事後分析。
+hookの仕組みと設定方法は[Claude Code公式ドキュメント](https://docs.anthropic.com/en/docs/claude-code/hooks)を参照。
 
 ## 必要なもの
 
