@@ -875,6 +875,7 @@ function examples() {
       'sandbox-write-verify.sh': 'Verify file existence before overwrite in sandbox mode',
       'sensitive-regex-guard.sh': 'Warn on ReDoS-vulnerable regex patterns',
       'session-start-safety-check.sh': 'Warn about uncommitted changes on session start',
+      'settings-mutation-detector.sh': 'Detect unauthorized changes to Claude settings files',
       'skill-injection-detector.sh': 'Detect silently injected skills/plugins',
       'sql-injection-detect.sh': 'Sql Injection Detect',
       'svelte-lint-on-edit.sh': 'Svelte Lint On Edit',
