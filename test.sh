@@ -17951,6 +17951,20 @@ test_hook "subagent-context-size-guard" '{"tool_input":null}' 0 "subagent-guard:
 
 echo ""
 
+# ========== task-integrity-guard (example) ==========
+echo "task-integrity-guard.sh (example):"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/app.py","old_string":"old","new_string":"new"}}' 0 "non-task file passes"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"todo.md","old_string":"- [ ] Fix bug","new_string":"- [x] Fix bug"}}' 0 "completing task allowed"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"todo.md","old_string":"- [ ] Fix bug\n- [ ] Write tests","new_string":"All done!"}}' 2 "deleting open tasks blocked"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"tasks.md","old_string":"- [ ] Deploy to prod","new_string":""}}' 2 "removing single task blocked"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"todo.md","old_string":"## Tasks","new_string":"## Tasks\n- [ ] New task"}}' 0 "adding tasks allowed"
+test_ex task-integrity-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"todo.md"}}' 0 "Write tool passes"
+test_ex task-integrity-guard.sh '{}' 0 "empty input safe"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"project/tasks/sprint-1.md","old_string":"- [ ] TODO item","new_string":"Nothing"}}' 2 "tasks subdir detected"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"mission.md","old_string":"- [ ] Launch v1.0","new_string":""}}' 2 "mission.md protected"
+test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"todo.md","old_string":"- [ ] First\n- [ ] Second","new_string":"- [x] First\n- [x] Second"}}' 0 "replacing with done allowed"
+echo ""
+
 # ========== read-only-mode (example) ==========
 echo "read-only-mode.sh (example):"
 # Without CLAUDE_READONLY, all commands pass
