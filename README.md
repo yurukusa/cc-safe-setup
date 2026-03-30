@@ -433,6 +433,18 @@ cc-safe-setup covers Safety Guards (75-100%) and Monitoring (context-monitor). T
 
 No. Each hook runs in ~10ms. They only fire on specific events (before tool use, after edits, on stop). No polling, no background processes.
 
+**Q: My permission patterns don't match compound commands like `cd /path && git status`**
+
+This is a known limitation of Claude Code's permission system ([#16561](https://github.com/anthropics/claude-code/issues/16561), [#28240](https://github.com/anthropics/claude-code/issues/28240)). Permission matching evaluates only the first token (`cd`), not the actual command (`git status`). Use a PreToolUse hook instead — hooks see the full command string and can parse compound commands. See `compound-command-allow.sh` in examples.
+
+**Q: `--dangerously-skip-permissions` still prompts for `.claude/` and `.git/` writes**
+
+Since v2.1.78, protected directories always prompt regardless of permission mode ([#35668](https://github.com/anthropics/claude-code/issues/35668)). Use a PermissionRequest hook to auto-approve specific protected directory operations. See `allow-protected-dirs.sh` in examples.
+
+**Q: `allow: ["Bash(*)"]` overrides my `ask` rules**
+
+`allow` takes precedence over `ask`. If you allow all Bash, ask rules are ignored ([#6527](https://github.com/anthropics/claude-code/issues/6527)). Use PreToolUse hooks to block dangerous commands instead of relying on the ask/allow priority system.
+
 ## Contributing
 
 Found a false positive? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md). Want a new hook? Open a [feature request](https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md).
