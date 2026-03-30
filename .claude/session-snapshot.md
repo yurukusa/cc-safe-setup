@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T23:30:52+09:00
+Updated: 2026-03-30T23:30:58+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-03-30T23:30:52+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 9437de79 634 hooks / 11,933 tests: coverage boost + env-dependent test fixes +49 tests for 15 low-coverage hooks (all now 10+) Disabled 4 env-dependent tests (jq+set-e, user-hook interference) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+- Last commit: dfdd92aa checkpoint: auto-save 23:30:57
 
 ## Recent Files
 ```
