@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T21:37:28+09:00
+Updated: 2026-03-30T21:46:30+09:00
 
 ## Git
 - Branch: `main`
@@ -7,16 +7,16 @@ Updated: 2026-03-30T21:37:28+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: db6d199f recovery: pre-compact checkpoint (1 files, 20260330-123728)
+- Last commit: 619fcdfd SEOページ: 628→629 hooks Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
+./README.md
 ./.claude/session-logs/2026-03-30.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/permission-pattern-auto-allow.sh
-./README.md
 ./examples/cwd-drift-detector.sh
 ./examples/virtual-cwd-helper.sh
 ./examples/edit-old-string-validator.sh
