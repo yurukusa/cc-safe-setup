@@ -15887,6 +15887,25 @@ WARN_OUT=$(echo '{"tool_input":{"prompt":"This is a sufficiently long prompt tha
 echo "$WARN_OUT" | grep -q "WARNING" && { echo "  FAIL: subagent-guard: false warning for long prompt"; FAIL=$((FAIL+1)); } || { echo "  PASS: subagent-guard: no warning for long prompt"; PASS=$((PASS+1)); }; TOTAL=$((TOTAL+1))
 echo ""
 
+# ========== permission-pattern-auto-allow (#819) ==========
+echo "permission-pattern-auto-allow.sh:"
+# Test without pattern file
+rm -f ~/.claude/allowed-patterns.txt
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"ls -la"}}' 0 "perm-allow: no patterns file passes"
+# Create patterns file
+mkdir -p ~/.claude
+echo '^npm (test|run|install)' > ~/.claude/allowed-patterns.txt
+echo '^git (status|log|diff|add|commit)' >> ~/.claude/allowed-patterns.txt
+echo '^(ls|cat|pwd|echo)' >> ~/.claude/allowed-patterns.txt
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"npm test"}}' 0 "perm-allow: npm test matches"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"git status"}}' 0 "perm-allow: git status matches"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"ls -la"}}' 0 "perm-allow: ls matches"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "perm-allow: unmatched command passes (exit 0)"
+test_ex permission-pattern-auto-allow.sh '{"tool_input":{"command":""}}' 0 "perm-allow: empty command passes"
+test_ex permission-pattern-auto-allow.sh '{}' 0 "perm-allow: empty input passes"
+rm -f ~/.claude/allowed-patterns.txt
+echo ""
+
 # ========== edit-old-string-validator (#22264) ==========
 echo "edit-old-string-validator.sh:"
 # Create a temp test file
