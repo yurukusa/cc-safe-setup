@@ -15946,6 +15946,11 @@ test_ex token-spike-alert.sh '{"tool_name":"Edit","tool_input":{"file_path":"x"}
 test_ex token-spike-alert.sh '{"tool_name":"Read","tool_input":{"file_path":"x"}}' 0 "token-spike: read passes"
 test_ex token-spike-alert.sh '{}' 0 "token-spike: empty input passes"
 test_ex token-spike-alert.sh '{"tool_name":""}' 0 "token-spike: empty tool_name passes"
+test_ex token-spike-alert.sh '{"tool_name":"Write","tool_input":{"file_path":"a","content":"b"}}' 0 "token-spike: write tool passes"
+test_ex token-spike-alert.sh '{"tool_name":"Glob","tool_input":{"pattern":"*.ts"}}' 0 "token-spike: glob tool passes"
+test_ex token-spike-alert.sh 'not-json' 0 "token-spike: non-JSON input passes"
+test_ex token-spike-alert.sh '{"tool_name":"$(cat /etc/passwd)"}' 0 "token-spike: injection in tool_name passes safely"
+test_ex token-spike-alert.sh '{"tool_name":"Bash","tool_input":{"command":"'"$(printf 'x%.0s' {1..500})"'"}}' 0 "token-spike: long command string passes"
 echo ""
 
 # ========== git-crypt-worktree-guard (#38538) ==========
