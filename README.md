@@ -447,11 +447,16 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 ## Contributing
 
-Found a false positive? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md). Want a new hook? Open a [feature request](https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md).
+**Report a problem:** Found a false positive or a bypass? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new). Include the command that was incorrectly blocked/allowed and your OS.
 
-📘 **Want the full story?** [Production guide from 700+ hours of autonomous operation](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — the incidents, fixes, and patterns behind every hook in this tool.
+**Request a hook:** Describe the problem you're trying to prevent (not the solution). We'll figure out the hook together.
 
-If cc-safe-setup saved your project from a destructive command, consider giving it a star — it helps others find this tool.
+**Write a hook:** Fork, add your `.sh` file to `examples/`, add tests to `test.sh`, and open a PR. Every hook needs:
+- A comment header explaining what it blocks and why
+- At least 7 test cases (block, allow, empty input, edge cases)
+- `bash -n` syntax validation passing
+
+**Share your experience:** Used cc-safe-setup and have feedback? Open a discussion or comment on any issue. We read everything.
 
 ## License
 
