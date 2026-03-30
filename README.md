@@ -445,6 +445,8 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 `allow` takes precedence over `ask`. If you allow all Bash, ask rules are ignored ([#6527](https://github.com/anthropics/claude-code/issues/6527)). Use PreToolUse hooks to block dangerous commands instead of relying on the ask/allow priority system.
 
+**Still stuck?** See the full [Permission Troubleshooting Flowchart](https://gist.github.com/yurukusa/b64217ffcb908fa309dbfcfa368cd84d) for step-by-step diagnosis.
+
 ## Contributing
 
 **Report a problem:** Found a false positive or a bypass? Open an [issue](https://github.com/yurukusa/cc-safe-setup/issues/new). Include the command that was incorrectly blocked/allowed and your OS.
