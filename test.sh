@@ -15690,6 +15690,43 @@ if [ -f "$EXDIR/prompt-injection-guard.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: prompt-injection empty"; PASS=$((PASS+1)); } || { echo "  FAIL: prompt-injection empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# --- output-length-guard ---
+if [ -f "$EXDIR/output-length-guard.sh" ]; then
+    EXIT=0; echo '{"tool_result":"short output"}' | bash "$EXDIR/output-length-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: output-length-guard allows short"; PASS=$((PASS+1)); } || { echo "  FAIL: output-length short (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    EXIT=0; echo '{}' | bash "$EXDIR/output-length-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: output-length-guard empty"; PASS=$((PASS+1)); } || { echo "  FAIL: output-length empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Should warn on very large output (>50K)
+    EXIT=0; python3 -c "import json; print(json.dumps({'tool_result': 'x'*60000}))" | bash "$EXDIR/output-length-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: output-length-guard warns on large"; PASS=$((PASS+1)); } || { echo "  FAIL: output-length large (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- read-before-edit ---
+if [ -f "$EXDIR/read-before-edit.sh" ]; then
+    # Non-Edit tool should pass
+    EXIT=0; echo '{"tool_name":"Write","tool_input":{"file_path":"test.js"}}' | bash "$EXDIR/read-before-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: read-before-edit ignores Write"; PASS=$((PASS+1)); } || { echo "  FAIL: read-before-edit Write (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Edit without file_path should pass
+    EXIT=0; echo '{"tool_name":"Edit","tool_input":{}}' | bash "$EXDIR/read-before-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: read-before-edit no file_path"; PASS=$((PASS+1)); } || { echo "  FAIL: read-before-edit no file (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/read-before-edit.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: read-before-edit empty"; PASS=$((PASS+1)); } || { echo "  FAIL: read-before-edit empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
+# --- enforce-tests ---
+if [ -f "$EXDIR/enforce-tests.sh" ]; then
+    # Non-source file should pass
+    EXIT=0; echo '{"tool_input":{"file_path":"README.md"}}' | bash "$EXDIR/enforce-tests.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: enforce-tests ignores README.md"; PASS=$((PASS+1)); } || { echo "  FAIL: enforce-tests README (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Test file should pass
+    EXIT=0; echo '{"tool_input":{"file_path":"tests/test_app.py"}}' | bash "$EXDIR/enforce-tests.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: enforce-tests allows test file"; PASS=$((PASS+1)); } || { echo "  FAIL: enforce-tests test file (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+    # Empty input
+    EXIT=0; echo '{}' | bash "$EXDIR/enforce-tests.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 0 ] && { echo "  PASS: enforce-tests empty"; PASS=$((PASS+1)); } || { echo "  FAIL: enforce-tests empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
+fi
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
