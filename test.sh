@@ -15961,6 +15961,10 @@ test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git worktree list
 test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-crypt-guard: safe command passes"
 test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":""}}' 0 "git-crypt-guard: empty command passes"
 test_ex git-crypt-worktree-guard.sh '{}' 0 "git-crypt-guard: empty input passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git worktree remove feature"}}' 0 "git-crypt-guard: worktree remove passes (not add)"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git  worktree  add ../branch"}}' 0 "git-crypt-guard: double-space worktree add passes in non-crypt"
+test_ex git-crypt-worktree-guard.sh 'not-json' 0 "git-crypt-guard: non-JSON input passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"echo git worktree add"}}' 0 "git-crypt-guard: git worktree add in echo passes in non-crypt"
 echo ""
 
 # ========== temp-file-cleanup-stop (#17720) ==========
