@@ -453,6 +453,7 @@ function examples() {
       'git-checkout-safety-guard.sh': 'Prevent file loss from careless branch switching',
       'git-checkout-uncommitted-guard.sh': 'Block branch switching with uncommitted changes',
       'git-config-guard.sh': 'Block git config --global modifications',
+      'git-crypt-worktree-guard.sh': 'Block worktree creation in git-crypt repos',
       'git-history-rewrite-guard.sh': 'Block git history rewriting commands',
       'git-hook-bypass-guard.sh': 'Git Hook Bypass Guard',
       'git-index-lock-cleanup.sh': 'Remove stale .git/index.lock after git commands',
@@ -997,6 +998,7 @@ function examples() {
       'stale-branch-guard.sh': 'Warn when working on a stale branch',
       'stale-env-guard.sh': 'Warn when .env files are very old',
       'system-message-workaround.sh': 'Ensure hook warnings reach both user and model',
+      'temp-file-cleanup-stop.sh': 'Clean up tmpclaude-* files on session end',
       'temp-file-cleanup.sh': 'Stop hook',
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd temp files',
       'token-budget-guard.sh': 'Estimate and limit session token cost',
@@ -1018,6 +1020,9 @@ function examples() {
       'subagent-scope-guard.sh': 'Limit subagent file access scope',
       'subagent-scope-validator.sh': 'Validate subagent task scope before launch',
       'subagent-tool-call-limiter.sh': 'Limit total tool calls per session',
+    },
+    'Other': {
+      'token-spike-alert.sh': 'Alert on abnormal token consumption per turn',
     },
   };
 
