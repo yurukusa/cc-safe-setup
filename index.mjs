@@ -681,6 +681,7 @@ function examples() {
       'worktree-delete-guard.sh': 'Block git worktree removal',
       'worktree-guard.sh': 'Warn when operating in a git worktree',
       'worktree-memory-guard.sh': 'Warn when memory path resolves to main worktree',
+      'worktree-path-validator.sh': 'Warn when file operations target main workspace instead of worktree',
       'worktree-project-unify.sh': 'Worktree Project Unify',
       'worktree-unmerged-guard.sh': 'Prevent worktree cleanup with unmerged commits',
       'write-overwrite-confirm.sh': 'Warn when Write tool overwrites large files',
