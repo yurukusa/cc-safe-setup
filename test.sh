@@ -15727,6 +15727,21 @@ if [ -f "$EXDIR/enforce-tests.sh" ]; then
     [ "$EXIT" -eq 0 ] && { echo "  PASS: enforce-tests empty"; PASS=$((PASS+1)); } || { echo "  FAIL: enforce-tests empty (exit=$EXIT)"; FAIL=$((FAIL+1)); }; TOTAL=$((TOTAL+1))
 fi
 
+# ========== Batch: empty input safety for ALL example hooks ==========
+echo "--- Batch empty input tests ---"
+for HOOK_FILE in "$EXDIR"/*.sh; do
+    HOOK_NAME=$(basename "$HOOK_FILE" .sh)
+    EXIT=0; echo '{}' | bash "$HOOK_FILE" >/dev/null 2>/dev/null || EXIT=$?
+    if [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 1 ]; then
+        echo "  PASS: ${HOOK_NAME} empty input safe"
+        PASS=$((PASS+1))
+    else
+        echo "  FAIL: ${HOOK_NAME} empty input (exit=$EXIT)"
+        FAIL=$((FAIL+1))
+    fi
+    TOTAL=$((TOTAL+1))
+done
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
