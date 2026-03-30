@@ -17951,6 +17951,23 @@ test_hook "subagent-context-size-guard" '{"tool_input":null}' 0 "subagent-guard:
 
 echo ""
 
+# ========== permission-denial-enforcer (example) ==========
+echo "permission-denial-enforcer.sh (example):"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"pip3 install requests"}}' 0 "pip allowed without denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello > /tmp/test"}}' 0 "redirect allowed without denial"
+# Create denial marker for subsequent tests
+echo "$(date +%s)" > /tmp/.cc-write-denied-test
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"pip3 install python-docx"}}' 2 "pip blocked after denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"npm install express"}}' 2 "npm blocked after denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"echo data > /tmp/out.txt"}}' 2 "redirect to /tmp blocked"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' 0 "ls allowed even after denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"cat README.md"}}' 0 "cat allowed after denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "git status allowed after denial"
+test_ex permission-denial-enforcer.sh '{"tool_name":"Write","tool_result":"user denied"}' 0 "PostToolUse denial marker creation"
+test_ex permission-denial-enforcer.sh '{}' 0 "empty input safe"
+rm -f /tmp/.cc-write-denied-test
+echo ""
+
 # ========== task-integrity-guard (example) ==========
 echo "task-integrity-guard.sh (example):"
 test_ex task-integrity-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/app.py","old_string":"old","new_string":"new"}}' 0 "non-task file passes"
