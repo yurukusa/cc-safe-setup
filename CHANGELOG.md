@@ -1,5 +1,22 @@
 # Changelog
 
+## [29.6.37] - 2026-03-31
+- **Tests**: +1,902 batch safety tests (11,933→13,835)
+  - null tool_input handling for all 634 hooks
+  - Unicode input safety for all 634 hooks
+  - Empty-field nested object safety for all 634 hooks
+  - Every hook now has 11+ tests (previously 113 hooks had only 7)
+- **Stats**: 634 examples, 13,835 tests
+- **Public-facing updates**: README, SEO pages, Zenn Book, Qiita all articles patched
+
+## [29.6.36] - 2026-03-30
+- **New**: 5 hooks from session 80:
+  - git-crypt-worktree-guard, temp-file-cleanup-stop, token-spike-alert
+  - worktree-path-validator, settings-mutation-detector
+- **Tests**: 11,933 tests (all passing)
+- **--examples**: Fixed to show all 634 hooks (was showing 147)
+- **cc-health-check**: v1.1.2 with 629+ hook count
+
 ## [29.6.35] - 2026-03-30
 - **New**: 7 hooks addressing top GitHub Issues (454+ combined reactions):
   - clear-command-confirm-guard (#40931): blocks accidental /clear, suggests /compact
