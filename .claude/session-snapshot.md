@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-03-30T21:53:04+09:00
+Updated: 2026-03-30T21:53:27+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-03-30T21:53:04+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4c653909 checkpoint: auto-save 21:52:42
+- Last commit: b04c790a recovery: pre-compact checkpoint (1 files, 20260330-125323)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./.claude/session-logs/2026-03-30.md
-./.claude/pre-compact-checkpoint.md
 ./README.md
 ./examples/permission-pattern-auto-allow.sh
 ./examples/cwd-drift-detector.sh
