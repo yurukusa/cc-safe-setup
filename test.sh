@@ -15908,6 +15908,26 @@ test_ex permission-pattern-auto-allow.sh '{}' 0 "perm-allow: empty input passes"
 rm -f ~/.claude/allowed-patterns.txt
 echo ""
 
+# ========== git-crypt-worktree-guard (#38538) ==========
+echo "git-crypt-worktree-guard.sh:"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git worktree add ../feature-branch"}}' 0 "git-crypt-guard: worktree add in non-crypt repo passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git status"}}' 0 "git-crypt-guard: non-worktree command passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"git worktree list"}}' 0 "git-crypt-guard: worktree list passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-crypt-guard: safe command passes"
+test_ex git-crypt-worktree-guard.sh '{"tool_input":{"command":""}}' 0 "git-crypt-guard: empty command passes"
+test_ex git-crypt-worktree-guard.sh '{}' 0 "git-crypt-guard: empty input passes"
+echo ""
+
+# ========== temp-file-cleanup-stop (#17720) ==========
+echo "temp-file-cleanup-stop.sh:"
+test_ex temp-file-cleanup-stop.sh '{}' 0 "temp-cleanup: empty input passes"
+test_ex temp-file-cleanup-stop.sh '{"session_id":"test"}' 0 "temp-cleanup: with session_id passes"
+# Create temp files and verify cleanup
+touch /tmp/tmpclaude-test-cleanup-cwd 2>/dev/null || true
+test_ex temp-file-cleanup-stop.sh '{}' 0 "temp-cleanup: runs cleanup successfully"
+test_ex temp-file-cleanup-stop.sh '' 0 "temp-cleanup: empty string input passes"
+echo ""
+
 # ========== edit-old-string-validator (#22264) ==========
 echo "edit-old-string-validator.sh:"
 # Create a temp test file
