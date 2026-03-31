@@ -17953,6 +17953,8 @@ echo ""
 
 # ========== permission-denial-enforcer (example) ==========
 echo "permission-denial-enforcer.sh (example):"
+# Clean up stale marker files from previous runs
+rm -f /tmp/.cc-write-denied-* 2>/dev/null
 test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"pip3 install requests"}}' 0 "pip allowed without denial"
 test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"echo hello > /tmp/test"}}' 0 "redirect allowed without denial"
 # Create denial marker for subsequent tests
@@ -17965,7 +17967,7 @@ test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"comman
 test_ex permission-denial-enforcer.sh '{"tool_name":"Bash","tool_input":{"command":"git status"}}' 0 "git status allowed after denial"
 test_ex permission-denial-enforcer.sh '{"tool_name":"Write","tool_result":"user denied"}' 0 "PostToolUse denial marker creation"
 test_ex permission-denial-enforcer.sh '{}' 0 "empty input safe"
-rm -f /tmp/.cc-write-denied-test
+rm -f /tmp/.cc-write-denied-* 2>/dev/null
 echo ""
 
 # ========== task-integrity-guard (example) ==========
