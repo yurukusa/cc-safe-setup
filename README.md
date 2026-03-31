@@ -99,6 +99,17 @@ Override Claude Code's built-in confirmation prompts. These run **after** the bu
 
 Install any of these: `npx cc-safe-setup --install-example <name>`
 
+## Session Protection Hooks
+
+Guards against issues that corrupt sessions or waste tokens silently.
+
+| Hook | What It Solves | Issue |
+|------|---------------|-------|
+| `cch-cache-guard` | Blocks reads of Claude session/billing files that poison prompt cache via `cch=` substitution | [#40652](https://github.com/anthropics/claude-code/issues/40652) |
+| `image-file-validator` | Blocks Read of fake image files (text in .png) that permanently corrupt sessions | [#24387](https://github.com/anthropics/claude-code/issues/24387) |
+| `terminal-state-restore` | Restores Kitty keyboard protocol, cursor, bracketed paste on exit | [#39096](https://github.com/anthropics/claude-code/issues/39096) [#39272](https://github.com/anthropics/claude-code/issues/39272) |
+| `large-read-guard` | Warns before reading large files via `cat`/`less` that waste context tokens | [#41617](https://github.com/anthropics/claude-code/issues/41617) |
+
 ## All 49 Commands
 
 | Command | What It Does |
