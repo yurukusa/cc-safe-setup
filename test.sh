@@ -18081,6 +18081,14 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- working-directory-fence tests ---
+test_ex working-directory-fence.sh '{}' 0 "working-directory-fence: empty input passes"
+test_ex working-directory-fence.sh '{"tool_input":{}}' 0 "working-directory-fence: no file_path passes"
+test_ex working-directory-fence.sh '{"tool_input":{"file_path":"./src/main.ts"}}' 0 "working-directory-fence: relative CWD path passes"
+test_ex working-directory-fence.sh '{"tool_input":{"file_path":"/tmp/scratch.txt"}}' 0 "working-directory-fence: /tmp path passes"
+test_ex working-directory-fence.sh '{"tool_input":{"file_path":"/home/other/project/file.ts"}}' 2 "working-directory-fence: outside CWD blocks"
+test_ex working-directory-fence.sh '{"tool_input":{"file_path":"/etc/passwd"}}' 2 "working-directory-fence: system file blocks"
+
 # --- session-backup-on-start tests ---
 test_ex session-backup-on-start.sh '{}' 0 "session-backup-on-start: empty input exits 0"
 test_ex session-backup-on-start.sh '{"session_id":"test123"}' 0 "session-backup-on-start: with session_id exits 0"
