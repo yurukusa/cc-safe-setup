@@ -18081,6 +18081,15 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- conversation-history-guard tests ---
+test_ex conversation-history-guard.sh '{}' 0 "conversation-history-guard: empty input passes"
+test_ex conversation-history-guard.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "conversation-history-guard: normal file passes"
+test_ex conversation-history-guard.sh '{"tool_input":{"file_path":"/home/user/.claude/projects/test/session.jsonl"}}' 2 "conversation-history-guard: session jsonl blocks"
+test_ex conversation-history-guard.sh '{"tool_input":{"command":"ls"}}' 0 "conversation-history-guard: safe command passes"
+test_ex conversation-history-guard.sh '{"tool_input":{"command":"cat ~/.claude/projects/x/y.jsonl"}}' 2 "conversation-history-guard: cat session jsonl blocks"
+test_ex conversation-history-guard.sh '{"tool_input":{"command":"cat app.log"}}' 0 "conversation-history-guard: cat normal log passes"
+CC_ALLOW_HISTORY_ACCESS=1 test_ex conversation-history-guard.sh '{"tool_input":{"file_path":"/home/user/.claude/projects/test/s.jsonl"}}' 0 "conversation-history-guard: allow override passes"
+
 # --- replace-all-guard tests ---
 test_ex replace-all-guard.sh '{}' 0 "replace-all-guard: empty input passes"
 test_ex replace-all-guard.sh '{"tool_input":{"file_path":"main.ts","old_string":"foo","new_string":"bar"}}' 0 "replace-all-guard: normal edit passes"
