@@ -484,6 +484,12 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 **Share your experience:** Used cc-safe-setup and have feedback? Open a discussion or comment on any issue. We read everything.
 
+## Also by yurukusa
+
+- [quiet life](https://yurukusa.github.io/quiet-life/) — Touch the dark. Something alive appears
+- [deep breath](https://yurukusa.github.io/deep-breath/) — Breathe with the light
+- [star moss](https://yurukusa.github.io/star-moss/) — Drag to grow
+
 ## License
 
 MIT
