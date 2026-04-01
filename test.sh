@@ -18081,13 +18081,30 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- cch-cache-guard tests ---
+test_ex cch-cache-guard.sh '{}' 0 "cch-cache-guard: empty input passes"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"ls"}}' 0 "cch-cache-guard: safe command passes"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"cat ~/.claude/sessions/abc.jsonl"}}' 0 "cch-cache-guard: reading claude session jsonl blocked (exit 0 with decision)"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"grep error transcript.log"}}' 0 "cch-cache-guard: transcript log blocked"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"cat app.log"}}' 0 "cch-cache-guard: non-claude log passes"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"cat billing_report.jsonl"}}' 0 "cch-cache-guard: billing jsonl blocked"
+test_ex cch-cache-guard.sh '{"tool_input":{"command":"jq . data.jsonl"}}' 0 "cch-cache-guard: generic jsonl passes"
+
+# --- image-file-validator tests ---
+test_ex image-file-validator.sh '{}' 0 "image-file-validator: empty input passes"
+test_ex image-file-validator.sh '{"tool_input":{"file_path":"/nonexistent/file.png"}}' 0 "image-file-validator: nonexistent file passes"
+test_ex image-file-validator.sh '{"tool_input":{"file_path":"README.md"}}' 0 "image-file-validator: non-image extension passes"
+test_ex image-file-validator.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "image-file-validator: code file passes"
+test_ex image-file-validator.sh '{"tool_input":{}}' 0 "image-file-validator: no file_path passes"
+
 # --- pre-compact-transcript-backup tests ---
 test_ex pre-compact-transcript-backup.sh '{}' 0 "pre-compact-transcript-backup: empty input exits 0"
 test_ex pre-compact-transcript-backup.sh '{"transcript_path":"/nonexistent/file.jsonl"}' 0 "pre-compact-transcript-backup: missing file exits 0"
+test_ex pre-compact-transcript-backup.sh '{"transcript_path":""}' 0 "pre-compact-transcript-backup: empty path exits 0"
 
 # --- mcp-warmup-wait tests ---
-# Note: this hook sleeps, so we test with CC_MCP_WARMUP_SECONDS=0
 CC_MCP_WARMUP_SECONDS=0 test_ex mcp-warmup-wait.sh '{}' 0 "mcp-warmup-wait: exits 0 with no MCP config"
+CC_MCP_WARMUP_SECONDS=0 test_ex mcp-warmup-wait.sh '{"session_id":"abc"}' 0 "mcp-warmup-wait: with session_id exits 0"
 
 # --- working-directory-fence tests ---
 test_ex working-directory-fence.sh '{}' 0 "working-directory-fence: empty input passes"
@@ -18100,6 +18117,7 @@ test_ex working-directory-fence.sh '{"tool_input":{"file_path":"/etc/passwd"}}' 
 # --- session-backup-on-start tests ---
 test_ex session-backup-on-start.sh '{}' 0 "session-backup-on-start: empty input exits 0"
 test_ex session-backup-on-start.sh '{"session_id":"test123"}' 0 "session-backup-on-start: with session_id exits 0"
+test_ex session-backup-on-start.sh '{"transcript_path":"/nonexistent"}' 0 "session-backup-on-start: nonexistent path exits 0"
 
 # --- subagent-error-detector tests ---
 test_ex subagent-error-detector.sh '{}' 0 "subagent-error-detector: empty input exits 0"
@@ -18113,18 +18131,23 @@ test_ex subagent-error-detector.sh '{"tool_result":"502 Bad Gateway nginx"}' 0 "
 # --- session-index-repair tests ---
 test_ex session-index-repair.sh '{}' 0 "session-index-repair: empty input exits 0"
 test_ex session-index-repair.sh '{"session_id":"abc123"}' 0 "session-index-repair: with session_id exits 0"
+test_ex session-index-repair.sh '{"transcript_path":"/tmp/test.jsonl"}' 0 "session-index-repair: with transcript_path exits 0"
 
 # --- prompt-usage-logger tests ---
 test_ex prompt-usage-logger.sh '{"prompt":"test prompt for logging"}' 0 "prompt-usage-logger: logs prompt and exits 0"
 test_ex prompt-usage-logger.sh '{}' 0 "prompt-usage-logger: empty input exits 0"
 test_ex prompt-usage-logger.sh '{"prompt":""}' 0 "prompt-usage-logger: empty prompt exits 0"
 test_ex prompt-usage-logger.sh '{"prompt":"日本語プロンプト"}' 0 "prompt-usage-logger: unicode prompt exits 0"
+test_ex prompt-usage-logger.sh '{"prompt":"a very long prompt that is exactly one hundred characters padded out to test truncation behavior ok"}' 0 "prompt-usage-logger: long prompt exits 0"
+test_ex prompt-usage-logger.sh '{"other":"field"}' 0 "prompt-usage-logger: no prompt field exits 0"
 
 # --- compact-alert-notification tests ---
 test_ex compact-alert-notification.sh '{"message":"Auto-compact triggered: context at 95%"}' 0 "compact-alert-notification: compact message exits 0"
 test_ex compact-alert-notification.sh '{"message":"Session started"}' 0 "compact-alert-notification: non-compact message exits 0"
 test_ex compact-alert-notification.sh '{}' 0 "compact-alert-notification: empty input exits 0"
 test_ex compact-alert-notification.sh '{"message":""}' 0 "compact-alert-notification: empty message exits 0"
+test_ex compact-alert-notification.sh '{"message":"Context compaction complete"}' 0 "compact-alert-notification: compaction complete exits 0"
+test_ex compact-alert-notification.sh '{"message":"COMPACT: reducing context from 900K to 200K"}' 0 "compact-alert-notification: uppercase COMPACT exits 0"
 
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
