@@ -53,6 +53,26 @@ Claude Codeを再起動。完了。
 | Python構文エラー | 気づかない | 自動検出 |
 | コンテキスト枯渇 | 突然死 | 段階的警告 |
 
+## セッション保護フック
+
+セッションの破損やトークンの無駄遣いを防ぐフック。
+
+| フック | 解決する問題 | Issue |
+|--------|-------------|-------|
+| `cch-cache-guard` | セッションファイル読み取りによるキャッシュ汚染をブロック | [#40652](https://github.com/anthropics/claude-code/issues/40652) |
+| `image-file-validator` | 偽画像ファイル（テキストの.png）の読み取りをブロック | [#24387](https://github.com/anthropics/claude-code/issues/24387) |
+| `large-read-guard` | 大きなファイルのcatによるコンテキスト浪費を警告 | [#41617](https://github.com/anthropics/claude-code/issues/41617) |
+| `prompt-usage-logger` | 全プロンプトをログしてトークン消費パターンを追跡 | [#41249](https://github.com/anthropics/claude-code/issues/41249) |
+| `compact-alert-notification` | auto-compaction発火を通知（トークン浪費サイクルを検知） | [#41788](https://github.com/anthropics/claude-code/issues/41788) |
+| `token-budget-guard` | セッションコスト上限を超えたらツール呼び出しをブロック | [#38335](https://github.com/anthropics/claude-code/issues/38335) |
+| `session-index-repair` | 終了時にsessions-index.jsonを再構築（`--resume`でセッション消失防止） | [#25032](https://github.com/anthropics/claude-code/issues/25032) |
+| `session-backup-on-start` | 開始時にセッションJSONLをバックアップ（勝手な削除から保護） | [#41874](https://github.com/anthropics/claude-code/issues/41874) |
+| `working-directory-fence` | CWD外のRead/Edit/Writeをブロック（別プロジェクトでの誤作業防止） | [#41850](https://github.com/anthropics/claude-code/issues/41850) |
+| `pre-compact-transcript-backup` | compaction前にJSONL全体をバックアップ（rate limit時のデータ喪失防止） | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
+| `subagent-error-detector` | サブエージェントの529/502/timeout結果を検知して警告 | [#41911](https://github.com/anthropics/claude-code/issues/41911) |
+
+インストール: `npx cc-safe-setup --install-example <名前>`
+
 ## ドキュメント
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html) — 5分で安全に
