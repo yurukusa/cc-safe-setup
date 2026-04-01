@@ -13,7 +13,7 @@
 # Related: https://github.com/anthropics/claude-code/issues/24387
 
 INPUT=$(cat)
-FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$FILE" ] && exit 0
 [ ! -f "$FILE" ] && exit 0
 
