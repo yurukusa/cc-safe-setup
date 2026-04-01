@@ -286,6 +286,40 @@ npx cc-safe-setup --install-example git-show-flag-sanitizer
 
 Install in `.claude/settings.json` as a PreToolUse hook with matcher `Bash`. The hook detects `git show` + `--no-stat`, strips the invalid flag, and returns the corrected command via `updatedInput`. See [#13071](https://github.com/anthropics/claude-code/issues/13071).
 
+## Recipe: Diagnose Token Consumption
+
+If your Max Plan 5-hour limit is exhausting too fast, install these two hooks to track what's consuming tokens:
+
+```bash
+# Log every prompt with timestamps
+npx cc-safe-setup --install-example prompt-usage-logger
+
+# Alert when auto-compaction fires
+npx cc-safe-setup --install-example compact-alert-notification
+```
+
+After a session, check `/tmp/claude-usage-log.txt` for prompt frequency and `/tmp/claude-compact-log.txt` for compaction count. If you see 3+ compactions per session, the compact-rebuild cycle is a major token sink — use manual `/compact` before the threshold.
+
+Quick wins: reduce MCP servers (`claude mcp list`), use `offset`/`limit` on large file reads, trim CLAUDE.md to essentials. See [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788).
+
+## Recipe: Protect Session Data
+
+Back up session JSONL files on every start (protects against silent deletion):
+
+```bash
+npx cc-safe-setup --install-example session-backup-on-start
+```
+
+Keeps last 5 timestamped backups in `~/.claude/session-backups/`. Restore with `cp`. See [#41874](https://github.com/anthropics/claude-code/issues/41874).
+
+Back up the full transcript before compaction (protects against rate-limit data loss):
+
+```bash
+npx cc-safe-setup --install-example pre-compact-transcript-backup
+```
+
+Keeps last 3 backups in `~/.claude/compact-backups/`. If compaction fails and your transcript is corrupted, restore from the backup. See [#40352](https://github.com/anthropics/claude-code/issues/40352).
+
 ## Recipe: Disable Auto-Compaction
 
 Power users who manage context manually can block auto-compaction entirely:
