@@ -7,7 +7,7 @@ Updated: 2026-04-01T20:55:38+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 8f228b2f checkpoint: auto-save 20:55:37
+- Last commit: 18370f65 recovery: pre-compact checkpoint (1 files, 20260401-115538)
 
 ## Recent Files
 ```
