@@ -109,6 +109,9 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `image-file-validator` | Blocks Read of fake image files (text in .png) that permanently corrupt sessions | [#24387](https://github.com/anthropics/claude-code/issues/24387) |
 | `terminal-state-restore` | Restores Kitty keyboard protocol, cursor, bracketed paste on exit | [#39096](https://github.com/anthropics/claude-code/issues/39096) [#39272](https://github.com/anthropics/claude-code/issues/39272) |
 | `large-read-guard` | Warns before reading large files via `cat`/`less` that waste context tokens | [#41617](https://github.com/anthropics/claude-code/issues/41617) |
+| `prompt-usage-logger` | Logs every prompt with timestamps to track token consumption patterns | [#41249](https://github.com/anthropics/claude-code/issues/41249) |
+| `compact-alert-notification` | Alerts when auto-compaction fires (tracks compact-rebuild cycles that burn tokens) | [#41788](https://github.com/anthropics/claude-code/issues/41788) |
+| `token-budget-guard` | Blocks tool calls when estimated session cost exceeds a configurable threshold | [#38335](https://github.com/anthropics/claude-code/issues/38335) |
 
 ## All 49 Commands
 
