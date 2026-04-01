@@ -42,5 +42,9 @@
     "type": "git",
     "url": "https://github.com/yurukusa/cc-safe-setup"
   },
-  "homepage": "https://yurukusa.github.io/cc-safe-setup/"
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/yurukusa"
+  }
 }

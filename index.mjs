@@ -191,6 +191,9 @@ if (HELP) {
   More: https://github.com/yurukusa/cc-safe-setup
   Find hooks: npx cc-hook-registry search <keyword>
   Test hooks: npx cc-hook-test <hook.sh>
+
+  Support: https://github.com/sponsors/yurukusa
+  Book:    https://zenn.dev/yurukusa/books/6076c23b1cb18b
 `);
   process.exit(0);
 }
@@ -5877,6 +5880,10 @@ async function main() {
   console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
   console.log();
   console.log('  ' + c.dim + '23 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
+  console.log();
+  console.log('  ' + c.dim + 'Like this tool? Support development:' + c.reset);
+  console.log('  ' + c.dim + '  Sponsor: https://github.com/sponsors/yurukusa' + c.reset);
+  console.log('  ' + c.dim + '  Book:    https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
   console.log();
 }
 
