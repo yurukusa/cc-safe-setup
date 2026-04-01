@@ -10,7 +10,7 @@
 # TRIGGER: PreToolUse  MATCHER: "Bash"
 
 INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)
+PROMPT=$(echo "$INPUT" | jq -r '.user_prompt // empty' 2>/dev/null)
 [ -z "$PROMPT" ] && exit 0
 
 THRESHOLD=5000

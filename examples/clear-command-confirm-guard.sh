@@ -12,7 +12,7 @@
 # MATCHER: "^/clear$"
 
 INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)
+PROMPT=$(echo "$INPUT" | jq -r '.user_prompt // empty' 2>/dev/null)
 
 if echo "$PROMPT" | grep -qE '^/clear$'; then
   echo "BLOCKED: /clear permanently destroys all context. Use /compact instead to reduce context safely." >&2
