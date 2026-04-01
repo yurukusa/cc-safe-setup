@@ -1,49 +1,73 @@
 #!/bin/bash
-# subagent-scope-validator.sh — Validate subagent task scope before launch
-#
-# Solves: Main agent's subagent delegation produces poor scoping (#40339).
-#         Subagents are launched with vague prompts, missing context,
-#         and no result verification criteria.
-#
-# How it works: PreToolUse hook on "Agent" that checks the prompt
-#   for minimum scope requirements:
-#   1. Prompt must be longer than 50 characters (not just "do X")
-#   2. Must contain file paths or specific identifiers
-#   3. Warns if no success criteria are mentioned
+# ================================================================
+# subagent-scope-validator.sh — Warn on vague subagent delegation
+# ================================================================
+# PURPOSE:
+#   When the main agent spawns a subagent, checks whether the
+#   delegation prompt includes sufficient context: file paths,
+#   specific questions, and adequate length. Warns via stderr
+#   when the delegation looks vague — the #1 cause of poor
+#   subagent results.
 #
 # TRIGGER: PreToolUse
 # MATCHER: "Agent"
+#
+# WHY THIS MATTERS:
+#   The main agent often delegates with vague prompts like
+#   "investigate the auth flow" instead of "read src/auth/login.ts
+#   lines 45-80 and trace how the JWT is validated." Vague prompts
+#   produce shallow, incorrect subagent results. This hook catches
+#   it before the subagent wastes a context window.
+#
+# WHAT IT CHECKS:
+#   1. Prompt length (< 100 chars is almost always too vague)
+#   2. Presence of file paths (subagents need specific files)
+#   3. Presence of actionable verbs (read, check, verify, find, grep)
+#
+# OUTPUT:
+#   Warning to stderr when delegation looks vague.
+#   Always exits 0 — advisory only, never blocks.
+#
+# CONFIGURATION:
+#   CC_SUBAGENT_MIN_PROMPT_LEN — minimum prompt length (default: 100)
+#
+# RELATED ISSUES:
+#   https://github.com/anthropics/claude-code/issues/40339
+# ================================================================
+
+set -u
 
 INPUT=$(cat)
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-[ "$TOOL" != "Agent" ] && exit 0
 
-PROMPT=$(echo "$INPUT" | jq -r '.tool_input.prompt // empty' 2>/dev/null)
-[ -z "$PROMPT" ] && exit 0
+PROMPT=$(printf '%s' "$INPUT" | jq -r '.tool_input.prompt // empty' 2>/dev/null)
 
-PROMPT_LEN=${#PROMPT}
+if [ -z "$PROMPT" ]; then
+    exit 0
+fi
+
+MIN_LEN="${CC_SUBAGENT_MIN_PROMPT_LEN:-100}"
 WARNINGS=""
 
-# Check 1: Minimum prompt length
-if [ "$PROMPT_LEN" -lt 50 ]; then
-    WARNINGS="${WARNINGS}\n  - Prompt is only ${PROMPT_LEN} chars. Subagents need detailed context (50+ chars recommended)"
+# Check 1: Prompt length
+PROMPT_LEN=${#PROMPT}
+if [ "$PROMPT_LEN" -lt "$MIN_LEN" ]; then
+    WARNINGS="${WARNINGS}  - Prompt is only ${PROMPT_LEN} chars (minimum recommended: ${MIN_LEN})\n"
 fi
 
-# Check 2: Contains specific identifiers (files, functions, paths)
-if ! echo "$PROMPT" | grep -qE '/[a-zA-Z]|\.ts|\.py|\.js|\.md|\.json|\.sh|function |class |def |const |let |var '; then
-    WARNINGS="${WARNINGS}\n  - No file paths or code identifiers found. Subagent may lack context"
+# Check 2: File paths present?
+if ! printf '%s' "$PROMPT" | grep -qE '(/[a-zA-Z0-9_.-]+){2,}|\.[a-z]{1,4}\b|src/|lib/|test/|docs/'; then
+    WARNINGS="${WARNINGS}  - No file paths detected. Subagents need specific files to read.\n"
 fi
 
-# Check 3: Success criteria
-if ! echo "$PROMPT" | grep -qiE 'verify|confirm|test|check|ensure|must|should|expect|return|report'; then
-    WARNINGS="${WARNINGS}\n  - No success criteria detected. Consider adding verification steps"
+# Check 3: Actionable verbs?
+if ! printf '%s' "$PROMPT" | grep -qiE '\b(read|check|verify|find|grep|search|look at|examine|trace|compare|analyze)\b'; then
+    WARNINGS="${WARNINGS}  - No actionable verbs found. Tell the subagent exactly what to do.\n"
 fi
 
-# Output warnings (don't block — just inform)
 if [ -n "$WARNINGS" ]; then
-    echo "⚠ Subagent scope review:" >&2
-    echo -e "$WARNINGS" >&2
-    echo "  Prompt preview: $(echo "$PROMPT" | head -c 100)..." >&2
+    printf '\n⚠ Subagent delegation quality check:\n' >&2
+    printf '%b' "$WARNINGS" >&2
+    printf 'Tip: Include specific file paths, line ranges, and what a complete answer looks like.\n\n' >&2
 fi
 
 exit 0

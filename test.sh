@@ -18072,6 +18072,27 @@ for HOOK_FILE in "$EXDIR"/*.sh; do
     TOTAL=$((TOTAL+1))
 done
 
+# --- subagent-scope-validator tests ---
+test_ex subagent-scope-validator.sh '{}' 0 "subagent-scope-validator: empty input passes"
+test_ex subagent-scope-validator.sh '{"tool_input":{}}' 0 "subagent-scope-validator: empty tool_input passes"
+test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":""}}' 0 "subagent-scope-validator: empty prompt passes"
+test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"look into this bug"}}' 0 "subagent-scope-validator: vague prompt exits 0 (advisory only)"
+test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/login.ts lines 45-80 and verify that the JWT validation checks the expiration timestamp. Compare with src/middleware/auth.ts to confirm the token refresh logic matches."}}' 0 "subagent-scope-validator: good prompt exits 0"
+test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
+test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
+
+# --- prompt-usage-logger tests ---
+test_ex prompt-usage-logger.sh '{"prompt":"test prompt for logging"}' 0 "prompt-usage-logger: logs prompt and exits 0"
+test_ex prompt-usage-logger.sh '{}' 0 "prompt-usage-logger: empty input exits 0"
+test_ex prompt-usage-logger.sh '{"prompt":""}' 0 "prompt-usage-logger: empty prompt exits 0"
+test_ex prompt-usage-logger.sh '{"prompt":"日本語プロンプト"}' 0 "prompt-usage-logger: unicode prompt exits 0"
+
+# --- compact-alert-notification tests ---
+test_ex compact-alert-notification.sh '{"message":"Auto-compact triggered: context at 95%"}' 0 "compact-alert-notification: compact message exits 0"
+test_ex compact-alert-notification.sh '{"message":"Session started"}' 0 "compact-alert-notification: non-compact message exits 0"
+test_ex compact-alert-notification.sh '{}' 0 "compact-alert-notification: empty input exits 0"
+test_ex compact-alert-notification.sh '{"message":""}' 0 "compact-alert-notification: empty message exits 0"
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
