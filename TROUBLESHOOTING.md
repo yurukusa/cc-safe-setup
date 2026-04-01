@@ -291,6 +291,33 @@ The hook has a strict whitelist. If a command isn't on the list, it passes throu
 - `pip install` (not whitelisted — install `pip-venv-guard` instead)
 - Custom scripts (unknown to the whitelist)
 
+## Token Consumption Too Fast
+
+**Symptom**: Max Plan 5-hour limit exhausted in 1-2 hours. Same usage pattern as before.
+
+**Diagnosis**:
+
+```bash
+# Install token tracking hooks
+npx cc-safe-setup --install-example prompt-usage-logger
+npx cc-safe-setup --install-example compact-alert-notification
+```
+
+After a session, check:
+- `/tmp/claude-usage-log.txt` — how many prompts, how frequently
+- `/tmp/claude-compact-log.txt` — how many auto-compactions fired
+
+**Common causes**:
+
+| Cause | Check | Fix |
+|-------|-------|-----|
+| Too many MCP servers | `claude mcp list` | Remove unused servers |
+| Large CLAUDE.md/MEMORY.md | `wc -c CLAUDE.md` | Move reference content to separate files |
+| Auto-compact cycles | compact-alert count > 3 | Use manual `/compact` before threshold |
+| Large file reads | prompt-usage-log timestamps | Use `offset`/`limit` parameters |
+
+**Related issues**: [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788), [#38335](https://github.com/anthropics/claude-code/issues/38335)
+
 ## Still Stuck?
 
 1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`
