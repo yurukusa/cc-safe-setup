@@ -75,12 +75,24 @@ cat /tmp/claude-compact-log.txt
 <h3>Trim CLAUDE.md</h3>
 <p>Every byte of CLAUDE.md is loaded into every turn's context. Move reference-only content to files that Claude reads on demand.</p>
 
+<h2>Step 5: Audit MCP Servers</h2>
+<p>Each MCP server adds tool definitions to every turn's context. 5+ servers can silently double your token usage.</p>
+<pre><code># List all active MCP servers
+claude mcp list
+
+# Check how many tools each server exposes
+# More tools = more tokens per turn, even if you never call them</code></pre>
+<p><strong>Fix:</strong> Remove MCP servers you don't use daily. Keep only what's needed for the current task. You can re-add them later.</p>
+
 <h2>Related Issues</h2>
+<p>This is a recurring problem. If you're experiencing it, you're not alone:</p>
 <ul>
+<li><a href="https://github.com/anthropics/claude-code/issues/41930">#41930</a> — Token consumption dramatically increased since March 2024 update</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/41866">#41866</a> — Abnormal token consumption making normal work impossible</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/41956">#41956</a> — Usage limit reached unexpectedly</li>
 <li><a href="https://github.com/anthropics/claude-code/issues/41249">#41249</a> — Excessive token consumption rate</li>
 <li><a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a> — Max 20 plan: 100% exhausted in ~70 minutes</li>
 <li><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a> — Max plan session limits exhausted abnormally fast</li>
-<li><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a> — Instantly hitting usage limits with Max subscription</li>
 </ul>
 
 <div class="cta">
