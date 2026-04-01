@@ -66,6 +66,8 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 | **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
+> 📘 Want to go deeper? [Hook Design Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 14 chapters on hook design patterns, testing strategies, and real incident postmortems from 700+ hours of autonomous operation. Chapter 2 free.
+
 Each hook exists because a real incident happened without it.
 
 ### v2.1.85: `if` Field Support
