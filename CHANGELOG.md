@@ -1,5 +1,19 @@
 # Changelog
 
+## [29.6.38] - 2026-04-01
+- **New hooks (8)**:
+  - session-index-repair — rebuild sessions-index.json on exit ([#25032](https://github.com/anthropics/claude-code/issues/25032))
+  - subagent-error-detector — detect 529/502/timeout in subagent results ([#41911](https://github.com/anthropics/claude-code/issues/41911))
+  - session-backup-on-start — backup session JSONL on start ([#41874](https://github.com/anthropics/claude-code/issues/41874))
+  - working-directory-fence — block file ops outside CWD ([#41850](https://github.com/anthropics/claude-code/issues/41850))
+  - mcp-warmup-wait — wait for MCP servers on start ([#41778](https://github.com/anthropics/claude-code/issues/41778))
+  - pre-compact-transcript-backup — backup transcript before compaction ([#40352](https://github.com/anthropics/claude-code/issues/40352))
+  - replace-all-guard — warn/block Edit replace_all:true ([#41681](https://github.com/anthropics/claude-code/issues/41681))
+  - subagent-scope-validator — improved: 100-char min, configurable, Issue refs ([#40339](https://github.com/anthropics/claude-code/issues/40339))
+- **Docs**: COOKBOOK (token diagnosis + session protection recipes), TROUBLESHOOTING (token consumption section), README.ja (Session Protection section)
+- **Tests**: +67 tests for Session Protection hooks (cch-cache-guard 0→7, image-file-validator 0→5, etc.)
+- **Stats**: 653 examples, 7,468+ tests, 100% hook coverage
+
 ## [29.6.37] - 2026-03-31
 - **Tests**: +1,902 batch safety tests (11,933→13,835)
   - null tool_input handling for all 634 hooks
