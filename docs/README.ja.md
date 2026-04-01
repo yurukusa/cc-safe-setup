@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 639個のexample hook · 13,943テスト · 1,000+ インストール/日
+**Claude Codeを安全にするワンコマンドツール。** 641個のexample hook · 13,955テスト · 1,000+ インストール/日
 
 ```bash
 npx cc-safe-setup
@@ -16,7 +16,7 @@ npx cc-safe-setup
 |---|---|
 | `npx cc-safe-setup` | 8個の安全フックをインストール |
 | `--shield` | 最大安全（スタック検出+推奨hook自動選択） |
-| `--install-example <name>` | 639個のexampleから個別インストール |
+| `--install-example <name>` | 641個のexampleから個別インストール |
 | `--examples` | 全exampleを一覧表示 |
 | `--create "説明"` | 自然言語でカスタムフック生成 |
 | `--verify` | 各フックの動作確認 |
