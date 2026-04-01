@@ -18081,6 +18081,10 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- session-backup-on-start tests ---
+test_ex session-backup-on-start.sh '{}' 0 "session-backup-on-start: empty input exits 0"
+test_ex session-backup-on-start.sh '{"session_id":"test123"}' 0 "session-backup-on-start: with session_id exits 0"
+
 # --- subagent-error-detector tests ---
 test_ex subagent-error-detector.sh '{}' 0 "subagent-error-detector: empty input exits 0"
 test_ex subagent-error-detector.sh '{"tool_result":""}' 0 "subagent-error-detector: empty result exits 0"
