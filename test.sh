@@ -18081,6 +18081,15 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- subagent-error-detector tests ---
+test_ex subagent-error-detector.sh '{}' 0 "subagent-error-detector: empty input exits 0"
+test_ex subagent-error-detector.sh '{"tool_result":""}' 0 "subagent-error-detector: empty result exits 0"
+test_ex subagent-error-detector.sh '{"tool_result":"Found 3 files matching. The JWT validation is correct on line 45 of src/auth/login.ts."}' 0 "subagent-error-detector: normal result exits 0"
+test_ex subagent-error-detector.sh '{"tool_result":"API Error: 529 overloaded_error"}' 0 "subagent-error-detector: 529 error exits 0 (advisory)"
+test_ex subagent-error-detector.sh '{"tool_result":"error"}' 0 "subagent-error-detector: short result exits 0 (advisory)"
+test_ex subagent-error-detector.sh '{"tool_result":"Connection timed out after 30s"}' 0 "subagent-error-detector: timeout exits 0 (advisory)"
+test_ex subagent-error-detector.sh '{"tool_result":"502 Bad Gateway nginx"}' 0 "subagent-error-detector: 502 error exits 0 (advisory)"
+
 # --- session-index-repair tests ---
 test_ex session-index-repair.sh '{}' 0 "session-index-repair: empty input exits 0"
 test_ex session-index-repair.sh '{"session_id":"abc123"}' 0 "session-index-repair: with session_id exits 0"
