@@ -18081,6 +18081,9 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- ripgrep-permission-fix tests ---
+test_ex ripgrep-permission-fix.sh '{}' 0 "ripgrep-permission-fix: exits 0 when claude not found"
+
 # --- conversation-history-guard tests ---
 test_ex conversation-history-guard.sh '{}' 0 "conversation-history-guard: empty input passes"
 test_ex conversation-history-guard.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "conversation-history-guard: normal file passes"
