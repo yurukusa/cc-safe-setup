@@ -18081,6 +18081,10 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- mcp-warmup-wait tests ---
+# Note: this hook sleeps, so we test with CC_MCP_WARMUP_SECONDS=0
+CC_MCP_WARMUP_SECONDS=0 test_ex mcp-warmup-wait.sh '{}' 0 "mcp-warmup-wait: exits 0 with no MCP config"
+
 # --- working-directory-fence tests ---
 test_ex working-directory-fence.sh '{}' 0 "working-directory-fence: empty input passes"
 test_ex working-directory-fence.sh '{"tool_input":{}}' 0 "working-directory-fence: no file_path passes"
