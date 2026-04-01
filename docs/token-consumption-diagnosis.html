@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Token Consumption Diagnosis — Why Your Max Plan Runs Out Fast</title>
+<meta name="description" content="Diagnose and fix excessive token consumption in Claude Code. Hooks to track prompts, detect auto-compact cycles, and reduce Max Plan usage.">
+<meta name="keywords" content="claude code token consumption, max plan usage, rate limit, token tracking, auto compact">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-consumption-diagnosis.html">
+<meta property="og:title" content="Claude Code Token Consumption Diagnosis">
+<meta property="og:description" content="Your Max Plan 5-hour limit runs out in 1 hour? Here's how to diagnose and fix it with hooks.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.8rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+h3{color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{padding:0;background:none}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{border:1px solid #30363d;padding:.5rem .8rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+.warn{background:#1a1504;border:1px solid #d29922;padding:1rem;border-radius:8px;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;padding:1.5rem;border-radius:8px;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem}
+</style>
+</head>
+<body>
+<h1>Why Your Claude Code Max Plan Runs Out So Fast</h1>
+<p>If your 5-hour Max Plan limit is exhausting in 1-2 hours with normal usage, hidden token sinks are the cause. This guide helps you find and fix them.</p>
+
+<div class="cta">
+<p>Quick install — two hooks that diagnose the problem:</p>
+<pre><code>npx cc-safe-setup --install-example prompt-usage-logger
+npx cc-safe-setup --install-example compact-alert-notification</code></pre>
+</div>
+
+<h2>Step 1: Track What's Consuming Tokens</h2>
+<p>The <code>prompt-usage-logger</code> hook logs every prompt with timestamps to <code>/tmp/claude-usage-log.txt</code>. After a session, compare the log with your usage dashboard.</p>
+<pre><code># Example log output:
+12:34:56 prompt=Read the file src/main.ts and explain the error handling
+12:35:23 prompt=Fix the bug in the validateInput function
+12:35:45 prompt=(agent spawned — new context window)</code></pre>
+
+<h2>Step 2: Count Auto-Compactions</h2>
+<p>The <code>compact-alert-notification</code> hook logs when auto-compaction fires. Each compaction cycle burns tokens to re-summarize the entire context.</p>
+<pre><code># Check after a session:
+cat /tmp/claude-compact-log.txt
+# If you see 3+ entries, compact-rebuild cycles are a major token sink</code></pre>
+
+<h2>Step 3: Check Common Token Sinks</h2>
+<table>
+<tr><th>Cause</th><th>How to Check</th><th>Fix</th></tr>
+<tr><td>Too many MCP servers</td><td><code>claude mcp list</code></td><td>Remove unused servers</td></tr>
+<tr><td>Large CLAUDE.md / MEMORY.md</td><td><code>wc -c CLAUDE.md</code></td><td>Move reference content to separate files</td></tr>
+<tr><td>Auto-compact cycles</td><td>compact-alert count &gt; 3</td><td>Use manual <code>/compact</code> before threshold</td></tr>
+<tr><td>Large file reads</td><td>Check prompt-usage-log</td><td>Use <code>offset</code> and <code>limit</code> parameters</td></tr>
+<tr><td>Subagent spawning</td><td>Count "agent spawned" in log</td><td>Each Agent call = new context window</td></tr>
+</table>
+
+<h2>Step 4: Reduce Consumption</h2>
+<h3>Manual /compact before threshold</h3>
+<p>Auto-compact fires at a fixed threshold. Manual <code>/compact</code> before that point is cheaper because you control the timing.</p>
+
+<h3>Use plan mode for complex tasks</h3>
+<p>Planning first reduces total tool calls vs. trial-and-error implementation.</p>
+
+<h3>Read files with offset/limit</h3>
+<p>Don't load full files when you only need a section. A 10K-line file costs the same tokens whether you need line 1 or all 10K.</p>
+
+<h3>Trim CLAUDE.md</h3>
+<p>Every byte of CLAUDE.md is loaded into every turn's context. Move reference-only content to files that Claude reads on demand.</p>
+
+<h2>Related Issues</h2>
+<ul>
+<li><a href="https://github.com/anthropics/claude-code/issues/41249">#41249</a> — Excessive token consumption rate</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a> — Max 20 plan: 100% exhausted in ~70 minutes</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a> — Max plan session limits exhausted abnormally fast</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a> — Instantly hitting usage limits with Max subscription</li>
+</ul>
+
+<div class="cta">
+<p>Full safety setup (8 core hooks + project-specific recommendations):</p>
+<pre><code>npx cc-safe-setup --shield</code></pre>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="getting-started.html">Getting Started</a> · <a href="https://yurukusa.github.io/cc-safe-setup/">All Tools</a></p>
+</div>
+
+</body>
+</html>
