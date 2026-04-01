@@ -18081,6 +18081,14 @@ test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Read src/auth/logi
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"x"}}' 0 "subagent-scope-validator: minimal prompt exits 0"
 test_ex subagent-scope-validator.sh '{"tool_input":{"prompt":"Search the codebase for all usages of processAuth() in src/auth/ and check if any callers skip the token validation step"}}' 0 "subagent-scope-validator: prompt with paths and verbs passes"
 
+# --- replace-all-guard tests ---
+test_ex replace-all-guard.sh '{}' 0 "replace-all-guard: empty input passes"
+test_ex replace-all-guard.sh '{"tool_input":{"file_path":"main.ts","old_string":"foo","new_string":"bar"}}' 0 "replace-all-guard: normal edit passes"
+test_ex replace-all-guard.sh '{"tool_input":{"file_path":"data.csv","old_string":"x","new_string":"y","replace_all":true}}' 0 "replace-all-guard: replace_all warns (exit 0)"
+test_ex replace-all-guard.sh '{"tool_input":{"file_path":"a.txt","old_string":"a","new_string":"b","replace_all":false}}' 0 "replace-all-guard: replace_all false passes"
+CC_BLOCK_REPLACE_ALL=1 test_ex replace-all-guard.sh '{"tool_input":{"file_path":"data.sql","old_string":"old","new_string":"new","replace_all":true}}' 2 "replace-all-guard: block mode blocks"
+CC_BLOCK_REPLACE_ALL=1 test_ex replace-all-guard.sh '{"tool_input":{"file_path":"main.ts","old_string":"a","new_string":"b"}}' 0 "replace-all-guard: block mode passes normal edit"
+
 # --- cch-cache-guard tests ---
 test_ex cch-cache-guard.sh '{}' 0 "cch-cache-guard: empty input passes"
 test_ex cch-cache-guard.sh '{"tool_input":{"command":"ls"}}' 0 "cch-cache-guard: safe command passes"
