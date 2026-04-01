@@ -44,7 +44,7 @@ INPUT=$(cat)
 LOG_FILE="${CC_PROMPT_LOG:-/tmp/claude-usage-log.txt}"
 
 # Extract first 100 chars of the prompt
-PROMPT=$(printf '%s' "$INPUT" | jq -r '.user_prompt | .[0:100]' 2>/dev/null || echo "(parse error)")
+PROMPT=$(printf '%s' "$INPUT" | jq -r '.prompt | .[0:100]' 2>/dev/null || echo "(parse error)")
 
 # Append timestamped entry
 echo "$(date -u +%H:%M:%S) prompt=$PROMPT" >> "$LOG_FILE"
