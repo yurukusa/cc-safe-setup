@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dw/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
 [![tests](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml/badge.svg)](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml)
 
-**One command to make Claude Code safe for autonomous operation.** 651 example hooks · 13,955 tests · 1,000+ installs/day · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 652 example hooks · 13,955 tests · 1,000+ installs/day · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
@@ -116,6 +116,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `session-backup-on-start` | Backs up session JSONL files on start (protects against silent deletion) | [#41874](https://github.com/anthropics/claude-code/issues/41874) |
 | `working-directory-fence` | Blocks Read/Edit/Write outside CWD (prevents operating on wrong project copy) | [#41850](https://github.com/anthropics/claude-code/issues/41850) |
 | `mcp-warmup-wait` | Waits for MCP servers to initialize on session start (fixes first-turn tool errors) | [#41778](https://github.com/anthropics/claude-code/issues/41778) |
+| `pre-compact-transcript-backup` | Full JSONL backup before compaction (protects against rate-limit data loss) | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
 
 ## All 49 Commands
 
