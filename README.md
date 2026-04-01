@@ -112,6 +112,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `prompt-usage-logger` | Logs every prompt with timestamps to track token consumption patterns | [#41249](https://github.com/anthropics/claude-code/issues/41249) |
 | `compact-alert-notification` | Alerts when auto-compaction fires (tracks compact-rebuild cycles that burn tokens) | [#41788](https://github.com/anthropics/claude-code/issues/41788) |
 | `token-budget-guard` | Blocks tool calls when estimated session cost exceeds a configurable threshold | [#38335](https://github.com/anthropics/claude-code/issues/38335) |
+| `session-index-repair` | Rebuilds `sessions-index.json` on exit so `claude --resume` finds all sessions | [#25032](https://github.com/anthropics/claude-code/issues/25032) |
 
 ## All 49 Commands
 
