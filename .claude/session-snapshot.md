@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-01T14:59:39+09:00
+Updated: 2026-04-01T17:12:48+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-04-01T14:59:39+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 92a80cc0 recovery: pre-compact checkpoint (1 files, 20260401-055938)
+- Last commit: 4ef1ea91 checkpoint: auto-save 17:12:39
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./examples/prompt-injection-detector.sh
+./examples/prompt-length-guard.sh
+./examples/clear-command-confirm-guard.sh
+./examples/prompt-usage-logger.sh
 ./.claude/session-logs/2026-04-01.md
 ./.claude/pre-compact-checkpoint.md
 ./examples/compact-alert-notification.sh
-./examples/prompt-usage-logger.sh
 ./docs/README.ja.md
-./README.md
-./examples/image-file-validator.sh
-./examples/cch-cache-guard.sh
-./.claude/session-logs/2026-03-31.md
 ```
 
