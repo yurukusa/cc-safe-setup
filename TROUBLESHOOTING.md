@@ -324,3 +324,4 @@ After a session, check:
 2. Check `~/.claude/hook-debug.log` for detailed I/O traces
 3. Run `npx cc-safe-setup --doctor` for automated checks
 4. Open an issue: [cc-safe-setup issues](https://github.com/yurukusa/cc-safe-setup/issues)
+5. Read the full guide: **[Hook Design Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — 14 chapters, Chapter 3 free

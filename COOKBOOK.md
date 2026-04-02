@@ -348,3 +348,4 @@ Install as a PreToolUse hook with matcher `WebFetch`. By default allows all doma
 - [Credential Protection](https://yurukusa.github.io/cc-safe-setup/prevent-credential-leak.html)
 - [Troubleshooting](TROUBLESHOOTING.md)
 - [Settings Reference](SETTINGS_REFERENCE.md)
+- **[Hook Design Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — 14 chapters on hook design patterns, testing, and real incident postmortems. Chapter 3 free.
