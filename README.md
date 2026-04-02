@@ -66,7 +66,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 | **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
-> 📘 Want to go deeper? [Hook Design Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 14 chapters on hook design patterns, testing strategies, and real incident postmortems from 700+ hours of autonomous operation. Chapter 3 free.
+> 📘 Tokens disappearing too fast? [The practical guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) covers 10 token consumption patterns (cache corruption, excessive reads, compact cycles) and how to detect them — from 700+ hours of autonomous operation. Chapter 3 free.
 
 Each hook exists because a real incident happened without it.
 
@@ -429,7 +429,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Hook Design Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — 14-chapter guide from 700+ hours of autonomous operation. Hook design patterns, testing strategies, real incident postmortems. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
+- **[Practical Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. 14 chapters from 700+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
 - [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 25 recipes from real GitHub Issues ([interactive version](https://yurukusa.github.io/claude-code-hooks/))
