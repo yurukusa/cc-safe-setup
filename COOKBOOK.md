@@ -300,7 +300,7 @@ npx cc-safe-setup --install-example compact-alert-notification
 
 After a session, check `/tmp/claude-usage-log.txt` for prompt frequency and `/tmp/claude-compact-log.txt` for compaction count. If you see 3+ compactions per session, the compact-rebuild cycle is a major token sink — use manual `/compact` before the threshold.
 
-Quick wins: reduce MCP servers (`claude mcp list`), use `offset`/`limit` on large file reads, trim CLAUDE.md to essentials. See [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788).
+Quick wins: reduce MCP servers (`claude mcp list`), use `offset`/`limit` on large file reads, trim CLAUDE.md to essentials. If on v2.1.89+, set `"ENABLE_TOOL_SEARCH": "false"` in settings.json `env` to prevent Deferred Tool Loading from breaking the cache prefix ([#41617](https://github.com/anthropics/claude-code/issues/41617)). See also [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788), [#40524](https://github.com/anthropics/claude-code/issues/40524).
 
 ## Recipe: Protect Session Data
 

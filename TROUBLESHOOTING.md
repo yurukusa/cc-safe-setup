@@ -315,8 +315,25 @@ After a session, check:
 | Large CLAUDE.md/MEMORY.md | `wc -c CLAUDE.md` | Move reference content to separate files |
 | Auto-compact cycles | compact-alert count > 3 | Use manual `/compact` before threshold |
 | Large file reads | prompt-usage-log timestamps | Use `offset`/`limit` parameters |
+| Deferred Tool Loading cache miss | Check `ToolSearch` calls in transcript | Set `ENABLE_TOOL_SEARCH=false` in settings.json `env` ([#41617](https://github.com/anthropics/claude-code/issues/41617)) |
+| `--resume` cache prefix breakage | "hi" costs 2-5% quota after resume | Start fresh sessions instead of resuming ([#40524](https://github.com/anthropics/claude-code/issues/40524)) |
+| Session file self-reads (`cch=` header) | Claude reads its own `.jsonl` files | Install `read-budget-guard` to limit large reads ([#40652](https://github.com/anthropics/claude-code/issues/40652)) |
 
-**Related issues**: [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788), [#38335](https://github.com/anthropics/claude-code/issues/38335)
+**Disabling Deferred Tool Loading** (v2.1.89+ workaround):
+
+Deferred Tool Loading can break the cache prefix, causing every prompt to rebuild context from scratch. To disable it, add to `.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ENABLE_TOOL_SEARCH": "false"
+  }
+}
+```
+
+This prevents `ToolSearch` deferred loading and preserves the cache prefix across turns. See community discussion in [#41617](https://github.com/anthropics/claude-code/issues/41617).
+
+**Related issues**: [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788), [#38335](https://github.com/anthropics/claude-code/issues/38335), [#40524](https://github.com/anthropics/claude-code/issues/40524), [#41617](https://github.com/anthropics/claude-code/issues/41617)
 
 ## Still Stuck?
 

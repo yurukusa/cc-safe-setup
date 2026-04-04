@@ -60,7 +60,20 @@ cat /tmp/claude-compact-log.txt
 <tr><td>Auto-compact cycles</td><td>compact-alert count &gt; 3</td><td>Use manual <code>/compact</code> before threshold</td></tr>
 <tr><td>Large file reads</td><td>Check prompt-usage-log</td><td>Use <code>offset</code> and <code>limit</code> parameters</td></tr>
 <tr><td>Subagent spawning</td><td>Count "agent spawned" in log</td><td>Each Agent call = new context window</td></tr>
+<tr><td>Deferred Tool Loading (v2.1.89+)</td><td><code>ToolSearch</code> calls in transcript</td><td>Set <code>ENABLE_TOOL_SEARCH=false</code> in settings.json <code>env</code></td></tr>
+<tr><td><code>--resume</code> cache breakage</td><td>"hi" costs 2-5% quota after resume</td><td>Start fresh sessions instead of resuming</td></tr>
+<tr><td>Session file self-reads</td><td>Claude reads its own <code>.jsonl</code> files</td><td>Install <code>read-budget-guard</code> hook</td></tr>
 </table>
+
+<h2>Step 3b: Disable Deferred Tool Loading (v2.1.89+)</h2>
+<p>In v2.1.89+, Deferred Tool Loading can break the cache prefix, causing every prompt to rebuild context from scratch. This is one of the most impactful token consumption bugs reported (<a href="https://github.com/anthropics/claude-code/issues/41617">#41617</a>, <a href="https://github.com/anthropics/claude-code/issues/40524">#40524</a>).</p>
+<p><strong>Fix:</strong> Add to <code>.claude/settings.json</code>:</p>
+<pre><code>{
+  "env": {
+    "ENABLE_TOOL_SEARCH": "false"
+  }
+}</code></pre>
+<p>This prevents <code>ToolSearch</code> deferred loading and preserves the cache prefix across turns. Symptoms: "hi" consuming 2% quota, simple questions using 20%+ quota, session hitting 100% in under 70 minutes.</p>
 
 <h2>Step 4: Reduce Consumption</h2>
 <h3>Manual /compact before threshold</h3>
@@ -93,6 +106,8 @@ claude mcp list
 <li><a href="https://github.com/anthropics/claude-code/issues/41249">#41249</a> — Excessive token consumption rate</li>
 <li><a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a> — Max 20 plan: 100% exhausted in ~70 minutes</li>
 <li><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a> — Max plan session limits exhausted abnormally fast</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/41617">#41617</a> — Cache prefix breakage from Deferred Tool Loading</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/40524">#40524</a> — Resume causes cache miss and excessive token usage</li>
 </ul>
 
 <div class="cta">
