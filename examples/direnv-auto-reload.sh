@@ -24,8 +24,15 @@ OLD_CWD=$(echo "$INPUT" | jq -r '.old_cwd // empty' 2>/dev/null)
 if [ -f "${NEW_CWD}/.envrc" ]; then
     echo "📂 Directory changed: found .envrc in ${NEW_CWD}" >&2
     if command -v direnv &>/dev/null; then
-        echo "  direnv: auto-allowing and loading" >&2
-        cd "$NEW_CWD" && direnv allow . 2>/dev/null && eval "$(direnv export bash 2>/dev/null)"
+        # Write exports to CLAUDE_ENV_FILE so Claude Code picks them up
+        # (eval in a subshell would be lost — CLAUDE_ENV_FILE persists to BashTool)
+        if [ -n "$CLAUDE_ENV_FILE" ]; then
+            echo "  direnv: auto-allowing and writing to CLAUDE_ENV_FILE" >&2
+            cd "$NEW_CWD" && direnv allow . 2>/dev/null && \
+                direnv export bash > "$CLAUDE_ENV_FILE" 2>/dev/null
+        else
+            echo "  ⚠ CLAUDE_ENV_FILE not set — direnv exports won't persist" >&2
+        fi
     else
         echo "  ⚠ direnv not installed — .envrc found but not loaded" >&2
     fi
