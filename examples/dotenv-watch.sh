@@ -10,9 +10,9 @@
 #         API keys, wrong database URLs, or missing config values.
 #
 # TRIGGER: FileChanged
-# MATCHER: ".env" (watches .env files — also catches .env.local, .env.production)
+# MATCHER: ".env" (watches the .env file in cwd — use ".env|.env.local" for multiple files)
 #
-# INPUT: {"file_path": "/path/to/.env", "event": "modified|created|deleted"}
+# INPUT: {"file_path": "/path/to/.env", "event": "change|add|unlink"}
 #
 # DECISION CONTROL: None (notification only — shows stderr to user)
 
@@ -24,17 +24,17 @@ EVENT=$(echo "$INPUT" | jq -r '.event // empty' 2>/dev/null)
 FILENAME=$(basename "$FILE_PATH")
 
 case "$EVENT" in
-    modified)
+    change)
         echo "⚠ Environment file changed: ${FILENAME}" >&2
         echo "  Path: ${FILE_PATH}" >&2
         echo "  Action: Verify environment variables are still correct" >&2
         ;;
-    created)
+    add)
         echo "📝 New environment file: ${FILENAME}" >&2
         echo "  Path: ${FILE_PATH}" >&2
         echo "  Action: Review contents before use" >&2
         ;;
-    deleted)
+    unlink)
         echo "🗑 Environment file deleted: ${FILENAME}" >&2
         echo "  Path: ${FILE_PATH}" >&2
         echo "  Action: Check if environment variables are still available" >&2
