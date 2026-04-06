@@ -335,6 +335,32 @@ This prevents `ToolSearch` deferred loading and preserves the cache prefix acros
 
 **Related issues**: [#41249](https://github.com/anthropics/claude-code/issues/41249), [#41788](https://github.com/anthropics/claude-code/issues/41788), [#38335](https://github.com/anthropics/claude-code/issues/38335), [#40524](https://github.com/anthropics/claude-code/issues/40524), [#41617](https://github.com/anthropics/claude-code/issues/41617)
 
+## Multiple Hook Sources: stdin Race Condition
+
+**Symptom**: Safety hooks appear installed but don't block dangerous commands. No errors, no warnings — hooks just silently allow everything.
+
+**Root cause**: When multiple `PreToolUse` hooks match the same tool (e.g., two hooks both matching `Bash`), only the first hook receives stdin. The second hook gets empty input, all guard conditions fail, and it exits 0 (allow). This is an upstream Claude Code bug ([#42702](https://github.com/anthropics/claude-code/issues/42702)).
+
+**When this happens**:
+- cc-safe-setup hooks + another hook provider (e.g., project-level `.claude/settings.json` hooks)
+- cc-safe-setup hooks + manually added hooks in `~/.claude/settings.json` that match the same trigger
+
+**When this does NOT happen**:
+- cc-safe-setup is the only hook source (default install)
+
+**How to verify your hooks receive input**:
+
+Add a temporary debug line to the top of a hook:
+
+```bash
+INPUT=$(cat)
+echo "DEBUG: input length = ${#INPUT}" >&2
+```
+
+If you see `input length = 0`, that hook is not receiving stdin.
+
+**Workaround**: Ensure only one hook source matches each trigger+matcher combination. If you need multiple hooks on the same trigger, combine them into a single script.
+
 ## Still Stuck?
 
 1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`
