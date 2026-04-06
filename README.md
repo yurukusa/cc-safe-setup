@@ -146,7 +146,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 654 examples |
+| `--install-example <name>` | Install from 650 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
