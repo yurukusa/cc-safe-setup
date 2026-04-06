@@ -1112,10 +1112,10 @@ async function installExample(name) {
   let matcher = 'Bash';
 
   // Detect trigger from header comments (case-insensitive for "Trigger:" prefix)
-  const triggerMatch = content.match(/^#\s*[Tt]rigger:\s*(\S+)/m);
+  const triggerMatch = content.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(\S+)/m);
   if (triggerMatch) {
     const t = triggerMatch[1];
-    if (['PermissionRequest','PostToolUse','Notification','Stop','SessionStart','PreCompact','SessionEnd','UserPromptSubmit'].includes(t)) {
+    if (['PermissionRequest','PostToolUse','Notification','Stop','SessionStart','PreCompact','SessionEnd','UserPromptSubmit','CwdChanged','FileChanged'].includes(t)) {
       trigger = t;
     }
   } else if (content.match(/^#.*PermissionRequest hook/m)) {
@@ -1127,8 +1127,12 @@ async function installExample(name) {
   // Detect matcher from header (JSON format or comment format)
   const matcherMatch = content.match(/"matcher":\s*"([^"]*)"/);
   if (matcherMatch) matcher = matcherMatch[1];
-  const commentMatcher = content.match(/^#\s*Matcher:\s*(.+)$/m);
-  if (commentMatcher) matcher = commentMatcher[1].trim();
+  const commentMatcher = content.match(/^#\s*[Mm][Aa][Tt][Cc][Hh][Ee][Rr]:\s*(.+)$/m);
+  if (commentMatcher) {
+    // Extract quoted value if present (e.g., ".env" or ".env|.env.local"), otherwise use raw
+    const quoted = commentMatcher[1].match(/^"([^"]*)"/);
+    matcher = quoted ? quoted[1] : commentMatcher[1].trim();
+  }
 
   // Update settings.json
   let settings = {};
@@ -1138,10 +1142,10 @@ async function installExample(name) {
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
 
-  const hookEntry = {
-    matcher: matcher,
-    hooks: [{ type: 'command', command: toBashPath(destPath) }],
-  };
+  // CwdChanged does not support matchers; FileChanged uses matcher from header
+  const hookEntry = trigger === 'CwdChanged'
+    ? { hooks: [{ type: 'command', command: toBashPath(destPath) }] }
+    : { matcher: matcher, hooks: [{ type: 'command', command: toBashPath(destPath) }] };
 
   // Check if already installed
   const existing = settings.hooks[trigger].find(h =>
