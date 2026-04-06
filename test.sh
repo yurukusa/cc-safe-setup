@@ -13159,13 +13159,13 @@ test_ex cwd-project-boundary-guard.sh '{"cwd":"."}' 0 "cwd-boundary: relative do
 
 # ========== file-change-undo-tracker (FileChanged) ==========
 echo "file-change-undo-tracker.sh:"
-test_ex file-change-undo-tracker.sh '{"file":"src/main.ts","event":"modified"}' 0 "undo-track: modified file"
-test_ex file-change-undo-tracker.sh '{"file":"src/new.ts","event":"created"}' 0 "undo-track: created file"
-test_ex file-change-undo-tracker.sh '{"file":"","event":"modified"}' 0 "undo-track: empty file"
+test_ex file-change-undo-tracker.sh '{"file":"src/main.ts","event":"change"}' 0 "undo-track: change file"
+test_ex file-change-undo-tracker.sh '{"file":"src/new.ts","event":"add"}' 0 "undo-track: add file"
+test_ex file-change-undo-tracker.sh '{"file":"","event":"change"}' 0 "undo-track: empty file"
 test_ex file-change-undo-tracker.sh '{}' 0 "undo-track: no input"
-test_ex file-change-undo-tracker.sh '{"file":"test.sh","event":"deleted"}' 0 "undo-track: deleted file"
+test_ex file-change-undo-tracker.sh '{"file":"test.sh","event":"unlink"}' 0 "undo-track: unlink file"
 test_ex file-change-undo-tracker.sh '{"file":"package.json"}' 0 "undo-track: no event type"
-test_ex file-change-undo-tracker.sh '{"event":"modified"}' 0 "undo-track: no file"
+test_ex file-change-undo-tracker.sh '{"event":"change"}' 0 "undo-track: no file"
 
 # ========== pre-compact-knowledge-save (PreCompact) ==========
 echo "pre-compact-knowledge-save.sh:"
