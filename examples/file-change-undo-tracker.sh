@@ -27,13 +27,13 @@ UNDO_FILE="/tmp/claude-undo-session-${PPID:-0}.sh"
 TIMESTAMP=$(date +"%H:%M:%S")
 
 # Log the change
-echo "${TIMESTAMP} ${EVENT:-modified} ${FILE}" >> "$LOG_FILE"
+echo "${TIMESTAMP} ${EVENT:-change} ${FILE}" >> "$LOG_FILE"
 
 # Track for undo (git-tracked files only)
 if git ls-files --error-unmatch "$FILE" &>/dev/null 2>&1; then
     # File is git-tracked — can be reverted with git checkout
     if ! grep -qF "git checkout -- \"$FILE\"" "$UNDO_FILE" 2>/dev/null; then
-        echo "git checkout -- \"$FILE\"  # ${EVENT:-modified} at ${TIMESTAMP}" >> "$UNDO_FILE"
+        echo "git checkout -- \"$FILE\"  # ${EVENT:-change} at ${TIMESTAMP}" >> "$UNDO_FILE"
     fi
 fi
 
