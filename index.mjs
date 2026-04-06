@@ -690,6 +690,14 @@ function examples() {
       'write-overwrite-confirm.sh': 'Warn when Write tool overwrites large files',
       'write-secret-guard.sh': 'Block secrets from being written to files',
       'write-shrink-guard.sh': 'Block writes that drastically shrink files',
+      'cch-cache-guard.sh': 'Block reads of session files to prevent cache poisoning',
+      'conversation-history-guard.sh': 'Block modifications to conversation history',
+      'image-file-validator.sh': 'Block reads of fake image files that corrupt sessions',
+      'permission-denial-enforcer.sh': 'Block alternative write methods after permission denial',
+      'read-only-mode.sh': 'Block all file modifications and destructive commands',
+      'replace-all-guard.sh': 'Warn when Edit uses replace_all: true',
+      'task-integrity-guard.sh': 'Prevent Claude from deleting tasks to hide unfinished work',
+      'working-directory-fence.sh': 'Block file operations outside current working directory',
     },
     'Auto-Approve': {
       'allow-claude-settings.sh': 'PermissionRequest hook',
@@ -927,6 +935,9 @@ function examples() {
       'tool-call-rate-limiter.sh': 'Prevent runaway tool calls',
       'tool-file-logger.sh': 'Log file paths from Read/Write/Edit to stderr',
       'usage-cache-local.sh': 'Cache usage info locally to avoid API calls',
+      'compact-alert-notification.sh': 'Warn when context compaction is imminent',
+      'prompt-usage-logger.sh': 'Log every prompt with timestamps',
+      'subagent-error-detector.sh': 'Detect failed subagent results',
     },
     'Recovery': {
       'auto-checkpoint.sh': 'Auto-commit after every edit for rollback protection',
@@ -956,6 +967,10 @@ function examples() {
       'session-summary.sh': 'Session Summary',
       'settings-auto-backup.sh': 'Auto-backup settings on session start',
       'terminal-state-restore.sh': 'terminal-state-restore — restore terminal to clean state on session exit',
+      'pre-compact-transcript-backup.sh': 'Backup transcript before compaction',
+      'ripgrep-permission-fix.sh': 'Auto-fix ripgrep execute permission on session start',
+      'session-backup-on-start.sh': 'Backup session JSONL files on start',
+      'session-index-repair.sh': 'Rebuild sessions-index.json on exit',
     },
     'UX': {
       'auto-answer-question.sh': 'Auto-answer AskUserQuestion for headless/autonomous mode',
@@ -1028,6 +1043,7 @@ function examples() {
     },
     'Other': {
       'token-spike-alert.sh': 'Alert on abnormal token consumption per turn',
+      'mcp-warmup-wait.sh': 'Wait for MCP servers to be ready on session start',
     },
   };
 
