@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-06T21:33:51+09:00
+Updated: 2026-04-06T21:33:59+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-04-06T21:33:51+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 131d1323 recovery: pre-compact checkpoint (1 files, 20260406-123351)
+- Last commit: 48eb87d9 recovery: pre-compact checkpoint (1 files, 20260406-123359)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-04-06.md
+./.claude/pre-compact-checkpoint.md
 ./examples/direnv-auto-reload.sh
 ./README.md
 ./examples/file-change-undo-tracker.sh
