@@ -58,6 +58,10 @@ Claude Codeを再起動。完了。
 
 > 📘 hookの設計パターンや自律セッション運用の実践例は[Claude Codeを本番品質にする — hook設計・運用ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）にまとめています。
 
+**既知の制限:**
+
+- `FileChanged`通知はファイル内容をhookの**前に**コンテキストへ注入します。セッション中に`.env`や`credentials.json`が外部で変更された場合、hookでブロックできません（[#44909](https://github.com/anthropics/claude-code/issues/44909)）。対策: `dotenv-watch`で警告を受け取り、Claude Code実行中は機密ファイルを編集しないでください。
+
 ## セッション保護フック
 
 セッションの破損やトークンの無駄遣いを防ぐフック。

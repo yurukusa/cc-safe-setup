@@ -252,7 +252,10 @@ Safe to run multiple times. Existing settings are preserved. A backup is created
 
 **Note:** Hooks are skipped when Claude Code runs with `--bare` or `--dangerously-skip-permissions`. These modes bypass all safety hooks by design.
 
-**Known limitation:** In headless mode (`-p` / `--print`), hook exit code 2 may not block tool execution ([#36071](https://github.com/anthropics/claude-code/issues/36071)). For CI pipelines, use interactive mode with hooks rather than `-p` mode.
+**Known limitations:**
+
+- In headless mode (`-p` / `--print`), hook exit code 2 may not block tool execution ([#36071](https://github.com/anthropics/claude-code/issues/36071)). For CI pipelines, use interactive mode with hooks rather than `-p` mode.
+- `FileChanged` notifications inject file contents into model context **before** hooks can intervene. If a sensitive file (`.env`, `credentials.json`) is modified externally during a session, its contents may appear in the conversation transcript regardless of hooks ([#44909](https://github.com/anthropics/claude-code/issues/44909)). Mitigation: use `dotenv-watch` to get alerted, and avoid editing sensitive files while Claude Code is running.
 
 ## Before / After
 
