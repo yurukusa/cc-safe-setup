@@ -53,6 +53,7 @@ Claude Codeを再起動。完了。
 | Python構文エラー | 気づかない | 自動検出 |
 | コンテキスト枯渇 | 突然死 | 段階的警告 |
 | CLAUDE.mdルール消失 | 圧縮後に無視 | 自動再注入 |
+| サブエージェントの指示無視 | v2.1.84以降CLAUDE.md除外 ([#40459](https://github.com/anthropics/claude-code/issues/40459)) | hookで制約 |
 | 読まずに編集 | 6%→34%に増加 ([#42796](https://github.com/anthropics/claude-code/issues/42796)) | 警告 |
 
 > 📘 hookの設計パターンや自律セッション運用の実践例は[Claude Codeを本番品質にする — hook設計・運用ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）にまとめています。

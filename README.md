@@ -30,6 +30,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
   ✗ Syntax errors cascading through 30+ files
   ✗ Sessions losing all context with no warning
   ✗ CLAUDE.md rules silently ignored after context compaction
+  ✗ Subagents ignoring all CLAUDE.md rules since v2.1.84 (#40459)
 
   Hooks to install:
 
@@ -55,6 +56,8 @@ One user [analyzed 6,852 sessions](https://github.com/anthropics/claude-code/iss
 Claude Code ships with no safety hooks by default. This tool fixes that.
 
 **Works with Auto Mode.** Claude Code's [Auto Mode sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing) provides container-level isolation. cc-safe-setup adds process-level hooks as defense-in-depth — catching destructive commands even outside sandboxed environments.
+
+**Works with subagents.** Since v2.1.84, subagents and teammates [don't receive CLAUDE.md](https://github.com/anthropics/claude-code/issues/40459) — your project rules are silently skipped. Hooks operate at the process level, so they apply to every tool call regardless of which agent makes it. The `subagent-claudemd-inject` example hook re-injects critical rules into subagent prompts.
 
 ## What Gets Installed
 
