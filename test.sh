@@ -1825,7 +1825,7 @@ test_allow_git_hooks() {
     local output
     output=$(echo "$input" | bash "$ALLOW_GIT_HOOKS" 2>/dev/null)
     local has_allow=0
-    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    echo "$output" | grep -qE '"decision"|"permissionDecision"' && has_allow=1
     if [ "$has_allow" -eq "$expect_allow" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -1852,7 +1852,7 @@ test_allow_claude() {
     local output
     output=$(echo "$input" | bash "$ALLOW_CLAUDE_SETTINGS" 2>/dev/null)
     local has_allow=0
-    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    echo "$output" | grep -qE '"decision"|"permissionDecision"' && has_allow=1
     if [ "$has_allow" -eq "$expect_allow" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -1877,7 +1877,7 @@ test_allow_protected() {
     local output
     output=$(echo "$input" | bash "$ALLOW_PROTECTED" 2>/dev/null)
     local has_allow=0
-    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    echo "$output" | grep -qE '"decision"|"permissionDecision"' && has_allow=1
     if [ "$has_allow" -eq "$expect_allow" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -1903,7 +1903,7 @@ test_compound_git() {
     local output
     output=$(echo "$input" | bash "$COMPOUND_GIT" 2>/dev/null)
     local has_allow=0
-    echo "$output" | grep -q '"permissionDecision"' && has_allow=1
+    echo "$output" | grep -qE '"decision"|"permissionDecision"' && has_allow=1
     if [ "$has_allow" -eq "$expect_allow" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -11963,7 +11963,7 @@ echo "warning" >&2; exit 0' > /tmp/test-stderr-hook.sh && chmod +x /tmp/test-std
 echo '#!/bin/bash
 echo "BLOCKED" >&2; exit 2' > /tmp/test-block-hook.sh && chmod +x /tmp/test-block-hook.sh
 echo '#!/bin/bash
-echo '"'"'{"hookSpecificOutput":{"permissionDecision":"allow"}}'"'"'; exit 0' > /tmp/test-json-hook.sh && chmod +x /tmp/test-json-hook.sh
+echo '"'"'{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}'"'"'; exit 0' > /tmp/test-json-hook.sh && chmod +x /tmp/test-json-hook.sh
 
 sanitizer_test() {
     local hook="$1" expected="$2" desc="$3"

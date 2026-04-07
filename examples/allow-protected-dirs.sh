@@ -24,8 +24,9 @@ if echo "$FILE_PATH" | grep -qE '\.(claude|git|vscode|idea)/'; then
   jq -n '{
     hookSpecificOutput: {
       hookEventName: "PermissionRequest",
-      permissionDecision: "allow",
-      permissionDecisionReason: "Allowed: protected directory (full bypass)"
+      decision: {
+        behavior: "allow"
+      }
     }
   }'
   exit 0

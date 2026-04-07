@@ -51,7 +51,7 @@ SAFE_COMMANDS="git|npm|npx|bun|yarn|pnpm|docker|make|cargo|go|pip|python3|node|t
 BASE_CMD=$(echo "$COMMAND" | tr '\n' ' ' | sed 's/^[[:space:]]*//' | sed 's/^[A-Z_]*=[^ ]* //' | sed 's/^cd [^&;]* *[&;]* *//' | awk '{print $1}' | sed 's|.*/||')
 
 if echo "$BASE_CMD" | grep -qE "^($SAFE_COMMANDS)$"; then
-  echo '{"permissionDecision":"allow"}'
+  jq -n '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}'
   exit 0
 fi
 

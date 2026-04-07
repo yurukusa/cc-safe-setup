@@ -21,8 +21,9 @@ if echo "$FILE_PATH" | grep -qE '\.git/hooks/[^/]+$'; then
   jq -n '{
     hookSpecificOutput: {
       hookEventName: "PermissionRequest",
-      permissionDecision: "allow",
-      permissionDecisionReason: "Allowed: git hooks directory"
+      decision: {
+        behavior: "allow"
+      }
     }
   }'
   exit 0

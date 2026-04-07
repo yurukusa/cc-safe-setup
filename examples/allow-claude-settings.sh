@@ -25,8 +25,9 @@ if echo "$FILE_PATH" | grep -qE '\.claude/'; then
   jq -n '{
     hookSpecificOutput: {
       hookEventName: "PermissionRequest",
-      permissionDecision: "allow",
-      permissionDecisionReason: "Allowed: .claude/ directory (isolated environment)"
+      decision: {
+        behavior: "allow"
+      }
     }
   }'
   exit 0
