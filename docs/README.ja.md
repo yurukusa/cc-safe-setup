@@ -53,6 +53,7 @@ Claude Codeを再起動。完了。
 | Python構文エラー | 気づかない | 自動検出 |
 | コンテキスト枯渇 | 突然死 | 段階的警告 |
 | CLAUDE.mdルール消失 | 圧縮後に無視 | 自動再注入 |
+| 読まずに編集 | 6%→34%に増加 ([#42796](https://github.com/anthropics/claude-code/issues/42796)) | 警告 |
 
 > 📘 hookの設計パターンや自律セッション運用の実践例は[Claude Codeを本番品質にする — hook設計・運用ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）にまとめています。
 
@@ -72,6 +73,7 @@ Claude Codeを再起動。完了。
 | `session-backup-on-start` | 開始時にセッションJSONLをバックアップ（勝手な削除から保護） | [#41874](https://github.com/anthropics/claude-code/issues/41874) |
 | `working-directory-fence` | CWD外のRead/Edit/Writeをブロック（別プロジェクトでの誤作業防止） | [#41850](https://github.com/anthropics/claude-code/issues/41850) |
 | `pre-compact-transcript-backup` | compaction前にJSONL全体をバックアップ（rate limit時のデータ喪失防止） | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
+| `read-before-edit` | 読まずに編集するパターンを検知して警告（Read:Edit比が70%低下 — [#42796](https://github.com/anthropics/claude-code/issues/42796)） | [#42796](https://github.com/anthropics/claude-code/issues/42796) |
 | `subagent-error-detector` | サブエージェントの529/502/timeout結果を検知して警告 | [#41911](https://github.com/anthropics/claude-code/issues/41911) |
 
 インストール: `npx cc-safe-setup --install-example <名前>`
