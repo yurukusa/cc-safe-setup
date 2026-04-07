@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 658個のexample hook · 14,078テスト · 1,200+ インストール/週
+**Claude Codeを安全にするワンコマンドツール。** 658個のexample hook · 14,096テスト · 1,200+ インストール/週
 
 ```bash
 npx cc-safe-setup
@@ -52,6 +52,7 @@ Claude Codeを再起動。完了。
 | `cat ~/.netrc` | トークン表示 | ブロック |
 | Python構文エラー | 気づかない | 自動検出 |
 | コンテキスト枯渇 | 突然死 | 段階的警告 |
+| CLAUDE.mdルール消失 | 圧縮後に無視 | 自動再注入 |
 
 > 📘 hookの設計パターンや自律セッション運用の実践例は[Claude Codeを本番品質にする — hook設計・運用ガイド](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）にまとめています。
 

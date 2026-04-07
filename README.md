@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dw/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
 [![tests](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml/badge.svg)](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml)
 
-**One command to make Claude Code safe for autonomous operation.** 658 example hooks · 14,078 tests · 1,200+ installs/week · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 658 example hooks · 14,096 tests · 1,200+ installs/week · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
@@ -29,6 +29,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
   ✗ API keys committed to public repos via git add .
   ✗ Syntax errors cascading through 30+ files
   ✗ Sessions losing all context with no warning
+  ✗ CLAUDE.md rules silently ignored after context compaction
 
   Hooks to install:
 
@@ -47,7 +48,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 ## Why This Exists
 
-A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed.
+A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed. And [CLAUDE.md rules get silently dropped](https://github.com/anthropics/claude-code/issues/6354) after context compaction — your instructions vanish mid-session.
 
 Claude Code ships with no safety hooks by default. This tool fixes that.
 

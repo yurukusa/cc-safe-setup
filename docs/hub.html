@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>cc-safe-setup — Claude Code Safety Hub</title>
-<meta name="description" content="451 example hooks, 56 commands, 28 browser tools. Make Claude Code safe for autonomous operation. Prevents rm -rf, force-push, secret leaks, and more.">
+<meta name="description" content="658 example hooks, 56 commands, 28 browser tools. Make Claude Code safe for autonomous operation. Prevents rm -rf, force-push, secret leaks, and more.">
 <meta name="keywords" content="claude code, hooks, safety, autonomous, pretooluse, rm rf, git push, secrets, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/hub.html">
 <style>
@@ -43,9 +43,9 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="tagline">Make Claude Code safe for autonomous operation</div>
 
 <div class="stats">
-<div class="stat"><div class="stat-num">605</div><div class="stat-label">hooks</div></div>
+<div class="stat"><div class="stat-num">658</div><div class="stat-label">hooks</div></div>
 <div class="stat"><div class="stat-num">56</div><div class="stat-label">commands</div></div>
-<div class="stat"><div class="stat-num">9,677</div><div class="stat-label">tests</div></div>
+<div class="stat"><div class="stat-num">14,096</div><div class="stat-label">tests</div></div>
 <div class="stat"><div class="stat-num">28</div><div class="stat-label">web tools</div></div>
 </div>
 
@@ -243,6 +243,13 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="card-title">Fix git show --no-stat</div>
 <div class="card-desc">Auto-fix the invalid --no-stat flag bug. 44 reactions on GitHub.</div>
 <span class="card-tag">fix</span>
+</a>
+
+<a href="claudemd-best-practices.html" class="card">
+<div class="card-icon">📋</div>
+<div class="card-title">CLAUDE.md Rule Protection</div>
+<div class="card-desc">Stop rules from being ignored after compaction. Re-inject CLAUDE.md automatically.</div>
+<span class="card-tag">compliance</span>
 </a>
 
 <a href="disable-auto-compaction.html" class="card">
