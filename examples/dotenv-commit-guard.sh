@@ -28,15 +28,21 @@ if echo "$COMMAND" | grep -qE 'git\s+add\s+.*\.env'; then
     exit 2
 fi
 
-# Check for git add -A/-f that might include .env
-if echo "$COMMAND" | grep -qE 'git\s+add\s+(-A|--all|-f|--force)\b'; then
-    # Check if .env exists in the working directory
+# Check for git add -f/--force (bypasses .gitignore — can stage secrets)
+# GitHub Issue anthropics/claude-code#44730: auto-mode used git add -f to
+# force-add .gitignore'd secret files, exposing credentials in a commit.
+if echo "$COMMAND" | grep -qE 'git\s+add\s+.*(-f|--force)\b'; then
+    echo "BLOCKED: 'git add --force' bypasses .gitignore and can stage secret files." >&2
+    echo "  Use 'git add <specific-file>' without --force instead." >&2
+    exit 2
+fi
+
+# Check for git add -A/--all that might include .env
+if echo "$COMMAND" | grep -qE 'git\s+add\s+(-A|--all)\b'; then
     if [ -f ".env" ] || [ -f ".env.local" ] || [ -f ".env.production" ]; then
-        # Check if .gitignore excludes it
         if ! git check-ignore -q .env 2>/dev/null; then
             echo "WARNING: 'git add -A' with .env file not in .gitignore." >&2
             echo "  Add .env to .gitignore before staging all files." >&2
-            # Warning only for git add -A
         fi
     fi
 fi
