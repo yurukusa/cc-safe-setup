@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-07T20:39:12+09:00
+Updated: 2026-04-07T20:39:18+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-04-07T20:39:12+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ee92048d fix: update hook examples to new decision API format Migrate PermissionRequest hooks from flat permissionDecision/ permissionDecisionReason fields to nested decision.behavior format. Update corresponding tests to match new output structure. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+- Last commit: fa4a1909 checkpoint: auto-save 20:39:17
 
 ## Recent Files
 ```
