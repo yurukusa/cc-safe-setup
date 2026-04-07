@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-07T02:33:58+09:00
+Updated: 2026-04-07T20:39:12+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-04-07T02:33:58+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2946e8a8 recovery: pre-compact checkpoint (1 files, 20260406-173357)
+- Last commit: ee92048d fix: update hook examples to new decision API format Migrate PermissionRequest hooks from flat permissionDecision/ permissionDecisionReason fields to nested decision.behavior format. Update corresponding tests to match new output structure. Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
@@ -16,10 +16,10 @@ Updated: 2026-04-07T02:33:58+09:00
 ./.claude/pre-compact-checkpoint.md
 ./docs/README.ja.md
 ./README.md
-./TROUBLESHOOTING.md
-./.claude/session-logs/2026-04-06.md
-./examples/direnv-auto-reload.sh
-./examples/file-change-undo-tracker.sh
 ./test.sh
+./examples/allow-claude-settings.sh
+./examples/allow-protected-dirs.sh
+./examples/bash-heuristic-approver.sh
+./examples/allow-git-hooks-dir.sh
 ```
 
