@@ -57,7 +57,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 **Works with Auto Mode.** Claude Code's [Auto Mode sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing) provides container-level isolation. cc-safe-setup adds process-level hooks as defense-in-depth — catching destructive commands even outside sandboxed environments.
 
-**Works with subagents.** Since v2.1.84, subagents and teammates [don't receive CLAUDE.md](https://github.com/anthropics/claude-code/issues/40459) — your project rules are silently skipped. Hooks operate at the process level, so they apply to every tool call regardless of which agent makes it. The `subagent-claudemd-inject` example hook re-injects critical rules into subagent prompts.
+**Works with subagents.** Since v2.1.84, subagents and teammates [don't receive CLAUDE.md](https://github.com/anthropics/claude-code/issues/40459) — your project rules are silently skipped. Hooks operate at the process level, but [subagent tool calls may bypass PreToolUse hooks](https://github.com/anthropics/claude-code/issues/21460) in some configurations. As defense-in-depth, cc-safe-setup installs hooks at the user level (`~/.claude/settings.json`). The `subagent-claudemd-inject` example hook re-injects critical rules into subagent prompts.
 
 ## What Gets Installed
 
