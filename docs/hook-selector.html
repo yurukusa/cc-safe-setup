@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Selector — Find Your Perfect Claude Code Safety Setup</title>
+<meta name="description" content="Answer 5 questions, get a personalized Claude Code safety hook configuration. Based on 800+ hours of autonomous operation experience.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:1rem;font-weight:600}
+.q-num{color:#58a6ff;font-size:.8rem;margin-bottom:.3rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.8rem 1rem;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#58a6ff;background:#1c2128}
+.opt.selected{border-color:#58a6ff;background:#0d2346}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.9rem}
+.opt-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.progress{display:flex;gap:.3rem;margin:1.5rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#238636}
+.dot.current{background:#58a6ff}
+.result{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.1rem;margin-bottom:.8rem}
+.hook-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.7rem;margin:.4rem 0}
+.hook-name{color:#58a6ff;font-weight:600;font-size:.85rem}
+.hook-why{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.hook-cat{display:inline-block;background:#1c2128;color:#8b949e;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;margin-top:.2rem}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.75rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;position:relative;margin:.8rem 0}
+.copy-btn{position:absolute;top:.4rem;right:.4rem;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-size:.7rem}
+.copy-btn:hover{color:#f0f6fc;border-color:#58a6ff}
+.btn{background:#238636;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600}
+.btn:hover{background:#2ea043}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#58a6ff;color:#58a6ff}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.score{font-size:2rem;font-weight:700;color:#f0f6fc;text-align:center;margin:.5rem 0}
+.score-label{text-align:center;color:#8b949e;font-size:.8rem}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem;text-align:center}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.8rem;margin-bottom:.6rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Selector</h1>
+<p class="sub">Answer 5 questions. Get your personalized Claude Code safety setup.<br>Based on 800+ hours of autonomous operation.</p>
+
+<div class="progress" id="progress"></div>
+
+<!-- Question 1 -->
+<div class="step active" id="step-0">
+<p class="q-num">Question 1 of 5</p>
+<p class="q">How do you primarily use Claude Code?</p>
+<div class="opts">
+<div class="opt" onclick="answer(0,'interactive')">
+<div class="opt-title">Interactive — I'm always watching</div>
+<div class="opt-desc">I type commands and review each response before proceeding</div>
+</div>
+<div class="opt" onclick="answer(0,'semi')">
+<div class="opt-title">Semi-autonomous — I check periodically</div>
+<div class="opt-desc">I start tasks and check back every 30-60 minutes</div>
+</div>
+<div class="opt" onclick="answer(0,'auto')">
+<div class="opt-title">Fully autonomous — It runs while I sleep</div>
+<div class="opt-desc">I set tasks and let Claude Code work for hours unattended</div>
+</div>
+</div>
+</div>
+
+<!-- Question 2 -->
+<div class="step" id="step-1">
+<p class="q-num">Question 2 of 5</p>
+<p class="q">What's your biggest concern?</p>
+<div class="opts">
+<div class="opt" onclick="answer(1,'files')">
+<div class="opt-title">File deletion / data loss</div>
+<div class="opt-desc">I'm worried about rm -rf, accidental file overwrites, or git disasters</div>
+</div>
+<div class="opt" onclick="answer(1,'tokens')">
+<div class="opt-title">Token consumption / cost</div>
+<div class="opt-desc">My quota burns too fast, or costs spike unexpectedly</div>
+</div>
+<div class="opt" onclick="answer(1,'secrets')">
+<div class="opt-title">Secret leaks / security</div>
+<div class="opt-desc">I'm worried about .env exposure, credential leaks, or unsafe operations</div>
+</div>
+<div class="opt" onclick="answer(1,'quality')">
+<div class="opt-title">Code quality / behavior</div>
+<div class="opt-desc">Claude Code ignores my instructions or writes bad code</div>
+</div>
+</div>
+</div>
+
+<!-- Question 3 -->
+<div class="step" id="step-2">
+<p class="q-num">Question 3 of 5</p>
+<p class="q">What's your technical comfort level?</p>
+<div class="opts">
+<div class="opt" onclick="answer(2,'beginner')">
+<div class="opt-title">Beginner — I don't write code</div>
+<div class="opt-desc">I need copy-paste solutions that just work</div>
+</div>
+<div class="opt" onclick="answer(2,'intermediate')">
+<div class="opt-title">Intermediate — I can edit scripts</div>
+<div class="opt-desc">I can modify bash scripts and JSON configuration</div>
+</div>
+<div class="opt" onclick="answer(2,'advanced')">
+<div class="opt-title">Advanced — I build custom solutions</div>
+<div class="opt-desc">I write my own hooks and integrate with external tools</div>
+</div>
+</div>
+</div>
+
+<!-- Question 4 -->
+<div class="step" id="step-3">
+<p class="q-num">Question 4 of 5</p>
+<p class="q">Do you use subagents or MCP servers?</p>
+<div class="opts">
+<div class="opt" onclick="answer(3,'no')">
+<div class="opt-title">No — Just the main Claude Code</div>
+<div class="opt-desc">I use Claude Code in a single terminal session</div>
+</div>
+<div class="opt" onclick="answer(3,'subagents')">
+<div class="opt-title">Yes — Subagents (Agent tool)</div>
+<div class="opt-desc">I spawn subagents for parallel tasks</div>
+</div>
+<div class="opt" onclick="answer(3,'mcp')">
+<div class="opt-title">Yes — MCP servers</div>
+<div class="opt-desc">I use external tools via MCP protocol</div>
+</div>
+<div class="opt" onclick="answer(3,'both')">
+<div class="opt-title">Both — Subagents + MCP</div>
+<div class="opt-desc">I use the full ecosystem</div>
+</div>
+</div>
+</div>
+
+<!-- Question 5 -->
+<div class="step" id="step-4">
+<p class="q-num">Question 5 of 5</p>
+<p class="q">Have you experienced any incidents?</p>
+<div class="opts">
+<div class="opt" onclick="answer(4,'none')">
+<div class="opt-title">No incidents yet</div>
+<div class="opt-desc">Everything has been smooth so far</div>
+</div>
+<div class="opt" onclick="answer(4,'minor')">
+<div class="opt-title">Minor issues — annoying but no damage</div>
+<div class="opt-desc">Infinite loops, wasted tokens, or ignored instructions</div>
+</div>
+<div class="opt" onclick="answer(4,'major')">
+<div class="opt-title">Major incident — real damage occurred</div>
+<div class="opt-desc">File deletion, secret exposure, or significant token waste</div>
+</div>
+</div>
+</div>
+
+<!-- Results -->
+<div class="step" id="step-results"></div>
+
+</div>
+
+<script>
+const answers = [];
+const TOTAL = 5;
+
+// Hook database — each hook has conditions for when it's recommended
+const hooks = [
+  {name:'destructive-guard',cat:'Safety',why:'Blocks rm -rf, git reset --hard, and other destructive commands',when:{concern:['files'],mode:['interactive','semi','auto']}},
+  {name:'main-branch-guard',cat:'Safety',why:'Prevents direct push to main/master branch',when:{concern:['files','quality'],mode:['interactive','semi','auto']}},
+  {name:'secret-scan-guard',cat:'Security',why:'Detects .env, API keys, tokens in file writes',when:{concern:['secrets'],mode:['interactive','semi','auto']}},
+  {name:'large-read-guard',cat:'Token',why:'Warns when reading files over 100KB — prevents token waste',when:{concern:['tokens'],mode:['semi','auto']}},
+  {name:'token-budget-guard',cat:'Token',why:'Tracks estimated token usage and blocks when budget exceeded',when:{concern:['tokens'],mode:['semi','auto']}},
+  {name:'subagent-budget-guard',cat:'Token',why:'Limits subagent spawning to prevent token explosions',when:{concern:['tokens'],agents:['subagents','both']}},
+  {name:'duplicate-read-detector',cat:'Token',why:'Warns when the same file is read multiple times',when:{concern:['tokens'],mode:['semi','auto']}},
+  {name:'syntax-check-after-edit',cat:'Quality',why:'Runs syntax validation after every file edit',when:{concern:['quality'],mode:['interactive','semi','auto']}},
+  {name:'scope-guard',cat:'Safety',why:'Prevents operations outside the project directory',when:{concern:['files'],mode:['semi','auto']}},
+  {name:'pre-compact-checkpoint',cat:'Safety',why:'Auto-saves work before context compaction',when:{mode:['semi','auto'],incident:['minor','major']}},
+  {name:'token-spike-alert',cat:'Token',why:'Alerts on rapid tool calls that suggest runaway behavior',when:{concern:['tokens'],mode:['auto']}},
+  {name:'session-budget-alert',cat:'Token',why:'Shows daily session count on startup',when:{concern:['tokens'],mode:['semi','auto']}},
+  {name:'conversation-history-guard',cat:'Safety',why:'Prevents reading .jsonl session files (cache invalidation risk)',when:{mode:['auto'],incident:['minor','major']}},
+  {name:'mcp-warmup-wait',cat:'MCP',why:'Waits for MCP servers to initialize before use',when:{agents:['mcp','both']}},
+  {name:'replace-all-guard',cat:'Safety',why:'Blocks replace_all edits that affect too many lines',when:{concern:['files','quality'],mode:['semi','auto']}},
+  {name:'auto-approve-readonly',cat:'Workflow',why:'Auto-approves read-only operations (Glob, Grep, Read)',when:{mode:['auto'],level:['intermediate','advanced']}},
+];
+
+function answer(step, value) {
+  answers[step] = value;
+  document.querySelectorAll(`#step-${step} .opt`).forEach(o => o.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  setTimeout(() => {
+    if (step < TOTAL - 1) {
+      showStep(step + 1);
+    } else {
+      showResults();
+    }
+  }, 300);
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`step-${n}`).classList.add('active');
+  updateProgress(n);
+}
+
+function updateProgress(current) {
+  const p = document.getElementById('progress');
+  p.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < current ? ' done' : i === current ? ' current' : '');
+    p.appendChild(d);
+  }
+}
+
+function getRecommendedHooks() {
+  const mode = answers[0];
+  const concern = answers[1];
+  const level = answers[2];
+  const agents = answers[3];
+  const incident = answers[4];
+
+  return hooks.filter(h => {
+    const w = h.when;
+    let score = 0;
+    if (w.concern && w.concern.includes(concern)) score += 2;
+    if (w.mode && w.mode.includes(mode)) score += 1;
+    if (w.agents && w.agents.includes(agents)) score += 2;
+    if (w.level && w.level.includes(level)) score += 1;
+    if (w.incident && w.incident.includes(incident)) score += 1;
+    h._score = score;
+    return score > 0;
+  }).sort((a, b) => b._score - a._score);
+}
+
+function showResults() {
+  const rec = getRecommendedHooks();
+  const el = document.getElementById('step-results');
+
+  // Generate settings.json
+  const hooksByEvent = {};
+  rec.forEach(h => {
+    const event = h.cat === 'Token' || h.cat === 'Safety' || h.cat === 'Security' || h.cat === 'Quality' ? 'PreToolUse' :
+                  h.cat === 'MCP' ? 'PreToolUse' : 'PostToolUse';
+    if (!hooksByEvent[event]) hooksByEvent[event] = [];
+    hooksByEvent[event].push(h.name);
+  });
+
+  const installCmd = `npx cc-safe-setup --install-example ${rec.slice(0, 5).map(h => h.name).join(' \\\n  --install-example ')}`;
+
+  el.innerHTML = `
+    <div class="result">
+      <h2>Your Personalized Safety Setup</h2>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:1rem">${rec.length} hooks recommended based on your answers</p>
+      ${rec.map(h => `
+        <div class="hook-card">
+          <div class="hook-name">${h.name}</div>
+          <div class="hook-why">${h.why}</div>
+          <span class="hook-cat">${h.cat}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <h2 style="color:#f0f6fc;font-size:1rem;margin:1rem 0 .5rem">Quick Install</h2>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>${installCmd}</pre>
+
+    <div class="cta">
+      <h3>Want the complete safety guide?</h3>
+      <p>Learn the "why" behind each hook, real incident stories, and advanced patterns from 800+ hours of autonomous operation.</p>
+      <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Safety Guide Book (¥800)</a>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Token Optimization (¥2,500)</a>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="restart()">Start Over</button>
+    </div>
+  `;
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  updateProgress(TOTAL);
+}
+
+function copyCode(btn) {
+  const pre = btn.parentElement;
+  const text = pre.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+function restart() {
+  answers.length = 0;
+  showStep(0);
+}
+
+// Init
+updateProgress(0);
+</script>
+
+<div class="footer">
+  <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · 653 hooks · 9,200+ tests<br>
+  Built from 800+ hours of autonomous Claude Code operation
+</div>
+</body>
+</html>
