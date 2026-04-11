@@ -31,6 +31,8 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
   ✗ Syntax errors cascading through 30+ files
   ✗ Sessions losing all context with no warning
   ✗ CLAUDE.md rules silently ignored after context compaction
+  ✗ Claude ran destructive DDL on production database (#46684)
+  ✗ AI executed delete/kill operations on production environment (#46650)
   ✗ Subagents ignoring all CLAUDE.md rules since v2.1.84 (#40459)
 
   Hooks to install:
@@ -50,7 +52,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 ## Why This Exists
 
-A user [lost 3,467 files (~7 GB)](https://github.com/anthropics/claude-code/issues/46058) when Claude ran `rm -rf` on their data directory without confirmation. Another [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed. And [CLAUDE.md rules get silently dropped](https://github.com/anthropics/claude-code/issues/6354) after context compaction — your instructions vanish mid-session.
+A user [lost 3,467 files (~7 GB)](https://github.com/anthropics/claude-code/issues/46058) when Claude ran `rm -rf` on their data directory without confirmation. Another [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. One user's Claude [ran destructive DDL on a production database](https://github.com/anthropics/claude-code/issues/46684) when asked only to investigate. Another had Claude [execute delete and kill operations on production systems](https://github.com/anthropics/claude-code/issues/46650). Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed. And [CLAUDE.md rules get silently dropped](https://github.com/anthropics/claude-code/issues/6354) after context compaction — your instructions vanish mid-session.
 
 One user [analyzed 6,852 sessions](https://github.com/anthropics/claude-code/issues/42796) and found the Read:Edit ratio dropped from 6.6 to 2.0 — Claude editing files it never read jumped from 6% to 34%. That issue has over 2,100 reactions. The `read-before-edit` example hook catches this pattern before damage happens.
 
@@ -365,7 +367,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **edit-guard.sh** — Block Edit/Write to protected files (defense-in-depth for [#37210](https://github.com/anthropics/claude-code/issues/37210))
 - **auto-approve-build.sh** — Auto-approve npm/yarn/cargo/go/python build, test, and lint commands
 - **auto-approve-docker.sh** — Auto-approve docker build, compose, ps, logs, and other safe commands
-- **block-database-wipe.sh** — Block destructive database commands: Laravel `migrate:fresh`, Django `flush`, Rails `db:drop`, raw `DROP DATABASE` ([#37405](https://github.com/anthropics/claude-code/issues/37405) [#37439](https://github.com/anthropics/claude-code/issues/37439))
+- **block-database-wipe.sh** — Block destructive database commands: Laravel `migrate:fresh`, Django `flush`, Rails `db:drop`, raw `DROP DATABASE` ([#46684](https://github.com/anthropics/claude-code/issues/46684) [#46650](https://github.com/anthropics/claude-code/issues/46650) [#37405](https://github.com/anthropics/claude-code/issues/37405) [#37439](https://github.com/anthropics/claude-code/issues/37439))
 - **auto-approve-python.sh** — Auto-approve pytest, mypy, ruff, black, isort, flake8, pylint commands
 - **auto-snapshot.sh** — Auto-save file snapshots before edits for rollback protection ([#37386](https://github.com/anthropics/claude-code/issues/37386) [#37457](https://github.com/anthropics/claude-code/issues/37457))
 - **allowlist.sh** — Block everything not explicitly approved — inverse permission model ([#37471](https://github.com/anthropics/claude-code/issues/37471))
