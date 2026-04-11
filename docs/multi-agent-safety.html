@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeマルチエージェント安全運用ガイド</title>
+<meta name="description" content="Claude Codeで複数のAIエージェントを安全に同時稼働させる方法。800時間の自律運用経験から得た、tmux制御・ファイル監視・3層アーキテクチャの実践パターン。">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+p{line-height:1.6;margin:.5rem 0;font-size:.9rem}
+ul{margin:.5rem 0 .5rem 1.5rem;font-size:.9rem}
+li{margin:.3rem 0}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.8rem;color:#e6edf3;overflow-x:auto;margin:.5rem 0}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.card h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.3rem}
+.warn{background:#1c1608;border-left:3px solid #d29922;padding:.5rem .8rem;font-size:.82rem;color:#d29922;margin:.5rem 0}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1.5rem 0;text-align:center}
+.cta h3{color:#f0f6fc;font-size:1rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.82rem;margin-bottom:.8rem}
+.btn{display:inline-block;background:#238636;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;font-size:.85rem;font-weight:600;text-decoration:none}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#58a6ff;color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Claude Code マルチエージェント安全運用</h1>
+<p class="sub">複数のAIエージェントを同時稼働させるとき、何が壊れるか。800時間の経験から。</p>
+
+<h2>なぜマルチエージェントが必要か</h2>
+<p>Claude Codeは1つのセッションで1つのタスクしか扱えない。コードを書きながらテストを走らせ、ドキュメントも更新する——これを1セッションでやるとコンテキストが膨らみ、トークン効率が悪化する。</p>
+<p>解決策は<strong>役割分離</strong>。実装エージェント、レビューエージェント、テストエージェントに分けて、それぞれが専門の仕事に集中する。</p>
+
+<h2>3層アーキテクチャ</h2>
+<div class="card">
+<h3>戦略層（人間 or Claude.ai）</h3>
+<p>全体方針の決定、優先順位付け、品質判断</p>
+</div>
+<div class="card">
+<h3>実行層（Claude Code × 複数）</h3>
+<p>コード実装、テスト実行、ドキュメント更新。tmuxで同時稼働</p>
+</div>
+<div class="card">
+<h3>安全層（Hooks）</h3>
+<p>全エージェントに共通の安全制約。rm -rf防止、秘密漏洩防止、トークン制限</p>
+</div>
+
+<h2>安全上の注意</h2>
+<div class="warn">マルチエージェントは事故リスクが単体の2〜3倍になる。各エージェントが独立して動くため、一方のエージェントが変更したファイルを別のエージェントが上書きするケースが発生する。</div>
+
+<p>最低限必要な安全設定:</p>
+<ul>
+<li><strong>destructive-guard</strong> — rm -rf、git reset --hardをブロック（全エージェント共通）</li>
+<li><strong>scope-guard</strong> — 各エージェントの作業ディレクトリを制限</li>
+<li><strong>subagent-budget-guard</strong> — サブエージェントの同時起動数を制限</li>
+<li><strong>pre-compact-checkpoint</strong> — compact前に自動コミット（作業消失防止）</li>
+</ul>
+
+<pre>npx cc-safe-setup --shield</pre>
+<p>このコマンドで8個の基本hookが一括インストールされる。マルチエージェント環境では<strong>全てのエージェントが同じhookを共有する</strong>（~/.claude/settings.jsonは共通）。</p>
+
+<h2>実践パターン</h2>
+
+<div class="card">
+<h3>パターン1: tmux分割</h3>
+<p>tmuxの各ペインでClaude Codeを起動。左ペインで実装、右ペインでテスト。send-keysでタスクを投入。</p>
+</div>
+
+<div class="card">
+<h3>パターン2: ファイル監視</h3>
+<p>特定のディレクトリにファイルが追加されたら自動でClaude Codeにタスクを投入。inotifywaitで監視。</p>
+</div>
+
+<div class="card">
+<h3>パターン3: サブエージェント活用</h3>
+<p>Claude Code内蔵のAgent toolで並列実行。メインセッションのコンテキストを汚さずに調査・分析を実行。</p>
+</div>
+
+<h2>正直な限界</h2>
+<p>マルチエージェント協調は<strong>まだ発展途上</strong>。以下の問題が日常的に発生する:</p>
+<ul>
+<li>エージェント間の文脈共有が困難（コンテキスト圧縮で文脈を忘れる）</li>
+<li>ファイル競合（同じファイルを同時に編集する事故）</li>
+<li>トークン消費が予想の2〜3倍になることがある</li>
+<li>デバッグが極めて困難（どのエージェントが何をしたか追跡しにくい）</li>
+</ul>
+
+<div class="cta">
+<h3>安全設定を始める</h3>
+<p>マルチエージェントの前に、まず単体の安全設定を固めよう。</p>
+<a href="hook-selector.html" class="btn" style="margin:.3rem">Hook Selector（無料）</a>
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn btn-outline" style="margin:.3rem">実践ガイド（¥800）</a>
+</div>
+
+</div>
+<div class="footer">
+<a href="hub.html">Hub</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · 653 hooks · 9,200+ tests
+</div>
+</body>
+</html>
