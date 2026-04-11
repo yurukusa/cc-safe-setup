@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Checkup — Is Your Claude Code Burning Tokens?</title>
+<meta name="description" content="Quick 5-question diagnostic to find where your Claude Code tokens are going. Get personalized optimization tips based on 800+ hours of operation data.">
+<meta property="og:title" content="Token Checkup — Is Your Claude Code Burning Tokens?">
+<meta property="og:description" content="5 questions to diagnose why your Claude Code session runs out so fast.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:1rem;font-weight:600}
+.q-num{color:#f97316;font-size:.8rem;margin-bottom:.3rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.8rem 1rem;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#f97316;background:#1c2128}
+.opt.selected{border-color:#f97316;background:#2a1a0a}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.9rem}
+.opt-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.progress{display:flex;gap:.3rem;margin:1.5rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#f97316}
+.dot.current{background:#fb923c}
+.result{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.1rem;margin-bottom:.8rem}
+.tip{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.7rem;margin:.4rem 0}
+.tip-title{color:#f97316;font-weight:600;font-size:.85rem}
+.tip-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.tip-impact{display:inline-block;background:#2a1a0a;color:#f97316;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;margin-top:.2rem}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.75rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;position:relative;margin:.8rem 0}
+.score{font-size:2.5rem;font-weight:700;text-align:center;margin:.5rem 0}
+.score.red{color:#f87171}
+.score.yellow{color:#fbbf24}
+.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.8rem}
+.btn{background:#f97316;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600}
+.btn:hover{background:#ea580c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#f97316;color:#f97316}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem;text-align:center}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.8rem;margin-bottom:.6rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Token Checkup</h1>
+<p class="sub">5 questions to diagnose why your Claude Code sessions run out so fast. Based on 800+ hours of operation data.</p>
+
+<div class="progress" id="progress"></div>
+
+<!-- Question 1 -->
+<div class="step active" id="step-0">
+<p class="q-num">Question 1 of 5</p>
+<p class="q">How fast does your session budget run out?</p>
+<div class="opts">
+<div class="opt" onclick="answer(0,'fast')">
+<div class="opt-title">Very fast — 15-30 minutes on Max plan</div>
+<div class="opt-desc">I burn through my allowance before getting much done</div>
+</div>
+<div class="opt" onclick="answer(0,'moderate')">
+<div class="opt-title">Moderate — 1-2 hours feels about right</div>
+<div class="opt-desc">Could be better, but manageable</div>
+</div>
+<div class="opt" onclick="answer(0,'slow')">
+<div class="opt-title">Slow — I rarely hit limits</div>
+<div class="opt-desc">Just want to optimize further</div>
+</div>
+</div>
+</div>
+
+<!-- Question 2 -->
+<div class="step" id="step-1">
+<p class="q-num">Question 2 of 5</p>
+<p class="q">How long is your typical CLAUDE.md file?</p>
+<div class="opts">
+<div class="opt" onclick="answer(1,'none')">
+<div class="opt-title">No CLAUDE.md</div>
+<div class="opt-desc">I don't have one or barely use it</div>
+</div>
+<div class="opt" onclick="answer(1,'short')">
+<div class="opt-title">Short — under 50 lines</div>
+<div class="opt-desc">Basic project rules</div>
+</div>
+<div class="opt" onclick="answer(1,'long')">
+<div class="opt-title">Long — 100+ lines</div>
+<div class="opt-desc">Detailed instructions, examples, and rules</div>
+</div>
+</div>
+</div>
+
+<!-- Question 3 -->
+<div class="step" id="step-2">
+<p class="q-num">Question 3 of 5</p>
+<p class="q">Do you use subagents or let Claude spawn agents?</p>
+<div class="opts">
+<div class="opt" onclick="answer(2,'no')">
+<div class="opt-title">No subagents</div>
+<div class="opt-desc">Single agent only</div>
+</div>
+<div class="opt" onclick="answer(2,'sometimes')">
+<div class="opt-title">Sometimes — Claude decides when</div>
+<div class="opt-desc">I don't control it much</div>
+</div>
+<div class="opt" onclick="answer(2,'heavy')">
+<div class="opt-title">Heavily — many parallel agents</div>
+<div class="opt-desc">I use Agent tool or auto mode extensively</div>
+</div>
+</div>
+</div>
+
+<!-- Question 4 -->
+<div class="step" id="step-3">
+<p class="q-num">Question 4 of 5</p>
+<p class="q">Have you ever seen cache read ratio drop below 50%?</p>
+<div class="opts">
+<div class="opt" onclick="answer(3,'dunno')">
+<div class="opt-title">I don't know what that is</div>
+<div class="opt-desc">Never checked /cost or status bar</div>
+</div>
+<div class="opt" onclick="answer(3,'no')">
+<div class="opt-title">No — my cache ratio stays high</div>
+<div class="opt-desc">Usually 70%+ cache reads</div>
+</div>
+<div class="opt" onclick="answer(3,'yes')">
+<div class="opt-title">Yes — it crashes sometimes</div>
+<div class="opt-desc">I've seen it drop to single digits</div>
+</div>
+</div>
+</div>
+
+<!-- Question 5 -->
+<div class="step" id="step-4">
+<p class="q-num">Question 5 of 5</p>
+<p class="q">How do you handle long sessions?</p>
+<div class="opts">
+<div class="opt" onclick="answer(4,'single')">
+<div class="opt-title">One long session until it stops</div>
+<div class="opt-desc">I keep going until I hit limits</div>
+</div>
+<div class="opt" onclick="answer(4,'split')">
+<div class="opt-title">I split into shorter sessions</div>
+<div class="opt-desc">New conversation every 1-2 hours</div>
+</div>
+<div class="opt" onclick="answer(4,'auto')">
+<div class="opt-title">Fully autonomous — runs overnight</div>
+<div class="opt-desc">Claude works while I sleep</div>
+</div>
+</div>
+</div>
+
+<!-- Results -->
+<div class="step" id="step-results"></div>
+
+</div>
+
+<script>
+const answers = [];
+const TOTAL = 5;
+
+const tips = [
+  {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Save 20-40% tokens',when:{claudemd:['long']}},
+  {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Common after editing CLAUDE.md mid-session.',impact:'Prevent 10-20x spikes',when:{cache:['dunno','yes']}},
+  {id:'subagent',title:'Set subagent budget limits',desc:'Each subagent gets its own context window. 5 parallel agents = 5x token cost. Use token-budget-guard and subagent-budget-guard hooks.',impact:'Save 30-60% on agent-heavy workflows',when:{agents:['heavy','sometimes']}},
+  {id:'session',title:'Split sessions strategically',desc:'After context compaction, cache efficiency drops. Starting a fresh session with a clear task description is often cheaper than continuing.',impact:'Save 15-25% per session',when:{session:['single','auto']}},
+  {id:'reads',title:'Block unnecessary file reads',desc:'Claude reads files it doesn\'t need — large binaries, generated code, logs. Use large-read-guard hook to warn on files over 100KB.',impact:'Save 10-20% tokens',when:{burn:['fast','moderate']}},
+  {id:'compact',title:'Auto-save before compaction',desc:'PreCompact hook creates a git checkpoint before context is compressed. Prevents Claude from re-reading files it already processed.',impact:'Prevent post-compaction waste',when:{session:['single','auto']}},
+  {id:'cost',title:'Check /cost regularly',desc:'The /cost command shows exactly where tokens go. Most users never check it. Understanding your baseline is the first step to optimizing.',impact:'Foundation for all other optimizations',when:{cache:['dunno']}},
+  {id:'workflow',title:'Design token-aware workflows',desc:'Break large tasks into focused sub-tasks. Each sub-task starts with a clean context = better cache ratio. Plan mode helps.',impact:'Save 20-30% on complex tasks',when:{burn:['fast']}}
+];
+
+function updateProgress(current) {
+  const el = document.getElementById('progress');
+  el.innerHTML = Array.from({length:TOTAL}, (_,i) =>
+    `<div class="dot ${i < current ? 'done' : i === current ? 'current' : ''}"></div>`
+  ).join('');
+}
+updateProgress(0);
+
+function answer(step, value) {
+  answers[step] = value;
+  const opts = document.querySelectorAll(`#step-${step} .opt`);
+  opts.forEach(o => o.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  setTimeout(() => {
+    if (step < TOTAL - 1) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step-${step+1}`).classList.add('active');
+      updateProgress(step + 1);
+    } else {
+      showResults();
+    }
+  }, 300);
+}
+
+function showResults() {
+  const [burn, claudemd, agents, cache, session] = answers;
+  const ctx = {burn, claudemd, agents, cache, session};
+
+  // Score calculation
+  let score = 100;
+  if (burn === 'fast') score -= 40;
+  else if (burn === 'moderate') score -= 15;
+  if (claudemd === 'long') score -= 15;
+  else if (claudemd === 'none') score -= 5;
+  if (agents === 'heavy') score -= 20;
+  else if (agents === 'sometimes') score -= 10;
+  if (cache === 'yes') score -= 15;
+  else if (cache === 'dunno') score -= 10;
+  if (session === 'single') score -= 10;
+  else if (session === 'auto') score -= 5;
+  score = Math.max(10, score);
+
+  // Match tips
+  const matched = tips.filter(tip => {
+    return Object.entries(tip.when).some(([key, vals]) => vals.includes(ctx[key]));
+  }).slice(0, 5);
+
+  const scoreClass = score >= 70 ? 'green' : score >= 40 ? 'yellow' : 'red';
+  const label = score >= 70 ? 'Good — minor tweaks possible' : score >= 40 ? 'Room for improvement' : 'Significant token waste detected';
+
+  const el = document.getElementById('step-results');
+  el.innerHTML = `
+    <div class="result">
+      <h2>Your Token Efficiency Score</h2>
+      <div class="score ${scoreClass}">${score}/100</div>
+      <p class="score-label">${label}</p>
+    </div>
+
+    <div class="result">
+      <h2>Recommended Optimizations</h2>
+      ${matched.map(t => `
+        <div class="tip">
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-desc">${t.desc}</div>
+          <span class="tip-impact">${t.impact}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="cta">
+      <h3>Want the complete token optimization system?</h3>
+      <p>10 chapters, 41,000 words of real operation data. CLAUDE.md templates, hook configs, and diagnostic commands you can copy-paste.</p>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Token Optimization Book (¥2,500)</a>
+      <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Safety Guide (¥800)</a>
+    </div>
+    <div class="cta" style="margin-top:.8rem">
+      <h3>Quick fix: Install safety hooks now</h3>
+      <p>Includes large-read-guard and token-budget-guard.</p>
+      <pre>npx cc-safe-setup</pre>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="restart()">Start Over</button>
+    </div>
+  `;
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  updateProgress(TOTAL);
+}
+
+function restart() {
+  answers.length = 0;
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-0').classList.add('active');
+  updateProgress(0);
+}
+</script>
+
+<div class="footer">
+  <a href="hook-selector.html">Hook Selector</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+  <br>cc-safe-setup — 650+ hooks · 9,200+ tests · MIT License
+</div>
+</body>
+</html>
