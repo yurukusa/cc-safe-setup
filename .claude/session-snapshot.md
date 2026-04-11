@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-11T21:30:29+09:00
+Updated: 2026-04-11T21:31:08+09:00
 
 ## Git
 - Branch: `main`
@@ -7,16 +7,16 @@ Updated: 2026-04-11T21:30:29+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 1a3a7a67 checkpoint: auto-save 21:30:06
+- Last commit: d7b9b90a checkpoint: pre-compact auto-save (1 files, 20260411-123106)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
+./examples/README.md
+./.claude/session-logs/2026-04-11.md
 ./docs/README.ja.md
 ./README.md
-./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-04-11.md
-./examples/README.md
 ./.claude/session-logs/2026-04-08.md
 ./test.sh
 ./examples/dotenv-commit-guard.sh
