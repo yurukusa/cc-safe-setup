@@ -54,7 +54,7 @@ A user [lost 3,467 files (~7 GB)](https://github.com/anthropics/claude-code/issu
 
 One user [analyzed 6,852 sessions](https://github.com/anthropics/claude-code/issues/42796) and found the Read:Edit ratio dropped from 6.6 to 2.0 — Claude editing files it never read jumped from 6% to 34%. That issue has over 2,100 reactions. The `read-before-edit` example hook catches this pattern before damage happens.
 
-Claude Code ships with no safety hooks by default. This tool fixes that.
+Claude Code ships with no safety hooks by default. This tool fixes that. ([Standalone guard script](https://gist.github.com/yurukusa/87f51b97bb655357dd148b66109d0c14) for quick setup)
 
 **Works with Auto Mode.** Claude Code's [Auto Mode sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing) provides container-level isolation. cc-safe-setup adds process-level hooks as defense-in-depth — catching destructive commands even outside sandboxed environments.
 
