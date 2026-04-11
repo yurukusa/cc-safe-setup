@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Getting Started — Make Claude Code Safe in 5 Minutes</title>
-<meta name="description" content="Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, force-push to main, secret leaks. Step-by-step for beginners. npx cc-safe-setup.">
-<meta name="keywords" content="claude code, safety, hooks, setup, pretooluse, autonomous, beginner guide, cc-safe-setup">
+<meta name="description" content="Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, production database destruction, force-push to main, secret leaks. Step-by-step for beginners. npx cc-safe-setup.">
+<meta name="keywords" content="claude code, safety, hooks, setup, pretooluse, autonomous, beginner guide, cc-safe-setup, database protection, production safety">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/getting-started.html">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -39,7 +39,7 @@ code{background:#161b22;padding:.1rem .25rem;border-radius:3px;font-size:.82rem}
 <p class="sub">Make Claude Code safe in 5 minutes. No coding required. Works on macOS, Linux, and Windows (WSL).</p>
 
 <div class="why">
-<strong>Why this matters:</strong> Claude Code has no safety hooks by default. Users have <a href="https://github.com/anthropics/claude-code/issues/36339" style="color:#58a6ff">lost entire directories</a>, pushed untested code to main, and committed API keys to public repos. These hooks prevent that.
+<strong>Why this matters:</strong> Claude Code has no safety hooks by default. Users have <a href="https://github.com/anthropics/claude-code/issues/36339" style="color:#58a6ff">lost entire directories</a>, had Claude <a href="https://github.com/anthropics/claude-code/issues/46684" style="color:#58a6ff">run destructive DDL on production databases</a>, pushed untested code to main, and committed API keys to public repos. These hooks prevent that.
 </div>
 
 <h2>Prerequisites</h2>
