@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md Analyzer — How Much Are Your Instructions Costing?</title>
+<meta name="description" content="Paste your CLAUDE.md and see how many tokens it costs per turn. Find waste patterns and get optimization tips from 800+ hours of Claude Code operation.">
+<meta property="og:title" content="CLAUDE.md Analyzer — How Much Are Your Instructions Costing?">
+<meta property="og:description" content="Paste your CLAUDE.md. See token cost per turn. Find waste patterns.">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.82rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+textarea{width:100%;min-height:200px;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;padding:.8rem;font-family:'SF Mono',Consolas,monospace;font-size:.8rem;resize:vertical}
+textarea:focus{outline:none;border-color:#58a6ff}
+.btn{background:#238636;color:#fff;border:none;padding:.5rem 1.2rem;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.8rem}
+.btn:hover{background:#2ea043}
+.results{margin-top:1.2rem;display:none}
+.stat-row{display:flex;gap:.8rem;margin:.8rem 0;flex-wrap:wrap}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.6rem .8rem;flex:1;min-width:140px;text-align:center}
+.stat-val{font-size:1.3rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.7rem;color:#8b949e;margin-top:.15rem}
+.grade{font-size:1.8rem;font-weight:700;text-align:center;margin:.8rem 0}
+.findings{margin:.8rem 0}
+.finding{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.7rem .9rem;margin:.5rem 0}
+.finding-icon{font-size:.9rem;margin-right:.3rem}
+.finding-title{color:#f0f6fc;font-weight:600;font-size:.85rem}
+.finding-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.finding-fix{color:#58a6ff;font-size:.78rem;margin-top:.3rem;font-style:italic}
+.cta{background:linear-gradient(135deg,rgba(88,166,255,0.08),rgba(57,211,83,0.04));border:1px solid #30363d;border-radius:10px;padding:1rem;margin:1rem 0;text-align:center}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.8rem;margin-bottom:.6rem}
+.cta a{display:inline-block;background:#238636;color:#fff;padding:.4rem 1rem;border-radius:6px;text-decoration:none;font-size:.85rem;font-weight:600;margin:.2rem}
+.cta a.secondary{background:#21262d;border:1px solid #30363d;color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.privacy{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem .7rem;margin:.6rem 0;font-size:.72rem;color:#8b949e}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>CLAUDE.md Analyzer</h1>
+<p class="sub">Paste your CLAUDE.md below. Everything stays in your browser — nothing is sent anywhere.</p>
+
+<div class="privacy">🔒 <strong>Privacy:</strong> This tool runs entirely in your browser using JavaScript. Your CLAUDE.md content is never transmitted, stored, or logged. View source to verify.</div>
+
+<textarea id="input" placeholder="Paste your CLAUDE.md content here..."></textarea>
+<button class="btn" onclick="analyze()">Analyze</button>
+
+<div class="results" id="results"></div>
+
+<div class="cta">
+<h3>Want the full optimization guide?</h3>
+<p>10 chapters on CLAUDE.md optimization, hook-based token guards, context management — from 800+ hours of real data.</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book (¥2,500)</a>
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="secondary">Safety Guide (¥800)</a>
+</div>
+
+<div style="margin-top:1rem;font-size:.8rem;color:#8b949e">
+<a href="hub.html">← All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+
+<div class="footer">
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · Analysis based on 800+ hours of autonomous Claude Code operation
+</div>
+</div>
+
+<script>
+function analyze() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) return;
+  const el = document.getElementById('results');
+
+  const lines = text.split('\n');
+  const lineCount = lines.length;
+  // Rough token estimate: ~1.3 tokens per word for English, ~2 for mixed
+  const words = text.split(/\s+/).filter(w => w).length;
+  const chars = text.length;
+  const hasJapanese = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/.test(text);
+  const tokenEst = hasJapanese ? Math.round(chars * 0.7) : Math.round(words * 1.3);
+
+  // Cost per turn (tokens * price per token, rough estimate)
+  // Opus input: ~$15/M tokens, cached ~$1.5/M
+  const costPerTurnUncached = (tokenEst / 1000000 * 15 * 100).toFixed(2); // cents
+  const costPerTurnCached = (tokenEst / 1000000 * 1.5 * 100).toFixed(3);
+  const costPer100Turns = (tokenEst / 1000000 * 1.5 * 100 * 100).toFixed(1); // cents for 100 turns cached
+
+  // Findings
+  const findings = [];
+
+  // Check: too long
+  if (lineCount > 200) {
+    findings.push({icon:'🔴', title:'Very long CLAUDE.md ('+lineCount+' lines)', desc:'Over 200 lines means significant fixed cost every turn. Each line adds tokens to every message.', fix:'Target 50-100 lines. Move detailed rules to hooks or separate files.', severity:3});
+  } else if (lineCount > 100) {
+    findings.push({icon:'🟡', title:'Long CLAUDE.md ('+lineCount+' lines)', desc:'100+ lines is workable but consider trimming. Fixed cost adds up over long sessions.', fix:'Review each section: can any rule become a hook instead?', severity:2});
+  } else {
+    findings.push({icon:'🟢', title:'Good length ('+lineCount+' lines)', desc:'Under 100 lines keeps fixed token cost low.', fix:'', severity:0});
+  }
+
+  // Check: prohibition lists (don't do X, don't do Y)
+  const prohibitions = lines.filter(l => /^[-*]\s*(don.t|do not|never|禁止|するな|使うな|しない)/i.test(l.trim()));
+  if (prohibitions.length > 5) {
+    findings.push({icon:'🔴', title:'Large prohibition list ('+prohibitions.length+' items)', desc:'Long "don\'t do" lists are token-inefficient and incomplete. Claude may find unlisted alternatives.', fix:'Switch to an allowlist pattern: list what IS allowed. "Anything not listed requires confirmation."', severity:3});
+  } else if (prohibitions.length > 2) {
+    findings.push({icon:'🟡', title:'Prohibition list detected ('+prohibitions.length+' items)', desc:'Consider converting to allowlist for better coverage with fewer tokens.', fix:'Allowlists are both shorter and more secure.', severity:1});
+  }
+
+  // Check: no examples (few-shot)
+  const hasExamples = /example|例|✓|✗|good:|bad:|before:|after:/i.test(text);
+  if (!hasExamples && lineCount > 20) {
+    findings.push({icon:'🟡', title:'No examples found', desc:'One concrete example ("✓ good" / "✗ bad") reduces ambiguity more than 10 lines of explanation.', fix:'Add 1 example per key rule. Saves tokens by reducing retries.', severity:2});
+  }
+
+  // Check: duplicate information
+  const lowerLines = lines.map(l => l.trim().toLowerCase()).filter(l => l.length > 20);
+  const seen = new Set();
+  let dupes = 0;
+  for (const l of lowerLines) {
+    if (seen.has(l)) dupes++;
+    seen.add(l);
+  }
+  if (dupes > 2) {
+    findings.push({icon:'🟡', title:'Possible duplicates ('+dupes+' similar lines)', desc:'Repeated instructions waste tokens without improving compliance.', fix:'Consolidate duplicate rules into single, clear statements.', severity:1});
+  }
+
+  // Check: hook-worthy rules
+  const hookable = lines.filter(l => /rm -rf|git push|git reset|force|delete|secret|password|key|token|credential/i.test(l));
+  if (hookable.length > 3) {
+    findings.push({icon:'🟡', title:hookable.length+' rules could be hooks instead', desc:'Rules about blocking specific commands (rm, push, secrets) work better as PreToolUse hooks — they enforce deterministically, not probabilistically.', fix:'Move blocking rules to hooks. CLAUDE.md for guidelines, hooks for enforcement.', severity:2});
+  }
+
+  // Check: verbose explanations
+  const longLines = lines.filter(l => l.trim().length > 150);
+  if (longLines.length > 5) {
+    findings.push({icon:'🟡', title:longLines.length+' very long lines', desc:'Lines over 150 chars often contain explanations that could be condensed.', fix:'Use tables or bullet points. "reason: 1 line" format.', severity:1});
+  }
+
+  // Score
+  const maxSeverity = Math.max(...findings.map(f => f.severity), 0);
+  const totalIssues = findings.filter(f => f.severity > 0).length;
+  let score, grade, gradeColor;
+  if (totalIssues === 0) { score = 95; grade = 'Excellent'; gradeColor = '#39d353'; }
+  else if (maxSeverity <= 1) { score = 75; grade = 'Good'; gradeColor = '#58a6ff'; }
+  else if (maxSeverity <= 2) { score = 50; grade = 'Needs Work'; gradeColor = '#d29922'; }
+  else { score = 25; grade = 'High Waste'; gradeColor = '#f85149'; }
+
+  // Potential savings estimate
+  const savingsPercent = totalIssues === 0 ? 0 : Math.min(totalIssues * 12, 50);
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val">${lineCount}</div><div class="stat-label">lines</div></div>
+      <div class="stat"><div class="stat-val">~${tokenEst.toLocaleString()}</div><div class="stat-label">tokens (est.)</div></div>
+      <div class="stat"><div class="stat-val">${costPer100Turns}¢</div><div class="stat-label">per 100 turns (cached)</div></div>
+    </div>
+    <div class="grade" style="color:${gradeColor}">${score}/100 — ${grade}</div>
+    ${savingsPercent > 0 ? `<p style="text-align:center;color:#8b949e;font-size:.8rem;margin-bottom:.8rem">Estimated potential savings: <strong style="color:#39d353">${savingsPercent}%</strong> of CLAUDE.md token cost</p>` : ''}
+    <div class="findings">
+      <h3 style="color:#f0f6fc;font-size:.95rem;margin-bottom:.5rem">Findings</h3>
+      ${findings.map(f => `
+        <div class="finding">
+          <span class="finding-icon">${f.icon}</span>
+          <span class="finding-title">${f.title}</span>
+          <div class="finding-desc">${f.desc}</div>
+          ${f.fix ? `<div class="finding-fix">→ ${f.fix}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ${totalIssues > 0 ? `
+    <div class="cta">
+      <h3>Your CLAUDE.md has optimization opportunities</h3>
+      <p>Chapter 2 of the Token Book covers 5 proven patterns to reduce CLAUDE.md token waste — with before/after examples and real data.</p>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Get the Token Book (¥2,500)</a>
+    </div>
+    ` : `
+    <div class="cta">
+      <h3>Your CLAUDE.md looks efficient!</h3>
+      <p>Want to optimize the rest of your setup? The Token Book covers context management, hooks, and workflow design.</p>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book (¥2,500)</a>
+    </div>
+    `}
+  `;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
