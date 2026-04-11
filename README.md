@@ -75,7 +75,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that. ([Stand
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 | **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
-> 📘 Tokens disappearing too fast? [The practical guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) covers 10 token consumption patterns (cache corruption, excessive reads, compact cycles) and how to detect them — from 700+ hours of autonomous operation. Chapter 3 free.
+> 📘 Tokens disappearing too fast? [The practical guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) covers 10 token consumption patterns (cache corruption, excessive reads, compact cycles) and how to detect them — from 800+ hours of autonomous operation. Chapter 3 free.
 
 Each hook exists because a real incident happened without it.
 
@@ -444,7 +444,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Practical Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. 14 chapters from 700+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
+- **[Practical Guide (Zenn Book, ¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
+- **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
 - [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 25 recipes from real GitHub Issues ([interactive version](https://yurukusa.github.io/claude-code-hooks/))
