@@ -21,6 +21,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
   Make Claude Code safe for autonomous operation
 
   Prevents real incidents (from GitHub Issues):
+  ✗ rm -rf deleted 3,467 files (~7 GB) without confirmation (#46058)
   ✗ rm -rf deleted entire user directory via NTFS junction (#36339)
   ✗ Remove-Item -Recurse -Force destroyed unpushed source (#37331)
   ✗ Entire Mac filesystem deleted during cleanup (#36233)
@@ -49,9 +50,9 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 ## Why This Exists
 
-A Claude Code user [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed. And [CLAUDE.md rules get silently dropped](https://github.com/anthropics/claude-code/issues/6354) after context compaction — your instructions vanish mid-session.
+A user [lost 3,467 files (~7 GB)](https://github.com/anthropics/claude-code/issues/46058) when Claude ran `rm -rf` on their data directory without confirmation. Another [lost their entire C:\Users directory](https://github.com/anthropics/claude-code/issues/36339) when `rm -rf` followed NTFS junctions. Another [lost all source code](https://github.com/anthropics/claude-code/issues/37331) when Claude ran `Remove-Item -Recurse -Force *` on a repo. Others had untested code pushed to main at 3am. API keys got committed via `git add .`. Syntax errors cascaded through 30+ files before anyone noticed. And [CLAUDE.md rules get silently dropped](https://github.com/anthropics/claude-code/issues/6354) after context compaction — your instructions vanish mid-session.
 
-One user [analyzed 6,852 sessions](https://github.com/anthropics/claude-code/issues/42796) and found the Read:Edit ratio dropped from 6.6 to 2.0 — Claude editing files it never read jumped from 6% to 34%. That issue has over 1,000 reactions. The `read-before-edit` example hook catches this pattern before damage happens.
+One user [analyzed 6,852 sessions](https://github.com/anthropics/claude-code/issues/42796) and found the Read:Edit ratio dropped from 6.6 to 2.0 — Claude editing files it never read jumped from 6% to 34%. That issue has over 2,100 reactions. The `read-before-edit` example hook catches this pattern before damage happens.
 
 Claude Code ships with no safety hooks by default. This tool fixes that.
 
@@ -63,7 +64,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that.
 
 | Hook | Prevents | Related Issues |
 |------|----------|----------------|
-| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, `git checkout --force`, `sudo` + destructive, PowerShell `Remove-Item -Recurse -Force`, `rd /s /q`, NFS mount detection | [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) [#37331](https://github.com/anthropics/claude-code/issues/37331) |
+| **Destructive Guard** | `rm -rf /`, `git reset --hard`, `git clean -fd`, `git checkout --force`, `sudo` + destructive, PowerShell `Remove-Item -Recurse -Force`, `rd /s /q`, NFS mount detection | [#46058](https://github.com/anthropics/claude-code/issues/46058) [#36339](https://github.com/anthropics/claude-code/issues/36339) [#36640](https://github.com/anthropics/claude-code/issues/36640) [#37331](https://github.com/anthropics/claude-code/issues/37331) |
 | **Branch Guard** | Pushes to main/master + force-push (`--force`) on all branches | |
 | **Secret Guard** | `git add .env`, credential files, `git add .` with .env present | [#6527](https://github.com/anthropics/claude-code/issues/6527) |
 | **Syntax Check** | Python, Shell, JSON, YAML, JS errors after edits | |
