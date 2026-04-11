@@ -106,6 +106,10 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;
 <div class="opt-title">Code quality / behavior</div>
 <div class="opt-desc">Claude Code ignores my instructions or writes bad code</div>
 </div>
+<div class="opt" onclick="answer(1,'fabrication')">
+<div class="opt-title">Fabrication / fake results</div>
+<div class="opt-desc">Claude claims tests passed without running them, or fabricates warnings</div>
+</div>
 </div>
 </div>
 
@@ -202,6 +206,8 @@ const hooks = [
   {name:'auto-approve-readonly',cat:'Workflow',why:'Auto-approves read-only operations (Glob, Grep, Read)',when:{mode:['auto'],level:['intermediate','advanced']}},
   {name:'block-database-wipe',cat:'Safety',why:'Blocks DROP DATABASE, migrate:fresh, db:drop, TRUNCATE — prevents production DB destruction',when:{concern:['files'],mode:['semi','auto'],incident:['major']}},
   {name:'db-connect-guard',cat:'Security',why:'Blocks connections to production databases (checks for production hostnames)',when:{concern:['secrets','files'],mode:['auto'],incident:['major']}},
+  {name:'fabrication-detection',cat:'Verification',why:'Detects fake test results, fabricated context warnings, and exit code mismatches',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
+  {name:'exit-code-verifier',cat:'Verification',why:'Flags when command exits non-zero but output claims success',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
 ];
 
 function answer(step, value) {
