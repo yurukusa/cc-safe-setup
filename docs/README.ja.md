@@ -86,6 +86,7 @@ Claude Codeを再起動。完了。
 ## ドキュメント
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html) — 5分で安全に
+- [Hook Selector](https://yurukusa.github.io/cc-safe-setup/hook-selector.html) — 5問で最適なhookセットを推薦
 - [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html) — 許可プロンプトを減らす
 - [OWASP MCP対応表](https://yurukusa.github.io/cc-safe-setup/owasp-mcp-hooks.html) — OWASP MCP Top 10全リスク対策
 - [settings.jsonリファレンス](../SETTINGS_REFERENCE.md) — 全設定の解説
