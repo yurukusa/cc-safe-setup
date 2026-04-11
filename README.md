@@ -295,6 +295,8 @@ cc-safe-setup gives you 8 essential hooks. Want to know what else your setup nee
 
 Run `npx cc-health-check` (free, 20 checks) to see your current score. If it's below 80, the **[Claude Code Ops Kit](https://yurukusa.github.io/cc-ops-kit-landing/?utm_source=github&utm_medium=readme&utm_campaign=safe-setup)** fills the gaps — 6 hooks + 5 templates + 9 scripts + install.sh. Pay What You Want ($0+).
 
+**Starter Kit:** Want hooks + settings + templates in one download? The **[Claude Code Safety Kit](https://yurukusa.itch.io/claude-code-safety-kit)** bundles 5 safety hooks, a pre-configured settings.json, CLAUDE.md templates, and 800-hour operation tips. Name your price ($0+).
+
 Or browse the free hooks: [claude-code-hooks](https://github.com/yurukusa/claude-code-hooks)
 
 ## Examples
