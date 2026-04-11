@@ -200,6 +200,8 @@ const hooks = [
   {name:'mcp-warmup-wait',cat:'MCP',why:'Waits for MCP servers to initialize before use',when:{agents:['mcp','both']}},
   {name:'replace-all-guard',cat:'Safety',why:'Blocks replace_all edits that affect too many lines',when:{concern:['files','quality'],mode:['semi','auto']}},
   {name:'auto-approve-readonly',cat:'Workflow',why:'Auto-approves read-only operations (Glob, Grep, Read)',when:{mode:['auto'],level:['intermediate','advanced']}},
+  {name:'block-database-wipe',cat:'Safety',why:'Blocks DROP DATABASE, migrate:fresh, db:drop, TRUNCATE — prevents production DB destruction',when:{concern:['files'],mode:['semi','auto'],incident:['major']}},
+  {name:'db-connect-guard',cat:'Security',why:'Blocks connections to production databases (checks for production hostnames)',when:{concern:['secrets','files'],mode:['auto'],incident:['major']}},
 ];
 
 function answer(step, value) {
