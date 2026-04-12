@@ -192,8 +192,9 @@ if (HELP) {
   Find hooks: npx cc-hook-registry search <keyword>
   Test hooks: npx cc-hook-test <hook.sh>
 
-  Support: https://github.com/sponsors/yurukusa
-  Book:    https://zenn.dev/yurukusa/books/6076c23b1cb18b
+  Token Checkup: https://yurukusa.github.io/cc-safe-setup/token-checkup.html
+  Token Book:    https://zenn.dev/yurukusa/books/token-savings-guide
+  Safety Guide:  https://zenn.dev/yurukusa/books/6076c23b1cb18b
 `);
   process.exit(0);
 }
@@ -5899,11 +5900,13 @@ async function main() {
   console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
   console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
   console.log();
-  console.log('  ' + c.dim + '23 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
+  console.log('  ' + c.dim + 'Free tools:' + c.reset);
+  console.log('  ' + c.blue + '  Token Checkup' + c.reset + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
+  console.log('  ' + c.dim + '  28 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Like this tool? Support development:' + c.reset);
-  console.log('  ' + c.dim + '  Sponsor: https://github.com/sponsors/yurukusa' + c.reset);
-  console.log('  ' + c.dim + '  Book:    https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log('  ' + c.dim + 'Learn more:' + c.reset);
+  console.log('  ' + c.dim + '  Token Book: https://zenn.dev/yurukusa/books/token-savings-guide' + c.reset);
+  console.log('  ' + c.dim + '  Safety:     https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
   console.log();
 }
 
