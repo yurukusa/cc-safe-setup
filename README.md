@@ -75,7 +75,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that. ([Stand
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 | **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
-> 📘 Tokens disappearing too fast? [Token Book](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) covers CLAUDE.md optimization, hook-based token guards, context management, and workflow design — with real data from 800+ hours of autonomous operation. Chapter 1 free. See also: [Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800, Chapter 3 free).
+> 📘 Tokens disappearing too fast? [Take the free Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) to diagnose where your tokens are going. For the full guide: [Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html) (¥2,500) — CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words from 800+ hours of operation. See also: [Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800, Chapter 3 free).
 
 Each hook exists because a real incident happened without it.
 
@@ -461,7 +461,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. [Chapter 1 free](https://zenn.dev/yurukusa/books/token-savings-guide/viewer/1-where-tokens-go)
+- **[Token Book (¥2,500)](https://yurukusa.github.io/cc-safe-setup/token-book.html)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
