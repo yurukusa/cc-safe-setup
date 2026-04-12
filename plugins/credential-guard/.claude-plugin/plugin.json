@@ -1,0 +1,58 @@
+{
+  "name": "credential-guard",
+  "description": "Protect secrets and credentials from Claude Code. Blocks writes to .env files, detects API keys in shell commands, prevents hardcoded tokens, and guards service account JSON files.",
+  "version": "1.0.0",
+  "author": { "name": "yurukusa" },
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/",
+  "repository": "https://github.com/yurukusa/cc-safe-setup",
+  "license": "MIT",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CC_TOOL_INPUT\" | jq -r '.file_path' 2>/dev/null); if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret'; then echo \"BLOCKED: Writing to sensitive file: $FILE\" >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CC_TOOL_INPUT\" | jq -r '.file_path' 2>/dev/null); if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret'; then echo \"BLOCKED: Editing sensitive file: $FILE\" >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE '(sk|pk|api|key|token|secret|password)[-_]?[a-zA-Z0-9]{20,}'; then echo 'WARNING: Possible API key or token detected in command. Verify no secrets are exposed.' >&2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CC_TOOL_INPUT\" | jq -r '.file_path' 2>/dev/null); if echo \"$FILE\" | grep -qE 'serviceaccount.*\\.json|key\\.json|credentials\\.json'; then echo \"BLOCKED: Writing to service account file: $FILE\" >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); CONTENT=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CONTENT\" | grep -qE 'ANTHROPIC_API_KEY|OPENAI_API_KEY|AWS_SECRET|GITHUB_TOKEN|DATABASE_URL' | head -1; then echo 'WARNING: Environment variable with potential secret detected in command.' >&2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

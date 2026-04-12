@@ -1,0 +1,58 @@
+{
+  "name": "safety-essentials",
+  "description": "5 essential safety hooks for Claude Code. Blocks rm -rf, force-push, hard-reset, .env overwrites, and package publish. The minimum viable safety net from 800+ hours of autonomous operation.",
+  "version": "1.0.0",
+  "author": { "name": "yurukusa" },
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/",
+  "repository": "https://github.com/yurukusa/cc-safe-setup",
+  "license": "MIT",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'rm\\s+-r(f|F)|rm\\s+-(f|F)r|rm\\s+--force.*-r|rm\\s+-r.*--force'; then echo 'BLOCKED: rm -rf detected. Use git clean or manual deletion instead.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+push.*--force|git\\s+push.*-f\\b'; then echo 'BLOCKED: Force push detected. Use --force-with-lease or push normally.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+reset\\s+--hard'; then echo 'BLOCKED: git reset --hard discards uncommitted changes. Use git stash instead.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CC_TOOL_INPUT\" | jq -r '.file_path' 2>/dev/null); if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.'; then echo \"BLOCKED: Writing to environment file: $FILE\" >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'npm\\s+publish|yarn\\s+publish'; then echo 'BLOCKED: Package publish requires manual execution.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
