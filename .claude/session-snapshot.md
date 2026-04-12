@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-13T00:13:43+09:00
+Updated: 2026-04-13T00:14:38+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-04-13T00:13:43+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 52726123 checkpoint: auto-save 00:13:42
+- Last commit: 8f230f62 checkpoint: pre-compact auto-save (1 files, 20260412-151346)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-04-13.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-04-13.md
 ./README.md
 ./docs/README.ja.md
 ./examples/session-memory-watchdog.sh
