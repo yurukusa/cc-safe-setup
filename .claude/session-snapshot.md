@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-13T00:13:35+09:00
+Updated: 2026-04-13T00:13:43+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-04-13T00:13:35+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 93a8ab0c checkpoint: auto-save 00:13:25
+- Last commit: 52726123 checkpoint: auto-save 00:13:42
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-04-13.md
+./.claude/pre-compact-checkpoint.md
 ./README.md
 ./docs/README.ja.md
 ./examples/session-memory-watchdog.sh
 ./.claude/session-logs/2026-04-12.md
-./.claude/pre-compact-checkpoint.md
 ./skills/safety-setup/SKILL.md
 ./SKILL.md
 ./test.sh
-./examples/full-rewrite-detector.sh
 ```
 
