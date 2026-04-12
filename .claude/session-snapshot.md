@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-11T21:31:40+09:00
+Updated: 2026-04-12T13:41:18+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-04-11T21:31:40+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 513de57b recovery: pre-compact checkpoint (1 files, 20260411-123140)
+- Last commit: 20067497 checkpoint: auto-save 13:41:09
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./examples/full-rewrite-detector.sh
+./README.md
+./docs/README.ja.md
 ./.claude/session-logs/2026-04-11.md
 ./.claude/pre-compact-checkpoint.md
 ./examples/README.md
-./docs/README.ja.md
-./README.md
 ./.claude/session-logs/2026-04-08.md
-./test.sh
 ./examples/dotenv-commit-guard.sh
-./.claude/session-logs/2026-04-07.md
 ```
 
