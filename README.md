@@ -479,6 +479,15 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [How to prevent force-push to main](https://yurukusa.github.io/cc-safe-setup/prevent-force-push.html) — branch protection via hooks
 - [How to prevent secret leaks](https://yurukusa.github.io/cc-safe-setup/prevent-secret-leaks.html) — stop git add . from committing .env
 
+### Free Gists
+
+- [settings.json Complete Template](https://gist.github.com/yurukusa/8ec367cf65042bf9fbd83c35931e7ed1) — copy-paste ready safety configuration
+- [First 3 Safety Steps](https://gist.github.com/yurukusa/72513272be9a4ee29b058e2b08453e1a) — 5-minute safety setup from scratch
+- [CLAUDE.md Before/After](https://gist.github.com/yurukusa/f9d7df5930bfb6d36a25673e69720f7e) — 40% token reduction through better writing patterns
+- [Token Savings Cheat Card](https://gist.github.com/yurukusa/cfe44bfbb3756eccaf51660466913a2d) — 5 techniques to cut consumption in half
+- [Token Consumption Checklist](https://gist.github.com/yurukusa/db8700a9f9fa331d36664df2868274cb) — 10-item diagnostic
+- [Outage Survival Kit](https://gist.github.com/yurukusa/a0e31171eecb527d0df1d5498bf5f5d0) — what to do when Claude Code is down
+
 ## FAQ
 
 **Q: I installed hooks but Claude says "Unknown skill: claude-code-hooks:setup"**

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code settings.json Validator — Check Your Hook Configuration</title>
+<meta name="description" content="Paste your Claude Code settings.json to detect common hook mistakes. Free validator from cc-safe-setup (655+ hooks).">
+<style>
+:root { --blue: #4f46e5; --green: #16a34a; --red: #dc2626; --yellow: #d97706; --bg: #f8fafc; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 1.5rem; margin-bottom: 8px; }
+.subtitle { color: #64748b; margin-bottom: 20px; }
+textarea { width: 100%; height: 300px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical; }
+textarea:focus { outline: none; border-color: var(--blue); }
+button { background: var(--blue); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 12px 0; }
+button:hover { opacity: 0.9; }
+.results { margin-top: 20px; }
+.result-item { padding: 12px 16px; margin: 8px 0; border-radius: 8px; border-left: 4px solid; }
+.error { background: #fef2f2; border-color: var(--red); }
+.warning { background: #fffbeb; border-color: var(--yellow); }
+.success { background: #f0fdf4; border-color: var(--green); }
+.info { background: #eff6ff; border-color: var(--blue); }
+.label { font-weight: 600; font-size: 14px; }
+.detail { font-size: 13px; color: #475569; margin-top: 4px; }
+.stats { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+.stat { background: white; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; min-width: 100px; }
+.stat-value { font-size: 24px; font-weight: 700; color: var(--blue); }
+.stat-label { font-size: 12px; color: #64748b; }
+.cta { background: white; border: 2px solid var(--blue); border-radius: 8px; padding: 16px; margin-top: 24px; }
+.cta a { color: var(--blue); text-decoration: none; font-weight: 600; }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #94a3b8; text-align: center; }
+footer a { color: #64748b; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>settings.json Validator</h1>
+<p class="subtitle">Paste your Claude Code settings.json to detect common hook configuration mistakes</p>
+
+<textarea id="input" placeholder='{
+  "permissions": { ... },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "your-hook-script.sh" }
+        ]
+      }
+    ]
+  }
+}'></textarea>
+
+<button onclick="validate()">Validate</button>
+
+<div id="results" class="results"></div>
+
+<div class="cta">
+  <strong>Want 655+ tested safety hooks?</strong> Run <code>npx cc-safe-setup</code> to auto-configure your settings.json.
+  <br><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ·
+  <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book (¥2,500)</a> ·
+  <a href="https://yurukusa.github.io/cc-safe-setup/">All Tools</a>
+</div>
+
+<footer>
+  <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 655+ safety hooks for Claude Code
+</footer>
+</div>
+
+<script>
+const VALID_EVENTS = ['PreToolUse','PostToolUse','Notification','Stop','SessionStart','UserPromptSubmit','PreCompact','SubagentStop','SubagentTool'];
+const VALID_MATCHERS = ['Bash','Read','Write','Edit','Glob','Grep','Agent','WebSearch','WebFetch','NotebookEdit','*'];
+
+function validate() {
+  const input = document.getElementById('input').value.trim();
+  const results = document.getElementById('results');
+  results.innerHTML = '';
+
+  if (!input) { addResult('error', 'Empty input', 'Paste your settings.json content'); return; }
+
+  let data;
+  try { data = JSON.parse(input); }
+  catch(e) { addResult('error', 'Invalid JSON', e.message); return; }
+
+  addResult('success', 'Valid JSON', 'Parsed successfully');
+
+  const checks = [];
+  let hookCount = 0;
+  let eventCount = 0;
+
+  // Check hooks section
+  if (!data.hooks) {
+    addResult('warning', 'No hooks configured', 'Your settings.json has no hooks. Consider adding safety hooks with npx cc-safe-setup');
+    showStats(0, 0, 0);
+    return;
+  }
+
+  // Check each event type
+  for (const [event, groups] of Object.entries(data.hooks)) {
+    eventCount++;
+
+    if (!VALID_EVENTS.includes(event)) {
+      addResult('error', `Unknown event: "${event}"`, `Valid events: ${VALID_EVENTS.join(', ')}`);
+    }
+
+    if (!Array.isArray(groups)) {
+      addResult('error', `"${event}" must be an array`, 'Each event type should contain an array of hook groups');
+      continue;
+    }
+
+    for (const group of groups) {
+      // Check matcher
+      if (group.matcher && !VALID_MATCHERS.includes(group.matcher) && !group.matcher.includes('|')) {
+        addResult('warning', `Unusual matcher: "${group.matcher}" in ${event}`, `Common matchers: ${VALID_MATCHERS.slice(0,5).join(', ')}`);
+      }
+
+      if (!group.hooks || !Array.isArray(group.hooks)) {
+        addResult('error', `Missing "hooks" array in ${event} group`, 'Each group needs a "hooks" array with at least one hook definition');
+        continue;
+      }
+
+      for (const hook of group.hooks) {
+        hookCount++;
+
+        // Check type
+        if (!hook.type) {
+          addResult('error', `Missing "type" in hook`, 'Each hook needs "type": "command"');
+        } else if (hook.type !== 'command') {
+          addResult('warning', `Unknown hook type: "${hook.type}"`, 'Currently only "command" type is supported');
+        }
+
+        // Check command
+        if (!hook.command) {
+          addResult('error', 'Missing "command" in hook', 'Each hook needs a "command" field with the script to run');
+        } else {
+          // Common mistakes
+          const cmd = hook.command;
+
+          if (cmd.includes('exit 1') && !cmd.includes('exit 2')) {
+            addResult('warning', 'Uses exit 1 instead of exit 2', 'exit 2 = block the action. exit 1 = error (action still proceeds). Use exit 2 to block.');
+          }
+
+          if (cmd.includes('.tool_input.command') && !cmd.includes('jq')) {
+            addResult('warning', 'Accesses .tool_input.command without jq', 'Hook input is JSON on stdin. Use jq to parse: CMD=$(cat | jq -r ".tool_input.command")');
+          }
+
+          if (cmd.includes('$COMMAND') || cmd.includes('$CMD')) {
+            if (!cmd.includes('cat') && !cmd.includes('jq')) {
+              addResult('warning', 'References $CMD/$COMMAND without reading stdin', 'Hook input comes via stdin as JSON, not environment variables');
+            }
+          }
+
+          if (event === 'PreToolUse' && !cmd.includes('exit')) {
+            addResult('info', 'PreToolUse hook without explicit exit', 'PreToolUse hooks should exit 0 (allow) or exit 2 (block)');
+          }
+
+          if (cmd.length > 500) {
+            addResult('info', 'Long inline command', 'Consider moving complex logic to a separate script file for maintainability');
+          }
+        }
+      }
+    }
+  }
+
+  // Check permissions
+  let permCount = 0;
+  if (data.permissions) {
+    const allow = data.permissions.allow || [];
+    const deny = data.permissions.deny || [];
+    permCount = allow.length + deny.length;
+    addResult('info', `${allow.length} allow + ${deny.length} deny permissions`, 'Permission rules reduce approval prompts');
+  }
+
+  // Safety checks
+  if (hookCount === 0) {
+    addResult('warning', 'No hooks defined', 'Your Claude Code has no safety hooks. Run npx cc-safe-setup for 655+ hooks');
+  } else if (hookCount < 3) {
+    addResult('info', `Only ${hookCount} hook(s)`, 'Consider adding more safety hooks: rm-rf guard, credential guard, force-push guard');
+  }
+
+  if (!input.includes('rm') && !input.includes('force') && !input.includes('reset')) {
+    addResult('warning', 'No destructive command protection detected', 'Add hooks to block rm -rf, git push --force, git reset --hard');
+  }
+
+  showStats(hookCount, eventCount, permCount);
+}
+
+function showStats(hooks, events, perms) {
+  const stats = document.createElement('div');
+  stats.className = 'stats';
+  stats.innerHTML = `
+    <div class="stat"><div class="stat-value">${hooks}</div><div class="stat-label">Hooks</div></div>
+    <div class="stat"><div class="stat-value">${events}</div><div class="stat-label">Event Types</div></div>
+    <div class="stat"><div class="stat-value">${perms}</div><div class="stat-label">Permissions</div></div>
+  `;
+  document.getElementById('results').prepend(stats);
+}
+
+function addResult(type, label, detail) {
+  const div = document.createElement('div');
+  div.className = `result-item ${type}`;
+  div.innerHTML = `<div class="label">${label}</div><div class="detail">${detail}</div>`;
+  document.getElementById('results').appendChild(div);
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,15 @@
 MAX_RSS_MB="${CC_MAX_RSS_MB:-4096}"
 CHECK_INTERVAL=300
+PID_FILE="/tmp/cc-memory-watchdog.pid"
+
+# Prevent duplicate instances — only one watchdog should run at a time
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    exit 0
+fi
+
 (
+    echo $$ > "$PID_FILE"
+    trap 'rm -f "$PID_FILE"' EXIT
     while true; do
         sleep "$CHECK_INTERVAL"
         pgrep -f "claude" | while read pid; do
