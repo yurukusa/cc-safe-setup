@@ -520,6 +520,8 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 **Share your experience:** Used cc-safe-setup and have feedback? Open a discussion or comment on any issue. We read everything.
 
+If cc-safe-setup saved you from a disaster (or just saved you time), a ⭐ helps others find it too.
+
 ## Also by yurukusa
 
 - [quiet life](https://yurukusa.github.io/quiet-life/) — Touch the dark. Something alive appears
