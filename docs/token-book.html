@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Book — Claude Codeのトークン消費を半分にする</title>
+<meta name="description" content="CLAUDE.mdの書き方でトークン消費が2-3倍変わる。800時間の運用データから見つけた実践テクニックを全10章で体系化。設定テンプレート収録。">
+<meta name="keywords" content="Claude Code, トークン消費, CLAUDE.md, hooks, 最適化, コスト削減">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-book.html">
+
+<!-- OGP -->
+<meta property="og:title" content="Token Book — Claude Codeのトークン消費を半分にする">
+<meta property="og:description" content="800時間の運用データから見つけたトークン節約テクニック。CLAUDE.md最適化、hook活用、ワークフロー設計を全10章で体系化。">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/token-book.html">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Book",
+  "name": "Claude Codeのトークン消費を半分にする——800時間の運用データ付き",
+  "author": {"@type": "Person", "name": "yurukusa"},
+  "description": "CLAUDE.mdの書き方でトークン消費が2-3倍変わる。800時間の自律運用から見つけた実践テクニックを全10章で体系化。設定テンプレート収録。第1章無料。",
+  "url": "https://zenn.dev/yurukusa/books/token-savings-guide",
+  "offers": {
+    "@type": "Offer",
+    "price": "2500",
+    "priceCurrency": "JPY",
+    "availability": "https://schema.org/PreOrder"
+  },
+  "numberOfPages": 10,
+  "inLanguage": "ja"
+}
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; line-height: 1.3; }
+h2 { font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 2px solid #e8e8e8; padding-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 1.1rem; margin-bottom: 2rem; }
+.price-badge { display: inline-block; background: #2563eb; color: white; padding: 0.3rem 1rem; border-radius: 999px; font-weight: bold; font-size: 1.1rem; margin-bottom: 1rem; }
+.free-badge { display: inline-block; background: #10b981; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; margin-left: 0.5rem; }
+.pain-point { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.pain-point strong { color: #dc2626; }
+.chapter-list { list-style: none; }
+.chapter-list li { padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
+.chapter-list li:last-child { border-bottom: none; }
+.ch-num { color: #888; font-size: 0.9rem; min-width: 3rem; }
+.data-point { background: #f0fdf4; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
+.data-point strong { color: #166534; }
+.cta-section { text-align: center; margin: 3rem 0 2rem; }
+.btn-primary { display: inline-block; background: #2563eb; color: white; padding: 1rem 2.5rem; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: bold; transition: background 0.2s; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-secondary { display: inline-block; color: #2563eb; padding: 0.8rem 2rem; border: 2px solid #2563eb; border-radius: 8px; text-decoration: none; font-size: 1rem; margin-top: 1rem; }
+.tools-section { background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.tools-section a { color: #2563eb; text-decoration: none; }
+.tools-section a:hover { text-decoration: underline; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="price-badge">¥2,500</span>
+<h1>Claude Codeのトークン消費を半分にする</h1>
+<p class="subtitle">800時間の運用データから見つけた実践テクニック — 全10章・設定テンプレート収録</p>
+
+<div class="pain-point">
+<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue #42796は2,200+リアクション。あなただけの問題ではない。
+</div>
+
+<h2>このBookで手に入るもの</h2>
+
+<div class="data-point">
+<strong>実測データ</strong>: CLAUDE.mdを100行→35行にしたらキャッシュ効率が改善し、トークン消費が体感40%減。
+</div>
+
+<ul class="chapter-list">
+<li><span class="ch-num">intro</span> はじめに<span class="free-badge">無料</span></li>
+<li><span class="ch-num">ch.1</span> トークンはどこで消えている？<span class="free-badge">無料</span></li>
+<li><span class="ch-num">ch.2</span> CLAUDE.mdの書き方でトークン消費が変わる</li>
+<li><span class="ch-num">ch.3</span> コンテキスト管理 — /clear・/compact・--resume</li>
+<li><span class="ch-num">ch.4</span> hookでトークンを守る — 9個の節約hook</li>
+<li><span class="ch-num">ch.5</span> サブエージェント戦略</li>
+<li><span class="ch-num">ch.6</span> ワークフロー設計</li>
+<li><span class="ch-num">ch.7</span> 実データ — 800時間の消費記録</li>
+<li><span class="ch-num">ch.8</span> トラブルシューティング — キャッシュバグ対策</li>
+<li><span class="ch-num">ch.9</span> 設定テンプレート集 — コピペで使えるCLAUDE.md・hooks</li>
+</ul>
+
+<h2>誰のための本か</h2>
+<ul>
+<li>Claude Code Max ($200/月) を使っていて、コストが気になる人</li>
+<li>長時間セッションでトークンが急増する問題を抱えている人</li>
+<li>CLAUDE.mdの最適な書き方を知りたい人</li>
+<li>hookでトークン消費を自動管理したい人</li>
+</ul>
+
+<h2>著者について</h2>
+<p>非エンジニア。Claude Codeを800時間以上自律運用し、650+のhookと14,000+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。</p>
+
+<div class="cta-section">
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn-primary">Zenn Bookで読む（第1章無料）</a>
+<br>
+<a href="https://yurukusa.github.io/cc-safe-setup/claudemd-analyzer.html" class="btn-secondary">まずCLAUDE.mdを無料診断する →</a>
+</div>
+
+<div class="tools-section">
+<h3>無料ツール</h3>
+<ul>
+<li><a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> — トークン効率を診断</li>
+<li><a href="cost-calculator.html">Cost Calculator</a> — 月額コストを推定</li>
+<li><a href="hook-selector.html">Hook Selector</a> — 最適なhookセットを推薦</li>
+<li><a href="token-checkup.html">Token Checkup</a> — トークン消費パターンを分析</li>
+</ul>
+</div>
+
+<footer>
+<p>cc-safe-setup — Claude Code安全フック集（650+ hooks / 9,200+ tests）</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a></p>
+</footer>
+
+</div>
+</body>
+</html>
