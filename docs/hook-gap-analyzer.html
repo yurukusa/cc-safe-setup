@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Gap Analyzer — What Safety Hooks Are You Missing?</title>
+<meta name="description" content="Paste your Claude Code settings.json and find out which safety hooks you're missing. Free analysis from 800+ hours of operation data.">
+<meta property="og:title" content="Hook Gap Analyzer — What Safety Hooks Are You Missing?">
+<meta property="og:description" content="Paste your settings.json. Find safety gaps. Get specific hook recommendations.">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.82rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+textarea{width:100%;min-height:220px;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;padding:.8rem;font-family:'SF Mono',Consolas,monospace;font-size:.8rem;resize:vertical}
+textarea:focus{outline:none;border-color:#58a6ff}
+.btn{background:#238636;color:#fff;border:none;padding:.5rem 1.2rem;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.8rem}
+.btn:hover{background:#2ea043}
+.results{margin-top:1.2rem;display:none}
+.score-ring{width:120px;height:120px;margin:0 auto 1rem}
+.score-ring svg{width:100%;height:100%}
+.score-text{font-size:2rem;font-weight:700;fill:#f0f6fc}
+.score-label{font-size:.7rem;fill:#8b949e}
+.stat-row{display:flex;gap:.8rem;margin:.8rem 0;flex-wrap:wrap}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.6rem .8rem;flex:1;min-width:140px;text-align:center}
+.stat-val{font-size:1.3rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.7rem;color:#8b949e;margin-top:.15rem}
+.cat{margin:1rem 0}
+.cat-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:#161b22;border:1px solid #30363d;border-radius:8px 8px 0 0;cursor:pointer}
+.cat-name{color:#f0f6fc;font-weight:600;font-size:.85rem}
+.cat-badge{font-size:.72rem;padding:.15rem .5rem;border-radius:10px;font-weight:600}
+.cat-badge.pass{background:rgba(57,211,83,0.15);color:#3fb950}
+.cat-badge.warn{background:rgba(210,153,34,0.15);color:#d29922}
+.cat-badge.fail{background:rgba(248,81,73,0.15);color:#f85149}
+.cat-body{background:#0d1117;border:1px solid #30363d;border-top:0;border-radius:0 0 8px 8px;padding:.7rem}
+.rec{padding:.4rem 0;font-size:.8rem;border-bottom:1px solid #161b22}
+.rec:last-child{border-bottom:0}
+.rec-status{display:inline-block;width:18px;text-align:center;margin-right:.3rem}
+.rec-cmd{font-family:'SF Mono',Consolas,monospace;font-size:.72rem;color:#8b949e;display:block;margin-top:.15rem}
+.cta{background:linear-gradient(135deg,rgba(88,166,255,0.08),rgba(57,211,83,0.04));border:1px solid #30363d;border-radius:10px;padding:1rem;margin:1rem 0;text-align:center}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.8rem;margin-bottom:.6rem}
+.cta a{display:inline-block;background:#238636;color:#fff;padding:.4rem 1rem;border-radius:6px;text-decoration:none;font-size:.85rem;font-weight:600;margin:.2rem}
+.cta a.secondary{background:#21262d;border:1px solid #30363d;color:#58a6ff}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+.privacy{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem .7rem;margin:.6rem 0;font-size:.72rem;color:#8b949e}
+.example-btn{background:#21262d;color:#8b949e;border:1px solid #30363d;padding:.3rem .8rem;border-radius:5px;font-size:.75rem;cursor:pointer;margin-top:.5rem}
+.example-btn:hover{color:#c9d1d9;border-color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Hook Gap Analyzer</h1>
+<p class="sub">Paste your <code>~/.claude/settings.json</code> below. Find out which safety hooks you're missing.</p>
+
+<div class="privacy">🔒 <strong>Privacy:</strong> Runs entirely in your browser. Nothing is transmitted or stored.</div>
+
+<textarea id="input" placeholder='Paste your ~/.claude/settings.json here...
+
+Example:
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/guard.sh"}]
+      }
+    ]
+  }
+}'></textarea>
+<br>
+<button class="btn" onclick="analyze()">Analyze Hooks</button>
+<button class="example-btn" onclick="loadExample()">Load example config</button>
+
+<div class="results" id="results">
+<div class="score-ring" id="scoreRing"></div>
+<div class="stat-row" id="stats"></div>
+<div id="categories"></div>
+<div class="cta" id="ctaSection"></div>
+</div>
+
+<div class="footer">
+Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 650+ safety hooks for Claude Code.
+<br>Built from 800+ hours of autonomous Claude Code operation.
+</div>
+</div>
+
+<script>
+const CATEGORIES = [
+  {
+    name: "Destructive Command Protection",
+    weight: 25,
+    desc: "Prevents rm -rf, git reset --hard, and other irreversible commands",
+    checks: [
+      { id: "bash-guard", label: "Bash command guard (rm, git reset, etc.)", detect: h => hasHook(h, "PreToolUse", "Bash"), install: "npx cc-safe-setup --install-example destructive-command-guard" },
+      { id: "write-guard", label: "File write/edit guard (critical paths)", detect: h => hasHook(h, "PreToolUse", "Write") || hasHook(h, "PreToolUse", "Edit"), install: "npx cc-safe-setup --install-example scope-guard" },
+    ]
+  },
+  {
+    name: "Token Consumption Control",
+    weight: 20,
+    desc: "Prevents excessive token usage and cost overruns",
+    checks: [
+      { id: "large-read", label: "Large file read guard (>100KB warning)", detect: h => hasHookPattern(h, "PreToolUse", "Read", /large|size|100/i), install: "npx cc-safe-setup --install-example large-read-guard" },
+      { id: "token-budget", label: "Token budget tracking", detect: h => hasHookPattern(h, "PostToolUse", "", /token|budget/i), install: "npx cc-safe-setup --install-example token-budget-guard" },
+      { id: "subagent-limit", label: "Subagent spawn limit", detect: h => hasHookPattern(h, "PreToolUse", "Agent", /subagent|agent/i), install: "npx cc-safe-setup --install-example subagent-budget-guard" },
+    ]
+  },
+  {
+    name: "Context & Recovery",
+    weight: 20,
+    desc: "Protects work during context compaction and session boundaries",
+    checks: [
+      { id: "precompact", label: "Pre-compaction checkpoint", detect: h => hasHook(h, "PreCompact", ""), install: "npx cc-safe-setup --install-example pre-compact-checkpoint" },
+      { id: "session-track", label: "Session start tracking", detect: h => hasHook(h, "SessionStart", ""), install: "npx cc-safe-setup --install-example session-budget-alert" },
+    ]
+  },
+  {
+    name: "Credential & Secret Protection",
+    weight: 20,
+    desc: "Prevents exposure of API keys, tokens, and sensitive files",
+    checks: [
+      { id: "env-guard", label: ".env / credential file protection", detect: h => hasHookPattern(h, "PreToolUse", "", /env|cred|secret|key|token/i), install: "npx cc-safe-setup --install-example env-guard" },
+      { id: "git-secret", label: "Git commit secret check", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /secret|commit|push/i), install: "npx cc-safe-setup --install-example git-secrets-guard" },
+    ]
+  },
+  {
+    name: "Code Quality Gates",
+    weight: 15,
+    desc: "Enforces syntax checks, test runs, and code standards",
+    checks: [
+      { id: "syntax-check", label: "Post-edit syntax verification", detect: h => hasHookPattern(h, "PostToolUse", "", /syntax|compile|lint|py_compile/i), install: "npx cc-safe-setup --install-example syntax-check" },
+      { id: "test-guard", label: "Pre-commit test requirement", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /test|jest|pytest/i), install: "npx cc-safe-setup --install-example test-before-commit" },
+    ]
+  }
+];
+
+function hasHook(hooks, event, matcher) {
+  if (!hooks || !hooks[event]) return false;
+  const entries = hooks[event];
+  if (!Array.isArray(entries)) return false;
+  if (!matcher) return entries.length > 0;
+  return entries.some(e => {
+    const m = (e.matcher || "").toLowerCase();
+    return m === matcher.toLowerCase() || m === "" || m === "*";
+  });
+}
+
+function hasHookPattern(hooks, event, matcher, pattern) {
+  if (!hooks || !hooks[event]) return false;
+  const entries = hooks[event];
+  if (!Array.isArray(entries)) return false;
+  return entries.some(e => {
+    const m = (e.matcher || "").toLowerCase();
+    const matcherOk = !matcher || m === matcher.toLowerCase() || m === "" || m === "*";
+    if (!matcherOk) return false;
+    const cmds = (e.hooks || []).map(h => h.command || "").join(" ");
+    return pattern.test(cmds) || pattern.test(m);
+  });
+}
+
+function analyze() {
+  const raw = document.getElementById("input").value.trim();
+  if (!raw) return;
+
+  let config;
+  try {
+    config = JSON.parse(raw);
+  } catch(e) {
+    alert("Invalid JSON. Please paste valid settings.json content.");
+    return;
+  }
+
+  const hooks = config.hooks || {};
+  const eventTypes = Object.keys(hooks);
+  let totalHooks = 0;
+  eventTypes.forEach(e => {
+    if (Array.isArray(hooks[e])) {
+      hooks[e].forEach(entry => {
+        totalHooks += (entry.hooks || []).length;
+      });
+    }
+  });
+
+  let totalScore = 0;
+  let totalWeight = 0;
+  let passCount = 0;
+  let totalChecks = 0;
+  const catResults = [];
+
+  CATEGORIES.forEach(cat => {
+    let catPass = 0;
+    const checkResults = cat.checks.map(check => {
+      totalChecks++;
+      const found = check.detect(hooks);
+      if (found) { catPass++; passCount++; }
+      return { ...check, found };
+    });
+    const catScore = cat.checks.length > 0 ? (catPass / cat.checks.length) : 0;
+    totalScore += catScore * cat.weight;
+    totalWeight += cat.weight;
+    catResults.push({ ...cat, checkResults, catPass, catScore });
+  });
+
+  const score = Math.round(totalWeight > 0 ? totalScore : 0);
+  renderResults(score, totalHooks, eventTypes.length, passCount, totalChecks, catResults);
+}
+
+function renderResults(score, totalHooks, eventCount, passCount, totalChecks, catResults) {
+  const results = document.getElementById("results");
+  results.style.display = "block";
+
+  // Score ring
+  const color = score >= 70 ? "#3fb950" : score >= 40 ? "#d29922" : "#f85149";
+  const circumference = 2 * Math.PI * 45;
+  const offset = circumference - (score / 100) * circumference;
+  document.getElementById("scoreRing").innerHTML = `
+    <svg viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="45" fill="none" stroke="#21262d" stroke-width="8"/>
+      <circle cx="60" cy="60" r="45" fill="none" stroke="${color}" stroke-width="8"
+        stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+        stroke-linecap="round" transform="rotate(-90 60 60)"
+        style="transition:stroke-dashoffset 0.8s ease"/>
+      <text x="60" y="55" text-anchor="middle" class="score-text" fill="${color}">${score}</text>
+      <text x="60" y="72" text-anchor="middle" class="score-label">Safety Score</text>
+    </svg>`;
+
+  // Stats
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="stat-val">${totalHooks}</div><div class="stat-label">Total hooks configured</div></div>
+    <div class="stat"><div class="stat-val">${eventCount}</div><div class="stat-label">Hook event types</div></div>
+    <div class="stat"><div class="stat-val">${passCount}/${totalChecks}</div><div class="stat-label">Safety checks passed</div></div>`;
+
+  // Categories
+  let catHTML = "";
+  catResults.forEach(cat => {
+    const status = cat.catScore >= 1 ? "pass" : cat.catScore > 0 ? "warn" : "fail";
+    const statusLabel = cat.catScore >= 1 ? "Covered" : cat.catScore > 0 ? "Partial" : "Missing";
+    let checksHTML = "";
+    cat.checkResults.forEach(ch => {
+      checksHTML += `<div class="rec">
+        <span class="rec-status">${ch.found ? "✅" : "❌"}</span>
+        ${ch.label}
+        ${!ch.found ? `<span class="rec-cmd">${ch.install}</span>` : ""}
+      </div>`;
+    });
+    catHTML += `<div class="cat">
+      <div class="cat-header">
+        <span class="cat-name">${cat.name}</span>
+        <span class="cat-badge ${status}">${statusLabel}</span>
+      </div>
+      <div class="cat-body">
+        <div style="font-size:.75rem;color:#8b949e;margin-bottom:.4rem">${cat.desc}</div>
+        ${checksHTML}
+      </div>
+    </div>`;
+  });
+  document.getElementById("categories").innerHTML = catHTML;
+
+  // CTA based on score
+  let ctaHTML = "";
+  if (score < 40) {
+    ctaHTML = `<h3>Your setup has critical gaps</h3>
+      <p>Install production-tested safety hooks in 10 seconds:</p>
+      <a href="https://github.com/yurukusa/cc-safe-setup">npx cc-safe-setup</a>
+      <a class="secondary" href="https://yurukusa.github.io/cc-safe-setup/docs/hook-selector.html">Browse 650+ hooks</a>`;
+  } else if (score < 70) {
+    ctaHTML = `<h3>Good start — here's how to close the gaps</h3>
+      <p>The missing checks above are available as one-command installs. For token optimization hooks and templates:</p>
+      <a class="secondary" href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub</a>`;
+  } else {
+    ctaHTML = `<h3>Solid setup!</h3>
+      <p>Your hooks cover the critical areas. Want to optimize token consumption too?</p>
+      <a class="secondary" href="https://yurukusa.github.io/cc-safe-setup/docs/claudemd-analyzer.html">Analyze your CLAUDE.md</a>`;
+  }
+  document.getElementById("ctaSection").innerHTML = ctaHTML;
+
+  results.scrollIntoView({ behavior: "smooth" });
+}
+
+function loadExample() {
+  document.getElementById("input").value = JSON.stringify({
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/destructive-guard.sh"}]
+        }
+      ]
+    }
+  }, null, 2);
+}
+</script>
+</body>
+</html>
