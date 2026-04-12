@@ -497,6 +497,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Cache TTL Mitigation Guide](https://gist.github.com/yurukusa/178d3949cd2bd6fbfc275b408f9711d4) — #46829 cache TTL change (1h→5m) impact and 4 mitigations
 - [Security Checkup Hooks](https://gist.github.com/yurukusa/81f79ae6d760b27c17f2cd642ea846d7) — 4 hooks for financial, PII, deny bypass, and background task protection
 - [Cache Breakage Fix](https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4) — 2 root causes of prompt cache invalidation (#47107 git status, #47098 session restart)
+- [Token Book Sampler: 5 Techniques](https://gist.github.com/yurukusa/4a867ba301b480f996c5b76e4b6a6fbc) — free preview of the Token Book — 5 immediate techniques to reduce consumption
 
 ### Professional Services
 
