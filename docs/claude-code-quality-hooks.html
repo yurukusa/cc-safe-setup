@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Quality Hooks — Detect Lazy Rewrites & Skipped Reads | cc-safe-setup</title>
+<meta name="description" content="Hooks to detect Claude Code quality degradation: lazy file rewrites, skipped code reads, untested commits. Based on AMD's 6,852-session analysis. Install with one command.">
+<meta name="keywords" content="Claude Code, hooks, quality, safety, lazy, rewrite, degradation, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-quality-hooks.html">
+<meta property="og:title" content="Claude Code Quality Hooks — Detect Lazy Rewrites">
+<meta property="og:description" content="Hooks to detect quality degradation in Claude Code. Based on 6,852-session analysis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-quality-hooks.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to detect Claude Code quality degradation with hooks",
+  "description": "Install hooks that detect lazy file rewrites, skipped code reads, and untested commits in Claude Code.",
+  "step": [
+    {"@type": "HowToStep", "name": "Install overwrite guard", "text": "npx cc-safe-setup --install-example overwrite-guard"},
+    {"@type": "HowToStep", "name": "Install diff size guard", "text": "npx cc-safe-setup --install-example diff-size-guard"},
+    {"@type": "HowToStep", "name": "Install commit quality gate", "text": "npx cc-safe-setup --install-example commit-quality-gate"},
+    {"@type": "HowToStep", "name": "Install test requirement", "text": "npx cc-safe-setup --install-example push-requires-test-pass"}
+  ]
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7;color:#1a1a2e;background:#fafafa;max-width:800px;margin:0 auto;padding:20px}
+h1{font-size:1.8em;margin:1em 0 0.5em;color:#16213e}
+h2{font-size:1.3em;margin:1.5em 0 0.5em;color:#0f3460;border-bottom:2px solid #e2e8f0;padding-bottom:0.3em}
+p{margin:0.8em 0}
+code{background:#edf2f7;padding:2px 6px;border-radius:4px;font-size:0.9em}
+pre{background:#1a1a2e;color:#e2e8f0;padding:16px;border-radius:8px;overflow-x:auto;margin:1em 0}
+pre code{background:none;color:inherit;padding:0}
+.stat{display:inline-block;background:#e8f4fd;padding:4px 12px;border-radius:20px;margin:4px;font-size:0.9em}
+.alert{background:#fff3cd;border-left:4px solid #ffc107;padding:12px 16px;margin:1em 0;border-radius:4px}
+.install{background:#d4edda;border-left:4px solid #28a745;padding:12px 16px;margin:1em 0;border-radius:4px}
+table{width:100%;border-collapse:collapse;margin:1em 0}
+th,td{border:1px solid #e2e8f0;padding:8px 12px;text-align:left}
+th{background:#f7fafc}
+a{color:#0f3460}
+.cta{background:#1a1a2e;color:white;padding:16px 24px;border-radius:8px;text-align:center;margin:2em 0}
+.cta a{color:#63b3ed;text-decoration:none}
+footer{margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.85em;color:#718096}
+</style>
+</head>
+<body>
+
+<h1>Claude Code Quality Hooks</h1>
+<p>Detect and prevent lazy rewrites, skipped reads, and untested commits.</p>
+
+<div>
+<span class="stat">653 hooks</span>
+<span class="stat">9,200+ tests</span>
+<span class="stat">800+ hours tested</span>
+</div>
+
+<div class="alert">
+<strong>The problem is real.</strong> Analysis of 6,852 Claude Code sessions found code read counts dropped from 6.6x to 2x per edit, and full-file rewrites increased significantly.
+(<a href="https://www.theregister.com/2026/04/06/anthropic_claude_code_dumber_lazier_amd_ai_director/">Source: The Register, April 2026</a>)
+</div>
+
+<h2>Quick Install</h2>
+
+<div class="install">
+<p>Install all quality hooks with one command:</p>
+<pre><code>npx cc-safe-setup --install-example overwrite-guard
+npx cc-safe-setup --install-example diff-size-guard
+npx cc-safe-setup --install-example commit-quality-gate
+npx cc-safe-setup --install-example push-requires-test-pass
+npx cc-safe-setup --install-example pre-compact-checkpoint</code></pre>
+</div>
+
+<h2>What Each Hook Does</h2>
+
+<table>
+<tr><th>Hook</th><th>Detects</th><th>Action</th></tr>
+<tr><td><code>overwrite-guard</code></td><td>Writing to existing files without reading first</td><td>Warning</td></tr>
+<tr><td><code>diff-size-guard</code></td><td>Too many files changed without committing</td><td>Warning / Block</td></tr>
+<tr><td><code>commit-quality-gate</code></td><td>Empty or vague commit messages</td><td>Block</td></tr>
+<tr><td><code>push-requires-test-pass</code></td><td>Pushing without running tests</td><td>Block</td></tr>
+<tr><td><code>pre-compact-checkpoint</code></td><td>Context compaction about to happen</td><td>Auto-save</td></tr>
+</table>
+
+<h2>Why Quality Hooks Matter</h2>
+
+<p>Claude Code can produce excellent work, but it can also take shortcuts:</p>
+<ul>
+<li><strong>Read 2x instead of 6.6x</strong> — editing files without fully understanding them</li>
+<li><strong>Full rewrites</strong> — replacing entire files when a 3-line change would suffice</li>
+<li><strong>Skipping tests</strong> — claiming "done" without verification</li>
+<li><strong>Losing work</strong> — context compaction erasing knowledge of recent edits</li>
+</ul>
+
+<p>Hooks don't fix the model. They provide a safety net that catches quality issues before they reach your codebase.</p>
+
+<h2>Customize Thresholds</h2>
+
+<pre><code># diff-size-guard: change file count thresholds
+export CC_DIFF_WARN=5    # warn at 5+ files changed
+export CC_DIFF_BLOCK=20  # block at 20+ files changed</code></pre>
+
+<h2>Find More Hooks</h2>
+
+<pre><code># Search by keyword
+npx cc-safe-setup --examples quality
+npx cc-safe-setup --examples overwrite
+npx cc-safe-setup --examples diff
+npx cc-safe-setup --examples commit</code></pre>
+
+<p>Or use the <a href="hook-selector.html">Hook Selector</a> to get a personalized recommendation in 5 questions.</p>
+
+<div class="cta">
+<strong>Token consumption is another side effect of lazy behavior.</strong><br>
+Retries and rewrites waste tokens. Learn how CLAUDE.md optimization can cut consumption in half.<br>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book</a> (Chapter 1 free)
+</div>
+
+<footer>
+<p><strong>cc-safe-setup</strong> &mdash; 653 hooks for Claude Code safety. <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+<p><a href="hub.html">All Tools</a> | <a href="hook-selector.html">Hook Selector</a> | <a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> | <a href="token-checkup.html">Token Checkup</a></p>
+</footer>
+
+</body>
+</html>
