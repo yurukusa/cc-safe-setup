@@ -1,0 +1,11 @@
+{
+  "name": "cc-safe-setup",
+  "description": "655+ safety hooks for Claude Code — prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions",
+  "version": "30.0.0",
+  "author": {
+    "name": "yurukusa"
+  },
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/",
+  "repository": "https://github.com/yurukusa/cc-safe-setup",
+  "license": "MIT"
+}

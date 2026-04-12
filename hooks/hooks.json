@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE '^\\s*(sudo\\s+)?rm\\s+.*-[rRf]*[rR]' && ! echo \"$CMD\" | grep -qE '(node_modules|dist|build|__pycache__|/tmp)'; then echo 'BLOCKED: recursive rm on non-safe target. Use specific paths.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+push\\s+.*--force|git\\s+reset\\s+--hard|git\\s+clean\\s+-fd'; then echo 'BLOCKED: destructive git operation. Use safer alternatives.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qiE '(api.key|secret|password|token).*=.*[A-Za-z0-9]{20}'; then echo 'BLOCKED: potential credential in command. Use environment variables.' >&2; exit 2; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.(env|pem|key|credentials|secret)$'; then echo 'BLOCKED: writing to sensitive file. Check if this is intentional.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
