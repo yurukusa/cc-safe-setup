@@ -27,7 +27,7 @@
     "@type": "Offer",
     "price": "2500",
     "priceCurrency": "JPY",
-    "availability": "https://schema.org/PreOrder"
+    "availability": "https://schema.org/InStock"
   },
   "numberOfPages": 10,
   "inLanguage": "ja"
@@ -58,6 +58,8 @@ h2 { font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 2px solid #e8e8e8; p
 .tools-section { background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
 .tools-section a { color: #2563eb; text-decoration: none; }
 .tools-section a:hover { text-decoration: underline; }
+.quotes-section { margin: 1.5rem 0; }
+.quotes-section blockquote { background: #fff7ed; border-left: 3px solid #f97316; padding: 0.8rem 1.2rem; margin: 0.5rem 0; font-style: italic; color: #444; border-radius: 0 6px 6px 0; }
 footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
 </style>
 </head>
@@ -69,13 +71,19 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p class="subtitle">800時間の運用データから見つけた実践テクニック — 全10章・設定テンプレート収録</p>
 
 <div class="pain-point">
-<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,200+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>でも報告。Anthropicが「top priority」と認めた問題。
+<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,230+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
+</div>
+
+<div class="quotes-section">
+<blockquote>"I have Max subscription and in less than 1 hour my usage is at 80%"</blockquote>
+<blockquote>"I burned through my entire daily quota in about 70 minutes of normal coding"</blockquote>
+<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788 より</p>
 </div>
 
 <h2>このBookで手に入るもの</h2>
 
 <div class="data-point">
-<strong>実測データ</strong>: CLAUDE.mdを100行→35行にしたらキャッシュ効率が改善し、トークン消費が体感40%減。
+<strong>実測データ</strong>: CLAUDE.mdを100行→35行に凝縮 → キャッシュ読み取り率89%→95%に改善、トークン消費が体感40%減。compaction頻度も下がり、セッション継続時間が伸びた。
 </div>
 
 <ul class="chapter-list">
@@ -100,7 +108,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </ul>
 
 <h2>著者について</h2>
-<p>非エンジニア。Claude Codeを800時間以上自律運用し、650+のhookと14,000+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。</p>
+<p>非エンジニア。Claude Codeを800時間以上自律運用し、655のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。</p>
 
 <div class="cta-section">
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn-primary">Zenn Bookで読む（第1章無料）</a>
@@ -119,7 +127,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </div>
 
 <footer>
-<p>cc-safe-setup — Claude Code安全フック集（650+ hooks / 9,200+ tests）</p>
+<p>cc-safe-setup — Claude Code安全フック集（655 hooks / 9,200+ tests）</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a></p>
 </footer>
 
