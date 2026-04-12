@@ -175,14 +175,14 @@ const answers = [];
 const TOTAL = 5;
 
 const tips = [
-  {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Save 20-40% tokens',when:{claudemd:['long']}},
-  {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Common after editing CLAUDE.md mid-session.',impact:'Prevent 10-20x spikes',when:{cache:['dunno','yes']}},
-  {id:'subagent',title:'Set subagent budget limits',desc:'Each subagent gets its own context window. 5 parallel agents = 5x token cost. Use token-budget-guard and subagent-budget-guard hooks.',impact:'Save 30-60% on agent-heavy workflows',when:{agents:['heavy','sometimes']}},
-  {id:'session',title:'Split sessions strategically',desc:'After context compaction, cache efficiency drops. Starting a fresh session with a clear task description is often cheaper than continuing.',impact:'Save 15-25% per session',when:{session:['single','auto']}},
-  {id:'reads',title:'Block unnecessary file reads',desc:'Claude reads files it doesn\'t need — large binaries, generated code, logs. Use large-read-guard hook to warn on files over 100KB.',impact:'Save 10-20% tokens',when:{burn:['fast','moderate']}},
-  {id:'compact',title:'Auto-save before compaction',desc:'PreCompact hook creates a git checkpoint before context is compressed. Prevents Claude from re-reading files it already processed.',impact:'Prevent post-compaction waste',when:{session:['single','auto']}},
-  {id:'cost',title:'Check /cost regularly',desc:'The /cost command shows exactly where tokens go. Most users never check it. Understanding your baseline is the first step to optimizing.',impact:'Foundation for all other optimizations',when:{cache:['dunno']}},
-  {id:'workflow',title:'Design token-aware workflows',desc:'Break large tasks into focused sub-tasks. Each sub-task starts with a clean context = better cache ratio. Plan mode helps.',impact:'Save 20-30% on complex tasks',when:{burn:['fast']}}
+  {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Save 20-40% tokens',chapter:'Ch.2 — CLAUDE.md Optimization',when:{claudemd:['long']}},
+  {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Common after editing CLAUDE.md mid-session.',impact:'Prevent 10-20x spikes',chapter:'Ch.8 — Troubleshooting',when:{cache:['dunno','yes']}},
+  {id:'subagent',title:'Set subagent budget limits',desc:'Each subagent gets its own context window. 5 parallel agents = 5x token cost. Use token-budget-guard and subagent-budget-guard hooks.',impact:'Save 30-60% on agent-heavy workflows',chapter:'Ch.5 — Subagent Strategy',when:{agents:['heavy','sometimes']}},
+  {id:'session',title:'Split sessions strategically',desc:'After context compaction, cache efficiency drops. Starting a fresh session with a clear task description is often cheaper than continuing.',impact:'Save 15-25% per session',chapter:'Ch.6 — Workflow Design',when:{session:['single','auto']}},
+  {id:'reads',title:'Block unnecessary file reads',desc:'Claude reads files it doesn\'t need — large binaries, generated code, logs. Use large-read-guard hook to warn on files over 100KB.',impact:'Save 10-20% tokens',chapter:'Ch.4 — Hook-based Token Guards',when:{burn:['fast','moderate']}},
+  {id:'compact',title:'Auto-save before compaction',desc:'PreCompact hook creates a git checkpoint before context is compressed. Prevents Claude from re-reading files it already processed.',impact:'Prevent post-compaction waste',chapter:'Ch.3 — Context Management',when:{session:['single','auto']}},
+  {id:'cost',title:'Check /cost regularly',desc:'The /cost command shows exactly where tokens go. Most users never check it. Understanding your baseline is the first step to optimizing.',impact:'Foundation for all other optimizations',chapter:'Ch.1 — Where Tokens Go (Free)',when:{cache:['dunno']}},
+  {id:'workflow',title:'Design token-aware workflows',desc:'Break large tasks into focused sub-tasks. Each sub-task starts with a clean context = better cache ratio. Plan mode helps.',impact:'Save 20-30% on complex tasks',chapter:'Ch.6 — Workflow Design',when:{burn:['fast']}}
 ];
 
 function updateProgress(current) {
@@ -251,16 +251,17 @@ function showResults() {
           <div class="tip-title">${t.title}</div>
           <div class="tip-desc">${t.desc}</div>
           <span class="tip-impact">${t.impact}</span>
+          ${t.chapter ? `<span style="display:block;color:#58a6ff;font-size:.75rem;margin-top:.3rem">📘 ${t.chapter}</span>` : ''}
         </div>
       `).join('')}
     </div>
 
     <div class="cta">
-      <h3>Want the complete token optimization system?</h3>
-      <p>CLAUDE.md optimization, hook-based token guards, context management, and 800 hours of real consumption data. Templates you can copy-paste.</p>
-      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Token Optimization Book (¥2,500)</a>
-      <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Safety Guide — Ch.3 Free (¥800)</a>
-      <a href="https://zenn.dev/yurukusa/books/3c3c3baee85f0a19" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">800 Hours Full Story (¥1,500)</a>
+      <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to fix it' : score < 70 ? 'You can save significantly more' : 'Fine-tune your setup further'}</h3>
+      <p>${score < 40 ? 'Your score suggests 40-60% of your tokens are wasted. The chapters above show exactly where — the Token Book has the fix for each one, with copy-paste templates.' : score < 70 ? 'The recommendations above map directly to Token Book chapters. Each chapter includes settings you can copy-paste to see immediate improvement.' : 'Even at your score, CLAUDE.md structure and cache management can squeeze out another 10-20%. The Token Book covers advanced techniques.'}</p>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Token Book — ¥2,500 (Ch.1 Free)</a>
+      <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Safety Guide — ¥800 (Ch.3 Free)</a>
+      <a href="https://zenn.dev/yurukusa/books/3c3c3baee85f0a19" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">800 Hours Full Story — ¥1,500</a>
     </div>
     <div class="cta" style="margin-top:.8rem">
       <h3>Quick fix: Install safety hooks now</h3>
@@ -294,7 +295,7 @@ function restart() {
 
 <div class="footer">
   <a href="hook-selector.html">Hook Selector</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
-  <br>cc-safe-setup — 650+ hooks · 9,200+ tests · MIT License
+  <br>cc-safe-setup — 655 hooks · 9,200+ tests · MIT License
 </div>
 </body>
 </html>
