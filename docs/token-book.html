@@ -104,6 +104,35 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <li><span class="ch-num">ch.9</span> 設定テンプレート集 — コピペで使えるCLAUDE.md・hooks</li>
 </ul>
 
+<details style="margin:1.5rem 0;border:1px solid #e5e7eb;border-radius:8px;padding:0;">
+<summary style="padding:1rem 1.5rem;cursor:pointer;font-weight:bold;font-size:1.1rem;background:#f9fafb;border-radius:8px;">第1章を無料で読む: トークンはどこで消えている？</summary>
+<div style="padding:1rem 1.5rem;line-height:1.8;">
+<p>「何もしていないのに減っている」——これはClaude Codeユーザーの最も多い不満だ。しかし「何もしていない」わけではない。見えないところでトークンが消費されている。</p>
+
+<h3 style="margin-top:1.5rem;">トークン消費の4つの層</h3>
+
+<p><strong>層1: システムプロンプト</strong> — Claude Codeが起動するたびに、内部のシステムプロンプト + CLAUDE.md + ツール定義 + MCP設定が読み込まれる。<strong>CLAUDE.mdが長いほど、毎ターンの基礎消費が増える</strong>。100行と500行では大きく違う。</p>
+
+<p><strong>層2: コンテキストウィンドウ</strong> — 会話が進むにつれ過去のやりとりが蓄積。プロンプトキャッシュが効いていれば再利用されるが、<strong>キャッシュが壊れると同じプロンプトでも消費が数倍に</strong>（第8章で詳述）。</p>
+
+<p><strong>層3: ツール呼び出し</strong> — ファイルの読み書き、Bash実行のたびにトークン消費。<code>ls -la</code>の出力と<code>cat large-file.txt</code>の出力では桁が違う。ツール結果には200Kトークンの内部上限があり、超えると切り捨て→リトライ→追加消費。</p>
+
+<p><strong>層4: サブエージェント</strong> — 各サブエージェントが独自のコンテキストを持つ。便利だが使いすぎるとトークン急増（第5章で詳述）。</p>
+
+<h3 style="margin-top:1.5rem;">何が最もトークンを食うか（800時間の実測）</h3>
+<ol>
+<li>大きなファイルの読み込み</li>
+<li>コンテキストの肥大化（/compactせずに長時間使用）</li>
+<li>プロンプトキャッシュの破壊</li>
+<li>不要なツール呼び出し</li>
+<li>CLAUDE.mdの肥大化（500行超え）</li>
+<li>状態管理ファイルの頻繁な更新</li>
+</ol>
+
+<p style="margin-top:1.5rem;padding:1rem;background:#f0fdf4;border-radius:6px;"><strong>続きは第2章以降で</strong>: CLAUDE.mdの最適化（第2章）、hookによる自動防御（第4章）、実データ比較（第7章）、設定テンプレート（第9章）。</p>
+</div>
+</details>
+
 <h2>誰のための本か</h2>
 <ul>
 <li>Claude Code Max ($200/月) を使っていて、コストが気になる人</li>
