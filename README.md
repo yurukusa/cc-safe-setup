@@ -519,6 +519,10 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 Claude Code runs hooks with a restricted PATH that excludes `/opt/homebrew/bin` ([#46954](https://github.com/anthropics/claude-code/issues/46954)). If `jq` is installed via Homebrew, hooks silently exit 0. Fix: add `export PATH="/opt/homebrew/bin:$PATH"` at the top of your hook script, or use absolute paths like `/opt/homebrew/bin/jq`. Inline hooks in `settings.json` may also be affected — add a PATH export prefix: `export PATH="/opt/homebrew/bin:$PATH"; INPUT=$(cat); ...`
 
+**Q: How is this different from [claude-token-efficient](https://github.com/drona23/claude-token-efficient)?**
+
+Different goals. claude-token-efficient optimizes CLAUDE.md to make Claude's responses shorter and cheaper. cc-safe-setup prevents dangerous operations (file deletion, credential leaks, force-push). They work well together: use claude-token-efficient for cost reduction, cc-safe-setup for safety. For comprehensive token optimization beyond CLAUDE.md (hooks, context management, workflow design), see the [Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html).
+
 **Still stuck?** See the full [Permission Troubleshooting Flowchart](https://gist.github.com/yurukusa/b64217ffcb908fa309dbfcfa368cd84d) for step-by-step diagnosis.
 
 ## Contributing
