@@ -97,7 +97,7 @@ const questions = [
       { text: "I use --dangerously-skip-permissions", desc: "All permissions bypassed", score: 0 }
     ],
     risks: [
-      { condition: s => s <= 1, text: "HIGH: Deny rules are bypassed when a command has 50+ subcommands (Adversa AI disclosure). Hooks are not affected by this limit.", incident: "50x 'true' + dangerous command bypasses ALL deny rules" }
+      { condition: s => s <= 1, text: "HIGH: Deny rules are bypassed when a command has 50+ subcommands (<a href='https://adversa.ai/blog/claude-code-security-bypass-deny-rules-disabled/'>Adversa AI disclosure</a>, <a href='https://www.theregister.com/2026/04/01/claude_code_rule_cap_raises/'>The Register</a>). Patched in v2.1.90, but hooks provide defense-in-depth.", incident: "50x 'true' + dangerous command bypasses ALL deny rules" }
     ]
   },
   {

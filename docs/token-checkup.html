@@ -177,7 +177,7 @@ const TOTAL = 5;
 
 const tips = [
   {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Save 20-40% tokens',chapter:'Ch.2 — CLAUDE.md Optimization',when:{claudemd:['long']}},
-  {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Common after editing CLAUDE.md mid-session.',impact:'Prevent 10-20x spikes',chapter:'Ch.8 — Troubleshooting',when:{cache:['dunno','yes']}},
+  {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Two root causes: git status changes break cache on every edit (#47107), and new sessions always miss cache for ~6,500 tokens (#47098). See <a href="https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4">Cache Breakage Fix</a> for details.',impact:'Prevent 10-20x spikes',chapter:'Ch.8 — Troubleshooting',when:{cache:['dunno','yes']}},
   {id:'subagent',title:'Set subagent budget limits',desc:'Each subagent gets its own context window. 5 parallel agents = 5x token cost. Use token-budget-guard and subagent-budget-guard hooks.',impact:'Save 30-60% on agent-heavy workflows',chapter:'Ch.5 — Subagent Strategy',when:{agents:['heavy','sometimes']}},
   {id:'session',title:'Split sessions strategically',desc:'After context compaction, cache efficiency drops. Starting a fresh session with a clear task description is often cheaper than continuing.',impact:'Save 15-25% per session',chapter:'Ch.6 — Workflow Design',when:{session:['single','auto']}},
   {id:'reads',title:'Block unnecessary file reads',desc:'Claude reads files it doesn\'t need — large binaries, generated code, logs. Use large-read-guard hook to warn on files over 100KB.',impact:'Save 10-20% tokens',chapter:'Ch.4 — Hook-based Token Guards',when:{burn:['fast','moderate']}},
@@ -296,8 +296,8 @@ function restart() {
 </script>
 
 <div class="footer">
-  <a href="hook-selector.html">Hook Selector</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
-  <br>cc-safe-setup — 655 hooks · 9,200+ tests · MIT License
+  <a href="security-checkup.html">Security Checkup</a> · <a href="hook-selector.html">Hook Selector</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+  <br>cc-safe-setup — 664+ hooks · 9,200+ tests · MIT License
 </div>
 </body>
 </html>

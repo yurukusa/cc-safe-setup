@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Safety Setup Service | cc-safe-setup</title>
+<meta name="description" content="Professional Claude Code safety configuration. Hooks, CLAUDE.md optimization, and token reduction by the team behind cc-safe-setup (664+ hooks, 53,000+ Qiita views).">
+<style>
+:root { --blue: #2563eb; --dark: #1e293b; --gray: #64748b; --light: #f8fafc; --green: #059669; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--dark); line-height: 1.7; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 2px solid var(--blue); padding-bottom: 0.3rem; }
+.subtitle { color: var(--gray); font-size: 1rem; margin-bottom: 2rem; }
+.service { background: var(--light); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid var(--blue); }
+.service h3 { margin-bottom: 0.5rem; }
+.service .price { color: var(--green); font-weight: bold; font-size: 1.1rem; }
+.credential { display: inline-block; background: #e0e7ff; color: var(--blue); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; margin: 0.2rem; }
+.cta { display: inline-block; background: var(--blue); color: #fff; padding: 0.8rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 1rem; }
+.cta:hover { background: #1d4ed8; }
+ul { padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+.stats { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.stat { text-align: center; padding: 0.8rem; background: var(--light); border-radius: 6px; flex: 1; min-width: 120px; }
+.stat .num { font-size: 1.5rem; font-weight: bold; color: var(--blue); }
+.stat .label { font-size: 0.8rem; color: var(--gray); }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; color: var(--gray); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code Safety Setup Service</h1>
+<p class="subtitle">Professional safety configuration by the cc-safe-setup team</p>
+
+<div class="stats">
+<div class="stat"><div class="num">664+</div><div class="label">Safety Hooks</div></div>
+<div class="stat"><div class="num">53K+</div><div class="label">Qiita Views</div></div>
+<div class="stat"><div class="num">800h</div><div class="label">Operation Data</div></div>
+<div class="stat"><div class="num">8</div><div class="label">GitHub Stars</div></div>
+</div>
+
+<h2>Why safety configuration matters</h2>
+<p>In April 2026 alone:</p>
+<ul>
+<li><strong>$1,446</strong> unauthorized fund transfer (<a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a>)</li>
+<li><strong>$367</strong> loss + account suspension (<a href="https://github.com/anthropics/claude-code/issues/47046">#47046</a>)</li>
+<li><strong>Deny rules bypass</strong> discovered (<a href="https://adversa.ai/blog/claude-code-security-bypass-deny-rules-disabled/">Adversa AI</a>, covered by <a href="https://www.theregister.com/2026/04/01/claude_code_rule_cap_raises/">The Register</a>)</li>
+<li><strong>PII leaked</strong> to public website despite CLAUDE.md rules (<a href="https://github.com/anthropics/claude-code/issues/46910">#46910</a>)</li>
+</ul>
+
+<h2>Services</h2>
+
+<div class="service">
+<h3>Safety Audit</h3>
+<p>Review your settings.json, CLAUDE.md, and hook configuration. Identify vulnerabilities including deny rules bypass, PII leaks, and token waste.</p>
+<p><strong>Deliverable:</strong> Vulnerability report + recommended hooks + settings.json template</p>
+<p class="price">$50</p>
+</div>
+
+<div class="service">
+<h3>Token Optimization</h3>
+<p>Analyze your CLAUDE.md, context management, and workflow for token efficiency. Based on 800 hours of measured data.</p>
+<p><strong>Deliverable:</strong> Optimized CLAUDE.md + hook set + before/after comparison guide</p>
+<p class="price">$75</p>
+</div>
+
+<div class="service">
+<h3>Custom Hook Development</h3>
+<p>Build PreToolUse/PostToolUse hooks tailored to your specific workflow. Financial operations, data protection, CI/CD safety, or any custom requirement.</p>
+<p><strong>Deliverable:</strong> Tested hooks + settings.json integration + documentation</p>
+<p class="price">$100</p>
+</div>
+
+<div class="service">
+<h3>Full Setup Package</h3>
+<p>Complete safety configuration: audit + token optimization + custom hooks + ongoing support for 30 days.</p>
+<p><strong>Deliverable:</strong> Everything above + 30-day email support</p>
+<p class="price">$200</p>
+</div>
+
+<h2>Credentials</h2>
+<p>
+<span class="credential">cc-safe-setup author (664+ hooks)</span>
+<span class="credential">800+ hours autonomous operation</span>
+<span class="credential">53,000+ Qiita views on Claude Code</span>
+<span class="credential">Anthropic Academy certified</span>
+<span class="credential">Google Analytics certified</span>
+<span class="credential">HubSpot Inbound certified</span>
+</p>
+
+<h2>Get started</h2>
+<p>Free diagnostic first: <a href="https://yurukusa.github.io/cc-safe-setup/security-checkup.html">Security Checkup</a> (6 questions, 2 minutes).</p>
+<p>For service inquiries:</p>
+<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/issues/new?title=Service%20Inquiry&labels=service">Contact via GitHub</a>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> | <a href="https://yurukusa.github.io/cc-safe-setup/token-book.html">Token Book</a> | <a href="https://ko-fi.com/s/fd44ef09a7">Buy Token Book (Ko-fi)</a></p>
+</footer>
+
+</div>
+</body>
+</html>
