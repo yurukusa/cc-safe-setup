@@ -79,6 +79,7 @@ npx cc-safe-setup --install-example pre-compact-checkpoint</code></pre>
 <table>
 <tr><th>Hook</th><th>Detects</th><th>Action</th></tr>
 <tr><td><code>overwrite-guard</code></td><td>Writing to existing files without reading first</td><td>Warning</td></tr>
+<tr><td><code>full-rewrite-detector</code></td><td>Rewriting &gt;80% of a file when partial edit would suffice</td><td>Warning</td></tr>
 <tr><td><code>diff-size-guard</code></td><td>Too many files changed without committing</td><td>Warning / Block</td></tr>
 <tr><td><code>commit-quality-gate</code></td><td>Empty or vague commit messages</td><td>Block</td></tr>
 <tr><td><code>push-requires-test-pass</code></td><td>Pushing without running tests</td><td>Block</td></tr>
