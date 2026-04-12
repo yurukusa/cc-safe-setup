@@ -214,6 +214,23 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | Maximum protection mode | `npx cc-safe-setup --safe-mode` |
 | Migrate from Cursor/Windsurf | [Migration Guide](https://yurukusa.github.io/cc-safe-setup/migration-guide.html) |
 
+## Plugin Marketplace
+
+Install safety hooks as Claude Code plugins — no npm required:
+
+```bash
+/plugin marketplace add yurukusa/cc-safe-setup
+/plugin install safety-essentials@cc-safe-setup
+```
+
+| Plugin | What it blocks |
+|---|---|
+| `safety-essentials` | rm -rf, force-push, hard-reset, .env overwrite, npm publish |
+| `git-protection` | Force-push, main/master push, git clean, branch -D |
+| `credential-guard` | .env write/edit, API keys in commands, service account files |
+
+Also listed on [claudemarketplaces.com](https://claudemarketplaces.com).
+
 ## Common Pain Points (from GitHub Issues)
 
 | Problem | Issue | Fix |
