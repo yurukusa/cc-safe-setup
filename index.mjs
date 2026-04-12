@@ -193,7 +193,7 @@ if (HELP) {
   Test hooks: npx cc-hook-test <hook.sh>
 
   Token Checkup: https://yurukusa.github.io/cc-safe-setup/token-checkup.html
-  Token Book:    https://zenn.dev/yurukusa/books/token-savings-guide
+  Token Book:    https://yurukusa.github.io/cc-safe-setup/token-book.html
   Safety Guide:  https://zenn.dev/yurukusa/books/6076c23b1cb18b
 `);
   process.exit(0);
@@ -5905,7 +5905,7 @@ async function main() {
   console.log('  ' + c.dim + '  28 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
   console.log('  ' + c.dim + 'Learn more:' + c.reset);
-  console.log('  ' + c.dim + '  Token Book: https://zenn.dev/yurukusa/books/token-savings-guide' + c.reset);
+  console.log('  ' + c.dim + '  Token Book: https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
   console.log('  ' + c.dim + '  Safety:     https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
   console.log();
 }
