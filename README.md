@@ -488,6 +488,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Token Consumption Checklist](https://gist.github.com/yurukusa/db8700a9f9fa331d36664df2868274cb) — 10-item diagnostic
 - [Outage Survival Kit](https://gist.github.com/yurukusa/a0e31171eecb527d0df1d5498bf5f5d0) — what to do when Claude Code is down
 - [CLAUDE.md Token Optimizer](https://gist.github.com/yurukusa/2b98fd2e90c0c13f6918c9f915e08e27) — 35-line template, 40% token reduction (800h tested)
+- [Worktree Safety Hooks](https://gist.github.com/yurukusa/98bd43c5d0d8a6ebbf2cf21bfc1e2907) — 3 hooks to protect against worktree deletion and cross-tree destruction
 
 ## FAQ
 
