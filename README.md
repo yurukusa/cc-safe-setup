@@ -514,6 +514,10 @@ Since v2.1.78, protected directories always prompt regardless of permission mode
 
 `allow` takes precedence over `ask`. If you allow all Bash, ask rules are ignored ([#6527](https://github.com/anthropics/claude-code/issues/6527)). Use PreToolUse hooks to block dangerous commands instead of relying on the ask/allow priority system.
 
+**Q: Hooks silently fail on macOS (Homebrew `jq` not found)**
+
+Claude Code runs hooks with a restricted PATH that excludes `/opt/homebrew/bin` ([#46954](https://github.com/anthropics/claude-code/issues/46954)). If `jq` is installed via Homebrew, hooks silently exit 0. Fix: add `export PATH="/opt/homebrew/bin:$PATH"` at the top of your hook script, or use absolute paths like `/opt/homebrew/bin/jq`. Inline hooks in `settings.json` may also be affected — add a PATH export prefix: `export PATH="/opt/homebrew/bin:$PATH"; INPUT=$(cat); ...`
+
 **Still stuck?** See the full [Permission Troubleshooting Flowchart](https://gist.github.com/yurukusa/b64217ffcb908fa309dbfcfa368cd84d) for step-by-step diagnosis.
 
 ## Contributing
