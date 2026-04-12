@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Cost Calculator — How Much Are You Really Spending?</title>
+<meta name="description" content="Estimate your real Claude Code monthly cost. Input your usage patterns, see where tokens go, and get optimization tips based on 800+ hours of operation data.">
+<meta property="og:title" content="Claude Code Cost Calculator">
+<meta property="og:description" content="See your real monthly Claude Code cost. Find where tokens go. Get optimization tips.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/cost-calculator.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Cost Calculator","description":"Estimate your real Claude Code monthly cost based on usage patterns. Optimization tips included.","url":"https://yurukusa.github.io/cc-safe-setup/cost-calculator.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.card h2{color:#f0f6fc;font-size:1rem;margin-bottom:.8rem}
+label{display:block;color:#8b949e;font-size:.8rem;margin-bottom:.3rem;margin-top:.8rem}
+label:first-child{margin-top:0}
+select,input[type="number"]{width:100%;background:#0d1117;border:1px solid #30363d;color:#f0f6fc;padding:.5rem;border-radius:6px;font-size:.9rem}
+select:focus,input:focus{outline:none;border-color:#58a6ff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.btn{background:#238636;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;cursor:pointer;font-size:.95rem;font-weight:600;width:100%;margin-top:1rem}
+.btn:hover{background:#2ea043}
+#results{display:none}
+.cost-big{font-size:2rem;color:#f0f6fc;font-weight:700;text-align:center;margin:.8rem 0}
+.cost-label{text-align:center;color:#8b949e;font-size:.8rem}
+.bar{background:#21262d;border-radius:6px;height:24px;margin:.4rem 0;position:relative;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.bar-label{position:absolute;left:8px;top:3px;font-size:.7rem;color:#f0f6fc;font-weight:600;z-index:1}
+.tip{background:#1c2128;border-left:3px solid #58a6ff;padding:.6rem .8rem;margin:.5rem 0;font-size:.8rem;border-radius:0 6px 6px 0}
+.tip-warn{border-color:#d29922}
+.tip-crit{border-color:#f85149}
+.savings{color:#3fb950;font-weight:600}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:12px;padding:1.2rem;margin-top:1rem;text-align:center}
+.cta h3{color:#f0f6fc;margin-bottom:.5rem}
+.cta p{color:#8b949e;font-size:.85rem;margin-bottom:.8rem}
+.cta a.btn-cta{display:inline-block;background:#238636;color:#fff;padding:.5rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem}
+.cta a.btn-cta:hover{background:#2ea043;text-decoration:none}
+.cta a.btn-outline{display:inline-block;border:1px solid #30363d;color:#58a6ff;padding:.5rem 1.2rem;border-radius:8px;text-decoration:none;font-size:.85rem;margin:.3rem}
+footer{text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Claude Code Cost Calculator</h1>
+<p class="sub">How much are you really spending? Based on 800+ hours of operation data.</p>
+
+<div class="card">
+<h2>Your Usage</h2>
+
+<label>Plan</label>
+<select id="plan">
+<option value="api">API (pay-per-token)</option>
+<option value="pro">Pro ($20/month)</option>
+<option value="max5">Max 5x ($100/month)</option>
+<option value="max20" selected>Max 20x ($200/month)</option>
+</select>
+
+<div class="row">
+<div>
+<label>Sessions per day</label>
+<input type="number" id="sessions" value="5" min="1" max="50">
+</div>
+<div>
+<label>Avg minutes per session</label>
+<input type="number" id="duration" value="30" min="5" max="480">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Days per month</label>
+<input type="number" id="days" value="25" min="1" max="31">
+</div>
+<div>
+<label>CLAUDE.md size (lines)</label>
+<input type="number" id="claudemd" value="80" min="0" max="500">
+</div>
+</div>
+
+<label>Primary use</label>
+<select id="usecase">
+<option value="coding">Coding (read/write files)</option>
+<option value="research">Research (web search, reading)</option>
+<option value="autonomous">Autonomous operation (long sessions)</option>
+<option value="mixed">Mixed</option>
+</select>
+
+<label>How often do you hit the usage limit?</label>
+<select id="limit_freq">
+<option value="never">Never</option>
+<option value="sometimes">Sometimes (1-2x/week)</option>
+<option value="often">Often (3-5x/week)</option>
+<option value="daily">Almost daily</option>
+</select>
+
+<button class="btn" onclick="calculate()">Calculate My Cost</button>
+</div>
+
+<div id="results">
+<div class="card">
+<h2>Your Estimated Cost</h2>
+<div class="cost-big" id="monthly-cost"></div>
+<div class="cost-label">estimated monthly cost</div>
+
+<div id="api-detail" style="display:none;margin-top:1rem">
+<div class="cost-label" style="text-align:left;margin-bottom:.4rem">Token breakdown (estimated)</div>
+<div id="breakdown"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Where Your Tokens Go</h2>
+<div id="token-bars"></div>
+<p style="color:#8b949e;font-size:.75rem;margin-top:.5rem">Based on averages from 800+ hours of Claude Code operation. Your actual usage may vary.</p>
+</div>
+
+<div class="card">
+<h2>Optimization Tips</h2>
+<div id="tips"></div>
+</div>
+
+<div class="cta" id="cta-section">
+<h3>Want to cut your token cost in half?</h3>
+<p>The Token Book covers CLAUDE.md optimization, hook-based token guards, context management, and workflow design — with real before/after data.</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn-cta">Token Book — Ch.1 Free (¥2,500)</a>
+<br>
+<a href="https://yurukusa.github.io/cc-safe-setup/claudemd-analyzer.html" class="btn-outline">Analyze your CLAUDE.md (free)</a>
+<a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" class="btn-outline">Token Checkup (free)</a>
+</div>
+</div>
+
+<footer>
+<a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · Data from 800+ hours of autonomous Claude Code operation
+</footer>
+</div>
+
+<script>
+function calculate() {
+  const plan = document.getElementById('plan').value;
+  const sessions = +document.getElementById('sessions').value;
+  const duration = +document.getElementById('duration').value;
+  const days = +document.getElementById('days').value;
+  const claudemd = +document.getElementById('claudemd').value;
+  const usecase = document.getElementById('usecase').value;
+  const limitFreq = document.getElementById('limit_freq').value;
+
+  // Token estimation model (based on 800+ hours of data)
+  // Average tokens per minute of active session
+  const tokensPerMin = {
+    coding: 1200,
+    research: 800,
+    autonomous: 1500,
+    mixed: 1100
+  }[usecase];
+
+  // CLAUDE.md overhead per turn (roughly 4 chars = 1 token, ~15 turns per session)
+  const claudemdTokensPerTurn = Math.round(claudemd * 30 * 0.25);
+  const turnsPerSession = Math.max(10, Math.round(duration / 2));
+  const claudemdOverhead = claudemdTokensPerTurn * turnsPerSession;
+
+  // Total tokens per session
+  const baseTokens = tokensPerMin * duration;
+  const totalTokensPerSession = baseTokens + claudemdOverhead;
+  const monthlyTokens = totalTokensPerSession * sessions * days;
+
+  // Cost calculation
+  let monthlyCost;
+  let costDisplay;
+  const apiDetail = document.getElementById('api-detail');
+
+  if (plan === 'api') {
+    // Opus: $15/M input, $75/M output. Assume 70% input, 30% output
+    const inputTokens = monthlyTokens * 0.7;
+    const outputTokens = monthlyTokens * 0.3;
+    // With caching (typical 60% cache hit)
+    const cachedInput = inputTokens * 0.6;
+    const uncachedInput = inputTokens * 0.4;
+    const inputCost = (uncachedInput / 1e6 * 15) + (cachedInput / 1e6 * 1.5);
+    const outputCost = outputTokens / 1e6 * 75;
+    monthlyCost = inputCost + outputCost;
+    costDisplay = '$' + monthlyCost.toFixed(0);
+    apiDetail.style.display = 'block';
+    document.getElementById('breakdown').innerHTML =
+      `<div style="font-size:.8rem;color:#8b949e">` +
+      `Monthly tokens: ~${(monthlyTokens/1e6).toFixed(1)}M<br>` +
+      `Input (70%): $${inputCost.toFixed(0)} · Output (30%): $${outputCost.toFixed(0)}<br>` +
+      `Assuming 60% cache hit rate and Opus pricing</div>`;
+  } else {
+    const planCosts = { pro: 20, max5: 100, max20: 200 };
+    monthlyCost = planCosts[plan];
+    costDisplay = '$' + monthlyCost;
+    apiDetail.style.display = 'none';
+  }
+
+  document.getElementById('monthly-cost').textContent = costDisplay;
+
+  // Token distribution bars
+  const distributions = {
+    coding: [
+      { label: 'CLAUDE.md / instructions', pct: claudemd > 50 ? 25 : 15, color: '#f85149' },
+      { label: 'File reading', pct: 30, color: '#d29922' },
+      { label: 'Code generation', pct: 25, color: '#3fb950' },
+      { label: 'Tool schemas / system', pct: 15, color: '#58a6ff' },
+      { label: 'Conversation history', pct: claudemd > 50 ? 5 : 15, color: '#8b949e' }
+    ],
+    research: [
+      { label: 'CLAUDE.md / instructions', pct: claudemd > 50 ? 20 : 10, color: '#f85149' },
+      { label: 'Web content / search results', pct: 35, color: '#d29922' },
+      { label: 'Response generation', pct: 20, color: '#3fb950' },
+      { label: 'Tool schemas / system', pct: 20, color: '#58a6ff' },
+      { label: 'Conversation history', pct: claudemd > 50 ? 5 : 15, color: '#8b949e' }
+    ],
+    autonomous: [
+      { label: 'CLAUDE.md / instructions', pct: claudemd > 50 ? 30 : 18, color: '#f85149' },
+      { label: 'File reading', pct: 25, color: '#d29922' },
+      { label: 'Code generation', pct: 20, color: '#3fb950' },
+      { label: 'Tool schemas / system', pct: 12, color: '#58a6ff' },
+      { label: 'Conversation history / compaction', pct: claudemd > 50 ? 13 : 25, color: '#8b949e' }
+    ],
+    mixed: [
+      { label: 'CLAUDE.md / instructions', pct: claudemd > 50 ? 22 : 12, color: '#f85149' },
+      { label: 'File reading / web content', pct: 28, color: '#d29922' },
+      { label: 'Code / response generation', pct: 25, color: '#3fb950' },
+      { label: 'Tool schemas / system', pct: 15, color: '#58a6ff' },
+      { label: 'Conversation history', pct: claudemd > 50 ? 10 : 20, color: '#8b949e' }
+    ]
+  };
+
+  const bars = distributions[usecase];
+  document.getElementById('token-bars').innerHTML = bars.map(b =>
+    `<div class="bar"><div class="bar-fill" style="width:${b.pct}%;background:${b.color}"></div>` +
+    `<div class="bar-label">${b.label} · ${b.pct}%</div></div>`
+  ).join('');
+
+  // Tips
+  const tips = [];
+
+  if (claudemd > 60) {
+    const savings = Math.round((claudemd - 35) * 30 * 0.25 * turnsPerSession * sessions * days / 1e6 * 15 * 0.4);
+    tips.push({
+      level: 'crit',
+      text: `Your CLAUDE.md (${claudemd} lines) is costing ~${claudemdTokensPerTurn} tokens per turn. ` +
+            `Reducing to 35 lines could save <span class="savings">~${savings > 0 ? '$' + savings : '15-30%'} of overhead</span> per month. ` +
+            `Use the 5 optimization patterns: allowlist, concrete examples, one-line reasons, tables, hook delegation.`
+    });
+  } else if (claudemd > 35) {
+    tips.push({
+      level: 'warn',
+      text: `CLAUDE.md at ${claudemd} lines — there's room to optimize. Move enforceable rules to hooks, procedures to Skills.`
+    });
+  }
+
+  if (duration > 60) {
+    tips.push({
+      level: 'warn',
+      text: `Sessions averaging ${duration} minutes will trigger context compaction. Install a PreCompact hook to auto-save before compaction: <code>npx cc-safe-setup --install-example pre-compact-checkpoint</code>`
+    });
+  }
+
+  if (usecase === 'autonomous') {
+    tips.push({
+      level: 'crit',
+      text: `Autonomous operation burns tokens fastest. Use session-budget-alert + token-budget-guard hooks to set hard limits. Without them, a single runaway session can consume 10x normal tokens.`
+    });
+  }
+
+  if (limitFreq === 'often' || limitFreq === 'daily') {
+    tips.push({
+      level: 'crit',
+      text: `Hitting limits ${limitFreq === 'daily' ? 'daily' : '3-5x/week'} means you're paying for capacity you can't fully use. Token optimization can extend your effective limit by 40-60%.`
+    });
+  } else if (limitFreq === 'sometimes') {
+    tips.push({
+      level: 'warn',
+      text: `Occasional limit hits suggest room for optimization. Start with CLAUDE.md reduction and file read guards.`
+    });
+  }
+
+  if (sessions > 8) {
+    tips.push({
+      level: 'warn',
+      text: `${sessions} sessions/day — consider batching related tasks into fewer, longer sessions to reduce session-start overhead.`
+    });
+  }
+
+  // Always add a general tip
+  tips.push({
+    level: '',
+    text: `Install token-saving hooks with one command: <code>npx cc-safe-setup --install-example token-budget-guard</code>. The guard warns when consumption is high and blocks runaway sessions.`
+  });
+
+  document.getElementById('tips').innerHTML = tips.map(t =>
+    `<div class="tip ${t.level ? 'tip-' + t.level : ''}">${t.text}</div>`
+  ).join('');
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

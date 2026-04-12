@@ -444,7 +444,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 43,000 words with copy-paste templates. [Chapter 1 free](https://zenn.dev/yurukusa/books/token-savings-guide/viewer/1-where-tokens-go)
+- **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. [Chapter 1 free](https://zenn.dev/yurukusa/books/token-savings-guide/viewer/1-where-tokens-go)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
