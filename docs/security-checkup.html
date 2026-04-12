@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Checkup — Is Your Claude Code Safe?</title>
+<meta name="description" content="6-question diagnostic to find security vulnerabilities in your Claude Code setup. Based on real incidents: $1,446 unauthorized transfers, file deletions, PII leaks.">
+<meta property="og:title" content="Security Checkup — Is Your Claude Code Safe?">
+<meta property="og:description" content="6 questions to check if your Claude Code setup is vulnerable to known attacks.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/security-checkup.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Security Checkup — Claude Code Vulnerability Check","description":"6-question diagnostic for Claude Code security. Based on real incidents totaling $1,800+ in losses.","url":"https://yurukusa.github.io/cc-safe-setup/security-checkup.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:1rem;font-weight:600}
+.q-num{color:#ef4444;font-size:.8rem;margin-bottom:.3rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.8rem 1rem;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#ef4444;background:#1c2128}
+.opt.selected{border-color:#ef4444;background:#2a1010}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.9rem}
+.opt-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem}
+.progress{display:flex;gap:.3rem;margin:1.5rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#ef4444}
+.dot.current{background:#f87171}
+.result{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.1rem;margin-bottom:.8rem}
+.result h3{color:#c9d1d9;font-size:.95rem;margin:1rem 0 .5rem}
+.risk{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700}
+.risk-critical{background:#7f1d1d;color:#fca5a5}
+.risk-high{background:#78350f;color:#fcd34d}
+.risk-medium{background:#1e3a5f;color:#93c5fd}
+.risk-low{background:#14532d;color:#86efac}
+.incident{background:#1a1a2e;border-left:3px solid #ef4444;padding:.6rem .8rem;margin:.5rem 0;font-size:.85rem;border-radius:0 6px 6px 0}
+.btn{display:inline-block;background:#ef4444;color:#fff;padding:.6rem 1.5rem;border-radius:6px;font-weight:600;text-decoration:none;font-size:.9rem;margin:.3rem}
+.btn:hover{background:#dc2626;text-decoration:none}
+.btn-outline{display:inline-block;color:#58a6ff;border:1px solid #30363d;padding:.5rem 1.2rem;border-radius:6px;font-size:.85rem;text-decoration:none;margin:.3rem}
+.btn-outline:hover{border-color:#58a6ff}
+.cta{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0;text-align:center}
+.cta h3{color:#f0f6fc;margin-bottom:.5rem}
+.cta p{color:#8b949e;font-size:.85rem;margin-bottom:.8rem}
+code{background:#1c2128;padding:.15rem .4rem;border-radius:4px;font-size:.85rem}
+footer{text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Security Checkup</h1>
+<p class="sub">6 questions to find vulnerabilities in your Claude Code setup. Based on real incidents totaling $1,800+ in losses (April 2026).</p>
+
+<div class="progress" id="progress"></div>
+
+<div id="quiz"></div>
+<div id="results" style="display:none"></div>
+
+<footer>
+Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 664 safety hooks for Claude Code.
+<br><a href="https://ko-fi.com/s/fd44ef09a7">Token Book (¥2,500)</a> · <a href="token-book.html">Details</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="hub.html">All Tools</a>
+</footer>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Do you have PreToolUse hooks configured?",
+    desc: "Hooks are the only enforcement mechanism — CLAUDE.md rules are suggestions.",
+    opts: [
+      { text: "Yes, multiple hooks", desc: "settings.json has PreToolUse hooks", score: 3 },
+      { text: "Yes, basic hooks only", desc: "1-2 hooks like destructive-guard", score: 2 },
+      { text: "No hooks configured", desc: "Default Claude Code setup", score: 0 },
+      { text: "I don't know what hooks are", desc: "Never heard of PreToolUse", score: 0 }
+    ],
+    risks: [
+      { condition: s => s === 0, text: "CRITICAL: Without hooks, Claude can run rm -rf, git push --force, and any destructive command without restriction.", incident: "A user lost 3,467 files (~7 GB) when Claude ran rm -rf (#46058)" }
+    ]
+  },
+  {
+    q: "Do you use deny rules in permissions?",
+    desc: "Deny rules block specific tools/commands. But they have a known bypass.",
+    opts: [
+      { text: "Yes, with hooks as backup", desc: "Deny rules + PreToolUse hooks", score: 3 },
+      { text: "Yes, deny rules only", desc: "Rely on deny rules without hooks", score: 1 },
+      { text: "No deny rules", desc: "Default permissions", score: 0 },
+      { text: "I use --dangerously-skip-permissions", desc: "All permissions bypassed", score: 0 }
+    ],
+    risks: [
+      { condition: s => s <= 1, text: "HIGH: Deny rules are bypassed when a command has 50+ subcommands (Adversa AI disclosure). Hooks are not affected by this limit.", incident: "50x 'true' + dangerous command bypasses ALL deny rules" }
+    ]
+  },
+  {
+    q: "Does Claude Code access financial APIs or exchanges?",
+    desc: "Trading, payments, fund transfers — any financial operation.",
+    opts: [
+      { text: "No financial access", desc: "No exchange/payment APIs", score: 3 },
+      { text: "Yes, with manual approval each time", desc: "I review every trade/transfer", score: 2 },
+      { text: "Yes, with some autonomy", desc: "Claude can execute some operations", score: 0 },
+      { text: "Yes, fully autonomous", desc: "Claude manages trades/transfers", score: 0 }
+    ],
+    risks: [
+      { condition: s => s <= 1, text: "CRITICAL: Claude transferred $1,446 USDT without authorization when told to 'close a position'.", incident: "$1,446 moved from spot to futures without permission (#46828)" }
+    ]
+  },
+  {
+    q: "Do you run Claude Code in autonomous/background mode?",
+    desc: "Unattended operation with --dangerously-skip-permissions or similar.",
+    opts: [
+      { text: "No, always supervised", desc: "I approve every action", score: 3 },
+      { text: "Sometimes, with hooks", desc: "Autonomous but with safety hooks", score: 2 },
+      { text: "Sometimes, without hooks", desc: "Autonomous with default settings", score: 0 },
+      { text: "Always autonomous", desc: "Run overnight / unattended", score: 0 }
+    ],
+    risks: [
+      { condition: s => s <= 1, text: "HIGH: Autonomous mode without hooks burned £140 in one night. Claude ignored CLAUDE.md rules and spawned 16 zombie subagents.", incident: "20% weekly quota consumed in one night (#47049)" }
+    ]
+  },
+  {
+    q: "Does Claude Code handle sensitive data (PII, credentials, configs)?",
+    desc: "Physical addresses, API keys, personal information, production configs.",
+    opts: [
+      { text: "No sensitive data in workspace", desc: "Only code, no secrets", score: 3 },
+      { text: "Yes, with .gitignore + hooks", desc: "Protected by multiple layers", score: 2 },
+      { text: "Yes, with .gitignore only", desc: "No hooks, rely on .gitignore", score: 1 },
+      { text: "Yes, minimal protection", desc: "Sensitive data in workspace", score: 0 }
+    ],
+    risks: [
+      { condition: s => s <= 1, text: "HIGH: Claude uploaded physical GPS coordinates to a public website despite 17 sessions of 'no PII' in CLAUDE.md.", incident: "Real coordinates leaked to sondehub.org (#46910)" }
+    ]
+  },
+  {
+    q: "Do you use git worktrees with Claude Code?",
+    desc: "Worktrees allow parallel development but have hook isolation issues.",
+    opts: [
+      { text: "No worktrees", desc: "Single working directory", score: 3 },
+      { text: "Yes, with linked settings", desc: "Worktree has symlinked .claude/", score: 2 },
+      { text: "Yes, default setup", desc: "Worktree without settings link", score: 0 },
+      { text: "I'm not sure", desc: "Claude might create worktrees", score: 1 }
+    ],
+    risks: [
+      { condition: s => s <= 1, text: "MEDIUM: In worktrees, .claude/settings.json is not found — all hooks are silently disabled. Claude deleted uncommitted worktrees without confirmation.", incident: "Hooks disabled in worktrees (#46808), data loss (#47074)" }
+    ]
+  }
+];
+
+let current = 0;
+const answers = [];
+
+function render() {
+  const prog = document.getElementById('progress');
+  prog.innerHTML = questions.map((_, i) =>
+    `<div class="dot ${i < current ? 'done' : i === current ? 'current' : ''}"></div>`
+  ).join('');
+
+  const quiz = document.getElementById('quiz');
+  if (current >= questions.length) { showResults(); return; }
+
+  const q = questions[current];
+  quiz.innerHTML = `
+    <div class="step active">
+      <div class="q-num">Question ${current + 1} of ${questions.length}</div>
+      <div class="q">${q.q}</div>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:1rem">${q.desc}</p>
+      <div class="opts">
+        ${q.opts.map((o, i) => `
+          <div class="opt" onclick="answer(${i})">
+            <div class="opt-title">${o.text}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function answer(idx) {
+  answers.push(questions[current].opts[idx].score);
+  current++;
+  render();
+}
+
+function showResults() {
+  document.getElementById('quiz').style.display = 'none';
+  const el = document.getElementById('results');
+  const total = answers.reduce((a, b) => a + b, 0);
+  const max = questions.length * 3;
+  const pct = Math.round(total / max * 100);
+
+  let grade, gradeClass, summary;
+  if (pct >= 80) {
+    grade = 'LOW RISK'; gradeClass = 'risk-low';
+    summary = 'Your setup has good security practices. Fine-tune with the recommendations below.';
+  } else if (pct >= 50) {
+    grade = 'MEDIUM RISK'; gradeClass = 'risk-medium';
+    summary = 'Some vulnerabilities exist. Address the issues flagged below to prevent incidents.';
+  } else if (pct >= 25) {
+    grade = 'HIGH RISK'; gradeClass = 'risk-high';
+    summary = 'Significant security gaps. Your setup is vulnerable to known attack patterns.';
+  } else {
+    grade = 'CRITICAL RISK'; gradeClass = 'risk-critical';
+    summary = 'Your Claude Code setup has serious vulnerabilities. Immediate action recommended.';
+  }
+
+  let risksHtml = '';
+  questions.forEach((q, i) => {
+    q.risks.forEach(r => {
+      if (r.condition(answers[i])) {
+        risksHtml += `
+          <div class="result">
+            <h3>${r.text}</h3>
+            <div class="incident">${r.incident}</div>
+          </div>
+        `;
+      }
+    });
+  });
+
+  el.innerHTML = `
+    <div class="result">
+      <h2>Security Score: ${pct}% <span class="risk ${gradeClass}">${grade}</span></h2>
+      <p>${summary}</p>
+    </div>
+
+    ${risksHtml || '<div class="result"><h3>No critical vulnerabilities detected</h3><p>Your setup addresses the major known risks.</p></div>'}
+
+    <div class="cta">
+      <h3>${pct < 50 ? 'Fix these vulnerabilities now' : 'Strengthen your setup'}</h3>
+      <p>cc-safe-setup installs 664 safety hooks in one command — including guards for every vulnerability above.</p>
+      <pre style="background:#0d1117;padding:.5rem;border-radius:4px;margin:.5rem 0"><code>npx cc-safe-setup</code></pre>
+    </div>
+
+    <div class="cta" style="margin-top:.8rem">
+      <h3>Token consumption is a security issue too</h3>
+      <p>${pct < 50 ? 'Uncontrolled token consumption burned £140 in one night. The Token Book covers hook-based guards that prevent token waste automatically.' : 'Even with good security, unoptimized token usage costs you. The Token Book has 10 chapters of optimization techniques with copy-paste templates.'}</p>
+      <a href="https://ko-fi.com/s/fd44ef09a7" class="btn" style="background:#2563eb">Token Book — ¥2,500</a>
+      <a href="token-book.html" class="btn-outline">Details (Ch.1 Free)</a>
+    </div>
+
+    <div class="cta" style="margin-top:.8rem">
+      <h3>Also check your token efficiency</h3>
+      <a href="token-checkup.html" class="btn-outline">Token Checkup (Free) →</a>
+      <a href="claudemd-analyzer.html" class="btn-outline">CLAUDE.md Analyzer →</a>
+    </div>
+  `;
+  el.style.display = 'block';
+}
+
+render();
+</script>
+</body>
+</html>
