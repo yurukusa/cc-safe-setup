@@ -1,7 +1,7 @@
 {
   "name": "git-protection",
   "description": "Git safety hooks for Claude Code. Blocks force-push, protects main/master branch, prevents hard-reset, guards interactive rebase, and blocks git clean -fd.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": { "name": "yurukusa" },
   "homepage": "https://yurukusa.github.io/cc-safe-setup/",
   "repository": "https://github.com/yurukusa/cc-safe-setup",
@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+push.*--force|git\\s+push.*-f\\b'; then echo 'BLOCKED: Force push. Use --force-with-lease for safer alternative.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+push.*--force|git\\s+push.*-f\\b'; then echo 'BLOCKED: Force push. Use --force-with-lease for safer alternative.' >&2; exit 2; fi"
           }
         ]
       },
@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+push\\s+(origin\\s+)?(main|master)\\b'; then echo 'BLOCKED: Direct push to main/master. Use a feature branch and PR.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+push\\s+(origin\\s+)?(main|master)\\b'; then echo 'BLOCKED: Direct push to main/master. Use a feature branch and PR.' >&2; exit 2; fi"
           }
         ]
       },
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+reset\\s+--hard'; then echo 'BLOCKED: git reset --hard. Use git stash or git reset --soft.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+reset\\s+--hard'; then echo 'BLOCKED: git reset --hard. Use git stash or git reset --soft.' >&2; exit 2; fi"
           }
         ]
       },
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+clean\\s+-fd|git\\s+clean\\s+-f'; then echo 'BLOCKED: git clean removes untracked files permanently. Review with git clean -n first.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+clean\\s+-fd|git\\s+clean\\s+-f'; then echo 'BLOCKED: git clean removes untracked files permanently. Review with git clean -n first.' >&2; exit 2; fi"
           }
         ]
       },
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(echo \"$CC_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$CMD\" | grep -qE 'git\\s+branch\\s+-D'; then echo 'BLOCKED: Force branch deletion. Use -d (safe delete) instead of -D.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'git\\s+branch\\s+-D'; then echo 'BLOCKED: Force branch deletion. Use -d (safe delete) instead of -D.' >&2; exit 2; fi"
           }
         ]
       }
