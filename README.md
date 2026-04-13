@@ -465,7 +465,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Token Book (¥2,500)](https://yurukusa.github.io/cc-safe-setup/token-book.html)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates
+- **[Token Book (¥2,500)](https://yurukusa.github.io/cc-safe-setup/token-book.html)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. [Buy on Ko-fi](https://ko-fi.com/s/fd44ef09a7)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
@@ -497,6 +497,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Cache TTL Mitigation Guide](https://gist.github.com/yurukusa/178d3949cd2bd6fbfc275b408f9711d4) — #46829 cache TTL change (1h→5m) impact and 4 mitigations
 - [Security Checkup Hooks](https://gist.github.com/yurukusa/81f79ae6d760b27c17f2cd642ea846d7) — 4 hooks for financial, PII, deny bypass, and background task protection
 - [Cache Breakage Fix](https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4) — 2 root causes of prompt cache invalidation (#47107 git status, #47098 session restart)
+- [CLAUDE.md Token Optimization Cheat Sheet](https://gist.github.com/yurukusa/556f67c493a2729ce9b1703f5003a227) — 5 CLAUDE.md patterns that reduce token consumption with before/after examples
+- [Token Troubleshooting Guide](https://gist.github.com/yurukusa/47b8c3eadb77cf74946f450f992ddac2) — fix quota drain, cache bugs, 1M context trap. Symptom-based diagnosis with latest issue references
 - [Token Book Sampler: 5 Techniques](https://gist.github.com/yurukusa/4a867ba301b480f996c5b76e4b6a6fbc) — free preview of the Token Book — 5 immediate techniques to reduce consumption
 - [Token Optimization Checklist](https://gist.github.com/yurukusa/4b75025beee916f9904f56b79eeb1217) — 10-step checklist to cut token consumption in half, with hook configs
 - [3 Things That Actually Work](https://gist.github.com/yurukusa/621f6d1cc35816df3da2e07876b44e16) — CLAUDE.md sizing, cache TTL, subagent control — based on 800h data
