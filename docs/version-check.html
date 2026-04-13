@@ -75,7 +75,8 @@ const ISSUES = [
     severity: 'critical',
     affectedVersions: v => v >= 210100,
     description: 'Server-side cache_creation tokens increase ~20K-47K above v2.1.98 baseline. Same request payload, more tokens billed.',
-    impact: v => v >= 210104 ? '~94% inflation (49.7K → 96.5K). Severe quota drain.' :
+    impact: v => v >= 210105 ? '~120%+ inflation (49.7K → ~110K estimated). Cold start jumps to ~11% context. Severe.' :
+            v >= 210104 ? '~94% inflation (49.7K → 96.5K). Severe quota drain.' :
             v >= 210101 ? '~45% inflation (49.7K → 72K). Significant quota impact.' :
             v >= 210100 ? '~40% inflation (49.7K → 69.9K). Noticeable quota reduction.' : '',
     fixes: [
@@ -176,8 +177,9 @@ function check() {
     html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.100</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~69,922</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#d29922">+40%</td></tr>`;
     html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.101</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~72,000</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#d29922">+45%</td></tr>`;
     html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.104</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~96,539</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#f85149">+94%</td></tr>`;
+    html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.105</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~110K (est.)</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#f85149">+120%</td></tr>`;
     html += `</table>`;
-    html += `<p class="stats">Data from <a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> community measurements</p>`;
+    html += `<p class="stats">Data from <a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> + <a href="https://github.com/anthropics/claude-code/issues/47659">#47659</a> community measurements</p>`;
     html += `</div>`;
     html += `<div class="cta" style="border-color:#f97316;margin-top:1rem"><p><strong>Version issues are just one factor.</strong> CLAUDE.md structure, cache management, hook-based guards, and workflow design all affect token consumption.</p><p style="margin-top:.5rem"><a href="token-book.html" style="color:#f97316;font-size:1rem">📘 Token Book — full optimization guide (¥2,500)</a></p></div>`;
   }
