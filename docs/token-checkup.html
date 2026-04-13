@@ -279,6 +279,7 @@ function showResults() {
     </div>
 
     <div class="actions">
+      <button class="btn" onclick="shareTwitter(${score})" style="background:#1d9bf0">Share Score on X</button>
       <button class="btn btn-outline" onclick="restart()">Start Over</button>
     </div>
   `;
@@ -286,6 +287,17 @@ function showResults() {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   updateProgress(TOTAL);
+}
+
+function shareTwitter(score) {
+  const emoji = score < 40 ? '🔥' : score < 70 ? '⚠️' : '✅';
+  const msg = score < 40
+    ? `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Significant waste detected. Check yours:`
+    : score < 70
+    ? `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Room for improvement. Check yours:`
+    : `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Looking good! Check yours:`;
+  const url = 'https://yurukusa.github.io/cc-safe-setup/token-checkup.html';
+  window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(url)}`, '_blank');
 }
 
 function restart() {
