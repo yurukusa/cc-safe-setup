@@ -118,7 +118,7 @@ function analyze() {
   if (d.creation && d.creation > 60000) {
     issues.push('inflation');
     html += `<p class="bad">cache_creation: ${d.creation.toLocaleString()} tokens (above 60K threshold)</p>`;
-    html += '<div class="tip">🔥 You may be affected by the cache_creation inflation bug (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 97+ reactions). Normal range is 40-55K. Consider pinning to v2.1.98: <code>npm i -g @anthropic-ai/claude-code@2.1.98</code></div>';
+    html += '<div class="tip">🔥 You may be affected by the cache_creation inflation bug (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 97+ reactions). Normal range is 40-55K. Consider pinning to v2.1.98: <code>npm i -g @anthropic-ai/claude-code@2.1.98</code>. <a href="version-check.html">Check your version →</a></div>';
   } else if (d.creation) {
     html += `<p class="good">cache_creation: ${d.creation.toLocaleString()} tokens (normal range)</p>`;
   }
