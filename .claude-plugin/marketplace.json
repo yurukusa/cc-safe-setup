@@ -48,6 +48,19 @@
       "keywords": ["credentials", "secrets", "api-keys", "env", "tokens", "security"],
       "category": "security",
       "tags": ["credentials", "secrets", "pretooluse"]
+    },
+    {
+      "name": "token-guard",
+      "source": "./plugins/token-guard",
+      "description": "Token consumption guards: large-read warning (100KB+), read budget limit, subagent cap, and token budget tracking. Reduce waste by 20-40%.",
+      "version": "1.0.0",
+      "author": { "name": "yurukusa" },
+      "homepage": "https://yurukusa.github.io/cc-safe-setup/token-book.html",
+      "repository": "https://github.com/yurukusa/cc-safe-setup",
+      "license": "MIT",
+      "keywords": ["tokens", "cost", "budget", "optimization", "large-read", "subagent"],
+      "category": "optimization",
+      "tags": ["token-saving", "cost-reduction", "pretooluse", "posttooluse"]
     }
   ]
 }

@@ -1,0 +1,51 @@
+{
+  "name": "token-guard",
+  "description": "Token consumption guards for Claude Code. Warns on large file reads (100KB+), limits unique file reads per session, estimates token budget, and caps subagent spawns. From 800+ hours of autonomous operation data.",
+  "version": "1.0.0",
+  "author": { "name": "yurukusa" },
+  "homepage": "https://yurukusa.github.io/cc-safe-setup/token-book.html",
+  "repository": "https://github.com/yurukusa/cc-safe-setup",
+  "license": "MIT",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FP=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FP\" ] || [ ! -f \"$FP\" ] && exit 0; SZ=$(stat -c%s \"$FP\" 2>/dev/null || stat -f%z \"$FP\" 2>/dev/null); [ \"$SZ\" -gt 102400 ] 2>/dev/null && echo \"Warning: $(basename $FP) is $((SZ/1024))KB. Use limit parameter to read only what you need.\" || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "BUDGET=${CC_READ_BUDGET:-100}; WARN=${CC_READ_WARN:-50}; T=/tmp/cc-read-budget-$PPID; INPUT=$(cat); FP=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FP\" ] && exit 0; C=0; if [ -f \"$T\" ]; then grep -qF \"$FP\" \"$T\" || echo \"$FP\" >> \"$T\"; C=$(wc -l < \"$T\"); else echo \"$FP\" > \"$T\"; C=1; fi; [ \"$C\" -ge \"$BUDGET\" ] && { echo \"[BLOCK] Read budget reached (${BUDGET} files). Use Glob/Grep to narrow down.\"; exit 2; }; [ \"$C\" -ge \"$WARN\" ] && echo \"Warning: ${C}/${BUDGET} files read.\""
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "MAX=${CC_MAX_AGENTS:-3}; T=/tmp/cc-agents-$PPID; C=0; [ -f \"$T\" ] && C=$(cat \"$T\"); C=$((C+1)); echo $C > \"$T\"; [ $C -gt $MAX ] && { echo \"[BLOCK] Subagent limit (${MAX}). Complete existing agents first.\"; exit 2; }; [ $C -ge $MAX ] && echo \"Warning: ${C}/${MAX} subagents spawned.\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": "WARN=${CC_TOKEN_BUDGET:-50000}; BLOCK=${CC_TOKEN_BLOCK:-100000}; T=/tmp/cc-tokens-$PPID; INPUT=$(cat); SZ=${#INPUT}; TK=$((SZ/4)); TOTAL=0; [ -f \"$T\" ] && TOTAL=$(cat \"$T\"); TOTAL=$((TOTAL+TK)); echo $TOTAL > \"$T\"; [ $TOTAL -ge $BLOCK ] && { echo \"[BLOCK] Token budget exceeded (~${TOTAL}). Run /compact.\"; exit 2; }; [ $TOTAL -ge $WARN ] && echo \"Warning: ~${TOTAL} tokens consumed (limit: ${BLOCK}).\""
+          }
+        ]
+      }
+    ]
+  }
+}
