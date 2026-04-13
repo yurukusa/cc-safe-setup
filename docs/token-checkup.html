@@ -67,7 +67,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;
 <body>
 <div class="c">
 <h1>Token Checkup</h1>
-<p class="sub">5 questions to diagnose why your Claude Code sessions run out so fast. Based on 800+ hours of operation data.</p>
+<p class="sub">5 questions to diagnose why your Claude Code sessions run out so fast. Works for Max ($200/mo) and Pro ($20/mo) plans. Based on 800+ hours of operation data.</p>
 
 <div class="progress" id="progress"></div>
 
@@ -189,7 +189,7 @@ const tips = [
   {id:'compact',title:'Auto-save before compaction',desc:'PreCompact hook creates a git checkpoint before context is compressed. Prevents Claude from re-reading files it already processed.',impact:'Prevent post-compaction waste',chapter:'Ch.3 — Context Management',when:{session:['single','auto']}},
   {id:'cost',title:'Check /cost regularly',desc:'The /cost command shows exactly where tokens go. Most users never check it. Understanding your baseline is the first step to optimizing.',impact:'Foundation for all other optimizations',chapter:'Ch.1 — Where Tokens Go (Free)',when:{cache:['dunno']}},
   {id:'workflow',title:'Design token-aware workflows',desc:'Break large tasks into focused sub-tasks. Each sub-task starts with a clean context = better cache ratio. Plan mode helps.',impact:'Save 20-30% on complex tasks ($40-60/mo)',chapter:'Ch.6 — Workflow Design',when:{burn:['fast']}},
-  {id:'inflation',title:'Check for cache_creation inflation',desc:'CC v2.1.100+ has a known bug that adds ~20K extra cache_creation tokens per request (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 46+ reactions). Run /cost and compare cache_creation vs cache_read. If cache_creation is consistently higher, consider pinning to v2.1.98: <code>npm i -g @anthropic-ai/claude-code@2.1.98</code>',impact:'Fix ~40% token inflation',chapter:'Ch.8 — Troubleshooting',when:{burn:['fast'],cache:['yes']}}
+  {id:'inflation',title:'Check for cache_creation inflation (v2.1.100+)',desc:'CC v2.1.100+ has a known bug that adds ~20K extra cache_creation tokens per request (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 77+ reactions). Run /cost and compare cache_creation vs cache_read. If cache_creation is consistently higher, consider pinning to v2.1.98: <code>npm i -g @anthropic-ai/claude-code@2.1.98</code>',impact:'Fix ~40% token inflation',chapter:'Ch.8 — Troubleshooting',when:{burn:['fast','moderate'],cache:['yes','dunno']}}
 ];
 
 function updateProgress(current) {
@@ -242,6 +242,9 @@ function showResults() {
 
   const scoreClass = score >= 70 ? 'green' : score >= 40 ? 'yellow' : 'red';
   const label = score >= 70 ? 'Good — minor tweaks possible' : score >= 40 ? 'Room for improvement' : 'Significant token waste detected';
+  const wastePercent = Math.round((100 - score) * 0.6);
+  const monthlySavings = burn === 'fast' ? Math.round(wastePercent * 2) : burn === 'moderate' ? Math.round(wastePercent * 1.2) : Math.round(wastePercent * 0.5);
+  const planCost = burn === 'fast' ? 200 : burn === 'moderate' ? 200 : 20;
 
   const el = document.getElementById('step-results');
   el.innerHTML = `
@@ -249,7 +252,7 @@ function showResults() {
       <h2>Your Token Efficiency Score</h2>
       <div class="score ${scoreClass}">${score}/100</div>
       <p class="score-label">${label}</p>
-      ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Max plan = $200/month. Even 10% reduction = $20/month saved.</p>` : ''}
+      ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Estimated ~${wastePercent}% token waste → <strong style="color:#f97316">~$${monthlySavings}/month</strong> in potential savings on your $${planCost}/month plan.</p>` : ''}
     </div>
 
     <div class="result">
@@ -266,7 +269,7 @@ function showResults() {
 
     <div class="cta">
       <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to fix it' : score < 70 ? 'You can save significantly more' : 'Fine-tune your setup further'}</h3>
-      <p>${score < 40 ? 'Your score suggests 40-60% of your tokens are wasted — that\'s $80-120/month on Max plan. The Token Book (¥2,500 ≈ $17) pays for itself in the first week. Copy-paste templates included.' : score < 70 ? 'The recommendations above map directly to Token Book chapters. At $30-60/month in savings, the ¥2,500 (≈ $17) investment pays back in days.' : 'Even at your score, CLAUDE.md structure and cache management can squeeze out another 10-20%. The Token Book covers advanced techniques with copy-paste templates.'}</p>
+      <p>${score < 40 ? `Your score suggests ~${wastePercent}% token waste — that's ~$${monthlySavings}/month on your plan. The Token Book (¥2,500 ≈ $17) pays for itself in ${monthlySavings > 17 ? 'the first week' : 'the first month'}. Copy-paste templates included.` : score < 70 ? `At ~$${monthlySavings}/month in potential savings, the ¥2,500 (≈ $17) investment pays back in ${monthlySavings > 17 ? 'days' : 'the first month'}. The recommendations above map directly to Token Book chapters.` : 'Even at your score, CLAUDE.md structure and cache management can squeeze out another 10-20%. The Token Book covers advanced techniques with copy-paste templates.'}</p>
       <a href="https://gist.github.com/yurukusa/47b8c3eadb77cf74946f450f992ddac2" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Free: Troubleshooting Guide</a>
       <a href="https://ko-fi.com/s/fd44ef09a7" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Token Book — ¥2,500 ($17)</a>
       <a href="token-book.html" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">詳細を見る (Ch.1 Free)</a>
