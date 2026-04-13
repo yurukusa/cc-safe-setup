@@ -501,6 +501,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Token Optimization Checklist](https://gist.github.com/yurukusa/4b75025beee916f9904f56b79eeb1217) — 10-step checklist to cut token consumption in half, with hook configs
 - [3 Things That Actually Work](https://gist.github.com/yurukusa/621f6d1cc35816df3da2e07876b44e16) — CLAUDE.md sizing, cache TTL, subagent control — based on 800h data
 - [Cache TTL Diagnostic](https://gist.github.com/yurukusa/3a5bdcfdd295bef17b3ee00978b299f2) — 3 patterns that break prompt cache + fixes
+- [Token Book Ch.1 Free Preview](https://gist.github.com/yurukusa/de862573f18d1a0a68d411b696dbcb73) — Where are your Claude Code tokens going? The 4 layers of token consumption explained
 
 ### Professional Services
 
