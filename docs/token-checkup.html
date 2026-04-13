@@ -244,6 +244,7 @@ function showResults() {
       <h2>Your Token Efficiency Score</h2>
       <div class="score ${scoreClass}">${score}/100</div>
       <p class="score-label">${label}</p>
+      ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Max plan = $200/month. Even 10% reduction = $20/month saved.</p>` : ''}
     </div>
 
     <div class="result">
