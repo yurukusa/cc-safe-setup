@@ -71,18 +71,24 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p class="subtitle">800時間の運用データから見つけた実践テクニック — 全10章・設定テンプレート収録</p>
 
 <div class="pain-point">
-<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,400+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
+<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,500+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
 </div>
 
 <div class="quotes-section">
 <blockquote>"I have Max subscription and in less than 1 hour my usage is at 80%"</blockquote>
 <blockquote>"I burned through my entire daily quota in about 70 minutes of normal coding"</blockquote>
 <blockquote>"Parallel subagents hit 'File modified since read' errors and burned 101K+ tokens in a retry loop"</blockquote>
-<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788, #46968 より</p>
+<blockquote>"Prompt cache TTL was silently reduced from 1 hour to 5 minutes — costs increased 20-32%"</blockquote>
+<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788, #46968, #46829 より</p>
 </div>
 
 <div class="pain-point" style="background:#fff7ed;border-left-color:#f97316;">
 <strong>トークン管理を怠ると、もっと大きな事故が起きる</strong> — 2026年4月の1週間だけで: 自律運行を一晩放置して<a href="https://github.com/anthropics/claude-code/issues/47049">£140のquotaを消費</a>（CLAUDE.mdのルールを全無視）。<a href="https://github.com/anthropics/claude-code/issues/47046">Claude Codeが生成したスクリプトが$367の損失とアカウント停止</a>を引き起こした事例も。さらに<a href="https://adversa.ai/blog/claude-code-security-bypass-deny-rules-disabled/">deny rulesが50コマンドで無効化される脆弱性</a>が発見され、<a href="https://www.theregister.com/2026/04/01/claude_code_rule_cap_raises/">The Register</a>等10媒体で報道された。hookによる自動防御がなければ、コストは青天井になる。
+</div>
+
+<div class="cta-section" style="margin:2rem 0 1rem;">
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Token Bookを購入する — ¥2,500</a>
+<p style="margin-top:8px;font-size:0.85em;color:#666">PDF全10章・44,000字・設定テンプレート収録 ｜ 第1章は下で無料プレビュー</p>
 </div>
 
 <h2>このBookで手に入るもの</h2>
@@ -161,19 +167,11 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p>非エンジニア。Claude Codeを800時間以上自律運用し、664のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計53,000+ビュー。</p>
 
 <div class="cta-section" id="buy">
-<!-- 🔧 Launch手順: BOOTH出品後に下の2行を入れ替え
-     1. btn-primaryのhrefをBOOTH商品URLに変更
-     2. テキストを「Token Bookを購入する — ¥2,500」に変更
-     3. pre-launchメッセージをコメントアウト
-     4. git add docs/token-book.html && git commit && git push -->
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Token Bookを購入する — ¥2,500</a>
 <p style="margin-top:8px;font-size:0.9em;color:#666">PDF全10章・44,000字・設定テンプレート収録</p>
+<p style="margin-top:12px;font-size:0.85em;color:#555;background:#f0fdf4;display:inline-block;padding:0.4rem 1rem;border-radius:6px;">Max plan $200/月のトークン消費を10%減らせば<strong>1ヶ月で回収</strong></p>
 <br>
 <a href="token-checkup.html" class="btn-secondary">まず無料でトークン消費を診断する →</a>
-<!-- BOOTH追加後:
-<a href="https://yurukusa.booth.pm/items/XXXXX" class="btn-primary">BOOTHで購入する — ¥2,500</a>
-<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-secondary">Ko-fiで購入する — ¥2,500</a>
--->
 </div>
 
 <div class="tools-section">
