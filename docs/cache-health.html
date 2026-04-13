@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cache Health Checker — Is Your Claude Code Cache Working?</title>
+<meta name="description" content="Paste your /cost output to diagnose cache_creation inflation, TTL breakage, and token waste. Free tool from cc-safe-setup.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0d1117;color:#e6edf3;line-height:1.6;padding:1rem;max-width:700px;margin:0 auto}
+h1{font-size:1.5rem;margin:1rem 0 .5rem}
+p{margin:.5rem 0;color:#8b949e}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1rem 0}
+textarea{width:100%;height:150px;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-family:monospace;font-size:.85rem;resize:vertical}
+.btn{background:#238636;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.9rem;margin:.5rem .3rem}
+.btn:hover{background:#2ea043}
+.result{margin-top:1rem}
+.good{color:#3fb950;font-weight:bold}
+.warn{color:#d29922;font-weight:bold}
+.bad{color:#f85149;font-weight:bold}
+.tip{background:#1c2128;border-left:3px solid #58a6ff;padding:.6rem 1rem;margin:.5rem 0;font-size:.85rem}
+a{color:#58a6ff}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1.5rem 0;text-align:center}
+.cta a{display:inline-block;background:#238636;color:#fff;padding:.5rem 1rem;border-radius:6px;text-decoration:none;margin:.3rem}
+</style>
+</head>
+<body>
+<h1>Cache Health Checker</h1>
+<p>Paste your <code>/cost</code> output below to diagnose cache problems.</p>
+
+<div class="card">
+<textarea id="input" placeholder="Paste your /cost output here. Example:
+
+Session cost:
+  Input tokens:          12,345
+  Cache creation:        69,922
+  Cache read:            45,000
+  Output tokens:          8,000
+  Total cost:            $0.42"></textarea>
+<button class="btn" onclick="analyze()">Diagnose</button>
+<button class="btn" style="background:#30363d" onclick="loadExample()">Load Example</button>
+</div>
+
+<div id="results" class="result"></div>
+
+<div class="cta">
+<p style="color:#e6edf3;font-size:.95rem"><strong>Want the full optimization guide?</strong></p>
+<a href="token-checkup.html">Token Checkup (Free)</a>
+<a href="token-book.html">Token Book — ¥2,500</a>
+<a href="https://ko-fi.com/s/fd44ef09a7">Buy Now (Ko-fi)</a>
+</div>
+
+<p style="font-size:.8rem;color:#484f58;margin-top:2rem;text-align:center">
+Built by <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · 665 hooks · 9,200+ tests
+</p>
+
+<script>
+function loadExample() {
+  document.getElementById('input').value = `Session cost:
+  Input tokens:          12,345
+  Cache creation:        69,922
+  Cache read:            45,000
+  Output tokens:          8,000
+  Total cost:            $0.42`;
+}
+
+function parse(text) {
+  const nums = {};
+  const patterns = [
+    [/cache.?creation[:\s]+([0-9,]+)/i, 'creation'],
+    [/cache.?read[:\s]+([0-9,]+)/i, 'read'],
+    [/input.?tokens?[:\s]+([0-9,]+)/i, 'input'],
+    [/output.?tokens?[:\s]+([0-9,]+)/i, 'output'],
+    [/total.?cost[:\s]+\$?([0-9.]+)/i, 'cost'],
+  ];
+  for (const [re, key] of patterns) {
+    const m = text.match(re);
+    if (m) nums[key] = parseFloat(m[1].replace(/,/g, ''));
+  }
+  return nums;
+}
+
+function analyze() {
+  const text = document.getElementById('input').value;
+  const d = parse(text);
+  const el = document.getElementById('results');
+
+  if (!d.creation && !d.read) {
+    el.innerHTML = '<p class="warn">Could not parse /cost output. Make sure to paste the full output.</p>';
+    return;
+  }
+
+  let html = '<h2 style="font-size:1.1rem;margin-bottom:.8rem">Diagnosis</h2>';
+  const issues = [];
+
+  // Check 1: Cache ratio
+  if (d.creation && d.read) {
+    const ratio = d.read / (d.creation + d.read) * 100;
+    const ratioClass = ratio > 70 ? 'good' : ratio > 40 ? 'warn' : 'bad';
+    html += `<p>Cache read ratio: <span class="${ratioClass}">${ratio.toFixed(1)}%</span></p>`;
+    if (ratio < 40) {
+      issues.push('low-cache');
+      html += '<div class="tip">⚠️ Below 40% means most content is being re-created instead of cached. This multiplies your token cost.</div>';
+    }
+  }
+
+  // Check 2: Cache creation inflation (#46917)
+  if (d.creation && d.creation > 60000) {
+    issues.push('inflation');
+    html += `<p class="bad">cache_creation: ${d.creation.toLocaleString()} tokens (above 60K threshold)</p>`;
+    html += '<div class="tip">🔥 You may be affected by the cache_creation inflation bug (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 49+ reactions). Normal range is 40-55K. Consider pinning to v2.1.98: <code>npm i -g @anthropic-ai/claude-code@2.1.98</code></div>';
+  } else if (d.creation) {
+    html += `<p class="good">cache_creation: ${d.creation.toLocaleString()} tokens (normal range)</p>`;
+  }
+
+  // Check 3: Creation > Read (bad sign)
+  if (d.creation && d.read && d.creation > d.read) {
+    issues.push('creation-dominant');
+    html += '<div class="tip">⚠️ cache_creation exceeds cache_read. This means you\'re paying full price for content that should be cached. Possible causes: <a href="https://github.com/anthropics/claude-code/issues/47107">#47107</a> (git status breaks cache), <a href="https://github.com/anthropics/claude-code/issues/46829">#46829</a> (TTL reduced to 5min).</div>';
+  }
+
+  // Check 4: High cost per session
+  if (d.cost && d.cost > 1) {
+    html += `<p class="warn">Session cost: $${d.cost.toFixed(2)} — ${d.cost > 5 ? 'very high' : 'above average'}</p>`;
+    if (d.cost > 5) issues.push('high-cost');
+  } else if (d.cost) {
+    html += `<p class="good">Session cost: $${d.cost.toFixed(2)} — normal range</p>`;
+  }
+
+  // Summary
+  html += '<h3 style="margin-top:1rem;font-size:1rem">Summary</h3>';
+  if (issues.length === 0) {
+    html += '<p class="good">✅ Your cache looks healthy. Keep monitoring with /cost.</p>';
+  } else {
+    html += `<p class="bad">Found ${issues.length} issue${issues.length > 1 ? 's' : ''}:</p><ul style="margin:.5rem 0 .5rem 1.5rem">`;
+    if (issues.includes('inflation')) html += '<li>Cache creation inflation (pin to v2.1.98)</li>';
+    if (issues.includes('low-cache')) html += '<li>Low cache hit ratio (check CLAUDE.md size, session length)</li>';
+    if (issues.includes('creation-dominant')) html += '<li>Creation exceeds reads (cache TTL or git status issue)</li>';
+    if (issues.includes('high-cost')) html += '<li>High session cost (consider session splitting)</li>';
+    html += '</ul>';
+    html += '<div class="tip">The <a href="token-book.html">Token Book</a> covers each of these issues with specific fixes and copy-paste hook configs.</div>';
+  }
+
+  el.innerHTML = html;
+}
+</script>
+</body>
+</html>
