@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Version Health Check — Is Your Version Affected?</title>
+<meta name="description" content="Check if your Claude Code version is affected by cache_creation inflation (#46917), TTL regression (#46829), or other known issues. Instant diagnosis with fix recommendations.">
+<meta name="keywords" content="Claude Code version, cache_creation inflation, TTL regression, token consumption, v2.1.100, v2.1.104">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/version-check.html">
+<meta property="og:title" content="Claude Code Version Health Check">
+<meta property="og:description" content="Is your Claude Code version burning extra tokens? Check in 5 seconds.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/version-check.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Claude Code Version Health Check">
+<meta name="twitter:description" content="Check if your version is affected by cache_creation inflation or TTL regression.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.7;max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+h1{color:#f0f6fc;font-size:1.6rem;margin-bottom:.3rem}
+.subtitle{color:#8b949e;margin-bottom:2rem}
+input{background:#161b22;border:1px solid #30363d;color:#f0f6fc;padding:.8rem 1rem;border-radius:8px;font-size:1.1rem;width:100%;margin:.5rem 0}
+input:focus{outline:none;border-color:#58a6ff}
+button{background:#238636;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;font-size:1rem;cursor:pointer;margin-top:.5rem}
+button:hover{background:#2ea043}
+.result{margin-top:1.5rem}
+.issue{padding:1rem;border-radius:8px;margin:.8rem 0}
+.critical{background:#1a0404;border:1px solid #da3633}
+.warning{background:#1a1504;border:1px solid #d29922}
+.ok{background:#04160d;border:1px solid #238636}
+.issue h3{margin-bottom:.4rem}
+.critical h3{color:#f85149}
+.warning h3{color:#d29922}
+.ok h3{color:#3fb950}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem}
+.fix{background:#161b22;padding:.8rem;border-radius:6px;margin:.5rem 0;border-left:3px solid #58a6ff}
+.stats{color:#8b949e;font-size:.85rem;margin-top:.3rem}
+.cta{background:#161b22;border:2px solid #58a6ff;padding:1.2rem;border-radius:8px;margin:2rem 0;text-align:center}
+.footer{text-align:center;color:#484f58;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+.footer a{color:#58a6ff}
+</style>
+</head>
+<body>
+
+<h1>Claude Code Version Health Check</h1>
+<p class="subtitle">Check if your version is affected by known token consumption issues</p>
+
+<label for="version">Your Claude Code version (run <code>claude --version</code>):</label>
+<input type="text" id="version" placeholder="e.g. 2.1.104 or v2.1.98" autofocus>
+<button onclick="check()">Check Version</button>
+
+<div id="result" class="result"></div>
+
+<div class="cta" style="margin-top:2rem">
+<p>Want to check your actual token consumption?</p>
+<p style="margin-top:.5rem"><a href="cache-health.html" style="font-size:1.1rem">📊 Cache Health Checker</a> — paste <code>/cost</code> output for detailed diagnosis</p>
+<p style="margin-top:.3rem"><a href="token-checkup.html">🔍 Token Checkup</a> — 5 questions to find where tokens are going</p>
+</div>
+
+<div class="footer">
+<a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · cc-safe-setup — 667 hooks · MIT License
+<br>Data sourced from GitHub Issues <a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, <a href="https://github.com/anthropics/claude-code/issues/46829">#46829</a>, <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>
+</div>
+
+<script>
+const ISSUES = [
+  {
+    id: 'cache-inflation',
+    title: 'Cache Creation Inflation',
+    issue: '#46917',
+    url: 'https://github.com/anthropics/claude-code/issues/46917',
+    reactions: 97,
+    severity: 'critical',
+    affectedVersions: v => v >= 210100,
+    description: 'Server-side cache_creation tokens increase ~20K-47K above v2.1.98 baseline. Same request payload, more tokens billed.',
+    impact: v => v >= 210104 ? '~94% inflation (49.7K → 96.5K). Severe quota drain.' :
+            v >= 210101 ? '~45% inflation (49.7K → 72K). Significant quota impact.' :
+            v >= 210100 ? '~40% inflation (49.7K → 69.9K). Noticeable quota reduction.' : '',
+    fixes: [
+      {label: 'Pin to v2.1.98', code: 'npm i -g @anthropic-ai/claude-code@2.1.98'},
+      {label: 'Override User-Agent (experimental)', code: 'export ANTHROPIC_CUSTOM_HEADERS=\'User-Agent: claude-cli/2.1.98 (external, sdk-cli)\''}
+    ]
+  },
+  {
+    id: 'ttl-regression',
+    title: 'Cache TTL Regression (1h → 5min)',
+    issue: '#46829',
+    url: 'https://github.com/anthropics/claude-code/issues/46829',
+    reactions: 269,
+    severity: 'warning',
+    affectedVersions: v => true,  // all versions affected (server-side)
+    description: 'Prompt cache TTL silently reduced from ~1 hour to ~5 minutes around early March 2026. Cache reads expire faster, causing 20-32% cost increase.',
+    impact: () => 'All versions affected (server-side change). Sessions with pauses >5min lose cache.',
+    fixes: [
+      {label: 'Keep sessions active', code: '# Avoid gaps >5 minutes between prompts'},
+      {label: 'Use /compact at 75%', code: '# Compress context before it accumulates too much'},
+      {label: 'Monitor with hook', code: 'npx cc-safe-setup --install-example compact-alert-notification'}
+    ]
+  },
+  {
+    id: 'context-default',
+    title: '1M Context Window Default',
+    issue: '#45756',
+    url: 'https://github.com/anthropics/claude-code/issues/45756',
+    reactions: 0,
+    severity: 'warning',
+    affectedVersions: v => true,
+    description: 'Default context window is 1M tokens. Anthropic is considering reducing to 400K. Larger context = more tokens per turn = faster quota drain.',
+    impact: () => 'Large context windows increase per-turn cost. Consider --max-turns or session splitting.',
+    fixes: [
+      {label: 'Split long sessions', code: '# Start new sessions every 2-3 hours'},
+      {label: 'Use --resume for continuation', code: 'claude --resume'}
+    ]
+  }
+];
+
+function parseVersion(input) {
+  const match = input.replace(/^v/i, '').match(/(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return null;
+  return parseInt(match[1]) * 100000 + parseInt(match[2]) * 1000 + parseInt(match[3]);
+}
+
+function formatVersion(input) {
+  const match = input.replace(/^v/i, '').match(/(\d+)\.(\d+)\.(\d+)/);
+  return match ? `v${match[1]}.${match[2]}.${match[3]}` : input;
+}
+
+function check() {
+  const raw = document.getElementById('version').value.trim();
+  const el = document.getElementById('result');
+
+  if (!raw) { el.innerHTML = '<p style="color:#d29922">Enter your version number</p>'; return; }
+
+  const v = parseVersion(raw);
+  if (!v) { el.innerHTML = '<p style="color:#f85149">Could not parse version. Expected format: 2.1.104 or v2.1.98</p>'; return; }
+
+  const ver = formatVersion(raw);
+  let html = `<h2 style="color:#f0f6fc;margin-bottom:1rem">Results for ${ver}</h2>`;
+
+  let hasIssues = false;
+
+  for (const issue of ISSUES) {
+    if (issue.affectedVersions(v)) {
+      hasIssues = true;
+      const cls = issue.severity;
+      html += `<div class="issue ${cls}">`;
+      html += `<h3>${issue.severity === 'critical' ? '🔴' : '🟡'} ${issue.title}</h3>`;
+      html += `<p>${issue.description}</p>`;
+      html += `<p style="margin-top:.4rem"><strong>Impact:</strong> ${issue.impact(v)}</p>`;
+      html += `<p class="stats"><a href="${issue.url}">${issue.issue}</a> — ${issue.reactions} reactions</p>`;
+
+      if (issue.fixes.length > 0) {
+        html += '<div style="margin-top:.5rem"><strong>Recommended fixes:</strong></div>';
+        for (const fix of issue.fixes) {
+          html += `<div class="fix"><small>${fix.label}:</small><br><code>${fix.code}</code></div>`;
+        }
+      }
+      html += '</div>';
+    }
+  }
+
+  if (!hasIssues) {
+    html += '<div class="issue ok"><h3>✅ No known issues for this version</h3>';
+    html += '<p>Your version is not affected by any tracked token consumption bugs. Note: the TTL regression (#46829) is server-side and affects all versions.</p></div>';
+  }
+
+  // Version comparison
+  if (v >= 210100) {
+    html += `<div class="issue ok" style="border-color:#58a6ff">`;
+    html += `<h3>💡 Version comparison</h3>`;
+    html += `<table style="width:100%;border-collapse:collapse;margin:.5rem 0">`;
+    html += `<tr><th style="border:1px solid #30363d;padding:.3rem .5rem;background:#161b22">Version</th><th style="border:1px solid #30363d;padding:.3rem .5rem;background:#161b22">cache_creation (cold)</th><th style="border:1px solid #30363d;padding:.3rem .5rem;background:#161b22">Overhead</th></tr>`;
+    html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.98</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~49,726</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#3fb950">baseline</td></tr>`;
+    html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.100</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~69,922</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#d29922">+40%</td></tr>`;
+    html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.101</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~72,000</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#d29922">+45%</td></tr>`;
+    html += `<tr><td style="border:1px solid #30363d;padding:.3rem .5rem">v2.1.104</td><td style="border:1px solid #30363d;padding:.3rem .5rem">~96,539</td><td style="border:1px solid #30363d;padding:.3rem .5rem;color:#f85149">+94%</td></tr>`;
+    html += `</table>`;
+    html += `<p class="stats">Data from <a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> community measurements</p>`;
+    html += `</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// Allow Enter key
+document.getElementById('version').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+</script>
+</body>
+</html>
