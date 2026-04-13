@@ -504,6 +504,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [3 Things That Actually Work](https://gist.github.com/yurukusa/621f6d1cc35816df3da2e07876b44e16) — CLAUDE.md sizing, cache TTL, subagent control — based on 800h data
 - [Cache TTL Diagnostic](https://gist.github.com/yurukusa/3a5bdcfdd295bef17b3ee00978b299f2) — 3 patterns that break prompt cache + fixes
 - [Token Book Ch.1 Free Preview](https://gist.github.com/yurukusa/de862573f18d1a0a68d411b696dbcb73) — Where are your Claude Code tokens going? The 4 layers of token consumption explained
+- [Deny Rules Break After 50 Subcommands](https://gist.github.com/yurukusa/0463d240d7b725218289a556414c72a5) — the hook that fixes Claude Code's deny rule bypass vulnerability
 
 ### Professional Services
 
