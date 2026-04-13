@@ -499,6 +499,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Cache Breakage Fix](https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4) — 2 root causes of prompt cache invalidation (#47107 git status, #47098 session restart)
 - [CLAUDE.md Token Optimization Cheat Sheet](https://gist.github.com/yurukusa/556f67c493a2729ce9b1703f5003a227) — 5 CLAUDE.md patterns that reduce token consumption with before/after examples
 - [Token Troubleshooting Guide](https://gist.github.com/yurukusa/47b8c3eadb77cf74946f450f992ddac2) — fix quota drain, cache bugs, 1M context trap. Symptom-based diagnosis with latest issue references
+- [Token Optimization Guide (English)](https://gist.github.com/yurukusa/70ff830c0ad3dff83e53be26cd80bd0a) — 3 biggest token levers with hook code, practical walkthrough
 - [Token Book Sampler: 5 Techniques](https://gist.github.com/yurukusa/4a867ba301b480f996c5b76e4b6a6fbc) — free preview of the Token Book — 5 immediate techniques to reduce consumption
 - [Token Optimization Checklist](https://gist.github.com/yurukusa/4b75025beee916f9904f56b79eeb1217) — 10-step checklist to cut token consumption in half, with hook configs
 - [3 Things That Actually Work](https://gist.github.com/yurukusa/621f6d1cc35816df3da2e07876b44e16) — CLAUDE.md sizing, cache TTL, subagent control — based on 800h data
