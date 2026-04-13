@@ -30,7 +30,10 @@
     "availability": "https://schema.org/InStock"
   },
   "numberOfPages": 10,
-  "inLanguage": "ja"
+  "inLanguage": "ja",
+  "datePublished": "2026-04-15",
+  "publisher": {"@type": "Person", "name": "yurukusa"},
+  "keywords": "Claude Code, token consumption, CLAUDE.md, hooks, cost optimization"
 }
 </script>
 
@@ -71,10 +74,10 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <h1>Claude Codeのトークン消費を半分にする</h1>
 <p class="subtitle">800時間の運用データから見つけた実践テクニック — 全10章・設定テンプレート収録</p>
 
-<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">この問題を報じたメディア: <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> — Anthropicが「top priority」と認めた問題</p>
+<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">この問題を報じたメディア: <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> · <a href="https://devops.com/claude-code-quota-limits-usage-problems/" style="color:#58a6ff;">DevOps.com</a> — Anthropicが「top priority」と認めた問題</p>
 
 <div class="pain-point">
-<strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,500+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
+<strong>$200/月のMax planが15〜19分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,500+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
 </div>
 
 <div class="quotes-section">
@@ -91,7 +94,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </div>
 
 <div class="cta-section" style="margin:2rem 0 1rem;">
-<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Token Bookを購入する — ¥2,500</a>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">トークン消費を半分にする — ¥2,500</a>
 <p style="margin-top:8px;font-size:0.85em;color:#666">PDF全10章・44,000字・設定テンプレート収録 ｜ 第1章は下で無料プレビュー</p>
 </div>
 
@@ -175,7 +178,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p>非エンジニア。Claude Codeを800時間以上自律運用し、657+のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計53,000+ビュー。</p>
 
 <div class="cta-section" id="buy">
-<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Token Bookを購入する — ¥2,500</a>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">トークン消費を半分にする — ¥2,500</a>
 <p style="margin-top:8px;font-size:0.9em;color:#666">PDF全10章・44,000字・設定テンプレート収録</p>
 <p style="margin-top:12px;font-size:0.85em;color:#555;background:#f0fdf4;display:inline-block;padding:0.4rem 1rem;border-radius:6px;">Max plan $200/月のトークン消費を10%減らせば<strong>1ヶ月で回収</strong></p>
 <br>
@@ -200,10 +203,10 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <h1>Cut Your Claude Code Token Usage in Half</h1>
 <p class="subtitle">Practical techniques from 800+ hours of autonomous operation — 10 chapters with copy-paste config templates</p>
 
-<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">Covered by <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> — Anthropic called it "top priority"</p>
+<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">Covered by <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> · <a href="https://devops.com/claude-code-quota-limits-usage-problems/" style="color:#58a6ff;">DevOps.com</a> — Anthropic called it "top priority"</p>
 
 <div class="pain-point">
-<strong>$200/month Max plan gone in 15 minutes?</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> has 2,500+ reactions. Cache TTL was <a href="https://github.com/anthropics/claude-code/issues/46829">silently reduced from 1h to 5min</a>, increasing costs 20-32%. Anthropic called it a "top priority."
+<strong>$200/month Max plan gone in 15-19 minutes?</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> has 2,500+ reactions. Cache TTL was <a href="https://github.com/anthropics/claude-code/issues/46829">silently reduced from 1h to 5min</a>, increasing costs 20-32%. Anthropic called it a "top priority."
 </div>
 
 <h2>What You Get</h2>
@@ -224,7 +227,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </div>
 
 <div class="cta-section">
-<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Buy Token Book — ¥2,500 (~$17)</a>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">Cut Your Token Usage in Half — ¥2,500 (~$17)</a>
 <p style="margin-top:8px;font-size:0.9em;color:#666">PDF · 10 chapters · 44,000 characters · Config templates included</p>
 <p style="margin-top:4px;font-size:0.85em;color:#888">Written in Japanese. Technical terms and config examples are in English.</p>
 <br>
