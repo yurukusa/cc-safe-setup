@@ -79,7 +79,7 @@ Claude Code ships with no safety hooks by default. This tool fixes that. ([Stand
 
 > 🛡️ **Is your setup safe?** [Take the Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html) — 6 questions based on real incidents ($1,800+ in losses, April 2026).
 >
-> 📘 Tokens disappearing too fast? [Take the free Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) to diagnose where your tokens are going. For the full guide: [Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html) (¥2,500) — CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words from 800+ hours of operation. See also: [Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800, Chapter 3 free).
+> 📘 Tokens disappearing too fast? [Take the free Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) to diagnose where your tokens are going. Free [CLAUDE.md templates](https://github.com/yurukusa/claude-code-token-templates) optimized for cache efficiency. For the full guide: [Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html) (¥2,500) — CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words from 800+ hours of operation. See also: [Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800, Chapter 3 free).
 
 Each hook exists because a real incident happened without it.
 
