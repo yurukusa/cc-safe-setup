@@ -294,10 +294,10 @@ function showResults() {
 function shareTwitter(score) {
   const emoji = score < 40 ? '🔥' : score < 70 ? '⚠️' : '✅';
   const msg = score < 40
-    ? `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Significant waste detected. Check yours:`
+    ? `My Claude Code token efficiency: ${score}/100 ${emoji} Losing ~$80-120/month on Max plan. 30 seconds to check yours:`
     : score < 70
-    ? `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Room for improvement. Check yours:`
-    : `My Claude Code Token Efficiency Score: ${score}/100 ${emoji} Looking good! Check yours:`;
+    ? `My Claude Code token efficiency: ${score}/100 ${emoji} Could save $30-60/month with better settings. Check yours:`
+    : `My Claude Code token efficiency: ${score}/100 ${emoji} Optimized. How does your setup compare?`;
   const url = 'https://yurukusa.github.io/cc-safe-setup/token-checkup.html';
   window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(url)}`, '_blank');
 }
