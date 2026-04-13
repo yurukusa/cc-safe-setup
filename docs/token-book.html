@@ -71,6 +71,8 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <h1>Claude Codeのトークン消費を半分にする</h1>
 <p class="subtitle">800時間の運用データから見つけた実践テクニック — 全10章・設定テンプレート収録</p>
 
+<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">この問題を報じたメディア: <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> — Anthropicが「top priority」と認めた問題</p>
+
 <div class="pain-point">
 <strong>$200/月のMax planが15分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は2,500+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。Anthropicが「top priority」と認めた問題。
 </div>
@@ -163,6 +165,9 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <div class="data-point">
 <strong>Max plan $200/月 ≈ ¥30,000/月</strong>。トークン消費を10%減らせば月¥3,000の節約。<strong>1ヶ月目で回収</strong>。実測では40%減の事例もあり、その場合は月¥12,000の効果。
 </div>
+<div class="data-point" style="background:#eff6ff;">
+<strong>Pro plan $20/月でも効果あり</strong>。トークン効率が上がれば、枠を使い切るまでの作業量が増える。「30日中12日しか使えない」状態を解消できれば、Max($100/月)へのアップグレードが不要になる可能性も。
+</div>
 <p>無料のTips記事を10本読んで試行錯誤する時間コスト vs. 体系化された10章を1冊で学ぶ時間コスト。どちらが安いか。</p>
 
 <h2>著者について</h2>
@@ -193,6 +198,8 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <span class="price-badge">¥2,500 (~$17)</span>
 <h1>Cut Your Claude Code Token Usage in Half</h1>
 <p class="subtitle">Practical techniques from 800+ hours of autonomous operation — 10 chapters with copy-paste config templates</p>
+
+<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">Covered by <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> — Anthropic called it "top priority"</p>
 
 <div class="pain-point">
 <strong>$200/month Max plan gone in 15 minutes?</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> has 2,500+ reactions. Cache TTL was <a href="https://github.com/anthropics/claude-code/issues/46829">silently reduced from 1h to 5min</a>, increasing costs 20-32%. Anthropic called it a "top priority."
