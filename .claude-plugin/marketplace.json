@@ -5,7 +5,7 @@
     "email": "yurukusa@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Safety hooks for Claude Code — 664 battle-tested hooks from 800+ hours of autonomous operation. Prevents rm -rf, force-push, credential leaks, unauthorized fund transfers, deny-rules bypass, and more.",
+    "description": "Safety hooks for Claude Code — 667 battle-tested hooks from 800+ hours of autonomous operation. Prevents rm -rf, force-push, credential leaks, unauthorized fund transfers, deny-rules bypass, and more.",
     "version": "1.0.0",
     "pluginRoot": "./plugins"
   },
