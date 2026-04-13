@@ -105,16 +105,16 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </div>
 
 <ul class="chapter-list">
-<li><span class="ch-num">intro</span> はじめに<span class="free-badge">無料</span></li>
-<li><span class="ch-num">ch.1</span> トークンはどこで消えている？<span class="free-badge">無料</span></li>
-<li><span class="ch-num">ch.2</span> CLAUDE.mdの書き方でトークン消費が変わる</li>
-<li><span class="ch-num">ch.3</span> コンテキスト管理 — /clear・/compact・--resume</li>
-<li><span class="ch-num">ch.4</span> hookでトークンを守る — 9個の節約hook</li>
-<li><span class="ch-num">ch.5</span> サブエージェント戦略</li>
-<li><span class="ch-num">ch.6</span> ワークフロー設計</li>
-<li><span class="ch-num">ch.7</span> 実データ — 800時間の消費記録</li>
-<li><span class="ch-num">ch.8</span> トラブルシューティング — キャッシュバグ対策</li>
-<li><span class="ch-num">ch.9</span> 設定テンプレート集 — コピペで使えるCLAUDE.md・hooks</li>
+<li><span class="ch-num">intro</span> はじめに — トークン消費の全体像を把握する<span class="free-badge">無料</span></li>
+<li><span class="ch-num">ch.1</span> トークンはどこで消えている？ — 4つの消費層を特定する<span class="free-badge">無料</span></li>
+<li><span class="ch-num">ch.2</span> CLAUDE.mdを35行に凝縮してキャッシュ効率を95%に上げる</li>
+<li><span class="ch-num">ch.3</span> compactionの発火を減らしてセッション寿命を伸ばす</li>
+<li><span class="ch-num">ch.4</span> 9個のhookでトークン浪費を自動で止める</li>
+<li><span class="ch-num">ch.5</span> サブエージェントの暴走を防いでトークン爆発を阻止する</li>
+<li><span class="ch-num">ch.6</span> セッション分割でキャッシュヒット率を最大化する</li>
+<li><span class="ch-num">ch.7</span> 800時間の実測データで最適化の効果を確認する</li>
+<li><span class="ch-num">ch.8</span> キャッシュ暴落・トークンスパイクを診断して直す</li>
+<li><span class="ch-num">ch.9</span> settings.json・CLAUDE.md・hookをコピペで導入する</li>
 </ul>
 
 <details style="margin:1.5rem 0;border:1px solid #e5e7eb;border-radius:8px;padding:0;">
@@ -156,14 +156,15 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </ul>
 
 <h2>無料記事との違い</h2>
-<ul>
-<li><strong>Anthropic公式が推奨するアプローチ</strong> — <a href="https://code.claude.com/docs/en/costs">公式ドキュメント</a>もhookによるコスト削減を推奨している。この本はその公式推奨を9個のhookで実装し、設定テンプレートまで提供する</li>
-<li><strong>800時間の実測データ</strong> — 無料記事の多くは短期テストや推測に基づく。この本は800時間の自律運用で蓄積したキャッシュヒット率、compaction頻度、ターン別消費量の実測値を掲載</li>
-<li><strong>hookによる自動防御</strong> — 「気をつける」ではなくhookで自動的にトークン浪費を検知・防止する仕組み。設定テンプレートをコピペで導入可能</li>
-<li><strong>体系的フレームワーク</strong> — Tips記事は断片的。この本はCLAUDE.md設計→コンテキスト管理→hook実装→ワークフロー設計を10章で一貫して解説</li>
-<li><strong>非エンジニアが書いた</strong> — 技術用語の壁なし。AIに仕事を任せる側の視点で実践方法を解説</li>
-<li><strong>CLAUDE.md最適化だけでは足りない</strong> — <a href="https://github.com/drona23/claude-token-efficient">claude-token-efficient</a>（4,000+★）や"caveman"テクニック（出力を簡潔にする手法、<a href="https://decrypt.co/363440/devs-claude-talk-like-caveman-cut-costs-work-better">Decryptが報道</a>）は即効性があるが、トークン消費の根本原因は出力量だけではない。キャッシュ管理、サブエージェント制御、ワークフロー設計を含む全体最適化を解説</li>
-</ul>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.95rem;">
+<tr style="background:#f8fafc;"><th style="padding:0.6rem;text-align:left;border-bottom:2px solid #e5e7eb;"></th><th style="padding:0.6rem;text-align:center;border-bottom:2px solid #e5e7eb;">無料記事・ガイド</th><th style="padding:0.6rem;text-align:center;border-bottom:2px solid #e5e7eb;background:#eff6ff;">この本</th></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">アプローチ</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">手動で注意する</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>hookで自動防止</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">データ</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">短期テスト・推測</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>800時間の実測値</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">対象範囲</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">CLAUDE.md or モデル選択</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>全6領域を体系化</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">設定テンプレート</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">なし</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>コピペで導入</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">トラブル対応</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">GitHub Issueを探す</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>診断フロー付き</strong></td></tr>
+</table>
+<p style="font-size:0.9rem;color:#666;margin-top:0.5rem;"><a href="https://code.claude.com/docs/en/costs">Anthropic公式ドキュメント</a>もhookによるコスト削減を推奨。<a href="https://github.com/drona23/claude-token-efficient">claude-token-efficient</a>（4,000+★）や<a href="https://decrypt.co/363440/devs-claude-talk-like-caveman-cut-costs-work-better">"caveman"テクニック</a>は即効性があるが、キャッシュ管理・サブエージェント制御・ワークフロー設計を含む全体最適化がこの本の価値。</p>
 
 <h2>¥2,500で元が取れるか</h2>
 <div class="data-point">
@@ -175,7 +176,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p>無料のTips記事を10本読んで試行錯誤する時間コスト vs. 体系化された10章を1冊で学ぶ時間コスト。どちらが安いか。</p>
 
 <h2>著者について</h2>
-<p>非エンジニア。Claude Codeを800時間以上自律運用し、657+のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計53,000+ビュー。</p>
+<p>非エンジニア。Claude Codeを800時間以上自律運用し、667+のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計53,000+ビュー。</p>
 
 <div class="cta-section" id="buy">
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary">トークン消費を半分にする — ¥2,500</a>
@@ -219,6 +220,16 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <li><strong>Written by a non-engineer</strong> — 800+ hours running Claude Code autonomously. No jargon wall</li>
 </ul>
 
+<h2>How This Differs From Free Guides</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.95rem;">
+<tr style="background:#f8fafc;"><th style="padding:0.6rem;text-align:left;border-bottom:2px solid #e5e7eb;"></th><th style="padding:0.6rem;text-align:center;border-bottom:2px solid #e5e7eb;">Free articles</th><th style="padding:0.6rem;text-align:center;border-bottom:2px solid #e5e7eb;background:#eff6ff;">This book</th></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Approach</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Manual discipline</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>Automated via hooks</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Data</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Short tests / estimates</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>800h measured values</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Scope</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">CLAUDE.md or model tips</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>6 areas, systematized</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Config templates</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">None</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>Copy-paste ready</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Troubleshooting</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Search GitHub Issues</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>Diagnostic flowcharts</strong></td></tr>
+</table>
+
 <h2>ROI</h2>
 <div class="data-point">
 <strong>Max plan = $200/month</strong>. Reduce token usage by just 10% = $20/month saved. <strong>Pays for itself in month one</strong>. Measured cases show 40% reduction = $80/month saved.
@@ -248,7 +259,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 </div>
 
 <footer>
-<p>cc-safe-setup — Claude Code safety hooks (657+ hooks / 9,200+ tests)</p>
+<p>cc-safe-setup — Claude Code safety hooks (667+ hooks / 9,200+ tests)</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a></p>
 </footer>
 
