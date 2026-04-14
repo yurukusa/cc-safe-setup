@@ -56,7 +56,7 @@ Session cost:
 <div class="cta">
 <p style="color:#e6edf3;font-size:.95rem"><strong>Want the full optimization guide?</strong></p>
 <a href="token-checkup.html">Token Checkup (Free)</a>
-<a href="token-book.html">Token Book — ¥2,500</a>
+<a href="token-book.html#en">Token Book — ¥2,500</a>
 <a href="https://ko-fi.com/s/fd44ef09a7">Buy Now (Ko-fi)</a>
 </div>
 
@@ -151,7 +151,7 @@ function analyze() {
   html += '<h3 style="margin-top:1rem;font-size:1rem">Summary</h3>';
   if (issues.length === 0) {
     html += '<p class="good">✅ Your cache looks healthy. Keep monitoring with /cost.</p>';
-    html += '<div class="tip" style="margin-top:.5rem">Even healthy caches can be optimized further. The <a href="token-book.html">Token Book</a> covers CLAUDE.md structure, context management, and 9 hook-based guards for token control.</div>';
+    html += '<div class="tip" style="margin-top:.5rem">Even healthy caches can be optimized further. The <a href="token-book.html#en">Token Book</a> covers CLAUDE.md structure, context management, and 9 hook-based guards for token control.</div>';
   } else {
     html += `<p class="bad">Found ${issues.length} issue${issues.length > 1 ? 's' : ''}:</p><ul style="margin:.5rem 0 .5rem 1.5rem">`;
     if (issues.includes('inflation')) html += '<li>Cache creation inflation (pin to v2.1.98)</li>';
@@ -159,7 +159,7 @@ function analyze() {
     if (issues.includes('creation-dominant')) html += '<li>Creation exceeds reads (cache TTL or git status issue)</li>';
     if (issues.includes('high-cost')) html += '<li>High session cost (consider session splitting)</li>';
     html += '</ul>';
-    html += '<div class="tip">The <a href="token-book.html">Token Book</a> covers each of these issues with specific fixes and copy-paste hook configs.</div>';
+    html += '<div class="tip">The <a href="token-book.html#en">Token Book</a> covers each of these issues with specific fixes and copy-paste hook configs.</div>';
   }
 
   el.innerHTML = html;
