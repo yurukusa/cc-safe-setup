@@ -5904,9 +5904,9 @@ async function main() {
   console.log('  ' + c.blue + '  Token Checkup' + c.reset + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + '  28 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Learn more:' + c.reset);
-  console.log('  ' + c.dim + '  Token Book: https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
-  console.log('  ' + c.dim + '  Safety:     https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log('  ' + c.dim + 'Tokens disappearing too fast?' + c.reset);
+  console.log('  ' + c.blue + '  Token Book' + c.reset + '  Cut consumption in half — https://yurukusa.github.io/cc-safe-setup/token-book.html');
+  console.log('  ' + c.dim + '  Safety Guide: https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
   console.log();
 }
 
