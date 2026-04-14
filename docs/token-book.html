@@ -78,6 +78,13 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <body>
 <div class="container">
 
+<div id="launch-banner" style="background:linear-gradient(90deg,#1e40af,#7c3aed);color:#fff;text-align:center;padding:0.7rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;font-weight:600;display:none;">
+New Release — April 2026
+</div>
+<script>
+(function(){var d=new Date();var m=d.getMonth();var y=d.getFullYear();if(y===2026&&m>=3&&m<=4){document.getElementById('launch-banner').style.display='block';}})();
+</script>
+
 <p style="text-align:right;font-size:0.85rem;margin-bottom:1rem;"><a href="#en" style="color:#2563eb;text-decoration:none;">🌐 English version below</a></p>
 <span class="price-badge">¥2,500</span>
 <h1>Claude Codeのトークン消費を半分にする</h1>
@@ -219,6 +226,8 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <hr style="margin:3rem 0;border:none;border-top:2px solid #e8e8e8;">
 
 <div id="en" lang="en">
+<div style="background:linear-gradient(90deg,#1e40af,#7c3aed);color:#fff;text-align:center;padding:0.7rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;font-weight:600;" id="launch-banner-en">New Release — April 2026</div>
+<script>(function(){var b=document.getElementById('launch-banner-en');var d=new Date();if(!(d.getFullYear()===2026&&d.getMonth()>=3&&d.getMonth()<=4))b.style.display='none';})();</script>
 <span class="price-badge">¥2,500 (~$17)</span>
 <h1>Cut Your Claude Code Token Usage in Half</h1>
 <p class="subtitle">Practical techniques from 800+ hours of autonomous operation — 10 chapters with copy-paste config templates</p>
