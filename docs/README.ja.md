@@ -56,7 +56,7 @@ Claude Codeを再起動。完了。
 | サブエージェントの指示無視 | v2.1.84以降CLAUDE.md除外 ([#40459](https://github.com/anthropics/claude-code/issues/40459)) | hookで制約 |
 | 読まずに編集 | 6%→34%に増加 ([#42796](https://github.com/anthropics/claude-code/issues/42796)) | 警告 |
 
-> 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Ko-fiで購入](https://ko-fi.com/s/fd44ef09a7)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
+> 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
 
 **既知の制限:**
 
