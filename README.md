@@ -525,6 +525,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Cache TTL Diagnostic](https://gist.github.com/yurukusa/3a5bdcfdd295bef17b3ee00978b299f2) — 3 patterns that break prompt cache + fixes
 - [Token Book Ch.1 Free Preview](https://gist.github.com/yurukusa/de862573f18d1a0a68d411b696dbcb73) — Where are your Claude Code tokens going? The 4 layers of token consumption explained
 - [Deny Rules Break After 50 Subcommands](https://gist.github.com/yurukusa/0463d240d7b725218289a556414c72a5) — the hook that fixes Claude Code's deny rule bypass vulnerability
+- [Opus 4.7 Emergency Kit](https://gist.github.com/yurukusa/1970b20fed95a682b72eb6e857e61d30) — 5 commands to protect your data from Opus 4.7 regressions (auto mode broken, 23+ data loss incidents)
 
 ### Professional Services
 
