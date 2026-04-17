@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Opus 4.7 Survival Guide — Known Issues, Fixes, and Safety Hooks</title>
+<meta name="description" content="Opus 4.7 has critical bugs: 4x token consumption, data loss (50GB+), classifier failures. Here are the hooks and fixes that protect your work right now.">
+<meta name="keywords" content="Claude Code Opus 4.7, token consumption, data loss, rm -rf, classifier bug, safety hooks, PreToolUse, auto mode">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html">
+<meta property="og:title" content="Claude Code Opus 4.7 Survival Guide">
+<meta property="og:description" content="Known issues, immediate fixes, and safety hooks for Opus 4.7. Protect your work from 4x token burn, data loss, and classifier failures.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Opus 4.7 Survival Guide — Fixes & Safety Hooks">
+<meta name="twitter:description" content="4x token burn, 50GB data loss, classifier bugs. Here's how to protect yourself.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Protect Claude Code from Opus 4.7 Issues",
+  "description": "Step-by-step guide to protect your work from known Opus 4.7 bugs including 4x token consumption, data loss, and classifier failures.",
+  "datePublished": "2026-04-17",
+  "author": {"@type": "Person", "name": "yurukusa"},
+  "step": [
+    {"@type": "HowToStep", "name": "Install safety hooks", "text": "Run npx cc-safe-setup to install 8 core safety hooks that block destructive commands."},
+    {"@type": "HowToStep", "name": "Pin your model version", "text": "Add model-version-alert hook to detect silent Opus 4.7 switching."},
+    {"@type": "HowToStep", "name": "Protect shell config", "text": "Install shell-config-truncation-guard to prevent installer from truncating your .bash_profile."},
+    {"@type": "HowToStep", "name": "Monitor token usage", "text": "Use /cost command after every task to catch 4x consumption early."}
+  ]
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.7;max-width:800px;margin:0 auto;padding:2rem 1.5rem}
+h1{color:#f0f6fc;font-size:1.7rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.2rem;margin:2rem 0 .8rem;padding-top:1rem;border-top:1px solid #21262d}
+h3{color:#f0f6fc;font-size:1rem;margin:1rem 0 .4rem}
+.subtitle{color:#8b949e;margin-bottom:1.5rem}
+.alert{background:#1a0404;border:2px solid #da3633;border-radius:8px;padding:1.2rem;margin:1.5rem 0}
+.alert h3{color:#f85149;margin-top:0}
+.warning{background:#1a1504;border:1px solid #d29922;border-radius:8px;padding:1rem;margin:.8rem 0}
+.warning h3{color:#d29922;margin-top:0}
+.fix{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.fix h3{color:#3fb950;margin-top:0}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;overflow-x:auto;font-size:.85rem;margin:.5rem 0}
+code{font-family:'SF Mono',Consolas,monospace;font-size:.85rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.issue-ref{color:#8b949e;font-size:.8rem}
+.toc{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1rem 1rem 2rem;margin:1.5rem 0}
+.toc li{margin:.3rem 0;font-size:.9rem}
+.cta{background:#161b22;border:2px solid #58a6ff;padding:1.2rem;border-radius:8px;margin:2rem 0;text-align:center}
+.cta h3{margin-bottom:.5rem}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{display:inline-block;background:transparent;color:#58a6ff;border:1px solid #30363d;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;margin:.3rem}
+.footer{text-align:center;padding:2rem;color:#484f58;font-size:.75rem;margin-top:2rem;border-top:1px solid #21262d}
+.severity{display:inline-block;font-size:.7rem;padding:.1rem .4rem;border-radius:3px;font-weight:600;margin-left:.5rem}
+.sev-critical{background:#da3633;color:#fff}
+.sev-high{background:#d29922;color:#000}
+.timestamp{color:#8b949e;font-size:.8rem;font-style:italic}
+</style>
+</head>
+<body>
+
+<h1>Opus 4.7 Survival Guide</h1>
+<p class="subtitle">Known issues, immediate fixes, and safety hooks. Last updated: April 17, 2026.</p>
+
+<div class="alert">
+<h3>April 15-17: 20+ data loss incidents in 72 hours</h3>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, and the installer can truncate your shell config to 0 bytes. This page tracks the issues and provides hooks that protect your work <strong>right now</strong>.</p>
+</div>
+
+<ol class="toc">
+<li><a href="#token">4x Token Consumption</a></li>
+<li><a href="#classifier">Classifier Failure in Auto Mode</a></li>
+<li><a href="#data-loss">Data Loss Incidents (50GB+)</a></li>
+<li><a href="#installer">Installer Truncates Shell Config</a></li>
+<li><a href="#quality">Model Quality Regression</a></li>
+<li><a href="#quick-setup">Quick Protection Setup</a></li>
+</ol>
+
+<h2 id="token">1. 4x Token Consumption <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>Users report Opus 4.7 consuming up to 4x the tokens for the same tasks. Some Max Plan ($200/month) users report quota depletion in 15-19 minutes.</p>
+
+<div class="warning">
+<h3>Silent Model Switching</h3>
+<p>Claude Code may switch from Opus 4.6 to 4.7 mid-session without notification. Your quota burns 4x faster without any visible change. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49541">#49541</a></span></p>
+</div>
+
+<div class="fix">
+<h3>Fix: model-version-alert hook</h3>
+<p>Checks every 50 tool calls and warns if Opus 4.7 is active:</p>
+<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<p>Or add to settings.json manually:</p>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/model-version-alert.sh"
+      }]
+    }]
+  }
+}</code></pre>
+</div>
+
+<div class="fix">
+<h3>Fix: Monitor with /cost</h3>
+<p>Run <code>/cost</code> after every task. If you see cache_creation tokens climbing faster than expected, you may be on Opus 4.7. Pin your model:</p>
+<pre><code>claude --model claude-opus-4-6</code></pre>
+<p>Or in settings.json: <code>"model": "claude-opus-4-6"</code></p>
+</div>
+
+<h2 id="classifier">2. Auto Mode Classifier Failure <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>The Bash safety classifier is hardcoded to <code>claude-opus-4-6-1m</code>. When Opus 4.7 is selected, dangerous commands pass through without the normal safety checks. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49618">#49618</a></span></p>
+
+<p>This means: <code>rm -rf ~/</code>, credential deletion, and other destructive commands that would normally be blocked by the classifier can execute freely under Opus 4.7.</p>
+
+<div class="fix">
+<h3>Fix: Install process-level safety hooks</h3>
+<p>Hooks run outside the model's control. They work regardless of which model version is active or whether the classifier is functioning:</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>This installs 8 core hooks including rm-rf protection, git safety, and secret leak detection. These hooks use <code>exit 2</code> (hard reject) — the command never reaches bash.</p>
+</div>
+
+<h2 id="data-loss">3. Data Loss Incidents <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>20 confirmed data loss incidents in 72 hours (April 15-17). The worst: <strong>~50GB permanently deleted</strong> via recursive rm. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a></span></p>
+
+<h3>Documented incidents</h3>
+<ul>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a></strong> — rm -rf deleted ~1,500 files, ~50GB. Moved files inside source directory, then deleted parent.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49539">#49539</a></strong> — ~/.git-credentials wiped. All PATs deleted without confirmation.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49554">#49554</a></strong> — Auto mode permitted ~/.ssh deletion. Should have been hard-blocked by classifier.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49464">#49464</a></strong> — Home directory deletion attempt via tilde misinterpretation (<code>./~</code> treated as <code>~/</code>).</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49615">#49615</a></strong> — Installer auto-update truncated ~/.bash_profile and ~/.zshrc to 0 bytes.</li>
+</ul>
+
+<div class="fix">
+<h3>Fix: Layer your defenses</h3>
+<pre><code># Core safety (rm-rf, git, secrets)
+npx cc-safe-setup
+
+# Credential protection
+npx cc-safe-setup --install-example credential-exfil-guard
+
+# Shell config protection (NEW — addresses #49615)
+npx cc-safe-setup --install-example shell-config-truncation-guard
+
+# Home directory protection
+npx cc-safe-setup --install-example home-directory-guard</code></pre>
+</div>
+
+<h2 id="installer">4. Installer Truncates Shell Config <span class="severity sev-high">HIGH</span></h2>
+
+<p>Claude Code's auto-update mechanism can truncate <code>~/.bash_profile</code> and <code>~/.zshrc</code> to 0 bytes, destroying all user shell configuration. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49615">#49615</a></span></p>
+
+<div class="fix">
+<h3>Fix: shell-config-truncation-guard (new)</h3>
+<p>Blocks any Write or Bash command that would truncate protected shell config files. Catches empty writes, near-empty writes, and >60% size reductions:</p>
+<pre><code>npx cc-safe-setup --install-example shell-config-truncation-guard</code></pre>
+<p>Protected files: <code>.bashrc</code>, <code>.bash_profile</code>, <code>.zshrc</code>, <code>.zprofile</code>, <code>.profile</code>, <code>.zshenv</code></p>
+</div>
+
+<h2 id="quality">5. Model Quality Regression <span class="severity sev-high">HIGH</span></h2>
+
+<p>Opus 4.7 shows quality regressions including XML/JSON format mixing in tool calls and reduced instruction-following. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49725">#49725</a>, <a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Pin to Opus 4.6</h3>
+<pre><code># CLI flag
+claude --model claude-opus-4-6
+
+# Or in settings.json
+{
+  "model": "claude-opus-4-6"
+}
+
+# Or in .claude/settings.json (project-level)
+{
+  "model": "claude-opus-4-6"
+}</code></pre>
+<p>Note: Some users report that the model picker shows 4.7 but delivers 4.6, or vice versa. Use <code>model-version-alert</code> hook to verify which model is actually running.</p>
+</div>
+
+<h2 id="quick-setup">Quick Protection Setup</h2>
+
+<p>Install all recommended Opus 4.7 protections in under 30 seconds:</p>
+
+<pre><code># Step 1: Core safety hooks (rm-rf, git, secrets, syntax check)
+npx cc-safe-setup
+
+# Step 2: Opus 4.7-specific protections
+npx cc-safe-setup --install-example model-version-alert
+npx cc-safe-setup --install-example shell-config-truncation-guard
+npx cc-safe-setup --install-example credential-exfil-guard
+npx cc-safe-setup --install-example home-directory-guard</code></pre>
+
+<p>These hooks work at the process level, independent of the model's safety classifier. Even if the classifier fails (as it does with Opus 4.7), hooks will still block destructive commands.</p>
+
+<div class="cta">
+<h3>Want to cut your token costs by 50%?</h3>
+<p>Opus 4.7 burns tokens 4x faster. The Token Book has 10 chapters of real optimization data from 800+ hours of operation — CLAUDE.md templates, hook configs, and workflow changes that halved our token spend.</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn">Token Book — Read Ch.1 Free</a>
+<a href="token-checkup.html" class="btn-outline">Free Token Checkup (5 questions)</a>
+</div>
+
+<div class="footer">
+<p>cc-safe-setup — 678 example hooks for Claude Code safety</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
+<p class="timestamp">Page created: April 17, 2026. Issues tracked: #49129, #49541, #49554, #49615, #49618, #49725, #49747</p>
+</div>
+
+</body>
+</html>
