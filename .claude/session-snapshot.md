@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-17T22:51:52+09:00
+Updated: 2026-04-17T22:52:43+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-04-17T22:51:52+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2940b439 checkpoint: auto-save 22:51:51
+- Last commit: 258d8e9d checkpoint: pre-compact auto-save (1 files, 20260417-135153)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-04-17.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-04-17.md
 ./docs/README.ja.md
 ./README.md
 ./tests/test-shell-config-truncation-guard.sh
