@@ -196,6 +196,19 @@ claude --model claude-opus-4-6
 <p><a href="opus47-scanner.html"><strong>Opus 4.7 Safety Scanner</strong></a> — paste your settings.json and get an instant vulnerability report with specific fix commands for each missing protection.</p>
 </div>
 
+<h2 id="thinking">6. Thinking Summaries Disappear <span class="severity sev-high">HIGH</span></h2>
+
+<p>Opus 4.7 changed the default <code>display</code> parameter from <code>"summarized"</code> to <code>"omitted"</code>. Claude Code's harness hasn't caught up, so thinking summaries silently disappear. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49268">#49268</a> (17👍), <a href="https://github.com/anthropics/claude-code/issues/49757">#49757</a> (VS Code)</span></p>
+
+<div class="fix">
+<h3>Fix: Restore thinking display</h3>
+<pre><code># CLI flag
+claude --thinking-display summarized
+
+# Or wait for Claude Code update to fix the default</code></pre>
+<p>This affects both CLI and VS Code extension. Without thinking summaries, you lose visibility into Claude's reasoning process.</p>
+</div>
+
 <h2 id="quick-setup">Quick Protection Setup</h2>
 
 <p>Install all Opus 4.7 protections in one command:</p>
