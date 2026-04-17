@@ -268,33 +268,23 @@ function showResults() {
     </div>
 
     <div class="cta">
-      <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to fix it' : score < 70 ? 'You can save significantly more' : 'Fine-tune your setup further'}</h3>
-      <p>${score < 40 ? `Your score suggests ~${wastePercent}% token waste — that's ~$${monthlySavings}/month on your plan. The Token Book (¥2,500 ≈ $17) pays for itself in ${monthlySavings > 17 ? 'the first week' : 'the first month'}. Copy-paste templates included.` : score < 70 ? `At ~$${monthlySavings}/month in potential savings, the ¥2,500 (≈ $17) investment pays back in ${monthlySavings > 17 ? 'days' : 'the first month'}. The recommendations above map directly to Token Book chapters.` : 'Even at your score, CLAUDE.md structure and cache management can squeeze out another 10-20%. The Token Book covers advanced techniques with copy-paste templates.'}</p>
-      <a href="https://gist.github.com/yurukusa/47b8c3eadb77cf74946f450f992ddac2" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Free: Troubleshooting Guide</a>
-      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem">Token Book — ¥2,500（Zenn）</a>
-      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">はじめに+第1章 無料で読む →</a>
-      <a href="token-book.html#en" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Details & 2 Chapters Free</a>
-      <a href="cache-health.html" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">/cost出力で詳細診断 →</a>
-      <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Safety Guide — ¥800 (Ch.3 Free)</a>
-      <a href="https://zenn.dev/yurukusa/books/3c3c3baee85f0a19" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">800 Hours Full Story — ¥800</a>
+      <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to stop it' : score < 70 ? 'Save $' + monthlySavings + '/month with these fixes' : 'Fine-tune your setup further'}</h3>
+      <p>${score < 40 ? `At ~${wastePercent}% waste, you're losing <strong style="color:#f97316">~$${monthlySavings}/month</strong>. The Token Book has copy-paste CLAUDE.md templates, hook configs, and the exact workflow changes that cut our cost by 50%. ¥2,500 (≈ $17) — pays for itself in ${monthlySavings > 34 ? '2 days' : monthlySavings > 17 ? 'the first week' : 'the first month'}.` : score < 70 ? `The ${matched.length} optimizations above come from the Token Book — 10 chapters of real data from 800+ hours. At ~$${monthlySavings}/month in savings, the ¥2,500 (≈ $17) pays back ${monthlySavings > 17 ? 'within days' : 'in the first month'}. Every template is copy-paste ready.` : 'CLAUDE.md structure and cache management alone can squeeze out 10-20% more. The Token Book covers advanced techniques with copy-paste templates from 800+ hours of operation.'}</p>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem;font-size:1rem;padding:.8rem 2rem">Get Token Book — ¥2,500 (≈ $17)</a>
+      <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Read Ch.1 Free First →</a>
+      <a href="token-book.html#en" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">English Details + 2 Free Chapters</a>
     </div>
     <div class="cta" style="margin-top:.8rem">
-      <h3>Quick fix: Install token guards now</h3>
-      <p>4 hooks from Token Book Ch.4 — free. Warns on large reads, limits file budget, caps subagents, tracks token spend.</p>
+      <h3>Start saving now: Install token guards (free)</h3>
+      <p>4 hooks from Token Book Ch.4. Warns on large reads, limits file budget, caps subagents, tracks token spend.</p>
       <pre>npx cc-safe-setup</pre>
-      <p style="color:#8b949e;font-size:.75rem;margin-top:.3rem">Or install just the token-guard plugin: <code style="background:#0d1117;padding:2px 6px;border-radius:3px">/plugin marketplace add yurukusa/cc-safe-setup</code> then <code style="background:#0d1117;padding:2px 6px;border-radius:3px">/plugin install token-guard</code></p>
+      <p style="color:#8b949e;font-size:.75rem;margin-top:.3rem">These hooks catch the most common token waste patterns. The Token Book explains <em>why</em> they work and covers 6 more optimization layers.</p>
     </div>
 
     <div class="cta" style="margin-top:.8rem;border-color:#da3633">
-      <h3>Is your version burning extra tokens?</h3>
-      <p>v2.1.100+ has a known cache_creation inflation bug (+40-94%). On April 13 alone, <strong>20 cost-related issues</strong> were filed — the system prompt grew from 49K to 96K tokens (+94%) between v2.1.98 and v2.1.104.</p>
+      <h3>⚠ Opus 4.7 users: token costs up to 4x higher</h3>
+      <p>Since April 15, Opus 4.7 users report <strong>4x quota consumption</strong>, data loss incidents (50GB+), and classifier bugs that bypass safety prompts (<a href="https://github.com/anthropics/claude-code/issues/49618">#49618</a>). Token Book Ch.8 covers all 13 known symptoms and defenses.</p>
       <a href="version-check.html" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem;border-color:#da3633;color:#f85149">Version Health Check</a>
-    </div>
-
-    <div class="cta" style="margin-top:.8rem">
-      <h3>Not sure which hooks to install?</h3>
-      <p>Take the Hook Selector — 5 questions to get a personalized safety setup.</p>
-      <a href="hook-selector.html" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Hook Selector</a>
     </div>
 
     <div class="actions">
