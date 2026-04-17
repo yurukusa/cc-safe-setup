@@ -4,6 +4,8 @@
 [![npm downloads](https://img.shields.io/npm/dw/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
 [![tests](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml/badge.svg)](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml)
 
+> 🚀 **Launching on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) — April 21!** Follow us and upvote to support open source safety for AI coding agents.
+
 **One command to make Claude Code safe for autonomous operation.** 683 example hooks · 9,200+ tests · 1,200+ installs/week · [日本語](docs/README.ja.md)
 
 ```bash
