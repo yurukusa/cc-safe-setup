@@ -190,16 +190,17 @@ claude --model claude-opus-4-6
 
 <h2 id="quick-setup">Quick Protection Setup</h2>
 
-<p>Install all recommended Opus 4.7 protections in under 30 seconds:</p>
+<p>Install all Opus 4.7 protections in one command:</p>
 
-<pre><code># Step 1: Core safety hooks (rm-rf, git, secrets, syntax check)
-npx cc-safe-setup
+<pre><code>npx cc-safe-setup --opus47</code></pre>
 
-# Step 2: Opus 4.7-specific protections
-npx cc-safe-setup --install-example model-version-alert
-npx cc-safe-setup --install-example shell-config-truncation-guard
-npx cc-safe-setup --install-example credential-exfil-guard
-npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
+<p>This installs core safety hooks plus 4 Opus 4.7-specific protections. Or install individually:</p>
+
+<pre><code>npx cc-safe-setup                                            # Core safety
+npx cc-safe-setup --install-example model-version-alert       # #49541
+npx cc-safe-setup --install-example shell-config-truncation-guard  # #49615
+npx cc-safe-setup --install-example credential-exfil-guard    # #49539
+npx cc-safe-setup --install-example home-critical-bash-guard  # #49554</code></pre>
 
 <p>These hooks work at the process level, independent of the model's safety classifier. Even if the classifier fails (as it does with Opus 4.7), hooks will still block destructive commands.</p>
 
