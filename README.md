@@ -6,7 +6,7 @@
 
 > 🚀 **Launching on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) — April 21!** Follow us and upvote to support open source safety for AI coding agents.
 
-**One command to make Claude Code safe for autonomous operation.** 685 example hooks · 9,200+ tests · 1,200+ installs/week · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 688 example hooks · 9,200+ tests · 1,200+ installs/week · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
