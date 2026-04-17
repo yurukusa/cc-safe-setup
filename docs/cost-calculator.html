@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code Cost Calculator — How Much Are You Really Spending?</title>
-<meta name="description" content="Estimate your real Claude Code monthly cost. Input your usage patterns, see where tokens go, and get optimization tips based on 800+ hours of operation data.">
+<title>Claude Code Cost Calculator — Opus 4.6 vs 4.7 Comparison</title>
+<meta name="description" content="Calculate your Claude Code monthly cost. Compare Opus 4.6 vs 4.7 token consumption (+35%). See where tokens go and get optimization tips from 800+ hours of data.">
 <meta property="og:title" content="Claude Code Cost Calculator">
 <meta property="og:description" content="See your real monthly Claude Code cost. Find where tokens go. Get optimization tips.">
 <meta property="og:type" content="website">
@@ -94,6 +94,13 @@ footer{text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem}
 <option value="mixed">Mixed</option>
 </select>
 
+<label>Model</label>
+<select id="model">
+<option value="opus46">Opus 4.6 (previous default)</option>
+<option value="opus47" selected>Opus 4.7 (current default — up to 35% more tokens)</option>
+<option value="sonnet46">Sonnet 4.6 (budget option)</option>
+</select>
+
 <label>How often do you hit the usage limit?</label>
 <select id="limit_freq">
 <option value="never">Never</option>
@@ -152,16 +159,22 @@ function calculate() {
   const days = +document.getElementById('days').value;
   const claudemd = +document.getElementById('claudemd').value;
   const usecase = document.getElementById('usecase').value;
+  const model = document.getElementById('model').value;
   const limitFreq = document.getElementById('limit_freq').value;
+
+  // Model multipliers (Opus 4.7 uses up to 35% more tokens — GitHub Issue #49601)
+  const modelMultiplier = { opus46: 1.0, opus47: 1.35, sonnet46: 0.45 }[model];
+  const modelLabel = { opus46: 'Opus 4.6', opus47: 'Opus 4.7', sonnet46: 'Sonnet 4.6' }[model];
 
   // Token estimation model (based on 800+ hours of data)
   // Average tokens per minute of active session
-  const tokensPerMin = {
+  const baseTokensPerMin = {
     coding: 1200,
     research: 800,
     autonomous: 1500,
     mixed: 1100
   }[usecase];
+  const tokensPerMin = Math.round(baseTokensPerMin * modelMultiplier);
 
   // CLAUDE.md overhead per turn (roughly 4 chars = 1 token, ~15 turns per session)
   const claudemdTokensPerTurn = Math.round(claudemd * 30 * 0.25);
@@ -203,6 +216,28 @@ function calculate() {
   }
 
   document.getElementById('monthly-cost').textContent = costDisplay;
+
+  // Model comparison (show what other models would cost)
+  if (plan === 'api') {
+    const compare = { opus46: 1.0, opus47: 1.35, sonnet46: 0.45 };
+    const baseCost = monthlyCost / modelMultiplier;
+    const comparisonHtml = Object.entries(compare)
+      .filter(([k]) => k !== model)
+      .map(([k, mult]) => {
+        const c = Math.round(baseCost * mult);
+        const diff = c - monthlyCost;
+        const diffStr = diff > 0 ? `+$${diff}` : `-$${Math.abs(diff)}`;
+        const color = diff > 0 ? '#f85149' : '#3fb950';
+        const label = { opus46: 'Opus 4.6', opus47: 'Opus 4.7', sonnet46: 'Sonnet 4.6' }[k];
+        return `<span style="margin:0 .5rem;font-size:.8rem">${label}: $${c} (<span style="color:${color}">${diffStr}</span>)</span>`;
+      }).join('');
+    document.getElementById('monthly-cost').insertAdjacentHTML('afterend',
+      `<div id="model-compare" style="text-align:center;margin-bottom:.5rem;color:#8b949e;font-size:.8rem">
+        Compare: ${comparisonHtml}
+      </div>`);
+    const old = document.querySelector('#model-compare + #model-compare');
+    if (old) old.remove();
+  }
 
   // Token distribution bars
   const distributions = {
@@ -290,6 +325,15 @@ function calculate() {
     tips.push({
       level: 'warn',
       text: `${sessions} sessions/day — consider batching related tasks into fewer, longer sessions to reduce session-start overhead.`
+    });
+  }
+
+  if (model === 'opus47') {
+    tips.push({
+      level: 'crit',
+      text: `<strong>Opus 4.7 Warning:</strong> Users report up to 35% more token consumption vs 4.6 (<a href="https://github.com/anthropics/claude-code/issues/49601">#49601</a>). ` +
+            `The auto mode safety classifier is also hardcoded to 4.6 — your safety checks may not work (<a href="https://github.com/anthropics/claude-code/issues/49618">#49618</a>). ` +
+            `Consider <code>claude --model claude-opus-4-6</code> until stabilized.`
     });
   }
 
