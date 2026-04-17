@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）が報告されています。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）が報告されています。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -89,7 +89,9 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <li><a href="#quality">Model Quality Regression</a></li>
 <li><a href="#thinking">Thinking Summaries Disappear</a></li>
 <li><a href="#auto-update">Auto-Update Removes Symlinks</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#token-inflation">1.7x Token Inflation</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#token-inflation">1.7x Token Inflation</a></li>
+<li><a href="#hidden-tokens">20K Hidden Token Inflation (196👍)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#permission-reset">Permission Mode Reset on /model</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -269,10 +271,31 @@ ls -la ~/.claude/skills/ | grep '^l' > ~/.claude/skills-symlinks-backup.txt
 <a href="token-checkup.html" class="btn-outline">Free Token Checkup (5 questions)</a>
 </div>
 
+<h2 id="hidden-tokens">9. 20K Hidden Token Inflation <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>Since v2.1.100, Claude Code injects ~20,000 invisible tokens into every API call. These tokens don't appear in your input but are billed as <code>cache_creation_input_tokens</code> — a 40% cost overhead you can't see or control. With 196 reactions, this is the most-upvoted token issue on GitHub. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> (196👍, 35 comments)</span></p>
+
+<p><strong>Impact:</strong> The hidden tokens also dilute your CLAUDE.md instructions — the model "sees" 20K tokens of system content before your actual instructions, reducing their effectiveness.</p>
+
+<div class="fix">
+<h3>Fix: Monitor and minimize</h3>
+<p>Use <code>/cost</code> after each task to check actual spend vs. expected. Keep sessions shorter to reduce cumulative overhead. Run <code>npx cc-safe-setup</code> to install the <code>cache-creation-spike-detector</code> hook that alerts when cache_creation spikes unexpectedly.</p>
+<p>Related: <a href="https://github.com/anthropics/claude-code/issues/50213">#50213</a> — subagents also lack cache_control, adding ~4.7K tokens per spawn at 1.25x cost.</p>
+</div>
+
+<h2 id="permission-reset">10. Permission Mode Resets on Model Switch <span class="severity sev-high">HIGH</span></h2>
+
+<p>Switching models via <code>/model</code> silently resets your permission mode to the default. If you were running in a restricted mode, the switch removes that protection without warning. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50201">#50201</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Re-set permission mode after switching</h3>
+<p>After any <code>/model</code> command, immediately verify your permission mode. Set it explicitly again if needed. A PreToolUse hook can detect and warn about permission mode changes.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 683 example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 685 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50207, #50213</p>
 </div>
 
 </body>
