@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opus 4.7 Safety Scanner — Is Your Claude Code Protected?</title>
+<meta name="description" content="Paste your settings.json to check if you're protected from Opus 4.7's broken classifier, 4x token burn, data loss, and config truncation. Free instant scan.">
+<meta name="keywords" content="Claude Code, Opus 4.7, safety scanner, settings.json, hooks, data loss, token consumption">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus47-scanner.html">
+<meta property="og:title" content="Opus 4.7 Safety Scanner — Is Your Claude Code Protected?">
+<meta property="og:description" content="23+ data loss incidents in 3 days. Check if your settings.json protects you.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/opus47-scanner.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Opus 4.7 Safety Scanner">
+<meta name="twitter:description" content="Paste settings.json → instant vulnerability check. Free.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Opus 4.7 Safety Scanner",
+  "description": "Check if your Claude Code settings.json protects against known Opus 4.7 vulnerabilities",
+  "url": "https://yurukusa.github.io/cc-safe-setup/opus47-scanner.html",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "author": {"@type": "Person", "name": "yurukusa"}
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.7;max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+.subtitle{color:#8b949e;margin-bottom:1.5rem;font-size:.9rem}
+textarea{width:100%;height:200px;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;font-family:'SF Mono',Consolas,monospace;font-size:.85rem;padding:1rem;resize:vertical}
+textarea:focus{outline:none;border-color:#58a6ff}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:8px;border:none;font-size:1rem;font-weight:600;cursor:pointer;margin-top:1rem}
+.btn:hover{background:#2ea043}
+.result{margin-top:1.5rem;display:none}
+.check{padding:.6rem 1rem;border-radius:6px;margin:.4rem 0;font-size:.9rem}
+.pass{background:#0d2818;border:1px solid #238636;color:#3fb950}
+.fail{background:#1a0404;border:1px solid #da3633;color:#f85149}
+.warn{background:#1a1504;border:1px solid #d29922;color:#d29922}
+.score{text-align:center;margin:1.5rem 0;padding:1.5rem;border-radius:12px;font-size:1.3rem;font-weight:700}
+.score-good{background:#0d2818;border:2px solid #238636;color:#3fb950}
+.score-mid{background:#1a1504;border:2px solid #d29922;color:#d29922}
+.score-bad{background:#1a0404;border:2px solid #da3633;color:#f85149}
+.fix{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0}
+.fix h3{color:#58a6ff;font-size:.95rem;margin-bottom:.5rem}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.8rem;margin:.4rem 0}
+code{font-family:'SF Mono',Consolas,monospace}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.cta{background:#161b22;border:2px solid #58a6ff;padding:1.2rem;border-radius:8px;margin:2rem 0;text-align:center}
+.cta-btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.3rem}
+.footer{text-align:center;padding:2rem 0;color:#484f58;font-size:.75rem;border-top:1px solid #21262d;margin-top:2rem}
+.alert{background:#1a0404;border:2px solid #da3633;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:.9rem}
+.alert strong{color:#f85149}
+</style>
+</head>
+<body>
+
+<h1>🔍 Opus 4.7 Safety Scanner</h1>
+<p class="subtitle">Paste your <code>~/.claude/settings.json</code> to check for known Opus 4.7 vulnerabilities</p>
+
+<div class="alert">
+<strong>23+ data loss incidents in 3 days.</strong> Auto mode's safety classifier is <a href="https://github.com/anthropics/claude-code/issues/49618">hardcoded to Opus 4.6</a> — on 4.7, dangerous commands pass through unchecked. <a href="opus-47-survival-guide.html">Full details →</a>
+</div>
+
+<textarea id="input" placeholder='Paste your ~/.claude/settings.json here...
+
+Example:
+{
+  "permissions": {
+    "allow": ["Bash(git *)"],
+    "deny": ["Bash(rm -rf *)"]
+  },
+  "hooks": {
+    "PreToolUse": [...]
+  }
+}'></textarea>
+
+<button class="btn" onclick="scan()">Scan for Opus 4.7 Vulnerabilities</button>
+
+<div class="result" id="result"></div>
+
+<div class="fix">
+<h3>Don't have settings.json yet?</h3>
+<pre><code>cat ~/.claude/settings.json</code></pre>
+<p style="font-size:.85rem;color:#8b949e;">Copy the output and paste it above. If the file doesn't exist, you have <strong>zero protection</strong>.</p>
+</div>
+
+<div class="cta">
+<h3>Want to cut token costs by 50%?</h3>
+<p style="font-size:.9rem;color:#8b949e;margin-bottom:.8rem;">Opus 4.7 burns tokens 4x faster. The Token Book has real data from 800+ hours.</p>
+<a href="token-book.html" class="cta-btn">Token Book — ¥2,500 (~$17)</a>
+<a href="token-checkup.html" style="display:inline-block;color:#58a6ff;padding:.6rem 1rem;margin:.3rem;font-size:.9rem;">Free Token Checkup →</a>
+</div>
+
+<div class="footer">
+<p>cc-safe-setup — 678 safety hooks for Claude Code</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="opus-47-survival-guide.html">Survival Guide</a></p>
+</div>
+
+<script>
+function scan() {
+  const input = document.getElementById('input').value.trim();
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+
+  if (!input) {
+    result.innerHTML = '<div class="score score-bad">⚠️ No settings.json — You have ZERO protection</div><div class="fix"><h3>Fix it now:</h3><pre><code>npx cc-safe-setup --opus47</code></pre></div>';
+    return;
+  }
+
+  let settings;
+  try {
+    settings = JSON.parse(input);
+  } catch (e) {
+    result.innerHTML = '<div class="check fail">❌ Invalid JSON — cannot parse settings.json</div>';
+    return;
+  }
+
+  const checks = [];
+  let score = 0;
+  const maxScore = 7;
+
+  // 1. Has any hooks at all?
+  const hasHooks = settings.hooks && Object.keys(settings.hooks).length > 0;
+  if (hasHooks) {
+    checks.push({pass: true, msg: 'Has hooks configured'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No hooks configured — zero process-level protection'});
+  }
+
+  // Flatten all hook commands
+  const allCommands = [];
+  if (settings.hooks) {
+    for (const [event, hookList] of Object.entries(settings.hooks)) {
+      if (Array.isArray(hookList)) {
+        for (const entry of hookList) {
+          if (entry.hooks) {
+            for (const h of entry.hooks) {
+              if (h.command) allCommands.push(h.command.toLowerCase());
+            }
+          }
+        }
+      }
+    }
+  }
+  const cmds = allCommands.join(' ');
+
+  // 2. rm -rf protection
+  if (cmds.includes('rm') && (cmds.includes('rf') || cmds.includes('destructive') || cmds.includes('guard'))) {
+    checks.push({pass: true, msg: 'rm -rf / destructive command protection detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No rm -rf protection — <a href="https://github.com/anthropics/claude-code/issues/49129">50GB lost in one command</a>'});
+  }
+
+  // 3. Credential protection
+  if (cmds.includes('credential') || cmds.includes('ssh') || cmds.includes('git-cred') || cmds.includes('exfil')) {
+    checks.push({pass: true, msg: 'Credential protection detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No credential protection — <a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials and SSH keys at risk</a>'});
+  }
+
+  // 4. Shell config protection
+  if (cmds.includes('truncat') || cmds.includes('bash_profile') || cmds.includes('zshrc') || cmds.includes('shell-config')) {
+    checks.push({pass: true, msg: 'Shell config truncation protection detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No shell config protection — <a href="https://github.com/anthropics/claude-code/issues/49615">installer can truncate .bash_profile to 0 bytes</a>'});
+  }
+
+  // 5. Model version monitoring
+  if (cmds.includes('model') && cmds.includes('version') || cmds.includes('model-version')) {
+    checks.push({pass: true, msg: 'Model version monitoring detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No model version alert — <a href="https://github.com/anthropics/claude-code/issues/49541">silent switch to 4.7 causes 4x token burn</a>'});
+  }
+
+  // 6. Home directory protection
+  if (cmds.includes('home') || cmds.includes('dotfile') || cmds.includes('critical')) {
+    checks.push({pass: true, msg: 'Home directory / dotfile protection detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No home directory protection — <a href="https://github.com/anthropics/claude-code/issues/49464">home deletion attempts reported</a>'});
+  }
+
+  // 7. Model pinning
+  if (settings.model && !settings.model.includes('4-7') && !settings.model.includes('4.7')) {
+    checks.push({pass: true, msg: 'Model pinned to non-4.7 version: ' + settings.model});
+    score++;
+  } else if (settings.model && (settings.model.includes('4-7') || settings.model.includes('4.7'))) {
+    checks.push({warn: true, msg: 'Model set to Opus 4.7 — known quality and safety regressions'});
+  } else {
+    checks.push({warn: true, msg: 'No model pin — Claude Code may default to Opus 4.7'});
+  }
+
+  // Score display
+  const pct = Math.round((score / maxScore) * 100);
+  let scoreClass = 'score-bad';
+  let emoji = '🔴';
+  if (pct >= 80) { scoreClass = 'score-good'; emoji = '🟢'; }
+  else if (pct >= 50) { scoreClass = 'score-mid'; emoji = '🟡'; }
+
+  let html = `<div class="score ${scoreClass}">${emoji} Opus 4.7 Protection: ${score}/${maxScore} (${pct}%)</div>`;
+
+  for (const c of checks) {
+    if (c.pass) html += `<div class="check pass">✅ ${c.msg}</div>`;
+    else if (c.warn) html += `<div class="check warn">⚠️ ${c.msg}</div>`;
+    else html += `<div class="check fail">❌ ${c.msg}</div>`;
+  }
+
+  if (score < maxScore) {
+    html += `<div class="fix"><h3>Fix all issues in one command:</h3><pre><code>npx cc-safe-setup --opus47</code></pre><p style="font-size:.85rem;color:#8b949e;">Installs ${maxScore - score} missing protection${maxScore - score > 1 ? 's' : ''}. <a href="opus-47-survival-guide.html">Learn what each hook does →</a></p></div>`;
+  } else {
+    html += '<div class="check pass" style="margin-top:1rem;font-size:1rem;font-weight:600;">🛡️ Your setup is fully protected against known Opus 4.7 issues.</div>';
+  }
+
+  result.innerHTML = html;
+}
+</script>
+</body>
+</html>
