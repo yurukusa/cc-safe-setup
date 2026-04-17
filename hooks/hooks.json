@@ -36,6 +36,24 @@
             "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.(env|pem|key|credentials|secret)$'; then echo 'BLOCKED: writing to sensitive file. Check if this is intentional.' >&2; exit 2; fi"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/move-delete-sequence-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/system-dir-protection-guard.sh"
+          }
+        ]
       }
     ]
   }

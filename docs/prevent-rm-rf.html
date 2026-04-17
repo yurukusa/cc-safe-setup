@@ -43,6 +43,12 @@ nav a{margin-right:1rem}
 <h2>Real Incidents</h2>
 
 <div class="incident">
+<p class="incident-title">🆕 1,500 files / 50GB permanently deleted (April 2026)</p>
+<p>Claude moved files into a subdirectory, then <code>rm -rf</code>'d the parent — destroying the just-moved files. A logical planning failure: the destination was a child of the source directory.</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a> — 3rd data-loss incident in 48 hours</p>
+</div>
+
+<div class="incident">
 <p class="incident-title">Entire C:\Users directory deleted via NTFS junction</p>
 <p><code>rm -rf</code> followed NTFS junctions and wiped the entire user profile directory. All documents, settings, and installed programs — gone.</p>
 <p><a href="https://github.com/anthropics/claude-code/issues/36339">#36339</a> — 40+ reactions</p>
@@ -90,7 +96,7 @@ exit 0</code></pre>
 <div class="cta">
 <h2>Install All 8 Safety Hooks in 10 Seconds</h2>
 <pre><code>npx cc-safe-setup</code></pre>
-<p style="margin-top:.8rem">Blocks rm -rf, prevents force-push to main, catches secret leaks, validates syntax after every edit. <span class="badge">9,200+ tests</span> <span class="badge">655 examples</span></p>
+<p style="margin-top:.8rem">Blocks rm -rf, prevents force-push to main, catches secret leaks, validates syntax after every edit. <span class="badge">9,200+ tests</span> <span class="badge">675 hooks</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
 </div>
 
