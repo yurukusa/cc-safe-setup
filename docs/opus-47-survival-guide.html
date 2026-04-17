@@ -65,7 +65,7 @@ a:hover{text-decoration:underline}
 <body>
 
 <h1>Opus 4.7 Survival Guide</h1>
-<p class="subtitle">Known issues, immediate fixes, and safety hooks. Last updated: April 17, 2026.</p>
+<p class="subtitle">Known issues, immediate fixes, and safety hooks. Last updated: April 18, 2026.</p>
 
 <div class="alert">
 <h3>April 15-17: 23+ data loss incidents in 72 hours</h3>
@@ -78,6 +78,9 @@ a:hover{text-decoration:underline}
 <li><a href="#data-loss">Data Loss Incidents (50GB+)</a></li>
 <li><a href="#installer">Installer Truncates Shell Config</a></li>
 <li><a href="#quality">Model Quality Regression</a></li>
+<li><a href="#thinking">Thinking Summaries Disappear</a></li>
+<li><a href="#auto-update">Auto-Update Removes Symlinks</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#token-inflation">1.7x Token Inflation</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -225,17 +228,42 @@ npx cc-safe-setup --install-example home-critical-bash-guard  # #49554</code></p
 
 <p>These hooks work at the process level, independent of the model's safety classifier. Even if the classifier fails (as it does with Opus 4.7), hooks will still block destructive commands.</p>
 
+<h2 id="auto-update">7. Auto-Update Removes User Symlinks <span class="severity sev-high">HIGH</span></h2>
+
+<p>Claude Code auto-updates silently remove symlinked skill directories from <code>~/.claude/skills/</code>. Real directories survive, but symlinks are lost without warning. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50052">#50052</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Backup symlinks before update</h3>
+<pre><code># Save your symlink targets
+ls -la ~/.claude/skills/ | grep '^l' > ~/.claude/skills-symlinks-backup.txt
+
+# After update, restore:
+# cat ~/.claude/skills-symlinks-backup.txt
+# ln -s /path/to/skill ~/.claude/skills/skill-name</code></pre>
+<p>Or use real directories (cp -r) instead of symlinks until the bug is fixed.</p>
+</div>
+
+<h2 id="token-inflation">8. 1.7x Token Inflation (New Tokenizer) <span class="severity sev-high">HIGH</span></h2>
+
+<p>Opus 4.7's new tokenizer generates up to 35% more tokens for the same text. Combined with system prompt changes, some users see 1.7x total token growth. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49356">#49356</a>, <a href="https://www.finout.io/blog/claude-opus-4.7-pricing-the-real-cost-story-behind-the-unchanged-price-tag">Finout.io analysis</a></span></p>
+
+<div class="fix">
+<h3>Fix: Reduce input tokens</h3>
+<p>Keep CLAUDE.md under 35 lines. Use <code>/compact</code> strategically. Pin to Opus 4.6 for cost-sensitive tasks.</p>
+<p>For detailed optimization: <a href="token-checkup.html">Token Checkup</a> (free, 5 questions)</p>
+</div>
+
 <div class="cta">
 <h3>Want to cut your token costs by 50%?</h3>
-<p>Opus 4.7 burns tokens 4x faster. The Token Book has 10 chapters of real optimization data from 800+ hours of operation — CLAUDE.md templates, hook configs, and workflow changes that halved our token spend.</p>
+<p>Opus 4.7 burns tokens up to 4x faster. The Token Book has 10 chapters of real optimization data from 800+ hours of operation — CLAUDE.md templates, hook configs, and workflow changes that halved our token spend.</p>
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn">Token Book — Read Ch.1 Free</a>
 <a href="token-checkup.html" class="btn-outline">Free Token Checkup (5 questions)</a>
 </div>
 
 <div class="footer">
-<p>cc-safe-setup — 678 example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 683 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 17, 2026. Issues tracked: #49129, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #48927</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052</p>
 </div>
 
 </body>
