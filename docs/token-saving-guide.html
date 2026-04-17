@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code トークン節約ガイド — 800時間の運用データに基づく実践的な方法</title>
+<meta name="description" content="Claude Codeのトークン消費を半分にする方法。Opus 4.7で最大35%増加したトークンコストの対策。CLAUDE.md最適化、hook活用、モデル選択の実測データ。">
+<meta name="keywords" content="Claude Code, トークン節約, トークン消費, Opus 4.7, コスト削減, hook, CLAUDE.md, 最適化">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-saving-guide.html">
+<meta property="og:title" content="Claude Code トークン節約ガイド — 実測データに基づく方法">
+<meta property="og:description" content="800時間の運用データから分かったトークン消費の実態と対策。Opus 4.7対応。">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ja_JP">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Codeのトー��ン消費を節約する方法","description":"800時間の運用データに基づくClaude Codeトークン最適化ガイド","step":[{"@type":"HowToStep","name":"CLAUDE.mdを最適化する","text":"CLAUDE.mdを200行���下に抑え、手順はSkillsに移動する"},{"@type":"HowToStep","name":"hookでトークン浪費を防ぐ","text":"read-budget-guardやtoken-budget-guardで自動制御する"},{"@type":"HowToStep","name":"モデルを使い分ける","text":"Sonnetで日常タスク、Opusは複雑な設計判断にのみ使う"},{"@type":"HowToStep","name":"コンテキストを管理する","text":"/clearでタスク切替、/compactで圧縮、PreCompactフックで自動保存"}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.6rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.2rem}
+h3{color:#f0f6fc;margin:1.2rem 0 .5rem;font-size:1rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.stat{display:inline-block;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1.2rem;margin:.3rem;text-align:center}
+.stat-num{font-size:1.5rem;color:#f0f6fc;font-weight:700}
+.stat-label{font-size:.75rem;color:#8b949e}
+.tip{background:#1c2128;border-left:3px solid #58a6ff;padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0;font-size:.9rem}
+.tip-warn{border-color:#d29922}
+.tip-danger{border-color:#f85149}
+.cta{background:#161b22;border:2px solid #238636;border-radius:12px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta h3{color:#f0f6fc;margin-bottom:.5rem}
+.cta p{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+.cta .btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.9rem}
+.cta .btn:hover{background:#2ea043;text-decoration:none}
+.cta .btn-outline{display:inline-block;border:1px solid #30363d;color:#58a6ff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;margin:.3rem}
+nav{margin-bottom:2rem;font-size:.85rem;color:#8b949e}
+footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{padding:.5rem .8rem;border:1px solid #30363d;text-align:left;font-size:.85rem}
+th{background:#161b22;color:#f0f6fc}
+</style>
+</head>
+<body>
+<nav><a href="index.html">cc-safe-setup</a> / <a href="hub.html">Tools</a> / トークン節約ガイド</nav>
+
+<h1>Claude Code トークン節約ガイド</h1>
+<p style="color:#8b949e;margin-bottom:1.5rem">800時間��自律運用データに基づく、実測済みの節約方法。</p>
+
+<div style="text-align:center;margin:1.5rem 0">
+<div class="stat"><div class="stat-num">$13</div><div class="stat-label">開発者1人の平均日額<br>(<a href="https://code.claude.com/docs/en/costs">公式データ</a>)</div></div>
+<div class="stat"><div class="stat-num">$150-250</div><div class="stat-label">月額コスト/人</div></div>
+<div class="stat"><div class="stat-num">+35%</div><div class="stat-label">Opus 4.7のトーク��増加<br>(新tokenizer)</div></div>
+</div>
+
+<h2>1. トークンがどこで消えているか</h2>
+
+<p>800時間の運用データから判明したトークン消費の内訳:</p>
+
+<table>
+<tr><th>消費先</th><th>割合</th><th>対策の効果</th></tr>
+<tr><td>CLAUDE.md / 指示文</td><td>15-30%</td><td>200行→35行で最大50%削減</td></tr>
+<tr><td>ファイル読み込み</td><td>25-30%</td><td>read-budget-guardで制御可能</td></tr>
+<tr><td>コード生成</td><td>20-25%</td><td>モデル選択で最適化</td></tr>
+<tr><td>ツールスキーマ / MCP</td><td>12-20%</td><td>未使用MCPの無効化</td></tr>
+<tr><td>会話履歴 / compaction</td><td>10-25%</td><td>/clear、/compact で管理</td></tr>
+</table>
+
+<div class="tip">
+<strong>最大の発見:</strong> CLAUDE.mdが100行を超えると、毎ターンのトークンコストが急増する。35行のテンプレートでも同じ効果を得られることが分かった。
+</div>
+
+<h2>2. CLAUDE.mdの最適化（最も効果が高い）</h2>
+
+<p>CLAUDE.mdは<strong>��ターン</strong>コンテキストに読み込まれる。100行のCLAUDE.mdは、30���ーンのセッションで約75,000トークンを消費する。</p>
+
+<h3>5つの最適化パターン</h3>
+
+<ol style="margin-left:1.5rem">
+<li><strong>許可リスト方式</strong>: 「〜するな」の列挙→「〜のみ許可」に変換</li>
+<li><strong>具体例は1つだけ</strong>: 3つの例より1つの正確な例</li>
+<li><strong>理由は1行</strong>: 「なぜ」を1行で。長い説明はSkillに移動</li>
+<li><strong>テーブル形式</strong>: 箇条書きよりテーブルの方がトークン効率が高い</li>
+<li><strong>hookに委任</strong>: 強制ルールはCLAUDE.mdではなくhookで実装</li>
+</ol>
+
+<pre><code># 最適化されたCLAUDE.md（35行の例）
+# Project: my-app
+
+## Rules
+- Test before commit (hook enforced)
+- No force-push (hook enforced)
+- TypeScript strict mode
+
+## Architecture
+| Layer | Tech | Notes |
+|-------|------|-------|
+| API | Express + Zod | /src/api/ |
+| DB | Prisma + Postgres | /prisma/ |
+| Auth | JWT + bcrypt | /src/auth/ |
+
+## Conventions
+- Files: kebab-case
+- Functions: camelCase
+- One export per file</code></pre>
+
+<h2>3. hookでトークン浪費を自動防止</h2>
+
+<p>hookはClaude Codeの動作を監視し、トークン浪費を防ぐ。</p>
+
+<pre><code># 10秒でインストール
+npx cc-safe-setup</code></pre>
+
+<h3>トークン節約に効くhook</h3>
+
+<table>
+<tr><th>Hook</th><th>効果</th></tr>
+<tr><td><code>read-budget-guard</code></td><td>ファイル読み込み回数を制限。同じファイルの繰り返し読み込みを防止</td></tr>
+<tr><td><code>token-budget-guard</code></td><td>セッション内のトークン消費に上限を設定</td></tr>
+<tr><td><code>pre-compact-checkpoint</code></td><td>compaction前にgit checkpointを自動作成。幻覚による無駄な作業を防止</td></tr>
+<tr><td><code>context-monitor</code></td><td>コンテキスト使用率を段階的に警告。75%で注意、90%で危険</td></tr>
+</table>
+
+<div class="tip tip-warn">
+<strong>Opus 4.7対策:</strong> 新しいtokenizerで同じテキストが最大35%多くトークンを消費する。<code>token-budget-guard</code>の閾値を従来の70%に設定すると安全。
+</div>
+
+<h2>4. モデルの使い分け</h2>
+
+<table>
+<tr><th>タスク</th><th>推奨モデル</th><th>理由</th></tr>
+<tr><td>日常的なコーディング</td><td>Sonnet 4.6</td><td>Opusの1/5のコスト。大半のタスクで十分</td></tr>
+<tr><td>複雑な設計判断</td><td>Opus 4.7</td><td>高い推論能力が必要な場合のみ</td></tr>
+<tr><td>サブエージェント</td><td>Haiku</td><td>単純なタスクに高性能モデルは不要</td></tr>
+</table>
+
+<p><code>/model</code>コマンドでセッション中にモデル切替可能。</p>
+
+<h2>5. コンテキスト管理</h2>
+
+<ul style="margin-left:1.5rem">
+<li><strong><code>/clear</code></strong>: タスクが変わったら即実行。古いコンテキストは毎メッセージのコスト</li>
+<li><strong><code>/compact</code></strong>: 長いセッションを圧縮。カスタム指示も可能: <code>/compact コードの変更点のみ保持</code></li>
+<li><strong>2-3時間で区切る</strong>: 長すぎるセッションはcompactionの精度が落ちる</li>
+<li><strong>未使用のMCPを無効化</strong>: <code>/mcp</code>で確認。使っていないサーバーはトークンを浪費する</li>
+</ul>
+
+<div class="cta">
+<h3>もっと詳しく学びたい方へ</h3>
+<p>このページは概要です。具体的な設定手順、before/afterデータ、チーム向けの最���化、Opus 4.7完全対応の��細は:</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn">Token Book — 全10章 ¥2,500</a>
+<p style="margin-top:.8rem;font-size:.8rem">はじめに + 第1章「トークンはどこに消えているか」無料公開中</p>
+<div style="margin-top:.8rem">
+<a href="token-checkup.html" class="btn-outline">無料診断: Token Checkup</a>
+<a href="cost-calculator.html" class="btn-outline">コスト計算機</a>
+<a href="claudemd-analyzer.html" class="btn-outline">CLAUDE.md分析</a>
+</div>
+</div>
+
+<h2>6. よくある質問</h2>
+
+<h3>Q: Max Plan（$200/月）でもトークンが足りない</h3>
+<p>Max 20xでも1時間で枯渇する報告がある（<a href="https://github.com/anthropics/claude-code/issues/23706">#23706</a>）。原因は多くの場合、CLAUDE.mdの肥大化、サブエージェントの乱用、不要なMCPサーバー。上記の対策で有効利用時間を2-3倍に延ばせる。</p>
+
+<h3>Q: Opus 4.7にしたらトークン消費が増えた</h3>
+<p>新しいtokenizerにより同じ入力で最大35%多くのトークンを消���する（<a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-7">公式ドキュメント</a>）。また、thinking tokenが増加し出力も多い。対策: effort levelを調整（<code>/effort</code>）、日常タスクはSonnetに切替。</p>
+
+<h3>Q: hookを入れるとセッションが遅くならない？</h3>
+<p>hookの実行時間は通常10-50ms。トークン節約の効果（数千〜数万トークン/セッショ���）と比べれば無視できる。</p>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 677 hooks / 9,200+ tests / 800時間の運用データ</p>
+<p>データは2026年4月時点。Anthropic公式データと自社運用データに基づく。</p>
+</footer>
+</body>
+</html>
