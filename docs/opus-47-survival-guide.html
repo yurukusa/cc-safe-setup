@@ -153,7 +153,7 @@ npx cc-safe-setup --install-example credential-exfil-guard
 npx cc-safe-setup --install-example shell-config-truncation-guard
 
 # Home directory protection
-npx cc-safe-setup --install-example home-directory-guard</code></pre>
+npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
 </div>
 
 <h2 id="installer">4. Installer Truncates Shell Config <span class="severity sev-high">HIGH</span></h2>
@@ -199,7 +199,7 @@ npx cc-safe-setup
 npx cc-safe-setup --install-example model-version-alert
 npx cc-safe-setup --install-example shell-config-truncation-guard
 npx cc-safe-setup --install-example credential-exfil-guard
-npx cc-safe-setup --install-example home-directory-guard</code></pre>
+npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
 
 <p>These hooks work at the process level, independent of the model's safety classifier. Even if the classifier fails (as it does with Opus 4.7), hooks will still block destructive commands.</p>
 
