@@ -67,6 +67,18 @@ Claude Code ships with no safety hooks by default. This tool fixes that. ([Stand
 
 **Works with subagents.** Since v2.1.84, subagents and teammates [don't receive CLAUDE.md](https://github.com/anthropics/claude-code/issues/40459) — your project rules are silently skipped. Hooks operate at the process level, but [subagent tool calls may bypass PreToolUse hooks](https://github.com/anthropics/claude-code/issues/21460) in some configurations. As defense-in-depth, cc-safe-setup installs hooks at the user level (`~/.claude/settings.json`). The `subagent-claudemd-inject` example hook re-injects critical rules into subagent prompts.
 
+### 🚨 Opus 4.7 Crisis (April 2026)
+
+Opus 4.7 broke auto mode's safety classifier — it was [hardcoded to Opus 4.6](https://github.com/anthropics/claude-code/issues/49618). **If you use auto mode with Opus 4.7, dangerous commands run without the built-in safety check.** In 3 days: [50 GB permanently deleted](https://github.com/anthropics/claude-code/issues/49129), [~/.ssh wiped](https://github.com/anthropics/claude-code/issues/49554), [git credentials destroyed](https://github.com/anthropics/claude-code/issues/49539), [shell configs truncated to 0 bytes](https://github.com/anthropics/claude-code/issues/49615). Users report [4x token consumption](https://github.com/anthropics/claude-code/issues/49541) from silent model switches.
+
+**One command to fix it:**
+
+```bash
+npx cc-safe-setup --opus47
+```
+
+Installs 4 hooks targeting known Opus 4.7 regressions. [Full details →](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)
+
 ## What Gets Installed
 
 | Hook | Prevents | Related Issues |

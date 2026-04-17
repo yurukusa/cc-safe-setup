@@ -68,7 +68,7 @@ a:hover{text-decoration:underline}
 <p class="subtitle">Known issues, immediate fixes, and safety hooks. Last updated: April 17, 2026.</p>
 
 <div class="alert">
-<h3>April 15-17: 20+ data loss incidents in 72 hours</h3>
+<h3>April 15-17: 23+ data loss incidents in 72 hours</h3>
 <p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, and the installer can truncate your shell config to 0 bytes. This page tracks the issues and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
@@ -130,7 +130,7 @@ a:hover{text-decoration:underline}
 
 <h2 id="data-loss">3. Data Loss Incidents <span class="severity sev-critical">CRITICAL</span></h2>
 
-<p>20 confirmed data loss incidents in 72 hours (April 15-17). The worst: <strong>~50GB permanently deleted</strong> via recursive rm. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a></span></p>
+<p>23+ confirmed data loss incidents in 72 hours (April 15-17). The worst: <strong>~50GB permanently deleted</strong> via recursive rm. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a></span></p>
 
 <h3>Documented incidents</h3>
 <ul>
@@ -139,6 +139,9 @@ a:hover{text-decoration:underline}
 <li><strong><a href="https://github.com/anthropics/claude-code/issues/49554">#49554</a></strong> — Auto mode permitted ~/.ssh deletion. Should have been hard-blocked by classifier.</li>
 <li><strong><a href="https://github.com/anthropics/claude-code/issues/49464">#49464</a></strong> — Home directory deletion attempt via tilde misinterpretation (<code>./~</code> treated as <code>~/</code>).</li>
 <li><strong><a href="https://github.com/anthropics/claude-code/issues/49615">#49615</a></strong> — Installer auto-update truncated ~/.bash_profile and ~/.zshrc to 0 bytes.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49740">#49740</a></strong> — Uncommitted work silently vanished during session.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/49696">#49696</a></strong> — PR creation overwrote uncommitted changes.</li>
+<li><strong><a href="https://github.com/anthropics/claude-code/issues/48927">#48927</a></strong> — Parallel subagent worktree cleanup destroyed .git directory.</li>
 </ul>
 
 <div class="fix">
@@ -214,7 +217,7 @@ npx cc-safe-setup --install-example home-critical-bash-guard  # #49554</code></p
 <div class="footer">
 <p>cc-safe-setup — 678 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Page created: April 17, 2026. Issues tracked: #49129, #49541, #49554, #49615, #49618, #49725, #49747</p>
+<p class="timestamp">Last updated: April 17, 2026. Issues tracked: #49129, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #48927</p>
 </div>
 
 </body>
