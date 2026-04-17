@@ -73,7 +73,7 @@ nav a{margin-right:1rem}
 </div>
 
 <div class="incident">
-<p class="incident-title">🆕 Opus 4.7: Safety classifier broken — 20+ data loss incidents in 3 days (April 2026)</p>
+<p class="incident-title">🆕 Opus 4.7: Safety classifier broken — 23+ data loss incidents in 3 days (April 2026)</p>
 <p>The auto mode safety classifier is <a href="https://github.com/anthropics/claude-code/issues/49618">hardcoded to Opus 4.6</a>. With Opus 4.7 as the default model, the classifier doesn't function — auto mode users are running without safety gates. Results: <a href="https://github.com/anthropics/claude-code/issues/49554">~/.ssh deleted</a>, <a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials wiped</a>, <a href="https://github.com/anthropics/claude-code/issues/49615">bash_profile/zshrc truncated to 0 bytes</a>.</p>
 <p><strong>Hooks are model-independent — they work regardless of which Opus version you're running.</strong></p>
 </div>
