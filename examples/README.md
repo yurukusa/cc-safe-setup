@@ -1,6 +1,6 @@
 # Example Hooks
 
-658 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 9,200+ tests.
+675 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 9,200+ tests.
 
 ```bash
 npx cc-safe-setup --install-example <name>   # install one
@@ -38,6 +38,16 @@ npx cc-safe-setup --shield                    # install recommended set
 - [Credential Protection](https://yurukusa.github.io/cc-safe-setup/prevent-credential-leak.html)
 - [OWASP MCP Top 10 Defense](https://yurukusa.github.io/cc-safe-setup/owasp-mcp-hooks.html)
 - [COOKBOOK](../COOKBOOK.md)
+
+## Token Optimization
+
+Using too many tokens? These hooks help monitor and reduce consumption:
+
+- **`token-budget-guard`** — Alert when session exceeds token budget
+- **`large-read-guard`** — Block reading files over 1000 lines
+- **`context-monitor`** — Track context window usage
+
+For a complete guide: [Token Book](https://zenn.dev/yurukusa/books/token-savings-guide) — cut token consumption in half with templates and measured data (¥2,500, chapter 1 free). Or try the [free diagnostic](https://yurukusa.github.io/cc-safe-setup/token-checkup.html).
 
 ## Write Your Own
 
