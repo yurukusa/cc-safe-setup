@@ -2970,6 +2970,9 @@ async function shield() {
   // Always include these for maximum safety
   extras.push('scope-guard', 'no-sudo-guard', 'protect-claudemd', 'memory-write-guard', 'skill-gate', 'auto-approve-test', 'auto-approve-readonly');
 
+  // Opus 4.7 safety: classifier is hardcoded to 4.6 (#49618) — hooks are the only defense
+  extras.push('dotfile-protection-guard', 'home-critical-bash-guard');
+
   for (const ex of extras) {
     const exPath = join(__dirname, 'examples', `${ex}.sh`);
     const hookPath = join(HOOKS_DIR, `${ex}.sh`);
