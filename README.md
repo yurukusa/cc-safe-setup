@@ -21,6 +21,9 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
   Make Claude Code safe for autonomous operation
 
   Prevents real incidents (from GitHub Issues):
+  ✗ rm -rf permanently destroyed ~50 GB / 1,500 files (#49129) ← April 2026
+  ✗ Auto mode approved ~/.ssh deletion — all SSH keys gone (#49554)
+  ✗ ~/.git-credentials PATs deleted without confirmation (#49539)
   ✗ rm -rf deleted 3,467 files (~7 GB) without confirmation (#46058)
   ✗ rm -rf deleted entire user directory via NTFS junction (#36339)
   ✗ Remove-Item -Recurse -Force destroyed unpushed source (#37331)
