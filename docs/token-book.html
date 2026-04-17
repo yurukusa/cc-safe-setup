@@ -206,7 +206,7 @@ New Release — April 2026
 <p>無料のTips記事を10本読んで試行錯誤する時間コスト vs. 体系化された10章を1冊で学ぶ時間コスト。どちらが安いか。</p>
 
 <h2>著者について</h2>
-<p>非エンジニア。Claude Codeを800時間以上自律運用し、667+のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計54,000+ビュー。</p>
+<p>非エンジニア。Claude Codeを800時間以上自律運用し、678のhookと9,200+のテストを持つOSSツール<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>をメンテナンスしている。Qiitaの解説記事は累計54,000+ビュー。</p>
 
 <div class="cta-section" id="buy">
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn-primary">トークン消費を半分にする — ¥2,500 (~$17)</a>
@@ -237,12 +237,16 @@ New Release — April 2026
 <h1>Cut Your Claude Code Token Usage in Half</h1>
 <p class="subtitle">Practical techniques from 800+ hours of autonomous operation — 10 chapters with copy-paste config templates</p>
 
-<p style="margin-bottom:1.5rem;"><a href="https://zenn.dev/yurukusa/books/token-savings-guide" style="color:#2563eb;font-weight:600;text-decoration:none;">Buy on Zenn — ¥2,500 →</a> <span style="color:#22c55e;font-size:0.9rem;">Intro + Ch.1 free</span> · <a href="https://zenn.dev/yurukusa/books/token-savings-guide" style="color:#666;font-size:0.9rem;text-decoration:none;">Buy on Ko-fi (~$17) →</a> · <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" style="color:#666;font-size:0.9rem;text-decoration:none;">Free diagnostic first →</a></p>
+<p style="margin-bottom:1.5rem;"><a href="https://zenn.dev/yurukusa/books/token-savings-guide" style="color:#2563eb;font-weight:600;text-decoration:none;">Buy on Zenn — ¥2,500 →</a> <span style="color:#22c55e;font-size:0.9rem;">Intro + Ch.1 free</span> · <a href="https://ko-fi.com/s/fd44ef09a7" style="color:#666;font-size:0.9rem;text-decoration:none;">Buy on Ko-fi (~$17) →</a> · <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" style="color:#666;font-size:0.9rem;text-decoration:none;">Free diagnostic first →</a></p>
 
 <p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">Covered by <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> · <a href="https://devops.com/claude-code-quota-limits-usage-problems/" style="color:#58a6ff;">DevOps.com</a> — Anthropic called it "top priority"</p>
 
 <div class="pain-point">
 <strong>$200/month Max plan gone in 15-19 minutes?</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> has 2,500+ reactions. Cache TTL was <a href="https://github.com/anthropics/claude-code/issues/46829">silently reduced from 1h to 5min</a>, increasing costs 20-32%. One API user saw costs jump from <a href="https://tokencost.app/blog/claude-code-getting-worse-april-2026">$345/month to $42,121</a>. Anthropic called it a "top priority."
+</div>
+
+<div class="pain-point" style="background:#fef2f2;border-left-color:#ef4444;">
+<strong>🚨 Opus 4.7 Alert (April 17, 2026)</strong> — Auto mode's safety classifier is <a href="https://github.com/anthropics/claude-code/issues/49618">hardcoded to Opus 4.6</a>. On 4.7, it doesn't work — <strong>23+ data loss incidents in 3 days</strong> (<a href="https://github.com/anthropics/claude-code/issues/49129">50GB permanently deleted</a>, <a href="https://github.com/anthropics/claude-code/issues/49554">~/.ssh wiped</a>, <a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials destroyed</a>). Users report <a href="https://github.com/anthropics/claude-code/issues/49541">4x token consumption</a> from silent model switches. Chapter 4's hooks are model-independent — the only defense right now. See <a href="opus-47-survival-guide.html">Survival Guide</a>.
 </div>
 
 <h2>What You Get</h2>
@@ -299,7 +303,7 @@ New Release — April 2026
 </div>
 
 <footer>
-<p>cc-safe-setup — Claude Code safety hooks (667+ hooks / 9,200+ tests)</p>
+<p>cc-safe-setup — Claude Code safety hooks (678 hooks / 9,200+ tests)</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup/discussions/40">Discussion</a></p>
 </footer>
 
