@@ -77,7 +77,7 @@ Opus 4.7 broke auto mode's safety classifier — it was [hardcoded to Opus 4.6](
 npx cc-safe-setup --opus47
 ```
 
-Installs 4 hooks targeting known Opus 4.7 regressions. [Full details →](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)
+Installs 4 hooks targeting known Opus 4.7 regressions. [Full details →](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html) · [Emergency Defense Kit (Gist)](https://gist.github.com/yurukusa/6747ea655cc5c374a1ec9ed4fba027e4) · [Safety Scanner](https://yurukusa.github.io/cc-safe-setup/opus47-scanner.html)
 
 ## What Gets Installed
 
