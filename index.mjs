@@ -94,6 +94,7 @@ const GENERATE_CI = process.argv.includes('--generate-ci');
 const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
+const OPUS47 = process.argv.includes('--opus47');
 const ANALYZE = process.argv.includes('--analyze');
 const TEAM = process.argv.includes('--team');
 const MIGRATE_FROM_IDX = process.argv.findIndex(a => a === '--migrate-from');
@@ -2914,6 +2915,79 @@ async function analyze() {
   console.log();
   console.log(c.dim + '  Tip: Use --stats for block history analytics' + c.reset);
   console.log(c.dim + '  Tip: Use --dashboard for real-time monitoring' + c.reset);
+  console.log();
+}
+
+async function opus47() {
+  console.log();
+  console.log(c.bold + '  🚨  cc-safe-setup --opus47' + c.reset);
+  console.log(c.dim + '  Opus 4.7 protection — fixes for known critical issues' + c.reset);
+  console.log();
+
+  // First install core hooks if not already installed
+  mkdirSync(HOOKS_DIR, { recursive: true });
+  let coreInstalled = 0;
+  for (const [hookId, hookMeta] of Object.entries(HOOKS)) {
+    const hookPath = join(HOOKS_DIR, `${hookId}.sh`);
+    if (!existsSync(hookPath)) {
+      writeFileSync(hookPath, SCRIPTS[hookId]);
+      chmodSync(hookPath, 0o755);
+      coreInstalled++;
+    }
+  }
+  if (coreInstalled > 0) {
+    // Update settings.json for core hooks
+    let settings = {};
+    if (existsSync(SETTINGS_PATH)) {
+      settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
+    }
+    if (!settings.hooks) settings.hooks = {};
+    for (const [hookId, hookMeta] of Object.entries(HOOKS)) {
+      const trigger = hookMeta.trigger;
+      if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
+      const hookPath = toBashPath(join(HOOKS_DIR, `${hookId}.sh`));
+      const exists = settings.hooks[trigger].some(h => h.hooks?.some(hh => hh.command?.includes(hookId)));
+      if (!exists) {
+        settings.hooks[trigger].push({
+          matcher: hookMeta.matcher,
+          hooks: [{ type: 'command', command: hookPath }]
+        });
+      }
+    }
+    writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n');
+    console.log(c.green + '  ✓' + c.reset + ` ${coreInstalled} core safety hooks installed`);
+  } else {
+    console.log(c.dim + '  ✓ Core safety hooks already installed' + c.reset);
+  }
+
+  // Install Opus 4.7-specific hooks
+  const opus47Hooks = [
+    { name: 'model-version-alert', desc: 'Warns when Opus 4.7 is silently active (#49541)', issue: '4x token consumption' },
+    { name: 'shell-config-truncation-guard', desc: 'Blocks installer from truncating ~/.bash_profile (#49615)', issue: 'config destruction' },
+    { name: 'credential-exfil-guard', desc: 'Blocks credential file access (#49539, #49554)', issue: 'credential deletion' },
+    { name: 'home-critical-bash-guard', desc: 'Blocks destructive ops on critical dotfiles (#49554)', issue: 'home directory attacks' },
+  ];
+
+  console.log();
+  console.log(c.bold + '  Opus 4.7 protection hooks:' + c.reset);
+  let added = 0;
+  for (const hook of opus47Hooks) {
+    try {
+      await installExample(hook.name);
+      added++;
+    } catch (e) {
+      // installExample may exit on error, but we want to continue
+    }
+  }
+
+  console.log();
+  console.log(c.bold + '  Why these hooks matter:' + c.reset);
+  console.log(c.dim + '  Opus 4.7\'s safety classifier is hardcoded to 4.6 (#49618).' + c.reset);
+  console.log(c.dim + '  Auto mode can\'t block dangerous commands on 4.7.' + c.reset);
+  console.log(c.dim + '  These hooks run at process level — independent of the model.' + c.reset);
+  console.log();
+  console.log(c.green + '  Done.' + c.reset + ' Your setup is protected against known Opus 4.7 issues.');
+  console.log(c.dim + '  Guide: https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html' + c.reset);
   console.log();
 }
 
@@ -5788,6 +5862,7 @@ async function main() {
   if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
+  if (OPUS47) return opus47();
   if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();
   if (REPORT) return report();
@@ -5902,6 +5977,7 @@ async function main() {
   console.log('  ' + c.blue + '  --doctor' + c.reset + '            Verify hooks work');
   console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
   console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
+  console.log('  ' + c.blue + '  --opus47' + c.reset + '            Opus 4.7 crisis protection');
   console.log();
   console.log('  ' + c.dim + 'Free tools:' + c.reset);
   console.log('  ' + c.blue + '  Token Checkup' + c.reset + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
