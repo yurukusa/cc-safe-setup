@@ -15,6 +15,9 @@
 # See: https://github.com/anthropics/claude-code/issues/30519
 # See: https://github.com/anthropics/claude-code/issues/16561
 #
+# Auto-approve hooks reduce token waste from permission prompts.
+# For more token optimization patterns: https://zenn.dev/yurukusa/books/token-savings-guide
+#
 # TRIGGER: PermissionRequest  MATCHER: ""
 
 INPUT=$(cat)
