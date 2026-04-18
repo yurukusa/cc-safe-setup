@@ -528,7 +528,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Opus 4.7 Emergency Kit](https://gist.github.com/yurukusa/1970b20fed95a682b72eb6e857e61d30) — 5 commands to protect your data from Opus 4.7 regressions (auto mode broken, 23+ data loss incidents)
 - [cache_read Billing Bug Guide](https://gist.github.com/yurukusa/d5dc731dbc69e3ca92d69832bed641cb) — Opus 4.7 cache_read billed at full rate. Anthropic confirmed. Max plan users losing quota 3-6x faster
 - [Opus 4.7 Survival Guide Summary](https://gist.github.com/yurukusa/5d66f0bcfe3fbfc73e6db106e10c533d) — 18 known issues with quick reference table, free diagnostic tools, and one-command fix
-- [Opus 4.7 Known Issues Quick Reference](https://gist.github.com/yurukusa/2c1effab34a7554130d2704fdac59dff) — 22 issues / 38+ GitHub bugs in one table. Severity ratings and direct issue links
+- [Opus 4.7 Known Issues Quick Reference](https://gist.github.com/yurukusa/2c1effab34a7554130d2704fdac59dff) — 26 issues / 43+ GitHub bugs in one table. Severity ratings and direct issue links
+- [4 New Critical Issues (April 18)](https://gist.github.com/yurukusa/37c19b5b7f50fd8bbbeda5e1336c352e) — DoS via recursive spawn, subagent OOM, billing mismatch, UI/CLI model mismatch
 - [トークン消費を半分にする方法](https://gist.github.com/yurukusa/bf4040a905148d9ca02898a53185fae1) — 800時間の実測データ＋設定テンプレート（日本語）
 - [How to Cut Token Usage in Half](https://gist.github.com/yurukusa/704d5cf9874f553dad5c46fccf53b09f) — 800h real data + config templates (English)
 
