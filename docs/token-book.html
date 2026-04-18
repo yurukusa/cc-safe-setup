@@ -110,11 +110,13 @@ New Release — April 2026
 <blockquote>"cache_read is being charged at full rate, not the documented 10% — Anthropic support confirmed 'inconsistency with docs'"</blockquote>
 <blockquote>"cache_creation spiked by hundreds of thousands of tokens — a single internal function folds dynamic text into tool results every turn, breaking cache prefix matching"</blockquote>
 <blockquote>"Effective context burn rate ~5x higher during working sessions"</blockquote>
-<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788, #46968, #46829, #46917, #47528, #49601, #49356, #49302, #49585, #49593 より</p>
+<blockquote>"Agent SDK shows costUSD is 3x the visible tokens — 66.7% of my spend is unexplained"</blockquote>
+<blockquote>"Claude ignored my CLAUDE.md backup rules and ran migrate:fresh + DROP SCHEMA CASCADE — 2 days of work gone"</blockquote>
+<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788, #46968, #46829, #46917, #47528, #49601, #49356, #49302, #49585, #49593, #49872, #50027 より</p>
 </div>
 
 <div class="pain-point" style="background:#fef2f2;border-left-color:#ef4444;">
-<strong>🚨 Opus 4.7 緊急警告（2026年4月17日）</strong> — auto modeの安全分類器が<a href="https://github.com/anthropics/claude-code/issues/49618">Opus 4.6にハードコード</a>されている問題が発覚。4.7では分類器が正しく機能せず、<strong>3日間で23件以上のデータ損失</strong>が報告された（<a href="https://github.com/anthropics/claude-code/issues/49129">50GB永久消失</a>、<a href="https://github.com/anthropics/claude-code/issues/49554">~/.ssh削除</a>、<a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials全消去</a>）。第4章のhookはモデル非依存で動作する — この危機への唯一の防御。
+<strong>🚨 Opus 4.7 緊急警告（2026年4月18日更新）</strong> — <strong>72時間で4件のP0-levelのrm -rf事故</strong>が発生。auto modeの安全分類器が<a href="https://github.com/anthropics/claude-code/issues/49618">Opus 4.6にハードコード</a>され、CLAUDE.mdのルールを無視して<a href="https://github.com/anthropics/claude-code/issues/50027">データベースを破壊</a>する事例も。トークンコストは<a href="https://github.com/anthropics/claude-code/issues/49872">可視トークンの3倍</a>に膨張。第4章のhookはモデル非依存で動作する — この危機への唯一の防御。
 </div>
 
 <div class="pain-point" style="background:#fff7ed;border-left-color:#f97316;">
