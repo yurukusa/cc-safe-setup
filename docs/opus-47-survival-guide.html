@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。33セクション/50+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。36セクション/53+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 24+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>33 known issues (50+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>36 known issues (53+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -569,10 +569,31 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>If compaction fails, start a new session rather than continuing with bloated context. Use <code>/compact</code> manually and check if it succeeds before proceeding.</p>
 </div>
 
+<h2 id="sandbox-relative-path">34. Sandbox denyWrite/denyRead Silently Ignores Relative Paths <span class="severity sev-critical">CRITICAL</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50454">#50454</a> — The sandbox configuration options <code>denyWrite</code> and <code>denyRead</code> only work with absolute paths. If you set <code>"denyWrite": ["src/config"]</code> with a relative path, the restriction is <strong>silently ignored</strong> — no error, no warning, no protection. Users who think they've protected sensitive directories may have zero actual protection.</p>
+<div class="fix">
+<h3>Fix: Always use absolute paths in sandbox config</h3>
+<p>Convert all sandbox paths to absolute: <code>"denyWrite": ["/home/user/project/src/config"]</code>. Audit your existing <code>settings.json</code> for any relative paths in <code>denyWrite</code>, <code>denyRead</code>, or <code>allowWrite</code> — they are all silently ignored.</p>
+</div>
+
+<h2 id="precompact-hook-silent">35. PreCompact Hook Does Not Fire on Auto-Compaction <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50467">#50467</a> — The <code>PreCompact</code> hook event only fires when the user manually triggers <code>/compact</code>. When Claude Code auto-compacts (triggered by context size), the hook is <strong>not executed</strong>. This means any safety checks, logging, or context preservation logic in PreCompact hooks is bypassed during automatic compaction. Confirmed in v2.1.105-114.</p>
+<div class="fix">
+<h3>Workaround: Use PostCompact for critical logic</h3>
+<p>Move critical compaction-related logic to <code>PostCompact</code> hooks instead, which fire for both manual and automatic compaction. For PreCompact-specific needs, consider using <code>/compact</code> manually before auto-compaction triggers.</p>
+</div>
+
+<h2 id="early-auto-compact">36. Auto-Compact Fires at 24% Context Usage <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50492">#50492</a> — Auto-compaction is triggering when context usage is only 24%, far below the expected ~80% threshold. This causes unnecessary context loss and disrupts long-running tasks. Combined with <a href="#compaction-broken">#33 (Compaction Broken)</a> and <a href="#precompact-hook-silent">#35 (PreCompact Hook Silent)</a>, compaction has become a triple threat to session stability.</p>
+<div class="fix">
+<h3>Workaround: Monitor context usage before and after compaction</h3>
+<p>If compaction fires unexpectedly early, save important context to a file before continuing. Use <code>/cost</code> to monitor context usage percentage. Consider starting new sessions proactively rather than relying on auto-compaction.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 693+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434</p>
+<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492</p>
 </div>
 
 </body>
