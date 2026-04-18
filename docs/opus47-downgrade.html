@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Downgrade from Opus 4.7 to Opus 4.6 — Claude Code Guide</title>
+<meta name="description" content="Opus 4.6 was removed from the Desktop model picker. Here's how to pin Claude Code to Opus 4.6 using CLI, settings.json, and CLAUDE.md — plus safety hooks.">
+<meta name="keywords" content="Claude Code Opus 4.7 downgrade, Opus 4.6, model picker, pin model, Claude Code safety">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus47-downgrade.html">
+<meta property="og:title" content="How to Downgrade from Opus 4.7 to Opus 4.6">
+<meta property="og:description" content="Opus 4.6 removed from picker? Here are 4 ways to pin Claude Code to Opus 4.6.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Downgrade Claude Code from Opus 4.7 to Opus 4.6",
+  "description": "4 methods to pin Claude Code to Opus 4.6 after the model picker removal.",
+  "datePublished": "2026-04-18",
+  "author": {"@type": "Person", "name": "yurukusa"},
+  "step": [
+    {"@type": "HowToStep", "name": "CLI flag", "text": "Run: claude --model claude-opus-4-6"},
+    {"@type": "HowToStep", "name": "User settings", "text": "Add model to ~/.claude/settings.json"},
+    {"@type": "HowToStep", "name": "Project settings", "text": "Add model to .claude/settings.json in your project"},
+    {"@type": "HowToStep", "name": "Model alert hook", "text": "Install model-version-alert to detect silent switching"}
+  ]
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.7;max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+h1{color:#f0f6fc;font-size:1.6rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .6rem;padding-top:.8rem;border-top:1px solid #21262d}
+.subtitle{color:#8b949e;margin-bottom:1.5rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;overflow-x:auto;font-size:.85rem;margin:.5rem 0}
+code{font-family:'SF Mono',Consolas,monospace;font-size:.85rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.method{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.method h3{color:#3fb950;margin:0 0 .5rem}
+.warning{background:#1a1504;border:1px solid #d29922;border-radius:8px;padding:1rem;margin:1rem 0}
+.warning h3{color:#d29922;margin-top:0}
+.cta{background:#161b22;border:2px solid #58a6ff;padding:1.2rem;border-radius:8px;margin:2rem 0;text-align:center}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{display:inline-block;background:transparent;color:#58a6ff;border:1px solid #30363d;padding:.5rem 1rem;border-radius:8px;text-decoration:none;margin:.3rem}
+.footer{text-align:center;padding:2rem;color:#484f58;font-size:.75rem;margin-top:2rem;border-top:1px solid #21262d}
+.issue-ref{color:#8b949e;font-size:.8rem}
+</style>
+</head>
+<body>
+
+<h1>How to Downgrade from Opus 4.7 to Opus 4.6</h1>
+<p class="subtitle">Opus 4.6 was removed from the Desktop model picker (<a href="https://github.com/anthropics/claude-code/issues/49689">#49689</a>). Here are 4 ways to pin your model.</p>
+
+<div class="warning">
+<h3>Why downgrade?</h3>
+<p>Opus 4.7 has <a href="opus-47-survival-guide.html">17 known issues</a>: 4x token consumption, safety classifier failure, data loss (50GB+), cache_read billing anomaly, and CLAUDE.md instructions being ignored. Pinning to Opus 4.6 avoids all of these.</p>
+</div>
+
+<h2>Method 1: CLI Flag (instant)</h2>
+<div class="method">
+<h3>One command</h3>
+<pre><code>claude --model claude-opus-4-6</code></pre>
+<p>This starts Claude Code with Opus 4.6 for this session only. You need to add the flag every time.</p>
+</div>
+
+<h2>Method 2: User Settings (permanent)</h2>
+<div class="method">
+<h3>Applies to all projects</h3>
+<pre><code># Edit your user settings
+# Location: ~/.claude/settings.json
+
+{
+  "model": "claude-opus-4-6"
+}</code></pre>
+<p>Create the file if it doesn't exist. This pins Opus 4.6 across all projects until you change it.</p>
+</div>
+
+<h2>Method 3: Project Settings (per-project)</h2>
+<div class="method">
+<h3>Pin for one project only</h3>
+<pre><code># Create in your project root
+# Location: .claude/settings.json
+
+{
+  "model": "claude-opus-4-6"
+}</code></pre>
+<p>Useful if you want Opus 4.7 for some projects but not others. Project settings override user settings.</p>
+</div>
+
+<h2>Method 4: Model Version Alert Hook</h2>
+<div class="method">
+<h3>Detect silent model switching</h3>
+<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<p>Even after pinning, Claude Code can silently switch models mid-session. This hook checks every 50 tool calls and warns if Opus 4.7 is active. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49541">#49541</a></span></p>
+</div>
+
+<div class="warning">
+<h3>Important: Pinning alone isn't enough</h3>
+<p>The safety classifier, data loss, and credential issues exist independent of model version. Install safety hooks for baseline protection:</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>This adds 8 core hooks (rm-rf blocker, git protection, secret leak detection) in ~10 seconds.</p>
+</div>
+
+<h2>Verify your model</h2>
+<div class="method">
+<h3>Check which model is actually running</h3>
+<pre><code># In Claude Code, type:
+/model
+
+# Or check settings:
+cat ~/.claude/settings.json | grep model</code></pre>
+<p>The <a href="opus47-scanner.html">Safety Scanner</a> can also detect your current model and identify missing protections.</p>
+</div>
+
+<div class="cta">
+<h3>Protect yourself while on any model version</h3>
+<p>691 safety hooks, all open source. One command to install.</p>
+<a href="https://github.com/yurukusa/cc-safe-setup" class="btn">View on GitHub</a>
+<a href="opus-47-survival-guide.html" class="btn-outline">Survival Guide (17 issues)</a>
+<a href="token-checkup.html" class="btn-outline">Token Checkup (free)</a>
+</div>
+
+<div class="footer">
+<p>cc-safe-setup — 691 example hooks for Claude Code safety</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="opus-47-survival-guide.html">Survival Guide</a></p>
+</div>
+
+</body>
+</html>
