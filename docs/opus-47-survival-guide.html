@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 23+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>17 known issues (33 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>18 known issues (34 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -99,6 +99,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <li><a href="#cache-destruction">Prompt Cache Destruction (smoosh)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#model-picker">Opus 4.6 Removed from Picker</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#instruction-ignoring">CLAUDE.md Rules Ignored → Data Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#allowedtools-bypass">--allowedTools Ignored in Bypass Mode</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -386,10 +387,21 @@ npx cc-safe-setup</code></pre>
 <p>Hooks use <code>exit 2</code> (hard reject) — the command never executes, regardless of what the model decides.</p>
 </div>
 
+<h2 id="allowedtools-bypass">18. --allowedTools Silently Ignored in Bypass Mode <span class="severity sev-high">HIGH</span></h2>
+
+<p><code>--allowedTools</code> is designed to restrict which tools Claude can use in headless/CI environments. However, when combined with <code>--dangerously-skip-permissions</code> or <code>--permission-mode bypassPermissions</code>, the allowlist is <strong>silently ignored</strong>. Claude can call any tool, defeating the intended safety boundary. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50303">#50303</a></span></p>
+
+<div class="fix">
+<h3>Fix: Use hooks instead of allowedTools</h3>
+<p>Hooks enforce tool restrictions at the process level, regardless of permission mode:</p>
+<pre><code>npx cc-safe-setup --install-example tool-allowlist-enforcer</code></pre>
+<p>PreToolUse hooks with <code>exit 2</code> provide hard blocks that cannot be bypassed by any flag or model decision.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 691 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49192, #49268, #49302, #49356, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50201, #50204, #50207, #50213, #50232</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49192, #49268, #49302, #49356, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325</p>
 </div>
 
 </body>
