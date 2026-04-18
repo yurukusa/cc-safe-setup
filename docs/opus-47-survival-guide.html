@@ -301,10 +301,34 @@ ls -la ~/.claude/skills/ | grep '^l' > ~/.claude/skills-symlinks-backup.txt
 <p>Don't rely solely on the UI percentage. Use <code>/cost</code> command to check actual token counts. A PostToolUse hook can track cumulative token usage per session and warn when approaching limits. The <code>context-usage-drift-alert</code> hook in cc-safe-setup monitors for this exact scenario.</p>
 </div>
 
+<h2 id="credential-overwrite">12. Git Credentials Overwritten <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>Claude Code can overwrite your <code>~/.gitconfig</code> credential helper, replacing your working GitHub authentication with a broken configuration. After this happens, <code>git push</code> fails with authentication errors and you need to manually reconfigure. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50232">#50232</a></span></p>
+
+<div class="fix">
+<h3>Fix: credential-overwrite-guard hook</h3>
+<p>Block any Write or Edit operation targeting <code>~/.gitconfig</code>, <code>~/.git-credentials</code>, or <code>~/.config/git/</code>. The <code>credential-overwrite-guard</code> hook in cc-safe-setup prevents Claude Code from touching your git authentication configuration.</p>
+<pre><code># Quick check: verify your credentials are intact
+gh auth status
+git config --global credential.helper</code></pre>
+</div>
+
+<h2 id="case-insensitive-path">13. macOS Case-Insensitive Path Destruction <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>On macOS with APFS (case-insensitive by default), Claude Code's path resolution can confuse <code>MyProject</code> and <code>myproject</code>, leading to catastrophic data loss. Two users lost 10+ years of projects within 48 hours of each other. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/48792">#48792</a></span></p>
+
+<div class="fix">
+<h3>Fix: case-insensitive-path-guard hook</h3>
+<p>A PreToolUse hook that detects when file operations target paths that differ only in casing from existing paths. Blocks the operation before damage occurs. Essential for macOS users.</p>
+<pre><code># Check if you're vulnerable
+diskutil info / | grep "File System Personality"
+# If it shows "Case-sensitive" you're safe. Otherwise, install the guard.</code></pre>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 688 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50204, #50207, #50213</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50204, #50207, #50213, #50232</p>
 </div>
 
 </body>
