@@ -77,8 +77,8 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 </div>
 
 <div class="alert">
-<h3>April 15-17: 23+ data loss incidents in 72 hours</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, and the installer can truncate your shell config to 0 bytes. This page tracks the issues and provides hooks that protect your work <strong>right now</strong>.</p>
+<h3>April 15-18: 23+ data loss incidents, prompt cache destruction, $500+ losses</h3>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>17 known issues (28 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -96,6 +96,9 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <li><a href="#context-ui-mismatch">Context UI Shows Wrong %</a></li>
 <li><a href="#credential-overwrite">Git Credentials Overwritten</a></li>
 <li><a href="#case-insensitive-path">macOS Path Destruction</a></li>
+<li><a href="#cache-destruction">Prompt Cache Destruction (smoosh)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#model-picker">Opus 4.6 Removed from Picker</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#instruction-ignoring">CLAUDE.md Rules Ignored → Data Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -340,10 +343,53 @@ diskutil info / | grep "File System Personality"
 # If it shows "Case-sensitive" you're safe. Otherwise, install the guard.</code></pre>
 </div>
 
+<h2 id="cache-destruction">15. Prompt Cache Destruction (smoosh pipeline) <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>Claude Code's "smoosh" pipeline folds dynamic <code>system-reminder</code> values into <code>tool_result</code> blocks. This invalidates prompt cache every turn, causing <code>cache_creation</code> spikes of hundreds of thousands of tokens. Users see their costs explode with no visible cause. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49585">#49585</a> (18 comments)</span></p>
+
+<p>This is the root cause behind many of the "4x token consumption" reports. Even if you do everything right, the smoosh pipeline silently destroys your cache efficiency.</p>
+
+<div class="fix">
+<h3>Fix: Monitor cache_creation spikes</h3>
+<pre><code>npx cc-safe-setup --install-example cache-creation-spike-detector</code></pre>
+<p>This hook alerts when <code>cache_creation_input_tokens</code> spikes unexpectedly. Combined with shorter sessions and strategic <code>/compact</code>, you can mitigate the impact. See <a href="token-checkup.html">Token Checkup</a> for diagnosis.</p>
+</div>
+
+<h2 id="model-picker">16. Opus 4.6 Removed from Desktop Picker <span class="severity sev-high">HIGH</span></h2>
+
+<p>The Desktop app's model picker no longer shows Opus 4.6 as an option. Users who want to downgrade from 4.7 cannot do so through the UI. This breaks the "pin to Opus 4.6" workaround recommended throughout this guide. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49689">#49689</a> (10👍)</span></p>
+
+<div class="fix">
+<h3>Workaround: Use CLI or settings.json</h3>
+<pre><code># CLI flag still works
+claude --model claude-opus-4-6
+
+# Or add to settings.json
+{
+  "model": "claude-opus-4-6"
+}</code></pre>
+<p>The CLI and settings.json methods still accept Opus 4.6. Only the Desktop picker UI is affected.</p>
+</div>
+
+<h2 id="instruction-ignoring">17. CLAUDE.md Rules Ignored → Data Loss <span class="severity sev-critical">CRITICAL</span></h2>
+
+<p>Opus 4.7 ignores explicit CLAUDE.md instructions more frequently than 4.6. One user's CLAUDE.md explicitly said "never run destructive database commands" — Claude ran <code>migrate:fresh</code> + <code>DROP SCHEMA CASCADE</code>, destroying 2 days of work. Another lost $500 when "Step Zero" instructions were skipped across 3 consecutive sessions. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50027">#50027</a>, <a href="https://github.com/anthropics/claude-code/issues/49192">#49192</a></span></p>
+
+<div class="fix">
+<h3>Fix: Don't rely on instructions alone</h3>
+<p>CLAUDE.md rules are suggestions, not enforcement. Use hooks as hard blocks:</p>
+<pre><code># Block destructive database commands
+npx cc-safe-setup --install-example dangerous-command-blocker
+
+# Block rm -rf regardless of what instructions say
+npx cc-safe-setup</code></pre>
+<p>Hooks use <code>exit 2</code> (hard reject) — the command never executes, regardless of what the model decides.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 691 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49268, #49302, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50204, #50207, #50213, #50232</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49192, #49268, #49302, #49356, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50201, #50204, #50207, #50213, #50232</p>
 </div>
 
 </body>
