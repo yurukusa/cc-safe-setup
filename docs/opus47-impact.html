@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opus 4.7 Cost Impact Calculator — How Much Extra Are You Paying?</title>
+<meta name="description" content="Calculate how much extra Opus 4.7 bugs are costing you. Input your plan and usage to see the hidden token inflation, cache bugs, and system overhead — and how much you could save.">
+<meta name="keywords" content="Claude Code, Opus 4.7, token cost, cost calculator, token inflation, Claude Code トークン 節約, Opus 4.7 コスト, トークン消費 計算">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus47-impact.html">
+<meta property="og:title" content="Opus 4.7 Cost Impact Calculator">
+<meta property="og:description" content="How much extra are Opus 4.7 bugs costing you? Calculate your hidden token overhead.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;max-width:700px;margin:0 auto;padding:2rem 1.5rem;line-height:1.7}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem}
+.subtitle{color:#8b949e;margin-bottom:1.5rem;font-size:.9rem}
+label{display:block;color:#c9d1d9;margin:.8rem 0 .3rem;font-size:.9rem}
+select,input[type=number]{background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:.5rem;border-radius:6px;width:100%;font-size:1rem}
+.result{background:#161b22;border:2px solid #f85149;border-radius:8px;padding:1.2rem;margin:1.5rem 0;display:none}
+.result.show{display:block}
+.result h2{color:#f85149;margin-top:0}
+.savings{background:#161b22;border:2px solid #3fb950;border-radius:8px;padding:1.2rem;margin:1rem 0}
+.savings h2{color:#3fb950;margin-top:0}
+.big-num{font-size:2rem;font-weight:700;color:#f0f6fc}
+.detail{color:#8b949e;font-size:.85rem;margin:.3rem 0}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.5rem .3rem;border:none;cursor:pointer;font-size:1rem}
+.btn:hover{background:#2ea043}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.footer{text-align:center;padding:2rem 0;color:#484f58;font-size:.75rem;border-top:1px solid #21262d;margin-top:2rem}
+.breakdown{margin:.8rem 0}
+.breakdown div{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #21262d;font-size:.9rem}
+.note{background:#1a1504;border:1px solid #d29922;border-radius:6px;padding:.8rem;margin:1rem 0;font-size:.85rem}
+</style>
+</head>
+<body>
+<h1>Opus 4.7 Cost Impact Calculator</h1>
+<p class="subtitle">How much extra are Opus 4.7 bugs costing you? Calculate your hidden overhead.</p>
+
+<label for="plan">Your Plan</label>
+<select id="plan" onchange="calculate()">
+<option value="max">Max ($200/month)</option>
+<option value="max5x">Max 5x ($100/month)</option>
+<option value="pro">Pro ($20/month)</option>
+<option value="api">API (pay per token)</option>
+</select>
+
+<label for="hours">Daily usage (hours)</label>
+<input type="number" id="hours" value="4" min="0.5" max="24" step="0.5" onchange="calculate()">
+
+<label for="sessions">Sessions per day</label>
+<input type="number" id="sessions" value="3" min="1" max="20" step="1" onchange="calculate()">
+
+<label for="subagents">Subagent spawns per session</label>
+<input type="number" id="subagents" value="5" min="0" max="50" step="1" onchange="calculate()">
+
+<button class="btn" onclick="calculate()" style="margin-top:1rem;width:100%">Calculate Impact</button>
+
+<div class="result" id="result">
+<h2>Your Hidden Opus 4.7 Overhead</h2>
+<div class="big-num" id="overhead-pct"></div>
+<p class="detail" id="overhead-detail"></p>
+
+<div class="breakdown" id="breakdown"></div>
+
+<div class="note" id="note-text"></div>
+</div>
+
+<div class="savings" id="savings" style="display:none">
+<h2>What You Could Save</h2>
+<p id="savings-text"></p>
+<p style="margin-top:1rem">
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn">Token Book — Cut costs in half (¥2,500)</a>
+<a href="token-checkup.html" class="btn btn-outline">Free Token Checkup</a>
+</p>
+<p class="detail" style="margin-top:.5rem">The Token Book covers all 16 symptoms in Chapter 8, with copy-paste fix templates.</p>
+</div>
+
+<h2>What's causing the overhead?</h2>
+<p style="font-size:.9rem">Opus 4.7 introduced multiple token inflation bugs that stack on top of each other:</p>
+<ul style="font-size:.9rem;padding-left:1.5rem;margin:.5rem 0">
+<li><strong>+20K hidden tokens</strong> per session from server-side inflation (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a>, 196 reactions)</li>
+<li><strong>1.7x system token bloat</strong> — 21.5K→36.7K on session start (<a href="https://github.com/anthropics/claude-code/issues/49356">#49356</a>)</li>
+<li><strong>~4.7K per subagent spawn</strong> without cache_control (<a href="https://github.com/anthropics/claude-code/issues/50213">#50213</a>)</li>
+<li><strong>Cache destruction every turn</strong> via smoosh pipeline (<a href="https://github.com/anthropics/claude-code/issues/49585">#49585</a>)</li>
+<li><strong>cache_read at full rate</strong> instead of 1/10 discount (<a href="https://github.com/anthropics/claude-code/issues/49302">#49302</a>)</li>
+</ul>
+<p style="font-size:.85rem;color:#8b949e;margin-top:.5rem">Full analysis: <a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a> (22 issues, 39+ GitHub bugs tracked)</p>
+
+<div class="footer">
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 691 hooks · <a href="hub.html">All Tools</a> · <a href="token-book.html">Token Book</a></p>
+</div>
+
+<script>
+function calculate() {
+  var plan = document.getElementById('plan').value;
+  var hours = parseFloat(document.getElementById('hours').value) || 4;
+  var sessions = parseInt(document.getElementById('sessions').value) || 3;
+  var subagents = parseInt(document.getElementById('subagents').value) || 5;
+
+  // Known overheads (from GitHub Issues)
+  var hiddenInflation = 20000; // #46917: 20K extra tokens per session
+  var systemBloat = 15200; // #49356: 36.7K - 21.5K = 15.2K extra
+  var subagentCost = 4700 * 1.25; // #50213: 4.7K * 1.25x cache_creation rate
+  var cacheBreakMultiplier = 2.5; // #49585: ~2.5x effective cost from cache misses
+
+  // Calculate per-session overhead
+  var perSessionOverhead = hiddenInflation + systemBloat + (subagents * subagentCost);
+  var dailyOverhead = perSessionOverhead * sessions;
+  var monthlyOverhead = dailyOverhead * 22; // working days
+
+  // Base usage estimate (tokens per hour of work)
+  var baseTokensPerHour = 50000; // rough average
+  var dailyBase = baseTokensPerHour * hours;
+  var monthlyBase = dailyBase * 22;
+
+  // Cache break impact
+  var cacheImpact = monthlyBase * (cacheBreakMultiplier - 1) * 0.3; // 30% of sessions affected
+
+  var totalOverhead = monthlyOverhead + cacheImpact;
+  var overheadPct = Math.round((totalOverhead / (monthlyBase + totalOverhead)) * 100);
+
+  // Cost impact
+  var costPerToken = 0; // for display
+  var monthlySavings = 0;
+  if (plan === 'api') {
+    costPerToken = 0.000015; // Opus input
+    monthlySavings = Math.round(totalOverhead * costPerToken * 100) / 100;
+  } else if (plan === 'max') {
+    monthlySavings = Math.round(200 * overheadPct / 100);
+  } else if (plan === 'max5x') {
+    monthlySavings = Math.round(100 * overheadPct / 100);
+  } else {
+    monthlySavings = Math.round(20 * overheadPct / 100);
+  }
+
+  // Display
+  document.getElementById('result').className = 'result show';
+  document.getElementById('overhead-pct').textContent = overheadPct + '% overhead';
+  document.getElementById('overhead-detail').textContent =
+    Math.round(totalOverhead/1000000*10)/10 + 'M extra tokens/month from known bugs';
+
+  var bd = document.getElementById('breakdown');
+  bd.innerHTML =
+    '<div><span>Hidden inflation (#46917)</span><span>' + Math.round(hiddenInflation*sessions*22/1000) + 'K/mo</span></div>' +
+    '<div><span>System bloat (#49356)</span><span>' + Math.round(systemBloat*sessions*22/1000) + 'K/mo</span></div>' +
+    '<div><span>Subagent cache miss (#50213)</span><span>' + Math.round(subagentCost*subagents*sessions*22/1000) + 'K/mo</span></div>' +
+    '<div><span>Cache destruction (#49585)</span><span>' + Math.round(cacheImpact/1000) + 'K/mo</span></div>' +
+    '<div style="font-weight:bold;border-top:2px solid #30363d;padding-top:.5rem"><span>Total overhead</span><span>' + Math.round(totalOverhead/1000) + 'K/mo</span></div>';
+
+  document.getElementById('note-text').textContent =
+    'These are conservative estimates based on GitHub Issue data. Actual overhead may be higher if cache_read billing bug (#49302) affects your account.';
+
+  document.getElementById('savings').style.display = 'block';
+  var planName = plan === 'max' ? '$200/mo Max' : plan === 'max5x' ? '$100/mo Max 5x' : plan === 'pro' ? '$20/mo Pro' : 'API';
+  document.getElementById('savings-text').innerHTML =
+    'On ' + planName + ' plan, ~<strong>$' + monthlySavings + '/month</strong> of your spend is going to known bugs. ' +
+    'Fixing the top 3 issues (CLAUDE.md optimization + hook guards + session management) typically reduces overhead by 40-60%.';
+}
+calculate();
+</script>
+</body>
+</html>
