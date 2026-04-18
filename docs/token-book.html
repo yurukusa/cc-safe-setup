@@ -203,6 +203,22 @@ New Release — April 2026
 <p style="font-size:0.9rem;color:#666;margin-top:0.5rem;"><a href="https://code.claude.com/docs/en/costs">Anthropic公式ドキュメント</a>もhookによるコスト削減を推奨。<a href="https://github.com/drona23/claude-token-efficient">claude-token-efficient</a>（4,000+★）や<a href="https://decrypt.co/363440/devs-claude-talk-like-caveman-cut-costs-work-better">"caveman"テクニック</a>は即効性があるが、キャッシュ管理・サブエージェント制御・ワークフロー設計を含む全体最適化がこの本の価値。</p>
 <p style="font-size:0.85rem;color:#888;margin-top:0.3rem;">2026年4月時点で確認済み: <a href="https://www.mindstudio.ai/blog/claude-code-token-management-hacks-3" style="color:#888;">MindStudio 18 Hacks</a>、<a href="https://claudefa.st/blog/guide/development/usage-optimization" style="color:#888;">ClaudeFast Guide</a>、<a href="https://levelup.gitconnected.com/stop-burning-tokens-a-developers-guide-to-claude-ai-token-optimization-4c70c7c52ffb" style="color:#888;">Medium記事</a>など主要な無料ガイドにhook活用・設定テンプレート・キャッシュ診断は含まれていません。</p>
 
+<h2>よくある質問</h2>
+<div style="margin:1rem 0;">
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">無料記事やGitHub Issueを読めば同じ情報が得られるのでは？</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">個別の情報は得られます。ただし39以上のGitHub Issueを読み解いて体系化する作業が必要です。この本は800時間の運用で蓄積した診断フローチャートとコピペ用テンプレートを提供します。第8章の16症状の診断だけでも、自力でIssueから組み立てると数時間かかります。まずは<a href="token-optimization-guide.html">無料ガイド</a>を読んで、それ以上が必要なら本書をどうぞ。</p>
+</details>
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">エンジニアじゃないけど使えますか？</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">著者自身がコードを書けない非エンジニアです。設定テンプレートは全てコピペで使えます。JSONファイルに貼り付けるだけで導入できます。</p>
+</details>
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">Claude Codeが更新されたら古くなりませんか？</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">メジャーリリースごとに更新しています。第8章はOpus 4.7の問題（2026年4月）にも対応済みです。CLAUDE.md最適化やコンテキスト管理の構造的テクニックはバージョンをまたいで有効です。</p>
+</details>
+</div>
+
 <h2>¥2,500で元が取れるか</h2>
 <div class="data-point">
 <strong>Max plan $200/月 ≈ ¥30,000/月</strong>。トークン消費を10%減らせば月¥3,000の節約。<strong>1ヶ月目で回収</strong>。実測では40%減の事例もあり、その場合は月¥12,000の効果。
@@ -287,6 +303,26 @@ New Release — April 2026
 </div>
 <div class="data-point" style="background:#eff6ff;">
 <strong>Pro plan ($20/month) users too</strong>. Better token efficiency means more work per session. "Out of 30 days I get to use Claude 12" — if optimization fixes that, you may not need to upgrade to Max at all.
+</div>
+
+<h2>FAQ</h2>
+<div style="margin:1rem 0;">
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">Can't I just read free articles and GitHub Issues?</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">You can — and you should start with our <a href="token-optimization-guide.html">free Token Optimization Guide</a>. The book goes further: it connects 39+ GitHub Issues into a diagnostic system with copy-paste templates. Instead of searching 10 separate Issues when your quota spikes, you follow one troubleshooting flowchart. The 16-symptom diagnosis in Chapter 8 alone would take hours to piece together from scattered Issues.</p>
+</details>
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">Is ¥2,500 ($17) worth it?</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">Max plan costs $200/month. A 10% reduction saves $20/month — the book pays for itself in month one. Measured cases show 40% reduction ($80/month saved). Even Pro plan ($20/month) users benefit: better efficiency means more work per session without upgrading.</p>
+</details>
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">I'm not an engineer. Will I understand it?</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">The author is a non-engineer who can't write code. Every config template is copy-paste ready — no coding required. If you can edit a JSON file, you can use everything in this book.</p>
+</details>
+<details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
+<summary style="cursor:pointer;font-weight:600;color:#1e293b;">Will this become outdated as Claude Code updates?</summary>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">The book is updated with each major Claude Code release. Chapter 8 already covers Opus 4.7 issues (April 2026). The structural techniques (CLAUDE.md optimization, context management, hook patterns) remain effective across versions — they target how Claude Code works, not specific version quirks.</p>
+</details>
 </div>
 
 <div class="cta-section">
