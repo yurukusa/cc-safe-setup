@@ -122,7 +122,7 @@ function scan() {
 
   const checks = [];
   let score = 0;
-  const maxScore = 7;
+  const maxScore = 9;
 
   // 1. Has any hooks at all?
   const hasHooks = settings.hooks && Object.keys(settings.hooks).length > 0;
@@ -190,7 +190,23 @@ function scan() {
     checks.push({pass: false, msg: 'No home directory protection — <a href="https://github.com/anthropics/claude-code/issues/49464">home deletion attempts reported</a>'});
   }
 
-  // 7. Model pinning
+  // 7. Credential protection (git config, SSH keys)
+  if (cmds.includes('credential') || cmds.includes('gitconfig') || cmds.includes('ssh')) {
+    checks.push({pass: true, msg: 'Git credential / SSH key protection detected'});
+    score++;
+  } else {
+    checks.push({pass: false, msg: 'No credential overwrite protection — <a href="https://github.com/anthropics/claude-code/issues/50232">git credentials can be silently overwritten</a>'});
+  }
+
+  // 8. Case-insensitive path protection (macOS APFS)
+  if (cmds.includes('case') || cmds.includes('insensitive') || cmds.includes('path-guard')) {
+    checks.push({pass: true, msg: 'Case-insensitive path protection detected'});
+    score++;
+  } else {
+    checks.push({warn: true, msg: 'No case-insensitive path guard — <a href="https://github.com/anthropics/claude-code/issues/48792">macOS users lost 10+ years of projects</a>'});
+  }
+
+  // 9. Model pinning
   if (settings.model && !settings.model.includes('4-7') && !settings.model.includes('4.7')) {
     checks.push({pass: true, msg: 'Model pinned to non-4.7 version: ' + settings.model});
     score++;
