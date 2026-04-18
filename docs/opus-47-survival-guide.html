@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）が報告されています。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。22セクション/38+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 23+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>18 known issues (34 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>22 known issues (38+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -99,7 +99,11 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <li><a href="#cache-destruction">Prompt Cache Destruction (smoosh)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#model-picker">Opus 4.6 Removed from Picker</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#instruction-ignoring">CLAUDE.md Rules Ignored → Data Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#allowedtools-bypass">--allowedTools Ignored in Bypass Mode</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#allowedtools-bypass">--allowedTools Ignored in Bypass Mode</a></li>
+<li><a href="#malware-false-positive">Malware False Positive Blocks Subagents</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#stale-worktree">Subagents Use Stale Worktree</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#system-prompt-outdated">System Prompt Outdated (Model Misidentifies Itself)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#auto-mode-gating">Auto Mode Permission Inconsistency</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -398,10 +402,48 @@ npx cc-safe-setup</code></pre>
 <p>PreToolUse hooks with <code>exit 2</code> provide hard blocks that cannot be bypassed by any flag or model decision.</p>
 </div>
 
+<h2 id="malware-false-positive">19. Malware False Positive Blocks Subagents <span class="severity sev-high">HIGH</span></h2>
+
+<p>A regression from the v2.1.92 fix: a system reminder injected on every <code>Read</code> and <code>Grep</code> call tells the model to "refuse to improve or augment" malware-like code. Subagents interpret this literally, causing a <strong>40-60% refusal rate</strong> on legitimate code. Each blocked Read wastes ~400 tokens — across 50-100 reads per session, that's 20-40K tokens burned on security theater. Finance apps with <code>getDisplayMedia()</code> + OCR + banking keywords get flagged as malware. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49363">#49363</a> (3👍), <a href="https://github.com/anthropics/claude-code/issues/49332">#49332</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Retry or use main agent</h3>
+<p>If a subagent refuses to read your code, try the same operation in the main agent (which has more context about legitimacy). For persistent false positives, break the task into smaller pieces that avoid triggering the malware heuristic. There is no user-configurable way to disable the malware scanner.</p>
+</div>
+
+<h2 id="stale-worktree">20. Subagents Use Stale Worktree <span class="severity sev-high">HIGH</span></h2>
+
+<p>Subagents and Explore agents create isolated worktrees pinned to <code>origin/main</code> instead of your parent session's local HEAD. If you have uncommitted changes or are on a feature branch, the subagent silently analyzes <strong>old code</strong> and produces findings based on stale state — without any warning. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49169">#49169</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Commit before delegating</h3>
+<p>Push your current changes before spawning subagents that need to analyze code. Alternatively, pass absolute file paths to subagents so they read from your working directory instead of the worktree copy.</p>
+</div>
+
+<h2 id="system-prompt-outdated">21. System Prompt Outdated — Model Misidentifies Itself <span class="severity sev-high">HIGH</span></h2>
+
+<p>The system prompt still references "Claude 4.6 and 4.5" as the most recent models. When users ask Opus 4.7 to identify itself, it says "Claude Opus 4" — because the system prompt never told it about 4.7. This causes confusion when debugging model-specific issues: users can't tell which model is actually running. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49232">#49232</a> (6👍)</span></p>
+
+<div class="fix">
+<h3>Workaround: Use model-version-alert hook</h3>
+<p>Don't ask the model what version it is — it doesn't know. Instead, use a hook that checks the actual API response:</p>
+<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<p>This reads the model ID from the API response, not from the model's self-report.</p>
+</div>
+
+<h2 id="auto-mode-gating">22. Auto Mode Permission Inconsistency <span class="severity sev-high">HIGH</span></h2>
+
+<p>Max plan users report that entering auto mode via plan-approval path gets rejected with "unavailable for your plan" — even though it works via other entry paths (shift+tab, settings). Worse, the rejection <strong>poisons the session state</strong>: auto mode becomes unavailable for shift+tab too, requiring a full restart. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49653">#49653</a> (4👍)</span></p>
+
+<div class="fix">
+<h3>Workaround: Use shift+tab directly</h3>
+<p>Avoid the plan-approval path to enter auto mode. Use shift+tab or configure auto mode in settings.json directly. If auto mode becomes stuck, restart Claude Code to clear the poisoned state.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 691 example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 691+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49192, #49268, #49302, #49356, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325</p>
 </div>
 
 </body>
