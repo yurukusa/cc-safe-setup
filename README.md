@@ -532,6 +532,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [4 New Critical Issues (April 18)](https://gist.github.com/yurukusa/37c19b5b7f50fd8bbbeda5e1336c352e) — DoS via recursive spawn, subagent OOM, billing mismatch, UI/CLI model mismatch
 - [トークン消費を半分にする方法](https://gist.github.com/yurukusa/bf4040a905148d9ca02898a53185fae1) — 800時間の実測データ＋設定テンプレート（日本語）
 - [How to Cut Token Usage in Half](https://gist.github.com/yurukusa/704d5cf9874f553dad5c46fccf53b09f) — 800h real data + config templates (English)
+- [Compaction Triple Threat](https://gist.github.com/yurukusa/aa15f2065199c6fac4dcd3796fbaf90f) — 3 compaction bugs active simultaneously (#50402 + #50467 + #50492)
+- [Sandbox Relative Path Bug (CRITICAL)](https://gist.github.com/yurukusa/a98efb6c561f92c82bcd49125af3b32a) — denyWrite/denyRead silently ignores relative paths (#50454)
 
 ### Professional Services
 
