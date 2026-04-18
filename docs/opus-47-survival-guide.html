@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 23+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>17 known issues (31 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>17 known issues (33 GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -104,7 +104,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <h2 id="token">1. 4x Token Consumption <span class="severity sev-critical">CRITICAL</span></h2>
 
-<p>Users report Opus 4.7 consuming up to 4x the tokens for the same tasks. Some Max Plan ($200/month) users report quota depletion in 15-19 minutes.</p>
+<p>Users report Opus 4.7 consuming up to 4x the tokens for the same tasks. Some Max Plan ($200/month) users report quota depletion in 15-19 minutes. Even on the highest 20x Max tier, one user saw <strong>50% of weekly budget consumed in just 1.5 days</strong> — effectively turning a weekly budget into a 3-day budget. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50325">#50325</a></span></p>
 
 <div class="warning">
 <h3>Silent Model Switching</h3>
@@ -193,7 +193,7 @@ npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
 
 <h2 id="quality">5. Model Quality Regression <span class="severity sev-high">HIGH</span></h2>
 
-<p>Opus 4.7 shows quality regressions including XML/JSON format mixing in tool calls and reduced instruction-following. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49725">#49725</a>, <a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a></span></p>
+<p>Opus 4.7 shows quality regressions including XML/JSON format mixing in tool calls, reduced instruction-following, and frequent hallucinations. Users report 4.7 doesn't check resource files even when properly mapped, assumes based on "thin information," and wastes tokens on self-calibration loops. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49725">#49725</a>, <a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a>, <a href="https://github.com/anthropics/claude-code/issues/50235">#50235</a></span></p>
 
 <div class="fix">
 <h3>Workaround: Pin to Opus 4.6 (<a href="opus47-downgrade.html">full guide</a>)</h3>
