@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。30セクション/47+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。33セクション/50+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 24+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>30 known issues (47+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>33 known issues (50+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -542,10 +542,37 @@ fi</code></pre>
 <p>Keep permission mode at <code>default</code> (not <code>auto</code> or <code>bypassPermissions</code>) so that tool calls require approval. This acts as a natural checkpoint even if plan mode exits unexpectedly.</p>
 </div>
 
+<h2 id="file-history-secrets">31. file-history Snapshots Secret Keys <span class="severity sev-critical">CRITICAL</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50429">#50429</a> — Claude Code automatically saves edit snapshots of every file it touches in <code>~/.claude/file-history/</code>. A security audit found <strong>6,789 files (196 MB)</strong> in file-history, including <strong>20 files containing a live EVM signer private key</strong> in plaintext — because <code>.env</code> was edited over multiple sessions.</p>
+<p>Every <code>.env</code>, <code>.env.local</code>, or secret-bearing file that Claude ever reads or edits gets copied to persistent local storage with no expiry.</p>
+<div class="fix">
+<h3>Fix: Audit and purge file-history</h3>
+<pre><code># Find secrets in file-history
+grep -rl "PRIVATE_KEY\|SECRET\|PASSWORD" ~/.claude/file-history/ | wc -l
+
+# Delete file-history for sensitive paths
+find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
+<p>Request <code>fileHistoryExclude</code> config option from Anthropic to prevent future snapshots of secret files.</p>
+</div>
+
+<h2 id="subagent-settings-freeze">32. Subagent Edits settings.json → Parent Freeze <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50434">#50434</a> — When a subagent with <code>--dangerously-skip-permissions</code> issues a <code>permission_request</code> for editing <code>~/.claude/settings.json</code>, all other parallel subagents block and the parent session freezes. Reported with 5 parallel subagents on Agent Teams.</p>
+<div class="fix">
+<h3>Workaround: Avoid --dangerously-skip-permissions on agents that touch settings</h3>
+<p>Use <code>--allowedTools</code> to limit subagent capabilities instead of granting full bypass. Never allow subagents to edit <code>~/.claude/settings.json</code>.</p>
+</div>
+
+<h2 id="compaction-broken">33. Opus Compaction Completely Broken <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/50402">#50402</a> — Compaction no longer functions for Opus. Every conversation, on every first compaction, the compaction fails. This means context grows unbounded until the session becomes unusable, wasting tokens on oversized context windows.</p>
+<div class="fix">
+<h3>Workaround: Start new sessions more frequently</h3>
+<p>If compaction fails, start a new session rather than continuing with bloated context. Use <code>/compact</code> manually and check if it succeeds before proceeding.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 691+ example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 693+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389</p>
+<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434</p>
 </div>
 
 </body>
