@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opus 4.7 Cost Estimator — How Much Is the Upgrade Costing You?</title>
+<meta name="description" content="Calculate how much extra Opus 4.7 costs compared to 4.6. Input your usage pattern, get estimated monthly cost and savings potential.">
+<meta property="og:title" content="Opus 4.7 Cost Estimator — Claude Code">
+<meta property="og:description" content="Calculate your Opus 4.7 cost increase. Free tool.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/opus47-cost-estimator.html">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus47-cost-estimator.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Opus 4.7 Cost Estimator","description":"Calculate how much extra Opus 4.7 costs you compared to 4.6. Based on real usage data from 800+ hours of autonomous operation.","url":"https://yurukusa.github.io/cc-safe-setup/opus47-cost-estimator.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:700px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin-bottom:1rem}
+label{display:block;color:#f0f6fc;font-size:.95rem;margin-bottom:.5rem;font-weight:600}
+.hint{color:#8b949e;font-size:.8rem;margin-bottom:.8rem}
+input[type=range]{width:100%;margin:.5rem 0}
+.val{color:#58a6ff;font-size:1.1rem;font-weight:700}
+.result{background:#1c2333;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:1.5rem 0;display:none}
+.result h2{color:#f0f6fc;font-size:1.2rem;margin-bottom:1rem}
+.row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #30363d}
+.row:last-child{border:none}
+.row .label{color:#8b949e}
+.row .value{color:#f0f6fc;font-weight:600}
+.row .value.red{color:#f85149}
+.row .value.green{color:#3fb950}
+.saving{background:#0d2818;border:1px solid #238636;border-radius:6px;padding:1rem;margin-top:1rem}
+.saving h3{color:#3fb950;font-size:1rem;margin-bottom:.5rem}
+.cta{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;font-weight:600;text-decoration:none;margin-top:1rem}
+.cta:hover{background:#2ea043;text-decoration:none}
+.cta-secondary{display:inline-block;background:transparent;color:#58a6ff;border:1px solid #58a6ff;padding:.5rem 1rem;border-radius:6px;font-size:.85rem;text-decoration:none;margin-top:.5rem;margin-left:.5rem}
+.footer{color:#8b949e;font-size:.75rem;margin-top:2rem;text-align:center}
+.issue-ref{color:#8b949e;font-size:.8rem;margin-top:.5rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Opus 4.7 Cost Estimator</h1>
+<p class="sub">How much is the Opus 4.7 upgrade costing you? Based on data from <a href="https://github.com/anthropics/claude-code/issues/49356">GitHub Issues</a> and 800+ hours of operation.</p>
+
+<div class="card">
+<label>Daily active hours with Claude Code</label>
+<p class="hint">How many hours per day do you actively use Claude Code?</p>
+<input type="range" id="hours" min="1" max="12" value="4" oninput="calc()">
+<p><span class="val" id="hoursVal">4</span> hours/day</p>
+</div>
+
+<div class="card">
+<label>Average tool calls per hour</label>
+<p class="hint">Typical: 15-30 for active coding, 50+ for autonomous sessions</p>
+<input type="range" id="tools" min="5" max="100" value="25" oninput="calc()">
+<p><span class="val" id="toolsVal">25</span> calls/hour</p>
+</div>
+
+<div class="card">
+<label>CLAUDE.md size (lines)</label>
+<p class="hint">Every line costs tokens every turn. Check with: wc -l ~/.claude/CLAUDE.md</p>
+<input type="range" id="claudemd" min="5" max="500" value="50" oninput="calc()">
+<p><span class="val" id="claudemdVal">50</span> lines</p>
+</div>
+
+<div class="card">
+<label>Subagents per session</label>
+<p class="hint">Each subagent gets its own context = separate cost</p>
+<input type="range" id="agents" min="0" max="20" value="2" oninput="calc()">
+<p><span class="val" id="agentsVal">2</span> subagents</p>
+</div>
+
+<div class="card">
+<label>Your plan</label>
+<p class="hint">Affects quota calculation</p>
+<select id="plan" onchange="calc()" style="width:100%;padding:.5rem;background:#0d1117;color:#c9d1d9;border:1px solid #30363d;border-radius:4px;font-size:1rem">
+<option value="max5">Max $100/mo (5x)</option>
+<option value="max20" selected>Max $200/mo (20x)</option>
+<option value="pro">Pro $20/mo</option>
+<option value="api">API (pay per token)</option>
+</select>
+</div>
+
+<button onclick="calc();document.getElementById('result').style.display='block'" style="width:100%;padding:.8rem;background:#238636;color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:.5rem">Calculate Cost Impact</button>
+
+<div class="result" id="result">
+<h2>Your Opus 4.7 Cost Estimate</h2>
+
+<div class="row"><span class="label">Estimated daily token usage (4.6)</span><span class="value" id="tokens46">—</span></div>
+<div class="row"><span class="label">Estimated daily token usage (4.7)</span><span class="value red" id="tokens47">—</span></div>
+<div class="row"><span class="label">Daily increase</span><span class="value red" id="increase">—</span></div>
+<div class="row"><span class="label">Monthly extra cost (API pricing)</span><span class="value red" id="monthlyCost">—</span></div>
+<div class="row"><span class="label">Quota impact (your plan)</span><span class="value red" id="quotaImpact">—</span></div>
+
+<div class="saving">
+<h3>Potential savings with optimization</h3>
+<p id="savingText">—</p>
+</div>
+
+<p class="issue-ref">Sources: <a href="https://github.com/anthropics/claude-code/issues/49356">#49356</a> (1.7x inflation), <a href="https://github.com/anthropics/claude-code/issues/49593">#49593</a> (14% startup bloat), <a href="https://github.com/anthropics/claude-code/issues/49302">#49302</a> (cache billing anomaly)</p>
+
+<p style="margin-top:1.2rem">
+<a class="cta" href="token-checkup.html">Free Token Checkup →</a>
+<a class="cta-secondary" href="token-book.html">Token Book (¥2,500) — 10 chapters of optimization</a>
+</p>
+<p style="margin-top:.8rem">
+<a class="cta-secondary" href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a>
+<a class="cta-secondary" href="opus47-scanner.html">Safety Scanner</a>
+</p>
+</div>
+
+<p class="footer">Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 691 safety hooks for Claude Code. <code>npx cc-safe-setup</code></p>
+</div>
+
+<script>
+function calc(){
+  var h=+document.getElementById('hours').value;
+  var t=+document.getElementById('tools').value;
+  var c=+document.getElementById('claudemd').value;
+  var a=+document.getElementById('agents').value;
+  var p=document.getElementById('plan').value;
+
+  document.getElementById('hoursVal').textContent=h;
+  document.getElementById('toolsVal').textContent=t;
+  document.getElementById('claudemdVal').textContent=c;
+  document.getElementById('agentsVal').textContent=a;
+
+  // Token estimation (rough model)
+  var basePerTool=2000; // avg tokens per tool call
+  var claudemdTokens=c*50; // ~50 tokens per line
+  var turnsPerHour=t;
+  var contextGrowth=turnsPerHour*basePerTool;
+  var claudemdCost=claudemdTokens*turnsPerHour; // re-read every turn
+  var agentMultiplier=1+a*0.3; // each agent adds ~30% overhead
+
+  var daily46=(contextGrowth*h+claudemdCost*h)*agentMultiplier;
+  var daily47=daily46*1.7; // 1.7x inflation per #49356
+  daily47+=daily47*0.14; // 14% startup bloat per #49593
+
+  var increase=daily47-daily46;
+  var monthlyExtra=(increase*22/1000000)*15; // $15/MTok input price, 22 working days
+
+  document.getElementById('tokens46').textContent=fmt(daily46)+' tokens';
+  document.getElementById('tokens47').textContent=fmt(daily47)+' tokens';
+  document.getElementById('increase').textContent='+'+fmt(increase)+' tokens/day (+'+Math.round((daily47/daily46-1)*100)+'%)';
+  document.getElementById('monthlyCost').textContent='$'+monthlyExtra.toFixed(2)+'/mo';
+
+  var quotaMsg='';
+  if(p==='pro') quotaMsg='Pro plan: quota may run out '+(daily47/daily46).toFixed(1)+'x faster. You might only get '+(30/((daily47/daily46))).toFixed(0)+' usable days per month.';
+  else if(p==='max5') quotaMsg='Max 5x: '+Math.round((daily47/daily46-1)*100)+'% more quota consumed. Sessions may end '+(daily47/daily46).toFixed(1)+'x sooner.';
+  else if(p==='max20') quotaMsg='Max 20x: '+Math.round((daily47/daily46-1)*100)+'% more quota consumed per session. Heavy users will hit limits faster.';
+  else quotaMsg='API: estimated $'+monthlyExtra.toFixed(2)+'/mo extra at current input token pricing.';
+  document.getElementById('quotaImpact').textContent=quotaMsg;
+
+  var savePct=Math.min(45,10+Math.floor(c/50)*5+a*3);
+  var saveAmt=increase*savePct/100;
+  document.getElementById('savingText').innerHTML='With CLAUDE.md optimization + hook-based token guards, you could save <strong>'+fmt(saveAmt)+' tokens/day ('+savePct+'%)</strong>. '+(c>100?'Your CLAUDE.md ('+c+' lines) is the biggest opportunity — trimming to 35 lines could save '+Math.round(claudemdCost*h*0.7/1000)+'K tokens/day.':'');
+}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return Math.round(n)}
+calc();
+</script>
+</body>
+</html>
