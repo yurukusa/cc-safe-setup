@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Token Optimization Guide — Cut Your Token Bill in Half (2026)</title>
+<meta name="description" content="Reduce Claude Code token consumption by 50% with measured techniques. CLAUDE.md optimization, hook-based guards, context management. Based on 800 hours of real operation data. Updated for Opus 4.7.">
+<meta name="keywords" content="Claude Code, token optimization, reduce token usage, save tokens, Claude Code costs, Opus 4.7, CLAUDE.md optimization, hooks, token waste, context management">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-optimization-guide.html">
+<meta property="og:title" content="Claude Code Token Optimization Guide — Cut Your Token Bill in Half">
+<meta property="og:description" content="800 hours of measured data. Copy-paste templates. 50% token reduction with CLAUDE.md patterns. Updated for Opus 4.7.">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/token-optimization-guide.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Token Optimization Guide — Cut Your Token Bill in Half">
+<meta name="twitter:description" content="800 hours of data. 50% reduction. Copy-paste templates. Updated for Opus 4.7.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"How to Reduce Claude Code Token Consumption","description":"A comprehensive guide to cutting Claude Code token usage in half, based on 800 hours of real operation data. Covers CLAUDE.md optimization, hook-based token guards, model selection, and context management.","totalTime":"PT30M","step":[{"@type":"HowToStep","position":1,"name":"Understand where tokens go","text":"CLAUDE.md and instructions consume 15-30% of tokens. File reads consume 25-30%. Code generation 20-25%. MCP schemas 12-20%. Conversation history 10-25%."},{"@type":"HowToStep","position":2,"name":"Optimize your CLAUDE.md","text":"Keep CLAUDE.md under 35 lines. Use allowlist patterns, one example per rule, table format, and delegate enforcement to hooks. This alone can cut token usage by 50%."},{"@type":"HowToStep","position":3,"name":"Install token-saving hooks","text":"Run npx cc-safe-setup to install 691+ hooks including read-budget-guard, token-budget-guard, pre-compact-checkpoint, and context-monitor."},{"@type":"HowToStep","position":4,"name":"Choose the right model per task","text":"Use Sonnet for routine coding (1/5 the cost of Opus). Reserve Opus for complex design decisions. Use Haiku for subagents."},{"@type":"HowToStep","position":5,"name":"Manage context aggressively","text":"Use /clear between tasks. Use /compact for long sessions. Split sessions every 2-3 hours. Disable unused MCP servers."}],"tool":[{"@type":"HowToTool","name":"cc-safe-setup"},{"@type":"HowToTool","name":"Token Checkup"}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.6rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.2rem}
+h3{color:#f0f6fc;margin:1.2rem 0 .5rem;font-size:1rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+ul,ol{margin:.8rem 0 .8rem 1.5rem}
+li{margin:.3rem 0}
+.stat{display:inline-block;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1.2rem;margin:.3rem;text-align:center}
+.stat-num{font-size:1.5rem;color:#f0f6fc;font-weight:700}
+.stat-label{font-size:.75rem;color:#8b949e}
+.tip{background:#1c2128;border-left:3px solid #58a6ff;padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0;font-size:.9rem}
+.tip-warn{border-color:#d29922}
+.tip-danger{border-color:#f85149}
+.cta{background:#161b22;border:2px solid #238636;border-radius:12px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta h3{color:#f0f6fc;margin-bottom:.5rem}
+.cta p{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+.cta .btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.9rem}
+.cta .btn:hover{background:#2ea043;text-decoration:none}
+.cta .btn-outline{display:inline-block;border:1px solid #30363d;color:#58a6ff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;margin:.3rem}
+nav{margin-bottom:2rem;font-size:.85rem;color:#8b949e}
+footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{padding:.5rem .8rem;border:1px solid #30363d;text-align:left;font-size:.85rem}
+th{background:#161b22;color:#f0f6fc}
+.toc{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.toc h3{margin:0 0 .5rem;font-size:.9rem;color:#8b949e}
+.toc ol{margin:0;padding-left:1.2rem}
+.toc li{margin:.2rem 0;font-size:.85rem}
+.toc a{color:#58a6ff}
+</style>
+</head>
+<body>
+<nav><a href="index.html">cc-safe-setup</a> / <a href="hub.html">Tools</a> / Token Optimization Guide</nav>
+
+<h1>Claude Code Token Optimization Guide</h1>
+<p style="color:#8b949e;margin-bottom:1.5rem">Cut your token consumption in half. Based on 800 hours of real operation data.</p>
+
+<div style="text-align:center;margin:1.5rem 0">
+<div class="stat"><div class="stat-num">$13</div><div class="stat-label">avg. daily cost per developer<br>(<a href="https://docs.anthropic.com/en/docs/claude-code/costs">official data</a>)</div></div>
+<div class="stat"><div class="stat-num">$150–250</div><div class="stat-label">monthly cost per user</div></div>
+<div class="stat"><div class="stat-num">4x</div><div class="stat-label">faster quota burn<br>on Opus 4.7</div></div>
+</div>
+
+<div class="toc">
+<h3>Table of Contents</h3>
+<ol>
+<li><a href="#where-tokens-go">Where your tokens actually go</a></li>
+<li><a href="#claudemd">CLAUDE.md optimization (highest impact)</a></li>
+<li><a href="#hooks">Hook-based token guards</a></li>
+<li><a href="#models">Model selection strategy</a></li>
+<li><a href="#context">Context management</a></li>
+<li><a href="#opus47">Opus 4.7 survival tips</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+</div>
+
+<h2 id="where-tokens-go">1. Where Your Tokens Actually Go</h2>
+
+<p>After 800 hours of autonomous Claude Code operation, here's the measured breakdown of where tokens are consumed:</p>
+
+<table>
+<tr><th>Source</th><th>% of Total</th><th>Optimization Potential</th></tr>
+<tr><td>CLAUDE.md / instructions</td><td>15–30%</td><td>200 lines → 35 lines = up to 50% reduction</td></tr>
+<tr><td>File reads</td><td>25–30%</td><td>read-budget-guard prevents redundant reads</td></tr>
+<tr><td>Code generation (output)</td><td>20–25%</td><td>Model selection + effort level</td></tr>
+<tr><td>Tool schemas / MCP servers</td><td>12–20%</td><td>Disable unused MCP servers</td></tr>
+<tr><td>Conversation history / compaction</td><td>10–25%</td><td>/clear and /compact management</td></tr>
+</table>
+
+<div class="tip">
+<strong>Key finding:</strong> CLAUDE.md is loaded into context on <em>every single turn</em>. A 100-line CLAUDE.md in a 30-turn session consumes ~75,000 tokens just from instructions. A 35-line version achieves the same results.
+</div>
+
+<h2 id="claudemd">2. CLAUDE.md Optimization (Highest Impact)</h2>
+
+<p>Your CLAUDE.md is the single biggest lever for token savings. It's included in every API call, so every line costs you tokens on every turn.</p>
+
+<h3>5 Optimization Patterns</h3>
+
+<ol>
+<li><strong>Allowlist pattern</strong> — Instead of listing 10 things to avoid, state what <em>is</em> allowed. "Only modify files in /src/" is cheaper than listing 10 forbidden directories.</li>
+<li><strong>One example per rule</strong> — Three examples don't help more than one precise example. Cut the extras.</li>
+<li><strong>One-line reasons</strong> — Write "why" in one line. Move detailed explanations to Skills files.</li>
+<li><strong>Table format</strong> — Tables are more token-efficient than bullet lists for structured data like architecture or conventions.</li>
+<li><strong>Delegate to hooks</strong> — Rules you want strictly enforced belong in hooks, not CLAUDE.md. Hooks are free (they run locally), CLAUDE.md costs tokens every turn.</li>
+</ol>
+
+<h3>Before & After</h3>
+
+<pre><code># BEFORE: 200+ lines (costs ~5,000 tokens/turn)
+## Project Rules
+- Do not modify files in /config/
+- Do not modify files in /migrations/
+- Do not modify files in /.github/
+- Do not delete any files without asking
+- Do not use rm -rf
+- Do not force-push
+- Do not commit directly to main
+- Always run tests before committing
+- Use TypeScript strict mode
+... (190 more lines of rules, examples, and explanations)</code></pre>
+
+<pre><code># AFTER: 35 lines (costs ~800 tokens/turn)
+# my-app
+
+## Rules
+- Only modify files in /src/ and /tests/ (hook enforced)
+- Test before commit (hook enforced)
+- TypeScript strict mode
+
+## Architecture
+| Layer | Tech | Path |
+|-------|------|------|
+| API | Express + Zod | /src/api/ |
+| DB | Prisma + Postgres | /prisma/ |
+| Auth | JWT + bcrypt | /src/auth/ |
+
+## Conventions
+- Files: kebab-case
+- Functions: camelCase
+- One export per file</code></pre>
+
+<p><strong>Result:</strong> Same behavior enforcement, 84% fewer tokens per turn. Over a 30-turn session, this saves ~126,000 tokens.</p>
+
+<p>Analyze your current CLAUDE.md: <a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> (free tool)</p>
+
+<h2 id="hooks">3. Hook-Based Token Guards</h2>
+
+<p>Hooks are shell scripts that run before or after Claude Code's tool calls. They execute locally (zero token cost) and can prevent token waste automatically.</p>
+
+<pre><code># Install 691+ safety and optimization hooks in 10 seconds
+npx cc-safe-setup</code></pre>
+
+<h3>Token-Saving Hooks</h3>
+
+<table>
+<tr><th>Hook</th><th>What It Does</th><th>Token Savings</th></tr>
+<tr><td><code>read-budget-guard</code></td><td>Limits file read count per session. Prevents Claude from re-reading the same file 5 times.</td><td>10–25% reduction</td></tr>
+<tr><td><code>token-budget-guard</code></td><td>Sets a session token budget. Warns at 70%, blocks at 90%.</td><td>Prevents runaway sessions</td></tr>
+<tr><td><code>pre-compact-checkpoint</code></td><td>Auto-creates a git checkpoint before compaction. Prevents hallucination-induced rework.</td><td>Saves entire redo sessions</td></tr>
+<tr><td><code>context-monitor</code></td><td>Warns at 75% context usage, alerts at 90%. Prompts you to /clear or /compact.</td><td>5–15% by preventing overflow</td></tr>
+<tr><td><code>subagent-spawn-limiter</code></td><td>Limits concurrent subagent spawns. Each subagent has its own context window.</td><td>20–40% on agent-heavy workflows</td></tr>
+<tr><td><code>large-read-guard</code></td><td>Blocks reads of files over a size threshold. Forces targeted reads with offset/limit.</td><td>10–30% on large codebases</td></tr>
+</table>
+
+<div class="tip">
+<strong>Example:</strong> <code>read-budget-guard</code> alone saved us 18% of tokens per session by catching Claude re-reading the same configuration file on every turn.
+</div>
+
+<h3>Quick Setup</h3>
+
+<pre><code># Option 1: Full safety + token optimization suite
+npx cc-safe-setup
+
+# Option 2: Token guards only
+npx cc-safe-setup
+# Then use the Hook Selector to pick only token-related hooks</code></pre>
+
+<p>Choose exactly which hooks you need: <a href="hook-selector.html">Hook Selector</a> (interactive)</p>
+
+<h2 id="models">4. Model Selection Strategy</h2>
+
+<p>Not every task needs Opus. Using the right model per task can cut costs by 60–80%.</p>
+
+<table>
+<tr><th>Task Type</th><th>Recommended Model</th><th>Why</th></tr>
+<tr><td>Routine coding, bug fixes</td><td>Sonnet 4.6</td><td>1/5 the cost of Opus. Handles 80% of tasks equally well.</td></tr>
+<tr><td>Complex architecture decisions</td><td>Opus 4.7</td><td>Better reasoning, but 5x the cost. Use only when needed.</td></tr>
+<tr><td>Subagent tasks</td><td>Haiku 4.5</td><td>Simple search/read tasks don't need Opus-level reasoning.</td></tr>
+<tr><td>Code review</td><td>Sonnet 4.6</td><td>Pattern matching is Sonnet's strength.</td></tr>
+</table>
+
+<p>Switch models mid-session with <code>/model</code>. No need to restart.</p>
+
+<div class="tip tip-warn">
+<strong>Pro tip:</strong> On the Max plan, switching to Sonnet for simple tasks doesn't save money (it's a flat fee), but it does reduce token consumption, which means your daily allowance lasts longer.
+</div>
+
+<h2 id="context">5. Context Management</h2>
+
+<p>Context is the most expensive resource in Claude Code. Every message accumulates in the context window, and you pay for all of it on every turn.</p>
+
+<h3>Key Practices</h3>
+
+<ul>
+<li><strong><code>/clear</code> between tasks</strong> — When you switch from one feature to another, clear the context. Old context is dead weight that costs tokens on every subsequent turn.</li>
+<li><strong><code>/compact</code> for long sessions</strong> — Compresses conversation history. You can add custom instructions: <code>/compact keep only code changes and test results</code></li>
+<li><strong>Split sessions every 2–3 hours</strong> — After 2–3 hours, compaction quality degrades. Start a fresh session.</li>
+<li><strong>Disable unused MCP servers</strong> — Each MCP server adds its tool schemas to every turn. Check with <code>/mcp</code> and disable what you don't need.</li>
+<li><strong>Use targeted file reads</strong> — <code>Read file.py lines 50-80</code> instead of reading entire files. The <code>large-read-guard</code> hook enforces this.</li>
+</ul>
+
+<h2 id="opus47">6. Opus 4.7 Survival Tips</h2>
+
+<p>Opus 4.7 (released April 16, 2026) changed the token economics significantly:</p>
+
+<ul>
+<li><strong>4x faster quota burn</strong> — The new tokenizer uses more tokens for the same text. Thinking tokens also increased.</li>
+<li><strong>Safety classifier issues</strong> — The April 16 launch introduced auto-mode safety classifier bugs, leading to 20+ data loss incidents in 3 days. (<a href="https://github.com/anthropics/claude-code/issues/49302">#49302</a>, <a href="https://github.com/anthropics/claude-code/issues/50027">#50027</a>)</li>
+<li><strong>cache_read billing anomaly</strong> — <code>cache_read_input_tokens</code> appearing with no prior <code>cache_creation</code>, inflating costs (<a href="https://github.com/anthropics/claude-code/issues/49302">#49302</a>)</li>
+</ul>
+
+<h3>Immediate Actions for Opus 4.7</h3>
+
+<ol>
+<li><strong>Lower your token-budget-guard threshold to 70%</strong> of your previous setting</li>
+<li><strong>Use <code>/model sonnet</code> for routine tasks</strong> — Opus 4.7 is expensive for simple work</li>
+<li><strong>Enable pre-compact-checkpoint</strong> — Critical with Opus 4.7's increased hallucination rate under pressure</li>
+<li><strong>Monitor with <code>/cost</code></strong> — Check your actual spending per session</li>
+</ol>
+
+<p>Full Opus 4.7 issue tracker: <a href="opus47-survival-guide.html">Opus 4.7 Survival Guide</a> (17 sections, 28 tracked issues)</p>
+
+<div class="cta">
+<h3>Get the Complete Guide</h3>
+<p>This page covers the basics. The full Token Book includes copy-paste templates, hook configurations, before/after data for every technique, and the complete Opus 4.7 chapter.</p>
+<a href="token-book.html" class="btn">Token Book — 10 chapters, 44K words</a>
+<p style="margin-top:.8rem;font-size:.8rem">Introduction + Chapter 1 available as free preview</p>
+<div style="margin-top:.8rem">
+<a href="token-checkup.html" class="btn-outline">Free: Token Checkup (5 questions)</a>
+<a href="cost-calculator.html" class="btn-outline">Free: Cost Calculator</a>
+<a href="claudemd-analyzer.html" class="btn-outline">Free: CLAUDE.md Analyzer</a>
+</div>
+</div>
+
+<h2 id="faq">7. FAQ</h2>
+
+<h3>Q: My Max Plan ($200/month) runs out in 15 minutes. What's wrong?</h3>
+<p>Usually caused by a bloated CLAUDE.md (200+ lines), multiple MCP servers running simultaneously, or subagents spawning in loops. Start with Step 2 (CLAUDE.md optimization) — it's the single highest-impact fix. Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> (1,700+ reactions) tracks this problem.</p>
+
+<h3>Q: Pro Plan ($20/month) — can I only use Claude Code 12 out of 30 days?</h3>
+<p>That matches community reports. With optimization, you can extend usable days to 20–25 by reducing per-session token consumption. The techniques in Step 2–5 above apply to Pro plan users as well.</p>
+
+<h3>Q: Do hooks slow down my sessions?</h3>
+<p>No. Hooks execute locally in 10–50ms. The token savings (thousands to tens of thousands per session) far outweigh the negligible execution time.</p>
+
+<h3>Q: I upgraded to Opus 4.7 and my costs doubled. Is this expected?</h3>
+<p>Yes. Opus 4.7's new tokenizer uses more tokens for the same input. Combined with increased thinking tokens and output length, costs can increase 2–4x. See <a href="#opus47">Section 6</a> for mitigation steps.</p>
+
+<h3>Q: Can I use these techniques with the API (not Claude Code)?</h3>
+<p>The CLAUDE.md optimization and context management principles apply to any Claude usage. The hooks are specific to Claude Code CLI/desktop.</p>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 691 hooks / 9,200+ tests / 800 hours of operation data</p>
+<p>Data as of April 2026. Based on Anthropic official documentation and first-party operation data.</p>
+</footer>
+</body>
+</html>
