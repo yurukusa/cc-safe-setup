@@ -482,7 +482,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 22 known issues (39+ GitHub Issues) with fixes: data loss, cache_read billing anomaly, allowedTools bypass, 1.7x token inflation, classifier failure, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
+- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 26 known issues (43+ GitHub Issues) with fixes: data loss, recursive spawn DoS, billing mismatch, subagent OOM, cache_read anomaly, allowedTools bypass, 1.7x token inflation, classifier failure, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
 - **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. Intro + Ch.1 free. [Details](https://yurukusa.github.io/cc-safe-setup/token-book.html)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
