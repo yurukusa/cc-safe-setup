@@ -394,7 +394,7 @@ npx cc-safe-setup</code></pre>
 <div class="fix">
 <h3>Fix: Use hooks instead of allowedTools</h3>
 <p>Hooks enforce tool restrictions at the process level, regardless of permission mode:</p>
-<pre><code>npx cc-safe-setup --install-example tool-allowlist-enforcer</code></pre>
+<pre><code>npx cc-safe-setup --install-example strict-allowlist</code></pre>
 <p>PreToolUse hooks with <code>exit 2</code> provide hard blocks that cannot be bypassed by any flag or model decision.</p>
 </div>
 
