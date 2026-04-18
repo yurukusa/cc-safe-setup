@@ -482,7 +482,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 14 known issues with fixes: data loss, cache_read billing anomaly (#49302), 1.7x token inflation, classifier failure, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
+- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 18 known issues (34 GitHub Issues) with fixes: data loss, cache_read billing anomaly, allowedTools bypass, 1.7x token inflation, classifier failure, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
 - **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. Intro + Ch.1 free. [Details](https://yurukusa.github.io/cc-safe-setup/token-book.html)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
@@ -527,8 +527,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Deny Rules Break After 50 Subcommands](https://gist.github.com/yurukusa/0463d240d7b725218289a556414c72a5) — the hook that fixes Claude Code's deny rule bypass vulnerability
 - [Opus 4.7 Emergency Kit](https://gist.github.com/yurukusa/1970b20fed95a682b72eb6e857e61d30) — 5 commands to protect your data from Opus 4.7 regressions (auto mode broken, 23+ data loss incidents)
 - [cache_read Billing Bug Guide](https://gist.github.com/yurukusa/d5dc731dbc69e3ca92d69832bed641cb) — Opus 4.7 cache_read billed at full rate. Anthropic confirmed. Max plan users losing quota 3-6x faster
-- [Opus 4.7 Survival Guide Summary](https://gist.github.com/yurukusa/5d66f0bcfe3fbfc73e6db106e10c533d) — 17 known issues with quick reference table, free diagnostic tools, and one-command fix
-- [Opus 4.7 Known Issues Quick Reference](https://gist.github.com/yurukusa/2c1effab34a7554130d2704fdac59dff) — 17 issues / 28 GitHub bugs in one table. Severity ratings and direct issue links
+- [Opus 4.7 Survival Guide Summary](https://gist.github.com/yurukusa/5d66f0bcfe3fbfc73e6db106e10c533d) — 18 known issues with quick reference table, free diagnostic tools, and one-command fix
+- [Opus 4.7 Known Issues Quick Reference](https://gist.github.com/yurukusa/2c1effab34a7554130d2704fdac59dff) — 18 issues / 34 GitHub bugs in one table. Severity ratings and direct issue links
 
 ### Professional Services
 
