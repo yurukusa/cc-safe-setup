@@ -292,10 +292,19 @@ ls -la ~/.claude/skills/ | grep '^l' > ~/.claude/skills-symlinks-backup.txt
 <p>After any <code>/model</code> command, immediately verify your permission mode. Set it explicitly again if needed. A PreToolUse hook can detect and warn about permission mode changes.</p>
 </div>
 
+<h2 id="context-ui-mismatch">11. Context Usage UI Shows Wrong Percentage <span class="severity sev-med">MEDIUM</span></h2>
+
+<p>The context usage indicator can dramatically under-report actual token consumption. One user observed their UI showing 60% while actual usage was 1,244,198 tokens — 124% of the 1M context window. Auto-compact fires without warning because the UI never showed the real number. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/50204">#50204</a></span></p>
+
+<div class="fix">
+<h3>Workaround: Monitor via API response headers</h3>
+<p>Don't rely solely on the UI percentage. Use <code>/cost</code> command to check actual token counts. A PostToolUse hook can track cumulative token usage per session and warn when approaching limits. The <code>context-usage-drift-alert</code> hook in cc-safe-setup monitors for this exact scenario.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 685 example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 688 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50207, #50213</p>
+<p class="timestamp">Last updated: April 18, 2026. Issues tracked: #46917, #48927, #49129, #49268, #49356, #49464, #49539, #49541, #49554, #49615, #49618, #49696, #49725, #49740, #49747, #49757, #50052, #50201, #50204, #50207, #50213</p>
 </div>
 
 </body>
