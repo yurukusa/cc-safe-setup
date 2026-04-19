@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Effort Level Calculator — How Much Are You Overpaying?</title>
+<meta name="description" content="Calculate how much you're overpaying by using the wrong Claude Code effort level. Opus 4.7 defaults to xhigh — switch to high or medium to save 30-50%.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.container{max-width:600px;margin:0 auto}
+h1{font-size:1.4rem;color:#f0f6fc;margin-bottom:.5rem;text-align:center}
+.sub{color:#8b949e;font-size:.85rem;text-align:center;margin-bottom:1.5rem}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:.8rem 0}
+label{display:block;color:#c9d1d9;font-size:.85rem;margin-bottom:.3rem;font-weight:600}
+select,input{width:100%;padding:.5rem;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;font-size:.85rem;margin-bottom:.8rem}
+.result{background:#1c2128;border:2px solid #238636;border-radius:8px;padding:1.2rem;margin:1rem 0;display:none}
+.savings{font-size:2rem;font-weight:bold;color:#3fb950;text-align:center}
+.detail{color:#8b949e;font-size:.8rem;margin-top:.5rem}
+.btn{display:inline-block;background:#238636;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.85rem;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.warn{color:#f97316;font-weight:600}
+a{color:#58a6ff;text-decoration:none}
+.footer{text-align:center;margin-top:2rem;font-size:.75rem;color:#484f58}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Effort Level Calculator</h1>
+<p class="sub">Opus 4.7 defaults to <span class="warn">xhigh</span>. See how much you can save by switching.</p>
+
+<div class="card">
+<label>Your Claude Code plan</label>
+<select id="plan" onchange="calc()">
+<option value="max">Max ($200/month)</option>
+<option value="pro">Pro ($20/month)</option>
+<option value="api">API (pay per token)</option>
+</select>
+
+<label>Current effort level</label>
+<select id="current" onchange="calc()">
+<option value="xhigh">xhigh (Opus 4.7 default)</option>
+<option value="high">high</option>
+<option value="medium">medium</option>
+<option value="low">low</option>
+</select>
+
+<label>Sessions per day</label>
+<input type="number" id="sessions" value="5" min="1" max="50" onchange="calc()">
+
+<label>Average turns per session</label>
+<input type="number" id="turns" value="20" min="1" max="200" onchange="calc()">
+</div>
+
+<div class="result" id="result">
+<p style="text-align:center;margin-bottom:.5rem">Switching to <strong id="rec-level"></strong> saves:</p>
+<div class="savings" id="savings-display"></div>
+<p class="detail" id="detail-text"></p>
+<div style="text-align:center;margin-top:1rem">
+<a href="token-checkup.html" class="btn">Run Full Diagnostic (free)</a>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline">Token Book (¥2,500)</a>
+</div>
+</div>
+
+<div class="card" style="border-color:#30363d">
+<h3 style="font-size:.9rem;color:#f0f6fc;margin-bottom:.5rem">How effort levels affect tokens</h3>
+<table style="width:100%;font-size:.8rem;border-collapse:collapse">
+<tr><th style="text-align:left;padding:.3rem;border-bottom:1px solid #30363d">Level</th><th style="padding:.3rem;border-bottom:1px solid #30363d">Tokens/turn</th><th style="padding:.3rem;border-bottom:1px solid #30363d">Quality</th></tr>
+<tr><td style="padding:.3rem;color:#f85149">xhigh</td><td style="padding:.3rem">~8,000</td><td style="padding:.3rem">Maximum (default)</td></tr>
+<tr><td style="padding:.3rem;color:#d29922">high</td><td style="padding:.3rem">~5,500</td><td style="padding:.3rem">Excellent for most tasks</td></tr>
+<tr><td style="padding:.3rem;color:#3fb950">medium</td><td style="padding:.3rem">~3,500</td><td style="padding:.3rem">Good for routine work</td></tr>
+<tr><td style="padding:.3rem">low</td><td style="padding:.3rem">~2,000</td><td style="padding:.3rem">Quick answers only</td></tr>
+</table>
+<p style="font-size:.75rem;color:#484f58;margin-top:.5rem">Source: <a href="https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code">Anthropic official best practices</a></p>
+</div>
+
+<div class="footer">
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 695 hooks · <a href="opus-47-survival-guide.html">Survival Guide (47 sections)</a> · <a href="hub.html">All Tools</a></p>
+</div>
+</div>
+
+<script>
+const rates = { xhigh: 8000, high: 5500, medium: 3500, low: 2000 };
+function calc() {
+  const plan = document.getElementById('plan').value;
+  const current = document.getElementById('current').value;
+  const sessions = parseInt(document.getElementById('sessions').value) || 5;
+  const turns = parseInt(document.getElementById('turns').value) || 20;
+
+  const bestLevel = current === 'xhigh' ? 'high' : current === 'high' ? 'medium' : null;
+  if (!bestLevel) { document.getElementById('result').style.display = 'none'; return; }
+
+  const currentTokens = rates[current] * turns * sessions * 30;
+  const newTokens = rates[bestLevel] * turns * sessions * 30;
+  const savedTokens = currentTokens - newTokens;
+  const savedPercent = Math.round((1 - newTokens / currentTokens) * 100);
+
+  let savingsText, detailText;
+  if (plan === 'max') {
+    const daysExtended = Math.round(savedPercent / 100 * 30);
+    savingsText = `${savedPercent}% fewer tokens = ~${daysExtended} extra days/month`;
+    detailText = `Max plan has fixed quota. ${savedPercent}% reduction means your quota lasts ${daysExtended} days longer. That's ${daysExtended} fewer "usage limit reached" interruptions.`;
+  } else if (plan === 'pro') {
+    savingsText = `${savedPercent}% fewer tokens used`;
+    detailText = `Pro plan has stricter limits. Reducing effort level extends your daily allowance by ~${savedPercent}%.`;
+  } else {
+    const savedDollars = Math.round(savedTokens / 1000000 * 15);
+    savingsText = `~$${savedDollars}/month saved`;
+    detailText = `${(savedTokens/1000000).toFixed(1)}M tokens/month saved at ~$15/MTok output. With Opus 4.7's +35% tokenizer overhead, this compounds.`;
+  }
+
+  document.getElementById('rec-level').textContent = bestLevel;
+  document.getElementById('savings-display').textContent = savingsText;
+  document.getElementById('detail-text').textContent = detailText;
+  document.getElementById('result').style.display = 'block';
+}
+calc();
+</script>
+</body>
+</html>
