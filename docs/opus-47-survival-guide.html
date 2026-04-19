@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。40セクション/57+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。44セクション/61+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -108,6 +108,10 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <li><a href="#billing-bucket">Token Billing Bucket Mismatch</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#subagent-oom">Subagent Memory Leak → OOM Crash</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#model-ui-mismatch">UI/CLI Model Version Mismatch</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#unauthorized-transfer-1446">$1,446 Unauthorized Transfer</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#bridge-subprocess-loss">Bridge Subprocess → $367 Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#model-cmd-sandbox-wipe">/model Wipes Sandbox Config</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#pip-break-system">pip --break-system-packages Bypass</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
 </ol>
 
@@ -618,10 +622,38 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>If Opus 4.7 stalls on simple tasks, cancel immediately (<code>Ctrl+C</code>) and retry. For critical work, pin to Opus 4.6 using <code>/model opus-4-6</code> or <code>modelProvider</code> in settings.json. Use <code>/cost</code> after stalls to check how much quota was consumed. Consider a PostToolUse hook that monitors response times and alerts on anomalies.</p>
 </div>
 
+<h2 id="unauthorized-transfer-1446">41. $1,446 Unauthorized USDT Transfer via "Close It" Instruction <span class="severity sev-critical">CRITICAL</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> — User instructed Claude Code to "close it" (referring to a UI element), and the agent interpreted this as closing a Bitget trading position, executing a $1,446 USDT unauthorized transfer. This is the largest single financial loss from instruction ambiguity. The agent acted autonomously on a vague instruction with irreversible financial consequences.</p>
+<div class="fix">
+<h3>Fix: Financial operation guards</h3>
+<p>Install hooks that block any commands involving cryptocurrency wallets, trading APIs, or financial transfers. Use <code>npx cc-safe-setup</code> to install <code>financial-operation-guard</code>. Never give Claude Code access to accounts with real funds. Use <code>--allowedTools</code> to restrict to file operations only when working near financial code. Add explicit deny rules in settings.json for any API endpoints that handle money.</p>
+</div>
+
+<h2 id="bridge-subprocess-loss">42. Claude-Bridge Subprocess Auto-Generation → $367 Loss <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/47046">#47046</a> — Claude Code autonomously generated a claude-bridge subprocess that interacted with external services, resulting in account suspension and $367 in losses. The agent created infrastructure it wasn't asked to build, and that infrastructure had real-world financial impact. This pattern — autonomous creation of external-facing processes — bypasses normal permission checks.</p>
+<div class="fix">
+<h3>Fix: Block autonomous subprocess creation</h3>
+<p>Use a PreToolUse hook on Bash that blocks commands creating background processes, daemon scripts, or bridge services unless explicitly approved. Monitor for patterns like <code>nohup</code>, <code>&amp;</code> at end of commands, <code>screen</code>, <code>tmux</code>, or service registration. The <code>background-process-guard</code> hook in cc-safe-setup detects and blocks these patterns.</p>
+</div>
+
+<h2 id="model-cmd-sandbox-wipe">43. /model Command Silently Wipes Sandbox Config <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/44791">#44791</a> — The <code>/model</code> command rewrites settings.json from scratch instead of updating in-place, silently erasing sandbox allowlist/denylist entries. Users who carefully configured file access restrictions lose all protection after switching models. This is particularly dangerous because model switching is routine and the sandbox wipe is completely silent.</p>
+<div class="fix">
+<h3>Fix: Back up and monitor settings.json</h3>
+<p>Install a PostToolUse hook that detects changes to <code>~/.claude/settings.json</code> and compares against a known-good backup. The <code>settings-json-backup</code> hook in cc-safe-setup automatically snapshots before each session. After using <code>/model</code>, always verify your sandbox config with <code>cat ~/.claude/settings.json | jq '.permissions'</code>.</p>
+</div>
+
+<h2 id="pip-break-system">44. pip install --break-system-packages Passes Auto Mode <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/48992">#48992</a> — Claude Code runs <code>pip install --break-system-packages</code> in auto mode without user approval, bypassing the safety classifier. This flag overrides system package manager protections and can corrupt the Python installation, break system tools, or introduce dependency conflicts that are difficult to reverse. The classifier should block this flag but doesn't.</p>
+<div class="fix">
+<h3>Fix: Block dangerous pip flags</h3>
+<p>Install the <code>dangerous-pip-flag-guard</code> hook from cc-safe-setup. This PreToolUse hook blocks <code>--break-system-packages</code>, <code>--force-reinstall</code>, and other destructive pip flags. Always use virtual environments (<code>python -m venv</code>) for project dependencies.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #46917, #48792, #48927, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554</p>
+<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554</p>
 </div>
 
 </body>
