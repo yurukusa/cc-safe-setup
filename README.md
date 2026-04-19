@@ -94,11 +94,24 @@ Installs 4 hooks targeting known Opus 4.7 regressions. [Full details →](https:
 | **cd+git Auto-Approver** | Permission prompt spam for `cd /path && git log` | [#32985](https://github.com/anthropics/claude-code/issues/32985) [#16561](https://github.com/anthropics/claude-code/issues/16561) |
 | **API Error Alert** | Silent session death from rate limits or API errors — desktop notification + log | |
 
-> 🛡️ **Is your setup safe?** [Take the Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html) — 6 questions based on real incidents ($1,800+ in losses, April 2026).
->
-> 📘 Tokens disappearing too fast? [Take the free Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) to diagnose where your tokens are going. [Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html): is your CC version affected by cache inflation ([#46917](https://github.com/anthropics/claude-code/issues/46917))? Free [CLAUDE.md templates](https://github.com/yurukusa/claude-code-token-templates) optimized for cache efficiency. For the full guide: [Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html) (¥2,500) — CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words from 800+ hours of operation. See also: [Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800, Chapter 3 free).
-
 Each hook exists because a real incident happened without it.
+
+### Free diagnostic tools
+
+| Tool | What it does |
+|------|-------------|
+| **[Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html)** | 5 questions → find where your tokens are going (30 seconds) |
+| **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
+| **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
+
+### Go deeper
+
+| Resource | What you get | Price |
+|----------|-------------|-------|
+| **[Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html)** | Cut token consumption in half. CLAUDE.md templates, hook configs, context management, 31 failure patterns with fixes. 44,000 words from 800+ hours of real operation data. | ¥2,500 (~$17). Ch.1 free |
+| **[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** | End-to-end Claude Code safety setup. From first install to overnight autonomous runs. | ¥800 (~$5). Ch.3 free |
+
+**Why pay?** A Max plan costs $200/month. One token waste incident burns 50–80% of your weekly quota in hours ([#46727](https://github.com/anthropics/claude-code/issues/46727)). One `rm -rf` incident costs days of recovery. The Token Book costs less than 2 hours of Max subscription time — and the CLAUDE.md templates alone can reduce consumption by 40%.
 
 ### v2.1.85: `if` Field Support
 
