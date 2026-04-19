@@ -548,6 +548,8 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Compaction Triple Threat](https://gist.github.com/yurukusa/aa15f2065199c6fac4dcd3796fbaf90f) — 3 compaction bugs active simultaneously (#50402 + #50467 + #50492)
 - [Sandbox Relative Path Bug (CRITICAL)](https://gist.github.com/yurukusa/a98efb6c561f92c82bcd49125af3b32a) — denyWrite/denyRead silently ignores relative paths (#50454)
 - [27 Token Symptoms Quick Reference](https://gist.github.com/yurukusa/03a379854fa0f8eca091a75f7aab593b) — all 27 known token failure modes with top 5 killers table and April 2026 new symptoms
+- [Token Saving Checklist (15 Items)](https://gist.github.com/yurukusa/6bd0d0a38a4887fc36475dd1f765ecd1) — ordered by impact: critical (30-50%), important (10-20%), good practice (5-10%)
+- [Opus 4.7 Survival Cheatsheet](https://gist.github.com/yurukusa/f2d6e261338eeda70f0ed9507f995c13) — 46 known problems, quick fixes under 60 seconds, full reference table
 
 ### Professional Services
 
