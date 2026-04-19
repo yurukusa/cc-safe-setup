@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Audit — Deep Analysis of Your Claude Code Token Usage</title>
+<meta name="description" content="Paste your /cost output and settings.json to get a detailed token optimization report with specific hook recommendations.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-audit.html">
+<meta property="og:title" content="Token Audit — Deep Claude Code Token Analysis">
+<meta property="og:description" content="Paste /cost output → get optimization report with hook recommendations">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+h3{color:#f0f6fc;font-size:.95rem;margin:.8rem 0 .3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+textarea{width:100%;background:#161b22;border:1px solid #30363d;color:#c9d1d9;border-radius:8px;padding:.8rem;font-family:'SF Mono',Consolas,monospace;font-size:.8rem;resize:vertical;min-height:120px}
+textarea:focus{border-color:#58a6ff;outline:none}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:.9rem;margin:.5rem .3rem .5rem 0}
+.btn:hover{background:#2ea043}
+.btn-outline{background:transparent;color:#58a6ff;border:1px solid #30363d}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.score{font-size:2rem;font-weight:700;text-align:center;padding:1rem}
+.score-good{color:#3fb950}
+.score-warn{color:#d29922}
+.score-bad{color:#f85149}
+.metric{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #21262d;font-size:.85rem}
+.metric:last-child{border:none}
+.label{color:#8b949e}
+.rec{background:#1a1504;border:1px solid #d29922;border-radius:6px;padding:.8rem;margin:.5rem 0;font-size:.85rem}
+.rec-fix{background:#0d1f0d;border:1px solid #3fb950}
+.hidden{display:none}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.8rem;margin:.4rem 0}
+.footer{text-align:center;padding:2rem;color:#484f58;font-size:.75rem;margin-top:2rem;border-top:1px solid #21262d}
+.tab-bar{display:flex;gap:0;margin-bottom:1rem}
+.tab{padding:.5rem 1rem;cursor:pointer;border:1px solid #30363d;background:#0d1117;color:#8b949e;font-size:.85rem}
+.tab:first-child{border-radius:8px 0 0 8px}
+.tab:last-child{border-radius:0 8px 8px 0}
+.tab.active{background:#161b22;color:#f0f6fc;border-color:#58a6ff}
+.panel{display:none}
+.panel.active{display:block}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Token Audit</h1>
+<p class="sub">Paste your <code>/cost</code> output or <code>settings.json</code> for a deep token usage analysis. Everything runs in your browser — no data is sent anywhere.</p>
+
+<div class="tab-bar">
+<div class="tab active" onclick="switchTab('cost')">📊 /cost Output</div>
+<div class="tab" onclick="switchTab('settings')">⚙️ settings.json</div>
+<div class="tab" onclick="switchTab('claudemd')">📝 CLAUDE.md</div>
+</div>
+
+<div id="panel-cost" class="panel active">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">Run <code>/cost</code> in Claude Code and paste the output here:</p>
+<textarea id="cost-input" placeholder="Session cost: $2.47&#10;Total tokens: 847,293&#10;  Input:  623,841 (cache_read: 412,000, cache_creation: 211,841)&#10;  Output: 223,452&#10;Duration: 45 minutes"></textarea>
+</div>
+
+<div id="panel-settings" class="panel">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">Paste your <code>~/.claude/settings.json</code>:</p>
+<textarea id="settings-input" placeholder='{ "permissions": { ... }, "hooks": { ... } }'></textarea>
+</div>
+
+<div id="panel-claudemd" class="panel">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">Paste your CLAUDE.md content:</p>
+<textarea id="claudemd-input" placeholder="# Project Rules&#10;..."></textarea>
+</div>
+
+<button class="btn" onclick="analyze()">Analyze</button>
+<button class="btn btn-outline" onclick="loadExample()">Load Example</button>
+
+<div id="results" class="hidden">
+
+<h2>Overall Token Health Score</h2>
+<div class="card">
+<div id="overall-score" class="score">—</div>
+<p id="overall-summary" style="text-align:center;font-size:.85rem;color:#8b949e"></p>
+</div>
+
+<h2>Cost Breakdown</h2>
+<div class="card" id="cost-breakdown"></div>
+
+<h2>Cache Efficiency</h2>
+<div class="card" id="cache-analysis"></div>
+
+<h2>Security & Safety</h2>
+<div class="card" id="safety-analysis"></div>
+
+<h2>Recommendations</h2>
+<div id="recommendations"></div>
+
+<h2>Recommended Hooks</h2>
+<div id="hook-recommendations"></div>
+
+<div class="card" style="text-align:center;margin-top:1.5rem;border-color:#58a6ff">
+<h3 style="margin-bottom:.5rem">Want the full optimization guide?</h3>
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.8rem">29 real-world symptoms, hook templates, and CLAUDE.md optimization patterns from 800+ hours of operation.</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="text-decoration:none">Token Book (¥2,500)</a>
+<a href="token-checkup.html" class="btn btn-outline" style="text-decoration:none">Quick Checkup (free)</a>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+<p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="opus-47-survival-guide.html">Survival Guide</a></p>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function loadExample() {
+  document.getElementById('cost-input').value = `Session cost: $4.82
+Total tokens: 1,247,293
+  Input:  923,841 (cache_read: 312,000, cache_creation: 611,841)
+  Output: 323,452
+Duration: 38 minutes
+Model: claude-opus-4-7`;
+  document.getElementById('settings-input').value = JSON.stringify({
+    "permissions": {
+      "allow": ["Bash(git *)"],
+      "deny": []
+    },
+    "hooks": {}
+  }, null, 2);
+  document.getElementById('claudemd-input').value = `# Project Rules
+## Coding Standards
+- Use TypeScript
+- Follow ESLint rules
+- Write tests for all new functions
+- Use meaningful variable names
+- Comment complex logic
+## Git Rules
+- Never push to main directly
+- Use conventional commits
+- Keep PRs under 400 lines
+## Architecture
+- src/ for source code
+- tests/ for test files
+- docs/ for documentation
+- Use dependency injection
+- Follow SOLID principles
+(... 80 more lines)`;
+  analyze();
+}
+
+function parseNumber(s) {
+  return parseFloat(s.replace(/[,$]/g, '')) || 0;
+}
+
+function analyze() {
+  const costText = document.getElementById('cost-input').value;
+  const settingsText = document.getElementById('settings-input').value;
+  const claudemdText = document.getElementById('claudemd-input').value;
+
+  let score = 100;
+  const recs = [];
+  const hooks = [];
+  const metrics = {};
+
+  // Parse /cost output
+  if (costText.trim()) {
+    const costMatch = costText.match(/\$([0-9,.]+)/);
+    const totalMatch = costText.match(/Total tokens?:\s*([0-9,]+)/i);
+    const inputMatch = costText.match(/Input:\s*([0-9,]+)/i);
+    const outputMatch = costText.match(/Output:\s*([0-9,]+)/i);
+    const cacheReadMatch = costText.match(/cache_read:\s*([0-9,]+)/i);
+    const cacheCreateMatch = costText.match(/cache_creation:\s*([0-9,]+)/i);
+    const durationMatch = costText.match(/Duration:\s*(\d+)\s*min/i);
+    const modelMatch = costText.match(/Model:\s*([\w.-]+)/i);
+
+    metrics.cost = costMatch ? parseNumber(costMatch[1]) : 0;
+    metrics.totalTokens = totalMatch ? parseNumber(totalMatch[1]) : 0;
+    metrics.inputTokens = inputMatch ? parseNumber(inputMatch[1]) : 0;
+    metrics.outputTokens = outputMatch ? parseNumber(outputMatch[1]) : 0;
+    metrics.cacheRead = cacheReadMatch ? parseNumber(cacheReadMatch[1]) : 0;
+    metrics.cacheCreate = cacheCreateMatch ? parseNumber(cacheCreateMatch[1]) : 0;
+    metrics.duration = durationMatch ? parseInt(durationMatch[1]) : 0;
+    metrics.model = modelMatch ? modelMatch[1] : 'unknown';
+
+    // Cache efficiency
+    const totalCache = metrics.cacheRead + metrics.cacheCreate;
+    metrics.cacheRate = totalCache > 0 ? (metrics.cacheRead / totalCache * 100) : 0;
+
+    // Cost per minute
+    metrics.costPerMin = metrics.duration > 0 ? metrics.cost / metrics.duration : 0;
+
+    // Scoring
+    if (metrics.cacheRate < 50) { score -= 30; recs.push({type:'bad', text:'Cache hit rate is very low (' + metrics.cacheRate.toFixed(0) + '%). Target >80%. Your prompt cache is being destroyed frequently — likely by file changes or >5min gaps between interactions.', fix:'Use /compact before long pauses. Avoid editing CLAUDE.md mid-session.'}); }
+    else if (metrics.cacheRate < 80) { score -= 15; recs.push({type:'warn', text:'Cache hit rate is below optimal (' + metrics.cacheRate.toFixed(0) + '%). Target >80%.', fix:'Check if skills/ directory or CLAUDE.md changes between turns.'}); }
+
+    if (metrics.costPerMin > 0.15) { score -= 20; recs.push({type:'bad', text:'Cost rate is high ($' + metrics.costPerMin.toFixed(2) + '/min). Typical efficient sessions are $0.03-0.08/min.', fix:'Consider lowering effort level to "high" or "medium" via /config.'}); }
+
+    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 detected. This model has known 35% token inflation and safety classifier issues.', fix:'Consider pinning to Opus 4.6: /model claude-opus-4-6'}); }
+
+    if (metrics.outputTokens > metrics.inputTokens * 0.5) { score -= 10; recs.push({type:'warn', text:'High output-to-input ratio (' + (metrics.outputTokens/metrics.inputTokens*100).toFixed(0) + '%). Claude may be generating verbose responses.', fix:'Add to CLAUDE.md: "Be concise. Skip explanations unless asked."'}); }
+  }
+
+  // Parse settings.json
+  if (settingsText.trim()) {
+    try {
+      const settings = JSON.parse(settingsText);
+      const hooks_conf = settings.hooks || {};
+      const preToolUse = hooks_conf.PreToolUse || [];
+      const postToolUse = hooks_conf.PostToolUse || [];
+      const totalHooks = preToolUse.length + postToolUse.length;
+
+      metrics.hookCount = totalHooks;
+
+      if (totalHooks === 0) {
+        score -= 25;
+        recs.push({type:'bad', text:'No hooks configured. Your Claude Code runs without any safety guardrails.', fix:'Run: npx cc-safe-setup'});
+        hooks.push({name:'cc-safe-setup core', cmd:'npx cc-safe-setup', reason:'Install 8 essential safety hooks'});
+      } else if (totalHooks < 3) {
+        score -= 10;
+        recs.push({type:'warn', text:'Only ' + totalHooks + ' hook(s) configured. Recommended: 5-8 core hooks minimum.', fix:'Run: npx cc-safe-setup --install-example model-version-alert'});
+      }
+
+      const perms = settings.permissions || {};
+      const deny = perms.deny || [];
+      if (deny.length === 0) {
+        score -= 10;
+        recs.push({type:'warn', text:'No deny rules in permissions. Consider blocking dangerous patterns.', fix:'Add deny rules for rm -rf, git reset --hard, etc.'});
+      }
+    } catch(e) {
+      // Invalid JSON, skip
+    }
+  }
+
+  // Parse CLAUDE.md
+  if (claudemdText.trim()) {
+    const lines = claudemdText.split('\n').filter(l => l.trim());
+    metrics.claudemdLines = lines.length;
+    metrics.claudemdTokensEstimate = Math.round(claudemdText.length / 4);
+
+    if (lines.length > 80) {
+      score -= 15;
+      recs.push({type:'bad', text:'CLAUDE.md is ' + lines.length + ' lines (~' + metrics.claudemdTokensEstimate + ' tokens). This adds ' + metrics.claudemdTokensEstimate + ' tokens to EVERY turn.', fix:'Condense to <40 lines. Move rules enforceable by hooks/linters out of CLAUDE.md.'});
+    } else if (lines.length > 40) {
+      score -= 5;
+      recs.push({type:'warn', text:'CLAUDE.md is ' + lines.length + ' lines. Consider condensing further.', fix:'Each line costs tokens every turn. Remove anything the linter/CI already enforces.'});
+    }
+
+    // Check for common anti-patterns
+    if (/don.t|never|do not|禁止/i.test(claudemdText)) {
+      const negCount = (claudemdText.match(/don.t|never|do not|禁止/gi) || []).length;
+      if (negCount > 5) {
+        score -= 5;
+        recs.push({type:'warn', text: negCount + ' prohibition rules found. Negative rules are less effective and use more tokens than positive rules.', fix:'Convert "don\'t do X" → allow-list + hook enforcement.'});
+      }
+    }
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  // Render results
+  document.getElementById('results').classList.remove('hidden');
+
+  const scoreEl = document.getElementById('overall-score');
+  scoreEl.textContent = score + '/100';
+  scoreEl.className = 'score ' + (score >= 70 ? 'score-good' : score >= 40 ? 'score-warn' : 'score-bad');
+  document.getElementById('overall-summary').textContent = score >= 80 ? 'Your token usage looks healthy!' : score >= 50 ? 'Room for improvement. See recommendations below.' : 'Significant token waste detected. Apply recommendations urgently.';
+
+  // Cost breakdown
+  const costDiv = document.getElementById('cost-breakdown');
+  if (metrics.cost) {
+    costDiv.innerHTML = `
+      <div class="metric"><span class="label">Session Cost</span><span>$${metrics.cost.toFixed(2)}</span></div>
+      <div class="metric"><span class="label">Duration</span><span>${metrics.duration} min</span></div>
+      <div class="metric"><span class="label">Cost/Minute</span><span>$${metrics.costPerMin.toFixed(3)}</span></div>
+      <div class="metric"><span class="label">Total Tokens</span><span>${metrics.totalTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">Input Tokens</span><span>${metrics.inputTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">Output Tokens</span><span>${metrics.outputTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">Model</span><span>${metrics.model || 'unknown'}</span></div>
+    `;
+  } else {
+    costDiv.innerHTML = '<p style="color:#8b949e;font-size:.85rem">Paste /cost output to see breakdown</p>';
+  }
+
+  // Cache analysis
+  const cacheDiv = document.getElementById('cache-analysis');
+  if (metrics.cacheRead || metrics.cacheCreate) {
+    const rateClass = metrics.cacheRate >= 80 ? 'score-good' : metrics.cacheRate >= 50 ? 'score-warn' : 'score-bad';
+    cacheDiv.innerHTML = `
+      <div class="metric"><span class="label">Cache Hit Rate</span><span class="${rateClass}" style="font-weight:700">${metrics.cacheRate.toFixed(1)}%</span></div>
+      <div class="metric"><span class="label">cache_read</span><span>${metrics.cacheRead.toLocaleString()} tokens</span></div>
+      <div class="metric"><span class="label">cache_creation</span><span>${metrics.cacheCreate.toLocaleString()} tokens</span></div>
+      <div class="metric"><span class="label">Cost Multiplier</span><span>${metrics.cacheRate >= 80 ? '1x (optimal)' : metrics.cacheRate >= 50 ? '~3-5x (elevated)' : '~10-20x (critical)'}</span></div>
+    `;
+  } else {
+    cacheDiv.innerHTML = '<p style="color:#8b949e;font-size:.85rem">Include cache_read/cache_creation data for analysis</p>';
+  }
+
+  // Safety analysis
+  const safetyDiv = document.getElementById('safety-analysis');
+  const hookInfo = metrics.hookCount !== undefined ? `<div class="metric"><span class="label">Hooks Configured</span><span>${metrics.hookCount}</span></div>` : '';
+  const claudeInfo = metrics.claudemdLines ? `<div class="metric"><span class="label">CLAUDE.md Size</span><span>${metrics.claudemdLines} lines (~${metrics.claudemdTokensEstimate} tokens/turn)</span></div>` : '';
+  safetyDiv.innerHTML = hookInfo + claudeInfo || '<p style="color:#8b949e;font-size:.85rem">Paste settings.json and CLAUDE.md for analysis</p>';
+
+  // Recommendations
+  const recDiv = document.getElementById('recommendations');
+  if (recs.length === 0) {
+    recDiv.innerHTML = '<div class="rec rec-fix">No issues found. Your setup looks well-optimized!</div>';
+  } else {
+    recDiv.innerHTML = recs.map(r => `<div class="rec ${r.type === 'bad' ? '' : 'rec-fix'}"><strong>${r.type === 'bad' ? '🔴' : '🟡'} ${r.text}</strong><br><em>Fix: ${r.fix}</em></div>`).join('');
+  }
+
+  // Hook recommendations
+  const hookDiv = document.getElementById('hook-recommendations');
+  if (hooks.length > 0) {
+    hookDiv.innerHTML = hooks.map(h => `<div class="card"><strong>${h.name}</strong><p style="font-size:.85rem;color:#8b949e">${h.reason}</p><pre><code>${h.cmd}</code></pre></div>`).join('');
+  } else if (metrics.hookCount > 0) {
+    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (44 sections)</a>.</p></div>';
+  } else {
+    hookDiv.innerHTML = '<div class="card"><pre><code>npx cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">One command to install 8 essential safety hooks.</p></div>';
+  }
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
