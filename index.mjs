@@ -3196,6 +3196,9 @@ async function shield() {
   console.log(c.dim + '  Verify: npx cc-safe-setup --verify' + c.reset);
   console.log(c.dim + '  Status: npx cc-safe-setup --status' + c.reset);
   console.log();
+  console.log(c.dim + '  Burning tokens too fast? Free diagnosis:' + c.reset);
+  console.log(c.blue + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html' + c.reset);
+  console.log();
 }
 
 async function quickfix() {
@@ -5981,6 +5984,7 @@ async function main() {
   console.log();
   console.log('  ' + c.dim + 'Free tools:' + c.reset);
   console.log('  ' + c.blue + '  Token Checkup' + c.reset + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
+  console.log('  ' + c.blue + '  Token Book' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/token-book.html');
   console.log('  ' + c.dim + '  28 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
   console.log();
   console.log('  ' + c.dim + 'Tokens disappearing too fast?' + c.reset);
