@@ -526,6 +526,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Outage Survival Kit](https://gist.github.com/yurukusa/a0e31171eecb527d0df1d5498bf5f5d0) — what to do when Claude Code is down
 - [CLAUDE.md Token Optimizer](https://gist.github.com/yurukusa/2b98fd2e90c0c13f6918c9f915e08e27) — 35-line template, 40% token reduction (800h tested)
 - [Worktree Safety Hooks](https://gist.github.com/yurukusa/98bd43c5d0d8a6ebbf2cf21bfc1e2907) — 3 hooks to protect against worktree deletion and cross-tree destruction
+- [Opus 4.7 Emergency Checklist](https://gist.github.com/yurukusa/c95efaee4b670e067369ece08092960c) — token burn diagnosis + immediate fixes
 - [Cache TTL Mitigation Guide](https://gist.github.com/yurukusa/178d3949cd2bd6fbfc275b408f9711d4) — #46829 cache TTL change (1h→5m) impact and 4 mitigations
 - [Security Checkup Hooks](https://gist.github.com/yurukusa/81f79ae6d760b27c17f2cd642ea846d7) — 4 hooks for financial, PII, deny bypass, and background task protection
 - [Cache Breakage Fix](https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4) — 2 root causes of prompt cache invalidation (#47107 git status, #47098 session restart)
