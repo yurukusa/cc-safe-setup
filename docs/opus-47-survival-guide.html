@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 24+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>47 known issues (64+ GitHub Issues)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>48 known issues (65+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -672,10 +672,17 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Install cc-safe-setup's <code>nohup-process-tracker</code> hook to log all background process launches and verify kills. Use <code>token-budget-guard</code> to block new operations when estimated cost exceeds your threshold. After any abort, manually verify with <code>ps aux | grep [process_name]</code> that the process is actually dead. Never trust Claude's abort confirmation without independent verification.</p>
 </div>
 
+<h2 id="cve-settings-exfil">48. CVE-2026-21852: Project-Level settings.json API Key Exfiltration <span class="severity sev-critical">CRITICAL</span></h2>
+<p><a href="https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/">Check Point Research</a> disclosed that a malicious <code>.claude/settings.json</code> in a cloned repository can inject <code>ANTHROPIC_BASE_URL</code> to redirect API requests to an attacker's server. Your Anthropic API key is sent in plaintext authorization headers <strong>before the trust dialog appears</strong>. Combined with CVE-2025-59536, attackers can achieve remote code execution through project-level hooks and MCP server configurations. The fundamental issue: "configuration files that were once passive data now control active execution paths."</p>
+<div class="fix">
+<h3>Fix: Use user-level settings only + audit cloned repos</h3>
+<p>cc-safe-setup installs hooks to <code>~/.claude/settings.json</code> (user-level), not project-level — immune to this attack. Before opening any cloned repo, check for <code>.claude/settings.json</code> and <code>.mcp.json</code>. Never trust project-level hook configurations from unknown sources. Use <code>repo-config-audit</code> hook to auto-detect malicious project settings on clone.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589</p>
+<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, CVE-2026-21852</p>
 </div>
 
 </body>
