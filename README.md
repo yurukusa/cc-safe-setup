@@ -12,7 +12,7 @@
 npx cc-safe-setup
 ```
 
-Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to main, catches secret leaks, validates syntax after every edit. Zero dependencies.
+Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to main, catches secret leaks, validates syntax after every edit. Zero npm dependencies. Hooks use [`jq`](https://jqlang.github.io/jq/) at runtime (`brew install jq` / `apt install jq`).
 
 > **What's a hook?** A checkpoint that runs before Claude executes a command. Like airport security — it inspects what's about to happen and blocks anything dangerous before it reaches the gate.
 
