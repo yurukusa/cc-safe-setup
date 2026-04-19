@@ -207,7 +207,7 @@ New Release — April 2026
 <div style="margin:1rem 0;">
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">無料記事やGitHub Issueを読めば同じ情報が得られるのでは？</summary>
-<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">個別の情報は得られます。ただし39以上のGitHub Issueを読み解いて体系化する作業が必要です。この本は800時間の運用で蓄積した診断フローチャートとコピペ用テンプレートを提供します。第8章の20症状の診断だけでも、自力でIssueから組み立てると数時間かかります。まずは<a href="token-optimization-guide.html">無料ガイド</a>を読んで、それ以上が必要なら本書をどうぞ。</p>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">個別の情報は得られます。ただし65以上のGitHub Issue+CVEを読み解いて体系化する作業が必要です。この本は800時間の運用で蓄積した診断フローチャートとコピペ用テンプレートを提供します。第8章の33症状の診断だけでも、自力でIssueから組み立てると数時間かかります。まずは<a href="token-optimization-guide.html">無料ガイド</a>を読んで、それ以上が必要なら本書をどうぞ。</p>
 </details>
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">エンジニアじゃないけど使えますか？</summary>
@@ -244,7 +244,7 @@ New Release — April 2026
 <h3>無料ツール</h3>
 <ul>
 <li><a href="token-saving-guide.html">トークン節約ガイド</a> — CLAUDE.md最適化、hook活用、モデル選択の全体ガイド</li>
-<li><a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a> — 46セクション・63+件のIssue追跡</li>
+<li><a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a> — 48セクション・65+件のIssue+CVE追跡</li>
 <li><a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> — トークン効率を診断</li>
 <li><a href="cost-calculator.html">Cost Calculator</a> — 月額コストを推定</li>
 <li><a href="hook-selector.html">Hook Selector</a> — 最適なhookセットを推薦</li>
@@ -279,7 +279,7 @@ New Release — April 2026
 <li><strong>Real measurements</strong> — CLAUDE.md restructured from 100→35 lines improved cache hit rate 89%→95%, cutting token usage by ~40%</li>
 <li><strong>9 token-saving hooks</strong> — Automatic protection against token waste. Copy-paste ready</li>
 <li><strong>Full framework</strong> — CLAUDE.md optimization → context management → hook setup → workflow design</li>
-<li><strong>Troubleshooting guide</strong> — 20 documented symptoms: cache bugs, token spikes, billing anomalies, subagent false positives</li>
+<li><strong>Troubleshooting guide</strong> — 33 documented symptoms: cache bugs, token spikes, billing anomalies, subagent false positives, CVE exploits</li>
 <li><strong>Written by a non-engineer</strong> — 800+ hours running Claude Code autonomously. No jargon wall</li>
 </ul>
 
@@ -294,7 +294,7 @@ New Release — April 2026
 <tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Data</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Short tests / estimates</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>800h measured values</strong></td></tr>
 <tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Scope</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">CLAUDE.md or model tips</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>6 areas, systematized</strong></td></tr>
 <tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Config templates</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">None</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>Copy-paste ready</strong></td></tr>
-<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Troubleshooting</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">None</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>20-symptom diagnostic</strong></td></tr>
+<tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Troubleshooting</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">None</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>33-symptom diagnostic</strong></td></tr>
 <tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Troubleshooting</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Search GitHub Issues</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>Diagnostic flowcharts</strong></td></tr>
 </table>
 
@@ -310,7 +310,7 @@ New Release — April 2026
 <div style="margin:1rem 0;">
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">Can't I just read free articles and GitHub Issues?</summary>
-<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">You can — and you should start with our <a href="token-optimization-guide.html">free Token Optimization Guide</a>. The book goes further: it connects 47+ GitHub Issues into a diagnostic system with copy-paste templates. Instead of searching 10 separate Issues when your quota spikes, you follow one troubleshooting flowchart. The 20-symptom diagnosis in Chapter 8 alone would take hours to piece together from scattered Issues.</p>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">You can — and you should start with our <a href="token-optimization-guide.html">free Token Optimization Guide</a>. The book goes further: it connects 65+ GitHub Issues and CVEs into a diagnostic system with copy-paste templates. Instead of searching 10 separate Issues when your quota spikes, you follow one troubleshooting flowchart. The 33-symptom diagnosis in Chapter 8 alone would take hours to piece together from scattered Issues.</p>
 </details>
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">Is ¥2,500 ($17) worth it?</summary>
@@ -340,7 +340,7 @@ New Release — April 2026
 <h3>Free Tools</h3>
 <ul>
 <li><a href="token-optimization-guide.html">Token Optimization Guide</a> — Full guide: CLAUDE.md patterns, hooks, model selection, Opus 4.7 tips</li>
-<li><a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a> — 48 sections tracking 64+ known issues</li>
+<li><a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide</a> — 48 sections tracking 65+ known issues + CVEs</li>
 <li><a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> — Check token efficiency</li>
 <li><a href="token-checkup.html">Token Checkup</a> — Analyze consumption patterns</li>
 <li><a href="cost-calculator.html">Cost Calculator</a> — Estimate monthly cost</li>
