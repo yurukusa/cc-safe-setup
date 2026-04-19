@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。44セクション/61+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。46セクション/63+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -650,10 +650,24 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Install the <code>dangerous-pip-flag-guard</code> hook from cc-safe-setup. This PreToolUse hook blocks <code>--break-system-packages</code>, <code>--force-reinstall</code>, and other destructive pip flags. Always use virtual environments (<code>python -m venv</code>) for project dependencies.</p>
 </div>
 
+<h2 id="systematic-hallucination-waste">45. Systematic Hallucinations + Rule Violations → 80% Usage Wasted <span class="severity sev-critical">CRITICAL</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/46727">#46727</a> (3👍, 9 comments) — On Max 20x ($200/month), Opus 4.6 exhibits a pattern of confident data fabrication, loaded CLAUDE.md rule violations, and panic-driven retry loops that waste 80% of the weekly quota in 2.5 days. Subagents amplify the problem by returning fabricated data (non-existent files, wrong prices, fictional APIs) that the main agent trusts without verification. Quality degradation begins at only 30–40% context usage — well before the nominal limit. The combination of hallucinated outputs, ignored instructions, and forgotten MCP tools means the user effectively cannot use the product they paid for.</p>
+<div class="fix">
+<h3>Fix: Multi-layer verification</h3>
+<p>Use cc-safe-setup's <code>verify-before-done</code> hook to require evidence before completion claims. Add <code>subagent-output-validator</code> to cross-check subagent results. Set <code>allowedTools</code> in settings.json to limit panic-driven tool sprawl. Consider switching to Sonnet 4.6 for routine tasks to preserve Opus quota for complex work.</p>
+</div>
+
+<h2 id="token-burn-no-downgrade">46. Opus 4.7 Burns 1% Per Prompt — No Downgrade Path <span class="severity sev-high">HIGH</span></h2>
+<p><a href="https://github.com/anthropics/claude-code/issues/49562">#49562</a> (2👍) — After updating to Claude Code v2.1.112, each prompt on Opus 4.7 consumes approximately 1% of session usage — even for trivial questions. Previous version (v2.1.69) could run for hours on Opus 4.6 with the same subscription. Critically, Opus 4.6 is no longer available in the model selection list, leaving users with no downgrade path. This forces users into the higher-consumption model with no escape.</p>
+<div class="fix">
+<h3>Fix: Pin model + monitor token rate</h3>
+<p>Use <code>/model sonnet</code> for routine tasks. Install cc-safe-setup's <code>token-rate-monitor</code> hook to alert when consumption exceeds 0.5% per prompt. Check the <a href="claude-code-downgrade-guide.html">Downgrade Guide</a> for model pinning strategies. If Opus 4.6 is unavailable, <code>claude-sonnet-4-6</code> offers the best cost/quality ratio for most tasks.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554</p>
+<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50353, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554</p>
 </div>
 
 </body>
