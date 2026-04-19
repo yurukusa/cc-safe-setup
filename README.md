@@ -190,7 +190,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 667 examples |
+| `--install-example <name>` | Install from 695 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
@@ -495,7 +495,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ## Learn More
 
-- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 44 known issues (61+ GitHub Issues) with fixes: data loss, recursive spawn DoS, billing mismatch, subagent OOM, cache_read anomaly, allowedTools bypass, 1.7x token inflation, classifier failure, thinking summary bugs, 30-min stalls, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
+- **[Opus 4.7 Survival Guide](https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html)** — 46 known issues (63+ GitHub Issues) with fixes: data loss, recursive spawn DoS, billing mismatch, subagent OOM, cache_read anomaly, allowedTools bypass, 1.7x token inflation, classifier failure, thinking summary bugs, 30-min stalls, and more. [`npx cc-safe-setup --opus47`](#-opus-47-crisis-april-2026)
 - **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. Intro + Ch.1 free. [Details](https://yurukusa.github.io/cc-safe-setup/token-book.html)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥1,500)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
@@ -540,7 +540,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Deny Rules Break After 50 Subcommands](https://gist.github.com/yurukusa/0463d240d7b725218289a556414c72a5) — the hook that fixes Claude Code's deny rule bypass vulnerability
 - [Opus 4.7 Emergency Kit](https://gist.github.com/yurukusa/1970b20fed95a682b72eb6e857e61d30) — 5 commands to protect your data from Opus 4.7 regressions (auto mode broken, 23+ data loss incidents)
 - [cache_read Billing Bug Guide](https://gist.github.com/yurukusa/d5dc731dbc69e3ca92d69832bed641cb) — Opus 4.7 cache_read billed at full rate. Anthropic confirmed. Max plan users losing quota 3-6x faster
-- [Opus 4.7 Survival Guide Summary](https://gist.github.com/yurukusa/5d66f0bcfe3fbfc73e6db106e10c533d) — 44 known issues with quick reference table, free diagnostic tools, and one-command fix
+- [Opus 4.7 Survival Guide Summary](https://gist.github.com/yurukusa/5d66f0bcfe3fbfc73e6db106e10c533d) — 46 known issues with quick reference table, free diagnostic tools, and one-command fix
 - [Opus 4.7 Known Issues Quick Reference](https://gist.github.com/yurukusa/2c1effab34a7554130d2704fdac59dff) — 26 issues / 43+ GitHub bugs in one table. Severity ratings and direct issue links
 - [4 New Critical Issues (April 18)](https://gist.github.com/yurukusa/37c19b5b7f50fd8bbbeda5e1336c352e) — DoS via recursive spawn, subagent OOM, billing mismatch, UI/CLI model mismatch
 - [トークン消費を半分にする方法](https://gist.github.com/yurukusa/bf4040a905148d9ca02898a53185fae1) — 800時間の実測データ＋設定テンプレート（日本語）
