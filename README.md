@@ -534,6 +534,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [How to Cut Token Usage in Half](https://gist.github.com/yurukusa/704d5cf9874f553dad5c46fccf53b09f) — 800h real data + config templates (English)
 - [Compaction Triple Threat](https://gist.github.com/yurukusa/aa15f2065199c6fac4dcd3796fbaf90f) — 3 compaction bugs active simultaneously (#50402 + #50467 + #50492)
 - [Sandbox Relative Path Bug (CRITICAL)](https://gist.github.com/yurukusa/a98efb6c561f92c82bcd49125af3b32a) — denyWrite/denyRead silently ignores relative paths (#50454)
+- [27 Token Symptoms Quick Reference](https://gist.github.com/yurukusa/03a379854fa0f8eca091a75f7aab593b) — all 27 known token failure modes with top 5 killers table and April 2026 new symptoms
 
 ### Professional Services
 
