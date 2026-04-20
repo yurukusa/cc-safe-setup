@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。47セクション/64+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。50セクション/67+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 24+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>48 known issues (65+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>50 known issues (67+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -679,10 +679,24 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>cc-safe-setup installs hooks to <code>~/.claude/settings.json</code> (user-level), not project-level — immune to this attack. Before opening any cloned repo, check for <code>.claude/settings.json</code> and <code>.mcp.json</code>. Never trust project-level hook configurations from unknown sources. Use <code>repo-config-audit</code> hook to auto-detect malicious project settings on clone.</p>
 </div>
 
+<h2 id="hooks-cwd-drift">49. Hook Commands Fail Silently When CWD Drifts <span class="severity sev-high">HIGH</span></h2>
+<p>When subagents write files to subdirectories (e.g., <code>.claude/claims/</code>), the main process CWD follows. Hook commands using bare-relative paths like <code>python .claude/hooks/foo.py</code> resolve against the drifted CWD instead of the project root, causing silent security-critical hook failures. Combined with context exhaustion, <code>/compact</code> recovery breaks because PreCompact hooks also fail. <a href="https://github.com/anthropics/claude-code/issues/50960">#50960</a></p>
+<div class="fix">
+<h3>Fix: Use $CLAUDE_PROJECT_DIR in all hook paths</h3>
+<p>Replace bare-relative paths with <code>$CLAUDE_PROJECT_DIR/.claude/hooks/foo.py</code> in all hook commands. This environment variable always points to the project root regardless of CWD drift. cc-safe-setup hooks use absolute path resolution by default, avoiding this issue entirely.</p>
+</div>
+
+<h2 id="docker-rm-dataloss">50. Docker Container Removal Without Volume Check → Data Loss <span class="severity sev-critical">CRITICAL</span></h2>
+<p>Opus 4.7 executed <code>docker stop && docker rm</code> on a production n8n container without verifying volume persistence. All manually-configured workflows, credentials, and execution history were permanently destroyed. The model chose the most destructive option (remove container) without exploring safer alternatives like <code>docker restart</code> or checking <code>docker inspect</code> for volume mounts first. <a href="https://github.com/anthropics/claude-code/issues/50952">#50952</a></p>
+<div class="fix">
+<h3>Fix: Block docker rm + enforce escalation order</h3>
+<p>Add a PreToolUse hook that blocks <code>docker rm</code> commands and reminds the model to verify data persistence with <code>docker inspect</code> first. Safe escalation order: (1) restart container, (2) kill specific process inside container, (3) commit container state before removal. Treat <code>docker rm</code> on containers without volume mounts as equivalent to <code>rm -rf</code> on user data.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 19, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, CVE-2026-21852</p>
 </div>
 
 </body>
