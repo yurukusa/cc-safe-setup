@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Token Cost Volatility: Why Your Bill Swings 2-3x (And How to Fix It)</title>
+<meta name="description" content="42% of developers cite token cost volatility as their #1 pain point with AI coding tools. Here's why Claude Code costs swing 2-3x and what hooks can stabilize them.">
+<meta name="keywords" content="Claude Code, token cost, token volatility, Max Plan, quota, hooks, cost optimization">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-token-cost-volatility.html">
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1117;color:#c9d1d9;max-width:720px;margin:0 auto;padding:2rem 1.5rem;line-height:1.7}
+h1{color:#f0f6fc;font-size:1.6rem;margin-bottom:.5rem}
+h2{color:#f0f6fc;font-size:1.2rem;margin-top:2rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:.2rem .4rem;border-radius:3px;font-size:.85rem}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto}
+pre code{background:none;padding:0}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1.5rem 0;text-align:center}
+.stat-number{font-size:2.5rem;font-weight:700;color:#f85149}
+.stat-label{font-size:.85rem;color:#8b949e;margin-top:.3rem}
+blockquote{border-left:3px solid #f85149;margin:1.5rem 0;padding:.5rem 1rem;background:#161b22;border-radius:0 6px 6px 0}
+.cta{background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4f46e5;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta a{color:#a5b4fc;font-weight:600}
+.footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.8rem;color:#484f58}
+</style>
+</head>
+<body>
+
+<p style="font-size:.8rem;color:#8b949e"><a href="index.html">cc-safe-setup</a> / Blog</p>
+
+<h1>Claude Code Token Cost Volatility: Why Your Bill Swings 2-3x</h1>
+<p style="color:#8b949e;font-size:.85rem">April 20, 2026 · 5 min read</p>
+
+<div class="stat">
+<div class="stat-number">42%</div>
+<div class="stat-label">of developers now cite token cost volatility as their #1 pain point with AI coding tools (Q1 2026 survey)</div>
+</div>
+
+<p>Your Claude Code bill shouldn't be unpredictable. But for most developers, it is. One week you're within budget, the next you've burned through your entire monthly allocation in 3 days.</p>
+
+<p>We've tracked <strong>76+ GitHub Issues</strong> related to cost spikes, and after analyzing hundreds of sessions, here's what's actually causing the volatility — and how to fix it.</p>
+
+<h2>The 5 Hidden Cost Multipliers</h2>
+
+<h3>1. Auto-Compact Death Spirals</h3>
+<p>Auto-compact is designed to save context. But when the recovery system degrades, it enters an infinite loop. One user lost their entire overnight budget to <strong>15+ consecutive compactions</strong> with zero work done (<a href="https://github.com/anthropics/claude-code/issues/51088">#51088</a>).</p>
+<p><strong>Cost impact:</strong> 100% of daily budget consumed while you sleep.</p>
+
+<h3>2. Extended Thinking Runaway</h3>
+<p>The reasoning phase has no built-in token ceiling. One Sonnet 4.6 user saw <strong>16 million tokens consumed in 25 minutes</strong> of thinking with no useful output (<a href="https://github.com/anthropics/claude-code/issues/51092">#51092</a>).</p>
+<p><strong>Cost impact:</strong> Entire weekly quota in a single session.</p>
+
+<h3>3. Retry Spirals on Simple Changes</h3>
+<p>Claude attempts a 1-line CSS change, fails, and retries 10+ times with the same approach. Each retry consumes tokens but makes zero progress (<a href="https://github.com/anthropics/claude-code/issues/50986">#50986</a>).</p>
+<p><strong>Cost impact:</strong> Weekly budget burned on a trivial edit.</p>
+
+<h3>4. Exploration Loops</h3>
+<p>Claude reads file after file, runs 40+ Glob/Grep searches, but never writes anything. Your budget drains on "understanding" without action (<a href="https://github.com/anthropics/claude-code/issues/51054">#51054</a>).</p>
+<p><strong>Cost impact:</strong> 20% of weekly budget on a simple task.</p>
+
+<h3>5. Sub-Agent Token Multiplication</h3>
+<p>Sub-agents spawn without inheriting your safety rules. They hit file conflicts and enter endless retry loops, burning <strong>101K+ tokens</strong> on operations that should cost 5K (<a href="https://github.com/anthropics/claude-code/issues/46968">#46968</a>).</p>
+<p><strong>Cost impact:</strong> 10-20x expected token consumption.</p>
+
+<h2>How Hooks Stabilize Your Costs</h2>
+
+<p>Each of these patterns can be detected and stopped by a simple bash hook that runs in &lt;50ms:</p>
+
+<pre><code># Install all cost-protection hooks in 30 seconds
+npx cc-safe-setup</code></pre>
+
+<p>What gets installed:</p>
+<ul>
+<li><strong>compact-circuit-breaker.sh</strong> — max 3 compactions/hour, prevents death spirals</li>
+<li><strong>thinking-stall-detector.sh</strong> — alerts after 5min of thinking with no output</li>
+<li><strong>tool-retry-budget-guard.sh</strong> — blocks after 7 failed attempts to same file</li>
+<li><strong>exploration-budget-guard.sh</strong> — forces action after 40 reads without writing</li>
+</ul>
+
+<blockquote>
+<p>"I went from unpredictable $150-250/month swings to a stable $80-100 range just by installing the token guards." — cc-safe-setup user</p>
+</blockquote>
+
+<h2>Diagnose Your Cost Pattern (Free)</h2>
+
+<p>Not sure which pattern is hitting you? Take the 30-second diagnostic:</p>
+
+<p style="text-align:center;margin:1.5rem 0">
+<a href="token-checkup.html" style="background:#238636;color:#fff;padding:.6rem 1.5rem;border-radius:6px;font-weight:600;text-decoration:none;display:inline-block">Token Checkup (free, 30 seconds) →</a>
+</p>
+
+<div class="cta">
+<p style="color:#f0f6fc;font-weight:700;font-size:1.1rem;margin-bottom:.5rem">Want the full playbook?</p>
+<p style="color:#c7d2fe;font-size:.85rem;margin-bottom:1rem">The Token Book documents 43 cost drain symptoms with copy-paste fixes. 800+ hours of real session data. Chapter 1 is free.</p>
+<a href="token-book.html#en">Read Chapter 1 free →</a> · <a href="https://ko-fi.com/s/fd44ef09a7">Get the full book ($17) →</a>
+</div>
+
+<h2>Further Reading</h2>
+<ul>
+<li><a href="opus-47-survival-guide.html">Opus 4.7 Survival Guide (61 sections)</a> — every known issue with fixes</li>
+<li><a href="incidents.html">Incident Tracker (76+ issues)</a> — browse real cost incidents</li>
+<li><a href="blog-compaction-death-spiral.html">How to Fix the Auto-Compact Death Spiral</a></li>
+<li><a href="blog-extended-thinking-drain.html">Extended Thinking: 16M Token Drain Fix</a></li>
+</ul>
+
+<div class="footer">
+<p><a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · MIT License</p>
+<p>Data sourced from <a href="https://github.com/anthropics/claude-code/issues">anthropics/claude-code GitHub Issues</a> and <a href="https://www.digitalapplied.com/blog/ai-coding-tool-adoption-2026-developer-survey">Digital Applied Developer Survey Q1 2026</a>.</p>
+</div>
+
+</body>
+</html>
