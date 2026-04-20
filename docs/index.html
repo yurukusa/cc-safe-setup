@@ -301,7 +301,17 @@ function renderAudit(risks,good,score,el) {
   if(good.length) { h+='<h3 style="color:#3fb950">Working</h3>'; good.forEach(g=>h+='<div class="good-item">✓ '+g+'</div>'); }
   if(risks.length) { h+='<h3>Risks ('+risks.length+')</h3>'; risks.forEach(r=>h+='<div class="risk"><strong>['+r.s+']</strong> '+r.i+'<br><code>'+r.f+'</code></div>'); }
   if(!risks.length) h+='<p style="color:#3fb950">No risks detected.</p>';
+  h+='<div style="margin-top:1rem"><button class="btn" onclick="shareAudit('+score+')" style="background:#1d9bf0;font-size:.8rem;padding:.4rem .8rem">Share Score on X</button></div>';
   el.innerHTML=h;
+}
+function shareAudit(score) {
+  const emoji = score < 40 ? '🔥' : score < 70 ? '⚠️' : '✅';
+  const msg = score < 40
+    ? `My Claude Code safety score: ${score}/100 ${emoji} No hooks installed — running unprotected. Check yours: #ClaudeCode #ProductHunt`
+    : score < 70
+    ? `My Claude Code safety score: ${score}/100 ${emoji} Some gaps in hook coverage. Free audit: #ClaudeCode #ProductHunt`
+    : `My Claude Code safety score: ${score}/100 ${emoji} Fully protected with safety hooks. How safe is your setup? #ClaudeCode #ProductHunt`;
+  window.open('https://x.com/intent/tweet?text='+encodeURIComponent(msg)+'&url='+encodeURIComponent('https://yurukusa.github.io/cc-safe-setup/'), '_blank');
 }
 
 // HOOK BUILDER
