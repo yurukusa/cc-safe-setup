@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Incident Tracker — Real Safety Issues from GitHub</title>
-<meta name="description" content="79+ real Claude Code safety incidents tracked from GitHub Issues. File deletion, credential leaks, token drain, production outages. See why hooks matter.">
+<meta name="description" content="80+ real Claude Code safety incidents tracked from GitHub Issues. File deletion, credential leaks, token drain, production outages. See why hooks matter.">
 <meta name="keywords" content="Claude Code, incidents, safety, rm -rf, data loss, token drain, hooks, CVE, production outage">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incidents.html">
-<meta property="og:title" content="Claude Code Incident Tracker — 79+ Real Safety Issues">
+<meta property="og:title" content="Claude Code Incident Tracker — 80+ Real Safety Issues">
 <meta property="og:description" content="Every incident is from a real GitHub Issue. Filter by category, severity, and date.">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Dataset","name":"Claude Code Safety Incident Tracker","description":"79+ real safety incidents from GitHub Issues, organized by category and severity","creator":{"@type":"Person","name":"yurukusa"},"url":"https://yurukusa.github.io/cc-safe-setup/incidents.html","keywords":"Claude Code, safety, incidents, hooks"}
+{"@context":"https://schema.org","@type":"Dataset","name":"Claude Code Safety Incident Tracker","description":"80+ real safety incidents from GitHub Issues, organized by category and severity","creator":{"@type":"Person","name":"yurukusa"},"url":"https://yurukusa.github.io/cc-safe-setup/incidents.html","keywords":"Claude Code, safety, incidents, hooks"}
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -131,7 +131,8 @@ const incidents = [
   {id:"49302",title:"cache_read charged at full rate, not documented 10%",desc:"Anthropic confirmed 'inconsistency with docs' — users overcharged on cached reads.",cat:"token-drain",sev:"medium",date:"2026-04"},
   {id:"51123",title:"Enterprise allowManagedHooksOnly bypassed via ANTHROPIC_BASE_URL",desc:"Setting ANTHROPIC_BASE_URL to a local proxy disables managed hooks enforcement. Any developer can bypass enterprise security policy.",cat:"credential-leak",sev:"critical",date:"2026-04"},
   {id:"51127",title:"Model hallucinated Telegram invite URLs — phishing vector",desc:"Sonnet 4.6 generated fake Telegram group invite links during session resume. No Telegram reference existed in project.",cat:"credential-leak",sev:"high",date:"2026-04"},
-  {id:"51126",title:"WSL2 sandbox E2BIG failure forces security degradation",desc:"30+ deny patterns overflow bwrap argument limit. Users must weaken sandbox to keep shell working.",cat:"data-loss",sev:"high",date:"2026-04"}
+  {id:"51126",title:"WSL2 sandbox E2BIG failure forces security degradation",desc:"30+ deny patterns overflow bwrap argument limit. Users must weaken sandbox to keep shell working.",cat:"data-loss",sev:"high",date:"2026-04"},
+  {id:"51255",title:"PreToolUse hook 'ask' silently auto-approved in auto mode",desc:"Hooks returning permissionDecision:'ask' are bypassed in auto mode. Safety gates designed to prompt users are silently approved during autonomous operation.",cat:"permission-bypass",sev:"high",date:"2026-04"}
 ];
 
 function render(filter) {

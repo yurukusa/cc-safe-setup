@@ -16,7 +16,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 > **What's a hook?** A checkpoint that runs before Claude executes a command. Like airport security — it inspects what's about to happen and blocks anything dangerous before it reaches the gate.
 
-[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (79+ real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html)
+[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (80+ real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html)
 
 ```
   cc-safe-setup
