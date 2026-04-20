@@ -5986,6 +5986,7 @@ async function main() {
   console.log('  ' + c.dim + 'Verify:' + c.reset + '  npx cc-safe-setup --verify');
   console.log('  ' + c.dim + 'More:' + c.reset + '    npx cc-safe-setup --shield  (maximum safety)');
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
+  console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log();
 }
 
