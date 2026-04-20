@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。58セクション/73+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。61セクション/76+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -749,10 +749,31 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Use the <code>thinking-stall-detector.sh</code> hook to detect when thinking duration exceeds a reasonable threshold (e.g., 5 minutes) and alert. For API users, set <code>max_tokens</code> and thinking budget limits. For Max/Pro plan users, monitor <code>/cost</code> regularly and restart sessions if token consumption spikes without corresponding output. Avoid leaving sessions unattended without session time limits, especially with extended thinking enabled. The fundamental issue — no built-in circuit breaker for runaway thinking — means external monitoring is the only defense. See also: §6 (thinking summaries), §29 (token misreporting).</p>
 </div>
 
+<h2 id="managed-hooks-bypass">59. Managed Hooks Restriction Bypassed via ANTHROPIC_BASE_URL <span class="severity sev-critical">CRITICAL</span></h2>
+<p>Enterprise administrators set <code>allowManagedHooksOnly: true</code> to enforce only approved hooks run. However, setting <code>ANTHROPIC_BASE_URL</code> to a local proxy (e.g., <code>localhost:4010</code>) causes the restriction check to be completely skipped. All non-managed hooks execute freely, including <code>/statusline</code> scripts. This allows any developer to trivially bypass enterprise security policy by pointing to a dummy endpoint. The bypass requires no special privileges — just an environment variable. <a href="https://github.com/anthropics/claude-code/issues/51123">#51123</a></p>
+<div class="fix">
+<h3>Fix: Validate hook policy enforcement independently of API endpoint</h3>
+<p>Enterprise teams should audit that <code>allowManagedHooksOnly</code> is enforced at the hook execution layer, not the API connection layer. Until this is fixed upstream, add a PreToolUse hook that validates the current <code>ANTHROPIC_BASE_URL</code> against an allowlist. If the URL doesn't match approved endpoints, block execution. For defense-in-depth, log all hook executions to a central audit system regardless of the <code>allowManagedHooksOnly</code> setting. This issue demonstrates that security controls must not depend on unrelated subsystems (API routing) for enforcement.</p>
+</div>
+
+<h2 id="hallucinated-phishing-links">60. Model Hallucinates Telegram Invite URLs — Potential Phishing Vector <span class="severity sev-high">HIGH</span></h2>
+<p>During a session resume, Sonnet 4.6 (1M) spontaneously generated two Telegram private group invite URLs (<code>t.me/+&lt;hash&gt;</code>). No Telegram reference existed anywhere in settings, hooks, skills, or user prompt. The URLs were pure hallucination. If a user clicks a hallucinated invite link, they could be joined to an attacker-controlled group (if the hash happens to be valid) or exposed to social engineering. While the probability of a valid hash is low, the pattern represents a class of vulnerability: models generating actionable external links that appear authoritative. <a href="https://github.com/anthropics/claude-code/issues/51127">#51127</a></p>
+<div class="fix">
+<h3>Fix: Filter external URLs in model output</h3>
+<p>Add a PostToolUse hook (or output filter) that flags or blocks URLs pointing to messaging platforms (Telegram, Discord, WhatsApp, Signal) that weren't present in the original prompt or project files. For maximum safety, maintain an allowlist of domains the model may reference. This is a defense-in-depth measure — the real fix requires model-level improvements to prevent URL hallucination. Also consider: never click links that appear unexpectedly in Claude Code output without manually verifying the domain and path.</p>
+</div>
+
+<h2 id="wsl2-sandbox-e2big">61. WSL2 Sandbox Fails with E2BIG — Forces Security Degradation <span class="severity sev-high">HIGH</span></h2>
+<p>On WSL2, Claude Code wraps bubblewrap (bwrap) sandbox commands in a single <code>/bin/bash -c</code> string. With realistic deny configurations (30+ patterns across <code>permissions.deny</code> and <code>sandbox.filesystem.denyRead</code>), the assembled command exceeds the Linux <code>MAX_ARG_STRLEN</code> (128 KB) limit, causing every Bash tool call to fail with <code>E2BIG</code>. Users are forced to choose: remove granular sandbox rules (weakening security) or lose all shell functionality. There is no workaround that preserves both security and functionality on WSL2 with complex configurations. <a href="https://github.com/anthropics/claude-code/issues/51126">#51126</a></p>
+<div class="fix">
+<h3>Fix: Reduce deny patterns or use file-based configuration</h3>
+<p>If you hit E2BIG on WSL2: (1) Consolidate deny patterns using wildcards where possible (e.g., <code>/home/user/secret*</code> instead of listing each file), (2) Move deny patterns from inline configuration to a referenced file that bwrap reads at runtime, (3) Prioritize the most critical deny rules and remove low-risk ones. For cc-safe-setup users: the hook-based approach (PreToolUse guards) provides equivalent protection without increasing the sandbox argument size, since hooks run independently of the bwrap command line. This makes hooks a more scalable security mechanism on WSL2 than sandbox deny lists.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 701 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #24179, #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, #51034, #51054, #51088, #51092, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #24179, #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, #51034, #51054, #51088, #51092, #51123, #51126, #51127, CVE-2026-21852</p>
 </div>
 
 </body>
