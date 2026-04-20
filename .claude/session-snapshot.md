@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-20T13:29:08+09:00
+Updated: 2026-04-20T13:29:38+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-04-20T13:29:08+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: faef20e6 checkpoint: auto-save 13:29:05
+- Last commit: be00305e checkpoint: pre-compact auto-save (1 files, 20260420-042909)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-04-20.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-04-20.md
 ./README.md
 ./docs/README.ja.md
 ./examples/cjk-punctuation-guard.sh
