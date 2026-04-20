@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。53セクション/70+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。54セクション/70+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -714,10 +714,17 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Use a PreToolUse hook that tracks consecutive Edit/Write attempts to the same file within a time window. After 5 attempts, warn the model. After 7, block and force a different approach (read the file first, try a smaller change, or ask for help). Install: <code>npx cc-safe-setup --install-example tool-retry-budget-guard</code>. This prevents the exponential token waste pattern where each retry adds ~2K tokens with zero progress.</p>
 </div>
 
+<h2 id="subagent-env-leak">54. Sub-Agent Reads .env File, Exposes 5 API Keys in Transcript <span class="severity sev-critical">CRITICAL</span></h2>
+<p>An Explore sub-agent is asked to find where API keys are used. It reads the .env file directly and outputs all secrets — Telegram Bot Token, Anthropic API Key, Gemini API Key, Perplexity API Key, DART API Key — into the conversation transcript. Memory-based security instructions ("never read .env") are NOT inherited by sub-agents. The user saved a "prevention memory" after the first incident, but the same leak happened again because sub-agents don't receive parent memory. Cost: $50 in API charges from the first incident, plus emergency key rotation for all 5 keys. <a href="https://github.com/anthropics/claude-code/issues/51030">#51030</a> <a href="https://github.com/anthropics/claude-code/issues/30731">#30731</a></p>
+<div class="fix">
+<h3>Fix: Install a .env Read guard hook</h3>
+<p>Use a PreToolUse hook on the Read matcher that blocks any attempt to read .env files (and variants like .env.local, .env.production). Unlike memory instructions, hooks ARE inherited by sub-agents — making this the only reliable protection. Safe reference files (.env.example, .env.sample) are allowed. Install: <code>npx cc-safe-setup --install-example dotenv-read-guard</code>. Also install <code>credential-file-cat-guard</code> to block Bash-based reads of credential files.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 699+ example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 700+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, CVE-2026-21852</p>
 </div>
 
 </body>

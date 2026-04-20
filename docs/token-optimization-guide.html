@@ -18,7 +18,7 @@
 <meta name="twitter:title" content="Claude Code Token Optimization Guide — Cut Your Token Bill in Half">
 <meta name="twitter:description" content="800 hours of data. 50% reduction. Copy-paste templates. Updated for Opus 4.7.">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"How to Reduce Claude Code Token Consumption","description":"A comprehensive guide to cutting Claude Code token usage in half, based on 800 hours of real operation data. Covers CLAUDE.md optimization, hook-based token guards, model selection, and context management.","totalTime":"PT30M","step":[{"@type":"HowToStep","position":1,"name":"Understand where tokens go","text":"CLAUDE.md and instructions consume 15-30% of tokens. File reads consume 25-30%. Code generation 20-25%. MCP schemas 12-20%. Conversation history 10-25%."},{"@type":"HowToStep","position":2,"name":"Optimize your CLAUDE.md","text":"Keep CLAUDE.md under 35 lines. Use allowlist patterns, one example per rule, table format, and delegate enforcement to hooks. This alone can cut token usage by 50%."},{"@type":"HowToStep","position":3,"name":"Install token-saving hooks","text":"Run npx cc-safe-setup to install 699+ hooks including read-budget-guard, token-budget-guard, pre-compact-checkpoint, and context-monitor."},{"@type":"HowToStep","position":4,"name":"Choose the right model per task","text":"Use Sonnet for routine coding (1/5 the cost of Opus). Reserve Opus for complex design decisions. Use Haiku for subagents."},{"@type":"HowToStep","position":5,"name":"Manage context aggressively","text":"Use /clear between tasks. Use /compact for long sessions. Split sessions every 2-3 hours. Disable unused MCP servers."}],"tool":[{"@type":"HowToTool","name":"cc-safe-setup"},{"@type":"HowToTool","name":"Token Checkup"}]}
+{"@context":"https://schema.org","@type":"HowTo","name":"How to Reduce Claude Code Token Consumption","description":"A comprehensive guide to cutting Claude Code token usage in half, based on 800 hours of real operation data. Covers CLAUDE.md optimization, hook-based token guards, model selection, and context management.","totalTime":"PT30M","step":[{"@type":"HowToStep","position":1,"name":"Understand where tokens go","text":"CLAUDE.md and instructions consume 15-30% of tokens. File reads consume 25-30%. Code generation 20-25%. MCP schemas 12-20%. Conversation history 10-25%."},{"@type":"HowToStep","position":2,"name":"Optimize your CLAUDE.md","text":"Keep CLAUDE.md under 35 lines. Use allowlist patterns, one example per rule, table format, and delegate enforcement to hooks. This alone can cut token usage by 50%."},{"@type":"HowToStep","position":3,"name":"Install token-saving hooks","text":"Run npx cc-safe-setup to install 700+ hooks including read-budget-guard, token-budget-guard, pre-compact-checkpoint, and context-monitor."},{"@type":"HowToStep","position":4,"name":"Choose the right model per task","text":"Use Sonnet for routine coding (1/5 the cost of Opus). Reserve Opus for complex design decisions. Use Haiku for subagents."},{"@type":"HowToStep","position":5,"name":"Manage context aggressively","text":"Use /clear between tasks. Use /compact for long sessions. Split sessions every 2-3 hours. Disable unused MCP servers."}],"tool":[{"@type":"HowToTool","name":"cc-safe-setup"},{"@type":"HowToTool","name":"Token Checkup"}]}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -157,7 +157,7 @@ th{background:#161b22;color:#f0f6fc}
 
 <p>Hooks are shell scripts that run before or after Claude Code's tool calls. They execute locally (zero token cost) and can prevent token waste automatically.</p>
 
-<pre><code># Install 699+ safety and optimization hooks in 10 seconds
+<pre><code># Install 700+ safety and optimization hooks in 10 seconds
 npx cc-safe-setup</code></pre>
 
 <h3>Token-Saving Hooks</h3>
@@ -238,7 +238,7 @@ npx cc-safe-setup
 <li><strong>Monitor with <code>/cost</code></strong> — Check your actual spending per session</li>
 </ol>
 
-<p>Full Opus 4.7 issue tracker: <a href="opus47-survival-guide.html">Opus 4.7 Survival Guide</a> (53 sections, 69+ tracked issues)</p>
+<p>Full Opus 4.7 issue tracker: <a href="opus47-survival-guide.html">Opus 4.7 Survival Guide</a> (54 sections, 69+ tracked issues)</p>
 
 <div class="cta">
 <h3>Get the Complete Guide</h3>
@@ -281,7 +281,7 @@ npx cc-safe-setup
 </div>
 
 <footer>
-<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 699 hooks / 9,200+ tests / 800 hours of operation data</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 700 hooks / 9,200+ tests / 800 hours of operation data</p>
 <p>Data as of April 2026. Based on Anthropic official documentation and first-party operation data.</p>
 </footer>
 </body>

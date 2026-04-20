@@ -111,7 +111,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;
 </div>
 
 <div class="footer">
-<p>cc-safe-setup — 699+ example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 700+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="opus-47-survival-guide.html">Survival Guide</a></p>
 </div>
 
@@ -324,7 +324,7 @@ function analyze() {
   if (hooks.length > 0) {
     hookDiv.innerHTML = hooks.map(h => `<div class="card"><strong>${h.name}</strong><p style="font-size:.85rem;color:#8b949e">${h.reason}</p><pre><code>${h.cmd}</code></pre></div>`).join('');
   } else if (metrics.hookCount > 0) {
-    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (53 sections)</a>.</p></div>';
+    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (54 sections)</a>.</p></div>';
   } else {
     hookDiv.innerHTML = '<div class="card"><pre><code>npx cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">One command to install 8 essential safety hooks.</p></div>';
   }

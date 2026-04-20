@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Claude Code settings.json Validator — Check Your Hook Configuration</title>
-<meta name="description" content="Paste your Claude Code settings.json to detect common hook mistakes. Free validator from cc-safe-setup (699+ hooks).">
+<meta name="description" content="Paste your Claude Code settings.json to detect common hook mistakes. Free validator from cc-safe-setup (700+ hooks).">
 <style>
 :root { --blue: #4f46e5; --green: #16a34a; --red: #dc2626; --yellow: #d97706; --bg: #f8fafc; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,14 +58,14 @@ footer a { color: #64748b; }
 <div id="results" class="results"></div>
 
 <div class="cta">
-  <strong>Want 699+ tested safety hooks?</strong> Run <code>npx cc-safe-setup</code> to auto-configure your settings.json.
+  <strong>Want 700+ tested safety hooks?</strong> Run <code>npx cc-safe-setup</code> to auto-configure your settings.json.
   <br><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ·
   <a href="token-book.html#en">Token Book (¥2,500)</a> ·
   <a href="https://yurukusa.github.io/cc-safe-setup/">All Tools</a>
 </div>
 
 <footer>
-  <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 699+ safety hooks for Claude Code
+  <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 700+ safety hooks for Claude Code
 </footer>
 </div>
 
@@ -175,7 +175,7 @@ function validate() {
 
   // Safety checks
   if (hookCount === 0) {
-    addResult('warning', 'No hooks defined', 'Your Claude Code has no safety hooks. Run npx cc-safe-setup for 699+ hooks');
+    addResult('warning', 'No hooks defined', 'Your Claude Code has no safety hooks. Run npx cc-safe-setup for 700+ hooks');
   } else if (hookCount < 3) {
     addResult('info', `Only ${hookCount} hook(s)`, 'Consider adding more safety hooks: rm-rf guard, credential guard, force-push guard');
   }
