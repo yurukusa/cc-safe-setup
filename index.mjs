@@ -5976,20 +5976,16 @@ async function main() {
   console.log(c.bold + '  Done.' + c.reset + ' ' + Object.keys(HOOKS).length + ' safety hooks installed.');
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
   console.log();
-  console.log('  ' + c.dim + 'Next steps:' + c.reset);
-  console.log('  ' + c.blue + '  --doctor' + c.reset + '            Verify hooks work');
-  console.log('  ' + c.blue + '  --simulate "cmd"' + c.reset + '    Test how hooks react');
-  console.log('  ' + c.blue + '  --shield' + c.reset + '            Maximum safety (recommended)');
-  console.log('  ' + c.blue + '  --opus47' + c.reset + '            Opus 4.7 crisis protection');
+  console.log('  ' + c.bold + 'You are now protected against:' + c.reset);
+  console.log('  ' + c.green + '  ✓' + c.reset + ' rm -rf / git reset --hard / git clean -fd');
+  console.log('  ' + c.green + '  ✓' + c.reset + ' Force-push to main/master');
+  console.log('  ' + c.green + '  ✓' + c.reset + ' .env / credential files committed to git');
+  console.log('  ' + c.green + '  ✓' + c.reset + ' Syntax errors cascading through files');
+  console.log('  ' + c.green + '  ✓' + c.reset + ' PowerShell Remove-Item -Recurse -Force');
   console.log();
-  console.log('  ' + c.dim + 'Free tools:' + c.reset);
-  console.log('  ' + c.blue + '  Token Checkup' + c.reset + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
-  console.log('  ' + c.blue + '  Token Book' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/token-book.html');
-  console.log('  ' + c.dim + '  28 web tools: https://yurukusa.github.io/cc-safe-setup/hub.html' + c.reset);
-  console.log();
-  console.log('  ' + c.dim + 'Tokens disappearing too fast?' + c.reset);
-  console.log('  ' + c.blue + '  Token Book' + c.reset + '  Cut consumption in half — https://yurukusa.github.io/cc-safe-setup/token-book.html');
-  console.log('  ' + c.dim + '  Safety Guide: https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log('  ' + c.dim + 'Verify:' + c.reset + '  npx cc-safe-setup --verify');
+  console.log('  ' + c.dim + 'More:' + c.reset + '    npx cc-safe-setup --shield  (maximum safety)');
+  console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log();
 }
 
