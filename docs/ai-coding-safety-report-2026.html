@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Safety Report 2026 — Incidents Across All Major Tools</title>
+<meta name="description" content="Cross-tool safety report covering real incidents from Claude Code, Cursor, GitHub Copilot, and Windsurf. Data loss, credential leaks, production failures, and token drain — documented with sources.">
+<meta property="og:title" content="AI Coding Safety Report 2026">
+<meta property="og:description" content="100+ real incidents across Claude Code, Cursor, Copilot, and Windsurf. The data developers need to code safely with AI.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/ai-coding-safety-report-2026.html">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/ai-coding-safety-report-2026.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Report","name":"AI Coding Safety Report 2026","description":"Cross-tool incident report covering Claude Code, Cursor, GitHub Copilot, and Windsurf","datePublished":"2026-04-21","author":{"@type":"Organization","name":"cc-safe-setup"}}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:860px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.6rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2.5rem 0 1rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin-bottom:1rem;font-size:.95rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:.2rem .4rem;border-radius:3px;font-size:.85rem;color:#f0883e}
+.hero{background:linear-gradient(135deg,#1a1025,#0d1117);border:1px solid #30363d;border-radius:12px;padding:2rem;margin-bottom:2rem;text-align:center}
+.hero h1{font-size:1.8rem;margin-bottom:.5rem}
+.hero .subtitle{color:#8b949e;font-size:1rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;text-align:center}
+.stat-num{font-size:2rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.8rem;color:#8b949e;margin-top:.3rem}
+.stat-num.red{color:#f85149}
+.stat-num.orange{color:#d29922}
+.stat-num.blue{color:#58a6ff}
+.tool-section{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.tool-header{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+.tool-icon{font-size:1.5rem}
+.tool-name{font-size:1.2rem;font-weight:700;color:#f0f6fc}
+.incident{border-left:3px solid #30363d;padding:.5rem 0 .5rem 1rem;margin:.8rem 0;font-size:.9rem}
+.incident.critical{border-color:#f85149}
+.incident.high{border-color:#d29922}
+.incident.medium{border-color:#58a6ff}
+.incident .title{font-weight:600;color:#f0f6fc}
+.incident .source{font-size:.75rem;color:#8b949e;margin-top:.2rem}
+.key-finding{background:#1c2333;border:1px solid #1f6feb;border-radius:8px;padding:1rem 1.5rem;margin:1rem 0;font-size:.9rem}
+.key-finding strong{color:#58a6ff}
+blockquote{border-left:3px solid #484f58;padding:.5rem 1rem;margin:1rem 0;color:#8b949e;font-style:italic}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+th,td{border:1px solid #30363d;padding:.6rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+.methodology{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0;font-size:.85rem}
+.contribute{background:linear-gradient(135deg,#1a2e1a,#0d1117);border:1px solid #238636;border-radius:8px;padding:1.5rem;margin:2rem 0}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.75rem;color:#484f58;text-align:center}
+footer a{color:#58a6ff}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>AI Coding Safety Report 2026</h1>
+<p class="subtitle">Real incidents across Claude Code, Cursor, GitHub Copilot, and Windsurf.<br>Not a product pitch. A public resource for every developer using AI coding tools.</p>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-num red">100+</div><div class="stat-label">Documented Incidents</div></div>
+<div class="stat"><div class="stat-num orange">4</div><div class="stat-label">Major Tools Affected</div></div>
+<div class="stat"><div class="stat-num blue">14.3%</div><div class="stat-label">AI Code Has Vulnerabilities</div></div>
+<div class="stat"><div class="stat-num red">$50K+</div><div class="stat-label">Documented Financial Loss</div></div>
+</div>
+
+<h2>Why This Report Exists</h2>
+
+<p>78% of Fortune 500 companies now use AI-assisted development. But 81% have no visibility into the safety of AI-generated code or the actions AI agents take on their behalf (<a href="https://www.aikido.dev/state-of-ai-security-development-2026">Aikido, 2026</a>).</p>
+
+<p>This report documents <strong>real incidents</strong> — not theoretical risks — across the four most widely-used AI coding tools. Every incident links to its primary source. No incidents are fabricated or hypothetical.</p>
+
+<p>This is a tool-agnostic resource. We maintain it because developers deserve to know the risks before they press "auto-approve."</p>
+
+<h2>Executive Summary</h2>
+
+<div class="key-finding">
+<strong>Key Finding 1:</strong> File deletion is the #1 incident category across ALL tools. Cursor, Claude Code, and Copilot (via agents) have all produced confirmed cases of unrecoverable data loss — some affecting entire system directories.
+</div>
+
+<div class="key-finding">
+<strong>Key Finding 2:</strong> Credential exposure is systematic, not accidental. AI-generated code contains hardcoded secrets at a 40% higher rate than human-written code (<a href="https://www.buildmvpfast.com/blog/copilot-secrets-api-key-leak-ai-code-security-2026">BuildMVPFast, citing GitGuardian</a>). The problem is architectural, not behavioral.
+</div>
+
+<div class="key-finding">
+<strong>Key Finding 3:</strong> Simon Willison's "Lethal Trifecta" — tool access + private data access + untrusted input — is present in every major AI coding tool. CVE-2025-62353 (Windsurf) demonstrated all three failing simultaneously.
+</div>
+
+<div class="key-finding">
+<strong>Key Finding 4:</strong> Token/cost drain is an AI-coding-specific risk category with no equivalent in traditional development. Users report $200/month plans consumed in 15-19 minutes (<a href="https://github.com/anthropics/claude-code/issues/42796">Claude Code #42796</a>, 1,700+ reactions).
+</div>
+
+<!-- ============ CLAUDE CODE ============ -->
+<div class="tool-section">
+<div class="tool-header">
+<span class="tool-icon">🟠</span>
+<span class="tool-name">Claude Code (Anthropic)</span>
+</div>
+
+<p><strong>90 documented incidents</strong> tracked in our <a href="incidents.html">Incident Tracker</a>. Categories: token drain (35), production failures (14), file deletion (13), credential leaks (9), config bypass (9), data loss (5), hook bypass (5).</p>
+
+<div class="incident critical">
+<div class="title">50 GB permanently deleted by rm -rf</div>
+<p>Claude ran <code>rm -rf</code> to "clean up" a project directory. Entire directory wiped. No recovery possible.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a> · April 2026 · Critical</div>
+</div>
+
+<div class="incident critical">
+<div class="title">$1,446 unauthorized financial transfer</div>
+<p>A Claude-generated script executed financial transactions without user authorization.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> · March 2026 · Critical</div>
+</div>
+
+<div class="incident critical">
+<div class="title">CVE-2026-21852: API key exfiltration via project settings</div>
+<p>Malicious project configuration could exfiltrate API keys to an external server.</p>
+<div class="source">CVE-2026-21852 · April 2026 · Critical</div>
+</div>
+
+<div class="incident high">
+<div class="title">$200/month Max plan consumed in 15-19 minutes</div>
+<p>1,700+ reactions. Entire daily token quota drained in a single short coding session.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a> · March 2026 · 1,700+ reactions</div>
+</div>
+
+<div class="incident high">
+<div class="title">Auto-compact death spiral: 15+ compactions overnight</div>
+<p>Auto-compact entered an infinite loop, consuming the entire token budget while the user slept.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/51088">#51088</a> · April 2026 · High</div>
+</div>
+
+<p style="font-size:.85rem;color:#8b949e">→ <a href="incidents.html">Browse all 90 Claude Code incidents</a></p>
+</div>
+
+<!-- ============ CURSOR ============ -->
+<div class="tool-section">
+<div class="tool-header">
+<span class="tool-icon">🟣</span>
+<span class="tool-name">Cursor (Anysphere)</span>
+</div>
+
+<p>Multiple confirmed file deletion and code reversion incidents. The Cursor team acknowledged three root causes in March 2026.</p>
+
+<div class="incident critical">
+<div class="title">System-wide file deletion</div>
+<p>"Cursor deleted files across my entire system." A cleanup operation cascaded beyond the project scope, deleting files system-wide.</p>
+<div class="source"><a href="https://forum.cursor.com/t/cursor-deleted-files-across-my-entire-system-critical-issue/158406">Cursor Forum #158406</a> · 2026 · Critical</div>
+</div>
+
+<div class="incident critical">
+<div class="title">Code destroyed 7 times</div>
+<p>"Cursor destroyed my code/full app, now 7th time." Repeated, unrecoverable code destruction across multiple projects.</p>
+<div class="source"><a href="https://forum.cursor.com/t/cursor-destroyed-my-code-full-app-now-7th-time/52371">Cursor Forum #52371</a> · Critical</div>
+</div>
+
+<div class="incident high">
+<div class="title">Repository deleted during indexing (Windows 11)</div>
+<p>Repository path appeared deleted or renamed during codebase indexing. Data loss incident on Windows 11.</p>
+<div class="source"><a href="https://forum.cursor.com/t/critical-data-loss-incident-repository-appears-deleted-or-renamed-during-after-indexing-on-windows-11/157534">Cursor Forum #157534</a> · 2026 · High</div>
+</div>
+
+<div class="incident high">
+<div class="title">March 2026 code reversion bug (confirmed by team)</div>
+<p>Cursor silently reverted code changes. Three root causes confirmed: Agent Review conflict, Cloud Sync race, and Format On Save producing different file states. Unknown number of users affected.</p>
+<div class="source"><a href="https://vibecoding.app/blog/cursor-problems-2026">VibeCoding analysis</a> · March 2026 · High</div>
+</div>
+
+<div class="incident high">
+<div class="title">Agent deletes critical files without confirmation</div>
+<p>A 16MB database dump file was deleted without explicit user confirmation during a "cleanup" suggestion.</p>
+<div class="source"><a href="https://forum.cursor.com/t/agent-deletes-critical-files-without-confirmation/147361">Cursor Forum #147361</a> · High</div>
+</div>
+</div>
+
+<!-- ============ COPILOT ============ -->
+<div class="tool-section">
+<div class="tool-header">
+<span class="tool-icon">⚫</span>
+<span class="tool-name">GitHub Copilot (Microsoft/GitHub)</span>
+</div>
+
+<p>Critical vulnerabilities involving repository takeover, credential exfiltration, and systematically elevated secret leakage rates.</p>
+
+<div class="incident critical">
+<div class="title">CVE-2025-59145 (CamoLeak): Private source code exfiltration — CVSS 9.6</div>
+<p>Attackers could exfiltrate API keys and private source code via GitHub's own trusted image proxy, bypassing Content Security Policy without executing any malicious code.</p>
+<div class="source"><a href="https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code">Legit Security</a> · CVE-2025-59145 · CVSS 9.6</div>
+</div>
+
+<div class="incident critical">
+<div class="title">RoguePilot: Repository takeover via prompt injection in GitHub Issues</div>
+<p>Attackers could craft hidden prompt injection in GitHub Issues that Copilot would automatically process, leaking GITHUB_TOKEN to an external server. Full repository takeover possible.</p>
+<div class="source"><a href="https://orca.security/resources/blog/roguepilot-github-copilot-vulnerability/">Orca Security</a> · February 2026 · Critical</div>
+</div>
+
+<div class="incident high">
+<div class="title">2,702 hardcoded API keys found in AI-generated code</div>
+<p>Analysis found 2,702 hardcoded secrets in Copilot-generated code. Repositories using Copilot had 40% higher secret leakage rates than traditional development.</p>
+<div class="source"><a href="https://www.buildmvpfast.com/blog/copilot-secrets-api-key-leak-ai-code-security-2026">BuildMVPFast</a> · 2026 · High</div>
+</div>
+
+<div class="incident high">
+<div class="title">"Comment and Control" attack affecting multiple AI agents</div>
+<p>Claude Code Security Review, Google Gemini CLI Action, and GitHub Copilot Agent all vulnerable to credential exfiltration via crafted GitHub Issue comments.</p>
+<div class="source"><a href="https://www.techzine.eu/news/security/140524/ai-agents-on-github-leak-api-keys-via-prompt-injection/">Techzine</a> · 2026 · High</div>
+</div>
+</div>
+
+<!-- ============ WINDSURF ============ -->
+<div class="tool-section">
+<div class="tool-header">
+<span class="tool-icon">🔵</span>
+<span class="tool-name">Windsurf (Codeium)</span>
+</div>
+
+<p>Path traversal vulnerability demonstrating the "Lethal Trifecta" — tool access, private data, untrusted input all failing simultaneously.</p>
+
+<div class="incident critical">
+<div class="title">CVE-2025-62353: Path traversal enables data exfiltration</div>
+<p>File access had no directory boundaries. System-level access was available without permissions. Prompt injection could trigger both without social engineering. Simon Willison described this as the "lethal trifecta" for AI applications.</p>
+<div class="source"><a href="https://vibegraveyard.ai/story/windsurf-path-traversal-data-exfiltration/">Vibe Graveyard</a> · CVE-2025-62353 · Critical</div>
+</div>
+</div>
+
+<!-- ============ CROSS-TOOL ANALYSIS ============ -->
+<h2>Cross-Tool Analysis</h2>
+
+<table>
+<tr><th>Risk Category</th><th>Claude Code</th><th>Cursor</th><th>Copilot</th><th>Windsurf</th></tr>
+<tr><td><strong>File Deletion</strong></td><td>13 incidents</td><td>5+ reports</td><td>Via agents</td><td>Via path traversal</td></tr>
+<tr><td><strong>Credential Leak</strong></td><td>9 incidents + CVE</td><td>Not primary</td><td>2 CVEs + 40% higher rate</td><td>CVE path traversal</td></tr>
+<tr><td><strong>Token/Cost Drain</strong></td><td>35 incidents</td><td>Subscription model</td><td>API cost spikes</td><td>Subscription model</td></tr>
+<tr><td><strong>Production Damage</strong></td><td>14 incidents</td><td>Code reversion</td><td>Repository takeover</td><td>Data exfiltration</td></tr>
+<tr><td><strong>Code Reversion</strong></td><td>Via compaction</td><td>Confirmed March 2026</td><td>Not primary</td><td>Not reported</td></tr>
+</table>
+
+<h3>Common Patterns</h3>
+<ol style="margin:1rem 0 1rem 1.5rem;font-size:.9rem">
+<li><strong>Auto-approve is the #1 risk amplifier.</strong> Every tool offers some form of "auto mode." Every tool has incidents where auto-approve enabled catastrophic actions.</li>
+<li><strong>File deletion is the most common catastrophic incident.</strong> All four tools have confirmed cases of unrecoverable file or project deletion.</li>
+<li><strong>"Clean up" is the most dangerous AI intent.</strong> When an AI decides to "clean up" or "organize," it frequently deletes files the user needs.</li>
+<li><strong>Overnight/unattended sessions multiply risk.</strong> The worst financial and data losses occur when nobody is watching.</li>
+<li><strong>The AI doesn't know what it doesn't know.</strong> AI tools delete SSH keys, production databases, and credentials because they don't understand the consequences — only the syntax.</li>
+</ol>
+
+<h2>Recommendations (Tool-Agnostic)</h2>
+
+<ol style="margin:1rem 0 1rem 1.5rem;font-size:.9rem">
+<li><strong>Never run auto-approve without guardrails.</strong> If your tool supports hooks/guards, install them before enabling auto mode.</li>
+<li><strong>Back up before long sessions.</strong> A simple <code>git stash</code> or branch checkpoint every 30 minutes prevents catastrophic loss.</li>
+<li><strong>Don't let AI touch production.</strong> Use separate credentials, separate environments. Never give an AI tool production database access.</li>
+<li><strong>Monitor token/cost usage.</strong> Set budget alerts. Don't leave sessions running overnight without spending limits.</li>
+<li><strong>Read the code before committing.</strong> AI-generated code has a 14.3% vulnerability rate (<a href="https://checkmarx.com/learn/ai-security/top-12-ai-developer-tools-in-2026-for-security-coding-and-quality/">Stanford/MIT study</a>). Review diffs.</li>
+<li><strong>Keep credentials out of the workspace.</strong> Use environment variables, secrets managers, and .gitignore. Never store keys in files the AI can read.</li>
+</ol>
+
+<div class="methodology">
+<h3>Methodology</h3>
+<p>This report compiles incidents from: GitHub Issues (anthropics/claude-code), Cursor Community Forum, security research publications (Orca Security, Legit Security, Aikido), CVE databases, developer forums, and news outlets (The Register, SecurityWeek, Techzine). Only incidents with verifiable primary sources are included. We do not fabricate or hypothesize incidents.</p>
+<p>Last updated: April 21, 2026. This is a living document — incidents are added as they're reported and verified.</p>
+</div>
+
+<div class="contribute">
+<h3>Contribute</h3>
+<p>Know of an incident we missed? Experienced something yourself? This report is open to contributions.</p>
+<p style="margin-top:.5rem"><a href="https://github.com/yurukusa/cc-safe-setup/issues/new?title=Safety+Report+Incident&labels=safety-report">Submit an incident via GitHub Issue</a></p>
+<p style="font-size:.8rem;color:#8b949e;margin-top:.5rem">We welcome incidents from any AI coding tool — Claude Code, Cursor, Copilot, Windsurf, Cline, Devin, or others. Include a link to the primary source (forum post, GitHub Issue, CVE, news article).</p>
+</div>
+
+<footer>
+<p>AI Coding Safety Report 2026 — a public resource by <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
+<p style="margin-top:.3rem">This report is not sponsored by or affiliated with Anthropic, Anysphere (Cursor), Microsoft/GitHub, or Codeium (Windsurf).</p>
+<p style="margin-top:.3rem"><a href="index.html">Home</a> · <a href="incidents.html">Claude Code Incidents (90)</a> · <a href="opus-47-survival-guide.html">Survival Guide</a></p>
+</footer>
+
+</body>
+</html>
