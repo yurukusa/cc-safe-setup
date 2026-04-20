@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Do Your Claude Code Tokens Go? — Free Chapter from Token Book</title>
+<meta name="description" content="Free chapter: the 4 layers of Claude Code token consumption explained with data from 800+ hours. Learn where your quota actually disappears.">
+<meta name="keywords" content="Claude Code, tokens, token consumption, where tokens go, quota, Max plan, save tokens, reduce cost">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html">
+<meta property="og:title" content="Where Do Your Claude Code Tokens Go? (Free Chapter)">
+<meta property="og:description" content="The 4 layers of token consumption — from 800+ hours of data. Free chapter from Token Book.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Where Do Your Claude Code Tokens Go?","description":"The 4 layers of token consumption explained with data from 800+ hours of autonomous operation.","datePublished":"2026-04-20","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Book","name":"Token Book","url":"https://yurukusa.github.io/cc-safe-setup/token-book.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.6rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.2rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.layer{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1rem 0}
+.layer strong{color:#f0f6fc}
+.highlight{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.highlight strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="token-book.html">&larr; Token Book</a> <span class="free-badge">FREE CHAPTER</span></p>
+<h1>Chapter 1: Where Do Your Claude Code Tokens Go?</h1>
+<p class="meta">From <a href="token-book.html">Token Book</a> — Cut Claude Code Token Usage in Half &middot; 800+ hours of data</p>
+
+<p>"I'm not doing anything and my quota keeps disappearing" — this is the most common complaint from Claude Code users. But you <em>are</em> doing something. Tokens are being consumed in places you can't see.</p>
+
+<h2>The 4 Layers of Token Consumption</h2>
+
+<div class="layer">
+<strong>Layer 1: System Prompt</strong>
+<p>Every time Claude Code starts a turn, it loads the internal system prompt + your CLAUDE.md + tool definitions + MCP configs. <strong>The longer your CLAUDE.md, the higher the base cost per turn.</strong> 100 lines vs 500 lines makes a massive difference.</p>
+</div>
+
+<div class="layer">
+<strong>Layer 2: Context Window</strong>
+<p>As conversation grows, past exchanges accumulate. If the prompt cache is working, these are reused cheaply. But <strong>when the cache breaks, the same prompt costs several times more</strong> (covered in Chapter 8 — 40 diagnostic symptoms).</p>
+</div>
+
+<div class="layer">
+<strong>Layer 3: Tool Calls</strong>
+<p>Every file read, file write, and Bash execution consumes tokens. The output of <code>ls -la</code> vs <code>cat large-file.txt</code> differs by orders of magnitude. Tool results have an internal 200K token cap — exceed it and you get truncation → retry → more consumption.</p>
+</div>
+
+<div class="layer">
+<strong>Layer 4: Subagents</strong>
+<p>Each subagent maintains its own context. Convenient, but overuse causes token explosion. One user lost 101K+ tokens to a subagent retry loop (<a href="https://github.com/anthropics/claude-code/issues/46968">#46968</a>).</p>
+</div>
+
+<h2>What Eats the Most Tokens (800 Hours of Data)</h2>
+
+<ol>
+<li><strong>Large file reads</strong> — a single <code>cat</code> of a big file can cost 50K+ tokens</li>
+<li><strong>Context bloat</strong> — not running <code>/compact</code> during long sessions</li>
+<li><strong>Prompt cache destruction</strong> — any change to CLAUDE.md invalidates the cache</li>
+<li><strong>Unnecessary tool calls</strong> — Claude "exploring" by reading files it doesn't need</li>
+<li><strong>CLAUDE.md bloat</strong> — 500+ lines means 500+ tokens per turn, every turn</li>
+<li><strong>Frequent state file updates</strong> — writing to todo.md or progress.md every turn</li>
+</ol>
+
+<div class="highlight">
+<strong>The key insight:</strong> Most token waste is invisible. You don't see the system prompt loading, the cache miss, or the 200K truncation retry. The only way to know is to measure — which is what the remaining 9 chapters cover.
+</div>
+
+<h2>What's in the Rest of the Book</h2>
+
+<ul>
+<li><strong>Chapter 2:</strong> Compress your CLAUDE.md from 500 lines to 35 — cache hit rate goes from 89% to 95%</li>
+<li><strong>Chapter 3:</strong> Reduce compaction frequency to extend session lifetime</li>
+<li><strong>Chapter 4:</strong> 9 hooks that automatically stop token waste</li>
+<li><strong>Chapter 5:</strong> Prevent subagent token explosions</li>
+<li><strong>Chapter 6:</strong> Session splitting to maximize cache hits</li>
+<li><strong>Chapter 7:</strong> Before/after data from 800 hours of optimization</li>
+<li><strong>Chapter 8:</strong> 40 diagnostic symptoms — if your quota is draining, find the cause here</li>
+<li><strong>Chapter 9:</strong> Copy-paste settings.json, CLAUDE.md, and hook templates</li>
+</ul>
+
+<div class="cta">
+<p style="font-size:1.1rem;font-weight:600;color:#f0f6fc;margin-bottom:.5rem">Get the full Token Book</p>
+<p style="font-size:.9rem;color:#8b949e;margin-bottom:1rem">10 chapters &middot; 40 diagnostic symptoms &middot; Copy-paste templates<br>Max plan ($200/month) saves ~10% = $20/month. Pays for itself in 1 month.</p>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn">Buy on Ko-fi — $17</a>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline">Buy on Zenn — ¥2,500</a>
+<p style="margin-top:.8rem;font-size:.8rem;color:#8b949e"><a href="token-checkup.html">Free: Token Checkup</a> — 5-question diagnostic, takes 30 seconds</p>
+</div>
+
+<footer>
+<p><a href="token-book.html">Token Book</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="index.html">Home</a></p>
+</footer>
+
+</body>
+</html>
