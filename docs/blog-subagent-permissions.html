@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Fix Subagent Permission Issues in Claude Code</title>
+<meta name="description" content="Subagent permissions don't propagate from parent sessions. Here's why and how to work around it with pre-declared permissions and hooks.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-subagent-permissions.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem 1rem;line-height:1.7}
+.container{max-width:720px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.5rem}
+h2{color:#f0f6fc;font-size:1.2rem;margin-top:2rem;margin-bottom:.5rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+h3{color:#f0f6fc;font-size:1rem;margin-top:1.5rem;margin-bottom:.5rem}
+p{margin-bottom:1rem;font-size:.95rem}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin-bottom:1rem;font-size:.85rem;line-height:1.5}
+code{font-family:'SF Mono',Monaco,monospace;font-size:.85rem;background:#161b22;padding:.1rem .3rem;border-radius:3px}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:2rem}
+.callout{background:#161b22;border-left:3px solid #f85149;padding:1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout-info{border-left-color:#58a6ff}
+.footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.8rem;color:#484f58}
+</style>
+</head>
+<body>
+<div class="container">
+<p><a href="index.html">&larr; cc-safe-setup</a></p>
+<h1>How to Fix Subagent Permission Issues in Claude Code</h1>
+<p class="meta">April 21, 2026 · Based on GitHub Issues <a href="https://github.com/anthropics/claude-code/issues/51287">#51287</a>, <a href="https://github.com/anthropics/claude-code/issues/51288">#51288</a>, <a href="https://github.com/anthropics/claude-code/issues/51289">#51289</a>, <a href="https://github.com/anthropics/claude-code/issues/51286">#51286</a></p>
+
+<div class="callout">
+<strong>The problem:</strong> You grant permissions to your parent Claude Code session, but child subagents re-prompt for the same permissions — or silently fail. This is a known bug affecting v2.1.111+.
+</div>
+
+<h2>What's happening</h2>
+<p>When you accept a permission in the parent session (via UI prompt or <code>--dangerously-skip-permissions</code>), that grant lives in the parent's <strong>session memory only</strong>. Child subagents spawned via the Agent tool start with a fresh permission state.</p>
+
+<p>This means:</p>
+<ul style="margin-bottom:1rem;padding-left:1.5rem">
+<li><strong>Edit/Write permissions don't propagate</strong> — even if your <code>settings.json</code> allows them for specific paths (<a href="https://github.com/anthropics/claude-code/issues/51287">#51287</a>)</li>
+<li><strong>Runtime-accepted grants are invisible to children</strong> — the child has no way to know what the parent accepted (<a href="https://github.com/anthropics/claude-code/issues/51289">#51289</a>)</li>
+<li><strong>additionalDirectories globs don't propagate</strong> — children can't access paths the parent was given access to (<a href="https://github.com/anthropics/claude-code/issues/51286">#51286</a>)</li>
+</ul>
+
+<h2>Workarounds</h2>
+
+<h3>1. Pre-declare all permissions in settings.json</h3>
+<p>Instead of accepting permissions at runtime, declare them upfront:</p>
+<pre>{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "Read",
+      "Bash(git *)",
+      "Bash(npm *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)"
+    ]
+  }
+}</pre>
+<p>Pre-declared permissions are read from <code>settings.json</code> at session start, so both parent and child agents see them.</p>
+
+<div class="callout callout-info">
+<strong>Tip:</strong> Run <code>npx cc-safe-setup --shield</code> to set up a complete permission + hook configuration that works for both parent and subagent sessions.
+</div>
+
+<h3>2. Use hooks instead of permission grants</h3>
+<p>Hooks execute for every tool call regardless of the session. A <code>PreToolUse</code> hook that auto-approves safe patterns works identically for parent and child:</p>
+<pre>// In settings.json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ~/.claude/hooks/auto-approve-project-edits.sh"
+        }]
+      }
+    ]
+  }
+}</pre>
+
+<h3>3. Avoid runtime permission grants when using subagents</h3>
+<p>If you know you'll spawn subagents, set everything up in <code>settings.json</code> before starting the session. Runtime grants are ephemeral — they won't survive subagent dispatch.</p>
+
+<h3>4. Use worktree isolation</h3>
+<p>If subagents need to edit files, use <code>isolation: "worktree"</code> in your Agent tool call. Each subagent gets its own git worktree with full write access, avoiding permission conflicts entirely.</p>
+
+<h2>The root cause</h2>
+<p>Claude Code's permission model was designed for single-session use. The Agent tool dispatches child processes that inherit <em>some</em> parent state but not runtime permission grants. This is an architectural limitation that Anthropic will likely need to address at the framework level.</p>
+
+<p>Until then, the safest approach is: <strong>if subagents need a permission, declare it in settings.json, not at runtime.</strong></p>
+
+<h2>Related resources</h2>
+<ul style="padding-left:1.5rem">
+<li><a href="opus-47-survival-guide.html">Survival Guide</a> — 65 sections covering permission issues and more</li>
+<li><a href="risk-assessment.html">Risk Assessment</a> — check if your subagent setup is at risk</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — one command to install hooks that work for parent and child sessions</li>
+</ul>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · MIT License
+</div>
+</div>
+</body>
+</html>
