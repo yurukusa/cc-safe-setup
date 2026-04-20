@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic's Security Review + cc-safe-setup: Complete Defense for Claude Code</title>
+<meta name="description" content="Anthropic's official security-review GitHub Action catches vulnerabilities in PRs. cc-safe-setup hooks block dangerous commands in real-time. Together, they provide layered defense.">
+<meta property="og:title" content="Official Security Review + Hooks = Complete Claude Code Defense">
+<meta property="og:description" content="How Anthropic's security-review Action and cc-safe-setup hooks work together for layered defense.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Anthropic's Security Review + cc-safe-setup: Complete Defense","datePublished":"2026-04-21","author":{"@type":"Person","name":"yurukusa"}}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.5rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.15rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+p{margin-bottom:1rem;font-size:.95rem}
+a{color:#58a6ff;text-decoration:none}
+code{background:#161b22;padding:.2rem .4rem;border-radius:3px;font-size:.85rem;color:#f0883e}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.8rem;color:#c9d1d9}
+.diagram{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0;text-align:center;font-family:monospace;font-size:.85rem;line-height:2}
+.layer{display:inline-block;padding:.5rem 1rem;border-radius:6px;margin:.3rem;font-weight:600}
+.layer-1{background:#1e3a5f;color:#58a6ff;border:1px solid #1f6feb}
+.layer-2{background:#1a2e1a;color:#3fb950;border:1px solid #238636}
+.cta{background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4f46e5;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta a{color:#a5b4fc;font-weight:600}
+.btn{display:inline-block;padding:.6rem 1.5rem;background:#238636;color:#fff;border-radius:6px;font-weight:600;margin:.3rem;text-decoration:none}
+.btn:hover{background:#2ea043}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+th,td{border:1px solid #30363d;padding:.6rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.75rem;color:#484f58;text-align:center}
+footer a{color:#58a6ff}
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; cc-safe-setup</a></p>
+
+<h1>Anthropic's Security Review + cc-safe-setup Hooks: Layered Defense</h1>
+<p style="color:#8b949e;font-size:.85rem">April 21, 2026 · 4 min read</p>
+
+<p>Anthropic released <a href="https://github.com/anthropics/claude-code-security-review">claude-code-security-review</a> — a GitHub Action that uses Claude to scan PRs for security vulnerabilities. It catches SQL injection, XSS, hardcoded secrets, and other OWASP Top 10 issues <em>before code merges</em>.</p>
+
+<p>That's <strong>Layer 1: pre-merge defense</strong>. But what about the commands Claude Code runs <em>right now</em>, in your terminal, at 3am during an autonomous session?</p>
+
+<p>That's where <strong>Layer 2: runtime hooks</strong> come in.</p>
+
+<h2>The Two Layers</h2>
+
+<div class="diagram">
+<div class="layer layer-1">Layer 1: Anthropic Security Review</div>
+<br>PR submitted → Claude scans diff → blocks vulnerable code before merge
+<br><br>
+<div class="layer layer-2">Layer 2: cc-safe-setup Hooks</div>
+<br>Command about to execute → hook inspects → blocks dangerous commands in real-time
+</div>
+
+<table>
+<tr><th>Aspect</th><th>Security Review (Layer 1)</th><th>cc-safe-setup Hooks (Layer 2)</th></tr>
+<tr><td><strong>When</strong></td><td>At PR time</td><td>At execution time (real-time)</td></tr>
+<tr><td><strong>What it catches</strong></td><td>Code vulnerabilities (SQLi, XSS, secrets in code)</td><td>Dangerous commands (rm -rf, force-push, credential deletion)</td></tr>
+<tr><td><strong>What it misses</strong></td><td>Runtime actions, file deletion, git operations</td><td>Static code vulnerabilities, logic flaws</td></tr>
+<tr><td><strong>Speed</strong></td><td>Minutes (full PR scan)</td><td>Milliseconds (pattern match)</td></tr>
+<tr><td><strong>Scope</strong></td><td>Code changes only</td><td>All terminal commands + file writes</td></tr>
+<tr><td><strong>Token cost</strong></td><td>Uses Claude API per review</td><td>Zero (bash scripts, no API calls)</td></tr>
+</table>
+
+<h2>What Layer 1 Doesn't Catch</h2>
+
+<p>The security review Action is excellent at finding code-level vulnerabilities. But <a href="incidents.html">90 documented incidents</a> show that most Claude Code disasters aren't code vulnerabilities — they're <strong>operational actions</strong>:</p>
+
+<ul style="margin:1rem 0 1rem 1.5rem;font-size:.9rem">
+<li><code>rm -rf ~/projects</code> — <a href="https://github.com/anthropics/claude-code/issues/49129">50GB permanently deleted</a> (#49129)</li>
+<li><code>git push --force origin main</code> — untested code deployed at 3am</li>
+<li><code>git add .env</code> — API keys committed to public repo (#6527)</li>
+<li>Auto-compact consumed entire token budget overnight (#51088)</li>
+<li>Extended thinking burned 16M tokens in 25 minutes (#51092)</li>
+</ul>
+
+<p>No PR review catches these — they happen in the terminal, between PRs, during autonomous sessions.</p>
+
+<h2>Setting Up Both Layers</h2>
+
+<p><strong>Layer 1</strong> — Add the official Action to your repo:</p>
+<pre>
+# .github/workflows/security-review.yml
+name: Security Review
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: anthropics/claude-code-security-review@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+</pre>
+
+<p><strong>Layer 2</strong> — Install runtime hooks (30 seconds):</p>
+<pre>npx cc-safe-setup</pre>
+
+<p>That's it. Layer 1 reviews your PRs. Layer 2 blocks dangerous commands in real-time. They don't conflict — they complement.</p>
+
+<h2>Why Both Matter</h2>
+
+<p>A Stanford/MIT study found 14.3% of AI-generated code contains security vulnerabilities. Layer 1 catches those before merge. But the remaining 85.7% of "safe" code can still be deployed via <code>git push --force</code> to production at 3am — and Layer 2 is the only thing that stops it.</p>
+
+<p>Neither layer alone is enough. Together, they provide defense-in-depth: one guards the code, the other guards the execution.</p>
+
+<div class="cta">
+<p style="font-weight:600;color:#f0f6fc;margin-bottom:.5rem">Get Both Layers</p>
+<p style="font-size:.85rem;color:#a5b4fc;margin-bottom:1rem">Layer 1: <a href="https://github.com/anthropics/claude-code-security-review">anthropics/claude-code-security-review</a> (official)</p>
+<a class="btn" href="https://github.com/yurukusa/cc-safe-setup">Layer 2: npx cc-safe-setup</a>
+<p style="margin-top:.8rem;font-size:.8rem;color:#8b949e"><a href="attack-simulator.html">Test your Layer 2</a> — paste your settings.json, see what survives 10 real attacks</p>
+</div>
+
+<footer>
+<a href="index.html">cc-safe-setup</a> · <a href="opus-47-survival-guide.html">Survival Guide (66 sections)</a> · <a href="incidents.html">Incident Tracker</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</footer>
+</body>
+</html>
