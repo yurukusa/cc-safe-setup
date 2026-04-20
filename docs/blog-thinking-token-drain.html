@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Extended Thinking Consumed 16 Million Tokens in 25 Minutes</title>
+<meta name="description" content="Extended thinking can enter a runaway state and drain your entire Claude Code token quota in minutes. Here's how to detect and stop it with a simple hook.">
+<meta name="keywords" content="Claude Code, extended thinking, token drain, 16 million tokens, reasoning loop, fix, hook, thinking stall, Sonnet 4.6, quota exhausted, token consumption">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-thinking-token-drain.html">
+<meta property="og:title" content="Claude Code: 16 Million Tokens Consumed in 25 Minutes of Thinking">
+<meta property="og:description" content="Extended thinking entered a runaway state. One hook detects it before your quota is gone.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Claude Code Extended Thinking Consumed 16 Million Tokens in 25 Minutes","description":"Extended thinking can enter a runaway state and drain your entire token quota. A stall detector hook catches it early.","datePublished":"2026-04-20","author":{"@type":"Person","name":"yurukusa"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+p{margin:.8rem 0}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.alert{background:#2d1b1b;border:1px solid #da3633;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}.alert strong{color:#f85149}
+.fix{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}.fix strong{color:#3fb950}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+<p style="margin-bottom:.5rem"><a href="index.html">← cc-safe-setup</a></p>
+<h1>Claude Code Extended Thinking Consumed 16 Million Tokens in 25 Minutes</h1>
+<p class="meta">April 20, 2026 · 3 min read · by <a href="https://github.com/yurukusa">yurukusa</a></p>
+
+<div class="alert">
+<strong>TL;DR:</strong> Extended thinking can silently consume millions of tokens with no output. Install <code>thinking-stall-detector.sh</code> to get warned when thinking exceeds 5 minutes. Takes 30 seconds.
+</div>
+
+<h2>What Happened</h2>
+
+<p>A user on Sonnet 4.6 asked Claude Code to work on a task. The model entered its extended thinking phase — and never came out.</p>
+
+<p><strong>25 minutes later, 16 million tokens were consumed.</strong> No useful output was produced. The user's entire quota was gone. They requested a refund. (<a href="https://github.com/anthropics/claude-code/issues/51092">#51092</a>)</p>
+
+<p>This is not an isolated incident. A related pattern (<a href="https://github.com/anthropics/claude-code/issues/49884">#49884</a>) shows Opus 4.7 reading a single file, then freezing for 30+ minutes before the API terminates the request. No output, but tokens consumed.</p>
+
+<h2>Why This Happens</h2>
+
+<p>Extended thinking has <strong>no built-in token ceiling</strong>. When the model enters a reasoning loop without finding a resolution:</p>
+
+<ol style="margin-left:1.5rem;margin-top:.5rem">
+<li>The model generates thinking tokens internally</li>
+<li>No tools are called, so no hooks fire</li>
+<li>From the outside, the session looks like it's "working"</li>
+<li>Tokens are consumed at full rate</li>
+<li>This continues until the context window limit is hit or the API times out</li>
+</ol>
+
+<p>The critical gap: during thinking, <strong>there's no way for hooks to intervene</strong>. The thinking happens between tool calls, not during them.</p>
+
+<h2>The Fix: Thinking Stall Detector</h2>
+
+<div class="fix">
+<strong>30-second install:</strong>
+<pre>npx cc-safe-setup --install-example thinking-stall-detector</pre>
+</div>
+
+<p>This hook can't stop thinking mid-stream (nothing can). But it <strong>detects the aftermath</strong>: if more than 5 minutes pass between consecutive tool calls, it warns you that a thinking stall occurred. This gives you a signal to:</p>
+
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li>Check <code>/cost</code> immediately</li>
+<li>Restart the session if tokens spiked</li>
+<li>Avoid the same pattern that triggered the stall</li>
+</ul>
+
+<h2>Manual Installation</h2>
+
+<p>Save as <code>~/.claude/hooks/thinking-stall-detector.sh</code>:</p>
+
+<pre>#!/bin/bash
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+STATE_FILE="/tmp/cc-thinking-stall-last-call"
+WARN_SECS="${CC_STALL_WARN_SECS:-300}"
+NOW=$(date +%s)
+LAST=$(cat "$STATE_FILE" 2>/dev/null || echo "$NOW")
+echo "$NOW" > "$STATE_FILE"
+GAP=$((NOW - LAST))
+if [ "$GAP" -ge "$WARN_SECS" ]; then
+    MINUTES=$((GAP / 60))
+    echo "⚠️ Thinking stall: ${MINUTES}m with no tool activity." >&2
+    echo "Check /cost. If tokens spiked, restart the session." >&2
+fi
+exit 0</pre>
+
+<p>Add to <code>~/.claude/settings.json</code>:</p>
+<pre>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "",
+      "hooks": [{"type": "command",
+        "command": "bash ~/.claude/hooks/thinking-stall-detector.sh"}]
+    }]
+  }
+}</pre>
+
+<h2>For API Users</h2>
+
+<p>If you're using the Claude API directly, you have more control:</p>
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li>Set <code>max_tokens</code> to cap total output (including thinking)</li>
+<li>Set thinking budget limits via the API's <code>thinking</code> parameter</li>
+<li>Implement client-side timeouts that abort requests after N minutes</li>
+</ul>
+
+<p>For Max/Pro plan users in Claude Code, these API-level controls aren't available — the hook-based detector is your best defense.</p>
+
+<h2>Prevention Checklist</h2>
+
+<ul style="margin-left:1.5rem">
+<li>☐ Install <code>thinking-stall-detector.sh</code></li>
+<li>☐ Check <code>/cost</code> every 10-15 minutes during active work</li>
+<li>☐ Never leave extended thinking sessions unattended</li>
+<li>☐ If output seems frozen for 5+ minutes, press Ctrl+C</li>
+</ul>
+
+<div class="cta">
+<h2 style="border:none;margin-top:0">40 token drain symptoms diagnosed</h2>
+<p>The extended thinking drain is Symptom 40 of 40 documented in the Token Book. Each symptom includes root cause, hook-based fix, and prevention steps.</p>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn">Token Book — $17</a>
+<a href="token-book.html#en" class="btn btn-outline">Details + Free Chapters</a>
+<a href="token-checkup.html" class="btn btn-outline">Free Token Checkup (30 sec)</a>
+</div>
+
+<h2>Related</h2>
+<ul style="margin-left:1.5rem">
+<li><a href="blog-compaction-death-spiral.html">Auto-Compact Death Spiral: How to Fix It</a></li>
+<li><a href="opus-47-survival-guide.html#thinking-token-drain">Survival Guide §58: Extended Thinking Token Drain</a></li>
+<li><a href="opus-47-survival-guide.html#compact-death-spiral">Survival Guide §57: Auto-Compact Death Spiral</a></li>
+</ul>
+
+<footer>
+<a href="index.html">cc-safe-setup</a> · <a href="opus-47-survival-guide.html">Survival Guide (58 sections)</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</footer>
+</body>
+</html>
