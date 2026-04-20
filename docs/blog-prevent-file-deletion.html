@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Stop Claude Code from Deleting Your Files</title>
+<meta name="description" content="Claude Code has deleted 50 GB of user data, wiped SSH keys, and destroyed production databases. Here's how to install a hook that blocks destructive commands in 30 seconds.">
+<meta name="keywords" content="Claude Code, rm -rf, delete files, data loss, safety, hooks, prevent, file protection, Claude Code safe, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-prevent-file-deletion.html">
+<meta property="og:title" content="How to Stop Claude Code from Deleting Your Files">
+<meta property="og:description" content="Real incidents: 50 GB deleted, SSH keys wiped, production databases destroyed. One command prevents all of them.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/blog-prevent-file-deletion.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How to Stop Claude Code from Deleting Your Files">
+<meta name="twitter:description" content="Real incidents from GitHub Issues. One command to prevent them all.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"How to Stop Claude Code from Deleting Your Files","description":"Claude Code has deleted 50 GB of user data, wiped SSH keys, and destroyed production databases. Install safety hooks in 30 seconds to prevent it.","datePublished":"2026-04-20","author":{"@type":"Person","name":"yurukusa"},"publisher":{"@type":"Organization","name":"cc-safe-setup"},"mainEntityOfPage":"https://yurukusa.github.io/cc-safe-setup/blog-prevent-file-deletion.html"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.alert{background:#2d1b1b;border:1px solid #da3633;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.alert strong{color:#f85149}
+.fix{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.fix strong{color:#3fb950}
+.incident{background:#1c1917;border:1px solid #78350f;border-radius:8px;padding:1rem 1.5rem;margin:1rem 0}
+.incident strong{color:#fbbf24}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="index.html">&larr; cc-safe-setup</a></p>
+<h1>How to Stop Claude Code from Deleting Your Files</h1>
+<p class="meta">April 20, 2026 &middot; 5 min read &middot; by <a href="https://github.com/yurukusa">yurukusa</a></p>
+
+<div class="alert">
+<strong>TL;DR:</strong> Claude Code can and does run <code>rm -rf</code> on user directories. It has destroyed 50+ GB of data across multiple incidents. Run <code>npx cc-safe-setup</code> to install a hook that blocks it. Takes 10 seconds.
+</div>
+
+<h2>The Incidents</h2>
+
+<p>These are real reports from GitHub Issues on the <a href="https://github.com/anthropics/claude-code">anthropics/claude-code</a> repository. Each one involves actual data loss.</p>
+
+<div class="incident">
+<strong>#49129 — 50 GB / 1,500 files permanently deleted</strong>
+<p>Claude ran <code>rm -rf</code> and permanently destroyed approximately 50 GB of data and 1,500 files from a user's directory. April 2026.</p>
+</div>
+
+<div class="incident">
+<strong>#49554 — All SSH keys wiped</strong>
+<p>Auto mode approved deletion of <code>~/.ssh</code>. Every SSH key on the machine was gone. No confirmation prompt was shown to the user.</p>
+</div>
+
+<div class="incident">
+<strong>#49539 — Git credentials deleted</strong>
+<p><code>~/.git-credentials</code> containing Personal Access Tokens was deleted without confirmation. Access to all repositories revoked instantly.</p>
+</div>
+
+<div class="incident">
+<strong>#46058 — 3,467 files / ~7 GB deleted</strong>
+<p>Claude decided to "clean up" a project directory. 3,467 files totaling roughly 7 GB were removed with a single <code>rm -rf</code> command.</p>
+</div>
+
+<div class="incident">
+<strong>#36339 — Entire user directory via NTFS junction</strong>
+<p>On Windows (WSL), Claude followed an NTFS junction point and deleted the entire user directory. The junction made a project subdirectory point to <code>~</code>.</p>
+</div>
+
+<h2>Why This Happens</h2>
+
+<p>Claude Code executes shell commands to accomplish tasks. When it decides a directory is "unnecessary" or wants to "start fresh," it reaches for <code>rm -rf</code> — the same command any developer would use. The difference is that Claude doesn't have the intuition for "wait, that's my home directory."</p>
+
+<p>The built-in permission system helps, but has gaps:</p>
+
+<ul style="margin:.8rem 0;padding-left:1.5rem">
+<li><strong>Auto mode</strong> approves many commands without asking. <code>rm -rf ./build</code> looks harmless — until <code>./build</code> is a symlink to <code>/</code>.</li>
+<li><strong>Deny rules</strong> can be bypassed. <a href="https://adversa.ai/blog/claude-code-security-bypass-deny-rules-disabled/">Research showed</a> deny rules can be disabled after ~50 commands.</li>
+<li><strong>No scope awareness.</strong> Claude doesn't know that <code>~/.ssh</code> is irreplaceable or that a 50 GB directory might be important.</li>
+</ul>
+
+<h2>The Fix: 10 Seconds</h2>
+
+<div class="fix">
+<strong>Install cc-safe-setup:</strong>
+<pre>npx cc-safe-setup</pre>
+<p>This installs 8 safety hooks into your <code>~/.claude/settings.json</code>. The <code>prevent-rm-rf</code> hook intercepts every Bash command and blocks any <code>rm</code> that targets dangerous paths (<code>/</code>, <code>~</code>, <code>.git</code>, <code>.ssh</code>, <code>.env</code>, and more).</p>
+</div>
+
+<h2>How the Hook Works</h2>
+
+<p>Claude Code fires a <code>PreToolUse</code> event before every tool execution. The hook receives a JSON payload with the command about to run:</p>
+
+<pre>{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rm -rf ~/projects"
+  }
+}</pre>
+
+<p>The <code>prevent-rm-rf</code> hook parses the command, checks it against a blocklist of dangerous patterns, and returns a <code>DENY</code> response if it matches:</p>
+
+<pre>#!/bin/bash
+# Simplified — real hook handles more edge cases
+CMD=$(cat | jq -r '.tool_input.command // empty')
+
+if echo "$CMD" | grep -qE 'rm\s+(-[rfRF]+\s+)*(/|~|\.git|\.ssh|\.env)'; then
+  echo '{"decision":"DENY","reason":"Blocked: destructive rm targeting protected path"}'
+fi</pre>
+
+<p>The command never executes. Claude sees the denial message and adjusts its approach — usually by asking what you'd like to do instead.</p>
+
+<h2>What Else Gets Blocked</h2>
+
+<p>The 8 default hooks from <code>cc-safe-setup</code> also protect against:</p>
+
+<ul style="margin:.8rem 0;padding-left:1.5rem">
+<li><strong>Force-push to main/master</strong> — <code>git push --force origin main</code> is blocked</li>
+<li><strong>Secret leaks</strong> — credentials, API keys, and tokens are caught before commit</li>
+<li><strong>Syntax errors</strong> — every file edit is validated before proceeding</li>
+<li><strong>Dangerous git commands</strong> — <code>git reset --hard</code>, <code>git clean -fd</code></li>
+<li><strong>Large file writes</strong> — full rewrites of files >500 lines trigger a warning</li>
+</ul>
+
+<h2>Beyond the Defaults: 700+ Example Hooks</h2>
+
+<p>The repository includes 700+ additional hook examples organized by category. Some highlights:</p>
+
+<ul style="margin:.8rem 0;padding-left:1.5rem">
+<li><code>file-recycle-bin.sh</code> — moves files to a recycle bin instead of deleting them</li>
+<li><code>symlink-traversal-guard.sh</code> — blocks commands that follow symlinks outside the project</li>
+<li><code>ntfs-junction-guard.sh</code> — prevents the Windows junction attack from <a href="https://github.com/anthropics/claude-code/issues/36339">#36339</a></li>
+<li><code>home-dir-shield.sh</code> — blocks any write/delete operation targeting <code>$HOME</code></li>
+</ul>
+
+<p>Use the <a href="https://yurukusa.github.io/cc-safe-setup/hook-selector.html">Hook Selector</a> to find hooks for your specific workflow.</p>
+
+<div class="cta">
+<p style="font-size:1.1rem;font-weight:600;color:#f0f6fc;margin-bottom:.8rem">Don't wait for the incident</p>
+<p style="margin-bottom:1rem;color:#8b949e">Every incident above happened to someone who thought "it won't happen to me."</p>
+<a href="https://github.com/yurukusa/cc-safe-setup" class="btn">Install cc-safe-setup</a>
+<a href="https://yurukusa.github.io/cc-safe-setup/opus-47-survival-guide.html" class="btn btn-outline">Read the Survival Guide</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">Tracking <strong>73+ real incidents</strong> from GitHub Issues &middot; <a href="https://yurukusa.github.io/cc-safe-setup/token-book.html">Token optimization guide &rarr;</a></p>
+</div>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; MIT License &middot; <a href="index.html">Home</a> &middot; <a href="hub.html">All Tools</a></p>
+</footer>
+
+</body>
+</html>
