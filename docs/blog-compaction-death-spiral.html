@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Auto-Compact Death Spiral: How to Fix It</title>
+<meta name="description" content="Auto-compact can loop infinitely and drain your entire token budget overnight. Here's how to install a circuit breaker hook that stops it in 30 seconds.">
+<meta name="keywords" content="Claude Code, auto-compact, compaction loop, token drain, death spiral, fix, hook, circuit breaker">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-compaction-death-spiral.html">
+<meta property="og:title" content="Claude Code Auto-Compact Death Spiral: How to Fix It">
+<meta property="og:description" content="15+ compactions overnight, entire budget consumed. One hook stops it.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/blog-compaction-death-spiral.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Claude Code Auto-Compact Death Spiral: How to Fix It">
+<meta name="twitter:description" content="Auto-compact loops infinitely and drains your token budget. Here's the fix.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Claude Code Auto-Compact Death Spiral: How to Fix It","description":"Auto-compact can loop infinitely and drain your entire token budget overnight. A circuit breaker hook stops it in 30 seconds.","datePublished":"2026-04-20","author":{"@type":"Person","name":"yurukusa"},"publisher":{"@type":"Organization","name":"cc-safe-setup"},"mainEntityOfPage":"https://yurukusa.github.io/cc-safe-setup/blog-compaction-death-spiral.html"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.alert{background:#2d1b1b;border:1px solid #da3633;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.alert strong{color:#f85149}
+.fix{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.fix strong{color:#3fb950}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="index.html">← cc-safe-setup</a></p>
+<h1>Claude Code Auto-Compact Death Spiral: How to Fix It</h1>
+<p class="meta">April 20, 2026 · 3 min read · by <a href="https://github.com/yurukusa">yurukusa</a></p>
+
+<div class="alert">
+<strong>TL;DR:</strong> Auto-compact can loop infinitely and consume your entire token budget overnight. Install <code>compact-circuit-breaker.sh</code> to prevent it. Takes 30 seconds.
+</div>
+
+<h2>The Problem</h2>
+
+<p>You leave a Claude Code session running overnight. By morning, your entire token budget is gone — and no work was done.</p>
+
+<p>The cause: <strong>auto-compact entered an infinite loop</strong>. Each compaction attempt failed to restore continuity (due to FileHistory errors), which triggered the next compaction immediately. The loop continued until every token was consumed.</p>
+
+<p>This isn't theoretical:</p>
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li><a href="https://github.com/anthropics/claude-code/issues/51088">#51088</a>: <strong>15+ compactions</strong> in a single overnight session, entire budget consumed</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/24179">#24179</a>: <strong>211 compactions</strong> in one session</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/42647">#42647</a>: High token burn from redundant context resubmission</li>
+</ul>
+
+<h2>Why Auto-Compact Has No Circuit Breaker</h2>
+
+<p>Auto-compact is designed as a stabilizing mechanism — when context gets too large, it compresses it. But it has <strong>no maximum frequency limit</strong>. When the underlying recovery system (FileHistory hard-linking) is degraded:</p>
+
+<ol style="margin-left:1.5rem;margin-top:.5rem">
+<li>Auto-compact fires because context is too large</li>
+<li>Compaction completes but FileHistory can't restore continuity</li>
+<li>The context appears "too large" again (continuity not restored)</li>
+<li>Auto-compact fires again — immediately</li>
+<li>Repeat until all tokens are consumed</li>
+</ol>
+
+<p>The critical flaw: there's no check for "did the last compaction actually help?" Each iteration costs tokens, and the total cost is unbounded.</p>
+
+<h2>The Fix: Circuit Breaker Hook</h2>
+
+<div class="fix">
+<strong>30-second install:</strong>
+<pre>npx cc-safe-setup --install-example compact-circuit-breaker</pre>
+</div>
+
+<p>This hook acts as a circuit breaker for auto-compaction:</p>
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li>Maximum <strong>3 compactions per hour</strong> (configurable)</li>
+<li>Minimum <strong>120 seconds</strong> between compactions (configurable)</li>
+<li>Logs all compaction events for debugging</li>
+<li>Blocks with clear error message when death spiral is detected</li>
+</ul>
+
+<p>If you prefer to block all compaction entirely, use <code>compact-blocker.sh</code> instead.</p>
+
+<h2>Manual Installation</h2>
+
+<p>Save as <code>~/.claude/hooks/compact-circuit-breaker.sh</code>:</p>
+
+<pre>#!/bin/bash
+MAX_PER_HOUR="${CC_COMPACT_MAX_PER_HOUR:-3}"
+MIN_INTERVAL="${CC_COMPACT_MIN_INTERVAL:-120}"
+STATE_DIR="/tmp/.cc-compact-circuit-breaker"
+STATE_FILE="$STATE_DIR/compaction-log"
+mkdir -p "$STATE_DIR"
+touch "$STATE_FILE"
+NOW=$(date +%s)
+ONE_HOUR_AGO=$((NOW - 3600))
+[ -f "$STATE_FILE" ] && awk -v cutoff="$ONE_HOUR_AGO" '$1 >= cutoff' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+RECENT_COUNT=$(wc -l < "$STATE_FILE" | tr -d ' ')
+LAST_TIME=0
+[ -s "$STATE_FILE" ] && LAST_TIME=$(tail -1 "$STATE_FILE")
+ELAPSED=$((NOW - LAST_TIME))
+if [ "$RECENT_COUNT" -ge "$MAX_PER_HOUR" ]; then
+  echo "CIRCUIT BREAKER: $RECENT_COUNT compactions in the last hour. Start a fresh session." >&2
+  exit 2
+fi
+if [ "$ELAPSED" -lt "$MIN_INTERVAL" ] && [ "$LAST_TIME" -gt 0 ]; then
+  echo "COOLDOWN: Last compaction was ${ELAPSED}s ago." >&2
+  exit 2
+fi
+echo "$NOW" >> "$STATE_FILE"
+exit 0</pre>
+
+<p>Add to <code>~/.claude/settings.json</code>:</p>
+<pre>{
+  "hooks": {
+    "PreCompact": [{
+      "matcher": "",
+      "hooks": [{"type": "command",
+        "command": "bash ~/.claude/hooks/compact-circuit-breaker.sh"}]
+    }]
+  }
+}</pre>
+
+<h2>Prevention Checklist</h2>
+
+<ul style="margin-left:1.5rem">
+<li>☐ Install <code>compact-circuit-breaker.sh</code></li>
+<li>☐ Add <code>session-time-limit.sh</code> for overnight sessions</li>
+<li>☐ Check <code>/cost</code> before leaving sessions unattended</li>
+<li>☐ Prefer fresh sessions over long-running ones</li>
+</ul>
+
+<div class="cta">
+<h2 style="border:none;margin-top:0">40 token drain symptoms diagnosed</h2>
+<p>The compaction death spiral is Symptom 39 of 40 documented in the Token Book. Each symptom includes root cause analysis, hook-based fix, and prevention checklist.</p>
+<a href="https://ko-fi.com/s/fd44ef09a7" class="btn">Token Book — $17</a>
+<a href="token-book.html#en" class="btn btn-outline">Details + Free Chapters</a>
+<a href="token-checkup.html" class="btn btn-outline">Free Token Checkup (30 sec)</a>
+</div>
+
+<h2>Related</h2>
+<ul style="margin-left:1.5rem">
+<li><a href="opus-47-survival-guide.html#compact-death-spiral">Survival Guide §57: Auto-Compact Death Spiral</a></li>
+<li><a href="opus-47-survival-guide.html#thinking-token-drain">Survival Guide §58: Extended Thinking Token Drain</a></li>
+<li><a href="opus-47-survival-guide.html#compact-misreport">Survival Guide §29: Auto-Compact Token Misreporting</a></li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/compact-circuit-breaker.sh">Source: compact-circuit-breaker.sh</a></li>
+</ul>
+
+<footer>
+<a href="index.html">cc-safe-setup</a> · <a href="opus-47-survival-guide.html">Survival Guide (58 sections)</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</footer>
+
+</body>
+</html>
