@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-21T03:50:54+09:00
+Updated: 2026-04-21T04:19:47+09:00
 
 ## Git
 - Branch: `main`
@@ -7,14 +7,14 @@ Updated: 2026-04-21T03:50:54+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 35d4eca5 checkpoint: auto-save 03:50:53
+- Last commit: 5ae9f5a7 Token Book LP: fix duplicate table row + update 78→80+ issues - Merged two "Troubleshooting" rows into one clear comparison - Updated GitHub Issues count from 78+ to 80+ (matches SG §65) Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-04-21.md
-./.claude/pre-compact-checkpoint.md
 ./README.md
+./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-04-21.md
 ./tests/powershell-remove-item-guard.test.sh
 ./examples/powershell-remove-item-guard.sh
 ./tests/git-filter-repo-guard.test.sh
