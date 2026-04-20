@@ -6,7 +6,7 @@
 
 > 🚀 **Launching on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) — April 21!** Follow us and upvote to support open source safety for AI coding agents.
 
-**One command to make Claude Code safe for autonomous operation.** 706 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 707 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
@@ -16,7 +16,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 > **What's a hook?** A checkpoint that runs before Claude executes a command. Like airport security — it inspects what's about to happen and blocks anything dangerous before it reaches the gate.
 
-[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (78+ real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html)
+[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (79+ real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html)
 
 ```
   cc-safe-setup
@@ -190,7 +190,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 706 examples |
+| `--install-example <name>` | Install from 707 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
