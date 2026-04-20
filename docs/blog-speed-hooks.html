@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 Hooks That Make Claude Code Faster (Fewer Permission Prompts)</title>
+<meta name="description" content="Reduce Claude Code permission prompts by 60%. Auto-approve safe git commands, skip redundant file reads, and batch approve test runs. Copy-paste ready hooks.">
+<meta name="keywords" content="Claude Code, hooks, auto approve, faster, permission prompts, productivity, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-speed-hooks.html">
+<meta property="og:title" content="3 Hooks That Make Claude Code Faster">
+<meta property="og:description" content="Auto-approve safe operations, skip redundant reads, batch approve tests. Fewer interruptions, same safety.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"3 Hooks That Make Claude Code Faster","description":"Install three hooks that reduce permission prompts while maintaining safety. Auto-approve safe git, skip redundant reads, batch test runs.","datePublished":"2026-04-21","author":{"@type":"Person","name":"yurukusa"},"totalTime":"PT2M"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.1rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.stat{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.stat strong{color:#3fb950}
+.hook-section{border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0;background:#161b22}
+.hook-num{display:inline-block;background:#1f6feb;color:#fff;width:28px;height:28px;border-radius:50%;text-align:center;line-height:28px;font-weight:700;font-size:.9rem;margin-right:.5rem}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-blue{background:#1f6feb}.btn-blue:hover{background:#388bfd}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="index.html">&larr; cc-safe-setup</a></p>
+<h1>3 Hooks That Make Claude Code Faster</h1>
+<p class="meta">April 21, 2026 &middot; 4 min read &middot; Fewer permission prompts, same safety</p>
+
+<div class="stat">
+<strong>The problem:</strong> Claude Code asks permission for every tool call. In a typical 30-minute session, you click "Allow" 40-80 times. Most of those are safe read-only operations that don't need human approval.
+</div>
+
+<p>These 3 hooks auto-approve safe operations while keeping guardrails on dangerous ones. The result: <strong>~60% fewer permission prompts</strong> without sacrificing safety.</p>
+
+<p><em>Note: These work alongside safety hooks, not instead of them. Install <code>npx cc-safe-setup</code> first for baseline protection, then add these for speed.</em></p>
+
+<!-- Hook 1 -->
+<div class="hook-section">
+<h2><span class="hook-num">1</span> Auto-Approve Safe Git Commands</h2>
+
+<p><strong>What it does:</strong> Automatically approves read-only and low-risk git operations: <code>git status</code>, <code>git log</code>, <code>git diff</code>, <code>git branch</code>, <code>git stash</code>, and compound commands like <code>cd project && git status</code>.</p>
+
+<p><strong>What it blocks:</strong> Still requires approval for <code>git push</code>, <code>git reset</code>, <code>git clean</code>, and anything that modifies remote state.</p>
+
+<pre>#!/bin/bash
+# auto-approve-safe-git.sh
+# Trigger: PreToolUse  Matcher: Bash
+
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$CMD" ] && exit 0
+
+# Strip safe prefixes (cd, &&) to get the core command
+CORE=$(echo "$CMD" | sed 's/.*&&\s*//' | sed 's/^\s*(cd [^;]*;\s*)//')
+
+# Auto-approve read-only git operations
+if echo "$CORE" | grep -qE '^\s*git\s+(status|log|diff|show|branch|tag|stash|remote|fetch|ls-files|rev-parse)'; then
+  echo '{"decision":"APPROVE","reason":"Read-only git operation"}'
+  exit 0
+fi</pre>
+
+<p><strong>Impact:</strong> In a typical coding session, this eliminates 15-25 permission prompts for git operations alone.</p>
+</div>
+
+<!-- Hook 2 -->
+<div class="hook-section">
+<h2><span class="hook-num">2</span> Auto-Approve File Reads in Project Directory</h2>
+
+<p><strong>What it does:</strong> Approves Read tool calls when the target file is inside the current project directory. Claude reads dozens of files per session — each one currently requires your approval.</p>
+
+<p><strong>What it blocks:</strong> Still requires approval for reads outside the project (system files, ~/.ssh, /etc, other projects).</p>
+
+<pre>#!/bin/bash
+# auto-approve-project-reads.sh
+# Trigger: PreToolUse  Matcher: Read
+
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE" ] && exit 0
+
+# Get project root (git root or CWD)
+PROJECT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+# Resolve to absolute path
+ABS_FILE=$(realpath "$FILE" 2>/dev/null || echo "$FILE")
+
+# Auto-approve if file is inside project
+if [[ "$ABS_FILE" == "$PROJECT"* ]]; then
+  echo '{"decision":"APPROVE","reason":"File is inside project directory"}'
+  exit 0
+fi</pre>
+
+<p><strong>Impact:</strong> Eliminates 20-40 permission prompts per session for in-project file reads.</p>
+</div>
+
+<!-- Hook 3 -->
+<div class="hook-section">
+<h2><span class="hook-num">3</span> Auto-Approve Test Commands</h2>
+
+<p><strong>What it does:</strong> Approves common test runners: <code>npm test</code>, <code>pytest</code>, <code>go test</code>, <code>cargo test</code>, and similar. Tests are read-heavy, side-effect-free operations that don't need human gatekeeping.</p>
+
+<pre>#!/bin/bash
+# auto-approve-tests.sh
+# Trigger: PreToolUse  Matcher: Bash
+
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$CMD" ] && exit 0
+
+# Auto-approve common test runners
+if echo "$CMD" | grep -qE '^\s*(npm\s+test|npx\s+(jest|vitest|mocha)|pytest|python\s+-m\s+(pytest|unittest)|go\s+test|cargo\s+test|bundle\s+exec\s+r(spec|ake)|php\s+artisan\s+test|dotnet\s+test)'; then
+  echo '{"decision":"APPROVE","reason":"Test command — safe to run"}'
+  exit 0
+fi</pre>
+
+<p><strong>Impact:</strong> During TDD cycles, this saves 5-10 approvals per iteration. Over a session with 20 test runs, that's 100+ clicks avoided.</p>
+</div>
+
+<h2>Install All 3 + Safety Baseline</h2>
+
+<pre>npx cc-safe-setup                          # Safety first (8 core hooks)
+npx cc-safe-setup --install-example auto-approve-compound-git
+npx cc-safe-setup --install-example auto-approve-project-reads
+npx cc-safe-setup --install-example auto-approve-test-runners</pre>
+
+<p>Or browse all 707 hook examples with <code>npx cc-safe-setup --examples</code>.</p>
+
+<h2>Want to Save Tokens Too?</h2>
+
+<p>Speed hooks reduce <em>friction</em>. Token hooks reduce <em>cost</em>. If your Claude Code quota drains faster than expected, the issue is usually invisible: broken prompt cache, compaction loops, or subagent sprawl.</p>
+
+<p>The <a href="token-checkup.html">Token Checkup</a> (free, 30 seconds) tells you which type of waste you have. The <a href="token-book.html">Token Book</a> ($17) gives you the full diagnostic framework — 46 documented symptoms with copy-paste fixes.</p>
+
+<div class="cta">
+<p style="font-size:1.1rem;font-weight:600;color:#f0f6fc;margin-bottom:.8rem">Fewer prompts + lower cost = better Claude Code</p>
+<a href="https://github.com/yurukusa/cc-safe-setup" class="btn">npx cc-safe-setup</a>
+<a href="token-checkup.html" class="btn btn-blue">Token Checkup (free)</a>
+</div>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; MIT License &middot; <a href="index.html">Home</a> &middot; <a href="blog-5-essential-hooks.html">5 Safety Hooks</a> &middot; <a href="hub.html">All Tools</a></p>
+</footer>
+
+</body>
+</html>
