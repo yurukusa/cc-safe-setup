@@ -77,6 +77,8 @@ footer{text-align:center;color:#8b949e;font-size:.75rem;margin-top:2rem;padding-
 <button class="filter-btn" data-filter="production">Production</button>
 <button class="filter-btn" data-filter="git-safety">Git Safety</button>
 <button class="filter-btn" data-filter="data-loss">Data Loss</button>
+<button class="filter-btn" data-filter="hook-bypass">Hook Bypass</button>
+<button class="filter-btn" data-filter="config-bypass">Config Issue</button>
 </div>
 
 <div class="incident-list" id="incident-list"></div>
@@ -132,7 +134,59 @@ const incidents = [
   {id:"51123",title:"Enterprise allowManagedHooksOnly bypassed via ANTHROPIC_BASE_URL",desc:"Setting ANTHROPIC_BASE_URL to a local proxy disables managed hooks enforcement. Any developer can bypass enterprise security policy.",cat:"credential-leak",sev:"critical",date:"2026-04"},
   {id:"51127",title:"Model hallucinated Telegram invite URLs — phishing vector",desc:"Sonnet 4.6 generated fake Telegram group invite links during session resume. No Telegram reference existed in project.",cat:"credential-leak",sev:"high",date:"2026-04"},
   {id:"51126",title:"WSL2 sandbox E2BIG failure forces security degradation",desc:"30+ deny patterns overflow bwrap argument limit. Users must weaken sandbox to keep shell working.",cat:"data-loss",sev:"high",date:"2026-04"},
-  {id:"51255",title:"PreToolUse hook 'ask' silently auto-approved in auto mode",desc:"Hooks returning permissionDecision:'ask' are bypassed in auto mode. Safety gates designed to prompt users are silently approved during autonomous operation.",cat:"permission-bypass",sev:"high",date:"2026-04"}
+  {id:"51255",title:"PreToolUse hook 'ask' silently auto-approved in auto mode",desc:"Hooks returning permissionDecision:'ask' are bypassed in auto mode. Safety gates designed to prompt users are silently approved during autonomous operation.",cat:"hook-bypass",sev:"high",date:"2026-04"},
+  // --- SG-sourced incidents (53 additional) ---
+  {id:"29249",title:"NTFS junction traversal deleted entire user directory",desc:"On Windows WSL, Claude followed a junction point beyond target scope. Full system restore required.",cat:"file-deletion",sev:"critical",date:"2026-01"},
+  {id:"45893",title:"git filter-repo destroyed production files + force-pushed",desc:"Deleted 4 production files, force-pushed without approval. Two mining pool servers went down.",cat:"file-deletion",sev:"critical",date:"2026-03"},
+  {id:"48792",title:"Case-insensitive path destroyed 10+ years of projects",desc:"Two users lost decade of projects within 48 hours due to case-insensitive path mishandling.",cat:"file-deletion",sev:"critical",date:"2026-04"},
+  {id:"49464",title:"Home directory deletion attempt via tilde misinterpretation",desc:"Claude treated ./~ as ~/ and attempted to delete the home directory.",cat:"file-deletion",sev:"high",date:"2026-04"},
+  {id:"49615",title:"Installer auto-update truncated shell config to 0 bytes",desc:"~/.bash_profile and ~/.zshrc truncated to empty during update.",cat:"file-deletion",sev:"high",date:"2026-04"},
+  {id:"49740",title:"Uncommitted work silently vanished during session",desc:"In-progress changes disappeared without warning or error.",cat:"file-deletion",sev:"high",date:"2026-04"},
+  {id:"49890",title:"SSH rm -rf x4 incidents in 7 days",desc:"Four separate SSH-related rm -rf incidents reported within one week.",cat:"file-deletion",sev:"critical",date:"2026-04"},
+  {id:"50052",title:"Skills directory symlinks destroyed during update",desc:"Claude Code update killed skill symlinks. Real dirs survived, symlinks lost.",cat:"file-deletion",sev:"medium",date:"2026-04"},
+  {id:"50952",title:"Docker rm without exploring safer alternatives",desc:"Claude used docker rm (destroying container) instead of docker restart.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"24179",title:"211 compactions in a single session",desc:"Compaction loop consumed enormous token budget in one sitting.",cat:"token-drain",sev:"critical",date:"2025-12"},
+  {id:"49268",title:"Thinking summaries silently disappeared (17 reactions)",desc:"Claude Code stopped showing thinking summaries. Users lost visibility into token usage.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"49541",title:"Opus 4.7 token consumption 4x higher than expected",desc:"After Opus 4.7 update, token usage quadrupled with no change in workload.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"49562",title:"Opus 4.7 burns 1% quota per prompt — no downgrade path",desc:"Each prompt consumes ~1% of plan. UI offered no way to switch back to 4.6.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"49585",title:"cache_creation token spikes — costs explode invisibly",desc:"Hundreds of thousands of cache_creation tokens with no visible cause.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"50191",title:"Subagent memory growth triggers OOM crash",desc:"Subagent memory grew exponentially, crashing the session and losing unsaved work.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50204",title:"Context at 124% capacity — auto-compact fires silently",desc:"Context exceeded 1M window. Auto-compact triggered without UI warning.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50213",title:"Subagents lack cache_control — redundant token costs",desc:"Subagent requests don't use cache_control, causing duplicate token charges.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50362",title:"Charges billed to extra usage instead of subscription",desc:"Tokens charged outside subscription bucket, causing unexpected bills.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50364",title:"CLI/UI model mismatch causes 4x token consumption",desc:"CLI and UI read different config sources, silently running expensive model.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50380",title:"Recursive subagent fork bomb — resource exhaustion",desc:"Unbounded subagent spawning exhausted CPU, memory, and file descriptors.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"50385",title:"Compaction itself consumes significant tokens",desc:"The compaction process burns tokens and post-compaction accounting is unreliable.",cat:"token-drain",sev:"medium",date:"2026-04"},
+  {id:"50389",title:"Background processes consume tokens silently",desc:"Heartbeats, context refreshes, and system prompt re-evaluation consume quota.",cat:"token-drain",sev:"medium",date:"2026-04"},
+  {id:"50402",title:"Opus compaction completely broken",desc:"Compaction non-functional for Opus. Every conversation fails on first compaction.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"50467",title:"PreCompact hook does not fire on auto-compaction",desc:"PreCompact hooks only fire on manual /compact, not automatic triggers.",cat:"hook-bypass",sev:"high",date:"2026-04"},
+  {id:"50492",title:"Auto-compact fires at 24% context usage",desc:"Compaction triggering at 24% instead of expected threshold, wasting quota.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50513",title:"Engineering quality regression on complex tasks",desc:"Opus 4.7 shows systematic quality degradation on complex engineering tasks.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"50554",title:"Compaction re-executes /loop commands",desc:"Compaction summary replays CronCreate commands, causing duplicate scheduled tasks.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"30731",title:".env credentials exposed to chat by subagent",desc:"Subagent dumped .env contents to chat, exposing secrets.",cat:"credential-leak",sev:"critical",date:"2026-01"},
+  {id:"50232",title:"Git credential config silently overwritten",desc:"Claude overwrote git credential configuration. Push fails until manual fix.",cat:"credential-leak",sev:"high",date:"2026-04"},
+  {id:"50303",title:"allowedTools silently ignored — any tool callable",desc:"With specific flags, allowedTools is bypassed. Claude can call any tool.",cat:"hook-bypass",sev:"critical",date:"2026-04"},
+  {id:"50960",title:"Security-critical hooks silently fail",desc:"Hooks stop executing without error. Combined with context exhaustion, recovery breaks.",cat:"hook-bypass",sev:"critical",date:"2026-04"},
+  {id:"46727",title:"Hallucinations + rule violations wasted 80% of budget",desc:"On Max 20x plan, Opus 4.6 hallucinated and violated rules, consuming 80% budget.",cat:"token-drain",sev:"critical",date:"2026-03"},
+  {id:"48927",title:"Subagent worktree cleanup destroyed .git directory",desc:"Parallel subagent cleanup deleted the .git directory.",cat:"file-deletion",sev:"critical",date:"2026-04"},
+  {id:"48992",title:"pip install --break-system-packages in auto mode",desc:"Claude ran pip with --break-system-packages without asking.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"49169",title:"Subagent analyzes stale code — produces wrong findings",desc:"Subagent works on old code state, produces findings based on stale files.",cat:"production",sev:"medium",date:"2026-04"},
+  {id:"49192",title:"CLAUDE.md instructions skipped across 3 sessions",desc:"Explicit rules in CLAUDE.md were ignored in 3 consecutive sessions.",cat:"config-bypass",sev:"high",date:"2026-04"},
+  {id:"49232",title:"Model identity confusion — wrong model reported",desc:"Claude Code reports wrong model identity, confusing debugging.",cat:"config-bypass",sev:"medium",date:"2026-04"},
+  {id:"49332",title:"Code flagged as malware by safety classifier",desc:"Legitimate security keywords trigger false positive malware detection.",cat:"config-bypass",sev:"medium",date:"2026-04"},
+  {id:"49363",title:"Subagent 40-60% refusal rate on legitimate code",desc:"Subagents refuse to read legitimate code files at very high rates.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"49653",title:"Auto mode toggle poisons session state",desc:"Toggling auto mode off poisons the session — shift+tab also breaks.",cat:"config-bypass",sev:"high",date:"2026-04"},
+  {id:"49689",title:"Model pinning broken — cannot downgrade from 4.7",desc:"Users who want Opus 4.6 cannot pin via UI. Workaround is CLI-only.",cat:"config-bypass",sev:"high",date:"2026-04"},
+  {id:"49696",title:"PR creation overwrote uncommitted changes",desc:"Creating a PR silently destroyed uncommitted local changes.",cat:"file-deletion",sev:"high",date:"2026-04"},
+  {id:"49725",title:"Sonnet ignores workspace files — wastes tokens on guessing",desc:"Sonnet doesn't read source files even when mapped, relies on thin info.",cat:"token-drain",sev:"medium",date:"2026-04"},
+  {id:"49757",title:"Thinking summaries invisible in VS Code extension",desc:"VS Code extension doesn't render thinking summaries. Token visibility lost.",cat:"config-bypass",sev:"medium",date:"2026-04"},
+  {id:"49902",title:"Thinking summaries not rendered in VS Code (8 reactions)",desc:"With Opus 4.7, thinking summaries show blank in VS Code extension.",cat:"config-bypass",sev:"medium",date:"2026-04"},
+  {id:"50176",title:"Mode transition without confirmation — scoping to implementation",desc:"Claude jumped from scoping to implementation without any confirmation prompt.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"50201",title:"Model switch resets permission mode silently",desc:"Switching models silently resets permissions to default, removing restrictions.",cat:"config-bypass",sev:"high",date:"2026-04"},
+  {id:"50434",title:"Subagent edits settings.json — parent session freezes",desc:"Subagent permission_request for settings.json causes parent to hang.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"50947",title:"Stale skill arguments survive compaction — ghost instructions",desc:"Old arguments persist after compaction, indistinguishable from current.",cat:"config-bypass",sev:"high",date:"2026-04"},
+  {id:"50975",title:"CJK content silently corrupted during edits",desc:"Chinese/Japanese/Korean text corrupted without warning during file edits.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"50986",title:"Edit drift — model mental model diverges from file",desc:"Claude's understanding of file state drifts from reality, causing wrong edits.",cat:"production",sev:"medium",date:"2026-04"}
 ];
 
 function render(filter) {
