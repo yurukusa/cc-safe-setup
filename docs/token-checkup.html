@@ -243,7 +243,9 @@ function showResults() {
   }).slice(0, 5);
 
   const scoreClass = score >= 70 ? 'green' : score >= 40 ? 'yellow' : 'red';
-  const label = score >= 70 ? 'Good — minor tweaks possible' : score >= 40 ? 'Room for improvement' : 'Significant token waste detected';
+  const typeName = score >= 80 ? 'The Optimizer' : score >= 60 ? 'The Conscious Coder' : score >= 40 ? 'The Silent Burner' : score >= 20 ? 'The Token Bleeder' : 'The Quota Destroyer';
+  const typeDesc = score >= 80 ? 'Your setup is solid. You already know where tokens go.' : score >= 60 ? 'You\'re aware of the problem but haven\'t plugged all the leaks yet.' : score >= 40 ? 'Tokens are draining in places you can\'t see. Most developers are here.' : score >= 20 ? 'Your monthly bill is 2-3x what it should be. Quick wins available.' : 'Emergency: your setup has critical token drains. Fix today.';
+  const label = `${typeName} — ${typeDesc}`;
   const wastePercent = Math.round((100 - score) * 0.6);
   const monthlySavings = burn === 'fast' ? Math.round(wastePercent * 2) : burn === 'moderate' ? Math.round(wastePercent * 1.2) : Math.round(wastePercent * 0.5);
   const planCost = burn === 'fast' ? 200 : burn === 'moderate' ? 200 : 20;
@@ -253,7 +255,8 @@ function showResults() {
     <div class="result">
       <h2>Your Token Efficiency Score</h2>
       <div class="score ${scoreClass}">${score}/100</div>
-      <p class="score-label">${label}</p>
+      <p style="font-size:1.1rem;font-weight:700;color:#f0f6fc;margin:.5rem 0 .3rem">${typeName}</p>
+      <p class="score-label">${typeDesc}</p>
       ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Estimated ~${wastePercent}% token waste → <strong style="color:#f97316">~$${monthlySavings}/month</strong> in potential savings on your $${planCost}/month plan.</p>` : ''}
     </div>
 
@@ -303,11 +306,12 @@ function showResults() {
 
 function shareTwitter(score) {
   const emoji = score < 40 ? '🔥' : score < 70 ? '⚠️' : '✅';
+  const typeForShare = score >= 80 ? 'The Optimizer' : score >= 60 ? 'The Conscious Coder' : score >= 40 ? 'The Silent Burner' : score >= 20 ? 'The Token Bleeder' : 'The Quota Destroyer';
   const msg = score < 40
-    ? `My Claude Code token efficiency: ${score}/100 ${emoji} Losing ~$80-120/month on Max plan. 30 seconds to check yours: #ClaudeCode #ProductHunt`
+    ? `My Claude Code type: "${typeForShare}" — ${score}/100 ${emoji} Time to install some hooks. 30 seconds to check yours: #ClaudeCode`
     : score < 70
-    ? `My Claude Code token efficiency: ${score}/100 ${emoji} Could save $30-60/month with better settings. Check yours: #ClaudeCode #ProductHunt`
-    : `My Claude Code token efficiency: ${score}/100 ${emoji} Optimized. How does your setup compare? #ClaudeCode #ProductHunt`;
+    ? `My Claude Code type: "${typeForShare}" — ${score}/100 ${emoji} Room to improve. Check yours: #ClaudeCode`
+    : `My Claude Code type: "${typeForShare}" — ${score}/100 ${emoji} Pretty optimized. How does yours compare? #ClaudeCode`;
   const url = 'https://yurukusa.github.io/cc-safe-setup/token-checkup.html';
   window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(url)}`, '_blank');
 }
