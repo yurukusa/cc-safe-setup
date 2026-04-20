@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-21T04:19:55+09:00
+Updated: 2026-04-21T04:20:47+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-04-21T04:19:55+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: adb6a413 checkpoint: auto-save 04:19:54
+- Last commit: ab8ba10d checkpoint: pre-compact auto-save (1 files, 20260420-191956)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-04-21.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-04-21.md
 ./README.md
 ./tests/powershell-remove-item-guard.test.sh
 ./examples/powershell-remove-item-guard.sh
