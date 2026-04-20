@@ -186,7 +186,9 @@ const incidents = [
   {id:"50434",title:"Subagent edits settings.json — parent session freezes",desc:"Subagent permission_request for settings.json causes parent to hang.",cat:"production",sev:"high",date:"2026-04"},
   {id:"50947",title:"Stale skill arguments survive compaction — ghost instructions",desc:"Old arguments persist after compaction, indistinguishable from current.",cat:"config-bypass",sev:"high",date:"2026-04"},
   {id:"50975",title:"CJK content silently corrupted during edits",desc:"Chinese/Japanese/Korean text corrupted without warning during file edits.",cat:"production",sev:"high",date:"2026-04"},
-  {id:"50986",title:"Edit drift — model mental model diverges from file",desc:"Claude's understanding of file state drifts from reality, causing wrong edits.",cat:"production",sev:"medium",date:"2026-04"}
+  {id:"50986",title:"Edit drift — model mental model diverges from file",desc:"Claude's understanding of file state drifts from reality, causing wrong edits.",cat:"production",sev:"medium",date:"2026-04"},
+  {id:"51341",title:"SessionStart hook EEXIST crash on WSL — safety hooks fail to load",desc:"Plugin data directory creation race condition on WSL/Windows causes hook crash. All subsequent hooks silently fail to execute.",cat:"hook-bypass",sev:"medium",date:"2026-04"},
+  {id:"51321",title:"Token consumption 6x report — quality degradation + token bloat",desc:"Sixth time user reports same issue: Claude Code quality degrades while consuming tokens at accelerated rate. Pattern persists across versions.",cat:"token-drain",sev:"high",date:"2026-04"}
 ];
 
 function render(filter) {

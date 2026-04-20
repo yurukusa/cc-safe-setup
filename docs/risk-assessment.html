@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Risk Assessment — How Exposed Are You?</title>
-<meta name="description" content="5-question risk assessment based on 88 real Claude Code incidents. Find out your risk level and get personalized safety recommendations.">
+<meta name="description" content="5-question risk assessment based on 90 real Claude Code incidents. Find out your risk level and get personalized safety recommendations.">
 <meta property="og:title" content="Claude Code Risk Assessment">
-<meta property="og:description" content="5 questions, 30 seconds. How exposed is your Claude Code setup? Based on 88 real incidents.">
+<meta property="og:description" content="5 questions, 30 seconds. How exposed is your Claude Code setup? Based on 90 real incidents.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/risk-assessment.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Quiz","name":"Claude Code Risk Assessment","description":"5-question risk assessment based on 88 real Claude Code safety incidents","numberOfQuestions":5,"about":{"@type":"SoftwareApplication","name":"Claude Code"},"provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Quiz","name":"Claude Code Risk Assessment","description":"5-question risk assessment based on 90 real Claude Code safety incidents","numberOfQuestions":5,"about":{"@type":"SoftwareApplication","name":"Claude Code"},"provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
@@ -45,7 +45,7 @@ h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem;text-align:center}
 <div class="container">
 <p style="margin-bottom:1rem"><a href="index.html" style="color:#58a6ff;text-decoration:none;font-size:.85rem">&larr; cc-safe-setup</a></p>
 <h1>Claude Code Risk Assessment</h1>
-<p class="subtitle">5 questions. 30 seconds. Based on 88 real incidents.</p>
+<p class="subtitle">5 questions. 30 seconds. Based on 90 real incidents.</p>
 
 <div class="progress" id="progress"></div>
 
@@ -60,7 +60,7 @@ h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem;text-align:center}
 <div class="cta">
 <p style="font-size:.9rem;margin-bottom:.5rem">Reduce your risk to near-zero:</p>
 <pre style="background:#0d1117;padding:.5rem;border-radius:4px;display:inline-block;font-size:.85rem;color:#f0f6fc">npx cc-safe-setup</pre>
-<p style="margin-top:.5rem;font-size:.8rem"><a href="incidents.html">Browse 88 real incidents</a> · <a href="demo.html">See hooks in action</a> · <a href="token-book.html">Token Book ($17)</a></p>
+<p style="margin-top:.5rem;font-size:.8rem"><a href="incidents.html">Browse 90 real incidents</a> · <a href="demo.html">See hooks in action</a> · <a href="token-book.html">Token Book ($17)</a></p>
 </div>
 <button class="btn" onclick="shareResult()" style="background:#1da1f2;margin-right:.5rem">Share on X</button>
 <button class="btn" onclick="location.reload()">Retake Assessment</button>
@@ -164,11 +164,11 @@ function showResult() {
   } else if (pct <= 60) {
     scoreEl.className = 'score med';
     labelEl.textContent = 'Moderate Risk';
-    descEl.textContent = `You're exposed to ${Math.round(pct * 0.88)} of the 88 documented incident patterns.`;
+    descEl.textContent = `You're exposed to ${Math.round(pct * 0.90)} of the 90 documented incident patterns.`;
   } else {
     scoreEl.className = 'score high';
     labelEl.textContent = 'High Risk';
-    descEl.textContent = `Your setup matches the conditions of ${Math.round(pct * 0.88)} documented incidents. Immediate action recommended.`;
+    descEl.textContent = `Your setup matches the conditions of ${Math.round(pct * 0.90)} documented incidents. Immediate action recommended.`;
   }
 
   let recs = [];
