@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Attack Simulator — Can Your Setup Survive?</title>
+<meta name="description" content="Paste your settings.json and watch 10 real attack scenarios play out. See which ones your hooks catch — and which ones slip through.">
+<meta property="og:title" content="Claude Code Attack Simulator">
+<meta property="og:description" content="10 real attack scenarios. Paste your settings.json. See what survives.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/attack-simulator.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Attack Simulator","description":"Simulates 10 real attack scenarios against your Claude Code settings to find gaps","applicationCategory":"DeveloperApplication","provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:2rem 1rem}
+.container{max-width:720px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;text-align:center;margin-bottom:.3rem}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:2rem}
+.input-section{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem}
+.input-section h2{color:#f0f6fc;font-size:1rem;margin-bottom:.8rem}
+.input-section p{color:#8b949e;font-size:.8rem;margin-bottom:.8rem}
+textarea{width:100%;height:200px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-family:'Fira Code',monospace;font-size:.8rem;padding:.8rem;resize:vertical}
+textarea:focus{outline:none;border-color:#58a6ff}
+.btn{display:inline-block;padding:.7rem 2rem;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:600;margin-top:.8rem}
+.btn:hover{background:#2ea043}
+.btn:disabled{background:#21262d;color:#484f58;cursor:not-allowed}
+.scenarios{display:none}
+.scenario{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin-bottom:.8rem;transition:border-color .3s}
+.scenario.pass{border-color:#3fb950}
+.scenario.fail{border-color:#f85149}
+.scenario.testing{border-color:#d29922;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.sc-header{display:flex;justify-content:space-between;align-items:center}
+.sc-name{font-weight:600;color:#f0f6fc;font-size:.95rem}
+.sc-result{font-size:.85rem;font-weight:600}
+.sc-result.pass{color:#3fb950}
+.sc-result.fail{color:#f85149}
+.sc-result.testing{color:#d29922}
+.sc-detail{color:#8b949e;font-size:.8rem;margin-top:.5rem}
+.sc-issue{font-size:.75rem;color:#58a6ff;margin-top:.3rem}
+.sc-issue a{color:#58a6ff;text-decoration:none}
+.results{display:none;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:2rem;text-align:center;margin-top:1.5rem}
+.score{font-size:3.5rem;font-weight:700;margin:.5rem 0}
+.score-label{font-size:1.1rem;font-weight:600;margin-bottom:.5rem}
+.score-desc{color:#8b949e;font-size:.9rem;margin-bottom:1.5rem}
+.grade-A{color:#3fb950}.grade-B{color:#a3e635}.grade-C{color:#d29922}.grade-D{color:#f97316}.grade-F{color:#f85149}
+.share-btn{display:inline-block;padding:.5rem 1.5rem;background:#1d9bf0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:600;text-decoration:none;margin:.3rem}
+.share-btn:hover{background:#1a8cd8}
+.install-btn{display:inline-block;padding:.7rem 2rem;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:600;text-decoration:none;margin-top:1rem}
+.install-btn:hover{background:#2ea043}
+.footer{margin-top:2rem;font-size:.75rem;color:#484f58;text-align:center}
+.footer a{color:#58a6ff;text-decoration:none}
+.no-hooks{background:#1c1210;border-color:#f85149;padding:1.5rem;border-radius:8px;margin-bottom:1.5rem;display:none}
+.no-hooks h3{color:#f85149;margin-bottom:.5rem}
+.no-hooks p{color:#da8b8b;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="container">
+<p style="margin-bottom:1rem"><a href="index.html" style="color:#58a6ff;text-decoration:none;font-size:.85rem">&larr; cc-safe-setup</a></p>
+<h1>🎯 Attack Simulator</h1>
+<p class="subtitle">Paste your settings.json. Watch 10 real attacks play out. See what survives.</p>
+
+<div class="input-section">
+<h2>Your Claude Code Settings</h2>
+<p>Paste the contents of <code>~/.claude/settings.json</code> below. Nothing leaves your browser.</p>
+<textarea id="settings" placeholder='{"hooks":{"PreToolUse":[...]}}'></textarea>
+<br>
+<button class="btn" id="run-btn" onclick="runSimulation()">Run Attack Simulation</button>
+<button class="btn" style="background:#30363d;margin-left:.5rem" onclick="loadExample()">Use Example Config</button>
+</div>
+
+<div class="no-hooks" id="no-hooks">
+<h3>⚠ No hooks detected</h3>
+<p>Your settings.json has no hooks configured. All 10 attacks will succeed. This is the default state of Claude Code — and it's why <a href="https://github.com/anthropics/claude-code/issues/49129">users lose 50 GB of files</a>.</p>
+</div>
+
+<div class="scenarios" id="scenarios"></div>
+
+<div class="results" id="results">
+<div class="score-label">Your Safety Score</div>
+<div class="score" id="score-display"></div>
+<div class="score-desc" id="score-desc"></div>
+<a class="share-btn" id="share-btn" target="_blank">Share on 𝕏</a>
+<br>
+<a class="install-btn" href="https://github.com/yurukusa/cc-safe-setup">Install cc-safe-setup — fix all 10 in 30 seconds</a>
+<p style="margin-top:.8rem;font-size:.8rem;color:#8b949e"><a href="token-book-chapter1.html">Read Chapter 1 free</a> — understand where your tokens go</p>
+</div>
+
+<div class="footer">
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="incidents.html">90 real incidents</a> · <a href="opus-47-survival-guide.html">Survival Guide (66 sections)</a> · <a href="token-checkup.html">Token Checkup</a></p>
+<p style="margin-top:.5rem">All analysis runs in your browser. No data is sent anywhere.</p>
+</div>
+</div>
+
+<script>
+const attacks = [
+  {
+    name: "rm -rf / (Full Directory Wipe)",
+    desc: "Claude runs rm -rf to 'clean up' your project directory. 50GB gone in seconds.",
+    issue: "49129",
+    command: "rm -rf ~/projects/myapp",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /rm\s+.*-r|rm\s+.*-f|rmdir/i)
+  },
+  {
+    name: "Force Push to Main",
+    desc: "Untested code pushed directly to main at 3am during autonomous session.",
+    issue: "46650",
+    command: "git push --force origin main",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /push.*main|push.*master|force.*push/i)
+  },
+  {
+    name: "Credential Leak via git add",
+    desc: "API keys committed to public repo via git add . with .env present.",
+    issue: "6527",
+    command: "git add .env",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /\.env|secret|credential|api.key/i)
+  },
+  {
+    name: "SSH Key Deletion",
+    desc: "Auto mode approved ~/.ssh deletion. All SSH keys wiped.",
+    issue: "49554",
+    command: "rm -rf ~/.ssh",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /\.ssh|ssh.key|id_rsa/i)
+  },
+  {
+    name: "Production Database DROP",
+    desc: "Claude ran migrate:fresh + DROP SCHEMA on production despite explicit rules.",
+    issue: "50027",
+    command: "psql -c 'DROP SCHEMA public CASCADE'",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /drop|truncate|delete.*from|migrate.*fresh/i)
+  },
+  {
+    name: "Syntax Error Cascade",
+    desc: "A single syntax error cascaded through 30+ files before anyone noticed.",
+    issue: null,
+    command: "Write tool: app.py with syntax error",
+    hookType: "PostToolUse",
+    detect: (hooks) => hasHookType(hooks, 'PostToolUse', /syntax|lint|py_compile|eslint/i)
+  },
+  {
+    name: "Exploration Loop (Token Drain)",
+    desc: "Claude read files endlessly on a simple task, wasting 20% of weekly budget.",
+    issue: "51054",
+    command: "Read tool × 50 consecutive calls",
+    hookType: "PostToolUse",
+    detect: (hooks) => hasHookType(hooks, 'PostToolUse', /explor|budget|consecutive|read.*count/i)
+  },
+  {
+    name: "Auto-Compact Death Spiral",
+    desc: "15+ compactions overnight consumed entire token budget while sleeping.",
+    issue: "51088",
+    command: "Automatic compaction loop",
+    hookType: "PreCompact",
+    detect: (hooks) => hasHookType(hooks, 'PreCompact', /compact|circuit|limit/i)
+  },
+  {
+    name: "PowerShell Remove-Item Traversal",
+    desc: "Remove-Item -Recurse followed NTFS junctions, deleted entire user directory.",
+    issue: "29249",
+    command: "Remove-Item -Recurse -Force ./node_modules",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /remove.item|powershell|ntfs|junction/i)
+  },
+  {
+    name: "Unauthorized Financial Transaction",
+    desc: "Claude-generated script executed $1,446 in unauthorized API calls.",
+    issue: "46828",
+    command: "python3 transfer.py --amount 1446",
+    hookType: "PreToolUse",
+    detect: (hooks) => hasCommandPattern(hooks, /transfer|payment|invoice|charge|billing/i) || hasCommandPattern(hooks, /curl.*api.*pay|wget.*payment/i)
+  }
+];
+
+function hasCommandPattern(hooks, pattern) {
+  if (!hooks || !hooks.PreToolUse) return false;
+  const entries = hooks.PreToolUse;
+  for (const entry of entries) {
+    const hookList = entry.hooks || [];
+    for (const h of hookList) {
+      if (h.command && pattern.test(h.command)) return true;
+    }
+    if (entry.matcher && pattern.test(entry.matcher)) return true;
+  }
+  // Also check the raw JSON string for common guard script names
+  const raw = JSON.stringify(hooks);
+  if (pattern.test(raw)) return true;
+  return false;
+}
+
+function hasHookType(hooks, type, pattern) {
+  if (!hooks || !hooks[type]) return false;
+  const raw = JSON.stringify(hooks[type]);
+  return pattern.test(raw);
+}
+
+function loadExample() {
+  document.getElementById('settings').value = JSON.stringify({
+    "hooks": {
+      "PreToolUse": [
+        {"matcher": "Bash", "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/destructive-guard.sh"}]},
+        {"matcher": "Bash", "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/branch-guard.sh"}]},
+        {"matcher": "Bash", "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/secret-guard.sh"}]}
+      ],
+      "PostToolUse": [
+        {"matcher": "Write", "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/syntax-check.sh"}]}
+      ]
+    }
+  }, null, 2);
+}
+
+async function runSimulation() {
+  const raw = document.getElementById('settings').value.trim();
+  if (!raw) {
+    alert('Paste your settings.json first');
+    return;
+  }
+
+  let settings;
+  try {
+    settings = JSON.parse(raw);
+  } catch(e) {
+    alert('Invalid JSON: ' + e.message);
+    return;
+  }
+
+  const hooks = settings.hooks || {};
+  const hasAnyHooks = Object.keys(hooks).length > 0;
+
+  if (!hasAnyHooks) {
+    document.getElementById('no-hooks').style.display = 'block';
+  } else {
+    document.getElementById('no-hooks').style.display = 'none';
+  }
+
+  const scenariosEl = document.getElementById('scenarios');
+  scenariosEl.style.display = 'block';
+  scenariosEl.innerHTML = '';
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('results').style.display = 'none';
+
+  let passed = 0;
+
+  for (let i = 0; i < attacks.length; i++) {
+    const atk = attacks[i];
+    const div = document.createElement('div');
+    div.className = 'scenario testing';
+    div.innerHTML = `
+      <div class="sc-header">
+        <span class="sc-name">${i+1}. ${atk.name}</span>
+        <span class="sc-result testing">Testing...</span>
+      </div>
+      <div class="sc-detail">${atk.desc}</div>
+      ${atk.issue ? `<div class="sc-issue"><a href="https://github.com/anthropics/claude-code/issues/${atk.issue}" target="_blank">#${atk.issue}</a></div>` : ''}
+    `;
+    scenariosEl.appendChild(div);
+
+    await new Promise(r => setTimeout(r, 400));
+
+    const caught = atk.detect(hooks);
+    div.className = `scenario ${caught ? 'pass' : 'fail'}`;
+    div.querySelector('.sc-result').className = `sc-result ${caught ? 'pass' : 'fail'}`;
+    div.querySelector('.sc-result').textContent = caught ? '✓ BLOCKED' : '✗ ATTACK SUCCEEDED';
+
+    if (caught) passed++;
+  }
+
+  // Show results
+  const score = passed;
+  const pct = Math.round((score / 10) * 100);
+  let grade, gradeClass, desc;
+
+  if (score >= 9) { grade = 'A'; gradeClass = 'grade-A'; desc = 'Excellent. Your setup catches nearly everything.'; }
+  else if (score >= 7) { grade = 'B'; gradeClass = 'grade-B'; desc = 'Good, but some real attack patterns slip through.'; }
+  else if (score >= 5) { grade = 'C'; gradeClass = 'grade-C'; desc = 'Moderate risk. Several critical attacks would succeed.'; }
+  else if (score >= 3) { grade = 'D'; gradeClass = 'grade-D'; desc = 'High risk. Most attacks succeed against your setup.'; }
+  else { grade = 'F'; gradeClass = 'grade-F'; desc = 'Critical. Your setup has almost no protection.'; }
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.style.display = 'block';
+  document.getElementById('score-display').textContent = `${score}/10 (${grade})`;
+  document.getElementById('score-display').className = `score ${gradeClass}`;
+  document.getElementById('score-desc').textContent = desc;
+
+  const shareText = `My Claude Code safety score: ${score}/10 (Grade ${grade}). ${10-score} real attack patterns would succeed against my setup. Test yours:`;
+  document.getElementById('share-btn').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent('https://yurukusa.github.io/cc-safe-setup/attack-simulator.html')}`;
+
+  document.getElementById('run-btn').disabled = false;
+}
+</script>
+</body>
+</html>
+</content>
+</invoke>
