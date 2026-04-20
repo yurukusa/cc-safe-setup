@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 Hooks Every Claude Code User Should Install Today</title>
+<meta name="description" content="Five copy-paste hooks that prevent rm -rf disasters, force-push to main, secret leaks, compaction death spirals, and token waste. Each one addresses a real GitHub Issue.">
+<meta name="keywords" content="Claude Code, hooks, safety, rm -rf, force push, secret leak, auto-compact, token saving, cc-safe-setup, claude code hooks, claude code safety">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/blog-5-essential-hooks.html">
+<meta property="og:title" content="5 Hooks Every Claude Code User Should Install Today">
+<meta property="og:description" content="rm -rf blocker, force-push guard, secret leak prevention, compaction circuit breaker, and read-once guard. Copy-paste ready, each backed by real incidents.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/blog-5-essential-hooks.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="5 Hooks Every Claude Code User Should Install Today">
+<meta name="twitter:description" content="Five practical hooks for Claude Code safety and cost control. Real incidents, copy-paste code.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"5 Hooks Every Claude Code User Should Install Today","description":"Install five essential safety and cost-saving hooks for Claude Code. Each hook prevents a real, documented problem.","datePublished":"2026-04-21","author":{"@type":"Person","name":"yurukusa"},"publisher":{"@type":"Organization","name":"cc-safe-setup"},"step":[{"@type":"HowToStep","name":"Install rm -rf blocker","text":"Add a PreToolUse hook that intercepts Bash commands and blocks rm targeting protected paths like /, ~, .git, .ssh, and .env."},{"@type":"HowToStep","name":"Install force-push guard","text":"Add a PreToolUse hook that blocks git push --force to main or master branches."},{"@type":"HowToStep","name":"Install secret leak prevention","text":"Add a PreToolUse hook that scans file writes for API keys, tokens, and credentials before they reach disk."},{"@type":"HowToStep","name":"Install auto-compact circuit breaker","text":"Add a PreCompact hook that limits compactions to 3 per hour, preventing death spiral loops."},{"@type":"HowToStep","name":"Install read-once guard","text":"Add a PreToolUse hook that warns when Claude re-reads files already in context, saving tokens."}],"totalTime":"PT2M"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.1rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.alert{background:#2d1b1b;border:1px solid #da3633;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.alert strong{color:#f85149}
+.fix{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.fix strong{color:#3fb950}
+.incident{background:#1c1917;border:1px solid #78350f;border-radius:8px;padding:1rem 1.5rem;margin:1rem 0}
+.incident strong{color:#fbbf24}
+.hook-section{border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0;background:#161b22}
+.hook-num{display:inline-block;background:#238636;color:#fff;width:28px;height:28px;border-radius:50%;text-align:center;line-height:28px;font-weight:700;font-size:.9rem;margin-right:.5rem}
+.hook-trigger{display:inline-block;background:#21262d;color:#8b949e;font-size:.75rem;padding:.15rem .4rem;border-radius:3px;margin-left:.5rem}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="index.html">&larr; cc-safe-setup</a></p>
+<h1>5 Hooks Every Claude Code User Should Install Today</h1>
+<p class="meta">April 21, 2026 &middot; 8 min read &middot; by <a href="https://github.com/yurukusa">yurukusa</a></p>
+
+<div class="alert">
+<strong>TL;DR:</strong> These 5 hooks address the most common ways Claude Code causes real damage &mdash; file deletion, force-push, secret leaks, runaway compaction, and token waste. Each one is backed by a GitHub Issue. Run <code>npx cc-safe-setup</code> to install all of them in 10 seconds.
+</div>
+
+<p>Claude Code hooks are shell scripts that run before (or after) every tool call. They can inspect the command about to execute and block it if it matches a dangerous pattern. The hook receives JSON on stdin and returns a decision on stdout.</p>
+
+<p>These 5 hooks cover the incidents we see most often in <a href="https://github.com/anthropics/claude-code/issues">anthropics/claude-code Issues</a>. They're ordered from "prevents data loss" to "saves money."</p>
+
+<!-- Hook 1: rm -rf blocker -->
+<div class="hook-section">
+<h2><span class="hook-num">1</span> rm -rf Blocker <span class="hook-trigger">PreToolUse &middot; Bash</span></h2>
+
+<h3>What it prevents</h3>
+<p>Claude running <code>rm -rf</code> on directories it shouldn't touch. This is the single most reported destructive action.</p>
+
+<div class="incident">
+<strong><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a> &mdash; 50 GB / 1,500 files permanently deleted.</strong> Claude ran <code>rm -rf</code> on a user's project directory. Everything gone.
+</div>
+<div class="incident">
+<strong><a href="https://github.com/anthropics/claude-code/issues/46058">#46058</a> &mdash; 3,467 files / ~7 GB deleted.</strong> Claude decided to "clean up" and wiped a project with a single command.
+</div>
+
+<h3>The hook</h3>
+<pre>#!/bin/bash
+# prevent-rm-rf.sh
+# Trigger: PreToolUse  Matcher: Bash
+
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$CMD" ] && exit 0
+
+# Block rm -rf targeting protected paths
+if echo "$CMD" | grep -qE 'rm\s+(-[a-zA-Z]*[rR][a-zA-Z]*\s+)*(\/|~|\$HOME|\.git|\.ssh|\.env|\.gnupg|node_modules\/\.\.)'; then
+  echo '{"decision":"DENY","reason":"Blocked: rm -rf targeting protected path. Use specific file paths instead."}'
+  exit 0
+fi
+
+# Block rm -rf with wildcard at root-like paths
+if echo "$CMD" | grep -qE 'rm\s+(-[a-zA-Z]*[rR][a-zA-Z]*\s+)\.\./'; then
+  echo '{"decision":"DENY","reason":"Blocked: rm -rf with parent directory traversal."}'
+  exit 0
+fi</pre>
+
+<h3>Why it matters</h3>
+<p>Once files are deleted with <code>rm -rf</code>, they're gone. No trash can, no undo. The hook blocks the command before it executes, so Claude sees a denial message and adjusts its approach.</p>
+</div>
+
+<!-- Hook 2: Force-push guard -->
+<div class="hook-section">
+<h2><span class="hook-num">2</span> Force-Push Guard <span class="hook-trigger">PreToolUse &middot; Bash</span></h2>
+
+<h3>What it prevents</h3>
+<p>Claude running <code>git push --force</code> to main or master, overwriting shared commit history that other people depend on.</p>
+
+<div class="incident">
+<strong><a href="https://github.com/anthropics/claude-code/issues/45893">#45893</a> &mdash; Force-push to main wiped team's work.</strong> Claude force-pushed to resolve a merge conflict. The team's commits from that day were gone from remote.
+</div>
+
+<h3>The hook</h3>
+<pre>#!/bin/bash
+# prevent-force-push.sh
+# Trigger: PreToolUse  Matcher: Bash
+
+INPUT=$(cat)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+[ -z "$CMD" ] && exit 0
+
+# Block force-push to main/master
+if echo "$CMD" | grep -qE 'git\s+push\s+.*--force.*\s+(origin\s+)?(main|master)'; then
+  echo '{"decision":"DENY","reason":"Blocked: force-push to main/master. Use a feature branch or --force-with-lease."}'
+  exit 0
+fi
+
+# Also catch the short form
+if echo "$CMD" | grep -qE 'git\s+push\s+-f\s+.*\s*(main|master)'; then
+  echo '{"decision":"DENY","reason":"Blocked: force-push (-f) to main/master."}'
+  exit 0
+fi</pre>
+
+<h3>Why it matters</h3>
+<p>Force-push to a shared branch is one of the few git operations that destroys other people's work. Unlike a bad commit (which can be reverted), a force-push rewrites history. If nobody fetched the old commits, they're gone.</p>
+</div>
+
+<!-- Hook 3: Secret leak prevention -->
+<div class="hook-section">
+<h2><span class="hook-num">3</span> Secret Leak Prevention <span class="hook-trigger">PreToolUse &middot; Write / Edit</span></h2>
+
+<h3>What it prevents</h3>
+<p>Claude writing API keys, tokens, or credentials into files that end up in version control. This happens more often than you'd expect &mdash; Claude copies a key from one file to another "for convenience," or hardcodes a token to make a test pass.</p>
+
+<div class="incident">
+<strong>Common pattern &mdash; .env values copied into source code.</strong> Claude reads <code>.env</code> to understand config, then hardcodes <code>OPENAI_API_KEY=sk-...</code> directly into a Python file. That file gets committed. The key is now in git history permanently.
+</div>
+
+<h3>The hook</h3>
+<pre>#!/bin/bash
+# prevent-secret-leak.sh
+# Trigger: PreToolUse  Matcher: Write|Edit
+
+INPUT=$(cat)
+CONTENT=$(echo "$INPUT" | jq -r '
+  .tool_input.content //
+  .tool_input.new_string //
+  empty')
+[ -z "$CONTENT" ] && exit 0
+
+# Check for common secret patterns
+if echo "$CONTENT" | grep -qE '(sk-[a-zA-Z0-9]{20,}|AKIA[0-9A-Z]{16}|ghp_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9\-]{20,}|xox[bpsa]-[a-zA-Z0-9\-]+)'; then
+  echo '{"decision":"DENY","reason":"Blocked: detected what looks like an API key or token. Use environment variables instead."}'
+  exit 0
+fi
+
+# Check for private key headers
+if echo "$CONTENT" | grep -qE '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'; then
+  echo '{"decision":"DENY","reason":"Blocked: private key detected. Never write private keys into source files."}'
+  exit 0
+fi
+
+# Check for .env-style secrets being written to non-.env files
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+if [[ "$FILE" != *.env* ]] && echo "$CONTENT" | grep -qE '^[A-Z_]+=(sk-|AKIA|ghp_|password|secret)'; then
+  echo '{"decision":"DENY","reason":"Blocked: secret-like values being written outside .env file."}'
+  exit 0
+fi</pre>
+
+<h3>Why it matters</h3>
+<p>A leaked API key costs real money. AWS keys have been exploited within minutes of being pushed to public repos. Even in private repos, keys in git history are hard to fully remove. This hook catches the most common key formats before they hit disk.</p>
+</div>
+
+<!-- Hook 4: Auto-compact circuit breaker -->
+<div class="hook-section">
+<h2><span class="hook-num">4</span> Auto-Compact Circuit Breaker <span class="hook-trigger">PreCompact</span></h2>
+
+<h3>What it prevents</h3>
+<p>Auto-compaction entering a death spiral &mdash; where each compaction fails to restore context, triggering the next one immediately. Users have lost entire overnight token budgets to this loop.</p>
+
+<div class="incident">
+<strong><a href="https://github.com/anthropics/claude-code/issues/51088">#51088</a> &mdash; 15+ compactions in a single overnight session.</strong> Each compaction consumed tokens but failed to restore working context. The session made zero forward progress while burning through the budget.
+</div>
+
+<h3>The hook</h3>
+<pre>#!/bin/bash
+# compact-circuit-breaker.sh
+# Trigger: PreCompact  (no matcher needed)
+
+MAX_PER_HOUR="${CC_COMPACT_MAX_PER_HOUR:-3}"
+MIN_INTERVAL="${CC_COMPACT_MIN_INTERVAL:-120}"
+STATE_DIR="/tmp/.cc-compact-breaker"
+STATE_FILE="$STATE_DIR/log"
+
+mkdir -p "$STATE_DIR"
+touch "$STATE_FILE"
+
+NOW=$(date +%s)
+ONE_HOUR_AGO=$((NOW - 3600))
+
+# Clean entries older than 1 hour
+awk -v cutoff="$ONE_HOUR_AGO" '$1 >= cutoff' "$STATE_FILE" > "$STATE_FILE.tmp"
+mv "$STATE_FILE.tmp" "$STATE_FILE"
+
+RECENT=$(wc -l < "$STATE_FILE" | tr -d ' ')
+
+# Check last compaction time
+LAST=0
+[ -s "$STATE_FILE" ] && LAST=$(tail -1 "$STATE_FILE")
+ELAPSED=$((NOW - LAST))
+
+if [ "$RECENT" -ge "$MAX_PER_HOUR" ]; then
+  echo "CIRCUIT BREAKER: $RECENT compactions in the last hour (max $MAX_PER_HOUR). Start a new session." >&2
+  exit 2
+fi
+
+if [ "$ELAPSED" -lt "$MIN_INTERVAL" ] && [ "$LAST" -gt 0 ]; then
+  echo "COOLDOWN: Last compaction was ${ELAPSED}s ago (min ${MIN_INTERVAL}s)." >&2
+  exit 2
+fi
+
+echo "$NOW" >> "$STATE_FILE"
+exit 0</pre>
+
+<h3>Why it matters</h3>
+<p>A single compaction costs tokens (it re-summarizes your entire conversation). When compaction enters a loop, each iteration burns tokens with no useful output. Three compactions per hour is generous for normal use; anything beyond that is almost certainly a spiral.</p>
+</div>
+
+<!-- Hook 5: Read-once guard -->
+<div class="hook-section">
+<h2><span class="hook-num">5</span> Read-Once Guard <span class="hook-trigger">PreToolUse &middot; Read</span></h2>
+
+<h3>What it prevents</h3>
+<p>Claude re-reading files that are already in its context window. Every time Claude reads a file, the full content is added to the conversation. Reading the same 500-line file 4 times means paying for 2,000 lines of tokens that add zero new information.</p>
+
+<div class="incident">
+<strong>Common pattern &mdash; 30%+ token waste from re-reads.</strong> In long sessions, Claude frequently re-reads files it already has in context. It forgets it already read them, or reads them "just to be sure." Each re-read costs tokens.
+</div>
+
+<h3>The hook</h3>
+<pre>#!/bin/bash
+# read-once-guard.sh
+# Trigger: PreToolUse  Matcher: Read
+
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+[ -z "$FILE_PATH" ] && exit 0
+
+FILE_PATH=$(realpath "$FILE_PATH" 2>/dev/null || echo "$FILE_PATH")
+
+STATE_DIR="/tmp/cc-read-once"
+mkdir -p "$STATE_DIR"
+STATE_FILE="$STATE_DIR/reads-$PPID.log"
+MAX_READS="${CC_READ_ONCE_MAX:-3}"
+
+# Get current file modification time
+MTIME=$(stat -c %Y "$FILE_PATH" 2>/dev/null || echo "0")
+
+# Look up previous reads
+COUNT=0
+PREV_MTIME="0"
+if [ -f "$STATE_FILE" ]; then
+  while IFS=$'\t' read -r path mtime count; do
+    [ "$path" = "$FILE_PATH" ] && COUNT=$count && PREV_MTIME=$mtime && break
+  done < "$STATE_FILE"
+fi
+
+# Reset if file was modified
+[ "$MTIME" != "$PREV_MTIME" ] && [ "$PREV_MTIME" != "0" ] && COUNT=0
+
+COUNT=$((COUNT + 1))
+
+# Update state
+grep -v "^${FILE_PATH}	" "$STATE_FILE" 2>/dev/null > "$STATE_FILE.tmp" || true
+printf '%s\t%s\t%s\n' "$FILE_PATH" "$MTIME" "$COUNT" >> "$STATE_FILE.tmp"
+mv "$STATE_FILE.tmp" "$STATE_FILE"
+
+if [ "$COUNT" -gt "$MAX_READS" ]; then
+  echo "Token waste: ${FILE_PATH} read ${COUNT} times without changes. Content is already in context." >&2
+fi
+
+exit 0</pre>
+
+<h3>Why it matters</h3>
+<p>Token costs add up fast on long sessions. This hook doesn't block the read (the default is warn-only), but the warning message reminds Claude to use what it already has. Set <code>CC_READ_ONCE_MAX=2</code> for stricter sessions, or change <code>exit 0</code> to <code>exit 2</code> to hard-block re-reads.</p>
+</div>
+
+<!-- Install all 5 -->
+<h2>Install All 5 in One Command</h2>
+
+<div class="fix">
+<strong>All 5 hooks ship with cc-safe-setup:</strong>
+<pre>npx cc-safe-setup</pre>
+<p>This adds 8 default hooks to your <code>~/.claude/settings.json</code> (the 5 above plus syntax validation, git-reset-hard protection, and large-file-write warnings). No config files to create. No dependencies to install.</p>
+</div>
+
+<p>After installing, you can verify hooks are active:</p>
+<pre>cat ~/.claude/settings.json | jq '.hooks'</pre>
+
+<h2>How Hooks Work (30-Second Primer)</h2>
+
+<p>Claude Code fires events at specific points during operation. A hook is a shell script registered to an event. The two most useful events:</p>
+
+<ul style="margin:.8rem 0;padding-left:1.5rem">
+<li><strong>PreToolUse</strong> &mdash; fires before every tool call (Bash, Read, Write, Edit). You can inspect the command and return <code>{"decision":"DENY","reason":"..."}</code> to block it.</li>
+<li><strong>PreCompact</strong> &mdash; fires before auto-compaction. Exit code 2 blocks the compaction.</li>
+</ul>
+
+<p>Hooks go in <code>~/.claude/settings.json</code> under the <code>"hooks"</code> key. Each hook specifies its trigger event, an optional matcher (which tool to intercept), and the command to run.</p>
+
+<h2>Going Further</h2>
+
+<p>These 5 hooks handle the most common problems. For deeper coverage:</p>
+
+<ul style="margin:.8rem 0;padding-left:1.5rem">
+<li><strong><a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html">Token Checkup</a></strong> &mdash; analyze your <code>settings.json</code> for token waste patterns and get specific hook recommendations.</li>
+<li><strong><a href="https://yurukusa.github.io/cc-safe-setup/token-book.html">Token Optimization Book</a></strong> &mdash; 8-chapter guide to understanding and reducing Claude Code token consumption.</li>
+<li><strong><a href="https://yurukusa.github.io/cc-safe-setup/hook-selector.html">Hook Selector</a></strong> &mdash; browse 706 hook examples by category.</li>
+</ul>
+
+<div class="cta">
+<p style="font-size:1.1rem;font-weight:600;color:#f0f6fc;margin-bottom:.8rem">Install all 5 hooks now</p>
+<p style="margin-bottom:1rem;color:#8b949e">One command. No configuration. Works with Claude Code v2.x.</p>
+<a href="https://github.com/yurukusa/cc-safe-setup" class="btn">npx cc-safe-setup</a>
+<a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" class="btn btn-outline">Token Checkup</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">Tracking <strong>78+ real incidents</strong> from GitHub Issues &middot; <a href="https://yurukusa.github.io/cc-safe-setup/token-book.html">Token optimization guide &rarr;</a></p>
+</div>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; MIT License &middot; <a href="index.html">Home</a> &middot; <a href="hub.html">All Tools</a></p>
+</footer>
+
+</body>
+</html>
