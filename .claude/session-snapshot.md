@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-20T13:29:38+09:00
+Updated: 2026-04-21T03:48:13+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-04-20T13:29:38+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: be00305e checkpoint: pre-compact auto-save (1 files, 20260420-042909)
+- Last commit: 352bd054 checkpoint: auto-save 03:48:03
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-04-20.md
 ./README.md
-./docs/README.ja.md
-./examples/cjk-punctuation-guard.sh
-./examples/production-port-kill-guard.sh
-./SKILL.md
-./skills/safety-setup/SKILL.md
-./.claude/session-logs/2026-04-19.md
+./tests/powershell-remove-item-guard.test.sh
+./examples/powershell-remove-item-guard.sh
+./tests/git-filter-repo-guard.test.sh
+./examples/git-filter-repo-guard.sh
+./examples/read-once-guard.sh
+./tests/test-read-once-guard.sh
+./tests/test-anthropic-base-url-guard.sh
+./examples/anthropic-base-url-guard.sh
 ```
 
