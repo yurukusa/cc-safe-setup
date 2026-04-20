@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Risk Assessment — How Exposed Are You?</title>
+<meta name="description" content="5-question risk assessment based on 88 real Claude Code incidents. Find out your risk level and get personalized safety recommendations.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+.container{max-width:640px;width:100%}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:2rem}
+.question{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin-bottom:1rem;display:none}
+.question.active{display:block}
+.q-num{color:#8b949e;font-size:.75rem;margin-bottom:.5rem}
+.q-text{color:#f0f6fc;font-size:1rem;font-weight:600;margin-bottom:1rem}
+.option{display:block;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.75rem 1rem;margin-bottom:.5rem;cursor:pointer;transition:all .2s;color:#c9d1d9;font-size:.9rem}
+.option:hover{border-color:#58a6ff;color:#58a6ff}
+.option.selected{border-color:#3fb950;color:#3fb950;background:#0d1117}
+.result{display:none;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:2rem;text-align:center}
+.score{font-size:3rem;font-weight:700;margin:.5rem 0}
+.score.low{color:#3fb950}.score.med{color:#d29922}.score.high{color:#f85149}
+.label{font-size:1.1rem;font-weight:600;margin-bottom:1rem}
+.recs{text-align:left;margin-top:1.5rem}
+.rec{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.75rem 1rem;margin-bottom:.5rem;font-size:.85rem}
+.rec-title{color:#f0f6fc;font-weight:600}.rec-desc{color:#8b949e;margin-top:.3rem}
+.cta{margin-top:1.5rem;padding:1rem;background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4f46e5;border-radius:8px}
+.cta a{color:#a5b4fc;text-decoration:none;font-weight:600}
+.progress{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.5rem}
+.dot{width:10px;height:10px;border-radius:50%;background:#30363d}
+.dot.done{background:#3fb950}.dot.current{background:#58a6ff}
+.footer{margin-top:2rem;font-size:.75rem;color:#484f58;text-align:center}
+.footer a{color:#58a6ff;text-decoration:none}
+.btn{display:inline-block;padding:.6rem 1.5rem;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600;margin-top:1rem}
+.btn:hover{background:#2ea043}
+</style>
+</head>
+<body>
+<div class="container">
+<p style="margin-bottom:1rem"><a href="index.html" style="color:#58a6ff;text-decoration:none;font-size:.85rem">&larr; cc-safe-setup</a></p>
+<h1>Claude Code Risk Assessment</h1>
+<p class="subtitle">5 questions. 30 seconds. Based on 88 real incidents.</p>
+
+<div class="progress" id="progress"></div>
+
+<div id="questions"></div>
+
+<div class="result" id="result">
+<p class="q-num">YOUR RISK LEVEL</p>
+<div class="score" id="score-num"></div>
+<div class="label" id="score-label"></div>
+<p id="score-desc" style="color:#8b949e;font-size:.9rem;margin-bottom:1rem"></p>
+<div class="recs" id="recs"></div>
+<div class="cta">
+<p style="font-size:.9rem;margin-bottom:.5rem">Reduce your risk to near-zero:</p>
+<pre style="background:#0d1117;padding:.5rem;border-radius:4px;display:inline-block;font-size:.85rem;color:#f0f6fc">npx cc-safe-setup</pre>
+<p style="margin-top:.5rem;font-size:.8rem"><a href="incidents.html">Browse 88 real incidents</a> · <a href="demo.html">See hooks in action</a> · <a href="token-book.html">Token Book ($17)</a></p>
+</div>
+<button class="btn" onclick="location.reload()">Retake Assessment</button>
+</div>
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · Nothing leaves your browser
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Do you use Auto Mode or run Claude Code unattended?",
+    opts: [
+      {text: "Yes, frequently (overnight / while away)", risk: 3, tags: ["auto","overnight"]},
+      {text: "Sometimes, for short periods", risk: 2, tags: ["auto"]},
+      {text: "No, I always supervise", risk: 0, tags: []}
+    ]
+  },
+  {
+    q: "Do you have safety hooks installed?",
+    opts: [
+      {text: "No hooks / I don't know what hooks are", risk: 3, tags: ["no-hooks"]},
+      {text: "I have some custom hooks", risk: 1, tags: ["some-hooks"]},
+      {text: "Yes, I use cc-safe-setup or similar", risk: 0, tags: ["protected"]}
+    ]
+  },
+  {
+    q: "How do you handle .env files and credentials?",
+    opts: [
+      {text: ".env files are in my project directory, no special protection", risk: 3, tags: ["creds"]},
+      {text: "I have a .gitignore but no hook protection", risk: 2, tags: ["creds"]},
+      {text: "Protected by hooks + .gitignore + git-secrets", risk: 0, tags: []}
+    ]
+  },
+  {
+    q: "What's your Claude Code plan?",
+    opts: [
+      {text: "Max ($100-200/month)", risk: 2, tags: ["max","tokens"]},
+      {text: "Pro ($20/month)", risk: 1, tags: ["tokens"]},
+      {text: "API / Pay-per-use", risk: 3, tags: ["api","tokens"]},
+      {text: "Free / Trial", risk: 0, tags: []}
+    ]
+  },
+  {
+    q: "Do you use subagents or multi-agent workflows?",
+    opts: [
+      {text: "Yes, heavily", risk: 3, tags: ["subagent","tokens"]},
+      {text: "Occasionally", risk: 1, tags: ["subagent"]},
+      {text: "No", risk: 0, tags: []}
+    ]
+  }
+];
+
+let current = 0;
+let answers = [];
+const qDiv = document.getElementById('questions');
+const progDiv = document.getElementById('progress');
+
+function renderProgress() {
+  progDiv.innerHTML = questions.map((_, i) =>
+    `<div class="dot ${i < current ? 'done' : i === current ? 'current' : ''}"></div>`
+  ).join('');
+}
+
+function renderQuestion() {
+  if (current >= questions.length) { showResult(); return; }
+  renderProgress();
+  const q = questions[current];
+  qDiv.innerHTML = `
+    <div class="question active">
+      <div class="q-num">Question ${current + 1} of ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      ${q.opts.map((o, i) => `<div class="option" onclick="answer(${i})">${o.text}</div>`).join('')}
+    </div>`;
+}
+
+function answer(idx) {
+  answers.push(questions[current].opts[idx]);
+  current++;
+  renderQuestion();
+}
+
+function showResult() {
+  const totalRisk = answers.reduce((s, a) => s + a.risk, 0);
+  const maxRisk = questions.reduce((s, q) => s + Math.max(...q.opts.map(o => o.risk)), 0);
+  const pct = Math.round((totalRisk / maxRisk) * 100);
+  const tags = [...new Set(answers.flatMap(a => a.tags))];
+
+  const scoreEl = document.getElementById('score-num');
+  const labelEl = document.getElementById('score-label');
+  const descEl = document.getElementById('score-desc');
+  const recsEl = document.getElementById('recs');
+
+  scoreEl.textContent = pct + '/100';
+  if (pct <= 25) {
+    scoreEl.className = 'score low';
+    labelEl.textContent = 'Low Risk';
+    descEl.textContent = 'Your setup is reasonably safe. Consider adding hooks for edge cases.';
+  } else if (pct <= 60) {
+    scoreEl.className = 'score med';
+    labelEl.textContent = 'Moderate Risk';
+    descEl.textContent = `You're exposed to ${Math.round(pct * 0.88)} of the 88 documented incident patterns.`;
+  } else {
+    scoreEl.className = 'score high';
+    labelEl.textContent = 'High Risk';
+    descEl.textContent = `Your setup matches the conditions of ${Math.round(pct * 0.88)} documented incidents. Immediate action recommended.`;
+  }
+
+  let recs = [];
+  if (tags.includes('no-hooks')) recs.push({t:'Install safety hooks',d:'<code>npx cc-safe-setup</code> — 8 hooks in 30 seconds. Blocks rm -rf, force-push, credential leaks.'});
+  if (tags.includes('auto') || tags.includes('overnight')) recs.push({t:'Add overnight protection',d:'Install compact-circuit-breaker and session-time-limit hooks. <a href="opus-47-survival-guide.html#compact-death-spiral">See §57</a>'});
+  if (tags.includes('creds')) recs.push({t:'Protect credentials',d:'The secret-guard hook blocks git add .env. Add dotfile-guard for ~/.ssh protection.'});
+  if (tags.includes('tokens')) recs.push({t:'Monitor token consumption',d:'Use <a href="token-checkup.html">Token Checkup</a> to diagnose waste patterns. The <a href="token-book.html">Token Book</a> covers 48 symptoms.'});
+  if (tags.includes('subagent')) recs.push({t:'Guard subagent behavior',d:'Subagents can leak .env (#51030), enter retry loops (#46968), and fork-bomb your system (#50380).'});
+  if (recs.length === 0) recs.push({t:'You\'re well protected',d:'Keep your hooks updated and check the <a href="opus-47-survival-guide.html">Survival Guide</a> for new threats.'});
+
+  recsEl.innerHTML = recs.map(r => `<div class="rec"><div class="rec-title">${r.t}</div><div class="rec-desc">${r.d}</div></div>`).join('');
+
+  qDiv.style.display = 'none';
+  progDiv.style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
