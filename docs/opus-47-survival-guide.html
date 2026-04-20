@@ -721,10 +721,17 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Use a PreToolUse hook on the Read matcher that blocks any attempt to read .env files (and variants like .env.local, .env.production). Unlike memory instructions, hooks ARE inherited by sub-agents — making this the only reliable protection. Safe reference files (.env.example, .env.sample) are allowed. Install: <code>npx cc-safe-setup --install-example dotenv-read-guard</code>. Also install <code>credential-file-cat-guard</code> to block Bash-based reads of credential files.</p>
 </div>
 
+<h2 id="exploration-loop-token-drain">55. Exploration Loop Drains 20% of Weekly Token Budget on Simple Task <span class="severity sev-high">HIGH</span></h2>
+<p>Claude reads file after file, runs Glob searches, and greps the entire codebase — but never writes anything. A task that should take 5 minutes consumes 20% of the user's weekly Max Plan allowance purely on "understanding" the code. The model keeps exploring because it lacks confidence to act, but each read operation costs tokens. After 40+ read calls with zero writes, the user's budget is gone with nothing to show for it. This is distinct from retry spirals (#50986): the model isn't failing — it's just never starting. <a href="https://github.com/anthropics/claude-code/issues/51054">#51054</a></p>
+<div class="fix">
+<h3>Fix: Install an exploration budget guard</h3>
+<p>Use a PreToolUse hook that counts consecutive Read/Glob/Grep calls. After 25 reads without any Edit or Write, warn. After 40, block and force the model to act on what it already knows. The counter resets whenever a write occurs or after 10 minutes of inactivity (indicating a new task). Install: <code>npx cc-safe-setup --install-example exploration-budget-guard</code>. Pairs well with tool-retry-budget-guard for comprehensive token protection.</p>
+</div>
+
 <div class="footer">
-<p>cc-safe-setup — 700+ example hooks for Claude Code safety</p>
+<p>cc-safe-setup — 701 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, #51054, CVE-2026-21852</p>
 </div>
 
 </body>
