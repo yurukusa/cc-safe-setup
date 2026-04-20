@@ -57,6 +57,7 @@ h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem;text-align:center}
 <pre style="background:#0d1117;padding:.5rem;border-radius:4px;display:inline-block;font-size:.85rem;color:#f0f6fc">npx cc-safe-setup</pre>
 <p style="margin-top:.5rem;font-size:.8rem"><a href="incidents.html">Browse 88 real incidents</a> · <a href="demo.html">See hooks in action</a> · <a href="token-book.html">Token Book ($17)</a></p>
 </div>
+<button class="btn" onclick="shareResult()" style="background:#1da1f2;margin-right:.5rem">Share on X</button>
 <button class="btn" onclick="location.reload()">Retake Assessment</button>
 </div>
 </div>
@@ -178,6 +179,13 @@ function showResult() {
   qDiv.style.display = 'none';
   progDiv.style.display = 'none';
   document.getElementById('result').style.display = 'block';
+}
+
+function shareResult() {
+  const score = document.getElementById('score-num').textContent;
+  const label = document.getElementById('score-label').textContent;
+  const text = `My Claude Code risk level: ${score} (${label})\n\nTake the 30-second assessment:`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent('https://yurukusa.github.io/cc-safe-setup/risk-assessment.html')}`, '_blank');
 }
 
 renderQuestion();
