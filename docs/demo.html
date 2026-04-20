@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cc-safe-setup Live Demo — See Hooks in Action</title>
+<meta name="description" content="Try cc-safe-setup without installing. See how hooks block rm -rf, force-push, and credential leaks in real-time.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'SF Mono',Monaco,monospace;background:#0d1117;color:#c9d1d9;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem;min-height:100vh}
+h1{font-family:-apple-system,sans-serif;color:#f0f6fc;font-size:1.3rem;margin-bottom:.5rem}
+.subtitle{font-family:-apple-system,sans-serif;color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.terminal{background:#161b22;border:1px solid #30363d;border-radius:8px;width:100%;max-width:700px;overflow:hidden}
+.terminal-bar{background:#21262d;padding:.5rem 1rem;display:flex;gap:.5rem;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot-r{background:#f85149}.dot-y{background:#d29922}.dot-g{background:#3fb950}
+.terminal-title{color:#8b949e;font-size:.75rem;margin-left:.5rem}
+.terminal-body{padding:1rem;min-height:300px;font-size:.8rem;line-height:1.6;overflow-y:auto;max-height:400px}
+.line{opacity:0;animation:fadeIn .3s forwards}
+@keyframes fadeIn{to{opacity:1}}
+.prompt{color:#3fb950}.cmd{color:#f0f6fc}.comment{color:#484f58}
+.blocked{color:#f85149;font-weight:700}.allowed{color:#3fb950}.warn{color:#d29922}
+.controls{margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.btn{font-family:-apple-system,sans-serif;padding:.6rem 1.5rem;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
+.btn-primary{background:#238636;color:#fff}.btn-primary:hover{background:#2ea043}
+.btn-outline{background:transparent;color:#58a6ff;border:1px solid #30363d}.btn-outline:hover{border-color:#58a6ff}
+.btn-danger{background:#da3633;color:#fff}.btn-danger:hover{background:#f85149}
+.scenarios{margin-top:1.5rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.scenario-btn{font-family:-apple-system,sans-serif;padding:.4rem 1rem;border-radius:20px;border:1px solid #30363d;background:#161b22;color:#8b949e;cursor:pointer;font-size:.75rem;transition:all .2s}
+.scenario-btn:hover{border-color:#58a6ff;color:#58a6ff}
+.scenario-btn.active{border-color:#3fb950;color:#3fb950;background:#0d1117}
+.cta{margin-top:2rem;text-align:center;font-family:-apple-system,sans-serif}
+.cta a{color:#58a6ff;text-decoration:none;font-size:.85rem}
+.footer{margin-top:2rem;font-family:-apple-system,sans-serif;font-size:.75rem;color:#484f58;text-align:center}
+</style>
+</head>
+<body>
+
+<h1>See cc-safe-setup in Action</h1>
+<p class="subtitle">No install needed. Click a scenario to see how hooks protect you.</p>
+
+<div class="scenarios">
+<button class="scenario-btn active" onclick="run('rmrf')">rm -rf attack</button>
+<button class="scenario-btn" onclick="run('forcepush')">Force push</button>
+<button class="scenario-btn" onclick="run('envleak')">Credential leak</button>
+<button class="scenario-btn" onclick="run('overnight')">Overnight drain</button>
+<button class="scenario-btn" onclick="run('install')">Install flow</button>
+</div>
+
+<div class="terminal">
+<div class="terminal-bar">
+<div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+<span class="terminal-title">claude-code — bash</span>
+</div>
+<div class="terminal-body" id="output"></div>
+</div>
+
+<div class="controls">
+<button class="btn btn-primary" onclick="run(currentScenario)">▶ Replay</button>
+<button class="btn btn-outline" onclick="window.location.href='index.html'">← Back to cc-safe-setup</button>
+</div>
+
+<div class="cta">
+<p style="margin-bottom:.5rem;color:#f0f6fc;font-weight:600">Ready to install?</p>
+<pre style="background:#161b22;padding:.5rem 1rem;border-radius:6px;display:inline-block;margin-bottom:1rem">npx cc-safe-setup</pre>
+<br>
+<a href="token-checkup.html">Take the Token Checkup →</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · MIT License
+</div>
+
+<script>
+let currentScenario = 'rmrf';
+const scenarios = {
+  rmrf: [
+    {type:'comment', text:'# Claude decides to "clean up" your project directory...'},
+    {type:'prompt', text:'claude', delay:500},
+    {type:'cmd', text:'> Let me clean up the temporary files in your project.'},
+    {type:'prompt', text:'$', delay:800},
+    {type:'cmd', text:'rm -rf ./src/components/'},
+    {type:'blocked', text:'🛑 BLOCKED by destructive-guard.sh', delay:300},
+    {type:'blocked', text:'   rm -rf targeting project directory detected'},
+    {type:'blocked', text:'   Prevented deletion of ./src/components/ (47 files)'},
+    {type:'line', text:''},
+    {type:'allowed', text:'✓ Your files are safe. Hook blocked the command before execution.'},
+    {type:'comment', text:'# Without cc-safe-setup: 47 files permanently deleted.'},
+    {type:'comment', text:'# Real incident: github.com/anthropics/claude-code/issues/49129'},
+  ],
+  forcepush: [
+    {type:'comment', text:'# Claude rewrites git history and pushes to main...'},
+    {type:'prompt', text:'claude', delay:500},
+    {type:'cmd', text:'> I\'ll rebase and push the fix to main.'},
+    {type:'prompt', text:'$', delay:800},
+    {type:'cmd', text:'git push --force origin main'},
+    {type:'blocked', text:'🛑 BLOCKED by branch-guard.sh', delay:300},
+    {type:'blocked', text:'   Force push to protected branch: main'},
+    {type:'blocked', text:'   Use a feature branch instead: git checkout -b fix/my-change'},
+    {type:'line', text:''},
+    {type:'allowed', text:'✓ Branch history preserved. 3 collaborators\' work protected.'},
+    {type:'comment', text:'# Real incident: github.com/anthropics/claude-code/issues/32476'},
+  ],
+  envleak: [
+    {type:'comment', text:'# Claude stages all files including .env...'},
+    {type:'prompt', text:'claude', delay:500},
+    {type:'cmd', text:'> I\'ll commit all the changes.'},
+    {type:'prompt', text:'$', delay:800},
+    {type:'cmd', text:'git add .'},
+    {type:'warn', text:'⚠️  WARNING from secret-guard.sh', delay:300},
+    {type:'blocked', text:'🛑 BLOCKED: .env file detected in staged changes'},
+    {type:'blocked', text:'   Files blocked: .env, .env.local'},
+    {type:'blocked', text:'   Contains: DATABASE_URL, API_KEY, JWT_SECRET'},
+    {type:'line', text:''},
+    {type:'allowed', text:'✓ Credentials saved from public exposure.'},
+    {type:'comment', text:'# Without hooks: API keys on public GitHub in 30 seconds.'},
+  ],
+  overnight: [
+    {type:'comment', text:'# You leave Claude running overnight...'},
+    {type:'prompt', text:'claude', delay:500},
+    {type:'cmd', text:'[03:42 AM] Auto-compact triggered (context full)'},
+    {type:'cmd', text:'[03:43 AM] Auto-compact triggered again'},
+    {type:'cmd', text:'[03:44 AM] Auto-compact triggered again', delay:600},
+    {type:'warn', text:'⚠️  compact-circuit-breaker.sh activated', delay:300},
+    {type:'blocked', text:'🛑 BLOCKED: 3 compactions in 5 minutes'},
+    {type:'blocked', text:'   Death spiral detected — stopping to preserve quota'},
+    {type:'blocked', text:'   Tokens saved: ~2,400,000 (estimated $48)'},
+    {type:'line', text:''},
+    {type:'allowed', text:'✓ Overnight quota protected. You wake up with budget intact.'},
+    {type:'comment', text:'# Real incident: github.com/anthropics/claude-code/issues/51088'},
+  ],
+  install: [
+    {type:'prompt', text:'$', delay:300},
+    {type:'cmd', text:'npx cc-safe-setup'},
+    {type:'line', text:''},
+    {type:'cmd', text:'  cc-safe-setup', delay:500},
+    {type:'comment', text:'  Make Claude Code safe for autonomous operation'},
+    {type:'line', text:''},
+    {type:'allowed', text:'  ✓ destructive-guard    → blocks rm -rf, git reset --hard', delay:200},
+    {type:'allowed', text:'  ✓ branch-guard         → blocks force-push to main', delay:200},
+    {type:'allowed', text:'  ✓ secret-guard         → blocks git add .env', delay:200},
+    {type:'allowed', text:'  ✓ syntax-check         → validates code after every edit', delay:200},
+    {type:'allowed', text:'  ✓ scope-guard          → blocks changes outside project', delay:200},
+    {type:'allowed', text:'  ✓ dotfile-guard        → protects ~/.bashrc, ~/.ssh/', delay:200},
+    {type:'allowed', text:'  ✓ api-error-alert      → notifies on API failures', delay:200},
+    {type:'allowed', text:'  ✓ comment-stripper     → fixes permission allowlist bugs', delay:200},
+    {type:'line', text:''},
+    {type:'cmd', text:'  Done. 8 safety hooks installed in 12 seconds.'},
+    {type:'comment', text:'  Restart Claude Code to activate.'},
+  ]
+};
+
+function run(name) {
+  currentScenario = name;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  event?.target?.classList.add('active');
+  const output = document.getElementById('output');
+  output.innerHTML = '';
+  const lines = scenarios[name];
+  let totalDelay = 0;
+  lines.forEach((line, i) => {
+    const delay = line.delay || 400;
+    totalDelay += delay;
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.style.animationDelay = '0s';
+      if (line.type === 'prompt') div.innerHTML = `<span class="prompt">${line.text}</span> `;
+      else if (line.type === 'cmd') div.innerHTML = `<span class="cmd">${line.text}</span>`;
+      else if (line.type === 'blocked') div.innerHTML = `<span class="blocked">${line.text}</span>`;
+      else if (line.type === 'allowed') div.innerHTML = `<span class="allowed">${line.text}</span>`;
+      else if (line.type === 'warn') div.innerHTML = `<span class="warn">${line.text}</span>`;
+      else if (line.type === 'comment') div.innerHTML = `<span class="comment">${line.text}</span>`;
+      else div.innerHTML = '&nbsp;';
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+    }, totalDelay);
+  });
+}
+
+// Auto-run first scenario
+run('rmrf');
+</script>
+</body>
+</html>
