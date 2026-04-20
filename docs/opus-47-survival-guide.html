@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。55セクション/70+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。56セクション/71+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -728,10 +728,17 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Use a PreToolUse hook that counts consecutive Read/Glob/Grep calls. After 25 reads without any Edit or Write, warn. After 40, block and force the model to act on what it already knows. The counter resets whenever a write occurs or after 10 minutes of inactivity (indicating a new task). Install: <code>npx cc-safe-setup --install-example exploration-budget-guard</code>. Pairs well with tool-retry-budget-guard for comprehensive token protection.</p>
 </div>
 
+<h2 id="wordpress-die-production-outage">56. WordPress Production Site Goes Offline After die() in Init Hook <span class="severity sev-critical">CRITICAL</span></h2>
+<p>Claude creates a diagnostic snippet using <code>echo get_option(...); die();</code> attached to WordPress's <code>init</code> hook. The init hook fires on every request (frontend, admin, API), so every single request is immediately halted. The entire production site goes completely offline with active users. Recovery requires manual database access via phpMyAdmin to deactivate the snippet. Claude had full context about the production environment but failed to choose a safe diagnostic approach (e.g., <code>error_log()</code> instead of <code>die()</code>). <a href="https://github.com/anthropics/claude-code/issues/51034">#51034</a></p>
+<div class="fix">
+<h3>Fix: Block die()/exit() in production hook contexts</h3>
+<p>Use a PostToolUse:Write hook that scans PHP files for <code>die(</code> or <code>exit(</code> patterns near WordPress hook registrations (<code>add_action</code>, <code>add_filter</code>). Warn immediately when detected. For broader protection, enforce that all diagnostic output uses <code>error_log()</code> rather than output-terminating functions. Also consider a pre-deployment hook that validates PHP files won't halt execution on production. See also: §3 (syntax validation) and §35 (silent data loss).</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 701 example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, #51054, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, #50986, #51030, #51034, #51054, CVE-2026-21852</p>
 </div>
 
 </body>
