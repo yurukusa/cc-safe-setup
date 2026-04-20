@@ -69,7 +69,7 @@ a:hover{text-decoration:underline}
 
 <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:1rem 0">
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
-<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。50セクション/67+ Issues追跡中。</p>
+<p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。52セクション/69+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
 <pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
@@ -78,7 +78,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 
 <div class="alert">
 <h3>April 15-18: 24+ data loss incidents, prompt cache destruction, $500+ losses</h3>
-<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>50 known issues (67+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
+<p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>52 known issues (69+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
 <ol class="toc">
@@ -693,10 +693,24 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Add a PreToolUse hook that blocks <code>docker rm</code> commands and reminds the model to verify data persistence with <code>docker inspect</code> first. Safe escalation order: (1) restart container, (2) kill specific process inside container, (3) commit container state before removal. Treat <code>docker rm</code> on containers without volume mounts as equivalent to <code>rm -rf</code> on user data.</p>
 </div>
 
+<h2 id="production-kill-1000-loss">51. Production Process Killed on Wrong Port → $1,000 Loss <span class="severity sev-critical">CRITICAL</span></h2>
+<p>User asked Claude to "read an Excel file only" with Accept Edits mode enabled. Instead, Claude modified the file AND ran <code>lsof -ti :8000 | xargs kill</code> to kill a production process — on port 8000, even though the CLAUDE.md specified port 7000. The production service was terminated without confirmation, causing $1,000 in losses. Claude acted on the wrong port and exceeded the scope of the request entirely. <a href="https://github.com/anthropics/claude-code/issues/50971">#50971</a></p>
+<div class="fix">
+<h3>Fix: Block port-based process killing</h3>
+<p>Add a PreToolUse hook that blocks <code>lsof -ti :PORT | xargs kill</code>, <code>fuser -k PORT/tcp</code>, and similar patterns. These commands find processes by port number and kill them in one step — no verification, no confirmation. Safe alternative: (1) <code>lsof -i :PORT</code> to inspect what's running, (2) verify it's the intended target, (3) use the service's own stop mechanism. See <code>production-port-kill-guard.sh</code> in cc-safe-setup.</p>
+</div>
+
+<h2 id="cjk-punctuation-corruption">52. Write Tool Silently Corrupts CJK Punctuation <span class="severity sev-high">HIGH</span></h2>
+<p>The Write and Edit tools silently convert full-width CJK punctuation to half-width ASCII: <code>，→,</code> <code>。→.</code> <code>「→"</code>. This corrupts Chinese, Japanese, and Korean text without any warning. The corruption is silent — no error, no diff shown. Users only discover it when reviewing the file later. Affects all CJK content: documentation, comments, string literals, configuration files. <a href="https://github.com/anthropics/claude-code/issues/50975">#50975</a></p>
+<div class="fix">
+<h3>Fix: Verify CJK content after Write/Edit</h3>
+<p>After any Write or Edit operation on files containing CJK text, run a PostToolUse hook that compares the original and modified content for unexpected punctuation changes. Alert if full-width characters were replaced with half-width equivalents. Workaround: use Python/Node scripts to write CJK content instead of the built-in Write tool, or add a git pre-commit hook that detects CJK punctuation corruption.</p>
+</div>
+
 <div class="footer">
 <p>cc-safe-setup — 695+ example hooks for Claude Code safety</p>
 <p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">All Tools</a> · <a href="token-checkup.html">Token Checkup</a> · <a href="version-check.html">Version Check</a></p>
-<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, CVE-2026-21852</p>
+<p class="timestamp">Last updated: April 20, 2026. Issues tracked: #44791, #46727, #46828, #46917, #47046, #48792, #48927, #48992, #49129, #49169, #49192, #49232, #49268, #49302, #49332, #49356, #49363, #49464, #49539, #49541, #49554, #49562, #49585, #49615, #49618, #49653, #49689, #49696, #49725, #49740, #49747, #49757, #49884, #49902, #50027, #50052, #50176, #50180, #50191, #50201, #50204, #50207, #50213, #50232, #50235, #50303, #50325, #50359, #50362, #50364, #50380, #50385, #50389, #50402, #50429, #50434, #50454, #50467, #50492, #50513, #50554, #50589, #50952, #50960, #50971, #50975, CVE-2026-21852</p>
 </div>
 
 </body>

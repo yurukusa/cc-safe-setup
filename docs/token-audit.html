@@ -324,7 +324,7 @@ function analyze() {
   if (hooks.length > 0) {
     hookDiv.innerHTML = hooks.map(h => `<div class="card"><strong>${h.name}</strong><p style="font-size:.85rem;color:#8b949e">${h.reason}</p><pre><code>${h.cmd}</code></pre></div>`).join('');
   } else if (metrics.hookCount > 0) {
-    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (50 sections)</a>.</p></div>';
+    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (52 sections)</a>.</p></div>';
   } else {
     hookDiv.innerHTML = '<div class="card"><pre><code>npx cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">One command to install 8 essential safety hooks.</p></div>';
   }
