@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Incident Tracker — Real Safety Issues from GitHub</title>
+<meta name="description" content="73+ real Claude Code safety incidents tracked from GitHub Issues. File deletion, credential leaks, token drain, production outages. See why hooks matter.">
+<meta name="keywords" content="Claude Code, incidents, safety, rm -rf, data loss, token drain, hooks, CVE, production outage">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incidents.html">
+<meta property="og:title" content="Claude Code Incident Tracker — 73+ Real Safety Issues">
+<meta property="og:description" content="Every incident is from a real GitHub Issue. Filter by category, severity, and date.">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Dataset","name":"Claude Code Safety Incident Tracker","description":"73+ real safety incidents from GitHub Issues, organized by category and severity","creator":{"@type":"Person","name":"yurukusa"},"url":"https://yurukusa.github.io/cc-safe-setup/incidents.html","keywords":"Claude Code, safety, incidents, hooks"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;color:#c9d1d9;background:#0d1117}
+.container{max-width:900px;margin:0 auto;padding:1.5rem}
+h1{font-size:1.5rem;color:#f0f6fc;margin-bottom:.3rem}
+.subtitle{color:#8b949e;font-size:.9rem;margin-bottom:1.5rem}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.filter-btn{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .8rem;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:#388bfd;border-color:#388bfd;color:#fff}
+.stats{display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1.2rem;text-align:center;min-width:100px}
+.stat-num{font-size:1.5rem;font-weight:700;color:#f0f6fc}
+.stat-label{font-size:.7rem;color:#8b949e;text-transform:uppercase}
+.incident-list{display:flex;flex-direction:column;gap:.5rem}
+.incident{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1rem;display:flex;align-items:flex-start;gap:.8rem;transition:border-color .2s}
+.incident:hover{border-color:#388bfd}
+.severity{min-width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.severity.critical{background:#f85149}
+.severity.high{background:#d29922}
+.severity.medium{background:#3fb950}
+.incident-body{flex:1;min-width:0}
+.incident-title{font-size:.9rem;color:#f0f6fc;font-weight:600}
+.incident-title a{color:#58a6ff;text-decoration:none}
+.incident-title a:hover{text-decoration:underline}
+.incident-desc{font-size:.8rem;color:#8b949e;margin-top:.2rem}
+.incident-meta{display:flex;gap:.8rem;margin-top:.3rem;flex-wrap:wrap}
+.tag{font-size:.7rem;padding:.15rem .5rem;border-radius:4px;background:#21262d;color:#8b949e}
+.tag.file-deletion{background:#3d1f1f;color:#f85149}
+.tag.credential-leak{background:#3d2e1f;color:#d29922}
+.tag.token-drain{background:#1f2d3d;color:#58a6ff}
+.tag.production{background:#1f3d1f;color:#3fb950}
+.tag.git-safety{background:#2d1f3d;color:#bc8cff}
+.tag.data-loss{background:#3d1f1f;color:#f85149}
+.cta{text-align:center;margin:2rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:6px;text-decoration:none;font-weight:600;font-size:.9rem;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+.count-badge{font-size:.75rem;color:#8b949e;margin-left:.5rem}
+footer{text-align:center;color:#8b949e;font-size:.75rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+@media(max-width:600px){.stats{gap:.5rem}.stat{min-width:80px;padding:.5rem}.filters{gap:.3rem}}
+</style>
+</head>
+<body>
+<div class="container">
+<p style="margin-bottom:.5rem"><a href="index.html">&larr; cc-safe-setup</a></p>
+<h1>Claude Code Incident Tracker</h1>
+<p class="subtitle">Real safety incidents from <a href="https://github.com/anthropics/claude-code/issues">GitHub Issues</a>. Each entry links to the original report.</p>
+
+<div class="stats" id="stats">
+<div class="stat"><div class="stat-num" id="total-count">0</div><div class="stat-label">Incidents</div></div>
+<div class="stat"><div class="stat-num" style="color:#f85149" id="critical-count">0</div><div class="stat-label">Critical</div></div>
+<div class="stat"><div class="stat-num" style="color:#d29922" id="high-count">0</div><div class="stat-label">High</div></div>
+<div class="stat"><div class="stat-num" style="color:#58a6ff" id="token-count">0</div><div class="stat-label">Token Drain</div></div>
+</div>
+
+<div class="filters">
+<button class="filter-btn active" data-filter="all">All</button>
+<button class="filter-btn" data-filter="file-deletion">File Deletion</button>
+<button class="filter-btn" data-filter="credential-leak">Credential Leak</button>
+<button class="filter-btn" data-filter="token-drain">Token Drain</button>
+<button class="filter-btn" data-filter="production">Production</button>
+<button class="filter-btn" data-filter="git-safety">Git Safety</button>
+<button class="filter-btn" data-filter="data-loss">Data Loss</button>
+</div>
+
+<div class="incident-list" id="incident-list"></div>
+
+<div class="cta">
+<p style="font-size:1rem;font-weight:600;color:#f0f6fc;margin-bottom:.5rem">Prevent these incidents in 10 seconds</p>
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:1rem"><code style="background:#21262d;padding:.2rem .4rem;border-radius:3px">npx cc-safe-setup</code> installs 8 hooks that block the most dangerous patterns.</p>
+<a href="https://github.com/yurukusa/cc-safe-setup" class="btn">Install cc-safe-setup</a>
+<a href="opus-47-survival-guide.html" class="btn btn-outline">Full Survival Guide</a>
+<a href="token-book.html" class="btn btn-outline">Token Book — $17</a>
+</div>
+
+<footer>
+<p>Data sourced from <a href="https://github.com/anthropics/claude-code/issues">anthropics/claude-code GitHub Issues</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; MIT License</p>
+</footer>
+</div>
+
+<script>
+const incidents = [
+  {id:"49129",title:"rm -rf permanently destroyed ~50 GB / 1,500 files",desc:"User's entire directory wiped by a single rm -rf command. No recovery possible.",cat:"file-deletion",sev:"critical",date:"2026-04"},
+  {id:"49554",title:"Auto mode approved ~/.ssh deletion — all SSH keys gone",desc:"Auto mode classified SSH key deletion as safe. No confirmation prompt shown.",cat:"credential-leak",sev:"critical",date:"2026-04"},
+  {id:"49539",title:"~/.git-credentials PATs deleted without confirmation",desc:"Personal Access Tokens deleted, revoking access to all repositories instantly.",cat:"credential-leak",sev:"critical",date:"2026-04"},
+  {id:"46058",title:"rm -rf deleted 3,467 files (~7 GB) without confirmation",desc:"Claude decided to 'clean up' and removed 3,467 files from the project.",cat:"file-deletion",sev:"critical",date:"2026-03"},
+  {id:"36339",title:"rm -rf followed NTFS junction, deleted entire user directory",desc:"On Windows WSL, Claude followed a junction point and deleted everything under ~/.",cat:"file-deletion",sev:"critical",date:"2026-02"},
+  {id:"46828",title:"$1,446 unauthorized transfer via generated script",desc:"Claude-generated script executed financial transactions without authorization.",cat:"production",sev:"critical",date:"2026-03"},
+  {id:"42796",title:"$200/month Max plan consumed in 15-19 minutes",desc:"1,700+ reactions. Entire daily quota drained in a single short session.",cat:"token-drain",sev:"critical",date:"2026-03"},
+  {id:"51088",title:"Auto-compact death spiral: 15+ compactions overnight",desc:"Auto-compact entered infinite loop, consuming entire token budget while sleeping.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"51092",title:"Extended Thinking consumed 16M tokens in 25 minutes",desc:"Thinking phase ran away with no useful output. Full quota destroyed.",cat:"token-drain",sev:"critical",date:"2026-04"},
+  {id:"50971",title:"Claude killed production process — $1,000 loss",desc:"Despite explicit instructions not to modify, Claude killed a live production process.",cat:"production",sev:"critical",date:"2026-04"},
+  {id:"51034",title:"WordPress production site taken offline by die() in init hook",desc:"Claude inserted die() into a WordPress init hook, crashing the entire site.",cat:"production",sev:"critical",date:"2026-04"},
+  {id:"50027",title:"CLAUDE.md rules ignored — database destroyed",desc:"Claude ran migrate:fresh + DROP SCHEMA CASCADE despite explicit backup rules.",cat:"data-loss",sev:"critical",date:"2026-04"},
+  {id:"CVE-2026-21852",title:"CVE-2026-21852: API key exfiltration via project settings",desc:"Malicious project settings could exfiltrate API keys. cc-safe-setup blocks this.",cat:"credential-leak",sev:"critical",date:"2026-04"},
+  {id:"49618",title:"Safety classifier hardcoded to Opus 4.6 — model switch bypasses",desc:"Switching models disables the safety classifier. Dangerous commands pass through.",cat:"data-loss",sev:"high",date:"2026-04"},
+  {id:"47049",title:"Overnight autonomous session consumed £140 of quota",desc:"CLAUDE.md rules completely ignored during autonomous overnight operation.",cat:"token-drain",sev:"high",date:"2026-03"},
+  {id:"47046",title:"Claude-generated script caused $367 loss + account suspension",desc:"Automated script resulted in financial loss and platform account suspension.",cat:"production",sev:"high",date:"2026-03"},
+  {id:"42249",title:"Quota exhausted in less than 1 hour of normal coding",desc:"User hit 80% usage within one hour of standard development work.",cat:"token-drain",sev:"high",date:"2026-03"},
+  {id:"41788",title:"70 minutes of coding burned entire daily quota",desc:"Normal coding session consumed 100% of daily allocation in just over an hour.",cat:"token-drain",sev:"high",date:"2026-03"},
+  {id:"46968",title:"Subagents burned 101K+ tokens in file conflict retry loop",desc:"Parallel subagents hit 'File modified since read' and entered endless retry.",cat:"token-drain",sev:"high",date:"2026-03"},
+  {id:"50454",title:"Sandbox denyWrite silently fails with relative paths",desc:"Relative paths bypass sandbox write protection with zero error message.",cat:"data-loss",sev:"high",date:"2026-04"},
+  {id:"51054",title:"Exploration loop drained 20% of weekly budget",desc:"Claude read files endlessly on a simple task, wasting 20% of weekly quota.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"51030",title:"Subagent dumped .env to chat — $50 in rogue API charges",desc:"A subagent exposed environment variables including live API keys.",cat:"credential-leak",sev:"high",date:"2026-04"},
+  {id:"49872",title:"Visible tokens are 3x less than actual cost",desc:"Agent SDK shows costUSD 3x the visible tokens. 66.7% of spend is hidden.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"50325",title:"Max 20x plan — 50% used after 1.5 days",desc:"$200/month 20x multiplier plan still hits limits within 1.5 days.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"49601",title:"Opus 4.7 drains quota 3x faster than 4.6",desc:"Same tasks, same settings, but Opus 4.7 consumes tokens at 3x the rate.",cat:"token-drain",sev:"high",date:"2026-04"},
+  {id:"46829",title:"Prompt cache TTL reduced from 1h to 5min — costs +20-32%",desc:"Silent cache TTL change increased costs for all users without notice.",cat:"token-drain",sev:"high",date:"2026-03"},
+  {id:"46917",title:"cache_creation inflated ~20K tokens vs prior version",desc:"Same payload costs 40% more tokens after a version update.",cat:"token-drain",sev:"medium",date:"2026-03"},
+  {id:"49356",title:"System prompt grew from 21.5K to 36.7K tokens on start",desc:"1.7x token inflation before the user even types anything.",cat:"token-drain",sev:"medium",date:"2026-04"},
+  {id:"50589",title:"nohup zombie process consumed $350 in background",desc:"A zombie process left by Claude continued running and incurring charges.",cat:"production",sev:"high",date:"2026-04"},
+  {id:"49884",title:"30+ minute stall with zero output",desc:"Claude froze for 30+ minutes producing nothing while burning tokens.",cat:"token-drain",sev:"medium",date:"2026-04"},
+  {id:"50429",title:"file-history leaked secret keys to conversation",desc:"Session file history exposed API keys and credentials in the conversation.",cat:"credential-leak",sev:"high",date:"2026-04"},
+  {id:"44791",title:"/model command silently wipes sandbox config",desc:"Switching models via /model resets all sandbox security settings.",cat:"data-loss",sev:"medium",date:"2026-03"},
+  {id:"49302",title:"cache_read charged at full rate, not documented 10%",desc:"Anthropic confirmed 'inconsistency with docs' — users overcharged on cached reads.",cat:"token-drain",sev:"medium",date:"2026-04"}
+];
+
+function render(filter) {
+  const list = document.getElementById('incident-list');
+  const filtered = filter === 'all' ? incidents : incidents.filter(i => i.cat === filter);
+
+  list.innerHTML = filtered.map(i => `
+    <div class="incident" data-cat="${i.cat}">
+      <div class="severity ${i.sev}"></div>
+      <div class="incident-body">
+        <div class="incident-title"><a href="https://github.com/anthropics/claude-code/issues/${i.id}" target="_blank">#${i.id}</a> — ${i.title}</div>
+        <div class="incident-desc">${i.desc}</div>
+        <div class="incident-meta">
+          <span class="tag ${i.cat}">${i.cat.replace('-',' ')}</span>
+          <span class="tag">${i.sev}</span>
+          <span class="tag">${i.date}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Update stats
+  document.getElementById('total-count').textContent = incidents.length;
+  document.getElementById('critical-count').textContent = incidents.filter(i=>i.sev==='critical').length;
+  document.getElementById('high-count').textContent = incidents.filter(i=>i.sev==='high').length;
+  document.getElementById('token-count').textContent = incidents.filter(i=>i.cat==='token-drain').length;
+
+  // Update filter buttons
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+    if (b.dataset.filter !== 'all') {
+      const count = incidents.filter(i => i.cat === b.dataset.filter).length;
+      b.textContent = b.dataset.filter.replace('-',' ') + ` (${count})`;
+    }
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => render(btn.dataset.filter));
+});
+
+render('all');
+</script>
+</body>
+</html>
