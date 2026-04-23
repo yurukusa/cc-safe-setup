@@ -111,6 +111,7 @@ Each hook exists because a real incident happened without it.
 | **[Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html)** | Cut token consumption in half. CLAUDE.md templates, hook configs, context management, 32 failure patterns with fixes. 44,000+ words from 800+ hours of real operation data. | ¥2,500 (~$17). Ch.1 free |
 | **[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** | End-to-end Claude Code safety setup. From first install to overnight autonomous runs. | ¥800 (~$5). Ch.3 free |
 | **[CLAUDE.md Audit (service)](./SERVICES.md)** | Written audit of your CLAUDE.md + top-3 fixes, delivered within 48h via this repo's Issue tracker. | $29 (~¥3,980) |
+| **[Token Burn Audit (service)](./SERVICES.md#2-token-burn-audit--29-3980)** | Diagnosis of your actual `/cost` output — top 3 waste patterns tied to Token Book Ch.8 symptoms, with per-pattern fixes. 48h delivery. | $29 (~¥3,980) |
 | **[CC Safety Lab Founder](https://ko-fi.com/yurukusa)** | Monthly membership: 3–5 incident reports, 1 new hook (early access), 1 measured token-saving technique. | ¥500/month, grandfathered |
 
 **Why pay?** A Max plan costs $200/month. One token waste incident burns 50–80% of your weekly quota in hours ([#46727](https://github.com/anthropics/claude-code/issues/46727)). One `rm -rf` incident costs days of recovery. The Token Book costs less than 2 hours of Max subscription time — and the CLAUDE.md templates alone can reduce consumption by 40%.
