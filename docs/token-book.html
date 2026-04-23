@@ -97,36 +97,15 @@ New Release — April 2026
 <p style="margin-top:4px;font-size:0.85em;color:#666">PDF全10章・44,000字 ｜ <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" style="color:#666;text-decoration:none;">まずは無料診断 →</a> ｜ <a href="token-book-chapter1.html" style="color:#22c55e;text-decoration:underline;">はじめに＋第1章 無料で読む →</a></p>
 </div>
 
-<p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem;">r/ClaudeAIが「Tokenocalypse」と呼ぶほどの危機。報道: <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/" style="color:#58a6ff;">The Register</a> · <a href="https://www.devclass.com/ai-ml/2026/04/01/anthropic-admits-claude-code-users-hitting-usage-limits-way-faster-than-expected/5213575" style="color:#58a6ff;">devclass</a> · <a href="https://www.faros.ai/blog/claude-code-token-limits" style="color:#58a6ff;">Faros.ai</a> — Anthropicが「top priority」と認めた問題</p>
-
-<div class="pain-point">
-<strong>$200/月のMax planが15〜19分で消える</strong> — GitHub Issue <a href="https://github.com/anthropics/claude-code/issues/42796">#42796</a>は1,700+リアクション。<a href="https://github.com/anthropics/claude-code/issues/42249">#42249</a>（1時間でquota枯渇）、<a href="https://github.com/anthropics/claude-code/issues/41788">#41788</a>（70分で100%消費）でも報告。API利用者の中には<a href="https://tokencost.app/blog/claude-code-getting-worse-april-2026">月額$345→$42,121に膨張した事例</a>もある。Anthropicが「top priority」と認めた問題。
-</div>
-
-<div class="quotes-section">
-<blockquote>"I have Max subscription and in less than 1 hour my usage is at 80%"</blockquote>
-<blockquote>"I burned through my entire daily quota in about 70 minutes of normal coding"</blockquote>
-<blockquote>"Parallel subagents hit 'File modified since read' errors and burned 101K+ tokens in a retry loop"</blockquote>
-<blockquote>"Prompt cache TTL was silently reduced from 1 hour to 5 minutes — costs increased 20-32%"</blockquote>
-<blockquote>"v2.1.100 inflates cache_creation by ~20K tokens vs v2.1.98 — same payload, 40% more tokens"</blockquote>
-<blockquote>"System prompt cache overhead increased 94% since v2.1.98 — 49.7K to 96.5K tokens on cold cache"</blockquote>
-<blockquote>"Opus 4.7 drains my 5-hour quota 3x faster than Opus 4.6 — same tasks, same settings"</blockquote>
-<blockquote>"System tokens jumped from 21.5K to 36.7K on session start — 1.7x inflation before I even type anything"</blockquote>
-<blockquote>"cache_read is being charged at full rate, not the documented 10% — Anthropic support confirmed 'inconsistency with docs'"</blockquote>
-<blockquote>"cache_creation spiked by hundreds of thousands of tokens — a single internal function folds dynamic text into tool results every turn, breaking cache prefix matching"</blockquote>
-<blockquote>"Effective context burn rate ~5x higher during working sessions"</blockquote>
-<blockquote>"Agent SDK shows costUSD is 3x the visible tokens — 66.7% of my spend is unexplained"</blockquote>
-<blockquote>"Claude ignored my CLAUDE.md backup rules and ran migrate:fresh + DROP SCHEMA CASCADE — 2 days of work gone"</blockquote>
-<blockquote>"Max 20x plan — weekly usage hit 50% after only 1.5 days. At this rate my 'weekly' budget is a 3-day budget"</blockquote>
-<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">— GitHub Issues #42249, #41788, #46968, #46829, #46917, #47528, #49601, #49356, #49302, #49585, #49593, #49872, #50027, #50325 より</p>
-</div>
-
-<div class="pain-point" style="background:#fef2f2;border-left-color:#ef4444;">
-<strong>🚨 Opus 4.7 緊急警告（2026年4月18日更新）</strong> — <strong>72時間で4件のP0-levelのrm -rf事故</strong>が発生。auto modeの安全分類器が<a href="https://github.com/anthropics/claude-code/issues/49618">Opus 4.6にハードコード</a>され、CLAUDE.mdのルールを無視して<a href="https://github.com/anthropics/claude-code/issues/50027">データベースを破壊</a>する事例も。トークンコストは<a href="https://github.com/anthropics/claude-code/issues/49872">可視トークンの3倍</a>に膨張。第4章のhookはモデル非依存で動作する — この危機への唯一の防御。
-</div>
-
-<div class="pain-point" style="background:#fff7ed;border-left-color:#f97316;">
-<strong>トークン管理を怠ると、もっと大きな事故が起きる</strong> — 2026年4月の1週間だけで: 自律運行を一晩放置して<a href="https://github.com/anthropics/claude-code/issues/47049">£140のquotaを消費</a>（CLAUDE.mdのルールを全無視）。<a href="https://github.com/anthropics/claude-code/issues/47046">Claude Codeが生成したスクリプトが$367の損失とアカウント停止</a>を引き起こした事例も。さらに<a href="https://adversa.ai/blog/claude-code-security-bypass-deny-rules-disabled/">deny rulesが50コマンドで無効化される脆弱性</a>が発見され、<a href="https://www.theregister.com/2026/04/01/claude_code_rule_cap_raises/">The Register</a>等10媒体で報道された。hookによる自動防御がなければ、コストは青天井になる。
+<div class="data-point" style="background:#f0f9ff;border-left:3px solid #2563eb;padding-left:1.5rem;">
+<p style="margin-bottom:0.5rem;">こんな経験はありませんか？</p>
+<ul style="list-style:none;padding:0;color:#444;">
+<li>・ 1時間も使ってないのに、もうquota 80%</li>
+<li>・ CLAUDE.mdを長くしたら、なぜかセッションが短くなった</li>
+<li>・ サブエージェントを使ったら、トークン消費が跳ね上がった</li>
+<li>・ /compact したのに、すぐまた「context is large」と言われる</li>
+</ul>
+<p style="margin-top:0.8rem;color:#666;font-size:0.9rem;">原因は1つではありません。CLAUDE.mdの書き方、キャッシュの仕組み、compactionのタイミング、ツールの使い方——複数の要因が絡み合っています。この本は800時間の運用データをもとに、それぞれの原因と対策を体系的にまとめました。</p>
 </div>
 
 <div class="cta-section" style="margin:2rem 0 1rem;">
