@@ -81,42 +81,77 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <p>Opus 4.7 introduced critical regressions: the auto mode safety classifier is hardcoded to Opus 4.6, token consumption jumped up to 4x, the installer can truncate your shell config to 0 bytes, and CLAUDE.md instructions are ignored more frequently — leading to database destruction and financial losses. This page tracks <strong>53 known issues (70+ GitHub Issues + CVEs)</strong> and provides hooks that protect your work <strong>right now</strong>.</p>
 </div>
 
+<details open style="margin:1.5rem 0;border:1px solid #30363d;border-radius:8px"><summary style="padding:.8rem 1rem;cursor:pointer;font-weight:600;color:#f0f6fc;background:#161b22;border-radius:8px">📋 Table of Contents (67 incidents) — click any item to jump</summary>
 <ol class="toc">
-<li><a href="#token">4x Token Consumption</a></li>
-<li><a href="#classifier">Classifier Failure in Auto Mode</a></li>
-<li><a href="#data-loss">Data Loss Incidents (50GB+)</a></li>
-<li><a href="#installer">Installer Truncates Shell Config</a></li>
-<li><a href="#quality">Model Quality Regression</a></li>
-<li><a href="#thinking">Thinking Summaries Disappear</a></li>
-<li><a href="#auto-update">Auto-Update Removes Symlinks</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#token-inflation">1.7x Token Inflation</a></li>
-<li><a href="#hidden-tokens">20K Hidden Token Inflation (196👍)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#cache-read-billing">cache_read Billed at Full Rate</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#permission-reset">Permission Mode Reset on /model</a></li>
-<li><a href="#context-ui-mismatch">Context UI Shows Wrong %</a></li>
-<li><a href="#credential-overwrite">Git Credentials Overwritten</a></li>
-<li><a href="#case-insensitive-path">macOS Path Destruction</a></li>
-<li><a href="#cache-destruction">Prompt Cache Destruction (smoosh)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#model-picker">Opus 4.6 Removed from Picker</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#instruction-ignoring">CLAUDE.md Rules Ignored → Data Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#allowedtools-bypass">--allowedTools Ignored in Bypass Mode</a></li>
-<li><a href="#malware-false-positive">Malware False Positive Blocks Subagents</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#stale-worktree">Subagents Use Stale Worktree</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#system-prompt-outdated">System Prompt Outdated (Model Misidentifies Itself)</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#auto-mode-gating">Auto Mode Permission Inconsistency</a></li>
-<li><a href="#recursive-spawn">Recursive Claude Spawn → DoS</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#billing-bucket">Token Billing Bucket Mismatch</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#subagent-oom">Subagent Memory Leak → OOM Crash</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#model-ui-mismatch">UI/CLI Model Version Mismatch</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#unauthorized-transfer-1446">$1,446 Unauthorized Transfer</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#bridge-subprocess-loss">Bridge Subprocess → $367 Loss</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#model-cmd-sandbox-wipe">/model Wipes Sandbox Config</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#pip-break-system">pip --break-system-packages Bypass</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#nohup-zombie-350">nohup Zombie Process → $350 Charges</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#filter-repo-production-loss">git filter-repo Destroys Production Files</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
-<li><a href="#stale-skill-args-replay">Stale Skill Arguments Replayed After Compaction</a> <span style="color:#3fb950;font-size:.8rem;">NEW</span></li>
+<li><a href="#token">1. 4x Token Consumption</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#classifier">2. Auto Mode Classifier Failure</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#data-loss">3. Data Loss Incidents</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#installer">4. Installer Truncates Shell Config</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#quality">5. Model Quality Regression</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#thinking">6. Thinking Summaries Disappear</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
 <li><a href="#quick-setup">Quick Protection Setup</a></li>
+<li><a href="#auto-update">7. Auto-Update Removes User Symlinks</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#token-inflation">8. 1.7x Token Inflation (New Tokenizer)</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#hidden-tokens">9. 20K Hidden Token Inflation</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#cache-read-billing">10. cache_read Billed at Full Rate</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#permission-reset">11. Permission Mode Resets on Model Switch</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#context-ui-mismatch">12. Context Usage UI Shows Wrong Percentage</a> <span class="severity sev-med" style="font-size:.65rem">MEDIUM</span></li>
+<li><a href="#credential-overwrite">13. Git Credentials Overwritten</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#case-insensitive-path">14. macOS Case-Insensitive Path Destruction</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#cache-destruction">15. Prompt Cache Destruction (smoosh pipeline)</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#model-picker">16. Opus 4.6 Removed from Desktop Picker</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#instruction-ignoring">17. CLAUDE.md Rules Ignored → Data Loss</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#allowedtools-bypass">18. --allowedTools Silently Ignored in Bypass Mode</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#malware-false-positive">19. Malware False Positive Blocks Subagents</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#stale-worktree">20. Subagents Use Stale Worktree</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#system-prompt-outdated">21. System Prompt Outdated — Model Misidentifies Itself</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#auto-mode-gating">22. Auto Mode Permission Inconsistency</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#recursive-spawn">23. Recursive Claude Spawn → DoS</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#billing-bucket">24. Token Billing Bucket Mismatch</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#subagent-oom">25. Subagent Memory Leak → OOM Crash</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#model-ui-mismatch">26. UI/CLI Model Version Mismatch</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#repo-visibility-theft">27. Autonomous Repo Visibility Change → Credential Theft</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#idle-token-drain">28. Idle Session Token Drain</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#compact-misreport">29. Auto-Compact Token Misreporting</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#plan-mode-escape">30. Plan Mode Silent Exit</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#file-history-secrets">31. file-history Snapshots Secret Keys</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#subagent-settings-freeze">32. Subagent Edits settings.json → Parent Freeze</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#compaction-broken">33. Opus Compaction Completely Broken</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#sandbox-relative-path">34. Sandbox denyWrite/denyRead Silently Ignores Relative Paths</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#precompact-hook-silent">35. PreCompact Hook Does Not Fire on Auto-Compaction</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#early-auto-compact">36. Auto-Compact Fires at 24% Context Usage</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#behavior-regression">37. Complex Engineering Behavior Regression</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#compaction-reexec-loop">38. Compaction Summary Re-Executes /loop Commands</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#thinking-summary-invisible">39. Thinking Summaries Not Rendered in VSCode Extension</a> <span class="severity sev-medium" style="font-size:.65rem">MEDIUM</span></li>
+<li><a href="#opus47-30min-stuck">40. Opus 4.7 Stalls for 30+ Minutes with API Termination</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#unauthorized-transfer-1446">41. $1,446 Unauthorized USDT Transfer via "Close It" Instruction</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#bridge-subprocess-loss">42. Claude-Bridge Subprocess Auto-Generation → $367 Loss</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#model-cmd-sandbox-wipe">43. /model Command Silently Wipes Sandbox Config</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#pip-break-system">44. pip install --break-system-packages Passes Auto Mode</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#systematic-hallucination-waste">45. Systematic Hallucinations + Rule Violations → 80% Usage Wasted</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#token-burn-no-downgrade">46. Opus 4.7 Burns 1% Per Prompt — No Downgrade Path</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#nohup-zombie-350">47. nohup Zombie Process → $350 Unauthorized Charges</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#cve-settings-exfil">48. CVE-2026-21852: Project-Level settings.json API Key Exfiltration</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#hooks-cwd-drift">49. Hook Commands Fail Silently When CWD Drifts</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#docker-rm-dataloss">50. Docker Container Removal Without Volume Check → Data Loss</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#production-kill-1000-loss">51. Production Process Killed on Wrong Port → $1,000 Loss</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#cjk-punctuation-corruption">52. Write Tool Silently Corrupts CJK Punctuation</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#retry-spiral-budget-waste">53. Retry Spiral Wastes Entire Weekly Token Budget on 1-Line Change</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#subagent-env-leak">54. Sub-Agent Reads .env File, Exposes 5 API Keys in Transcript</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#exploration-loop-token-drain">55. Exploration Loop Drains 20% of Weekly Token Budget on Simple Task</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#wordpress-die-production-outage">56. WordPress Production Site Goes Offline After die() in Init Hook</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#compact-death-spiral">57. Auto-Compact Death Spiral Consumes Entire Overnight Token Budget</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#thinking-token-drain">58. Extended Thinking Consumes 16 Million Tokens in 25 Minutes</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#managed-hooks-bypass">59. Managed Hooks Restriction Bypassed via ANTHROPIC_BASE_URL</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#hallucinated-phishing-links">60. Model Hallucinates Telegram Invite URLs — Potential Phishing Vector</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#wsl2-sandbox-e2big">61. WSL2 Sandbox Fails with E2BIG — Forces Security Degradation</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#stale-skill-args-replay">62. Stale Skill Arguments Replayed After Compaction</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#filter-repo-production-loss">63. git filter-repo Destroys Production Files + Force Push</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#ntfs-junction-traversal">64. NTFS Junction Traversal Destroys User Profile via pnpm Worktree Deletion</a> <span class="severity sev-critical" style="font-size:.65rem">CRITICAL</span></li>
+<li><a href="#ask-auto-bypass">65. PreToolUse Hook "ask" Silently Auto-Approved in Auto Mode</a> <span class="severity sev-high" style="font-size:.65rem">HIGH</span></li>
+<li><a href="#sessionstart-eexist-wsl">66. SessionStart Hook Fails with EEXIST on WSL/Windows Plugin Data Directory</a> <span class="severity sev-medium" style="font-size:.65rem">MEDIUM</span></li>
 </ol>
+</details>
 
 <h2 id="token">1. 4x Token Consumption <span class="severity sev-critical">CRITICAL</span></h2>
 
