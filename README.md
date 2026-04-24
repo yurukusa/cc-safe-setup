@@ -193,7 +193,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 707 examples |
+| `--install-example <name>` | Install from 711 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
@@ -414,6 +414,7 @@ npx cc-safe-setup --install-example block-database-wipe
 
 Or browse all available examples in [`examples/`](examples/):
 
+- **claude-update-smart.sh** — Skip the 226 MB tarball download when already up-to-date (workaround for [#51243](https://github.com/anthropics/claude-code/issues/51243)). Turns 30 s checks into 0.3 s. Falls through to the real `claude update` when a new release exists or the registry is unreachable.
 - **auto-approve-git-read.sh** — Auto-approve `git status`, `git log`, even with `-C` flags
 - **auto-approve-ssh.sh** — Auto-approve safe SSH commands (`uptime`, `whoami`, etc.)
 - **enforce-tests.sh** — Warn when source files change without corresponding test files
