@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Where Do Your Claude Code Tokens Go? — Free Chapter from Token Book</title>
-<meta name="description" content="Free chapter: the 4 layers of Claude Code token consumption explained with data from 800+ hours. Learn where your quota actually disappears.">
+<title>Where Do Your Claude Code Tokens Go? — Free Intro + Chapter 1 from Token Book</title>
+<meta name="description" content="Free Intro + Chapter 1 from Token Book: the 4 invisible layers of Claude Code token consumption, explained with data from 800+ hours. Pro and Max plan ROI math included.">
 <meta name="keywords" content="Claude Code, tokens, token consumption, where tokens go, quota, Max plan, save tokens, reduce cost">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html">
 <meta property="og:title" content="Where Do Your Claude Code Tokens Go? (Free Chapter)">
@@ -39,13 +39,21 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 </head>
 <body>
 
-<p style="margin-bottom:.5rem"><a href="token-book.html">&larr; Token Book</a> <span class="free-badge">FREE CHAPTER</span></p>
-<h1>Chapter 1: Where Do Your Claude Code Tokens Go?</h1>
-<p class="meta">From <a href="token-book.html">Token Book</a> — Cut Claude Code Token Usage in Half &middot; 800+ hours of data</p>
+<p style="margin-bottom:.5rem"><a href="token-book.html">&larr; Token Book</a> <span class="free-badge">FREE: INTRO + CH.1</span></p>
+<h1>Where Do Your Claude Code Tokens Go?</h1>
+<p class="meta">Intro + Chapter 1 from <a href="token-book.html">Token Book</a> — Cut Claude Code Token Usage in Half &middot; 800+ hours of data</p>
 
-<p>"I'm not doing anything and my quota keeps disappearing" — this is the most common complaint from Claude Code users. But you <em>are</em> doing something. Tokens are being consumed in places you can't see.</p>
+<p style="background:#2a1a0b;border:1px solid #d29922;border-radius:6px;padding:.8rem 1rem;margin:1rem 0;font-size:.9rem"><strong style="color:#d29922">Opus 4.7 readers:</strong> Since April 18, 2026, Claude Code users have reported 1.46x token consumption, 40%+ cost increase, and auto mode's safety classifier hardcoded to Opus 4.6 (<a href="https://github.com/anthropics/claude-code/issues/49618">#49618</a>). If you landed here because of 4.7 pain, Chapter 4's hooks are <em>model-independent</em>. See also the free <a href="opus-47-survival-guide.html">Survival Guide (66 sections)</a>.</p>
 
-<h2>The 4 Layers of Token Consumption</h2>
+<h2>Intro — Why this book exists</h2>
+
+<p>"I'm not doing anything and my quota keeps disappearing" — this is the most common complaint in the Claude Code community. But you <em>are</em> doing something. Tokens are being consumed in 4 invisible layers: the system prompt, the context window, tool calls, and subagents. You don't see them, so you can't cut them.</p>
+
+<p>This book came out of 800+ hours of autonomous Claude Code operation. The author hit every token trap personally, documented 48 distinct waste symptoms (Chapter 8), and built the <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> hook library to automate prevention. Most "save your tokens" advice tells you to do less with Claude Code. This book tells you how to do the same work and pay less for it.</p>
+
+<p><strong>Chapter 1 (below) shows the 4 invisible layers. Chapters 2–9 give you the tools.</strong></p>
+
+<h2>Chapter 1 — The 4 Layers of Token Consumption</h2>
 
 <div class="layer">
 <strong>Layer 1: System Prompt</strong>
@@ -97,10 +105,11 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 
 <div class="cta">
 <p style="font-size:1.1rem;font-weight:600;color:#f0f6fc;margin-bottom:.5rem">Get the full Token Book</p>
-<p style="font-size:.9rem;color:#8b949e;margin-bottom:1rem">10 chapters &middot; 48 diagnostic symptoms &middot; Copy-paste templates<br>Max plan ($200/month) saves ~10% = $20/month. Pays for itself in 1 month.</p>
+<p style="font-size:.9rem;color:#8b949e;margin-bottom:.4rem">10 chapters &middot; 48 diagnostic symptoms &middot; Copy-paste templates</p>
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:1rem"><strong style="color:#c9d1d9">ROI quick-math:</strong> Max ($200/mo) saves ~10% = $20/mo → pays back in month 1. Pro ($20/mo) saves ~10% = $2/mo → pays back in ~8 months, plus hours not spent debugging quota.</p>
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn">Buy on Ko-fi — $17</a>
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn btn-outline">Buy on Zenn — ¥2,500</a>
-<p style="margin-top:.8rem;font-size:.8rem;color:#8b949e"><a href="token-checkup.html">Free: Token Checkup</a> — 5-question diagnostic, takes 30 seconds</p>
+<p style="margin-top:1rem;padding:.6rem .8rem;background:#0d1f12;border:1px solid #238636;border-radius:6px;font-size:.9rem"><strong style="color:#3fb950">Not buying today?</strong> Run the free <a href="token-checkup.html" style="color:#3fb950;text-decoration:underline;font-weight:600">Token Checkup</a> — 5 questions, 30 seconds, tells you which chapter(s) you most need.</p>
 </div>
 
 <footer>
