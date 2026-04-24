@@ -509,6 +509,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Hooks Cookbook](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 25 recipes from real GitHub Issues ([interactive version](https://yurukusa.github.io/claude-code-hooks/))
 - [Skills Guide deep-dive (Qiita, 19K+ views)](https://qiita.com/yurukusa/items/f69920b4a02cf7e2988c) — Anthropic's official Skills PDF analyzed with 40% token reduction
 - [Japanese guide (Qiita)](https://qiita.com/yurukusa/items/a9714b33f5d974e8f1e8) — この記事の日本語解説
+- [Opus 4.7 breaking changes deep-dive (Hashnode)](https://yurukusa.hashnode.dev/opus-47-isnt-a-regression-but-your-46-prompts-are-now-broken) — Anthropic's 9 breaking changes, 5 workarounds, and the `task_budget` beta nobody mentions. Covers why `thinking-stall-detector` and `claude-md-reinjector` hooks exist
 - [v2.1.85 `if` field guide (Qiita)](https://qiita.com/yurukusa/items/7079866e9dc239fcdd57) — Reduce hook overhead with conditional execution
 - [Deny rules bypass vulnerability (Qiita)](https://qiita.com/yurukusa/items/f9c48bb44569bbf4492e) — 50+ subcommands disable all deny rules; hook-based defense
 - [Hook Test Runner](https://github.com/yurukusa/cc-hook-test) — `npx cc-hook-test <hook.sh>` to auto-test any hook
