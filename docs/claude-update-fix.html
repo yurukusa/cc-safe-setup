@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix `claude update` downloading 226 MB every time (Issue #51243)</title>
+<meta name="description" content="Claude Code downloads the full release tarball (226 MB, ~30 s) on every `claude update` — even when already up-to-date. Open Issue, no upstream fix. Drop-in bash wrapper that checks the npm registry first.">
+<meta name="keywords" content="claude update slow, claude code 226 MB, Issue 51243, WSL claude update, claude update hangs">
+<meta property="og:title" content="Fix `claude update` 226 MB download — Issue #51243 workaround">
+<meta property="og:description" content="30 s wait → 0.3 s. 60-line bash wrapper. Checks npm registry before calling `claude update`. MIT, tested.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-update-fix.html">
+<style>
+  :root { --bg: #0d1117; --fg: #c9d1d9; --accent: #58a6ff; --green: #3fb950; --red: #f85149; --amber: #f59e0b; --border: #30363d; --card: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem 1rem; max-width: 820px; margin: 0 auto; }
+  h1 { color: #fff; font-size: 1.8rem; margin-bottom: .5rem; }
+  h2 { color: var(--accent); font-size: 1.3rem; margin-top: 2rem; margin-bottom: .5rem; }
+  h3 { color: var(--amber); font-size: 1.05rem; margin-top: 1.2rem; margin-bottom: .3rem; }
+  p { margin: .5rem 0; }
+  pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .85rem; margin: .5rem 0; }
+  code { font-family: 'SF Mono', Monaco, Consolas, monospace; background: var(--card); padding: 1px 4px; border-radius: 3px; }
+  pre code { background: none; padding: 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .callout { background: #3d2910; border-left: 3px solid var(--amber); padding: .8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+  .incident { background: #3d1010; border-left: 3px solid var(--red); padding: .8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: .8rem 0; font-size: .9rem; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+  th { color: var(--accent); font-weight: 600; }
+  .nav { padding-bottom: 1.2rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; font-size: .85rem; color: #8b949e; }
+  .nav a { margin-right: 1rem; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--border); font-size: .85rem; color: #8b949e; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Fix claude update downloading 226 MB every time",
+  "description": "Workaround for anthropics/claude-code Issue #51243 — skip the tarball download when the installed version is already the latest.",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Save the wrapper to ~/bin/claude-update-smart"},
+    {"@type": "HowToStep", "position": 2, "name": "chmod +x the file"},
+    {"@type": "HowToStep", "position": 3, "name": "Alias claude-update to the wrapper in your shell rc"}
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/cc-safe-setup/">← cc-safe-setup</a>
+  <a href="/cc-safe-setup/hub.html">All tools</a>
+  <a href="https://github.com/anthropics/claude-code/issues/51243">Issue #51243</a>
+</div>
+
+<h1>Fix <code>claude update</code> downloading 226 MB every time</h1>
+<p>Every time you run <code>claude update</code>, it downloads the full release tarball (~226 MB) — even when your installation is already the latest version. On typical WSL2 connections this is <strong>~30 s of wall time and ~226 MB of silently-metered bandwidth per check</strong>.</p>
+
+<div class="incident">
+<strong>Upstream report (<a href="https://github.com/anthropics/claude-code/issues/51243">#51243</a>):</strong> Opened 2026-04-20 by @phil71x on Claude Code 2.1.114. Confirmed via <code>strace</code> that the command receives ~226 MB across 6,915 socket reads, then prints "Claude Code is up to date." Labels: <code>area:packaging</code>, <code>bug</code>, <code>has repro</code>, <code>platform:wsl</code>. <strong>Status: open, no upstream fix yet.</strong>
+</div>
+
+<h2>What the wrapper does</h2>
+<p>Before calling <code>claude update</code>, it asks the npm registry (~2 KB response) for the latest version and compares against <code>claude --version</code>. If they match it prints "up to date" and exits without downloading anything. If a newer version actually exists, it calls the real <code>claude update</code> as usual.</p>
+
+<table>
+  <tr><th>path</th><th>wall time</th><th>bytes down</th></tr>
+  <tr><td><code>claude update</code></td><td>~30 s</td><td>~226 MB</td></tr>
+  <tr><td>wrapper, up-to-date</td><td>~0.3 s</td><td>~2 KB (first run), 0 B (cache hit)</td></tr>
+  <tr><td>wrapper, update exists</td><td>~30 s</td><td>~226 MB (only when the release actually changed)</td></tr>
+</table>
+
+<div class="callout">
+<strong>Safe by design:</strong> if neither the npm registry nor the GitHub Releases API can be reached, the wrapper falls through to the real <code>claude update</code>. You never end up without an update path.
+</div>
+
+<h2>Install</h2>
+
+<h3>Option A — from cc-safe-setup</h3>
+<pre><code>npx cc-safe-setup --install-example claude-update-smart</code></pre>
+
+<h3>Option B — download the one file</h3>
+<pre><code>curl -fsSL https://raw.githubusercontent.com/yurukusa/cc-safe-setup/main/examples/claude-update-smart.sh \
+  -o ~/bin/claude-update-smart
+chmod +x ~/bin/claude-update-smart</code></pre>
+
+<h3>Option C — shadow the command</h3>
+<p>Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code>:</p>
+<pre><code>alias claude-update='bash ~/bin/claude-update-smart'</code></pre>
+
+<h2>Tested with</h2>
+<p>WSL2 Ubuntu 22.04, <code>claude</code> 2.1.118 + 2.1.119, against the npm registry and <code>api.github.com/repos/anthropics/claude-code/releases/latest</code>. 15 automated assertions covering up-to-date skip, update-available path, stale-cache handling, missing-binary fallthrough, no-network fallthrough.</p>
+
+<h2>Environment knobs</h2>
+<table>
+  <tr><th>variable</th><th>default</th><th>purpose</th></tr>
+  <tr><td><code>CLAUDE_UPDATE_SMART_CACHE</code></td><td><code>~/.cache/claude-update-smart.json</code></td><td>Where to cache the registry response</td></tr>
+  <tr><td><code>CLAUDE_UPDATE_SMART_TTL</code></td><td><code>3600</code></td><td>Cache lifetime in seconds</td></tr>
+  <tr><td><code>CLAUDE_UPDATE_SMART_NO_EXEC</code></td><td>(unset)</td><td>Print the decision only, do not call the real updater (for scripting and testing)</td></tr>
+</table>
+
+<h2>Why publish this as a separate page</h2>
+<p>Issue #51243 has been open for four days with no upstream response. A separate landing page makes the workaround discoverable from search engines before a package-level fix lands. If Anthropic ships a proper HEAD-request or metadata-endpoint fix, this page and the wrapper become unnecessary — and that will be a good day.</p>
+
+<footer>
+Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — open-source safety hooks and workarounds for Claude Code. MIT. Not affiliated with Anthropic.
+</footer>
+
+</body>
+</html>
