@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 1h to 5m Cache TTL Silent Downgrade — FREE Preview from Claude Code Incident Postmortems</title>
+<meta name="description" content="Free preview (Incident 1 of 10) from Claude Code Incident Postmortems. Why Max subscribers suddenly hit the 5-hour quota cap in March 2026, reverse-engineered from Issue #46829, Anthropic staff replies, and a 119,866-call dataset. Detection hook included.">
+<meta name="keywords" content="Claude Code, cache TTL, prompt caching, Max subscription, quota, ephemeral_5m, ephemeral_1h, incident postmortem">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incident-postmortems-preview.html">
+<meta property="og:title" content="The 1h to 5m Cache TTL Silent Downgrade — FREE Preview">
+<meta property="og:description" content="Incident 1 of 10 from Claude Code Incident Postmortems. Why Max subscribers hit quota first in March 2026.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"The 1h to 5m Cache TTL Silent Downgrade","description":"Free Incident 1 of 10 from Claude Code Incident Postmortems. Reverse-engineered from public GitHub Issues and Anthropic documentation.","datePublished":"2026-04-24","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Book","name":"Claude Code Incident Postmortems","url":"https://yurukusa.gumroad.com"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0}
+pre code{background:none;padding:0;font-size:.82rem;line-height:1.5}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.9rem}
+th,td{border:1px solid #30363d;padding:.5rem .8rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.preorder{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.preorder strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="hub.html">&larr; cc-safe-setup hub</a> <span class="free-badge">FREE PREVIEW — INCIDENT 1 OF 10</span></p>
+<h1>The 1h to 5m Cache TTL Silent Downgrade</h1>
+<p class="meta">Free preview chapter from <strong>Claude Code Incident Postmortems</strong> — a forthcoming $29 Gumroad release (target date 2026-05-05).</p>
+
+<div class="preorder">
+<strong>What this book is.</strong> Ten production-level Claude Code failures, reverse-engineered from public GitHub Issues, Anthropic staff replies, official documentation, and 800 hours of verified operator logs. Each incident follows a five-part structure: Signal, Root cause, Evidence, Fix/Workaround, Prevention (with a detection hook). This page is Incident 1 in full. The other nine and four appendices are in the book.
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">Not affiliated with Anthropic PBC. Every claim is traceable to a cited public source.</p>
+</div>
+
+<div class="meta-block">
+<strong>Period:</strong> March 6, 2026 to April 12, 2026 (closed as not planned)<br>
+<strong>Severity:</strong> High for Max subscribers, neutral-to-positive for API users<br>
+<strong>Status:</strong> Closed without fix; environment variables promised, not yet shipped<br>
+<strong>Primary sources:</strong> <a href="https://github.com/anthropics/claude-code/issues/46829">#46829</a> &middot; <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching">docs.anthropic.com/prompt-caching</a> &middot; <a href="https://www.theregister.com/2026/04/13/anthropic_claude_quota/">theregister.com 2026-04-13</a>
+</div>
+
+<p><strong>What you will learn from this postmortem:</strong></p>
+<ol>
+<li>Why a "cost-neutral on average" change can still drain a specific subscriber's weekly quota in hours.</li>
+<li>How to tell from <code>/usage</code> output whether your sessions are running on 5-minute or 1-hour cache TTL.</li>
+<li>Why Anthropic's official "not planned" response is technically correct <em>and</em> still leaves Max users worse off.</li>
+<li>A concrete detection hook you can install today that logs cache tier per request without waiting for a future environment variable.</li>
+</ol>
+
+<h2>Signal</h2>
+<p>In the first week of March 2026, Max $200/month subscribers who had been using Claude Code for six-plus months without ever hitting the 5-hour quota cap suddenly began to hit it. Some hit both the 5-hour and the weekly limit in the same day. Reddit threads from this window include "20x max usage gone in 19 minutes" (r/ClaudeAI, 330+ comments) and "Claude Code Limits Were Silently Reduced" (r/ClaudeCode, 360+ comments).</p>
+<p>There had been no announcement. The CLI version had not changed in a way that explained the difference. Same prompts, same codebase, same workflow — different burn rate.</p>
+<p>The <code>/usage</code> endpoint (in versions that shipped it) showed the usual breakdown by cache tier, but without a reference point for "what should this look like," most users could not tell that anything was off until they hit the cap.</p>
+<p>This is the pattern you should learn to recognize from this incident: <strong>nothing visibly breaks, a single hidden dial moves, and the cost of your existing workflow changes by double digits.</strong></p>
+
+<h2>Root cause</h2>
+<p>Every request Claude Code sends to the Anthropic API can tag its prompt cache with a TTL — the time the cache content will stay valid for cheap reads. Two tiers exist:</p>
+<ul>
+<li><code>ephemeral_5m</code> — cache expires in 5 minutes. Write cost &asymp; 1.25&times; base input. Read cost &asymp; 0.1&times; base input.</li>
+<li><code>ephemeral_1h</code> — cache expires in 1 hour. Write cost &asymp; 2&times; base input. Read cost &asymp; 0.1&times; base input.</li>
+</ul>
+<p>The client chooses which tier to tag per request. From roughly February 7 to March 5, 2026, Claude Code was tagging nearly all Max-subscription main-conversation turns as <code>ephemeral_1h</code>. Subagent turns were often tagged <code>ephemeral_5m</code> even in that window — a detail that matters later.</p>
+<p>On March 6, 2026, an experiment gate on the client flipped. The logic became per-request selection rather than "1h by default." In practice this meant a large fraction of Max main-conversation turns began writing to <code>ephemeral_5m</code>.</p>
+<p>For a workflow where the same main session is used intermittently over a 20-minute coding session — five minutes of typing, a three-minute tool call, a twelve-minute look at the output — each gap over five minutes expires the cache. The next turn must re-upload the same context as a fresh cache write. Every re-upload is billed as <code>cache_creation_input_tokens</code>, which Max subscription quota accounting weights heavily.</p>
+<p>The change did not break anything. It simply moved the efficient-reuse assumption from "1 hour" to "5 minutes." For a subscription user whose work pattern straddles the 5-minute boundary all day, this translates directly into faster quota exhaustion.</p>
+
+<h2>Evidence</h2>
+<p>Issue <a href="https://github.com/anthropics/claude-code/issues/46829">#46829</a> ("Cache TTL silently regressed from 1h to 5m around early March 2026") was opened by seanGSISG with a 119,866-call analysis covering January 11 through April 11, 2026, across two machines on Max subscription and Vertex billing. The data showed three distinct phases:</p>
+
+<table>
+<thead>
+<tr><th>Period</th><th>5m-tier share of <code>cache_creation</code> tokens (Max main turns)</th></tr>
+</thead>
+<tbody>
+<tr><td>January 29 to February 6</td><td>~58% (1h rollout in progress)</td></tr>
+<tr><td>February 7 to March 5</td><td><strong>0%</strong> (full 1h)</td></tr>
+<tr><td>March 6 to March 31</td><td>~20 to 45% (per-request mix)</td></tr>
+<tr><td>April 1 onward (post v2.1.90 fix)</td><td>0 to 6% (bug fix restored most main turns to 1h)</td></tr>
+</tbody>
+</table>
+
+<p>A second independent dataset from @spm1001 (approximately 407,000 turns on Max + Vertex, UK and DE) confirmed the timeline, matched the March 6 breakpoint, and added a detail that became important for reproducing the incident: <strong>Vertex-billed turns are always 5-minute TTL.</strong> Across 35,000 Vertex-billed turns, every single cache creation was tagged <code>ephemeral_5m</code>, with no exceptions. If you are running Claude Code through Google Cloud Vertex AI billing, you have never received the 1-hour cache optimization regardless of the client gate state.</p>
+
+<p>A note on the financial figures in the OP. The original post calculated the regression as a $949 over-cost on Sonnet and $1,581 over-cost on Opus, roughly 17.1 percent. After Anthropic staff replied, the OP corrected his own math in <a href="https://github.com/anthropics/claude-code/issues/46829#issuecomment-4233120483">issuecomment-4233120483</a>. The corrected figures separate main-session turns (21.8 : 1 read-to-write ratio, 35.3 million 5-minute tokens, $121 upper-bound waste) from subagent turns (9.1 : 1, 239.8 million 5-minute tokens). Subagents have a 1.4-second median inter-turn gap, so 5-minute TTL almost never expires on them, and the cheaper 5-minute write tier is in fact the right choice. Combined, the corrected math showed <strong>API users saved approximately $418 on average</strong> rather than losing $949.</p>
+
+<p>This retraction is one of the most instructive moments in the entire thread, and it matters for your operational thinking. Averaging across all request types hid the subscriber-specific harm. The "net positive on API cost" story is true. It is also true that Max subscribers ran out of quota faster because main-conversation turns — the ones that sit across human-scale gaps — are exactly the ones that suffer from short TTL. Two different user populations, one change, two different outcomes. If you spot an incident postmortem that reports only an "on average" figure, apply the same split.</p>
+
+<h2>Official response</h2>
+<p>Boris Cherny (bcherny, Anthropic) replied on the thread with a clarification of the per-request heuristic and a commitment: "We will soon be changing the client-side default to 1h for a few queries ... We will also give you env vars to force 1h and 5m." In the same comment he added that Claude reads the default value (5 minutes) when telemetry is disabled, because the experiment gate is delivered through the telemetry channel. Users who opted out of telemetry for privacy reasons were effectively opted out of the cache optimization as well.</p>
+<p>Jarred Sumner (Jarred-Sumner, Anthropic) addressed a related client-side bug in which sessions that started already in subscription overage would stay pinned to 5-minute TTL until the session exited. That bug was reported fixed in v2.1.90. The CHANGELOG for v2.1.90 does not mention the fix; it is recorded only in the Issue thread.</p>
+<p>The Register summarized Anthropic's public position on April 13, 2026 as "Claude quota drain not caused by cache tweaks." That framing is technically defensible for API customers and technically hollow for Max customers who cannot buy quota back at token price.</p>
+<p>Issue #46829 was closed with status "not planned" on April 12, 2026. The subscription-side quota impact was referenced to Issue <a href="https://github.com/anthropics/claude-code/issues/45756">#45756</a> ("Pro Max 5x Quota Exhausted in 1.5 Hours Despite Moderate Usage") for separate handling.</p>
+
+<h2>Diagnosis — how to tell if you were affected</h2>
+<p>If you ran Claude Code on Max or Pro between March 6 and April 1 and your 5-hour or weekly quota started hitting for the first time, the answer is likely yes.</p>
+<p>For ongoing diagnosis on current versions, use the <code>/usage</code> command (available in v2.1.118+):</p>
+<pre><code>/usage</code></pre>
+<p>The output shows cumulative <code>cache_creation_input_tokens</code> and <code>cache_read_input_tokens</code>. A healthy coding workflow on 1-hour TTL typically shows a read-to-write ratio of 10 : 1 or better on the main session. If you see a ratio below 5 : 1 and your work pattern includes gaps of 5 to 60 minutes between turns, you are paying the 5-minute-TTL tax.</p>
+<p>A second diagnostic is telemetry state. Run:</p>
+<pre><code>grep -i telemetry ~/.claude/settings.json</code></pre>
+<p>If telemetry is disabled, your client is reading the hard-coded default cache TTL (5 minutes for most queries) and you are not receiving the gate updates that restore 1-hour behavior for main-conversation turns.</p>
+<p>A third diagnostic, specific to Vertex customers: you cannot fix this by client upgrade, and you should plan your budget against the 5-minute baseline permanently until Anthropic ships automatic Vertex support (no published date as of this writing).</p>
+
+<h2>Fix and workaround</h2>
+<p>There is no official fix. <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code> is discussed in Incident 7 of this book and partially compensates by removing a background cache chain that inflates cost independently of TTL. That is not the same as fixing the TTL itself.</p>
+<p>Promised but not yet shipped as of the closing of Issue #46829:</p>
+<ul>
+<li>Environment variable to force 1-hour TTL on main turns.</li>
+<li>Environment variable to force 5-minute TTL for cost-sensitive subagent-heavy workflows.</li>
+</ul>
+<p>Until those ship, the available levers for Max subscribers are operational rather than configurational:</p>
+<ol>
+<li><strong>Keep main-session turns under 5 minutes apart when the context is expensive.</strong> If you are working on a 200K-token CLAUDE.md and a large file tree, stay in the session. Breaking for a 10-minute code review means the next turn is a 200K-token cache write.</li>
+<li><strong>Use subagents for short, one-shot tasks.</strong> They already benefit from the 5-minute tier and their cost structure is actually improved by the March 6 change.</li>
+<li><strong>Avoid keepalive ping scripts on subscription.</strong> Third-party tools like <code>yujiachen-y/claude-code-cache-keepalive</code> send periodic dummy requests to keep the cache warm. As kaiomp pointed out on the thread, every ping is a full cache-read on the prefix — cheap in API dollars, but it counts against your 5-hour and weekly quotas. Keepalive works for API customers paying per token; it actively harms Max subscribers by spending coding capacity on cache maintenance. Measured benefit does not exceed measured quota cost.</li>
+<li><strong>Accept the peak-hour penalty.</strong> As opriz noted, cache misses do not save compute — they force a full prefill. In the 5 to 11 AM Pacific window (business hours for most North American users), capacity is tight, TTFT (time to first token) rises, and throttling complaints spike. If you can schedule heavy work outside that window, do.</li>
+</ol>
+
+<h2>Prevention — a detection hook you can install today</h2>
+<p>The cc-safe-setup repository includes a PostToolUse hook that logs cache tier per request. Copy it into <code>~/.claude/hooks/cache-tier-logger.sh</code>:</p>
+<pre><code>#!/usr/bin/env bash
+# cache-tier-logger.sh — logs TTL tier per API call for after-the-fact diagnosis.
+# PostToolUse event, triggered on any model call.
+
+set -eu
+
+# Read tool-call JSON from stdin.
+payload="$(cat)"
+
+# Extract fields; skip non-API events silently.
+tier="$(printf '%s' "$payload" | jq -r '.tool_input.cache_control.ttl // empty' 2&gt;/dev/null)"
+[ -z "$tier" ] &amp;&amp; exit 0
+
+timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+creation="$(printf '%s' "$payload" | jq -r '.tool_output.usage.cache_creation_input_tokens // 0')"
+read="$(printf '%s' "$payload" | jq -r '.tool_output.usage.cache_read_input_tokens // 0')"
+
+log_dir="${HOME}/.claude/logs"
+mkdir -p "$log_dir"
+printf '%s\t%s\t%s\t%s\n' "$timestamp" "$tier" "$creation" "$read" &gt;&gt; "$log_dir/cache-tier.log"
+</code></pre>
+<p>Wire it up in <code>~/.claude/settings.json</code>:</p>
+<pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [{ "type": "command", "command": "~/.claude/hooks/cache-tier-logger.sh" }] }
+    ]
+  }
+}
+</code></pre>
+<p>After a day of normal use, inspect the log:</p>
+<pre><code>awk '{c[$2]++; w[$2]+=$3; r[$2]+=$4} END { for (t in c) printf "%s\tcalls=%d\twrite=%d\tread=%d\tratio=%.1f\n", t, c[t], w[t], r[t], (w[t]&gt;0 ? r[t]/w[t] : 0) }' ~/.claude/logs/cache-tier.log
+</code></pre>
+<p>If you see <code>ephemeral_5m</code> dominating on main-session turns with a read-to-write ratio under 5 : 1, and you know your workflow includes multi-minute gaps, you are absorbing the 5-minute-TTL penalty. That is signal worth a change of workflow (see "Fix and workaround" above).</p>
+<p>The hook is MIT-licensed and pinned in the <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup repository</a> so the implementation stays current as new cache metadata fields are added.</p>
+
+<h2>Lessons</h2>
+<ol>
+<li><strong>A "cost-neutral on average" change is a meaningless statement to any individual user.</strong> Averages hide distribution. The user population that absorbs the regression is rarely the population Anthropic's internal dashboards center.</li>
+<li><strong>When an OP retracts their own numbers, the retraction itself is evidence.</strong> The seanGSISG retraction shows that naive token-waste math assumes the wrong counterfactual. If your own postmortem of a cost incident uses "tokens &times; wrong-tier-price" as the waste number, you are making the same mistake.</li>
+<li><strong>Telemetry is not a neutral setting.</strong> Disabling telemetry has a second-order effect on cache optimization delivery. If your organization disables telemetry for privacy reasons, document that you are also accepting slower cache tuning uptake and plan budget accordingly.</li>
+<li><strong>Anthropic support channels do not provide incident reimbursement on Max.</strong> No quota refund was offered on this incident. If your organization depends on predictable quota, build in a 30 percent buffer for silent client-side regressions of this kind.</li>
+</ol>
+
+<h2>The other 9 incidents in the book</h2>
+<ol start="2">
+<li><strong>Resume Attachment Relocation Bug</strong> (v2.1.69 to v2.1.89, "fixed" with residual drift)</li>
+<li><strong>Native Sentinel Replacement <code>cch=00000</code></strong> (v2.1.36+, still unfixed — 10-20x cost multiplier on standalone Bun binary)</li>
+<li><strong>Opus 4.7 silent mid-session downgrade to 1M context</strong> (#49541)</li>
+<li><strong>Opus 4.7 tokenizer 1.35 to 1.46x token inflation</strong> (launch 2026-04-16)</li>
+<li><strong>Opus 4.7 long-context retrieval regression</strong> (MRCR -46pt, 256k-8-needle -32.7pt)</li>
+<li><strong>extractMemories Double Cache Chain</strong> (default ON, 2x API cost baseline)</li>
+<li><strong>v2.1.105 MCP stdio non-JSON regression</strong></li>
+<li><strong>Weekly quota reset time bug</strong> (April 2026 cluster, independent 4-reporter window)</li>
+<li><strong>/doctor dismissed plus settings.json corruption</strong> (#52648 pattern)</li>
+</ol>
+<p>Plus four appendices: a one-page postmortem template for your own incidents, ten detection hooks packaged with copy-paste install, how to read GitHub Issues productively, and further reading (Maria&#324;ski's binary disassembly series, Simon Willison's token counting work, The Register coverage, cc-safe-setup).</p>
+
+<div class="cta">
+<p style="font-size:1.1rem;color:#f0f6fc;font-weight:600;margin:0 0 .5rem">Claude Code Incident Postmortems</p>
+<p style="color:#8b949e;font-size:.9rem;margin:0 0 1rem">$29 &middot; Target date 2026-05-05 &middot; Buyers receive revised PDF free if Anthropic ships fixes that materially change any incident</p>
+<a class="btn" href="https://yurukusa.gumroad.com">Gumroad store &rarr;</a>
+<a class="btn btn-outline" href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup (detection hooks, MIT)</a>
+<a class="btn btn-outline" href="token-book.html">Token Book (everyday cost reduction)</a>
+</div>
+
+<p style="font-size:.88rem;color:#8b949e;margin-top:1.5rem">If this preview was useful, <a href="https://github.com/yurukusa/cc-safe-setup">star cc-safe-setup</a> — the detection hook in this chapter ships from there, and the book's source archive is pinned to a repository release.</p>
+
+<footer>
+&copy; 2026 yurukusa &middot; This preview is released under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> (reuse with attribution). The full Gumroad book is commercial. &middot; <a href="hub.html">cc-safe-setup hub</a>
+</footer>
+
+</body>
+</html>
