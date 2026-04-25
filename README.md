@@ -614,6 +614,14 @@ Different goals. claude-token-efficient optimizes CLAUDE.md to make Claude's res
 
 If cc-safe-setup saved you from a disaster (or just saved you time), a ⭐ helps others find it too.
 
+## Affiliate Program
+
+If you write or teach about Claude Code, you can earn 30% commission promoting our paid books and kits. Apply with any Gumroad account — no application form, 30-day cookie window, automatic Gumroad payouts:
+
+- [yurukusa.gumroad.com/affiliates](https://yurukusa.gumroad.com/affiliates)
+
+Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($12), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and three other Claude Code titles.
+
 ## Also by yurukusa
 
 - [quiet life](https://yurukusa.github.io/quiet-life/) — Touch the dark. Something alive appears
