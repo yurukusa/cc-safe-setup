@@ -5988,6 +5988,8 @@ async function main() {
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Save $:' + c.reset + '   https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html (free)');
+  console.log('  ' + c.dim + 'Feedback:' + c.reset + ' https://github.com/yurukusa/cc-safe-setup/discussions  (questions / patterns that worked)');
+  console.log('  ' + c.dim + 'Bug:' + c.reset + '      https://github.com/yurukusa/cc-safe-setup/issues/new/choose  (false positives / install issues)');
   console.log();
 }
 
