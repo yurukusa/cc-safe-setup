@@ -29,6 +29,15 @@ TTL="${CLAUDE_UPDATE_SMART_TTL:-3600}"
 
 mkdir -p "$(dirname "$CACHE")" 2>/dev/null
 
+# Early bailout: if `claude` CLI is not installed at all and no LOCAL override is
+# in scope, the hook has nothing to do. Common in CI runners and dev containers
+# without Claude Code installed. The `${VAR+x}` test distinguishes "unset" (no
+# scope) from "set to empty" (test fixtures asserting exit-127 fallback).
+if ! command -v claude >/dev/null 2>&1 && [ -z "${CLAUDE_UPDATE_SMART_LOCAL+x}" ]; then
+  echo "claude-update-smart: claude CLI not installed (advisory: nothing to update)" >&2
+  exit 0
+fi
+
 # Resolve LOCAL version.
 if [ -n "${CLAUDE_UPDATE_SMART_LOCAL:-}" ]; then
   LOCAL="$CLAUDE_UPDATE_SMART_LOCAL"
