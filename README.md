@@ -109,6 +109,7 @@ Each hook exists because a real incident happened without it.
 | Guide | What it covers |
 |-------|----------------|
 | **[6-hook fortification for the 2026-04 regression cluster](https://gist.github.com/yurukusa/79eeabd11dbfa29d99e7f2a058391286)** | The April 2026 postmortem recap + which 6 cc-safe-setup hooks would have caught each issue. No signup. |
+| **[Find which CC versions ran your cache regression sessions](https://gist.github.com/yurukusa/60b21cc133769e0bedab0b828bca4f90)** | One-line `grep + jq` diagnostic over `~/.claude/` logs. Shows per-day per-version count of sessions affected by [#46829](https://github.com/anthropics/claude-code/issues/46829)/[#46917](https://github.com/anthropics/claude-code/issues/46917). |
 
 ### Go deeper
 
