@@ -1,6 +1,6 @@
 #!/bin/bash
-# Tests for tokenizer-ratio-alert.sh
-HOOK="examples/tokenizer-ratio-alert.sh"
+# Tests for tokenizer-ratio-alert-corpus.sh
+HOOK="examples/tokenizer-ratio-alert-corpus.sh"
 PASS=0 FAIL=0
 
 assert_contains() { if echo "$2" | grep -q "$3"; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: $1 (expected '$3')"; fi; }
@@ -22,7 +22,7 @@ INPUT='{"tool_input":{"command":"echo test"}}'
 OUT=$(echo "$INPUT" | bash "$HOOK" 2>&1)
 RC=$?
 assert_exit "missing tokens exit 0" "$RC" 0
-assert_not_contains "no alert without tokens" "$OUT" "tokenizer-ratio-alert"
+assert_not_contains "no alert without tokens" "$OUT" "tokenizer-ratio-alert-corpus"
 
 # Test 3: Valid input logs entry
 rm -f "$HISTORY" "$SESSION_FLAG"
@@ -43,7 +43,7 @@ for i in $(seq 1 49); do
   echo '{"tool_input":{"command":"x"},"tool_response":{"usage":{"input_tokens":10}}}' | bash "$HOOK" 2>/dev/null
 done
 OUT=$(echo '{"tool_input":{"command":"y"},"tool_response":{"usage":{"input_tokens":10}}}' | bash "$HOOK" 2>&1)
-assert_not_contains "no alert below baseline turn count" "$OUT" "tokenizer-ratio-alert"
+assert_not_contains "no alert below baseline turn count" "$OUT" "tokenizer-ratio-alert-corpus"
 
 # Test 6: After baseline + sustained 1.25x ratio, alert fires after 3 sessions
 rm -f "$HISTORY" "$SESSION_FLAG"
@@ -61,7 +61,7 @@ export CLAUDE_SESSION_ID=session-2; OUT2=$(echo "$SPIKE_INPUT" | bash "$HOOK" 2>
 # Session 3 — should trigger alert
 export CLAUDE_SESSION_ID=session-3; OUT3=$(echo "$SPIKE_INPUT" | bash "$HOOK" 2>&1)
 unset CLAUDE_SESSION_ID
-assert_contains "session 3 alert fires" "$OUT3" "tokenizer-ratio-alert"
+assert_contains "session 3 alert fires" "$OUT3" "tokenizer-ratio-alert-corpus"
 assert_contains "alert mentions baseline" "$OUT3" "baseline"
 assert_contains "alert mentions Issue 46829" "$OUT3" "46829"
 

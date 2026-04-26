@@ -1,5 +1,6 @@
 #!/bin/bash
-# tokenizer-ratio-alert.sh — トークナイザー比率の drift を検知
+# tokenizer-ratio-alert-corpus.sh — 個人 corpus の input_tokens/character_count 比率 drift を検知 (PostToolUse rolling baseline 方式)
+# 関連: examples/tokenizer-ratio-alert.sh は同名異設計の PreToolUse + Anthropic API count_tokens 経由版 (Postmortems Incident 5)
 # Why: Anthropic がトークナイザーを silent に変更 (#46829 関連、Opus 4.7 で 1.35-1.46× インフレ実測 Simon Willison 2026-04-20)。
 #      個人の corpus に対し input_tokens / character_count を 7日 rolling baseline と比較、
 #      1.25× threshold を 3 連続 session で超えたら alert。
@@ -71,7 +72,7 @@ if [ "$EXCEEDS" = "1" ]; then
     echo "$SESSION_ID|$EXCEED_COUNT" > "$SESSION_FLAG"
   fi
   if [ "$EXCEED_COUNT" -ge 3 ]; then
-    echo "[tokenizer-ratio-alert] tokens/chars ratio ${RATIO} exceeds 1.25x baseline (${BASELINE}) for ${EXCEED_COUNT} consecutive sessions. Tokenizer may have shifted (Issue #46829 / Opus 4.7 inflation pattern). Review your /usage --json output." >&2
+    echo "[tokenizer-ratio-alert-corpus] tokens/chars ratio ${RATIO} exceeds 1.25x baseline (${BASELINE}) for ${EXCEED_COUNT} consecutive sessions. Tokenizer may have shifted (Issue #46829 / Opus 4.7 inflation pattern). Review your /usage --json output." >&2
   fi
 else
   # 比率正常 = 連続カウンタ reset
