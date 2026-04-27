@@ -90,6 +90,22 @@ EOF
 OUT=$(bash "$HOOK" "$SETTINGS7" 2>&1)
 assert_exit "mixed regression exits 1" "$?" 1
 
+# Test 9 (Codex P2): malformed JSON is a config error, not "nothing to test"
+SETTINGS_BAD="$TMPDIR_MCP/settings-bad.json"
+echo '{this is not json' > "$SETTINGS_BAD"
+OUT=$(bash "$HOOK" "$SETTINGS_BAD" 2>&1)
+assert_exit "malformed json exits 2" "$?" 2
+assert_contains "malformed json error message" "$OUT" "not valid JSON"
+
+# Test 10 (Codex P1): script declares TIMEOUT_CMD fallback for macOS (gtimeout)
+# Functional test would need to isolate PATH cleanly; static check is the
+# pragmatic compromise given the cross-platform shell-environment friction.
+if grep -q 'TIMEOUT_CMD=""' "$HOOK" && grep -q 'gtimeout' "$HOOK"; then
+  PASS=$((PASS+1))
+else
+  FAIL=$((FAIL+1)); echo "FAIL: timeout/gtimeout fallback logic missing in script"
+fi
+
 rm -rf "$TMPDIR_MCP"
 
 echo "PASS: $PASS  FAIL: $FAIL"

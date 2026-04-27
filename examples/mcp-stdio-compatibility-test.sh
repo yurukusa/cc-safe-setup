@@ -26,9 +26,29 @@ if [ ! -r "$SETTINGS" ]; then
   exit 2
 fi
 
+# Reject malformed JSON up front so a parse failure isn't reported as
+# "nothing to test" — that would mask a broken config and exit 0.
+if ! jq empty "$SETTINGS" 2>/dev/null; then
+  echo "mcp-stdio-compatibility-test: settings file is not valid JSON: $SETTINGS" >&2
+  exit 2
+fi
+
 if ! jq -e '.mcpServers // empty' "$SETTINGS" >/dev/null 2>&1; then
   echo "[info] no mcpServers block in $SETTINGS — nothing to test"
   exit 0
+fi
+
+# Pick whichever timeout binary is available; macOS ships only `gtimeout`
+# via coreutils, while Linux usually has `timeout`. Without one of these
+# a misbehaving server could hang the whole probe loop, so fall back to
+# a no-timeout invocation only when we have warned the operator.
+if command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD="gtimeout"
+else
+  TIMEOUT_CMD=""
+  echo "[warn] no timeout/gtimeout in PATH — server probes may hang on misbehaving servers" >&2
 fi
 
 SERVERS=$(jq -r '.mcpServers | keys[]' "$SETTINGS" 2>/dev/null)
@@ -52,7 +72,11 @@ send_initialize() {
     while IFS= read -r a; do args_array+=("$a"); done < <(printf '%s' "$args_json" | jq -r '.[]' 2>/dev/null)
   fi
   local init_req='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"cc-safe-setup-compat-test","version":"1.0"}}}'
-  printf '%s\n' "$init_req" | timeout 5 "$cmd" "${args_array[@]}" 2>&1
+  if [ -n "$TIMEOUT_CMD" ]; then
+    printf '%s\n' "$init_req" | "$TIMEOUT_CMD" 5 "$cmd" "${args_array[@]}" 2>&1
+  else
+    printf '%s\n' "$init_req" | "$cmd" "${args_array[@]}" 2>&1
+  fi
 }
 
 for name in $SERVERS; do
