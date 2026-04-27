@@ -110,6 +110,7 @@ Each hook exists because a real incident happened without it.
 |-------|----------------|
 | **[6-hook fortification for the 2026-04 regression cluster](https://gist.github.com/yurukusa/79eeabd11dbfa29d99e7f2a058391286)** | The April 2026 postmortem recap + which 6 cc-safe-setup hooks would have caught each issue. No signup. |
 | **[Find which CC versions ran your cache regression sessions](https://gist.github.com/yurukusa/60b21cc133769e0bedab0b828bca4f90)** | One-line `grep + jq` diagnostic over `~/.claude/` logs. Shows per-day per-version count of sessions affected by [#46829](https://github.com/anthropics/claude-code/issues/46829)/[#46917](https://github.com/anthropics/claude-code/issues/46917). |
+| **[`/usage --json`: 5 fields, one ratio that decides whether you migrate](https://yurukusa.hashnode.dev/how-to-read-usage-json-5-fields-one-ratio-that-decides-whether-you-migrate)** | `cache_creation_ratio` cheat sheet for the v2.1.118 `/usage --json` output. Five fields and one ratio with HEALTHY / WATCH / TRIGGER bands so you can decide migration timing from your own logs, no third-party dashboard. |
 
 ### Go deeper
 
