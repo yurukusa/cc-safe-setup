@@ -699,7 +699,7 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p><a href="https://github.com/anthropics/claude-code/issues/49562">#49562</a> (2👍) — After updating to Claude Code v2.1.112, each prompt on Opus 4.7 consumes approximately 1% of session usage — even for trivial questions. Previous version (v2.1.69) could run for hours on Opus 4.6 with the same subscription. Critically, Opus 4.6 is no longer available in the model selection list, leaving users with no downgrade path. This forces users into the higher-consumption model with no escape.</p>
 <div class="fix">
 <h3>Fix: Pin model + monitor token rate</h3>
-<p>Use <code>/model sonnet</code> for routine tasks. Install cc-safe-setup's <code>token-rate-monitor</code> hook to alert when consumption exceeds 0.5% per prompt. Check the <a href="claude-code-downgrade-guide.html">Downgrade Guide</a> for model pinning strategies. If Opus 4.6 is unavailable, <code>claude-sonnet-4-6</code> offers the best cost/quality ratio for most tasks.</p>
+<p>Use <code>/model sonnet</code> for routine tasks. Install cc-safe-setup's <code>token-rate-monitor</code> hook to alert when consumption exceeds 0.5% per prompt. If Opus 4.6 is unavailable, <code>claude-sonnet-4-6</code> offers the best cost/quality ratio for most tasks.</p>
 </div>
 
 <h2 id="nohup-zombie-350">47. nohup Zombie Process → $350 Unauthorized Charges <span class="severity sev-critical">CRITICAL</span></h2>

@@ -6,7 +6,7 @@
 
 > 🚀 **Launching on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) — April 21!** Follow us and upvote to support open source safety for AI coding agents.
 
-**One command to make Claude Code safe for autonomous operation.** 708 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 715 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
@@ -104,11 +104,20 @@ Each hook exists because a real incident happened without it.
 | **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
 | **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
 
+### Free guides
+
+| Guide | What it covers |
+|-------|----------------|
+| **[6-hook fortification for the 2026-04 regression cluster](https://gist.github.com/yurukusa/79eeabd11dbfa29d99e7f2a058391286)** | The April 2026 postmortem recap + which 6 cc-safe-setup hooks would have caught each issue. No signup. |
+| **[Find which CC versions ran your cache regression sessions](https://gist.github.com/yurukusa/60b21cc133769e0bedab0b828bca4f90)** | One-line `grep + jq` diagnostic over `~/.claude/` logs. Shows per-day per-version count of sessions affected by [#46829](https://github.com/anthropics/claude-code/issues/46829)/[#46917](https://github.com/anthropics/claude-code/issues/46917). |
+| **[`/usage --json`: 5 fields, one ratio that decides whether you migrate](https://yurukusa.hashnode.dev/how-to-read-usage-json-5-fields-one-ratio-that-decides-whether-you-migrate)** | `cache_creation_ratio` cheat sheet for the v2.1.118 `/usage --json` output. Five fields and one ratio with HEALTHY / WATCH / TRIGGER bands so you can decide migration timing from your own logs, no third-party dashboard. |
+
 ### Go deeper
 
 | Resource | What you get | Price |
 |----------|-------------|-------|
 | **[Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html)** | Cut token consumption in half. CLAUDE.md templates, hook configs, context management, 32 failure patterns with fixes. 44,000+ words from 800+ hours of real operation data. | ¥2,500 (~$17). Ch.1 free |
+| **[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)** | Stay, switch, or hybridize? Six-week timeline of the April 2026 quota wars + 5 measurable migration triggers + Path A/B/C frameworks + cost forecasting worksheet + decision tree + 48-hour rollback checklist. Edition 1, ~40 pages, English. | $19. [Free preview Gist](https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9) |
 | **[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** | End-to-end Claude Code safety setup. From first install to overnight autonomous runs. | ¥800 (~$5). Ch.3 free |
 | **[CLAUDE.md Audit (service)](./SERVICES.md)** | Written audit of your CLAUDE.md + top-3 fixes, delivered within 48h via this repo's Issue tracker. | $29 (~¥3,980) |
 | **[Token Burn Audit (service)](./SERVICES.md#2-token-burn-audit--29-3980)** | Diagnosis of your actual `/cost` output — top 3 waste patterns tied to Token Book Ch.8 symptoms, with per-pattern fixes. 48h delivery. | $29 (~¥3,980) |
@@ -613,6 +622,14 @@ Different goals. claude-token-efficient optimizes CLAUDE.md to make Claude's res
 **Share your experience:** Used cc-safe-setup and have feedback? Open a discussion or comment on any issue. We read everything.
 
 If cc-safe-setup saved you from a disaster (or just saved you time), a ⭐ helps others find it too.
+
+## Affiliate Program
+
+If you write or teach about Claude Code, you can earn 30% commission promoting our paid books and kits. Apply with any Gumroad account — no application form, 30-day cookie window, automatic Gumroad payouts:
+
+- [yurukusa.gumroad.com/affiliates](https://yurukusa.gumroad.com/affiliates)
+
+Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($12), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and three other Claude Code titles.
 
 ## Also by yurukusa
 
