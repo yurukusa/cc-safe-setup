@@ -66,9 +66,16 @@ if [ "$ELAPSED_MIN" -lt "$FIRST_THRESHOLD_MIN" ]; then
 fi
 
 # 直近のリマインダー時刻を確認、繰り返し間隔を守る
+# stale-reset path で `: > "$LAST_REMIND"` が空ファイルを残す経路があり、
+# 空 / 非数値の内容を読むと後続の `[ -gt 0 ]` で integer error が出て
+# throttle が bypass される。空 / 非数値は 0 扱いに正規化 (PR #137 Codex review fix)
 LAST_EPOCH=0
 if [ -f "$LAST_REMIND" ]; then
-    LAST_EPOCH=$(cat "$LAST_REMIND" 2>/dev/null || echo 0)
+    LAST_EPOCH_RAW=$(cat "$LAST_REMIND" 2>/dev/null)
+    case "$LAST_EPOCH_RAW" in
+        ''|*[!0-9]*) LAST_EPOCH=0 ;;
+        *) LAST_EPOCH="$LAST_EPOCH_RAW" ;;
+    esac
 fi
 SINCE_LAST_MIN=$(( (NOW_EPOCH - LAST_EPOCH) / 60 ))
 if [ "$LAST_EPOCH" -gt 0 ] && [ "$SINCE_LAST_MIN" -lt "$REPEAT_INTERVAL_MIN" ]; then

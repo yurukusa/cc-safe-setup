@@ -104,6 +104,34 @@ OUT=$(printf '%s' "$PAYLOAD" | HOME="$TMP_HOME" bash "$HOOK" 2>&1)
 assert_exit "mid-tier exits 0" "$?" 0
 assert_contains "mid-tier uses window emoji" "$OUT" "🪟"
 
+# Test 12 (PR #137 Codex review regression): empty LAST_REMIND file does not
+# raise integer error and does not bypass throttle. Repro: stale-reset path
+# `: > "$LAST_REMIND"` leaves the file empty; previous code stored ''  in
+# LAST_EPOCH, which made `[ "$LAST_EPOCH" -gt 0 ]` raise "integer expression
+# expected" on stricter shells and silently bypassed throttle on others.
+echo $(( $(date +%s) - 9000 )) > "$START_FLAG"  # 2h30m ago, past threshold
+: > "$LAST_REMIND"  # empty file (the reported bug surface)
+OUT=$(printf '%s' "$PAYLOAD" | HOME="$TMP_HOME" bash "$HOOK" 2>&1)
+assert_exit "empty LAST_REMIND exits 0 cleanly" "$?" 0
+assert_not_contains "empty LAST_REMIND raises no integer error" "$OUT" "integer expression"
+# First call past threshold with empty LAST_REMIND should still emit the reminder
+# (LAST_EPOCH=0 → throttle gate `[ -gt 0 ]` is false → reminder fires).
+assert_contains "empty LAST_REMIND still emits reminder" "$OUT" "🪟"
+# After the call, LAST_REMIND should now contain a valid epoch (numeric)
+LAST_REMIND_AFTER=$(cat "$LAST_REMIND")
+case "$LAST_REMIND_AFTER" in
+    ''|*[!0-9]*) FAIL=$((FAIL+1)); echo "FAIL: LAST_REMIND post-call not numeric (got '$LAST_REMIND_AFTER')" ;;
+    *) PASS=$((PASS+1)) ;;
+esac
+
+# Test 13 (PR #137 Codex review regression, companion): non-numeric garbage in
+# LAST_REMIND is also normalized to 0 — tests case statement, not just empty.
+echo $(( $(date +%s) - 9000 )) > "$START_FLAG"
+echo "garbage_text" > "$LAST_REMIND"
+OUT=$(printf '%s' "$PAYLOAD" | HOME="$TMP_HOME" bash "$HOOK" 2>&1)
+assert_exit "non-numeric LAST_REMIND exits 0 cleanly" "$?" 0
+assert_not_contains "non-numeric LAST_REMIND raises no integer error" "$OUT" "integer expression"
+
 rm -rf "$TMP_HOME"
 
 echo "PASS: $PASS  FAIL: $FAIL"
