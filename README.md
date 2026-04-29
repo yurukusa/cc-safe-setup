@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dw/cc-safe-setup)](https://www.npmjs.com/package/cc-safe-setup)
 [![tests](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml/badge.svg)](https://github.com/yurukusa/cc-safe-setup/actions/workflows/test.yml)
 
-**One command to make Claude Code safe for autonomous operation.** 720 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 719 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
