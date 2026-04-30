@@ -189,6 +189,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `pre-compact-transcript-backup` | Full JSONL backup before compaction (protects against rate-limit data loss) | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
 | `conversation-history-guard` | Blocks access to session JSONL files (prevents 20x cache poisoning) | [#40524](https://github.com/anthropics/claude-code/issues/40524) |
 | `read-before-edit` | Warns when Edit targets a file not recently Read (Read:Edit ratio dropped 70% — [#42796](https://github.com/anthropics/claude-code/issues/42796)) | [#42796](https://github.com/anthropics/claude-code/issues/42796) |
+| `read-loop-detector` | Surfaces same-file Read loops within a session (catches memory-write loops that re-verify already-cached files) | [#53578](https://github.com/anthropics/claude-code/issues/53578) |
 | `replace-all-guard` | Warns/blocks Edit `replace_all:true` (prevents bulk data corruption) | [#41681](https://github.com/anthropics/claude-code/issues/41681) |
 | `ripgrep-permission-fix` | Auto-fixes vendored ripgrep +x permission on start (fixes broken commands/skills) | [#41933](https://github.com/anthropics/claude-code/issues/41933) |
 
