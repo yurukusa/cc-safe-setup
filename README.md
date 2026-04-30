@@ -112,6 +112,15 @@ Each hook exists because a real incident happened without it.
 | **[Find which CC versions ran your cache regression sessions](https://gist.github.com/yurukusa/60b21cc133769e0bedab0b828bca4f90)** | One-line `grep + jq` diagnostic over `~/.claude/` logs. Shows per-day per-version count of sessions affected by [#46829](https://github.com/anthropics/claude-code/issues/46829)/[#46917](https://github.com/anthropics/claude-code/issues/46917). |
 | **[`/usage --json`: 5 fields, one ratio that decides whether you migrate](https://yurukusa.hashnode.dev/how-to-read-usage-json-5-fields-one-ratio-that-decides-whether-you-migrate)** | `cache_creation_ratio` cheat sheet for the v2.1.118 `/usage --json` output. Five fields and one ratio with HEALTHY / WATCH / TRIGGER bands so you can decide migration timing from your own logs, no third-party dashboard. |
 
+### Companion log-analysis tools (third-party)
+
+These are unaffiliated projects that pair well with the cc-safe-setup hooks — they read your `~/.claude/projects/` JSONL logs from a *post-hoc analysis* angle, where the hooks here intervene at *pre-execution* time. Use them together if you want both prevention (hooks) and observation (viewers).
+
+| Tool | What it does | License |
+|------|-------------|---------|
+| **[delexw/claude-code-trace](https://github.com/delexw/claude-code-trace)** (251★) | Real-time viewer for Claude Code session logs — desktop app (Tauri), web UI, and TUI. Browse projects, conversations, tool calls, token usage. Rust + TypeScript + React. | MIT |
+| **[Claude Code のログから学びを得る](https://speakerdeck.com/rmizuta3/claude-codenorogukara-xue-biwode-ru)** (slides, JP) | DS perspective on parsing CC logs to learn from agent behavior. JSONL format walkthrough, subagent delegation patterns, EDA examples. By @rmizuta3, GO/DeNA AI Community 2026-03-26. | Public slides |
+
 ### Go deeper
 
 | Resource | What you get | Price |
