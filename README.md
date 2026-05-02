@@ -6,7 +6,7 @@
 
 > 🚀 **Launching on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) — April 21!** Follow us and upvote to support open source safety for AI coding agents.
 
-**One command to make Claude Code safe for autonomous operation.** 718 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 719 example hooks · 9,200+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
@@ -130,13 +130,16 @@ These are unaffiliated projects that pair well with the cc-safe-setup hooks — 
 | Resource | What you get | Price |
 |----------|-------------|-------|
 | **[Token Book](https://yurukusa.github.io/cc-safe-setup/token-book.html)** | Cut token consumption in half. CLAUDE.md templates, hook configs, context management, 32 failure patterns with fixes. 44,000+ words from 800+ hours of real operation data. | ¥2,500 (~$17). Ch.1 free |
-| **[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)** | Stay, switch, or hybridize? Six-week timeline of the April 2026 quota wars + 5 measurable migration triggers + Path A/B/C frameworks + cost forecasting worksheet + decision tree + 48-hour rollback checklist. Edition 1, 89 pages, English. | $19. [Free preview Gist](https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9) |
+| **[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)** | Stay, switch, or hybridize? Six-week timeline of the April 2026 quota wars + 5 measurable migration triggers + Path A/B/C frameworks + cost forecasting worksheet + decision tree + 48-hour rollback checklist. Edition 1, 89 pages, English. Ships 2026-05-08. | $19. [Free preview Gist](https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9) |
+| **[Incident Postmortems](https://yurukusa.gumroad.com/l/rhtptb)** | Forensic archaeology of 10 production-level Claude Code incidents (cache TTL, Opus 4.7 silent downgrade, tokenizer inflation, MCP regression, weekly quota reset, /doctor settings corruption, and more) — each with reproduction steps, official response analysis, and a detection hook. 100 pages, English. Ships 2026-05-05. | See [product page](https://yurukusa.gumroad.com/l/rhtptb) for the current price. [Free preview](https://gist.github.com/yurukusa/9f597e27d4a44de85d4c8815a84b4f5d) |
 | **[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** | End-to-end Claude Code safety setup. From first install to overnight autonomous runs. | ¥800 (~$5). Ch.3 free |
 | **[CLAUDE.md Audit (service)](./SERVICES.md)** | Written audit of your CLAUDE.md + top-3 fixes, delivered within 48h via this repo's Issue tracker. | $29 (~¥3,980) |
 | **[Token Burn Audit (service)](./SERVICES.md#2-token-burn-audit--29-3980)** | Diagnosis of your actual `/cost` output — top 3 waste patterns tied to Token Book Ch.8 symptoms, with per-pattern fixes. 48h delivery. | $29 (~¥3,980) |
-| **[CC Safety Lab Founder](https://ko-fi.com/yurukusa)** | Monthly membership: 3–5 incident reports, 1 new hook (early access), 1 measured token-saving technique. | ¥500/month, grandfathered |
+| **[CC Safety Lab Founder](https://yurukusa.github.io/cc-safe-setup/safety-lab.html)** | Monthly digest: 4–8 newly-found incidents (with fixes), 1 deep-dive failure case, 1–2 copy-paste safety hooks, an updated safety checklist, and product update notes. The recurring companion to the one-time books. | ¥500/month, Founder pricing locked |
 
-**Why pay?** A Max plan costs $200/month. One token waste incident burns 50–80% of your weekly quota in hours ([#46727](https://github.com/anthropics/claude-code/issues/46727)). One `rm -rf` incident costs days of recovery. The Token Book costs less than 2 hours of Max subscription time — and the CLAUDE.md templates alone can reduce consumption by 40%.
+**Why pay?** A Max plan costs $200/month. One token waste incident burns 50–80% of your weekly quota in hours ([#46727](https://github.com/anthropics/claude-code/issues/46727)). One `rm -rf` incident costs days of recovery. The Token Book costs less than 2 hours of Max subscription time — and the CLAUDE.md templates alone can reduce consumption by 40%. **For the recurring track**, one Safety Lab month covers what would otherwise mean reading 50–100 GitHub Issues yourself; one avoided Max-plan incident pays for a year of membership.
+
+**Pick one path.** *Cost out of control?* → Token Book. *Considering a switch (Cursor / Codex / Cline)?* → Migration Playbook. *Need to know what's already broken in production?* → Incident Postmortems. *Need to keep up with what's breaking now?* → Safety Lab.
 
 ### v2.1.85: `if` Field Support
 
@@ -215,7 +218,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `--scan [--apply]` | Tech stack detection |
 | `--export / --import` | Team config sharing |
 | `--verify` | Test each hook |
-| `--install-example <name>` | Install from 718 examples |
+| `--install-example <name>` | Install from 719 examples |
 | `--examples [filter]` | Browse examples by keyword |
 | `--full` | All-in-one setup |
 | `--status` | Check installed hooks |
@@ -525,7 +528,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - **[Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide)** — Cut token consumption in half. CLAUDE.md optimization, hook-based guards, context management, workflow design. 44,000 words with copy-paste templates. Intro + Ch.1 free. [Details](https://yurukusa.github.io/cc-safe-setup/token-book.html)
 - **[Safety Guide (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — Token consumption diagnosis, file loss prevention, autonomous operation safety. From 800+ hours of real incidents. [Chapter 3 free](https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/3-code-quality)
 - **[800 Hours Operation Record (¥800)](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19)** — Non-engineer running Claude Code autonomously for 800 hours. Failures, recovery, revenue reality. [Chapter 2 free](https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/2-first-failures)
-- **[CC Safety Lab Founder (¥500/月, Ko-fi Membership)](https://ko-fi.com/yurukusa)** — Monthly companion to the Books. Each month delivers 3–5 curated incidents (with fixes), 1 new safety hook, 1 measured token-saving technique, and early access to Token Book updates. Founder price locked for charter members.
+- **[CC Safety Lab Founder (¥500/月, Ko-fi Membership)](https://yurukusa.github.io/cc-safe-setup/safety-lab.html)** — Monthly digest delivered via Ko-fi member-only post. Each issue: 4–8 incidents (with fixes), 1 deep-dive failure case, 1–2 copy-paste safety hooks, updated safety checklist, and product update notes. The recurring companion to the one-time books — one avoided Max-plan incident covers a year of membership. Founder price locked for charter members.
 - **Wiki Guides**: [Token FAQ](https://github.com/yurukusa/cc-safe-setup/wiki/Claude-Code-Token-FAQ) · [CLAUDE.md Best Practices](https://github.com/yurukusa/cc-safe-setup/wiki/CLAUDE-md-Best-Practices) · [Token Optimization](https://github.com/yurukusa/cc-safe-setup/wiki/Token-Optimization-Guide)
 - [Cookbook](COOKBOOK.md) — 26 practical recipes (block, approve, protect, monitor, diagnose)
 - [Official Hooks Reference](https://code.claude.com/docs/en/hooks) — Claude Code hooks documentation
@@ -641,7 +644,7 @@ If you write or teach about Claude Code, you can earn 30% commission promoting o
 
 - [yurukusa.gumroad.com/affiliates](https://yurukusa.gumroad.com/affiliates)
 
-Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (pay what you want), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and three other Claude Code titles.
+Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19), [Incident Postmortems](https://yurukusa.gumroad.com/l/rhtptb) ($29, ships 2026-05-05), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (pay what you want), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and other Claude Code titles.
 
 ## Also by yurukusa
 
