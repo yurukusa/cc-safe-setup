@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC Safety Lab — Claude Code の事故レポートと安全運用パックを毎月届ける（¥500/月）</title>
+<meta name="description" content="Claude Code の事故事例、再発防止 hook、トークン節約手法を、毎月 1 本のレポートとして届ける。¥500/月 Founder 価格（grandfathered）。無料の試し読みあり。">
+<meta name="keywords" content="Claude Code, safety, monthly report, incident, hook, token saving, Ko-fi, membership">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">
+
+<meta property="og:title" content="CC Safety Lab — 毎月、Claude Code の事故と仕様変更を整理して届ける">
+<meta property="og:description" content="GitHub Issue ベースで月次の事故レポート、安全チェックリスト、再発防止 hook、失敗事例の深掘り、商品更新を届ける月額メンバーシップ。¥500/月。">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CC Safety Lab — Claude Code の月次安全運用パック">
+<meta name="twitter:description" content="GitHub Issue から拾った Claude Code の事故事例、対処、再発防止 hook を毎月整理して届ける。¥500/月 Founder 価格。">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; line-height: 1.3; }
+h2 { font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 2px solid #e8e8e8; padding-bottom: 0.5rem; }
+h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
+.subtitle { color: #666; font-size: 1.05rem; margin-bottom: 1.5rem; }
+.price-badge { display: inline-block; background: #16a34a; color: white; padding: 0.3rem 1rem; border-radius: 999px; font-weight: bold; font-size: 1.05rem; margin-bottom: 1rem; }
+.founder-badge { display: inline-block; background: #f59e0b; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; vertical-align: middle; }
+.pain-point { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.pain-point strong { color: #dc2626; }
+.what-list { list-style: none; padding-left: 0; }
+.what-list li { padding: 0.7rem 0; border-bottom: 1px solid #f0f0f0; }
+.what-list li:last-child { border-bottom: none; }
+.what-list .label { font-weight: 600; color: #1f2937; }
+.what-list .desc { color: #555; font-size: 0.92rem; margin-top: 0.2rem; }
+.may-issue { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.may-issue h3 { margin-top: 0; color: #166534; }
+.may-issue ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+.may-issue li { margin: 0.3rem 0; font-size: 0.92rem; }
+.honest-section { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.honest-section strong { color: #854d0e; }
+.cta-section { text-align: center; margin: 2.5rem 0 1.5rem; }
+.btn-primary { display: inline-block; background: #16a34a; color: white; padding: 1rem 2.5rem; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: bold; transition: background 0.2s; }
+.btn-primary:hover { background: #15803d; }
+.btn-secondary { display: inline-block; color: #2563eb; padding: 0.8rem 2rem; border: 2px solid #2563eb; border-radius: 8px; text-decoration: none; font-size: 1rem; margin-top: 1rem; }
+.faq-item { margin: 1rem 0; padding: 0.8rem 1rem; background: #f8fafc; border-radius: 6px; }
+.faq-item .q { font-weight: 600; color: #1f2937; }
+.faq-item .a { color: #555; font-size: 0.92rem; margin-top: 0.3rem; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+.lang-switch { text-align: right; font-size: 0.85rem; margin-bottom: 1rem; }
+.lang-switch a { color: #2563eb; text-decoration: none; }
+hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="lang-switch"><a href="#en">🌐 English version below</a></p>
+
+<span class="price-badge">¥500/月</span>
+<span class="founder-badge">Founder（価格据え置き）</span>
+
+<h1>CC Safety Lab — 毎月、Claude Code の事故と安全運用を整理して届ける</h1>
+<p class="subtitle">GitHub Issue から拾った事故事例、再発防止 hook、トークン節約手法を月 1 本のレポートに。Ko-fi メンバーシップ。</p>
+
+<div style="margin-bottom:1.5rem;">
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn-primary">Founder で参加する → Ko-fi</a>
+<p style="margin-top:8px;font-size:0.85em;color:#16a34a;font-weight:600">Max plan ($200/月) の事故 1 件分で 1 年分の費用を回収</p>
+<p style="margin-top:4px;font-size:0.85em;color:#666">月 4-8 件の事故 + チェックリスト + hook + 商品更新 ｜ <a href="#may-issue" style="color:#666;text-decoration:underline;">5 月号の中身を見る ↓</a></p>
+</div>
+
+<div class="pain-point">
+<strong>こんな時に役立つ：</strong> Claude Code を仕事で使っていて、「先週の更新で何が壊れた？」「この hook は本当に効いているのか？」「トークン消費が突然倍になったが、何が原因か？」と毎月のように振り返る人。GitHub Issue を全部読む時間はないが、起きている事故と対処は知っておきたい人。
+</div>
+
+<h2>何を届けるか（毎月）</h2>
+
+<ul class="what-list">
+<li>
+  <div class="label">1. 月次インシデント・ラウンドアップ</div>
+  <div class="desc">その月に Claude Code 公式リポジトリで報告された事故・退行・仕様変更を 4-8 件、再現手順と対処方法と一緒に整理する。Issue 番号、発生のきっかけ、影響範囲、回避策をまとめる。</div>
+</li>
+<li>
+  <div class="label">2. 安全チェックリスト</div>
+  <div class="desc">料金、秘密情報、破壊的操作、長時間セッション、公開前確認の 5 領域の月次更新版。前月との差分が分かるように書く。</div>
+</li>
+<li>
+  <div class="label">3. コピペで使える hook 例</div>
+  <div class="desc">毎月 1-2 個、その月の事故から逆算した PreToolUse / Stop hook を出す。動作確認済みの bash スクリプトと、適用方法を添える。</div>
+</li>
+<li>
+  <div class="label">4. 失敗事例 1 件の深掘り</div>
+  <div class="desc">月で最も影響の大きかった事故 1 件を、症状・原因・復旧手順・予防策・月次チェック項目の追加 まで分解する。GitHub Issue で「同じ症状」と言われている関連報告も束ねる。</div>
+</li>
+<li>
+  <div class="label">5. 既存商品の更新案内</div>
+  <div class="desc">Token Book、Migration Playbook、Postmortems 本、Survival Guide、cc-safe-setup の各商品で、その月にどんな更新が入ったかを整理する。読み返すべき章があればその案内も書く。</div>
+</li>
+</ul>
+
+<h2 id="may-issue">5 月号の中身（一部公開）</h2>
+
+<div class="may-issue">
+<h3>2026 年 5 月号 — 5/2 時点で 6 件揃っている</h3>
+<ul>
+<li><strong>月次まとめ：</strong> 4/25-5/2 に見つかった 8 種類の問題を整理。cache_control 詰まり、利用量表示ずれ、Cowork の応答消失、Worktree 周辺、Skill plugin 変数、画面表示の不具合、クライアント切り替え時の cache_creation 増加、子エージェントの身分の漏れ（Issue #55488）。</li>
+<li><strong>安全チェックリスト：</strong> 料金、秘密情報、破壊的操作、長時間セッション、公開前確認の 5 領域。</li>
+<li><strong>hook 例 (料金監視)：</strong> Stop hook で 1 日のトークン消費を監視し、閾値を超えた瞬間に警告する。「後から気付く」状態を排除する。</li>
+<li><strong>hook 例 (圧縮直前の保存)：</strong> PreCompact hook で、git の一時保存、進行中作業の覚え書き、発火回数の記録。autoCompactEnabled が効かない状況（#42817）と、圧縮が通信不良で途切れる状況（#55468）の両方への保険。</li>
+<li><strong>失敗事例：</strong> cache_control 空テキストブロック問題の症状、原因、復旧手順、予防策。</li>
+<li><strong>商品更新案内：</strong> cc-safe-setup / Token Book / Migration Playbook / Postmortems / Survival Guide の 5 月時点の事実と、月額会員の自然な読了順。</li>
+</ul>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Founder で参加すると、5 月号の全文がそのまま読める。</p>
+</div>
+
+<h2>Founder 価格について</h2>
+<p>初期メンバー向けの価格として ¥500/月 で固定する。あとから価格を上げても、Founder で参加した会員はそのまま据え置きにする（grandfathered）。Max plan の事故 1 件で 1 年分以上の元が取れる前提で設計している。</p>
+
+<h2>これは何ではないか（誠実な開示）</h2>
+<div class="honest-section">
+<p><strong>含まれないもの：</strong></p>
+<ul style="padding-left:1.2rem;margin-top:0.4rem;">
+<li>1 対 1 のサポートやチャット相談（コンテンツ商品としての提供）</li>
+<li>専用 Discord や Slack（個別の議論場は用意していない）</li>
+<li>Anthropic 公式との特別な連携や事前情報（一次情報は誰でも見られる Issue を整理する立場）</li>
+<li>「絶対に事故が起きなくなる」保証（事故を完全に防ぐ仕組みではなく、起きたものを早く知り、対処を共有するもの）</li>
+</ul>
+<p style="margin-top:0.5rem;"><strong>合うかどうかの目安：</strong> Claude Code を週 5 日以上業務で使っており、毎月の事故と仕様変更を 30 分以内で把握したい人には合う。月 1 回しか触らない人や、事故が起きても影響が小さい使い方の人には合わない。</p>
+</div>
+
+<h2>よくある質問</h2>
+
+<div class="faq-item">
+<div class="q">Q. Token Book を持っているが、Safety Lab とどう違うか？</div>
+<div class="a">A. Token Book は一度買えば全章読める一括商品。Safety Lab は毎月新しい事故と対処を追跡する月次の購読商品。Token Book を読んだあと、最新の事故事例と仕様変更を継続して受け取りたい人に Safety Lab が合う。</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. 解約はいつでもできるか？</div>
+<div class="a">A. Ko-fi 側でいつでも解約可能。次の月から請求が止まる。日割り返金はない（Ko-fi の仕様）。</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. 過去号は読めるか？</div>
+<div class="a">A. 参加した月以降の号にアクセスできる。過去号のアーカイブは現時点では未提供。月額メンバーが増えてきた段階でアーカイブ提供を検討する。</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. 何で配信されるか？</div>
+<div class="a">A. Ko-fi のメンバー限定投稿として、月 1 回 PDF か Markdown でまとめて公開する。ファイルはダウンロードして手元に残せる。</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. 月の途中で参加した場合、その月号は読めるか？</div>
+<div class="a">A. 参加した日以降に投稿される号から読める。参加月の号がまだ未投稿なら、それも含む。投稿済みの当月号には間に合わない場合がある。</div>
+</div>
+
+<div class="cta-section">
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn-primary">Founder で参加する → Ko-fi</a>
+<p style="margin-top:0.8rem;font-size:0.85rem;color:#666;">登録は Ko-fi 経由。Stripe でカード決済。日本円も米ドルも対応。</p>
+</div>
+
+<hr class="section-break" id="en">
+
+<!-- ============== ENGLISH ============== -->
+<p class="lang-switch"><a href="#">🌐 日本語版へ戻る</a></p>
+
+<span class="price-badge">¥500/month (~$3.50)</span>
+<span class="founder-badge">Founder pricing (grandfathered)</span>
+
+<h1>CC Safety Lab — Monthly briefing on Claude Code incidents and safe operation</h1>
+<p class="subtitle">A curated monthly digest of incidents from GitHub Issues, fix-it hooks, and token-saving techniques. Ko-fi membership.</p>
+
+<div style="margin-bottom:1.5rem;">
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn-primary">Join as Founder → Ko-fi</a>
+<p style="margin-top:8px;font-size:0.85em;color:#16a34a;font-weight:600">One avoided incident on a Max plan ($200/mo) pays for a year of membership</p>
+<p style="margin-top:4px;font-size:0.85em;color:#666">4-8 incidents + checklist + hook + product updates per month ｜ <a href="#may-issue-en" style="color:#666;text-decoration:underline;">See the May issue ↓</a></p>
+</div>
+
+<div class="pain-point">
+<strong>You'll find this useful if:</strong> you use Claude Code at work and find yourself asking every month, "what broke in last week's release?", "is this hook actually firing?", "why did my token consumption double?". You don't have time to read every GitHub Issue, but you want to know what's happening.
+</div>
+
+<h2>What you get every month</h2>
+
+<ul class="what-list">
+<li>
+  <div class="label">1. Monthly incident roundup</div>
+  <div class="desc">4-8 incidents, regressions, and behavior changes from the official Claude Code repo, with reproduction steps and fixes. Includes Issue numbers, triggers, scope, and workarounds.</div>
+</li>
+<li>
+  <div class="label">2. Safety checklist</div>
+  <div class="desc">Updated for the month across 5 areas: billing, secrets, destructive operations, long-running sessions, and pre-publication checks. Diff from the previous month is highlighted.</div>
+</li>
+<li>
+  <div class="label">3. Copy-paste hook examples</div>
+  <div class="desc">1-2 new PreToolUse / Stop hooks each month, derived from that month's incidents. Tested bash scripts with installation notes.</div>
+</li>
+<li>
+  <div class="label">4. One deep-dive failure case</div>
+  <div class="desc">The most impactful incident of the month, broken down into symptoms, root cause, recovery, prevention, and a checklist update. Related reports from GitHub Issues are bundled.</div>
+</li>
+<li>
+  <div class="label">5. Product update notes</div>
+  <div class="desc">Updates to Token Book, Migration Playbook, Postmortems, Survival Guide, and cc-safe-setup that month, with reading suggestions.</div>
+</li>
+</ul>
+
+<h2 id="may-issue-en">May 2026 issue (preview)</h2>
+
+<div class="may-issue">
+<h3>May 2026 — 6 pieces ready as of 5/2</h3>
+<ul>
+<li><strong>Monthly roundup:</strong> 8 problems found between 4/25-5/2: cache_control jam, usage display drift, Cowork response loss, Worktree edges, Skill plugin variables, UI display bugs, cache_creation token doubling on client switch, sub-agent identity leak (Issue #55488).</li>
+<li><strong>Safety checklist:</strong> 5 areas — billing, secrets, destructive ops, long sessions, pre-publication checks.</li>
+<li><strong>Hook example (cost guard):</strong> a Stop hook that monitors daily token consumption and alerts the moment a threshold is crossed. Replaces the "found out later" mode.</li>
+<li><strong>Hook example (PreCompact checkpoint):</strong> PreCompact hook that runs git stash, dumps in-progress notes, and logs trigger counts. Insurance against #42817 (autoCompactEnabled stops working) and #55468 (compaction broken by network issues).</li>
+<li><strong>Failure case:</strong> cache_control empty-text-block bug — symptoms, cause, recovery, prevention.</li>
+<li><strong>Product updates:</strong> May state of cc-safe-setup, Token Book, Migration Playbook, Postmortems, Survival Guide, plus a recommended reading order.</li>
+</ul>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Joining as Founder gets you the full May issue.</p>
+</div>
+
+<h2>About Founder pricing</h2>
+<p>Charter members lock in ¥500/month (about $3.50) permanently. Even if the price goes up later, Founder members stay grandfathered. Designed so a single avoided incident on a Max plan covers more than a year of membership.</p>
+
+<h2>What this is not (honest disclosure)</h2>
+<div class="honest-section">
+<p><strong>Not included:</strong></p>
+<ul style="padding-left:1.2rem;margin-top:0.4rem;">
+<li>1-on-1 support or chat consulting (this is a content product)</li>
+<li>Private Discord or Slack (no separate discussion space)</li>
+<li>Special access to Anthropic or pre-release info (everything we cover comes from public Issues)</li>
+<li>A guarantee that "incidents will never happen" — this is about knowing fast and recovering well, not preventing every possible failure</li>
+</ul>
+<p style="margin-top:0.5rem;"><strong>Good fit if:</strong> you use Claude Code 5+ days a week for work and want to absorb the month's incidents and changes in under 30 minutes. Not a fit if Claude Code is occasional or low-stakes for you.</p>
+</div>
+
+<h2>FAQ</h2>
+
+<div class="faq-item">
+<div class="q">Q. I already own Token Book — how is Safety Lab different?</div>
+<div class="a">A. Token Book is a one-time purchase covering all chapters. Safety Lab is a monthly subscription tracking new incidents and changes. After reading Token Book, Safety Lab is for those who want to keep up with what's breaking now.</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. Can I cancel anytime?</div>
+<div class="a">A. Yes, via Ko-fi. Billing stops the next month. No prorated refunds (Ko-fi policy).</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. Can I read past issues?</div>
+<div class="a">A. You get access to issues from your join month forward. A back-issue archive isn't offered yet — we'll consider one once subscriber count grows.</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. How is it delivered?</div>
+<div class="a">A. As a monthly Ko-fi member-only post (PDF or Markdown). You can download and keep the file.</div>
+</div>
+
+<div class="faq-item">
+<div class="q">Q. If I join mid-month, do I get this month's issue?</div>
+<div class="a">A. Yes if it's not posted yet. If the current month's issue is already out, you may miss it but will get every following month.</div>
+</div>
+
+<div class="cta-section">
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn-primary">Join as Founder → Ko-fi</a>
+<p style="margin-top:0.8rem;font-size:0.85rem;color:#666;">Sign-up via Ko-fi. Card payment via Stripe. Both JPY and USD accepted.</p>
+</div>
+
+<footer>
+<p>Run by <a href="https://github.com/yurukusa" style="color:#2563eb;text-decoration:none;">yurukusa</a> ｜ <a href="https://yurukusa.github.io/cc-safe-setup/" style="color:#2563eb;text-decoration:none;">cc-safe-setup home</a> ｜ <a href="https://yurukusa.github.io/cc-safe-setup/token-book.html" style="color:#2563eb;text-decoration:none;">Token Book</a></p>
+</footer>
+
+</div>
+</body>
+</html>
