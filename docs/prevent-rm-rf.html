@@ -82,7 +82,7 @@ nav a{margin-right:1rem}
 <p>CLAUDE.md rules are part of the prompt context. When context fills up, rules get pushed out. Claude can (and does) ignore them. A rule saying "never run rm -rf" is a <em>suggestion</em>, not enforcement.</p>
 
 <h2>The Fix: PreToolUse Hooks</h2>
-<p>Claude Code <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">Hooks</a> run at the process level, outside the model's control. A PreToolUse hook that exits with code 2 blocks the tool invocation. The model cannot bypass this.</p>
+<p>Claude Code <a href="https://code.claude.com/docs/en/hooks">Hooks</a> run at the process level, outside the model's control. A PreToolUse hook that exits with code 2 blocks the tool invocation. The model cannot bypass this.</p>
 
 <div class="fix">
 <p><strong>destructive-guard.sh</strong> — the hook that prevents rm -rf:</p>

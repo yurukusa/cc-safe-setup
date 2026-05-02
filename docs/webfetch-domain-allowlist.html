@@ -39,7 +39,7 @@ nav a{margin-right:1rem}
 <p>46 reactions on <a href="https://github.com/anthropics/claude-code/issues/9329">#9329</a>. The native wildcard matching silently fails. Users add <code>WebFetch(domain:*)</code> and still get prompted for every URL. Subdomain patterns like <code>*.example.com</code> also fail.</p>
 
 <h2>The Fix: PreToolUse Hook</h2>
-<p>A <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">PreToolUse hook</a> extracts the domain from the URL and auto-approves if it matches your allowlist. Works in sandbox mode.</p>
+<p>A <a href="https://code.claude.com/docs/en/hooks">PreToolUse hook</a> extracts the domain from the URL and auto-approves if it matches your allowlist. Works in sandbox mode.</p>
 
 <div class="fix">
 <p><strong>webfetch-domain-allow.sh</strong>:</p>

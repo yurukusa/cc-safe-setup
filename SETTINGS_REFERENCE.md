@@ -276,7 +276,7 @@ Run `npx cc-safe-setup --doctor` for automated diagnosis.
 
 ## Resources
 
-- [Official Hooks Documentation](https://docs.anthropic.com/en/docs/claude-code/hooks)
+- [Official Hooks Documentation](https://code.claude.com/docs/en/hooks)
 - [COOKBOOK.md](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 20 hook recipes
 - [Migration Guide](MIGRATION.md) — from permissions to hooks
 - [Ecosystem Comparison](https://yurukusa.github.io/cc-safe-setup/ecosystem.html) — all hook projects

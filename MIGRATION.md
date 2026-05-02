@@ -218,7 +218,7 @@ npx cc-safe-setup --learn
 
 ## Resources
 
-- [Official Hooks Documentation](https://docs.anthropic.com/en/docs/claude-code/hooks)
+- [Official Hooks Documentation](https://code.claude.com/docs/en/hooks)
 - [COOKBOOK.md](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 19 hook recipes
 - [cc-safe-setup](https://github.com/yurukusa/cc-safe-setup) — automated setup
 - [Web Audit Tool](https://yurukusa.github.io/cc-safe-setup/) — browser-based setup generator
