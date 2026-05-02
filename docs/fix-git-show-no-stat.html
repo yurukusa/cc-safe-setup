@@ -48,7 +48,7 @@ fatal: unrecognized argument: --no-stat</code></pre>
 <p>Each failure burns context tokens on the error message and Claude's retry attempt.</p>
 
 <h2>The Fix: PreToolUse Hook</h2>
-<p>A <a href="https://docs.anthropic.com/en/docs/claude-code/hooks">PreToolUse hook</a> intercepts the command before execution and strips the invalid flag via <code>updatedInput</code>. Claude never sees the error.</p>
+<p>A <a href="https://code.claude.com/docs/en/hooks">PreToolUse hook</a> intercepts the command before execution and strips the invalid flag via <code>updatedInput</code>. Claude never sees the error.</p>
 
 <div class="fix">
 <p><strong>git-show-flag-sanitizer.sh</strong>:</p>

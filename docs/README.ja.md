@@ -95,7 +95,7 @@ Claude Codeを再起動。完了。
 - [Web版ツール](https://yurukusa.github.io/cc-safe-setup/hub.html) — 全ツール一覧
 - [Safety Audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) — プロによる安全設定レビュー（$50〜）
 
-hookの仕組みと設定方法は[Claude Code公式ドキュメント](https://docs.anthropic.com/en/docs/claude-code/hooks)を参照。
+hookの仕組みと設定方法は[Claude Code公式ドキュメント](https://code.claude.com/docs/en/hooks)を参照。
 
 ## 必要なもの
 
