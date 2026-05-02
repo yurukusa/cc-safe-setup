@@ -58,6 +58,8 @@ Claude Codeを再起動。完了。
 
 > 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
 
+> 🔁 月次の追跡が欲しい？ [CC Safety Lab Founder](safety-lab.html)（¥500/月・[Ko-fiで参加](https://ko-fi.com/yurukusa/tiers)）で毎月 4-8 件の事故事例（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次チェックリスト差分、 商品更新案内を届ける。 [5 月号の中身](safety-lab.html#may-issue) ｜ [6 月号予告](safety-lab.html#next-issue)。 Founder 価格は 12 ヶ月で ¥6,000、 据え置き。
+
 **既知の制限:**
 
 - `FileChanged`通知はファイル内容をhookの**前に**コンテキストへ注入します。セッション中に`.env`や`credentials.json`が外部で変更された場合、hookでブロックできません（[#44909](https://github.com/anthropics/claude-code/issues/44909)）。対策: `dotenv-watch`で警告を受け取り、Claude Code実行中は機密ファイルを編集しないでください。
