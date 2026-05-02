@@ -114,8 +114,54 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Founder で参加すると、5 月号の全文がそのまま読める。</p>
 </div>
 
+<h2 id="next-issue">6 月号の予告と毎月続く構造</h2>
+
+<div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
+<h3 style="color:#1e40af;">2026 年 6 月号 — 5/3-5/31 の 4 週間が対象（予告）</h3>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 3 万-3 万 5 千字、紙の版は 28-32 ページの規模を想定。現時点で確定している組み込み予定の素材:</p>
+<ul style="font-size:0.92rem;color:#1e3a8a;">
+<li><strong>冒頭の特集：</strong>3/31 の流出事件（Anthropic がデバッグ設定の経路で Claude Code の全ソースコード 51 万行を npm の公開置き場に出した事件）を「個人開発者が学ぶべき教訓」 の角度で書く。単発の解説記事は既に出尽くしているため、検出と予防の hook 例まで分解する。</li>
+<li><strong>料金監視 hook の続編：</strong>3/23 から発生した利用上限の急速消耗（Issue #41930）の根本原因 4 件のうち、個人開発者が自分で検出できる 2 件の検出方法。5 月号の cost guard hook の上に乗せる続編。</li>
+<li><strong>今月の品質傾向：</strong>思考の塊 1 万 7 千件と道具呼び出し 23 万件の研究結果の解釈。中断率が良い時期から退行時期で 12 倍に増えた数値を、個人開発者が自分で観測する方法。</li>
+<li><strong>長期傾向の見守り：</strong>1/26 から続く品質退行（Issue #21431）の 6 月時点の状態。月次の継続見守りの項目として書き続ける。</li>
+</ul>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">編集 5/30、校正 5/31、配信 6/1。Founder で 5 月中に参加すれば、6 月号も初回から受け取れる。</p>
+</div>
+
+<div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#374151;">毎月続く構造</h3>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">月号は単発の特集ではなく、GitHub Issue を継続的に読み込んで月単位で束ねる仕組みで作る。5 月号で扱った 8 種類の問題のうち、cache_control 詰まり、利用量表示ずれ、子エージェントの身分の漏れ（Issue #55488）は 6 月号でも追跡を継続する。解決済みかどうか、関連の続報があるかを毎月確認し、前月までの記録の上に積み上げる。</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">5 月号の安全装置の例（料金監視と圧縮直前の保存）は、6 月号で根本原因 2 件の検出方法に拡張する。hook は単月で完結せず、複数号にまたがって育っていく。</p>
+</div>
+
 <h2>Founder 価格について</h2>
 <p>初期メンバー向けの価格として ¥500/月 で固定する。あとから価格を上げても、Founder で参加した会員はそのまま据え置きにする（grandfathered）。Max plan の事故 1 件で 1 年分以上の元が取れる前提で設計している。</p>
+
+<h2>半年・1 年で何が手元に残るか</h2>
+
+<p>月額メンバーは、参加した月以降の全号のファイル（PDF または Markdown）を Ko-fi のメンバー限定投稿として受け取る。ファイルはダウンロードして手元に残せる。Founder 価格（¥500/月）で続けた場合の累積のイメージ:</p>
+
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.93rem;">
+<thead>
+<tr style="background:#f3f4f6;">
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">期間</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">事故の事例</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">hook の例</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">深掘りの章</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">月次まとめ</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">支払い総額</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">3 ヶ月</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12-24 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3-6 個</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3 回</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥1,500</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">6 ヶ月</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">24-48 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6-12 個</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6 回</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥3,000</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">12 ヶ月</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">48-96 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12-24 個</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12 件</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12 回</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥6,000</td></tr>
+</tbody>
+</table>
+
+<p style="font-size:0.93rem;color:#555;">12 ヶ月の費用は ¥6,000（Founder 価格で固定）。Max plan の事故 1 件（料金の暴走で月の請求が ¥30,000-100,000 増える、秘密情報の漏れ、主要な依存関係の破壊など）を 1 年に 1 件防げれば、5-15 倍の元が取れる前提で設計している。</p>
+
+<p style="font-size:0.93rem;color:#555;margin-top:0.6rem;">単発で本を買い続けるよりも経済的: 単発本（事故報告本 $43.5、Migration Playbook $19、Token Book ¥2,500 など）は買った時点の事実で固定する。Safety Lab は毎月の事故と仕様変更の追跡を続ける形式で、本では追えない「直近の月の動き」 を補う位置づけ。</p>
 
 <h2>これは何ではないか（誠実な開示）</h2>
 <div class="honest-section">
@@ -149,6 +195,8 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 </table>
 
 <p style="margin-top:0.5rem;color:#555;">「事故が起きてから知る」 ではなく「事故が起きる前に予防」 を選ぶ人向け。中小企業の経営層向けの無料の予防策ガイドが既に流通しているが、こちらは個人開発者向けの月次の実践に絞る。</p>
+
+<p style="margin-top:1rem;color:#555;font-size:0.93rem;"><strong>単発の解説記事との違い：</strong>3/31 の流出事件のような大きな事案は、セキュリティ企業（SQAT、TrendMicro）、大手 SI（サーバーワークス）、主要技術媒体（@IT、SBBit）、個人開発者（Zenn、Qiita）が単発の解説記事を出す。これらは事件の全体像と対策をその時点で押さえるには有効だが、翌月以降に新しい事故が起きた時の続報の経路がない。Safety Lab は「事件の後追い」 ではなく「日々の運用の更新」 を月次で続ける位置づけ。中小企業の経営層向けの予防啓発（無料領域）とも、単発解説（個別記事）とも重ならない、個人開発者の月次実践のスロットを埋める。</p>
 
 <h2>よくある質問</h2>
 
@@ -243,8 +291,54 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Joining as Founder gets you the full May issue.</p>
 </div>
 
+<h2 id="next-issue-en">June issue preview & how each issue builds on the last</h2>
+
+<div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
+<h3 style="color:#1e40af;">June 2026 — covering 5/3-5/31 (preview)</h3>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">May covered 8 days (4/25-5/2). June covers a full 4-week window — over 3x the scope. Body length expected at 30,000-35,000 characters / 28-32 PDF pages. Confirmed inclusions:</p>
+<ul style="font-size:0.92rem;color:#1e3a8a;">
+<li><strong>Lead feature:</strong> the 3/31 source-leak incident (Anthropic accidentally published all 510K lines of Claude Code source via the npm public registry through a debug-config path), framed as "what individual developers should learn from it." Single-incident explainers are saturated, so we go down to detection and prevention hooks.</li>
+<li><strong>Cost-guard hook v2:</strong> follow-up to the 3/23 quota-burn incident (Issue #41930). Of the 4 root causes identified by the community, 2 are detectable by individual users. Builds on May's cost guard hook.</li>
+<li><strong>Quality trend of the month:</strong> interpretation of the 17K thinking-block / 230K tool-call study showing a 12x increase in interruption rate from healthy to degraded periods, plus how individual users can observe it themselves.</li>
+<li><strong>Long-term watch:</strong> June status of the quality regression that started 1/26 (Issue #21431). Tracked monthly going forward.</li>
+</ul>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">Edit 5/30, proof 5/31, ship 6/1. Joining as Founder during May means you get June from the first issue too.</p>
+</div>
+
+<div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#374151;">How each issue builds on the last</h3>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">Issues are not standalone features — they are continuous reads of GitHub Issues bundled monthly. Of the 8 problems covered in May (cache_control jam, usage display drift, sub-agent identity leak Issue #55488, etc.), several remain under monthly tracking in June: are they fixed, are there new related reports? Each new issue stacks on top of the previous month's record.</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">The May hooks (cost guard, PreCompact checkpoint) become the base for June's extensions — detection methods for the 2 root causes from Issue #41930. Hooks don't end with one issue; they evolve across multiple months.</p>
+</div>
+
 <h2>About Founder pricing</h2>
 <p>Charter members lock in ¥500/month (about $3.50) permanently. Even if the price goes up later, Founder members stay grandfathered. Designed so a single avoided incident on a Max plan covers more than a year of membership.</p>
+
+<h2>What you'll have after 6 or 12 months</h2>
+
+<p>Members get every issue from the month they join onward as a Ko-fi member-only post (PDF or Markdown). Files are downloadable and yours to keep. Cumulative picture at Founder pricing (¥500/month):</p>
+
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.93rem;">
+<thead>
+<tr style="background:#f3f4f6;">
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">After</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Incidents</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Hooks</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Deep-dives</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Roundups</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Total cost</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">3 months</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12-24</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3-6</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">3</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥1,500 (~$10.5)</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">6 months</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">24-48</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6-12</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">6</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥3,000 (~$21)</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;">12 months</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">48-96</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12-24</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">12</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">¥6,000 (~$42)</td></tr>
+</tbody>
+</table>
+
+<p style="font-size:0.93rem;color:#555;">A year of membership costs ¥6,000 (~$42, locked at Founder rate). One avoided Max-plan incident per year (a billing runaway adding ¥30K-100K to your monthly bill, a credentials leak, a critical-dependency break) returns 5-15x of that.</p>
+
+<p style="font-size:0.93rem;color:#555;margin-top:0.6rem;">More economical than buying standalone books: standalone titles (Postmortems book $43.5, Migration Playbook $19, Token Book ¥2,500) are fixed at the moment of purchase. Safety Lab continues tracking incidents and behavior changes monthly — covering the "what's happening in the last month" that books can't keep up with.</p>
 
 <h2>What this is not (honest disclosure)</h2>
 <div class="honest-section">
