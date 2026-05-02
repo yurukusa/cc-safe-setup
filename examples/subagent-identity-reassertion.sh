@@ -27,13 +27,14 @@ set -euo pipefail
 
 INPUT=$(cat)
 
-# Apply only on Agent tool calls
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+# Apply only on Agent tool calls. Tolerate malformed JSON by treating
+# unparseable input as a non-Agent fast path (silent exit 0).
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null || true)
 [ "$TOOL" = "Agent" ] || exit 0
 
 # Extract subagent type / name for the reminder
-SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty' 2>/dev/null)
-SUBAGENT_NAME=$(echo "$INPUT" | jq -r '.tool_input.name // empty' 2>/dev/null)
+SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty' 2>/dev/null || true)
+SUBAGENT_NAME=$(echo "$INPUT" | jq -r '.tool_input.name // empty' 2>/dev/null || true)
 
 ROLE_LABEL="subagent"
 [ -n "$SUBAGENT_TYPE" ] && ROLE_LABEL="$SUBAGENT_TYPE"
