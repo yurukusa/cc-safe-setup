@@ -108,7 +108,7 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <li><strong>安全チェックリスト：</strong> 料金、秘密情報、破壊的操作、長時間セッション、公開前確認の 5 領域。</li>
 <li><strong>hook 例 (料金監視)：</strong> Stop hook で 1 日のトークン消費を監視し、閾値を超えた瞬間に警告する。「後から気付く」状態を排除する。</li>
 <li><strong>hook 例 (圧縮直前の保存)：</strong> PreCompact hook で、git の一時保存、進行中作業の覚え書き、発火回数の記録。autoCompactEnabled が効かない状況（#42817）と、圧縮が通信不良で途切れる状況（#55468）の両方への保険。</li>
-<li><strong>失敗事例：</strong> cache_control 空テキストブロック問題の症状、原因、復旧手順、予防策。</li>
+<li><strong>失敗事例：</strong> cache_control 空テキストブロック問題の症状、原因、復旧手順、予防策。<a href="https://gist.github.com/yurukusa/556c697308907ca963358fbf596d34f6" style="color:#16a34a;font-weight:600;text-decoration:underline;margin-left:0.3rem;">この章の全文を無料で読む →</a></li>
 <li><strong>商品更新案内：</strong> cc-safe-setup / Token Book / Migration Playbook / Postmortems / Survival Guide の 5 月時点の事実と、月額会員の自然な読了順。</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Founder で参加すると、5 月号の全文がそのまま読める。</p>
@@ -285,7 +285,7 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <li><strong>Safety checklist:</strong> 5 areas — billing, secrets, destructive ops, long sessions, pre-publication checks.</li>
 <li><strong>Hook example (cost guard):</strong> a Stop hook that monitors daily token consumption and alerts the moment a threshold is crossed. Replaces the "found out later" mode.</li>
 <li><strong>Hook example (PreCompact checkpoint):</strong> PreCompact hook that runs git stash, dumps in-progress notes, and logs trigger counts. Insurance against #42817 (autoCompactEnabled stops working) and #55468 (compaction broken by network issues).</li>
-<li><strong>Failure case:</strong> cache_control empty-text-block bug — symptoms, cause, recovery, prevention.</li>
+<li><strong>Failure case:</strong> cache_control empty-text-block bug — symptoms, cause, recovery, prevention. <a href="https://gist.github.com/yurukusa/556c697308907ca963358fbf596d34f6" style="color:#16a34a;font-weight:600;text-decoration:underline;">Read the full chapter free →</a></li>
 <li><strong>Product updates:</strong> May state of cc-safe-setup, Token Book, Migration Playbook, Postmortems, Survival Guide, plus a recommended reading order.</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Joining as Founder gets you the full May issue.</p>
