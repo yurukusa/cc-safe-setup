@@ -644,7 +644,7 @@ If you write or teach about Claude Code, you can earn 30% commission promoting o
 
 - [yurukusa.gumroad.com/affiliates](https://yurukusa.gumroad.com/affiliates)
 
-Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19), [Incident Postmortems](https://yurukusa.gumroad.com/l/rhtptb) ($29, ships 2026-05-05), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (pay what you want), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and other Claude Code titles.
+Eligible products include the [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook), [Incident Postmortems](https://yurukusa.gumroad.com/l/rhtptb) (ships 2026-05-05), [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (pay what you want), [Complete Survival Kit](https://yurukusa.gumroad.com/l/poqhoo), [CLAUDE.md Templates](https://yurukusa.gumroad.com/l/iaple), and other Claude Code titles. See each product page for the current price.
 
 ## Also by yurukusa
 
