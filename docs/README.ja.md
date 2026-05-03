@@ -85,6 +85,7 @@ Claude Codeを再起動。完了。
 | `subagent-identity-leak-guard` | 子エージェントが親の身分を名乗ったり親の会話履歴を漏らすのを予防（delegation prompt の身分の境界の検査） | [#55488](https://github.com/anthropics/claude-code/issues/55488) |
 | `subagent-tool-allowlist-enforcer` | 子エージェントの道具の境界を delegation prompt で明示し、 親の検証手順を促す（虚偽報告の予防） | [#55653](https://github.com/anthropics/claude-code/issues/55653) |
 | `subagent-spawn-verification-enforcer` | 子エージェントの spawn の応答が虚偽でないかを成果物の検証手順で予防する | [#55666](https://github.com/anthropics/claude-code/issues/55666) |
+| `subagent-permission-mode-guard` | Agent tool の mode パラメータが子エージェントの frontmatter で silent に上書きされる事例を予防（mode の指定時のみ検査） | [#55691](https://github.com/anthropics/claude-code/issues/55691) |
 
 インストール: `npx cc-safe-setup --install-example <名前>`
 
