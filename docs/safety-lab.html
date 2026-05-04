@@ -119,19 +119,19 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 
 <div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
 <h3 style="color:#1e40af;">2026 年 6 月号 — 5/3-5/31 の 4 週間が対象（予告）</h3>
-<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 3 万-3 万 5 千字、紙の版は 28-32 ページの規模を想定。現時点で確定している組み込み予定の素材:</p>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 2 万 5 千-2 万 8 千字、紙の版は 25-30 ページの規模を想定。現時点で確定している組み込み予定の素材は次の 4 件:</p>
 <ul style="font-size:0.92rem;color:#1e3a8a;">
-<li><strong>冒頭の特集：</strong>3/31 の流出事件（Anthropic がデバッグ設定の経路で Claude Code の全ソースコード 51 万行を npm の公開置き場に出した事件）を「個人開発者が学ぶべき教訓」 の角度で書く。単発の解説記事は既に出尽くしているため、検出と予防の hook 例まで分解する。</li>
-<li><strong>料金監視 hook の続編：</strong>3/23 から発生した利用上限の急速消耗（Issue #41930）の根本原因 4 件のうち、個人開発者が自分で検出できる 2 件の検出方法。5 月号の cost guard hook の上に乗せる続編。</li>
-<li><strong>今月の品質傾向：</strong>思考の塊 1 万 7 千件と道具呼び出し 23 万件の研究結果の解釈。中断率が良い時期から退行時期で 12 倍に増えた数値を、個人開発者が自分で観測する方法。</li>
-<li><strong>長期傾向の見守り：</strong>1/26 から続く品質退行（Issue #21431）の 6 月時点の状態。月次の継続見守りの項目として書き続ける。</li>
+<li><strong>子エージェントの境界の不在（5 件の Issue の集まり）：</strong>Issue #55488（子が親の身分と会話の履歴を漏らす）、 #55653（子が読み取りだけの道具で「保存しました」 と虚偽報告）、 #55660（子の作業時間の損失「数十時間」）、 #55666 と #55691（関連の症状）の 5 件を構造化。 各事例の検出の手段、 親側の事後の点検の仕組み、 起動時の検査の方法を解説。 約 14,000 字を予定。</li>
+<li><strong>2.1.126 公開直後 24-48 時間の沈黙の退行（5 件）：</strong>Issue #55209 / #55241 / #55502 / #55529 / #55613 の 5 件は、 公式の更新の通知に記載されない退行。 利用者の側でしか検出できないため、 月次で 1 本にまとまった形が必要。</li>
+<li><strong>自動の運用での利用枠の焼き：</strong>2026 年 5 月 1 日の利用者の集まりの上位の事例（1,085 ポイント）。 1 つの自動の命令で 26 時間で 6,000 ドル相当の利用枠を焼いた根本の原因と予防の手順。 自動の運用を前提とした個人開発者にとって最大の痛み。</li>
+<li><strong>料金構造の不合理：</strong>4/22 の値段反発、 4/24 の公式の事後の検証、 5/1 の 6,000 ドルの焼き、 5/2 の Issue #55663（中位と上位の模型の分離の枠の不合理）、 5/3 の特定の語の検閲事件 の 5 件を時系列に整理。 共通の構造的な失敗（公式の推奨と料金の仕組みの食い違い、 公式の説明の遅延、 利用者を実害の検出器にする設計の 3 軸）と、 個人の開発者が今すぐ取れる予防の手順を 3 段で解説。 約 8,500 字を予定。</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">編集 5/30、校正 5/31、配信 6/1。Founder で 5 月中に参加すれば、6 月号も初回から受け取れる。</p>
 </div>
 
 <div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
 <h3 style="margin-top:0;color:#374151;">毎月続く構造</h3>
-<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">月号は単発の特集ではなく、GitHub Issue を継続的に読み込んで月単位で束ねる仕組みで作る。5 月号で扱った 8 種類の問題のうち、cache_control 詰まり、利用量表示ずれ、子エージェントの身分の漏れ（Issue #55488）は 6 月号でも追跡を継続する。解決済みかどうか、関連の続報があるかを毎月確認し、前月までの記録の上に積み上げる。</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">月号は単発の特集ではなく、GitHub Issue を継続的に読み込んで月単位で束ねる仕組みで作る。5 月号で扱った 9 種類の問題のうち、cache_control 詰まり、利用量表示ずれ、子エージェントの身分の漏れ（Issue #55488）は 6 月号でも追跡を継続する。解決済みかどうか、関連の続報があるかを毎月確認し、前月までの記録の上に積み上げる。</p>
 <p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">5 月号の安全装置の例（料金監視と圧縮直前の保存）は、6 月号で根本原因 2 件の検出方法に拡張する。hook は単月で完結せず、複数号にまたがって育っていく。</p>
 </div>
 
@@ -297,19 +297,19 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 
 <div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
 <h3 style="color:#1e40af;">June 2026 — covering 5/3-5/31 (preview)</h3>
-<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">May covered 8 days (4/25-5/2). June covers a full 4-week window — over 3x the scope. Body length expected at 30,000-35,000 characters / 28-32 PDF pages. Confirmed inclusions:</p>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">May covered 8 days (4/25-5/2). June covers a full 4-week window — over 3x the scope. Body length expected at 25,000-28,000 characters / 25-30 PDF pages. Confirmed inclusions (4 topics):</p>
 <ul style="font-size:0.92rem;color:#1e3a8a;">
-<li><strong>Lead feature:</strong> the 3/31 source-leak incident (Anthropic accidentally published all 510K lines of Claude Code source via the npm public registry through a debug-config path), framed as "what individual developers should learn from it." Single-incident explainers are saturated, so we go down to detection and prevention hooks.</li>
-<li><strong>Cost-guard hook v2:</strong> follow-up to the 3/23 quota-burn incident (Issue #41930). Of the 4 root causes identified by the community, 2 are detectable by individual users. Builds on May's cost guard hook.</li>
-<li><strong>Quality trend of the month:</strong> interpretation of the 17K thinking-block / 230K tool-call study showing a 12x increase in interruption rate from healthy to degraded periods, plus how individual users can observe it themselves.</li>
-<li><strong>Long-term watch:</strong> June status of the quality regression that started 1/26 (Issue #21431). Tracked monthly going forward.</li>
+<li><strong>Subagent boundary failures (cluster of 5 Issues):</strong> Issue #55488 (subagent leaks the parent's identity and conversation history), #55653 (subagent reports "saved" using a read-only tool — a false claim), #55660 (subagent loses "tens of hours" of work), #55666 and #55691 (related symptoms). Five cases reconstructed structurally with detection methods, parent-side post-execution audit hooks, and startup-time inspection procedures. Approximately 14,000 characters.</li>
+<li><strong>Silent regressions in the 24-48 hours after 2.1.126 ships (5 cases):</strong> Issue #55209 / #55241 / #55502 / #55529 / #55613 — five regressions absent from the official changelog. Detectable only on the user side, so the monthly compilation is essential.</li>
+<li><strong>Burning quota under autonomous operation:</strong> the top-rated case from the user community on 2026-05-01 (1,085 points) — a single automated command burned $6,000 worth of quota in 26 hours. The chapter covers the root cause and prevention. For developers running Claude Code autonomously, this is the most painful failure mode of the year.</li>
+<li><strong>Pricing structure inconsistencies:</strong> the April 22 pricing pushback, the April 24 official post-mortem, the May 1 $6,000 burn, the May 2 Issue #55663 (the irrational separation between mid-tier and top-tier model quotas), and the May 3 keyword-censorship incident. Five cases organized chronologically. The chapter extracts the structural failure shared across them across three axes (official guidance contradicting quota mechanics, official explanation latency, the design that turns users into damage detectors) and provides three prevention procedures individual developers can adopt today. Approximately 8,500 characters.</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">Edit 5/30, proof 5/31, ship 6/1. Joining as Founder during May means you get June from the first issue too.</p>
 </div>
 
 <div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
 <h3 style="margin-top:0;color:#374151;">How each issue builds on the last</h3>
-<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">Issues are not standalone features — they are continuous reads of GitHub Issues bundled monthly. Of the 8 problems covered in May (cache_control jam, usage display drift, sub-agent identity leak Issue #55488, etc.), several remain under monthly tracking in June: are they fixed, are there new related reports? Each new issue stacks on top of the previous month's record.</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">Issues are not standalone features — they are continuous reads of GitHub Issues bundled monthly. Of the 9 problems covered in May (cache_control jam, usage display drift, sub-agent identity leak Issue #55488, etc.), several remain under monthly tracking in June: are they fixed, are there new related reports? Each new issue stacks on top of the previous month's record.</p>
 <p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">The May hooks (cost guard, PreCompact checkpoint) become the base for June's extensions — detection methods for the 2 root causes from Issue #41930. Hooks don't end with one issue; they evolve across multiple months.</p>
 </div>
 
