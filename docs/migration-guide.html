@@ -186,6 +186,22 @@ npx cc-safe-setup --audit
 <pre><code>npx cc-safe-setup --profile strict  # For autonomous/production use
 </code></pre>
 
+<h2>If You're Considering the Reverse Direction</h2>
+
+<p>This guide is for moving <em>to</em> Claude Code. Some readers come here weighing the opposite question, especially after the April 22 pricing changes: should I keep Claude Code as the primary tool, switch to a cheaper alternative, or run a hybrid setup with parts of my workflow offloaded to a smaller model?</p>
+
+<p>The popular cheap-model-offload tutorials (OpenRouter, Ollama, GLM-4.5, NVIDIA NIM, Unsloth) cover the setup well. They tend to share five gaps in the <em>decision</em> they assume you've already made. If you're at the deciding stage, watch for these:</p>
+
+<ol>
+<li>No specific failure cases. Tutorials say "complex tasks may not work" without listing which tasks empirically fail on a 7B-32B model in Claude Code's harness. Things like multi-file refactors that need a 12-file context, tool-call sequences over 8-10 steps where the model loses the goal, and diff-aware edits where the model must reason about what <em>not</em> to change.</li>
+<li>Vendor bias. Most are published by the model provider or service being recommended, so the bias-correction is left to the reader.</li>
+<li>Task-classification criteria are missing. "Code review" can mean lint a 30-line function or review a 4-file architectural change. Same word, very different model requirements.</li>
+<li>Hidden costs are not priced. Electricity (a 285W GPU run 4 hours/day is ~$10-15/month), time-to-first-token latency (a 5-minute task often becomes 12 minutes), maintenance after model updates, and the quality-recovery loop when the cheaper model produces wrong output that you re-run on the larger one.</li>
+<li>Migration triggers are not defined in numbers. The setup is shown but not the decision criteria. When does offload actually pay off, and what's the rollback signal?</li>
+</ol>
+
+<p>None of this means cheap-model offload is a bad idea. It often is the right call. But the publicly available tutorials assume the decision and skip the framework. If you're still at the deciding stage, treat the tutorials as setup recipes, not as evaluations.</p>
+
 <div class="footer">
   <a href="hooks-cheatsheet.html">Cheat Sheet</a> ·
   <a href="builder.html">Hook Builder</a> ·
