@@ -38,6 +38,17 @@ h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
 .may-issue h3 { margin-top: 0; color: #166534; }
 .may-issue ul { padding-left: 1.2rem; margin-top: 0.5rem; }
 .may-issue li { margin: 0.3rem 0; font-size: 0.92rem; }
+.preview-box { background: #fff; border: 1px solid #d1d5db; border-radius: 10px; padding: 1.5rem 1.7rem; margin: 1.8rem 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.preview-box .preview-tag { display: inline-block; background: #eff6ff; color: #1e40af; font-size: 0.78rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 4px; margin-bottom: 0.7rem; }
+.preview-box h3 { font-size: 1.1rem; color: #1f2937; margin: 0.3rem 0 0.7rem; border: none; padding: 0; }
+.preview-box h4 { font-size: 0.98rem; color: #374151; margin: 1rem 0 0.4rem; }
+.preview-box p { font-size: 0.93rem; color: #374151; margin-bottom: 0.6rem; }
+.preview-box pre { background: #1f2937; color: #f3f4f6; padding: 0.7rem 0.9rem; border-radius: 6px; font-size: 0.82rem; overflow-x: auto; margin: 0.5rem 0; }
+.preview-box code { background: #f3f4f6; padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.88em; color: #374151; }
+.preview-box pre code { background: transparent; padding: 0; color: #f3f4f6; }
+.preview-fade { position: relative; max-height: none; }
+.preview-cta { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed #d1d5db; font-size: 0.92rem; color: #555; }
+.preview-cta a { color: #16a34a; font-weight: 600; }
 .honest-section { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
 .honest-section strong { color: #854d0e; }
 .cta-section { text-align: center; margin: 2.5rem 0 1.5rem; }
@@ -73,6 +84,39 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 
 <div class="pain-point">
 <strong>こんな時に役立つ：</strong> Claude Code を仕事で使っていて、「先週の更新で何が壊れた？」「この hook は本当に効いているのか？」「トークン消費が突然倍になったが、何が原因か？」と毎月のように振り返る人。GitHub Issue を全部読む時間はないが、起きている事故と対処は知っておきたい人。
+</div>
+
+<h2>5 月号の本文を読んでみる（買う前の試し読み）</h2>
+<p style="font-size:0.95rem;color:#444;margin-bottom:1rem;">月額の中身が「払う価値があるか」 は、 売り文句では判断できない。 5 月号の失敗事例の章 (本文 3,500 字) の冒頭の 3 節を、 実際の本文のまま下に出す。 ここで質を判断してから、 続きを読むかを決めてほしい。</p>
+
+<div class="preview-box">
+<span class="preview-tag">5 月号 — 失敗事例の章の冒頭抜粋</span>
+<h3>2026-05 失敗事例: cache_control 空テキストブロックでセッションが完全に詰まる</h3>
+
+<h4>何が起きるか</h4>
+<p>短いセッションでも突然、 API から <code>400</code> エラーが返り続けて作業が止まる。 代表的なメッセージは次の 2 つで、 順番にこの形で出ることが多い。</p>
+<pre><code>messages.N.content.M.text: cache_control cannot be set for empty text blocks
+messages: text content blocks must be non-empty</code></pre>
+<p>「Try again」 も <code>claude --resume</code> も同じエラーで止まる。 新しいセッションを始めると直るが、 それまでの文脈は捨てることになる。</p>
+
+<h4>なぜ詰まるか</h4>
+<p>会話履歴のどこかの content block が <code>text: ""</code> のまま <code>cache_control: { type: "ephemeral" }</code> を付けた状態で残り、 API がそれを拒否する。 一度この壊れたブロックが履歴に入ると、 再送のたびに同じブロックが含まれるので、 resume も Try again も同じ理由で落ちる。</p>
+<p>「短いセッションだから長文ではない」 と感じても、 ツールを 1 回使うごとに <code>assistant tool_use</code> と <code>user tool_result</code> の 2 メッセージが追加される。 ツール多用のセッションなら数ターンで <code>messages[48]</code> 程度まですぐ伸びる。</p>
+
+<h4>どんなときに発生しているか (2026 年 4-5 月の集積から)</h4>
+<ul style="padding-left:1.2rem;font-size:0.93rem;color:#374151;">
+<li>画像をキャプションなしで貼り付けた直後</li>
+<li>ストリームの待機タイムアウト後の自動再送</li>
+<li>AskUserQuestion の回答が空のまま送られたとき</li>
+<li>セッション再開直後に履歴が壊れていたとき</li>
+</ul>
+<p style="margin-top:0.5rem;">GitHub Issue では同じ根本原因で別々のスレッドが <strong>12 本以上</strong> 立っている。 本ガイドの公開前に各スレッドの本文を確認し、 エラー文言と再現手順が一致するものだけを残した: #55369 / #55156 / #55302 / #55283 / #55118 / #54988 / #54421 / #54314 / #53632 / #50738 / #50681 / #50010 など。</p>
+
+<div class="preview-cta">
+ここから先 (約 2,500 字) には、 壊れた行の見え方、 検出の grep 一行、 復旧の Python スクリプト、 予防の 3 件の手順、 自分の環境での月次の点検の項目が続く。<br>
+→ <a href="https://gist.github.com/yurukusa/556c697308907ca963358fbf596d34f6">この 1 章の全文 (3,500 字) を Gist で無料で読む</a><br>
+→ <a href="https://ko-fi.com/yurukusa/tiers">Founder で参加して 5 月号の全 6 章を受け取る</a>
+</div>
 </div>
 
 <h2>何を届けるか（毎月）</h2>
@@ -176,6 +220,36 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <p style="margin-top:0.5rem;"><strong>合うかどうかの目安：</strong> Claude Code を週 5 日以上業務で使っており、毎月の事故と仕様変更を 30 分以内で把握したい人には合う。月 1 回しか触らない人や、事故が起きても影響が小さい使い方の人には合わない。</p>
 </div>
 
+<h2>同じ作者の単発書との関係（月額と本の使い分け）</h2>
+<p style="font-size:0.93rem;color:#444;">同じ作者が出している単発の本は、 ある時点までの蓄積を 1 冊にまとめた形。 Safety Lab は その本では追えない「翌月以降の動き」 を月次で続ける位置づけ。 単発書を買った人が、 続報を継続して受け取りたい時に Safety Lab が合う。</p>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.92rem;">
+<thead>
+<tr style="background:#f3f4f6;">
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">商品</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">形式</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">扱う範囲</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">続報の経路</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/rhtptb" style="color:#2563eb;">事故報告本 (Postmortems)</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本 (2026-05-05 から販売中)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">過去に起きた主要な事故の集積を 1 冊にまとめた形</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の月次まとめで翌月以降の事故を追跡</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">移行の手引き (Migration Playbook)</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本 (2026-04-25 から販売中、 第 2 版 5/8 配信予定)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">4/22 の値段の変更を契機とする 4 つの選択肢の判定</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の料金構造の節で月次の値段の動きと公式の対応を追跡</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.github.io/cc-safe-setup/token-book.html" style="color:#2563eb;">Token Book</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">トークン消費の根本原因と節約の手順 (8 章 24 症状)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の hook の例と商品更新の節で新しい症状と対策を追加</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><strong>CC Safety Lab (本商品)</strong></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">月額の購読 (¥500/月)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">直近 1 ヶ月の事故、 仕様変更、 公式の対応の継続的な読み込み</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">毎月 1 本の納品物として配信</td></tr>
+</tbody>
+</table>
+<p style="font-size:0.92rem;color:#555;">単発書の値段は商品の頁で現在の価格を確認。 単発書 1 冊と Safety Lab 1-3 ヶ月の組み合わせが、 過去の蓄積と月次の追跡の両方を抑える典型的な使い方。</p>
+
+<h2>Ko-fi での配信の仕組み</h2>
+<p style="font-size:0.93rem;color:#444;">Ko-fi は、 個人の作者が月額の購読や 1 回限りの応援を集めるための海外のサービスで、 Stripe でのカード決済に対応している。 配信の仕組みは次の 4 段階。</p>
+<ol style="padding-left:1.4rem;font-size:0.93rem;color:#444;margin-top:0.5rem;">
+<li><strong>登録：</strong> Ko-fi のアカウントを作る (メールアドレスのみで可能)。 既存の Google アカウントでもログイン可能。</li>
+<li><strong>支払い：</strong> Founder の階層を選び、 Stripe でカード情報を入力する。 ¥500/月 の自動課金が始まる。 日本円のカードでも米ドルのカードでも対応。</li>
+<li><strong>受け取り：</strong> 月 1 回、 Ko-fi のメンバー限定投稿として PDF または Markdown が公開される。 投稿の通知はメールで届く (Ko-fi のメールアドレスへ)。</li>
+<li><strong>読み方：</strong> 通知のリンクから Ko-fi のメンバー限定の頁にアクセスし、 ファイルをダウンロードする。 ダウンロード後はオフラインでも読める。 過去の自分の参加月以降の号は何度でも再ダウンロード可能。</li>
+</ol>
+<p style="font-size:0.93rem;color:#555;margin-top:0.5rem;">解約はいつでも Ko-fi の管理画面から可能。 解約の翌月から請求は止まる。 日割り返金は Ko-fi の仕様で対応していない。</p>
+
 <h2>他の選択肢との違い</h2>
 <p>Claude Code 関連の月額の有料媒体は、英語圏に複数ある（読者 20 万〜38 万人規模）。日本語の月額の納品物は、把握する範囲で他にない。主要な英語圏の媒体と 4 つの軸で比較する。</p>
 
@@ -251,6 +325,39 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 
 <div class="pain-point">
 <strong>You'll find this useful if:</strong> you use Claude Code at work and find yourself asking every month, "what broke in last week's release?", "is this hook actually firing?", "why did my token consumption double?". You don't have time to read every GitHub Issue, but you want to know what's happening.
+</div>
+
+<h2>Read the May issue before you decide</h2>
+<p style="font-size:0.95rem;color:#444;margin-bottom:1rem;">Whether the monthly is worth paying for can't be judged from sales copy. Below is the actual opening of the May issue's failure-case chapter (full chapter ≈ 3,500 characters). Judge the quality first, then decide whether to read on.</p>
+
+<div class="preview-box">
+<span class="preview-tag">May issue — Failure case chapter (opening excerpt)</span>
+<h3>2026-05 Failure case: cache_control on empty text blocks jams sessions completely</h3>
+
+<h4>What happens</h4>
+<p>Even short sessions suddenly start returning <code>400</code> errors and work stops. The two messages that typically appear, in this order:</p>
+<pre><code>messages.N.content.M.text: cache_control cannot be set for empty text blocks
+messages: text content blocks must be non-empty</code></pre>
+<p>"Try again" and <code>claude --resume</code> both fail with the same error. Starting a fresh session works but discards all the context.</p>
+
+<h4>Why it jams</h4>
+<p>Somewhere in the conversation history, a content block is left as <code>text: ""</code> with <code>cache_control: { type: "ephemeral" }</code> attached, and the API rejects it. Once the broken block is in history, every retry includes it, so resume and Try again fail for the same reason.</p>
+<p>Even if "the session feels short", every tool call adds two messages (assistant <code>tool_use</code> and user <code>tool_result</code>). Tool-heavy sessions reach <code>messages[48]</code> in just a few turns.</p>
+
+<h4>When it occurs (from the 2026 April-May cluster)</h4>
+<ul style="padding-left:1.2rem;font-size:0.93rem;color:#374151;">
+<li>Right after pasting an image without a caption</li>
+<li>Auto-resend after a stream wait timeout</li>
+<li>When AskUserQuestion replies are submitted empty</li>
+<li>Right after resuming a session whose history was already broken</li>
+</ul>
+<p style="margin-top:0.5rem;">Across GitHub Issues, the same root cause spawned <strong>more than 12 separate threads</strong>. Before publication, each thread was checked and only those whose error text and reproduction steps match were kept: #55369 / #55156 / #55302 / #55283 / #55118 / #54988 / #54421 / #54314 / #53632 / #50738 / #50681 / #50010 and others.</p>
+
+<div class="preview-cta">
+The remaining ~2,500 characters cover what the broken line looks like, the one-liner grep to detect it, the Python recovery script, three prevention procedures, and a monthly check item for your environment.<br>
+→ <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a45a5150a6d">Read this full chapter (3,500 chars) free on Gist</a><br>
+→ <a href="https://ko-fi.com/yurukusa/tiers">Join as Founder to receive all 6 chapters of the May issue</a>
+</div>
 </div>
 
 <h2>What you get every month</h2>
@@ -353,6 +460,26 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 </ul>
 <p style="margin-top:0.5rem;"><strong>Good fit if:</strong> you use Claude Code 5+ days a week for work and want to absorb the month's incidents and changes in under 30 minutes. Not a fit if Claude Code is occasional or low-stakes for you.</p>
 </div>
+
+<h2>How this fits with the same author's standalone books</h2>
+<p style="font-size:0.93rem;color:#444;">The standalone books from the same author each capture a snapshot of the accumulated material at one point in time. Safety Lab covers what those books can't: the month-by-month motion that follows. If you've read one of the books and want to keep tracking what's breaking next, Safety Lab is the continuation.</p>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.92rem;">
+<thead>
+<tr style="background:#f3f4f6;">
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Product</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Format</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Scope</th>
+<th style="padding:0.5rem;text-align:left;border:1px solid #e5e7eb;">Continuation</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/rhtptb" style="color:#2563eb;">Incident Postmortems</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book (live since 2026-05-05)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">A bound collection of major past incidents in one volume</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's monthly roundup tracks new incidents going forward</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">Migration Playbook</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book (live since 2026-04-25; Edition 2 ships 2026-05-08)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Four migration paths triggered by the April 22 pricing change</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's pricing-structure section tracks monthly price moves and official responses</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.github.io/cc-safe-setup/token-book.html" style="color:#2563eb;">Token Book</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Token-consumption root causes and saving recipes (8 chapters, 24 symptoms)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's hook examples and product-update sections add new symptoms and remedies</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><strong>CC Safety Lab (this membership)</strong></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Monthly subscription (¥500/month, ~$3.50)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Continuous read of incidents, behavior changes, and official responses from the last month</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Delivered as one bound deliverable per month</td></tr>
+</tbody>
+</table>
+<p style="font-size:0.92rem;color:#555;">Standalone book prices are on each product page. The typical pairing is one standalone book plus 1-3 months of Safety Lab — past accumulation plus monthly tracking.</p>
 
 <h2>How this compares to alternatives</h2>
 <p>Multiple paid Claude Code newsletters exist in English (200K-380K reader scale). No comparable Japanese-language monthly delivery exists, to our knowledge. Below is a 4-axis comparison with the dominant English-language category.</p>
