@@ -144,6 +144,19 @@ messages: text content blocks must be non-empty</code></pre>
 </li>
 </ul>
 
+<h2>なぜ月額で届けるか（一回の本との違い）</h2>
+
+<div style="background:#fdf2f8;border-left:4px solid #db2777;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#9d174d;font-size:1.05rem;">1. 根拠が古びない前提の商品</h3>
+<p style="font-size:0.93rem;color:#374151;">一回の本（移行の手引き、 事故報告本）は公開時の根拠を凍らせた文書。 5/6 朝に移行の手引きの第 11 触媒の章を 8 時間前の起稿状態と比較したところ、 18 件の引用のうち 4 件が既に閉じられていた（22%）。 8 時間で 22% の根拠が動いた領域では、 月次更新を前提にした商品が一回の本を上回る形になる。 5 月号の購読者は 6 月号、 7 月号と連続で受け取り、 過去の章で扱った Issue の続報も毎月反映される。</p>
+
+<h3 style="color:#9d174d;font-size:1.05rem;">2. 数百件の Issue を月次で 9 件に圧縮</h3>
+<p style="font-size:0.93rem;color:#374151;">5 月号の第 1 部だけで、 8 日間（4/25-5/2）の公開 Issue、 利用者の集まり、 海外の場、 自分の運用記録を巡回し、 9 件の事故の集まりに整理した。 各集まりに該当の Issue 番号（空のキャッシュの印の問題だけで 14 件）、 発生のきっかけ、 対処の方向を入れた。 利用者が同じ整理を自分でやると数百件の Issue 巡回が必要。 月 ¥500 はこの巡回と整理を月次で外注する値段。</p>
+
+<h3 style="color:#9d174d;font-size:1.05rem;">3. 月ごとの失敗様式に対応した動作確認済みの設定</h3>
+<p style="font-size:0.93rem;color:#374151;">5 月号の hook は当月の事故から逆算した動作確認済みの設定。 費用監視 hook は Issue #55445（事前のキャッシュの作成の量が 2 倍に膨らんだ退行）に直接対応する 1 日累計の閾値警告。 圧縮直前の保存 hook は #42817（自動の圧縮が効かない）と #55468（圧縮が通信不良で途切れる）の両方への保険。 設定例自体は再利用可能で、 過去号のものも蓄積する。 12 ヶ月の購読で 12-24 件の hook が手元に集まる。</p>
+</div>
+
 <h2 id="may-issue">5 月号の中身（一部公開）</h2>
 
 <div class="may-issue">
@@ -384,6 +397,19 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
   <div class="desc">Updates to Token Book, Migration Playbook, Postmortems, Survival Guide, and cc-safe-setup that month, with reading suggestions.</div>
 </li>
 </ul>
+
+<h2>Why monthly (vs. a one-time book)</h2>
+
+<div style="background:#fdf2f8;border-left:4px solid #db2777;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#9d174d;font-size:1.05rem;">1. Designed around evidence that decays</h3>
+<p style="font-size:0.93rem;color:#374151;">One-time books (Migration Playbook, Postmortems) freeze the evidence at publication. On the morning of 2026-05-06 I compared the Migration Playbook's 11th trigger chapter against its 8-hour-earlier draft: of 18 cited Issues, 4 had already been closed (22%). When 22% of the evidence moves in 8 hours, a monthly product structurally outperforms a one-time book. May subscribers receive June, July, and so on, with prior chapters' Issue follow-ups folded in each month.</p>
+
+<h3 style="color:#9d174d;font-size:1.05rem;">2. Compresses hundreds of Issues into a 9-cluster monthly read</h3>
+<p style="font-size:0.93rem;color:#374151;">May issue's Part 1 alone scanned 8 days (4/25-5/2) of public Issues, user communities, English-language venues, and my own operational records, and condensed them into 9 incident clusters. Each cluster lists the relevant Issue numbers (the empty-cache-control bug alone has 14), trigger conditions, and remediation. Doing the same scan yourself takes hundreds of Issue reviews. ¥500/month (~$3.50) is the price of outsourcing that scan and synthesis monthly.</p>
+
+<h3 style="color:#9d174d;font-size:1.05rem;">3. Tested hooks derived from this month's failure modes</h3>
+<p style="font-size:0.93rem;color:#374151;">May's hooks are tested configurations derived from the month's incidents. The cost-guard hook directly addresses Issue #55445 (cache_creation token doubling regression) with a daily-cumulative threshold alert. The PreCompact-checkpoint hook insures against both #42817 (autoCompactEnabled stops working) and #55468 (compaction broken by network issues). Each hook is reusable, and past issues' hooks accumulate. After 12 months you have 12-24 working hooks in hand.</p>
+</div>
 
 <h2 id="may-issue-en">May 2026 issue (preview)</h2>
 
