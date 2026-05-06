@@ -292,6 +292,10 @@ New Release — April 2026
 <strong>🚨 Opus 4.7 Alert (April 18, 2026)</strong> — Auto mode's safety classifier is <a href="https://github.com/anthropics/claude-code/issues/49618">hardcoded to Opus 4.6</a>. On 4.7, it doesn't work — <strong>23+ data loss incidents in 3 days</strong> (<a href="https://github.com/anthropics/claude-code/issues/49129">50GB permanently deleted</a>, <a href="https://github.com/anthropics/claude-code/issues/49554">~/.ssh wiped</a>, <a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials destroyed</a>, <strong>$413 stolen in 90 seconds</strong> after autonomous repo visibility change). Users report <a href="https://github.com/anthropics/claude-code/issues/49541">4x token consumption</a> and <a href="https://github.com/anthropics/claude-code/issues/50389">idle sessions draining 18% quota</a>. Chapter 4's hooks are model-independent — the only defense right now. See <a href="opus-47-survival-guide.html">Survival Guide (66 sections, 80+ issues)</a>.
 </div>
 
+<div class="pain-point" style="background:#fef3c7;border-left-color:#f59e0b;">
+<strong>🚨 v2.1.128 Cache Regression (May 5, 2026)</strong> — The v2.1.128 changelog claims a "~3x cache_creation reduction." Empirical analysis of <a href="https://github.com/anthropics/claude-code/issues/56293">4,367 sub-agent transcript files (Issue #56293)</a> shows the opposite for parallel-team workloads: cache miss share rose from <strong>4% to 40%</strong> (10x worse) and average cache_creation per turn climbed from <strong>5,648 to 26,000 tokens</strong> compared to v2.1.121. The official text and the field measurement diverge verbatim. Chapter 8's diagnostic flow shows how to measure your own cache miss rate session by session — without it, the changelog claim is unverifiable for your workload.
+</div>
+
 <h2>What You Get</h2>
 <ul>
 <li><strong>Real measurements</strong> — CLAUDE.md restructured from 100→35 lines improved cache hit rate 89%→95%, cutting token usage by ~40%</li>
