@@ -1,7 +1,7 @@
 {
   "name": "cc-safe-setup",
   "version": "30.0.0",
-  "description": "One command to make Claude Code safe. 707 example hooks + 8 built-in. 88 tracked incidents. 65-section Survival Guide. Token diagnosis. Works with Auto Mode.",
+  "description": "One command to make Claude Code safe. 727 example hooks + 8 built-in. 88 tracked incidents. 65-section Survival Guide. Token diagnosis. Works with Auto Mode.",
   "main": "index.mjs",
   "bin": {
     "cc-safe-setup": "index.mjs"
