@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CC Safety Lab — Claude Code の事故レポートと安全運用パックを毎月届ける（¥500/月）</title>
+<title>CC Safety Lab: Claude Code の事故レポートと安全運用パックを毎月届ける（¥500/月）</title>
 <meta name="description" content="Claude Code の事故事例、再発防止 hook、トークン節約手法を、毎月 1 本のレポートとして届ける。¥500/月 Founder 価格（grandfathered）。無料の試し読みあり。">
 <meta name="keywords" content="Claude Code, safety, monthly report, incident, hook, token saving, Ko-fi, membership">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">
 
-<meta property="og:title" content="CC Safety Lab — 毎月、Claude Code の事故と仕様変更を整理して届ける">
+<meta property="og:title" content="CC Safety Lab: 毎月、Claude Code の事故と仕様変更を整理して届ける">
 <meta property="og:description" content="GitHub Issue ベースで月次の事故レポート、安全チェックリスト、再発防止 hook、失敗事例の深掘り、商品更新を届ける月額メンバーシップ。¥500/月。">
 <meta property="og:type" content="product">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CC Safety Lab — Claude Code の月次安全運用パック">
+<meta name="twitter:title" content="CC Safety Lab: Claude Code の月次安全運用パック">
 <meta name="twitter:description" content="GitHub Issue から拾った Claude Code の事故事例、対処、再発防止 hook を毎月整理して届ける。¥500/月 Founder 価格。">
 
 <style>
@@ -72,7 +72,7 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <span class="price-badge">¥500/月</span>
 <span class="founder-badge">Founder（価格据え置き）</span>
 
-<h1>CC Safety Lab — 毎月、Claude Code の事故と安全運用を整理して届ける</h1>
+<h1>CC Safety Lab: 毎月、Claude Code の事故と安全運用を整理して届ける</h1>
 <p class="subtitle">GitHub Issue から拾った事故事例、再発防止 hook、トークン節約手法を月 1 本のレポートに。Ko-fi メンバーシップ。</p>
 
 <div style="margin-bottom:1.5rem;">
@@ -90,7 +90,7 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <p style="font-size:0.95rem;color:#444;margin-bottom:1rem;">月額の中身が「払う価値があるか」 は、 売り文句では判断できない。 5 月号の失敗事例の章 (本文 3,500 字) の冒頭の 3 節を、 実際の本文のまま下に出す。 ここで質を判断してから、 続きを読むかを決めてほしい。</p>
 
 <div class="preview-box">
-<span class="preview-tag">5 月号 — 失敗事例の章の冒頭抜粋</span>
+<span class="preview-tag">5 月号, 失敗事例の章の冒頭抜粋</span>
 <h3>2026-05 失敗事例: cache_control 空テキストブロックでセッションが完全に詰まる</h3>
 
 <h4>何が起きるか</h4>
@@ -160,7 +160,7 @@ messages: text content blocks must be non-empty</code></pre>
 <h2 id="may-issue">5 月号の中身（一部公開）</h2>
 
 <div class="may-issue">
-<h3>2026 年 5 月号 — 本文 23,951 字 / 紙の版 23 ページ ｜ 配信 2026-05-05</h3>
+<h3>2026 年 5 月号: 本文 23,951 字 / 紙の版 23 ページ ｜ 配信 2026-05-05</h3>
 <ul>
 <li><strong>月次まとめ：</strong> 4/25-5/2 に見つかった 9 種類の問題を整理。cache_control 詰まり、利用量表示ずれ、Cowork の応答消失、Worktree 周辺、Skill plugin 変数、画面表示の不具合、クライアント切り替え時の cache_creation 増加、子エージェントの身分の漏れ（Issue #55488）、2.1.126 公開直後の動作環境の沈黙の退行 5 件。</li>
 <li><strong>安全チェックリスト：</strong> 料金、秘密情報、破壊的操作、長時間セッション、公開前確認の 5 領域。</li>
@@ -175,7 +175,7 @@ messages: text content blocks must be non-empty</code></pre>
 <h2 id="next-issue">6 月号の予告と毎月続く構造</h2>
 
 <div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
-<h3 style="color:#1e40af;">2026 年 6 月号 — 5/3-5/31 の 4 週間が対象（予告）</h3>
+<h3 style="color:#1e40af;">2026 年 6 月号: 5/3-5/31 の 4 週間が対象（予告）</h3>
 <p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 2 万 5 千-2 万 8 千字、紙の版は 25-30 ページの規模を想定。現時点で確定している組み込み予定の素材は次の 4 件:</p>
 <ul style="font-size:0.92rem;color:#1e3a8a;">
 <li><strong>子エージェントの境界の不在（5 件の Issue の集まり）：</strong>Issue #55488（子が親の身分と会話の履歴を漏らす）、 #55653（子が読み取りだけの道具で「保存しました」 と虚偽報告）、 #55660（子の作業時間の損失「数十時間」）、 #55666 と #55691（関連の症状）の 5 件を構造化。 各事例の検出の手段、 親側の事後の点検の仕組み、 起動時の検査の方法を解説。 約 14,000 字を予定。</li>
@@ -247,7 +247,7 @@ messages: text content blocks must be non-empty</code></pre>
 </thead>
 <tbody>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/rhtptb" style="color:#2563eb;">事故報告本 (Postmortems)</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本 (2026-05-05 から販売中)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">過去に起きた主要な事故の集積を 1 冊にまとめた形</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の月次まとめで翌月以降の事故を追跡</td></tr>
-<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">移行の手引き (Migration Playbook)</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本 (2026-04-25 から販売中、 第 2 版 5/8 配信予定)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">4/22 の値段の変更を契機とする 4 つの選択肢の判定</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の料金構造の節で月次の値段の動きと公式の対応を追跡</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">移行の手引き (Migration Playbook)</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本 (2026-04-25 から販売中、 5/8 に既存購入者向けの無料更新を配信)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">4/22 の値段の変更を契機とする 4 つの選択肢の判定</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の料金構造の節で月次の値段の動きと公式の対応を追跡</td></tr>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.github.io/cc-safe-setup/token-book.html" style="color:#2563eb;">Token Book</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">単発の本</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">トークン消費の根本原因と節約の手順 (8 章 24 症状)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab の hook の例と商品更新の節で新しい症状と対策を追加</td></tr>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><strong>CC Safety Lab (本商品)</strong></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">月額の購読 (¥500/月)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">直近 1 ヶ月の事故、 仕様変更、 公式の対応の継続的な読み込み</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">毎月 1 本の納品物として配信</td></tr>
 </tbody>
@@ -327,7 +327,7 @@ messages: text content blocks must be non-empty</code></pre>
 <span class="price-badge">¥500/month (~$3.50)</span>
 <span class="founder-badge">Founder pricing (grandfathered)</span>
 
-<h1>CC Safety Lab — Monthly briefing on Claude Code incidents and safe operation</h1>
+<h1>CC Safety Lab: Monthly briefing on Claude Code incidents and safe operation</h1>
 <p class="subtitle">A curated monthly digest of incidents from GitHub Issues, fix-it hooks, and token-saving techniques. Ko-fi membership.</p>
 
 <div style="margin-bottom:1.5rem;">
@@ -345,7 +345,7 @@ messages: text content blocks must be non-empty</code></pre>
 <p style="font-size:0.95rem;color:#444;margin-bottom:1rem;">Whether the monthly is worth paying for can't be judged from sales copy. Below is the actual opening of the May issue's failure-case chapter (full chapter ≈ 3,500 characters). Judge the quality first, then decide whether to read on.</p>
 
 <div class="preview-box">
-<span class="preview-tag">May issue — Failure case chapter (opening excerpt)</span>
+<span class="preview-tag">May issue, Failure case chapter (opening excerpt)</span>
 <h3>2026-05 Failure case: cache_control on empty text blocks jams sessions completely</h3>
 
 <h4>What happens</h4>
@@ -415,13 +415,13 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 <h2 id="may-issue-en">May 2026 issue (preview)</h2>
 
 <div class="may-issue">
-<h3>May 2026 — 23,951 characters / 23-page PDF ｜ Ships 2026-05-05</h3>
+<h3>May 2026: 23,951 characters / 23-page PDF ｜ Ships 2026-05-05</h3>
 <ul>
 <li><strong>Monthly roundup:</strong> 9 problems found between 4/25-5/2: cache_control jam, usage display drift, Cowork response loss, Worktree edges, Skill plugin variables, UI display bugs, cache_creation token doubling on client switch, sub-agent identity leak (Issue #55488), and a cluster of 5 silent regressions in the 24-48h after the 2.1.126 release.</li>
-<li><strong>Safety checklist:</strong> 5 areas — billing, secrets, destructive ops, long sessions, pre-publication checks.</li>
+<li><strong>Safety checklist:</strong> 5 areas, billing, secrets, destructive ops, long sessions, pre-publication checks.</li>
 <li><strong>Hook example (cost guard):</strong> a Stop hook that monitors daily token consumption and alerts the moment a threshold is crossed. Replaces the "found out later" mode.</li>
 <li><strong>Hook example (PreCompact checkpoint):</strong> PreCompact hook that runs git stash, dumps in-progress notes, and logs trigger counts. Insurance against #42817 (autoCompactEnabled stops working) and #55468 (compaction broken by network issues).</li>
-<li><strong>Failure case:</strong> cache_control empty-text-block bug — symptoms, cause, recovery, prevention. <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a45a5150a6d" style="color:#16a34a;font-weight:600;text-decoration:underline;">Read the full chapter free (English) →</a></li>
+<li><strong>Failure case:</strong> cache_control empty-text-block bug, symptoms, cause, recovery, prevention. <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a45a5150a6d" style="color:#16a34a;font-weight:600;text-decoration:underline;">Read the full chapter free (English) →</a></li>
 <li><strong>Product updates:</strong> May state of cc-safe-setup, Token Book, Migration Playbook, Postmortems, Survival Guide, plus a recommended reading order.</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#166534;">Joining as Founder gets you the full May issue.</p>
@@ -430,12 +430,12 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 <h2 id="next-issue-en">June issue preview & how each issue builds on the last</h2>
 
 <div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
-<h3 style="color:#1e40af;">June 2026 — covering 5/3-5/31 (preview)</h3>
-<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">May covered 8 days (4/25-5/2). June covers a full 4-week window — over 3x the scope. Body length expected at 25,000-28,000 characters / 25-30 PDF pages. Confirmed inclusions (4 topics):</p>
+<h3 style="color:#1e40af;">June 2026: covering 5/3-5/31 (preview)</h3>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">May covered 8 days (4/25-5/2). June covers a full 4-week window, over 3x the scope. Body length expected at 25,000-28,000 characters / 25-30 PDF pages. Confirmed inclusions (4 topics):</p>
 <ul style="font-size:0.92rem;color:#1e3a8a;">
-<li><strong>Subagent boundary failures (cluster of 5 Issues):</strong> Issue #55488 (subagent leaks the parent's identity and conversation history), #55653 (subagent reports "saved" using a read-only tool — a false claim), #55660 (subagent loses "tens of hours" of work), #55666 and #55691 (related symptoms). Five cases reconstructed structurally with detection methods, parent-side post-execution audit hooks, and startup-time inspection procedures. Approximately 14,000 characters.</li>
-<li><strong>Silent regressions in the 24-48 hours after 2.1.126 ships (5 cases):</strong> Issue #55209 / #55241 / #55502 / #55529 / #55613 — five regressions absent from the official changelog. Detectable only on the user side, so the monthly compilation is essential.</li>
-<li><strong>Burning quota under autonomous operation:</strong> the top-rated case from the user community on 2026-05-01 (1,085 points) — a single automated command burned $6,000 worth of quota in 26 hours. The chapter covers the root cause and prevention. For developers running Claude Code autonomously, this is the most painful failure mode of the year.</li>
+<li><strong>Subagent boundary failures (cluster of 5 Issues):</strong> Issue #55488 (subagent leaks the parent's identity and conversation history), #55653 (subagent reports "saved" using a read-only tool, a false claim), #55660 (subagent loses "tens of hours" of work), #55666 and #55691 (related symptoms). Five cases reconstructed structurally with detection methods, parent-side post-execution audit hooks, and startup-time inspection procedures. Approximately 14,000 characters.</li>
+<li><strong>Silent regressions in the 24-48 hours after 2.1.126 ships (5 cases):</strong> Issue #55209 / #55241 / #55502 / #55529 / #55613, five regressions absent from the official changelog. Detectable only on the user side, so the monthly compilation is essential.</li>
+<li><strong>Burning quota under autonomous operation:</strong> the top-rated case from the user community on 2026-05-01 (1,085 points), a single automated command burned $6,000 worth of quota in 26 hours. The chapter covers the root cause and prevention. For developers running Claude Code autonomously, this is the most painful failure mode of the year.</li>
 <li><strong>Pricing structure inconsistencies:</strong> the April 22 pricing pushback, the April 24 official post-mortem, the May 1 $6,000 burn, the May 2 Issue #55663 (the irrational separation between mid-tier and top-tier model quotas), and the May 3 keyword-censorship incident. Five cases organized chronologically. The chapter extracts the structural failure shared across them across three axes (official guidance contradicting quota mechanics, official explanation latency, the design that turns users into damage detectors) and provides three prevention procedures individual developers can adopt today. Approximately 8,500 characters.</li>
 <li><strong>2026-05-05 morning additions (2 cases):</strong> the eleventh silent-regression case Issue #56293 — the v2.1.128 changelog claims "approximately 3x cache_creation reduction" while the reporter's 4,367-record transcript analysis shows per-turn cache_creation rising from 5,534 to 22,713 (a 4.1x degradation). Verbatim contradiction between the official text and the measurement. Plus two subagent destructive-action cases: Issue #56255 (a subagent issued a destroy-database command, losing 7.8 GB of operational data) and Issue #56277 (the main branch's uploads directory was wiped, losing 18+ images). These extend the May 3 subagent-boundary cluster of 5 Issues by exposing a design gap: the path-type change (file ↔ symlink ↔ directory) is not gated.</li>
 </ul>
@@ -444,8 +444,8 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 
 <div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
 <h3 style="margin-top:0;color:#374151;">How each issue builds on the last</h3>
-<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">Issues are not standalone features — they are continuous reads of GitHub Issues bundled monthly. Of the 9 problems covered in May (cache_control jam, usage display drift, sub-agent identity leak Issue #55488, etc.), several remain under monthly tracking in June: are they fixed, are there new related reports? Each new issue stacks on top of the previous month's record.</p>
-<p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">The May hooks (cost guard, PreCompact checkpoint) become the base for June's extensions — detection methods for the 2 root causes from Issue #41930. Hooks don't end with one issue; they evolve across multiple months.</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.4rem;">Issues are not standalone features, they are continuous reads of GitHub Issues bundled monthly. Of the 9 problems covered in May (cache_control jam, usage display drift, sub-agent identity leak Issue #55488, etc.), several remain under monthly tracking in June: are they fixed, are there new related reports? Each new issue stacks on top of the previous month's record.</p>
+<p style="font-size:0.93rem;color:#374151;margin-top:0.6rem;">The May hooks (cost guard, PreCompact checkpoint) become the base for June's extensions, detection methods for the 2 root causes from Issue #41930. Hooks don't end with one issue; they evolve across multiple months.</p>
 </div>
 
 <h2>About Founder pricing</h2>
@@ -475,7 +475,7 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 
 <p style="font-size:0.93rem;color:#555;">A year of membership costs ¥6,000 (~$42, locked at Founder rate). One avoided Max-plan incident per year (a billing runaway adding ¥30K-100K to your monthly bill, a credentials leak, a critical-dependency break) returns 5-15x of that.</p>
 
-<p style="font-size:0.93rem;color:#555;margin-top:0.6rem;">More economical than buying standalone books: standalone titles (Postmortems book, Migration Playbook, Token Book — see each product page for current price) are fixed at the moment of purchase. Safety Lab continues tracking incidents and behavior changes monthly — covering the "what's happening in the last month" that books can't keep up with.</p>
+<p style="font-size:0.93rem;color:#555;margin-top:0.6rem;">More economical than buying standalone books: standalone titles (Postmortems book, Migration Playbook, Token Book, see each product page for current price) are fixed at the moment of purchase. Safety Lab continues tracking incidents and behavior changes monthly, covering the "what's happening in the last month" that books can't keep up with.</p>
 
 <h2>What this is not (honest disclosure)</h2>
 <div class="honest-section">
@@ -484,7 +484,7 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 <li>1-on-1 support or chat consulting (this is a content product)</li>
 <li>Private Discord or Slack (no separate discussion space)</li>
 <li>Special access to Anthropic or pre-release info (everything we cover comes from public Issues)</li>
-<li>A guarantee that "incidents will never happen" — this is about knowing fast and recovering well, not preventing every possible failure</li>
+<li>A guarantee that "incidents will never happen", this is about knowing fast and recovering well, not preventing every possible failure</li>
 </ul>
 <p style="margin-top:0.5rem;"><strong>Good fit if:</strong> you use Claude Code 5+ days a week for work and want to absorb the month's incidents and changes in under 30 minutes. Not a fit if Claude Code is occasional or low-stakes for you.</p>
 </div>
@@ -502,12 +502,12 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 </thead>
 <tbody>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/rhtptb" style="color:#2563eb;">Incident Postmortems</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book (live since 2026-05-05)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">A bound collection of major past incidents in one volume</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's monthly roundup tracks new incidents going forward</td></tr>
-<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">Migration Playbook</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book (live since 2026-04-25; Edition 2 ships 2026-05-08)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Four migration paths triggered by the April 22 pricing change</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's pricing-structure section tracks monthly price moves and official responses</td></tr>
+<tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" style="color:#2563eb;">Migration Playbook</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book (live since 2026-04-25; free silent-refresh sweep on 2026-05-08)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Four migration paths triggered by the April 22 pricing change</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's pricing-structure section tracks monthly price moves and official responses</td></tr>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><a href="https://yurukusa.github.io/cc-safe-setup/token-book.html" style="color:#2563eb;">Token Book</a></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Standalone book</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Token-consumption root causes and saving recipes (8 chapters, 24 symptoms)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Safety Lab's hook examples and product-update sections add new symptoms and remedies</td></tr>
 <tr><td style="padding:0.5rem;border:1px solid #e5e7eb;"><strong>CC Safety Lab (this membership)</strong></td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Monthly subscription (¥500/month, ~$3.50)</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Continuous read of incidents, behavior changes, and official responses from the last month</td><td style="padding:0.5rem;border:1px solid #e5e7eb;">Delivered as one bound deliverable per month</td></tr>
 </tbody>
 </table>
-<p style="font-size:0.92rem;color:#555;">Standalone book prices are on each product page. The typical pairing is one standalone book plus 1-3 months of Safety Lab — past accumulation plus monthly tracking.</p>
+<p style="font-size:0.92rem;color:#555;">Standalone book prices are on each product page. The typical pairing is one standalone book plus 1-3 months of Safety Lab, past accumulation plus monthly tracking.</p>
 
 <h2>How this compares to alternatives</h2>
 <p>Multiple paid Claude Code newsletters exist in English (200K-380K reader scale). However, no newsletter in either English or Japanese focuses specifically on structuring GitHub Issue incidents into a monthly deliverable, to our knowledge. Existing English-language newsletters are weekly strategy, hiring, and operations reads that don't make incident tracking their primary axis. Below is a 4-axis comparison with the dominant English-language category.</p>
@@ -533,7 +533,7 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 <h2>FAQ</h2>
 
 <div class="faq-item">
-<div class="q">Q. I already own Token Book — how is Safety Lab different?</div>
+<div class="q">Q. I already own Token Book, how is Safety Lab different?</div>
 <div class="a">A. Token Book is a one-time purchase covering all chapters. Safety Lab is a monthly subscription tracking new incidents and changes. After reading Token Book, Safety Lab is for those who want to keep up with what's breaking now.</div>
 </div>
 
@@ -544,7 +544,7 @@ The remaining ~2,500 characters cover what the broken line looks like, the one-l
 
 <div class="faq-item">
 <div class="q">Q. Can I read past issues?</div>
-<div class="a">A. You get access to issues from your join month forward. A back-issue archive isn't offered yet — we'll consider one once subscriber count grows.</div>
+<div class="a">A. You get access to issues from your join month forward. A back-issue archive isn't offered yet, we'll consider one once subscriber count grows.</div>
 </div>
 
 <div class="faq-item">
