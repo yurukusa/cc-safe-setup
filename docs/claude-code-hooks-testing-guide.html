@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>How to Test Claude Code Hooks — Validation Guide — cc-safe-setup</title>
-<meta name="description" content="9,200+ tests for 719 hooks. How to validate your hooks work correctly before trusting them in production.">
+<meta name="description" content="9,200+ tests for 727 hooks. How to validate your hooks work correctly before trusting them in production.">
 <meta name="keywords" content="claude code hook testing, validate hooks, cc-safe-setup verify, pretooluse hook test, hook validation, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-hooks-testing-guide.html">
 <meta property="og:title" content="How to Test Claude Code Hooks — Validation Guide">
-<meta property="og:description" content="9,200+ tests for 719 hooks. Validate your hooks work before trusting them in production.">
+<meta property="og:description" content="9,200+ tests for 727 hooks. Validate your hooks work before trusting them in production.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
@@ -81,7 +81,7 @@ echo '{"tool_input":{"command":"cat README.md"}}' | bash your-hook.sh</code></pr
 <h2>How cc-safe-setup Tests Its Hooks</h2>
 
 <div class="fix">
-<p>cc-safe-setup ships with <strong>9,200+ tests</strong> covering 719 example hooks. Every hook is tested for:</p>
+<p>cc-safe-setup ships with <strong>9,200+ tests</strong> covering 727 example hooks. Every hook is tested for:</p>
 <ul style="margin:.5rem 0 0 1.5rem">
 <li>Correct blocking (exit 2) on dangerous commands</li>
 <li>Correct pass-through (exit 0) on safe commands</li>
@@ -100,7 +100,7 @@ npx cc-safe-setup --doctor</code></pre>
 <div class="cta">
 <h2>Install 8 Tested Safety Hooks</h2>
 <pre><code>npx cc-safe-setup</code></pre>
-<p style="margin-top:.8rem">Every hook validated with comprehensive tests. Zero false positives in production. <span class="badge">9,200+ tests</span> <span class="badge">719 examples</span></p>
+<p style="margin-top:.8rem">Every hook validated with comprehensive tests. Zero false positives in production. <span class="badge">9,200+ tests</span> <span class="badge">727 examples</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
 </div>
 
