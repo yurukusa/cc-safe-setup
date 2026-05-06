@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-04-21T04:20:47+09:00
+Updated: 2026-04-27T21:04:47+09:00
 
 ## Git
 - Branch: `main`
@@ -7,19 +7,19 @@ Updated: 2026-04-21T04:20:47+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ab8ba10d checkpoint: pre-compact auto-save (1 files, 20260420-191956)
+- Last commit: 0c22e046 checkpoint: auto-save 21:04:46
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-04-27.md
 ./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-04-21.md
 ./README.md
-./tests/powershell-remove-item-guard.test.sh
-./examples/powershell-remove-item-guard.sh
-./tests/git-filter-repo-guard.test.sh
-./examples/git-filter-repo-guard.sh
-./examples/read-once-guard.sh
-./tests/test-read-once-guard.sh
+./examples/mcp-stdio-compatibility-test.sh
+./examples/quota-reset-audit.sh
+./tests/test-mcp-stdio-compatibility-test.sh
+./tests/test-quota-reset-audit.sh
+./examples/claude-update-smart.sh
+./tests/test-memory-chain-audit.sh
 ```
 

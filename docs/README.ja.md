@@ -82,6 +82,9 @@ Claude Codeを再起動。完了。
 | `pre-compact-transcript-backup` | compaction前にJSONL全体をバックアップ（rate limit時のデータ喪失防止） | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
 | `read-before-edit` | 読まずに編集するパターンを検知して警告（Read:Edit比が70%低下 — [#42796](https://github.com/anthropics/claude-code/issues/42796)） | [#42796](https://github.com/anthropics/claude-code/issues/42796) |
 | `subagent-error-detector` | サブエージェントの529/502/timeout結果を検知して警告 | [#41911](https://github.com/anthropics/claude-code/issues/41911) |
+| `subagent-identity-leak-guard` | 子エージェントが親の身分を名乗ったり親の会話履歴を漏らすのを予防（delegation prompt の身分の境界の検査） | [#55488](https://github.com/anthropics/claude-code/issues/55488) |
+| `subagent-tool-allowlist-enforcer` | 子エージェントの道具の境界を delegation prompt で明示し、 親の検証手順を促す（虚偽報告の予防） | [#55653](https://github.com/anthropics/claude-code/issues/55653) |
+| `subagent-spawn-verification-enforcer` | 子エージェントの spawn の応答が虚偽でないかを成果物の検証手順で予防する | [#55666](https://github.com/anthropics/claude-code/issues/55666) |
 
 インストール: `npx cc-safe-setup --install-example <名前>`
 
