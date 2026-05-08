@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-05-08T17:14:56+09:00
+Updated: 2026-05-08T17:15:05+09:00
 
 ## Git
 - Branch: `fix/deploy-friday-test-day-aware-2026-05-08`
@@ -7,7 +7,7 @@ Updated: 2026-05-08T17:14:56+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d76bd182 recovery: pre-compact checkpoint (1 files, 20260508-081456)
+- Last commit: abb90053 recovery: pre-compact checkpoint (1 files, 20260508-081505)
 
 ## Recent Files
 ```
