@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Checkup — Will Claude Code Wipe Your Data?</title>
+<meta name="description" content="7-question diagnostic for irreversible-operation risk. Built from Issue #56738 (24,472 rows lost), #56759 (silent file overwrite), #56739 (file sent to 3rd-party API).">
+<meta property="og:title" content="Safety Checkup — Will Claude Code Wipe Your Data?">
+<meta property="og:description" content="7 questions to assess irreversible-operation risk in your Claude Code setup. Free, takes 90 seconds.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-checkup.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-checkup.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Safety Checkup — Claude Code Irreversible-Operation Risk","description":"7-question diagnostic for irreversible-operation risk in your Claude Code setup. Built from real 2026-05 incident reports.","url":"https://yurukusa.github.io/cc-safe-setup/safety-checkup.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:720px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem;line-height:1.5}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:.4rem;font-weight:600;line-height:1.4}
+.q-num{color:#dc2626;font-size:.8rem;margin-bottom:.3rem}
+.q-context{color:#8b949e;font-size:.8rem;margin-bottom:1rem;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.8rem 1rem;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#dc2626;background:#1c2128}
+.opt.selected{border-color:#dc2626;background:#2a0a0a}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.9rem}
+.opt-desc{color:#8b949e;font-size:.78rem;margin-top:.2rem;line-height:1.5}
+.progress{display:flex;gap:.3rem;margin:1.5rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#dc2626}
+.dot.current{background:#f87171}
+.result{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.1rem;margin-bottom:.8rem}
+.tip{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;margin:.5rem 0}
+.tip-title{color:#f87171;font-weight:600;font-size:.9rem}
+.tip-desc{color:#c9d1d9;font-size:.82rem;margin-top:.3rem;line-height:1.5}
+.tip-action{color:#58a6ff;font-size:.78rem;margin-top:.4rem;display:block}
+.tip-impact{display:inline-block;background:#2a0a0a;color:#f87171;font-size:.7rem;padding:.15rem .5rem;border-radius:3px;margin-top:.3rem;font-weight:600}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.75rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;margin:.6rem 0}
+.score{font-size:2.5rem;font-weight:700;text-align:center;margin:.5rem 0}
+.score.red{color:#f87171}
+.score.yellow{color:#fbbf24}
+.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.85rem}
+.btn{background:#dc2626;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:600;text-decoration:none;display:inline-block}
+.btn:hover{background:#b91c1c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#dc2626;color:#f87171}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.82rem;margin-bottom:.6rem;line-height:1.5}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem;line-height:1.6}
+.evidence{background:#0d1117;border-left:3px solid #dc2626;padding:.5rem .8rem;margin:.6rem 0;font-size:.75rem;color:#8b949e}
+.evidence strong{color:#c9d1d9}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Safety Checkup</h1>
+<p class="sub">Seven questions to estimate how exposed your Claude Code setup is to irreversible-operation accidents — silent file overwrites, accidental data deletes, files leaving the machine. Built from May 2026 incident reports where real users lost real data. Takes 90 seconds. No tracking, no email.</p>
+
+<div class="evidence">
+<strong>Why now:</strong> May 6, 2026, Issue #56738 — Claude Code wrote a SQL script with a regex bug that deleted 24,472 of 24,475 rows (3 days of scraping work). Same week: #56759 (<code>/export</code> silently overwrote an existing file), #56739 (model bypassed CLAUDE.md restrictions and sent a personal file to a third-party API). The pattern is recurring. This checkup tells you where you sit.
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- Question 1 -->
+<div class="step active" id="step-0">
+<p class="q-num">Question 1 of 7 — Direct destructive access</p>
+<p class="q">What destructive operations can Claude Code reach in your current setup?</p>
+<p class="q-context">"Reach" = it can run the command without your approval, or you typically click approve without reading.</p>
+<div class="opts">
+<div class="opt" onclick="answer(0,'sql_db')">
+<div class="opt-title">Direct DB access (psql, mysql, sqlite3) on real data</div>
+<div class="opt-desc">Production database, scraped dataset, anything you cannot easily recreate.</div>
+</div>
+<div class="opt" onclick="answer(0,'fs_user')">
+<div class="opt-title">File operations on user data (rm, mv, find -delete)</div>
+<div class="opt-desc">Documents, Pictures, Desktop, source code outside the project.</div>
+</div>
+<div class="opt" onclick="answer(0,'fs_project')">
+<div class="opt-title">File operations only inside one project tree</div>
+<div class="opt-desc">Bounded by CLAUDE.md or by sandboxing (Docker, devcontainer, restricted user).</div>
+</div>
+<div class="opt" onclick="answer(0,'readonly')">
+<div class="opt-title">Read-only or sandboxed</div>
+<div class="opt-desc">Claude Code cannot modify anything outside an ephemeral environment.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 2 -->
+<div class="step" id="step-1">
+<p class="q-num">Question 2 of 7 — Hook layer</p>
+<p class="q">Do you have PreToolUse hooks gating destructive operations?</p>
+<p class="q-context">Hooks intercept tool calls <em>before</em> they run. Without them, the model's self-restraint is the only line of defense.</p>
+<div class="opts">
+<div class="opt" onclick="answer(1,'none')">
+<div class="opt-title">No hooks at all</div>
+<div class="opt-desc">Default Claude Code installation, nothing custom.</div>
+</div>
+<div class="opt" onclick="answer(1,'some')">
+<div class="opt-title">Some hooks, but not for destructive operations</div>
+<div class="opt-desc">Logging, formatting, lint — useful but won't stop a bad DELETE.</div>
+</div>
+<div class="opt" onclick="answer(1,'partial')">
+<div class="opt-title">Hooks block one or two destructive patterns</div>
+<div class="opt-desc">e.g. block <code>rm -rf</code> but no row-count guard on SQL.</div>
+</div>
+<div class="opt" onclick="answer(1,'thorough')">
+<div class="opt-title">Comprehensive: SQL row counts, file overwrite checks, scope limits</div>
+<div class="opt-desc">Multiple PreToolUse hooks covering the destructive patterns Claude Code can invoke.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 3 -->
+<div class="step" id="step-2">
+<p class="q-num">Question 3 of 7 — Backup recoverability</p>
+<p class="q">If Claude Code corrupted or deleted something important right now, how recently could you restore it?</p>
+<p class="q-context">"Restore" = you actually verified the backup works, not just "I think there's a snapshot somewhere."</p>
+<div class="opts">
+<div class="opt" onclick="answer(2,'never')">
+<div class="opt-title">No working backup</div>
+<div class="opt-desc">No tested restore path. Or backups exist but you have not actually restored from them.</div>
+</div>
+<div class="opt" onclick="answer(2,'old')">
+<div class="opt-title">Backup older than a week</div>
+<div class="opt-desc">Some recoverable snapshot exists but you would lose recent work.</div>
+</div>
+<div class="opt" onclick="answer(2,'session')">
+<div class="opt-title">Per-session snapshot</div>
+<div class="opt-desc">Git checkpoint, restic snapshot, or DB dump before each significant Claude session.</div>
+</div>
+<div class="opt" onclick="answer(2,'continuous')">
+<div class="opt-title">Continuous, tested, off-machine</div>
+<div class="opt-desc">Recoverable to within an hour, restore tested in the last 30 days.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 4 -->
+<div class="step" id="step-3">
+<p class="q-num">Question 4 of 7 — Permission mode</p>
+<p class="q">What permission mode do you typically run Claude Code in?</p>
+<p class="q-context">Permission mode controls whether each tool call needs your approval before it runs.</p>
+<div class="opts">
+<div class="opt" onclick="answer(3,'autoall')">
+<div class="opt-title">Auto-approve everything</div>
+<div class="opt-desc"><code>--dangerously-skip-permissions</code>, or <code>acceptEdits</code> on, or "approve all" clicked at the start.</div>
+</div>
+<div class="opt" onclick="answer(3,'click')">
+<div class="opt-title">Click-through approve</div>
+<div class="opt-desc">Prompted for each tool call, but you usually click approve without reading carefully.</div>
+</div>
+<div class="opt" onclick="answer(3,'review')">
+<div class="opt-title">Review every tool call</div>
+<div class="opt-desc">You actually read each Bash command before approving.</div>
+</div>
+<div class="opt" onclick="answer(3,'allowlist')">
+<div class="opt-title">Tight allowlist + manual review</div>
+<div class="opt-desc">Only specific tools or commands are pre-approved; everything else needs explicit review.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 5 -->
+<div class="step" id="step-4">
+<p class="q-num">Question 5 of 7 — Scope</p>
+<p class="q">What can Claude Code see beyond your current project?</p>
+<p class="q-context">Issue #56739 (May 6, 2026) reported the model running <code>find</code> across the entire Desktop and sending an unrelated personal file to a third-party API.</p>
+<div class="opts">
+<div class="opt" onclick="answer(4,'home')">
+<div class="opt-title">Full home directory or Desktop</div>
+<div class="opt-desc">No filesystem restrictions; Claude Code can <code>find</code>, <code>cat</code>, or send anything in <code>~</code>.</div>
+</div>
+<div class="opt" onclick="answer(4,'user_data')">
+<div class="opt-title">User data folders are reachable</div>
+<div class="opt-desc">Documents, Pictures, OneDrive, Dropbox folders are not blocked.</div>
+</div>
+<div class="opt" onclick="answer(4,'parents')">
+<div class="opt-title">Project tree plus parent ancestors</div>
+<div class="opt-desc">Bounded but can climb up the directory tree (<code>../../../</code>).</div>
+</div>
+<div class="opt" onclick="answer(4,'project')">
+<div class="opt-title">Strictly project-scoped</div>
+<div class="opt-desc">CLAUDE.md scope rules + PreToolUse hooks that grep <code>find</code> paths and block escapes.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 6 -->
+<div class="step" id="step-5">
+<p class="q-num">Question 6 of 7 — Dry-run discipline</p>
+<p class="q">When you ask Claude Code to clean, transform, or delete data, do you require it to count or test first?</p>
+<p class="q-context">Issue #56738's deleted 24,472 rows could have been caught by a single <code>SELECT COUNT(*)</code> before the <code>DELETE</code>.</p>
+<div class="opts">
+<div class="opt" onclick="answer(5,'never')">
+<div class="opt-title">Just runs</div>
+<div class="opt-desc">Tell Claude what to do, it writes the script, it executes. You see the result.</div>
+</div>
+<div class="opt" onclick="answer(5,'sometimes')">
+<div class="opt-title">For "big" changes only</div>
+<div class="opt-desc">Production deploys, schema migrations — sure. Daily data cleaning — no.</div>
+</div>
+<div class="opt" onclick="answer(5,'usually')">
+<div class="opt-title">Usually, when you remember</div>
+<div class="opt-desc">Goal is dry-run-first; in practice you skip when you are in a rush.</div>
+</div>
+<div class="opt" onclick="answer(5,'always')">
+<div class="opt-title">Always, automated</div>
+<div class="opt-desc">A hook or workflow forces a SELECT/dry-run before any DELETE/UPDATE/destructive action.</div>
+</div>
+</div>
+</div>
+
+<!-- Question 7 -->
+<div class="step" id="step-6">
+<p class="q-num">Question 7 of 7 — Past incidents</p>
+<p class="q">Have you experienced an irreversible Claude Code outcome you regretted?</p>
+<p class="q-context">Honest answer here calibrates the score. Most respondents have at least one near-miss.</p>
+<div class="opts">
+<div class="opt" onclick="answer(6,'multiple')">
+<div class="opt-title">Multiple times</div>
+<div class="opt-desc">Pattern is recurring; you have lost meaningful work or data more than once.</div>
+</div>
+<div class="opt" onclick="answer(6,'once')">
+<div class="opt-title">Once, lesson learned</div>
+<div class="opt-desc">It happened, you adjusted, but the structural fix is partial.</div>
+</div>
+<div class="opt" onclick="answer(6,'nearmiss')">
+<div class="opt-title">Near-miss, no actual damage</div>
+<div class="opt-desc">Caught it before it committed; or the recovery worked because of a recent backup.</div>
+</div>
+<div class="opt" onclick="answer(6,'never')">
+<div class="opt-title">Never</div>
+<div class="opt-desc">No irreversible regrets. Either you are early in adoption, or the controls in earlier questions are doing their job.</div>
+</div>
+</div>
+</div>
+
+<!-- Results -->
+<div class="step" id="step-results"></div>
+
+</div>
+
+<script>
+const TOTAL = 7;
+const answers = [];
+const tips = [
+  {
+    title: "Install pre-bulk-delete-row-count-guard.sh",
+    desc: "Free PreToolUse hook published 2026-05-08 that intercepts SQL DELETE statements, generates the corresponding SELECT COUNT(*), and blocks execution until you verify the row count. Built specifically for the #56738 pattern.",
+    action: "View hook source on GitHub",
+    actionUrl: "https://github.com/yurukusa/cc-safe-setup/blob/main/examples/pre-bulk-delete-row-count-guard.sh",
+    impact: "Stops #56738-style accidents",
+    when: {q1: ['sql_db'], q2: ['none','some','partial']},
+  },
+  {
+    title: "Add a /export overwrite check",
+    desc: "Issue #56759 reports /export silently overwrites existing files. The fix is a PreToolUse hook that grep's for 'export' on existing filenames and either prompts you or auto-renames. Two lines of bash.",
+    action: "Pattern documented in the Postmortems incident-01 free preview",
+    actionUrl: "https://gist.github.com/yurukusa/9f597e27d4a44de85d4c8815a84b4f5d",
+    impact: "Prevents silent file loss",
+    when: {q1: ['fs_user','fs_project'], q2: ['none','some','partial']},
+  },
+  {
+    title: "Lock filesystem scope at the harness layer",
+    desc: "Issue #56739 reports the model bypassing CLAUDE.md's directory restriction and running find across the full Desktop. CLAUDE.md is suggestion. A PreToolUse hook on Bash that exits non-zero when the command contains find rooted at ~, /Users/, or /home/ outside the project actually blocks the call before it runs.",
+    action: "See pattern in Issue #56739 reply",
+    actionUrl: "https://github.com/anthropics/claude-code/issues/56739",
+    impact: "Stops scope creep + file egress",
+    when: {q5: ['home','user_data','parents']},
+  },
+  {
+    title: "Set up tested restore-in-an-hour backup",
+    desc: "If Claude Code corrupts data right now and your last verified restore was a month ago, you will not recover gracefully. Use restic or borg with daily snapshots, off-machine. Test the restore path quarterly. The work is done before you need it.",
+    action: "restic quickstart",
+    actionUrl: "https://restic.readthedocs.io/en/stable/010_introduction.html",
+    impact: "Recovery in hours, not days",
+    when: {q3: ['never','old']},
+  },
+  {
+    title: "Drop --dangerously-skip-permissions for sessions on real data",
+    desc: "Auto-approve mode is fine for greenfield code or sandboxed environments. It is the wrong default when Claude Code can reach a database, user files, or production credentials. Switch to manual approval for any session touching irreplaceable state.",
+    action: "Permission mode docs",
+    actionUrl: "https://docs.claude.com/en/docs/agents-and-tools/claude-code/security",
+    impact: "Forces a pause before destructive calls",
+    when: {q4: ['autoall','click']},
+  },
+  {
+    title: "Require count-before-delete for any data work",
+    desc: "Issue #56738 wiped 24,472 rows because the regex returned NULL and DELETE ran without first counting. SELECT COUNT(*) takes one second. Do it every time. Better: install the row-count-guard hook so you cannot forget.",
+    action: "Hook source",
+    actionUrl: "https://github.com/yurukusa/cc-safe-setup/blob/main/examples/pre-bulk-delete-row-count-guard.sh",
+    impact: "Catches the regex-returns-NULL trap",
+    when: {q6: ['never','sometimes','usually']},
+  },
+  {
+    title: "Catalog the past incident, build a hook for its shape",
+    desc: "If you have lost data once, the same pattern is likely still active. Write down what command ran, what it touched, what the recovery path was. Then write the PreToolUse hook that would have blocked that exact command. The cc-safe-setup repository has 727 hook examples to copy from.",
+    action: "Browse hook patterns",
+    actionUrl: "https://github.com/yurukusa/cc-safe-setup",
+    impact: "Stops the pattern from recurring",
+    when: {q7: ['multiple','once']},
+  },
+  {
+    title: "Lock CLAUDE.md scope and back it with a hook",
+    desc: "CLAUDE.md is suggestion to the model. A PreToolUse hook is enforcement. Pair them: write your scope rules in CLAUDE.md for the model to read, then add a hook that greps Bash commands and blocks paths outside the project root. Belt and suspenders.",
+    action: "CLAUDE.md scope pattern",
+    actionUrl: "https://github.com/yurukusa/cc-safe-setup/blob/main/CLAUDE.md",
+    impact: "Hard scope vs soft suggestion",
+    when: {q1: ['fs_user','fs_project'], q5: ['home','user_data','parents']},
+  },
+  {
+    title: "Audit current hook coverage against destructive verbs",
+    desc: "Hooks are useful only if they cover the actual verbs Claude Code can invoke. Run through the Bash command surface: rm, mv, find -delete, DELETE, DROP, TRUNCATE, git push --force, kubectl delete, etc. Each unguarded verb is a potential incident.",
+    action: "Audit checklist (free, 6 sections)",
+    actionUrl: "https://yurukusa.github.io/cc-safe-setup/hub.html",
+    impact: "Find the unguarded verb before it finds you",
+    when: {q2: ['some','partial']},
+  },
+];
+
+const progress = document.getElementById('progress');
+function updateProgress(current) {
+  progress.innerHTML = Array.from({length: TOTAL}, (_, i) =>
+    `<div class="dot ${i < current ? 'done' : i === current ? 'current' : ''}"></div>`
+  ).join('');
+}
+updateProgress(0);
+
+function answer(step, value) {
+  answers[step] = value;
+  const opts = document.querySelectorAll(`#step-${step} .opt`);
+  opts.forEach(o => o.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  setTimeout(() => {
+    if (step < TOTAL - 1) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step-${step+1}`).classList.add('active');
+      updateProgress(step + 1);
+    } else {
+      showResults();
+    }
+  }, 250);
+}
+
+function showResults() {
+  const ctx = {
+    q1: answers[0], q2: answers[1], q3: answers[2], q4: answers[3],
+    q5: answers[4], q6: answers[5], q7: answers[6],
+  };
+
+  // Risk points (higher = more risk)
+  let pts = 0;
+  // Q1 destructive access
+  pts += {sql_db: 4, fs_user: 3, fs_project: 1, readonly: 0}[ctx.q1] || 0;
+  // Q2 hook layer
+  pts += {none: 4, some: 3, partial: 1, thorough: 0}[ctx.q2] || 0;
+  // Q3 backup
+  pts += {never: 4, old: 3, session: 1, continuous: 0}[ctx.q3] || 0;
+  // Q4 permission mode
+  pts += {autoall: 4, click: 2, review: 1, allowlist: 0}[ctx.q4] || 0;
+  // Q5 scope
+  pts += {home: 4, user_data: 3, parents: 1, project: 0}[ctx.q5] || 0;
+  // Q6 dry-run discipline
+  pts += {never: 4, sometimes: 2, usually: 1, always: 0}[ctx.q6] || 0;
+  // Q7 past incidents
+  pts += {multiple: 3, once: 2, nearmiss: 1, never: 0}[ctx.q7] || 0;
+
+  // Score: 100 minus weighted risk; range 5-100
+  let score = Math.max(5, 100 - pts * 3);
+
+  const scoreClass = score >= 75 ? 'green' : score >= 45 ? 'yellow' : 'red';
+  const persona =
+    score >= 90 ? 'The Sandbox Sentry' :
+    score >= 75 ? 'The Cautious Coder' :
+    score >= 55 ? 'The Trusting Veteran' :
+    score >= 30 ? 'The High-Wire Walker' :
+                  'The Live-Fire Practitioner';
+  const personaDesc =
+    score >= 90 ? 'Your harness layer does the work. Claude Code cannot ruin your day.' :
+    score >= 75 ? 'Most of the destructive paths are gated. Audit the gaps in the recommendations below.' :
+    score >= 55 ? 'You trust the model more than the hook layer. The 2026-05 incidents started here.' :
+    score >= 30 ? 'You are protected by attention rather than infrastructure. One distracted session is enough.' :
+                  'Your setup matches the conditions that led to #56738, #56759, and #56739. Read the recommendations carefully.';
+
+  const matched = tips.filter(tip => {
+    return Object.entries(tip.when).every(([key, vals]) => vals.includes(ctx[key]));
+  });
+  const matched_loose = tips.filter(tip => {
+    return Object.entries(tip.when).some(([key, vals]) => vals.includes(ctx[key]));
+  });
+  const final = (matched.length >= 3 ? matched : matched_loose).slice(0, 6);
+
+  const el = document.getElementById('step-results');
+  el.innerHTML = `
+    <div class="result">
+      <h2>Your Irreversible-Operation Risk Score</h2>
+      <div class="score ${scoreClass}">${score}/100</div>
+      <p style="font-size:1.1rem;font-weight:700;color:#f0f6fc;text-align:center;margin:.5rem 0 .3rem">${persona}</p>
+      <p class="score-label">${personaDesc}</p>
+    </div>
+
+    <div class="result">
+      <h2>Recommended Mitigations</h2>
+      ${final.map(t => `
+        <div class="tip">
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-desc">${t.desc}</div>
+          <a class="tip-action" href="${t.actionUrl}" target="_blank" rel="noopener">${t.action} →</a>
+          <span class="tip-impact">${t.impact}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="cta">
+      <h3>Read the cache TTL incident free</h3>
+      <p>Incident 1 of <em>Claude Code Incident Postmortems</em> (March 2026 cache TTL silent regression) is published as a free Gist. Three read-only checks tell you whether your sessions were affected. No purchase required.</p>
+      <a href="https://gist.github.com/yurukusa/9f597e27d4a44de85d4c8815a84b4f5d?utm_source=safety-checkup&utm_medium=tool&utm_campaign=postmortems-preview" class="btn btn-outline" target="_blank" rel="noopener">Read Incident 1 (free)</a>
+    </div>
+
+    <div class="cta">
+      <h3>${score < 45 ? 'Build the missing hook layer this week' : 'Install the free hook collection'}</h3>
+      <p>cc-safe-setup is an open-source collection of 727 PreToolUse and Stop hooks covering token budget, scope locking, destructive-operation gates, and Issue-pattern detection. MIT license. The patterns above point into specific files in this repository.</p>
+      <pre>npx cc-safe-setup</pre>
+      <p style="font-size:.78rem">After install, audit which hooks fired in your last few sessions and tune the threshold-based ones to your actual usage.</p>
+    </div>
+
+    <div class="cta">
+      <h3>Continuous coverage as new incident classes emerge</h3>
+      <p>The 2026-05 cluster (#56738 + #56759 + #56739) is one of several recurring patterns. <em>CC Safety Lab Founder Membership</em> is the monthly journal that documents new incident classes, ships detection hooks for them, and tracks Anthropic's response timeline. ¥500/month, founder pricing locked.</p>
+      <a href="https://ko-fi.com/yurukusa/tiers?utm_source=safety-checkup&utm_medium=tool&utm_campaign=safety-lab" class="btn" target="_blank" rel="noopener">Join Safety Lab — ¥500/month</a>
+      <a href="safety-lab.html" class="btn btn-outline">See the May 2026 issue contents →</a>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="restart()">Start over</button>
+      <button class="btn" onclick="shareTwitter(${score})" style="background:#1d9bf0;border-color:#1d9bf0">Share score on X</button>
+    </div>
+  `;
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  updateProgress(TOTAL);
+}
+
+function shareTwitter(score) {
+  const persona =
+    score >= 90 ? 'Sandbox Sentry' :
+    score >= 75 ? 'Cautious Coder' :
+    score >= 55 ? 'Trusting Veteran' :
+    score >= 30 ? 'High-Wire Walker' :
+                  'Live-Fire Practitioner';
+  const emoji = score < 45 ? '🚨' : score < 75 ? '⚠️' : '🛡️';
+  const msg = score < 45
+    ? `My Claude Code irreversible-op risk: ${score}/100 — "${persona}" ${emoji} Time to add some hooks. Check yours: #ClaudeCode`
+    : score < 75
+    ? `My Claude Code safety score: ${score}/100 — "${persona}" ${emoji} Some gaps to close. Check yours: #ClaudeCode`
+    : `My Claude Code safety score: ${score}/100 — "${persona}" ${emoji} Mostly locked down. Check yours: #ClaudeCode`;
+  const url = 'https://yurukusa.github.io/cc-safe-setup/safety-checkup.html';
+  window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(msg)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+function restart() {
+  answers.length = 0;
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-0').classList.add('active');
+  updateProgress(0);
+}
+</script>
+
+<div class="footer">
+  <a href="token-checkup.html">Token Checkup</a> · <a href="cache-health.html">Cache Health</a> · <a href="security-checkup.html">Security Checkup</a> · <a href="hub.html">All Tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
+  <br>cc-safe-setup — 727 hooks · 9,200+ tests · MIT License · Built 2026-05-08 from May 2026 incident reports
+</div>
+</body>
+</html>
