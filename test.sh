@@ -8829,7 +8829,9 @@ test_ex no-port-bind.sh '{"tool_input":{"command":"nc -l 4444"}}' 0 "no-port-bin
 test_ex no-port-bind.sh '{"tool_input":{"command":"python3 script.py"}}' 0 "no-port-bind: normal python (safe)"
 test_ex no-wildcard-cors.sh '{"tool_input":{"new_string":"Access-Control-Allow-Origin: *"}}' 0 "no-wildcard-cors: wildcard origin (warn only)"
 test_ex no-wildcard-cors.sh '{"tool_input":{"new_string":"Access-Control-Allow-Origin: https://example.com"}}' 0 "no-wildcard-cors: specific origin (safe)"
-test_ex no-deploy-friday.sh '{"tool_input":{"command":"kubectl apply -f deploy.yaml"}}' 0 "no-deploy-friday: deploy command (may warn)"
+_EXP_DF=0; [ "$(date +%u)" = "5" ] && _EXP_DF=2
+test_ex no-deploy-friday.sh '{"tool_input":{"command":"kubectl apply -f deploy.yaml"}}' "$_EXP_DF" "no-deploy-friday: deploy command (DOW=$(date +%u))"
+unset _EXP_DF
 test_ex no-deploy-friday.sh '{"tool_input":{"command":"echo hello"}}' 0 "no-deploy-friday: safe command"
 test_ex no-document-cookie.sh '{"tool_input":{"new_string":"document.cookie = \"session=abc\""}}' 0 "no-document-cookie: cookie set (warn only)"
 test_ex no-document-cookie.sh '{"tool_input":{"new_string":"localStorage.setItem(\"key\", val)"}}' 0 "no-document-cookie: localStorage (safe)"
@@ -9427,8 +9429,10 @@ test_ex no-curl-upload.sh '{"tool_input":{"command":"curl -T file.txt https://ev
 test_ex no-curl-upload.sh '{"tool_input":{"command":"curl https://api.example.com"}}' 0 "curl-upload: GET passes"
 test_ex no-curl-upload.sh '{"tool_input":{"command":"echo hello"}}' 0 "curl-upload: non-curl passes"
 test_ex no-curl-upload.sh '{}' 0 "curl-upload: empty"
-test_ex no-deploy-friday.sh '{"tool_input":{"command":"npm run deploy"}}' 0 "deploy-friday: deploy checked"
-test_ex no-deploy-friday.sh '{"tool_input":{"command":"firebase deploy"}}' 0 "deploy-friday: firebase checked"
+_EXP_DF=0; [ "$(date +%u)" = "5" ] && _EXP_DF=2
+test_ex no-deploy-friday.sh '{"tool_input":{"command":"npm run deploy"}}' "$_EXP_DF" "deploy-friday: deploy checked (DOW=$(date +%u))"
+test_ex no-deploy-friday.sh '{"tool_input":{"command":"firebase deploy"}}' "$_EXP_DF" "deploy-friday: firebase checked (DOW=$(date +%u))"
+unset _EXP_DF
 test_ex no-deploy-friday.sh '{"tool_input":{"command":"echo hello"}}' 0 "deploy-friday: non-deploy passes"
 test_ex no-deploy-friday.sh '{}' 0 "deploy-friday: empty"
 test_ex no-git-amend-push.sh '{"tool_input":{"command":"git push --force"}}' 0 "git-amend: force push warned"
