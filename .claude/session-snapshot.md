@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-05-08T17:13:57+09:00
+Updated: 2026-05-08T17:14:32+09:00
 
 ## Git
 - Branch: `fix/deploy-friday-test-day-aware-2026-05-08`
@@ -7,7 +7,7 @@ Updated: 2026-05-08T17:13:57+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ab0f8bc6 checkpoint: pre-compact auto-save (1 files, 20260508-081308)
+- Last commit: 5699d1e1 checkpoint: auto-save 17:14:25
 
 ## Recent Files
 ```
