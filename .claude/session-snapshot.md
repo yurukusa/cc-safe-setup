@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-05-08T17:14:36+09:00
+Updated: 2026-05-08T17:14:47+09:00
 
 ## Git
 - Branch: `fix/deploy-friday-test-day-aware-2026-05-08`
@@ -7,13 +7,13 @@ Updated: 2026-05-08T17:14:36+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2a040ad7 recovery: pre-compact checkpoint (1 files, 20260508-081435)
+- Last commit: 188e69f7 recovery: pre-compact checkpoint (1 files, 20260508-081447)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-05-08.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/sql-bulk-delete-warn.sh
 ./tests/test-sql-bulk-delete-warn.sh
