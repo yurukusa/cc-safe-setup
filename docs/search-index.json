@@ -126,6 +126,13 @@
     "snippet": "Quick reference · Print this page (Ctrl+P) · github.com/yurukusa/cc-safe-setup"
   },
   {
+    "url": "claude-code-2-1-133-context-bloat-fix.html",
+    "title": "Claude Code v2.1.133 loads 2.9M tokens at Pro login (one-line fix)",
+    "description": "On v2.1.133, Pro / Claude.ai-OAuth login can fill /context with 2.9 million tokens of System tools before you type anything. One environment variable disables the connector sync without losing OAuth.",
+    "keywords": "Claude Code, v2.1.133, Pro login, OAuth, System tools, 2.9M tokens, /context, ENABLE_CLAUDEAI_MCP_SERVERS, MCP connector, claude.ai sync, fix, workaround, Issue 57235, Issue 50062",
+    "snippet": "You log in as Claude Pro through OAuth (/login → \"Claude.ai Subscription\"). Then you check /context and see something like:"
+  },
+  {
     "url": "claude-code-auto-mode-hooks.html",
     "title": "Essential Hooks for Claude Code Auto Mode — cc-safe-setup",
     "description": "Claude Code Auto Mode skips confirmation prompts. Without hooks, rm -rf, force-push, and secret leaks happen silently. Install safety hooks before enabling Auto Mode.",

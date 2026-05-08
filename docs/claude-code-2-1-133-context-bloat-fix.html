@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code v2.1.133 loads 2.9M tokens at Pro login (one-line fix)</title>
+<meta name="description" content="On v2.1.133, Pro / Claude.ai-OAuth login can fill /context with 2.9 million tokens of System tools before you type anything. One environment variable disables the connector sync without losing OAuth.">
+<meta name="keywords" content="Claude Code, v2.1.133, Pro login, OAuth, System tools, 2.9M tokens, /context, ENABLE_CLAUDEAI_MCP_SERVERS, MCP connector, claude.ai sync, fix, workaround, Issue 57235, Issue 50062">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-2-1-133-context-bloat-fix.html">
+<meta property="og:title" content="Claude Code v2.1.133: 2.9M tokens loaded at Pro login (one-line fix)">
+<meta property="og:description" content="Pro / Claude.ai-OAuth login can fill /context to 1,460% before the first turn. The fix is one environment variable.">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Claude Code v2.1.133 loads 2.9M tokens at Pro login - one-line fix","description":"Pro OAuth login fills /context with 2.9 million tokens of System tools. One environment variable fixes it.","datePublished":"2026-05-08","author":{"@type":"Person","name":"yurukusa"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+h2{font-size:1.3rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+p{margin:.8rem 0}a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:6px;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;color:#e6edf3}
+.alert{background:#2d1b1b;border:1px solid #da3633;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}.alert strong{color:#f85149}
+.fix{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}.fix strong{color:#3fb950}
+.note{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.95rem}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+<p style="margin-bottom:.5rem"><a href="index.html">← cc-safe-setup</a></p>
+<h1>Claude Code v2.1.133: 2.9M tokens loaded at Pro login (one-line fix)</h1>
+<p class="meta">May 8, 2026 · 4 min read · by <a href="https://github.com/yurukusa">yurukusa</a></p>
+
+<div class="alert">
+<strong>TL;DR:</strong> On v2.1.133, logging in as Claude Pro / Claude.ai-OAuth can fill <code>/context</code> with about 2.9 million tokens of "System tools" before you type anything (1,460% full). Set <code>ENABLE_CLAUDEAI_MCP_SERVERS=false</code> in your shell, remove the credentials file, and re-run <code>/login</code>. OAuth login keeps working; only the connector sync gets disabled.
+</div>
+
+<h2>What does this look like?</h2>
+
+<p>You log in as Claude Pro through OAuth (<code>/login</code> → "Claude.ai Subscription"). Then you check <code>/context</code> and see something like:</p>
+
+<pre>System tools  2,900,000 tokens  (1,460% full)
+Files, conversation, etc:  0 tokens</pre>
+
+<p>The context window is gone. Before you type a single word, Claude Code is unusable. Restarting doesn't help. Switching project folders doesn't help.</p>
+
+<p>If you delete <code>~/.claude/.credentials.json</code> and log back in with an API key (no OAuth), <code>/context</code> drops to about 700 tokens. Normal again.</p>
+
+<p>This was filed as <a href="https://github.com/anthropics/claude-code/issues/57235">Issue #57235</a> on May 8, 2026.</p>
+
+<h2>Why does this happen?</h2>
+
+<p>When you log in through Claude.ai's OAuth, Claude Code inherits every connector configured on your claude.ai account, including Canva, Figma, Linear, Notion, Google Drive, Gmail, and so on. Each connector ships its MCP tool definitions and authentication entries into the CLI session, even if you never plan to use them from the command line.</p>
+
+<p>Each connector's tool definitions cost roughly 250–330 tokens of context. With a handful of connectors that's ~10K tokens. With many connectors plus their accumulated tool definitions, it scales up fast.</p>
+
+<p>This isn't a new problem. <a href="https://github.com/anthropics/claude-code/issues/50062">Issue #50062</a> (closed April 19, 2026) reported the same pattern at about 100K tokens. The fix shipped in v2.1.14 added the <code>ENABLE_CLAUDEAI_MCP_SERVERS=false</code> escape hatch.</p>
+
+<p>What changed in v2.1.133 is the scale: 100K became 2.9M. <strong>That's 29× the original report.</strong> Either the v2.1.14 fix regressed, or a new code path bypasses it. Either way, the <code>ENABLE_CLAUDEAI_MCP_SERVERS=false</code> escape hatch is still the documented way to opt out.</p>
+
+<h2>The fix</h2>
+
+<div class="fix">
+<strong>One-line workaround.</strong> Run these in your shell, then re-launch Claude Code:
+<pre>export ENABLE_CLAUDEAI_MCP_SERVERS=false
+mv ~/.claude/.credentials.json ~/.claude/.credentials.json.bak
+claude /login</pre>
+Re-authenticate with Claude.ai. Then check <code>/context</code>; you should see ~700 tokens instead of 2.9M.
+</div>
+
+<p>The <code>mv</code> instead of <code>rm</code> is intentional: if anything goes wrong with the new login, you can restore the old credentials.</p>
+
+<p>To make the change permanent, add the export to your shell rc file (<code>~/.bashrc</code>, <code>~/.zshrc</code>, etc.):</p>
+
+<pre>echo 'export ENABLE_CLAUDEAI_MCP_SERVERS=false' >> ~/.bashrc
+source ~/.bashrc</pre>
+
+<h2>If the fix doesn't work</h2>
+
+<p>If <code>/context</code> still shows 2.9M tokens after setting the flag and re-logging in, the v2.1.14 fix likely doesn't cover whatever path is firing in v2.1.133. In that case:</p>
+
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li>Comment on <a href="https://github.com/anthropics/claude-code/issues/57235">Issue #57235</a> with your version, the connector count from <code>claude mcp list</code>, and the post-fix <code>/context</code> reading. The maintainers asked for that data on the closed predecessor.</li>
+<li>As a temporary fallback, log in with an API key instead of OAuth. You lose the Claude.ai subscription quota but get a usable context window back.</li>
+</ul>
+
+<h2>How to detect this at session start</h2>
+
+<p>The shell command <code>claude mcp list</code> shows every MCP server known to your CLI. Lines that start with <code>claude.ai </code> are the auto-synced connectors. Run it after the fix to confirm the count drops.</p>
+
+<p>If you'd rather have a session-start warning that fires automatically when the connector count crosses a threshold, the <code>mcp-startup-bloat-detector.sh</code> hook in cc-safe-setup runs on SessionStart and points to this exact workaround. It's <a href="https://github.com/yurukusa/cc-safe-setup/pull/192">PR #192</a>; pending merge as of writing.</p>
+
+<h2>Background and related reports</h2>
+
+<ul style="margin-left:1.5rem;margin-top:.5rem">
+<li><a href="https://github.com/anthropics/claude-code/issues/50062">#50062</a>: closed April 19, 2026. ~100K tokens of connector bloat. Fixed in v2.1.14 with <code>ENABLE_CLAUDEAI_MCP_SERVERS=false</code>.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/20412">#20412</a>: open. Same auto-sync pattern causing OOM crashes on resource-constrained hosts (Raspberry Pi 5, 16GB RAM). v2.1.17.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/56773">#56773</a>: closed May 7, 2026. Feature request for an opt-out flag that's friendlier than the env var. Closed without action.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/57235">#57235</a>: open as of writing. v2.1.133 at 2.9M tokens.</li>
+</ul>
+
+<div class="note">
+The pattern across all four reports is that the connector sync defaults are tuned for the Claude Desktop UI, where account-level connectors are useful, and not for the CLI, where they consume context that would otherwise go to your code. The env var is a blunt instrument that disables every connector, including the ones you might actually want, but until there's a per-connector opt-in, it's the only documented control.
+</div>
+
+<footer>
+<p>Posted because v2.1.133 is widely deployed and the fix is hard to find unless you happen to read the closed predecessor. If you have a colleague hitting "Claude Code is unusable on Pro login," send them this page.</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://github.com/anthropics/claude-code/issues/57235">Original Issue #57235</a></p>
+</footer>
+</body>
+</html>
