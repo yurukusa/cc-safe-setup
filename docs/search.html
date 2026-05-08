@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code symptom search — find the fix from your error message</title>
+<meta name="description" content="Search 109 pages of Claude Code incident write-ups, fix recipes, and prevention hooks by symptom keyword. Free, no signup.">
+<meta name="keywords" content="Claude Code, search, symptom, fix, error, hook, incident, troubleshooting, regression, postmortem">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/search.html">
+<meta property="og:title" content="Claude Code symptom search">
+<meta property="og:description" content="Find the fix from your error message. 109 indexed pages, no signup.">
+<meta property="og:type" content="website">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;color:#c9d1d9;background:#0d1117;max-width:780px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.5rem;line-height:1.3}
+.lede{color:#8b949e;font-size:.95rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+input[type=search]{width:100%;padding:.9rem 1rem;font-size:1rem;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-family:inherit}
+input[type=search]:focus{outline:none;border-color:#58a6ff;box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+.examples{margin:.8rem 0 1.2rem;font-size:.9rem;color:#8b949e}
+.examples a{margin-right:.6rem;background:#161b22;border:1px solid #30363d;border-radius:99px;padding:.2rem .8rem;display:inline-block;margin-bottom:.4rem;color:#8b949e}
+.examples a:hover{color:#58a6ff;border-color:#58a6ff;text-decoration:none}
+.meta{color:#8b949e;font-size:.85rem;margin:1rem 0}
+.result{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1rem 1.25rem;margin:.8rem 0}
+.result h3{font-size:1.05rem;color:#58a6ff;margin-bottom:.4rem;font-weight:600}
+.result h3 a{color:inherit}
+.result p{color:#c9d1d9;font-size:.92rem;margin:.3rem 0}
+.result .url{color:#3fb950;font-size:.8rem;word-break:break-all}
+.empty{color:#8b949e;font-style:italic;padding:1rem 0}
+mark{background:#3fb95040;color:#e6edf3;padding:0 2px;border-radius:2px}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+<p style="margin-bottom:.5rem"><a href="index.html">← cc-safe-setup</a></p>
+<h1>Claude Code symptom search</h1>
+<p class="lede">Type the error message, version number, or symptom you're hitting. Searches 109 incident write-ups, fix recipes, and prevention hooks. Free, no signup, no tracking.</p>
+
+<input type="search" id="q" placeholder="e.g. 2.9M tokens, EACCES, cache_control, /export overwrite, v2.1.133..." autofocus>
+
+<div class="examples">
+  Try:
+  <a href="#" data-q="2.9M tokens">2.9M tokens</a>
+  <a href="#" data-q="EACCES">EACCES</a>
+  <a href="#" data-q="cache_control">cache_control</a>
+  <a href="#" data-q="/export overwrite">/export overwrite</a>
+  <a href="#" data-q="git commit">git commit</a>
+  <a href="#" data-q="DELETE">SQL DELETE</a>
+  <a href="#" data-q="thinking stall">thinking stall</a>
+  <a href="#" data-q="MCP">MCP</a>
+  <a href="#" data-q="subagent">subagent</a>
+</div>
+
+<div class="meta" id="meta"></div>
+<div id="results"></div>
+
+<footer>
+<p>Index built from <code>cc-safe-setup/docs/</code>. New pages added regularly. Source on <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>.</p>
+</footer>
+
+<script>
+const q = document.getElementById('q');
+const results = document.getElementById('results');
+const meta = document.getElementById('meta');
+let index = [];
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function highlight(text, terms) {
+  let html = escapeHTML(text);
+  for (const t of terms) {
+    if (!t) continue;
+    const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    html = html.replace(re, '<mark>$1</mark>');
+  }
+  return html;
+}
+
+function score(item, terms) {
+  const blob = ((item.title || '') + ' ' + (item.description || '') + ' ' + (item.keywords || '') + ' ' + (item.snippet || '') + ' ' + (item.url || '')).toLowerCase();
+  let s = 0;
+  for (const t of terms) {
+    const tl = t.toLowerCase();
+    if (!tl) continue;
+    if ((item.title || '').toLowerCase().includes(tl)) s += 10;
+    if ((item.keywords || '').toLowerCase().includes(tl)) s += 5;
+    if ((item.url || '').toLowerCase().includes(tl)) s += 3;
+    if (blob.includes(tl)) s += 1;
+  }
+  return s;
+}
+
+function render(query) {
+  const terms = query.trim().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) {
+    results.innerHTML = '';
+    meta.textContent = `Indexing ${index.length} pages.`;
+    return;
+  }
+  const matches = index
+    .map(it => ({ it, s: score(it, terms) }))
+    .filter(x => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 30);
+
+  meta.textContent = matches.length
+    ? `${matches.length} match${matches.length === 1 ? '' : 'es'} for "${query}"`
+    : `No matches for "${query}". The index covers cc-safe-setup docs only; the symptom may be elsewhere.`;
+
+  if (matches.length === 0) {
+    results.innerHTML = '<p class="empty">Nothing here yet. <a href="https://github.com/anthropics/claude-code/issues">Search the upstream issue tracker</a> instead.</p>';
+    return;
+  }
+
+  results.innerHTML = matches.map(({ it }) => `
+    <div class="result">
+      <h3><a href="${escapeHTML(it.url)}">${highlight(it.title || it.url, terms)}</a></h3>
+      ${it.description ? `<p>${highlight(it.description, terms)}</p>` : ''}
+      ${it.snippet ? `<p style="color:#8b949e">${highlight(it.snippet, terms)}</p>` : ''}
+      <p class="url">${escapeHTML(it.url)}</p>
+    </div>
+  `).join('');
+}
+
+fetch('search-index.json')
+  .then(r => r.json())
+  .then(data => {
+    index = data;
+    meta.textContent = `Indexing ${index.length} pages. Type to search.`;
+    render(q.value);
+  })
+  .catch(e => {
+    meta.textContent = 'Failed to load search index. Reload the page.';
+  });
+
+q.addEventListener('input', () => render(q.value));
+
+document.querySelectorAll('.examples a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    q.value = a.dataset.q;
+    render(q.value);
+    q.focus();
+  });
+});
+
+// Allow ?q=... in the URL for direct linking
+const params = new URLSearchParams(location.search);
+const initial = params.get('q');
+if (initial) {
+  q.value = initial;
+  render(initial);
+}
+</script>
+</body>
+</html>

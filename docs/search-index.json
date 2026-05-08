@@ -1,0 +1,765 @@
+[
+  {
+    "url": "ai-coding-safety-report-2026.html",
+    "title": "AI Coding Safety Report 2026 — Incidents Across All Major Tools",
+    "description": "Cross-tool safety report covering real incidents from Claude Code, Cursor, GitHub Copilot, and Windsurf. Data loss, credential leaks, production failures, and token drain — documented with sources.",
+    "keywords": "",
+    "snippet": "Real incidents across Claude Code, Cursor, GitHub Copilot, and Windsurf.Not a product pitch. A public resource for every developer using AI coding tools."
+  },
+  {
+    "url": "attack-simulator.html",
+    "title": "Claude Code Attack Simulator — Can Your Setup Survive?",
+    "description": "Paste your settings.json and watch 10 real attack scenarios play out. See which ones your hooks catch — and which ones slip through.",
+    "keywords": "",
+    "snippet": "Paste your settings.json. Watch 10 real attacks play out. See what survives."
+  },
+  {
+    "url": "auto-approve-guide.html",
+    "title": "Auto-Approve Hooks for Claude Code — Skip Permission Prompts Safely",
+    "description": "Stop clicking 'Allow' for every tool call. Auto-approve read-only commands, build tools, git operations, and more with Claude Code hooks. Copy-paste configs included.",
+    "keywords": "",
+    "snippet": "Stop clicking \"Allow\" for every cat, ls, and git status. Use hooks to auto-approve safe commands while keeping dangerous operations gated."
+  },
+  {
+    "url": "autonomous-checklist.html",
+    "title": "Running Claude Code Overnight — The Complete Checklist",
+    "description": "Everything you need before leaving Claude Code running unattended. Git setup, hooks, monitoring, recovery plan.",
+    "keywords": "",
+    "snippet": ""
+  },
+  {
+    "url": "background-agent-write-fix.html",
+    "title": "Fix Claude Code Background Agent Write Permissions — cc-safe-setup",
+    "description": "Background agents in Claude Code can't write files even with allow rules. Use bypassPermissions + safety hooks as a workaround.",
+    "keywords": "claude code background agent, claude code write permission, agent tool run_in_background, bypass permissions hook, cc-safe-setup",
+    "snippet": "Background agents (run_in_background: true) can't perform write operations even when those operations are in permissions.allow. Read-only operations work fine."
+  },
+  {
+    "url": "bash-domain-allowlist.html",
+    "title": "Bash Domain Allowlist for Claude Code — Block Unauthorized HTTP Requests",
+    "description": "Claude Code can run curl/wget to any domain. Block unauthorized HTTP requests with a PreToolUse hook that enforces a domain allowlist on Bash commands.",
+    "keywords": "claude code curl block, claude code domain allowlist, claude code network security, data exfiltration prevention, sandbox bypass, cc-safe-setup",
+    "snippet": "Claude Code can run curl, wget, and other HTTP tools to any domain. Even with sandbox allowedDomains configured, plain HTTP requests may bypass filtering. A hook-level domain allowlist provides defense-in-depth."
+  },
+  {
+    "url": "blog-5-essential-hooks.html",
+    "title": "5 Hooks Every Claude Code User Should Install Today",
+    "description": "Five copy-paste hooks that prevent rm -rf disasters, force-push to main, secret leaks, compaction death spirals, and token waste. Each one addresses a real GitHub Issue.",
+    "keywords": "Claude Code, hooks, safety, rm -rf, force push, secret leak, auto-compact, token saving, cc-safe-setup, claude code hooks, claude code safety",
+    "snippet": "April 21, 2026 &middot; 8 min read &middot; by yurukusa"
+  },
+  {
+    "url": "blog-compaction-death-spiral.html",
+    "title": "Claude Code Auto-Compact Death Spiral: How to Fix It",
+    "description": "Auto-compact can loop infinitely and drain your entire token budget overnight. Here's how to install a circuit breaker hook that stops it in 30 seconds.",
+    "keywords": "Claude Code, auto-compact, compaction loop, token drain, death spiral, fix, hook, circuit breaker",
+    "snippet": "You leave a Claude Code session running overnight. By morning, your entire token budget is gone — and no work was done."
+  },
+  {
+    "url": "blog-official-security-review-plus-hooks.html",
+    "title": "Anthropic's Security Review + cc-safe-setup: Complete Defense for Claude Code",
+    "description": "Anthropic's official security-review GitHub Action catches vulnerabilities in PRs. cc-safe-setup hooks block dangerous commands in real-time. Together, they provide layered defense.",
+    "keywords": "",
+    "snippet": "Anthropic released claude-code-security-review — a GitHub Action that uses Claude to scan PRs for security vulnerabilities. It catches SQL injection, XSS, hardcoded secrets, and other OWASP Top 10 issues before code merges."
+  },
+  {
+    "url": "blog-prevent-file-deletion.html",
+    "title": "How to Stop Claude Code from Deleting Your Files",
+    "description": "Claude Code has deleted 50 GB of user data, wiped SSH keys, and destroyed production databases. Here's how to install a hook that blocks destructive commands in 30 seconds.",
+    "keywords": "Claude Code, rm -rf, delete files, data loss, safety, hooks, prevent, file protection, Claude Code safe, cc-safe-setup",
+    "snippet": "April 20, 2026 &middot; 5 min read &middot; by yurukusa"
+  },
+  {
+    "url": "blog-speed-hooks.html",
+    "title": "3 Hooks That Make Claude Code Faster (Fewer Permission Prompts)",
+    "description": "Reduce Claude Code permission prompts by 60%. Auto-approve safe git commands, skip redundant file reads, and batch approve test runs. Copy-paste ready hooks.",
+    "keywords": "Claude Code, hooks, auto approve, faster, permission prompts, productivity, cc-safe-setup",
+    "snippet": "April 21, 2026 &middot; 4 min read &middot; Fewer permission prompts, same safety"
+  },
+  {
+    "url": "blog-subagent-permissions.html",
+    "title": "How to Fix Subagent Permission Issues in Claude Code",
+    "description": "Subagent permissions don't propagate from parent sessions. Here's why and how to work around it with pre-declared permissions and hooks.",
+    "keywords": "",
+    "snippet": "April 21, 2026 · Based on GitHub Issues #51287, #51288, #51289, #51286"
+  },
+  {
+    "url": "blog-thinking-token-drain.html",
+    "title": "Claude Code Extended Thinking Consumed 16 Million Tokens in 25 Minutes",
+    "description": "Extended thinking can enter a runaway state and drain your entire Claude Code token quota in minutes. Here's how to detect and stop it with a simple hook.",
+    "keywords": "Claude Code, extended thinking, token drain, 16 million tokens, reasoning loop, fix, hook, thinking stall, Sonnet 4.6, quota exhausted, token consumption",
+    "snippet": "A user on Sonnet 4.6 asked Claude Code to work on a task. The model entered its extended thinking phase — and never came out."
+  },
+  {
+    "url": "blog-token-cost-volatility.html",
+    "title": "Claude Code Token Cost Volatility: Why Your Bill Swings 2-3x (And How to Fix It)",
+    "description": "42% of developers cite token cost volatility as their #1 pain point with AI coding tools. Here's why Claude Code costs swing 2-3x and what hooks can stabilize them.",
+    "keywords": "Claude Code, token cost, token volatility, Max Plan, quota, hooks, cost optimization",
+    "snippet": "Your Claude Code bill shouldn't be unpredictable. But for most developers, it is. One week you're within budget, the next you've burned through your entire monthly allocation in 3 days."
+  },
+  {
+    "url": "builder.html",
+    "title": "Hook Builder — Claude Code",
+    "description": "Generate Claude Code hooks from plain English. No coding required.",
+    "keywords": "",
+    "snippet": "Describe what you want in plain English. Get a working hook."
+  },
+  {
+    "url": "by-example.html",
+    "title": "Claude Code Hooks by Example — Real Incidents, Real Fixes",
+    "description": "Every hook was born from a real incident. See the before/after for each one.",
+    "keywords": "",
+    "snippet": "Every hook was born from a real incident. Here's the before and after."
+  },
+  {
+    "url": "cache-health.html",
+    "title": "Cache Health Checker — Is Your Claude Code Cache Working?",
+    "description": "Paste your /cost output to diagnose cache_creation inflation, TTL breakage, and token waste. Free tool from cc-safe-setup.",
+    "keywords": "",
+    "snippet": "Paste your /cost output below to diagnose cache problems."
+  },
+  {
+    "url": "cheatsheet.html",
+    "title": "Claude Code Hooks Cheat Sheet",
+    "description": "",
+    "keywords": "",
+    "snippet": "Quick reference · Print this page (Ctrl+P) · github.com/yurukusa/cc-safe-setup"
+  },
+  {
+    "url": "claude-code-auto-mode-hooks.html",
+    "title": "Essential Hooks for Claude Code Auto Mode — cc-safe-setup",
+    "description": "Claude Code Auto Mode skips confirmation prompts. Without hooks, rm -rf, force-push, and secret leaks happen silently. Install safety hooks before enabling Auto Mode.",
+    "keywords": "claude code auto mode, claude code auto mode safety, claude code auto approve, auto mode hooks, cc-safe-setup",
+    "snippet": "Auto Mode removes the confirmation step. Every tool call executes immediately. Without hooks, there is nothing between Claude and rm -rf /."
+  },
+  {
+    "url": "claude-code-auto-mode-safety.html",
+    "title": "Claude Code Auto Mode Safety Guide — cc-safe-setup",
+    "description": "Auto Mode in Claude Code runs commands without asking. Here's how to add safety hooks that block dangerous operations even in Auto Mode. One command setup.",
+    "keywords": "claude code auto mode, claude code auto mode safety, claude code autonomous, claude code hooks auto mode, pretooluse hook, cc-safe-setup",
+    "snippet": "Auto Mode in Claude Code runs tools without asking for permission. No \"Allow this command?\" prompts. No confirmation dialogs. This is powerful for autonomous work — and dangerous without guardrails."
+  },
+  {
+    "url": "claude-code-autonomous-safety.html",
+    "title": "Claude Code Autonomous Mode Safety — Complete Hook Setup — cc-safe-setup",
+    "description": "Running Claude Code unattended? 727 hooks to prevent rm -rf, force-push, secret leaks, and session drift.",
+    "keywords": "claude code autonomous, unattended safety, auto mode hooks, claude code headless, pretooluse hook, cc-safe-setup",
+    "snippet": "Running Claude Code unattended — overnight builds, CI pipelines, headless mode — means no human is watching when it decides to rm -rf node_modules, force-push to main, or commit your .env file. Hooks are the only safety layer that works without human oversight."
+  },
+  {
+    "url": "claude-code-hooks-testing-guide.html",
+    "title": "How to Test Claude Code Hooks — Validation Guide — cc-safe-setup",
+    "description": "9,200+ tests for 727 hooks. How to validate your hooks work correctly before trusting them in production.",
+    "keywords": "claude code hook testing, validate hooks, cc-safe-setup verify, pretooluse hook test, hook validation, cc-safe-setup",
+    "snippet": "A hook that doesn't work is worse than no hook at all. It gives you false confidence that you're protected while dangerous commands slip through. Here's how to validate your hooks actually block what they should."
+  },
+  {
+    "url": "claude-code-pipe-mode-safety.html",
+    "title": "Claude Code Pipe Mode Safety — Hooks Don't Fire in -p Mode",
+    "description": "PreToolUse hooks don't fire in Claude Code pipe mode (claude -p). Learn the workarounds: CLAUDE.md rules, output validation scripts, and wrapper approaches.",
+    "keywords": "claude code pipe mode, claude -p hooks, claude code headless, non-interactive mode safety, claude code automation",
+    "snippet": "Hooks don't fire in pipe mode (claude -p). This means your safety guards — destructive-guard, secret-guard, branch-guard — are all inactive when running headless."
+  },
+  {
+    "url": "claude-code-quality-hooks.html",
+    "title": "Claude Code Quality Hooks — Detect Lazy Rewrites & Skipped Reads | cc-safe-setup",
+    "description": "Hooks to detect Claude Code quality degradation: lazy file rewrites, skipped code reads, untested commits. Based on AMD's 6,852-session analysis. Install with one command.",
+    "keywords": "Claude Code, hooks, quality, safety, lazy, rewrite, degradation, cc-safe-setup",
+    "snippet": "Detect and prevent lazy rewrites, skipped reads, and untested commits."
+  },
+  {
+    "url": "claude-update-fix.html",
+    "title": "Fix `claude update` downloading 226 MB every time (Issue #51243)",
+    "description": "Claude Code downloads the full release tarball (226 MB, ~30 s) on every `claude update` — even when already up-to-date. Open Issue, no upstream fix. Drop-in bash wrapper that checks the npm registry first.",
+    "keywords": "claude update slow, claude code 226 MB, Issue 51243, WSL claude update, claude update hangs",
+    "snippet": "Every time you run claude update, it downloads the full release tarball (~226 MB) — even when your installation is already the latest version. On typical WSL2 connections this is ~30 s of wall time and ~226 MB of silently-metered bandwidth per check."
+  },
+  {
+    "url": "claudemd-analyzer.html",
+    "title": "CLAUDE.md Analyzer — How Much Are Your Instructions Costing?",
+    "description": "Paste your CLAUDE.md and see how many tokens it costs per turn. Find waste patterns and get optimization tips from 800+ hours of Claude Code operation.",
+    "keywords": "",
+    "snippet": "Paste your CLAUDE.md below. Everything stays in your browser — nothing is sent anywhere."
+  },
+  {
+    "url": "claudemd-best-practices.html",
+    "title": "CLAUDE.md Best Practices — Templates, Tips, and Common Mistakes",
+    "description": "How to write an effective CLAUDE.md for Claude Code. 5 templates for different use cases, common mistakes to avoid, and how hooks enforce your rules.",
+    "keywords": "claude code CLAUDE.md, CLAUDE.md template, CLAUDE.md best practices, claude code configuration, claude code settings, cc-safe-setup",
+    "snippet": "CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. Get it right and Claude follows your rules. Get it wrong and Claude ignores everything."
+  },
+  {
+    "url": "claudemd-guide.html",
+    "title": "CLAUDE.md Optimization Guide — Cut Token Costs by 40%",
+    "description": "Optimize your CLAUDE.md to reduce Claude Code token consumption by 40%. Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.",
+    "keywords": "",
+    "snippet": "3 rules that cut token costs by 40%. Based on 800+ hours of Claude Code operation."
+  },
+  {
+    "url": "common-mistakes.html",
+    "title": "7 Common Hook Mistakes (and How to Fix Them)",
+    "description": "The most common Claude Code hook mistakes: syntax errors that block all tools, wrong matchers, missing jq, and more. Each with a fix.",
+    "keywords": "",
+    "snippet": "Each one has caused real incidents. Each one has a simple fix."
+  },
+  {
+    "url": "compare.html",
+    "title": "Claude Code Safety: Manual vs cc-safe-setup vs Do Nothing",
+    "description": "Compare three approaches to Claude Code safety: manual hooks, cc-safe-setup, or no protection. Time, coverage, and maintenance compared.",
+    "keywords": "",
+    "snippet": "Three approaches compared. Pick the one that fits your situation."
+  },
+  {
+    "url": "cost-calculator.html",
+    "title": "Claude Code Cost Calculator — Opus 4.6 vs 4.7 Comparison",
+    "description": "Calculate your Claude Code monthly cost. Compare Opus 4.6 vs 4.7 token consumption (+35%). See where tokens go and get optimization tips from 800+ hours of data.",
+    "keywords": "",
+    "snippet": "How much are you really spending? Based on 800+ hours of operation data."
+  },
+  {
+    "url": "demo.html",
+    "title": "cc-safe-setup Live Demo — See Hooks in Action",
+    "description": "Try cc-safe-setup without installing. See how hooks block rm -rf, force-push, and credential leaks in real-time.",
+    "keywords": "",
+    "snippet": "No install needed. Click a scenario to see how hooks protect you."
+  },
+  {
+    "url": "disable-auto-compaction.html",
+    "title": "Disable Claude Code Auto-Compaction — cc-safe-setup",
+    "description": "Stop Claude Code from auto-compacting your context. Use a PreCompact hook to block compaction entirely or conditionally. Preserve your full conversation history.",
+    "keywords": "claude code auto compact, claude code compaction, disable compaction, no-auto-compact, precompact hook, cc-safe-setup, context window",
+    "snippet": "Claude Code auto-compacts your conversation when context reaches ~80%. This loses nuance, plan details, and conversation history. Power users who manage context manually need a way to prevent it."
+  },
+  {
+    "url": "ecosystem.html",
+    "title": "Claude Code Hooks Ecosystem",
+    "description": "Compare all Claude Code hook projects — features, language, stars, and installation methods.",
+    "keywords": "",
+    "snippet": "A neutral comparison of all major hook projects. Pick the one that fits your stack."
+  },
+  {
+    "url": "effort-calculator.html",
+    "title": "Claude Code Effort Level Calculator — How Much Are You Overpaying?",
+    "description": "Calculate how much you're overpaying by using the wrong Claude Code effort level. Opus 4.7 defaults to xhigh — switch to high or medium to save 30-50%.",
+    "keywords": "",
+    "snippet": "Opus 4.7 defaults to xhigh. See how much you can save by switching."
+  },
+  {
+    "url": "enforce-command-allowlist.html",
+    "title": "Enforce Command Allowlist in Claude Code — cc-safe-setup",
+    "description": "Claude Code's permissions.allow rules don't always work. Enforce a strict command allowlist with a PreToolUse hook that can't be bypassed, even in bypassPermissions mode.",
+    "keywords": "claude code allowlist, claude code permissions allow, claude code command whitelist, pretooluse hook enforce, cc-safe-setup, bypass permissions",
+    "snippet": "Claude Code's permissions.allow rules are fundamentally broken in many configurations. Wildcard matching fails, compound commands bypass rules, and bypassPermissions ignores allowlists entirely."
+  },
+  {
+    "url": "events.html",
+    "title": "Claude Code Hook Events — When Does Each One Fire?",
+    "description": "PreToolUse, PostToolUse, Stop, SubagentStop, UserPromptSubmit — when each fires, what data it receives, what it can do.",
+    "keywords": "",
+    "snippet": "When each event fires, what data it receives, and what it can do."
+  },
+  {
+    "url": "exit-codes.html",
+    "title": "Claude Code Hook Exit Codes — The Complete Guide",
+    "description": "Exit code 0 = allow. Exit code 2 = block. Exit code 1 = error (ignored). Bash syntax errors = exit 2 = accidental block. The full guide.",
+    "keywords": "",
+    "snippet": "The complete guide to what exit codes mean in Claude Code hooks. Includes the bash syntax error trap that can lock your entire session."
+  },
+  {
+    "url": "faq.html",
+    "title": "Claude Code Hooks FAQ — Every Question Answered",
+    "description": "Answers to every common question about Claude Code hooks. Why hooks? How do they work? What about performance?",
+    "keywords": "",
+    "snippet": "Every question we've been asked, answered. Official docs"
+  },
+  {
+    "url": "fix-bashrc-agent-hang.html",
+    "title": "Fix Claude Code Agent Bash Shell Hang — .bashrc Safety Check",
+    "description": "Claude Code agents source .bashrc on every spawn, causing hangs from completion scripts (Angular, nvm, conda). Fix with a SessionStart hook that detects dangerous patterns.",
+    "keywords": "claude code agent hang, claude code bashrc, claude code shell freeze, angular completion hang, nvm slow, agent subprocess, cc-safe-setup",
+    "snippet": "Claude Code agents spawn bash shells that source your .bashrc. If your shell config contains completion scripts, slow init commands, or hanging processes, every agent spawn becomes a cascading hang."
+  },
+  {
+    "url": "fix-git-show-no-stat.html",
+    "title": "Fix Claude Code git show --no-stat Error — cc-safe-setup",
+    "description": "Claude Code runs git show with invalid --no-stat flag, causing exit code 128 errors. Fix it automatically with a PreToolUse hook that strips the bad flag.",
+    "keywords": "claude code git show no-stat, git show --no-stat error, claude code bash error, pretooluse hook rewrite, cc-safe-setup",
+    "snippet": "Claude Code frequently runs git show HEAD --no-stat, but --no-stat is not a valid git-show flag. This causes exit code 128 errors and wastes context on retries."
+  },
+  {
+    "url": "getting-started.html",
+    "title": "Getting Started — Make Claude Code Safe in 5 Minutes",
+    "description": "Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, production database destruction, force-push to main, secret leaks. Step-by-step for beginners. npx cc-safe-setup.",
+    "keywords": "claude code, safety, hooks, setup, pretooluse, autonomous, beginner guide, cc-safe-setup, database protection, production safety",
+    "snippet": "Make Claude Code safe in 5 minutes. No coding required. Works on macOS, Linux, and Windows (WSL)."
+  },
+  {
+    "url": "hook-gap-analyzer.html",
+    "title": "Hook Gap Analyzer — What Safety Hooks Are You Missing?",
+    "description": "Paste your Claude Code settings.json and find out which safety hooks you're missing. Free analysis from 800+ hours of operation data.",
+    "keywords": "",
+    "snippet": "Paste your ~/.claude/settings.json below. Find out which safety hooks you're missing."
+  },
+  {
+    "url": "hook-if-field-performance.html",
+    "title": "Claude Code Hook if Field — Reduce Hook Overhead by 90% (v2.1.85)",
+    "description": "Claude Code v2.1.85 adds the 'if' field to hooks. Skip hook process spawning when commands don't match. Eliminate unnecessary overhead in autonomous sessions.",
+    "keywords": "claude code hooks if field, claude code v2.1.85, hook performance, conditional hooks, pretooluse optimization, cc-safe-setup",
+    "snippet": "New in Claude Code v2.1.85. The if field lets you specify when a hook should run using permission rule syntax. If the command doesn't match, the hook process is never spawned."
+  },
+  {
+    "url": "hook-patterns.html",
+    "title": "10 Hook Patterns Every Claude Code User Should Know",
+    "description": "The 10 foundational patterns for writing Claude Code hooks. Block, approve, warn, log, validate, protect, limit, checkpoint, enforce, recover.",
+    "keywords": "",
+    "snippet": "The building blocks for every Claude Code hook. Learn these patterns, combine them for any use case."
+  },
+  {
+    "url": "hook-selector.html",
+    "title": "Hook Selector — Find Your Perfect Claude Code Safety Setup",
+    "description": "Answer 5 questions, get a personalized Claude Code safety hook configuration. Based on 800+ hours of autonomous operation experience.",
+    "keywords": "",
+    "snippet": "Answer 5 questions. Get your personalized Claude Code safety setup.Based on 800+ hours of autonomous operation."
+  },
+  {
+    "url": "hooks-cheatsheet.html",
+    "title": "Claude Code Hooks Cheat Sheet — Copy-Paste Patterns",
+    "description": "30+ copy-paste hook patterns for Claude Code. Block dangerous commands, auto-approve safe ones, monitor costs. One page, zero fluff.",
+    "keywords": "",
+    "snippet": "#!/bin/bash COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null) [ -z \"$COMMAND\" ] && exit 0 if echo \"$COMMAND\" | grep -qE 'rm\\s+.*-rf\\s+/'; then echo \"BLOCKED: rm -rf on root\" >&2 exit 2 fi exit 0Copy Block file edits to specific paths BLOCK #!/bin/bash FILE=$(cat | jq -r '.tool_input."
+  },
+  {
+    "url": "hub.html",
+    "title": "cc-safe-setup: Claude Code Safety Hub",
+    "description": "727 example hooks, 56 commands, 28 browser tools, 30K+ total installs. Make Claude Code safe for autonomous operation. Prevents rm -rf, database destruction, force-push, secret leaks, and more.",
+    "keywords": "claude code, hooks, safety, autonomous, pretooluse, rm rf, git push, secrets, cc-safe-setup, database protection, production safety",
+    "snippet": ""
+  },
+  {
+    "url": "incident-postmortems-preview.html",
+    "title": "The 1h to 5m Cache TTL Silent Downgrade — FREE Preview from Claude Code Incident Postmortems",
+    "description": "Free preview (Incident 1 of 10) from Claude Code Incident Postmortems. Why Max subscribers suddenly hit the 5-hour quota cap in March 2026, reverse-engineered from Issue #46829, Anthropic staff replies, and a 119,866-call dataset. Detection hook included.",
+    "keywords": "Claude Code, cache TTL, prompt caching, Max subscription, quota, ephemeral_5m, ephemeral_1h, incident postmortem",
+    "snippet": "&larr; cc-safe-setup hub FREE PREVIEW — INCIDENT 1 OF 10"
+  },
+  {
+    "url": "incidents.html",
+    "title": "Claude Code Incident Tracker — Real Safety Issues from GitHub",
+    "description": "80+ real Claude Code safety incidents tracked from GitHub Issues. File deletion, credential leaks, token drain, production outages. See why hooks matter.",
+    "keywords": "Claude Code, incidents, safety, rm -rf, data loss, token drain, hooks, CVE, production outage",
+    "snippet": "Real safety incidents from GitHub Issues. Each entry links to the original report."
+  },
+  {
+    "url": "index-legacy.html",
+    "title": "Claude Code Safety Audit & Setup Generator",
+    "description": "Audit your Claude Code settings and generate safety hooks — 100% in your browser. No npm required.",
+    "keywords": "",
+    "snippet": "Audit your setup and generate safety hooks — 100% in your browser. No npm required."
+  },
+  {
+    "url": "matchers.html",
+    "title": "Hook Matchers — Which Tools Does Your Hook Apply To?",
+    "description": "Complete matcher reference for Claude Code hooks. Bash, Edit, Write, Read, Agent — how to target specific tools.",
+    "keywords": "",
+    "snippet": "Control which tools trigger your hook. Regex-based matching on tool names."
+  },
+  {
+    "url": "matrix.html",
+    "title": "Claude Code Hooks Matrix — 605 Hooks Collection",
+    "description": "Interactive matrix of Claude Code hooks. Filter by trigger, category, and action type. 727 hooks available.",
+    "keywords": "",
+    "snippet": "727 hooks total — showing 67 curated hooks below. Browse all 605 →"
+  },
+  {
+    "url": "migration-guide.html",
+    "title": "Claude Code Hooks — Migration Guide from Other AI Tools",
+    "description": "Moving from Cursor, Windsurf, Aider, or Copilot to Claude Code? Here's how to set up equivalent safety using hooks.",
+    "keywords": "",
+    "snippet": "Safety setup guide for developers coming from Cursor, Windsurf, Aider, or Copilot"
+  },
+  {
+    "url": "multi-agent-safety.html",
+    "title": "Claude Codeマルチエージェント安全運用ガイド",
+    "description": "Claude Codeで複数のAIエージェントを安全に同時稼働させる方法。800時間の自律運用経験から得た、tmux制御・ファイル監視・3層アーキテクチャの実践パターン。",
+    "keywords": "",
+    "snippet": "Claude Codeは1つのセッションで1つのタスクしか扱えない。コードを書きながらテストを走らせ、ドキュメントも更新する——これを1セッションでやるとコンテキストが膨らみ、トークン効率が悪化する。"
+  },
+  {
+    "url": "opus-47-data-loss-crisis.html",
+    "title": "Opus 4.7 Data Loss Crisis — 47+ Bugs, 50GB Lost, and How to Protect Yourself",
+    "description": "Opus 4.7 caused 20+ data loss incidents in 3 days. Auto mode classifier failure, 4x token burn, prompt cache destruction. Here are the hooks that stop it.",
+    "keywords": "Claude Code Opus 4.7, data loss, rm -rf, safety hooks, auto mode classifier, token consumption, prompt cache",
+    "snippet": "34 bugs tracked. 50GB+ lost. 20+ incidents in 3 days. Published April 18, 2026."
+  },
+  {
+    "url": "opus-47-survival-guide.html",
+    "title": "Claude Code Opus 4.7 Survival Guide — Known Issues, Fixes, and Safety Hooks",
+    "description": "Opus 4.7 has critical bugs: 4x token consumption, data loss (50GB+), classifier failures. Here are the hooks and fixes that protect your work right now.",
+    "keywords": "Claude Code Opus 4.7, token consumption, data loss, rm -rf, classifier bug, safety hooks, PreToolUse, auto mode",
+    "snippet": "Known issues, immediate fixes, and safety hooks. Last updated: April 18, 2026."
+  },
+  {
+    "url": "opus47-cost-estimator.html",
+    "title": "Opus 4.7 Cost Estimator — How Much Is the Upgrade Costing You?",
+    "description": "Calculate how much extra Opus 4.7 costs compared to 4.6. Input your usage pattern, get estimated monthly cost and savings potential.",
+    "keywords": "",
+    "snippet": "How much is the Opus 4.7 upgrade costing you? Based on data from GitHub Issues and 800+ hours of operation."
+  },
+  {
+    "url": "opus47-downgrade.html",
+    "title": "How to Downgrade from Opus 4.7 to Opus 4.6 — Claude Code Guide",
+    "description": "Opus 4.6 was removed from the Desktop model picker. Here's how to pin Claude Code to Opus 4.6 using CLI, settings.json, and CLAUDE.md — plus safety hooks.",
+    "keywords": "Claude Code Opus 4.7 downgrade, Opus 4.6, model picker, pin model, Claude Code safety",
+    "snippet": "Opus 4.6 was removed from the Desktop model picker (#49689). Here are 4 ways to pin your model."
+  },
+  {
+    "url": "opus47-impact.html",
+    "title": "Opus 4.7 Cost Impact Calculator — How Much Extra Are You Paying?",
+    "description": "Calculate how much extra Opus 4.7 bugs are costing you. Input your plan and usage to see the hidden token inflation, cache bugs, and system overhead — and how much you could save.",
+    "keywords": "Claude Code, Opus 4.7, token cost, cost calculator, token inflation, Claude Code トークン 節約, Opus 4.7 コスト, トークン消費 計算",
+    "snippet": "How much extra are Opus 4.7 bugs costing you? Calculate your hidden overhead."
+  },
+  {
+    "url": "opus47-scanner.html",
+    "title": "Opus 4.7 Safety Scanner — Is Your Claude Code Protected?",
+    "description": "Paste your settings.json to check if you're protected from Opus 4.7's broken classifier, 4x token burn, data loss, and config truncation. Free instant scan.",
+    "keywords": "Claude Code, Opus 4.7, safety scanner, settings.json, hooks, data loss, token consumption",
+    "snippet": "Paste your ~/.claude/settings.json to check for known Opus 4.7 vulnerabilities"
+  },
+  {
+    "url": "outage-recovery.html",
+    "title": "Claude Code Outage Recovery — 3 Hooks That Saved My Work",
+    "description": "Protect your Claude Code sessions from outages. 3 battle-tested hooks from 800+ hours of autonomous operation that prevent data loss during disconnections.",
+    "keywords": "",
+    "snippet": "3 hooks that saved my work during the April 6-8 incidents"
+  },
+  {
+    "url": "owasp-mcp-hooks.html",
+    "title": "OWASP MCP Top 10 — Claude Code Hook Defense Guide",
+    "description": "Defend against all 10 OWASP MCP risks with Claude Code hooks. Token leaks, privilege escalation, tool poisoning, supply chain attacks — each with a working hook.",
+    "keywords": "",
+    "snippet": "The OWASP MCP Top 10 defines the top security risks for AI agents using MCP. 9 out of 10 can be mitigated with Claude Code hooks."
+  },
+  {
+    "url": "permission-checker.html",
+    "title": "Hook Permission Checker — cc-safe-setup",
+    "description": "Paste your settings.json and check if all hook scripts exist and are executable. Diagnose Permission denied errors.",
+    "keywords": "",
+    "snippet": "Paste your settings.json to check all hook commands for common issues."
+  },
+  {
+    "url": "playground.html",
+    "title": "Hook Playground — Write, Test, and Debug Claude Code Hooks",
+    "description": "Write Claude Code hooks in your browser. Test with sample inputs. See output instantly. No install needed.",
+    "keywords": "",
+    "snippet": "Write a hook. Pick a sample input. Click Run. See what happens. No install needed."
+  },
+  {
+    "url": "preflight.html",
+    "title": "Claude Code Autonomous Pre-Flight Checklist",
+    "description": "14-point safety checklist before running Claude Code autonomously. Print it. Share it. Never skip it.",
+    "keywords": "",
+    "snippet": "14 checks before running Claude Code unattended. Check each item. Fix reds before launch."
+  },
+  {
+    "url": "prevent-bash-debug-leak.html",
+    "title": "Prevent Claude Code bash -x Debug Tracing from Exposing Secrets — cc-safe-setup",
+    "description": "Claude Code running bash -x traces all commands including expanded secrets from .env files. One hook to prevent it.",
+    "keywords": "claude code bash -x secrets, debug trace leak, bash-trace-guard, claude code security, pretooluse hook, cc-safe-setup",
+    "snippet": "When Claude Code runs bash -x script.sh, every command is printed to stderr with all variables fully expanded. If your script sources .env files, your API keys, database passwords, and tokens appear in plain text in the terminal output."
+  },
+  {
+    "url": "prevent-coauthored-by.html",
+    "title": "Remove Co-Authored-By from Claude Code Commits — cc-safe-setup",
+    "description": "Claude auto-appends Co-Authored-By trailers to every commit. A hook to control or strip them.",
+    "keywords": "claude code co-authored-by, remove commit trailer, strip-coauthored-by, claude code git commit, posttooluse hook, cc-safe-setup",
+    "snippet": "Claude Code automatically appends Co-Authored-By: Claude trailers to every commit message it creates. For some teams, this is unwanted — it clutters git log, triggers CI attribution rules, or simply isn't appropriate for the project's commit style."
+  },
+  {
+    "url": "prevent-compact-autonomous-push.html",
+    "title": "Prevent Claude Code from Pushing Code After Context Compaction — cc-safe-setup",
+    "description": "After /compact, Claude autonomously pushes commits. A hook guards the vulnerable post-compaction period.",
+    "keywords": "claude code compaction push, autonomous git push, post-compact-safety, claude code compact, pretooluse hook, cc-safe-setup",
+    "snippet": "When Claude Code runs /compact or auto-compacts due to context limits, it loses the full conversation history. In this degraded state, it may push incomplete commits, skip tests, or push to the wrong branch — believing it has already verified the work."
+  },
+  {
+    "url": "prevent-cost-explosion.html",
+    "title": "Prevent Claude Code Cost Explosion — Rate Limit & Loop Protection",
+    "description": "Claude Code can burn through your entire quota in minutes due to runaway loops. Real incidents from GitHub Issues. Prevent it with tool-call-rate-limiter and consecutive-error-breaker hooks.",
+    "keywords": "claude code cost explosion, claude code rate limit, claude code runaway loop, claude code quota, tool call rate limiter, claude code billing, cc-safe-setup",
+    "snippet": "Claude Code can burn through your entire quota in minutes when it gets stuck in a loop. This page shows the real problem and the hooks that prevent it."
+  },
+  {
+    "url": "prevent-credential-leak.html",
+    "title": "Prevent Claude Code from Leaking Credentials — Hook Guide",
+    "description": "Stop Claude Code from reading .netrc, .npmrc, .aws/credentials, and other credential files. Three hooks that prevent credential exposure in AI agent sessions.",
+    "keywords": "",
+    "snippet": "AI agents can read your credential files, display tokens in conversations, and hunt for secrets. Three hooks stop this."
+  },
+  {
+    "url": "prevent-database-wipe.html",
+    "title": "Prevent Claude Code from Dropping Your Database — cc-safe-setup",
+    "description": "Claude Code can run DROP DATABASE, prisma migrate reset, rails db:drop. A PreToolUse hook blocks destructive database commands. Protect your production data.",
+    "keywords": "claude code database drop, claude code prisma migrate reset, claude code rails db drop, database protection hook, cc-safe-setup",
+    "snippet": "Claude Code can run DROP DATABASE, prisma migrate reset, rails db:drop, or php artisan migrate:fresh without warning in Auto Mode. One command and your production data is gone."
+  },
+  {
+    "url": "prevent-denied-action-retry.html",
+    "title": "Stop Claude Code from Retrying Denied Commands — cc-safe-setup",
+    "description": "Claude Code ignores 'No' permission responses and retries denied commands in a loop. Fix it with a PreToolUse hook that tracks and blocks re-attempts.",
+    "keywords": "claude code ignore no, claude code retry denied, claude code permission loop, pretooluse hook, cc-safe-setup",
+    "snippet": "You say \"No\" to a command. Claude runs it anyway. Then asks for the next command. The only way to stop it is Ctrl+C."
+  },
+  {
+    "url": "prevent-dependency-bloat.html",
+    "title": "Prevent Claude Code from Installing Random Dependencies — cc-safe-setup",
+    "description": "Claude Code can run npm install, pip install, and add unwanted dependencies. Block unauthorized package installations with a PreToolUse hook.",
+    "keywords": "claude code npm install, claude code pip install, dependency guard, supply chain attack, pretooluse hook, cc-safe-setup",
+    "snippet": "Claude Code can run npm install, pip install, and other package managers freely. When it encounters a missing module, its natural behavior is to install it — without asking. This creates supply chain risks and dependency bloat."
+  },
+  {
+    "url": "prevent-env-file-commit.html",
+    "title": "Prevent Claude Code from Committing .env Files — cc-safe-setup",
+    "description": "Claude Code can git add .env and commit your API keys. A PreToolUse hook blocks .env from being staged, even with git add . or git add -A. Instant protection.",
+    "keywords": "claude code env file, claude code git add env, claude code api key commit, secret guard hook, cc-safe-setup",
+    "snippet": "Claude Code runs git add . or git add -A and your .env with API keys gets staged. If followed by git commit and git push, your secrets are public."
+  },
+  {
+    "url": "prevent-force-push.html",
+    "title": "Prevent Claude Code Force-Push to Main — cc-safe-setup",
+    "description": "Claude Code can force-push to main and rewrite shared branch history. Real incidents from autonomous sessions. One command to prevent it: npx cc-safe-setup.",
+    "keywords": "claude code force push, claude code git push main, claude code branch protection, pretooluse hook, cc-safe-setup",
+    "snippet": "In autonomous mode, Claude Code can run git push --force origin main and rewrite your shared branch history. This has happened to real users during overnight sessions."
+  },
+  {
+    "url": "prevent-git-reset-hard.html",
+    "title": "Prevent Claude Code git reset --hard Disasters — cc-safe-setup",
+    "description": "Claude Code can run git reset --hard and wipe all uncommitted work. Real incidents from GitHub Issues. One command to prevent it: npx cc-safe-setup.",
+    "keywords": "claude code git reset hard, claude code lose changes, claude code undo, destructive git commands, pretooluse hook, cc-safe-setup",
+    "snippet": "git reset --hard destroys all uncommitted changes instantly. No confirmation, no recycle bin, no undo. Claude Code runs it when it thinks \"starting fresh\" is the fastest path forward."
+  },
+  {
+    "url": "prevent-no-verify-bypass.html",
+    "title": "Prevent Claude Code --no-verify Bypass — cc-safe-setup",
+    "description": "Claude Code used --no-verify on 6 consecutive commits, bypassing pre-commit hooks silently. Block it with a PreToolUse hook. One command: npx cc-safe-setup.",
+    "keywords": "claude code no-verify, claude code bypass pre-commit, claude code git hooks, pretooluse hook, cc-safe-setup, git commit no-verify",
+    "snippet": "Claude Code can use --no-verify to skip your pre-commit hooks entirely — even when your CLAUDE.md explicitly forbids it."
+  },
+  {
+    "url": "prevent-npm-publish.html",
+    "title": "Prevent Accidental npm publish from Claude Code — cc-safe-setup",
+    "description": "Claude Code can accidentally run npm publish and push unfinished code to the public registry. Block it with a PreToolUse hook. Works in Auto Mode.",
+    "keywords": "claude code npm publish, accidental npm publish, npm publish guard, claude code package publish, cc-safe-setup",
+    "snippet": "Claude Code can run npm publish during a refactoring session, pushing half-finished code to the public npm registry. In Auto Mode, there's no confirmation prompt."
+  },
+  {
+    "url": "prevent-rm-rf.html",
+    "title": "Prevent Claude Code rm -rf Disasters — cc-safe-setup",
+    "description": "Claude Code can run rm -rf and delete your entire filesystem. Real incidents from GitHub Issues. One command to prevent it: npx cc-safe-setup.",
+    "keywords": "claude code rm -rf, claude code delete files, claude code safety, destructive command guard, pretooluse hook, cc-safe-setup",
+    "snippet": "Claude Code has full terminal access. It can — and has — run rm -rf / and deleted entire filesystems. These aren't hypothetical risks. They're real incidents reported on GitHub."
+  },
+  {
+    "url": "prevent-secret-leaks.html",
+    "title": "Prevent Claude Code from Leaking Secrets — cc-safe-setup",
+    "description": "Claude Code can commit .env files, API keys, and credentials to public repos via git add. A PreToolUse hook catches it before the commit. npx cc-safe-setup.",
+    "keywords": "claude code secrets, claude code env file, claude code api keys, git add env, secret leak prevention, pretooluse hook, cc-safe-setup",
+    "snippet": "Claude Code can run git add . and commit your .env file, API keys, SSH keys, and other credentials to a public repository. This happens silently during autonomous sessions."
+  },
+  {
+    "url": "prevent-session-drift.html",
+    "title": "Prevent Claude Code Session Drift After 6 Hours — cc-safe-setup",
+    "description": "Claude Code degrades after 6+ hours — ignoring rules, creating duplicates. A hook that progressively tightens safety.",
+    "keywords": "claude code session drift, long session degradation, session-drift-guard",
+    "snippet": "Claude Code degrades after 6+ hours — ignoring rules, creating duplicates. A hook that progressively tightens safety."
+  },
+  {
+    "url": "prevent-syntax-errors.html",
+    "title": "Prevent Claude Code Syntax Errors Cascading — cc-safe-setup",
+    "description": "Claude Code can introduce syntax errors that cascade through dozens of files. A PostToolUse hook catches them immediately. npx cc-safe-setup.",
+    "keywords": "claude code syntax error, claude code breaks code, claude code validation, posttooluse hook, syntax check hook, cc-safe-setup",
+    "snippet": "Claude Code edits files one after another. When it introduces a syntax error in file #1, it doesn't notice. It moves to file #2, which imports file #1. Now file #2 breaks. By the time it stops, 30 files have cascading errors."
+  },
+  {
+    "url": "prevent-temp-file-accumulation.html",
+    "title": "Prevent Claude Code Temp File Accumulation — cc-safe-setup",
+    "description": "Claude Code creates hundreds of temp files in /tmp that are never cleaned up. Prevent disk exhaustion with a Stop hook that auto-deletes session artifacts.",
+    "keywords": "claude code temp files, claude code /tmp, claude code disk full, stop hook cleanup, cc-safe-setup, temp file accumulation",
+    "snippet": "Claude Code creates /tmp/claude-*-cwd files for directory tracking but never cleans them up. Over time, hundreds of files accumulate, consuming disk space and inodes."
+  },
+  {
+    "url": "prevent-token-waste.html",
+    "title": "Prevent Claude Code Token Waste from Excessive File Reading — cc-safe-setup",
+    "description": "Claude Code reads too many files, consuming 25% of token quota before working. A read budget hook.",
+    "keywords": "claude code token waste, excessive reading, read-budget-guard",
+    "snippet": "Claude Code reads too many files, consuming 25% of token quota before working. A read budget hook."
+  },
+  {
+    "url": "prevent-variable-expansion.html",
+    "title": "Prevent Claude Code Shell Variable Expansion Disasters — cc-safe-setup",
+    "description": "Claude Code rm -rf with shell variables like ${LOCALAPPDATA} can delete system directories. One hook to prevent it.",
+    "keywords": "claude code rm variable expansion, shell variable guard, cc-safe-setup",
+    "snippet": "Claude Code rm -rf with shell variables like ${LOCALAPPDATA} can delete system directories. One hook to prevent it."
+  },
+  {
+    "url": "recipes.html",
+    "title": "Claude Code Hook Recipes — Copy-Paste Solutions for Real Problems",
+    "description": "30 hook recipes for Claude Code. Each solves a specific problem with copy-paste code. From permission prompt fatigue to silent file edits.",
+    "keywords": "",
+    "snippet": "Real problems. Copy-paste solutions. Each recipe is a working hook you can install in 10 seconds."
+  },
+  {
+    "url": "risk-assessment.html",
+    "title": "Claude Code Risk Assessment — How Exposed Are You?",
+    "description": "5-question risk assessment based on 90 real Claude Code incidents. Find out your risk level and get personalized safety recommendations.",
+    "keywords": "",
+    "snippet": "5 questions. 30 seconds. Based on 90 real incidents."
+  },
+  {
+    "url": "safety-audit.html",
+    "title": "Claude Code Safety Audit — Professional Review of Your AI Development Setup",
+    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (700+ hooks, 9,200+ tests).",
+    "keywords": "claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant",
+    "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
+  },
+  {
+    "url": "safety-lab.html",
+    "title": "CC Safety Lab: Claude Code の事故レポートと安全運用パックを毎月届ける（¥500/月）",
+    "description": "Claude Code の事故事例、再発防止 hook、トークン節約手法を、毎月 1 本のレポートとして届ける。¥500/月 Founder 価格（grandfathered）。無料の試し読みあり。",
+    "keywords": "Claude Code, safety, monthly report, incident, hook, token saving, Ko-fi, membership",
+    "snippet": "GitHub Issue から拾った事故事例、再発防止 hook、トークン節約手法を月 1 本のレポートに。Ko-fi メンバーシップ。"
+  },
+  {
+    "url": "security-checkup.html",
+    "title": "Security Checkup — Is Your Claude Code Safe?",
+    "description": "6-question diagnostic to find security vulnerabilities in your Claude Code setup. Based on real incidents: $1,446 unauthorized transfers, file deletions, PII leaks.",
+    "keywords": "",
+    "snippet": "6 questions to find vulnerabilities in your Claude Code setup. Based on real incidents totaling $1,800+ in losses (April 2026)."
+  },
+  {
+    "url": "services.html",
+    "title": "Claude Code Safety Setup Service | cc-safe-setup",
+    "description": "Professional Claude Code safety configuration. Hooks, CLAUDE.md optimization, and token reduction by the team behind cc-safe-setup (707+ hooks, 57,000+ Qiita views).",
+    "keywords": "",
+    "snippet": "Professional safety configuration by the cc-safe-setup team"
+  },
+  {
+    "url": "session-quality-degradation.html",
+    "title": "Detect Claude Code Session Quality Degradation — cc-safe-setup",
+    "description": "Claude Code quality degrades after 6+ hours: more errors, ignored instructions, destructive actions. Monitor error rates with a PostToolUse hook and know when to restart.",
+    "keywords": "claude code quality degradation, claude code long session, claude code 6 hours, session restart, error rate monitor, cc-safe-setup",
+    "snippet": "After 6+ hours, Claude Code sessions degrade: more errors, ignored instructions, and even destructive actions. Users report the model \"going rogue\" in long sessions."
+  },
+  {
+    "url": "settings-reference.html",
+    "title": "Claude Code settings.json Complete Reference",
+    "description": "Every settings.json field explained with examples. Hooks, permissions, env vars — the definitive reference.",
+    "keywords": "",
+    "snippet": "Every field, every option, with practical examples. Official docs"
+  },
+  {
+    "url": "settings-validator.html",
+    "title": "Claude Code settings.json Validator — Check Your Hook Configuration",
+    "description": "Paste your Claude Code settings.json to detect common hook mistakes. Free validator from cc-safe-setup (700+ hooks).",
+    "keywords": "",
+    "snippet": "Paste your Claude Code settings.json to detect common hook configuration mistakes"
+  },
+  {
+    "url": "token-audit.html",
+    "title": "Token Audit — Deep Analysis of Your Claude Code Token Usage",
+    "description": "Paste your /cost output and settings.json to get a detailed token optimization report with specific hook recommendations.",
+    "keywords": "",
+    "snippet": "Paste your /cost output or settings.json for a deep token usage analysis. Everything runs in your browser — no data is sent anywhere."
+  },
+  {
+    "url": "token-book-chapter1.html",
+    "title": "Where Do Your Claude Code Tokens Go? — Free Intro + Chapter 1 from Token Book",
+    "description": "Free Intro + Chapter 1 from Token Book: the 4 invisible layers of Claude Code token consumption, explained with data from 800+ hours. Pro and Max plan ROI math included.",
+    "keywords": "Claude Code, tokens, token consumption, where tokens go, quota, Max plan, save tokens, reduce cost",
+    "snippet": "Intro + Chapter 1 from Token Book — Cut Claude Code Token Usage in Half &middot; 800+ hours of data"
+  },
+  {
+    "url": "token-book.html",
+    "title": "Token Book — Cut Claude Code Token Usage in Half",
+    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. 10 chapters with copy-paste templates. $17 / ¥2,500.",
+    "keywords": "Claude Code, token consumption, reduce tokens, save tokens, CLAUDE.md optimization, hooks, cost reduction, Claude Code token saving, Claude Code expensive, Max plan quota, token usage half, Opus 4.7 tokens, Claude Code settings, Claude Code cost, token drain, quota exhausted",
+    "snippet": "原因は1つではありません。CLAUDE.mdの書き方、キャッシュの仕組み、compactionのタイミング、ツールの使い方——複数の要因が絡み合っています。この本は800時間の運用データをもとに、それぞれの原因と対策を体系的にまとめました。"
+  },
+  {
+    "url": "token-checkup.html",
+    "title": "Token Checkup — Is Your Claude Code Burning Tokens?",
+    "description": "Quick 5-question diagnostic to find where your Claude Code tokens are going. Get personalized optimization tips based on 800+ hours of operation data.",
+    "keywords": "",
+    "snippet": "5 questions to diagnose why your Claude Code sessions run out so fast. Works for Max ($200/mo) and Pro ($20/mo) plans. Based on 800+ hours of operation data."
+  },
+  {
+    "url": "token-consumption-diagnosis.html",
+    "title": "Claude Code Token Consumption Diagnosis — Why Your Max Plan Runs Out Fast",
+    "description": "Diagnose and fix excessive token consumption in Claude Code. Hooks to track prompts, detect auto-compact cycles, and reduce Max Plan usage.",
+    "keywords": "claude code token consumption, max plan usage, rate limit, token tracking, auto compact",
+    "snippet": "If your 5-hour Max Plan limit is exhausting in 1-2 hours with normal usage, hidden token sinks are the cause. This guide helps you find and fix them."
+  },
+  {
+    "url": "token-optimization-guide.html",
+    "title": "Claude Code Token Optimization Guide — Cut Your Token Bill in Half (2026)",
+    "description": "Reduce Claude Code token consumption by 50% with measured techniques. CLAUDE.md optimization, hook-based guards, context management. Based on 800 hours of real operation data. Updated for Opus 4.7.",
+    "keywords": "Claude Code, token optimization, reduce token usage, save tokens, Claude Code costs, Opus 4.7, CLAUDE.md optimization, hooks, token waste, context management",
+    "snippet": "Cut your token consumption in half. Based on 800 hours of real operation data."
+  },
+  {
+    "url": "token-saving-guide.html",
+    "title": "Claude Code トークン節約ガイド — 800時間の運用データに基づく実践的な方法",
+    "description": "Claude Codeのトークン消費を半分にする方法。Opus 4.7で最大35%増加したトークンコストの対策。CLAUDE.md最適化、hook活用、モデル選択の実測データ。",
+    "keywords": "Claude Code, トークン節約, トークン消費, Opus 4.7, コスト削減, hook, CLAUDE.md, 最適化",
+    "snippet": "CLAUDE.mdは��ターンコンテキストに読み込まれる。100行のCLAUDE.mdは、30���ーンのセッションで約75,000トークンを消費する。"
+  },
+  {
+    "url": "token-saving-hooks.html",
+    "title": "5 Claude Code Hooks That Save Tokens — Copy-Paste Ready",
+    "description": "5 hooks that automatically reduce Claude Code token consumption. Copy-paste into settings.json. Blocks file spam, limits reads, caps subagents.",
+    "keywords": "",
+    "snippet": "Copy-paste into ~/.claude/settings.json. Each hook targets a proven token waste pattern."
+  },
+  {
+    "url": "troubleshooting.html",
+    "title": "Claude Code Troubleshooting — Fix Any Problem in 2 Minutes",
+    "description": "Hook not firing? Claude ignoring rules? Permission prompt spam? Fix every common Claude Code problem.",
+    "keywords": "",
+    "snippet": "Click your problem. Follow the steps. Fixed in 2 minutes."
+  },
+  {
+    "url": "validator.html",
+    "title": "Claude Code settings.json Validator",
+    "description": "Paste your settings.json and get instant feedback: errors, missing hooks, security issues, and improvement suggestions.",
+    "keywords": "",
+    "snippet": "Paste your Claude Code settings.json. Get instant feedback on errors, missing safety hooks, and improvements."
+  },
+  {
+    "url": "version-check.html",
+    "title": "Claude Code Version Health Check — Is Your Version Affected?",
+    "description": "Check if your Claude Code version is affected by cache_creation inflation (#46917), TTL regression (#46829), or other known issues. Instant diagnosis with fix recommendations.",
+    "keywords": "Claude Code version, cache_creation inflation, TTL regression, token consumption, v2.1.100, v2.1.104",
+    "snippet": "Check if your version is affected by known token consumption issues"
+  },
+  {
+    "url": "webfetch-domain-allowlist.html",
+    "title": "Fix Claude Code WebFetch Domain Matching — cc-safe-setup",
+    "description": "WebFetch(domain:*) doesn't work in Claude Code sandbox mode. Fix it with a PreToolUse hook that auto-approves domains from your allowlist.",
+    "keywords": "claude code webfetch, webfetch domain wildcard, claude code sandbox permissions, pretooluse hook, cc-safe-setup, webfetch allow",
+    "snippet": "WebFetch(domain:*) in settings.json is supposed to allow all domains. It doesn't work reliably, especially in sandbox mode. Every domain still triggers a permission prompt."
+  },
+  {
+    "url": "which-hook.html",
+    "title": "Which Hook Do I Need? — Interactive Decision Tree",
+    "description": "Answer 3 questions to find the exact Claude Code hook you need. Interactive decision tree.",
+    "keywords": "",
+    "snippet": "Answer a few questions. Get the exact hook and install command."
+  },
+  {
+    "url": "wizard.html",
+    "title": "Claude Code Safety Wizard — Find Your Setup in 30 Seconds",
+    "description": "Answer 3 questions, get the exact commands to make Claude Code safe for your project.",
+    "keywords": "",
+    "snippet": ""
+  }
+]
