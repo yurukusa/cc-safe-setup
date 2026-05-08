@@ -86,6 +86,7 @@ Claude Codeを再起動。完了。
 | `subagent-tool-allowlist-enforcer` | 子エージェントの道具の境界を delegation prompt で明示し、 親の検証手順を促す（虚偽報告の予防） | [#55653](https://github.com/anthropics/claude-code/issues/55653) |
 | `subagent-spawn-verification-enforcer` | 子エージェントの spawn の応答が虚偽でないかを成果物の検証手順で予防する | [#55666](https://github.com/anthropics/claude-code/issues/55666) |
 | `trustfall-mcp-injection-guard` | clone した repo の `.mcp.json` と `.claude/settings.json` で MCP server が unsandboxed で起動する 1-click RCE を SessionStart の段で警告（Adversa AI の TrustFall PoC 対応） | [The Register](https://www.theregister.com/security/2026/05/07/claude-code-trust-prompt-can-trigger-one-click-rce/) / [GHSA-vp62-r36r-9xqp](https://github.com/advisories/GHSA-vp62-r36r-9xqp) |
+| `mcp-startup-bloat-detector` | Pro / Claude.ai-OAuth の login で `claude.ai ` 前置きの connector が大量に同期されて System tools の context が膨れる現象を SessionStart で検知し、 `ENABLE_CLAUDEAI_MCP_SERVERS=false` の回避策を提示する（v2.1.14 で塞いだはずの経路が v2.1.133 で 29 倍に再発） | [#50062](https://github.com/anthropics/claude-code/issues/50062) / [#57235](https://github.com/anthropics/claude-code/issues/57235) |
 
 インストール: `npx cc-safe-setup --install-example <名前>`
 
