@@ -82,7 +82,7 @@ assert_contains "block JSON has reason" "$OUT" '"reason"'
 write_transcript \
   '{"role":"user","content":"取引の点検"}' \
   '{"role":"assistant","content":"この銘柄には滑りの危険があります。"}' \
-  '{"role":"user","content":"修正の段の出荷"}' \
+  '{"role":"user","content":"修正を出荷"}' \
   '{"role":"assistant","content":"修正で完璧に直った状態です。"}'
 INPUT=$(make_input "$TRAP_FILE")
 OUT=$(printf '%s' "$INPUT" | bash "$HOOK" 2>&1)
