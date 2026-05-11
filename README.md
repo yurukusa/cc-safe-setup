@@ -116,6 +116,20 @@ Each hook exists because a real incident happened without it.
 | **[Copilot 2026-06-01 transition pre-flight checklist](https://gist.github.com/yurukusa/abf63634d1e0b5856bdbdcb378915bd8)** | Five read-only audit steps to run today before GitHub's "Preview my bill" tool launches in early May. Identifies your tier, inventories your past 30-day usage by surface, and stages the stay/switch/hybridize decision tree against your own numbers. No purchase required. |
 | **[Five primary-source-verified Claude Code signals (2026-04-26 to 2026-04-28)](https://gist.github.com/yurukusa/751f4c229b2499ba9e005e25c07d002d)** | 48-hour roundup with audit one-liners. [#52921](https://github.com/anthropics/claude-code/issues/52921) (Max 20× weekly limits resetting on a ~24-hour cycle, Anthropic in-app support acknowledged), [#53489](https://github.com/anthropics/claude-code/issues/53489) (Web MCP connectors lost + v2.1.120 force-rolled-back within 24h), [#53262](https://github.com/anthropics/claude-code/issues/53262) (HERMES.md substring routing), plugin hook path drift cluster, and the 2026-04-25 Anthropic Rate Limits API release. Two issues independently primary-source-verified. |
 
+### Where cc-safe-setup fits in the Claude Code safety stack
+
+cc-safe-setup is the runtime-prevention layer of a five-layer safety stack. Each layer catches a different failure mode, they pair well in combination. None of these tools are affiliated with cc-safe-setup, they are third-party projects with their own maintainers and licenses.
+
+| Layer | What it catches | When it acts | Representative tool |
+|---|---|---|---|
+| 0. Configuration audit | Vulnerabilities and misconfigurations in your Claude Code setup itself | Before any agent run | [ecc-agentshield](https://github.com/affaan-m/agentshield) (102 rules, 1282 tests) |
+| 1. Runtime prevention | Dangerous tool calls about to execute | At each tool call | **cc-safe-setup (this repo)** |
+| 2. Output verification | Subtle bugs and regressions in code Claude wrote | After code generation | [adamsreview](https://github.com/adamjgmiller/adamsreview) (multi-lens review pipeline) |
+| 3. Session governance | Runaway retry loops, budget overruns, missing audit trails | Across an entire agent run | [Martin-Loop](https://github.com/Keesan12/Martin-Loop) (governed runtime, 11-class failure taxonomy) |
+| 4. Cost measurement | Token consumption visibility | Continuous | Various trackers |
+
+See the [5-layer ecosystem map](https://gist.github.com/yurukusa/66e2cb1e066f5a4a5117378be4c576ff) for the failure mode each layer addresses and a progression of which layer to add at which stage of Claude Code adoption.
+
 ### Companion log-analysis tools (third-party)
 
 These are unaffiliated projects that pair well with the cc-safe-setup hooks, they read your `~/.claude/projects/` JSONL logs from a *post-hoc analysis* angle, where the hooks here intervene at *pre-execution* time. Use them together if you want both prevention (hooks) and observation (viewers).
