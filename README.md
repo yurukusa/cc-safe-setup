@@ -492,6 +492,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **stale-branch-guard.sh**: Warn when working branch is far behind default
 - **cost-tracker.sh**: Estimate session token cost and warn at thresholds ($1, $5)
 - **read-before-edit.sh**: Warn when editing files not recently read (prevents old_string mismatches)
+- **windows-python-stub-detector.sh**: SessionStart probe that surfaces the Microsoft Store `python3` stub on Windows Git Bash — `which python3` succeeds but subprocess exits 49 with no output, silently no-op-ing every Python-based hook. Matches four failure modes (exit 49 / Store-redirect stderr / exit 127 / silent stub) and warns via hookSpecificOutput ([#57946](https://github.com/anthropics/claude-code/issues/57946))
 
 ## Safety Checklist
 
