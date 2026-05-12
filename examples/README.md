@@ -19,7 +19,7 @@ npx cc-safe-setup --shield                    # install recommended set
 | Auto-Approve (PreToolUse) | 11 | `auto-approve-readonly`, `auto-approve-build`, `auto-approve-docker` |
 | Auto-Approve (PermissionRequest) | 7 | `allow-git-hooks-dir`, `allow-protected-dirs`, `edit-always-allow` |
 | Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |
-| Security | 10 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard` |
+| Security | 11 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard`, `webfetch-system-reminder-detector` |
 | Deploy | 4 | `deploy-guard`, `no-deploy-friday`, `work-hours-guard` |
 | Monitoring & Cost | 14 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter`, `dotenv-watch` |
 | Utility | 20 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard`, `direnv-auto-reload`, `pre-compact-checkpoint` |
