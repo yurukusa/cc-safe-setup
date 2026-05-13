@@ -146,29 +146,28 @@ section "Check 3: skill bloat per-session token cost"
 SKILLS_DIR="${CLAUDE_DIR}/skills"
 if [[ -d "$SKILLS_DIR" ]]; then
     SKILL_COUNT=$(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-    # Estimate based on the *descriptor* size only (what actually loads into prompt).
-    # Each skill loads its frontmatter + description block (~200-400 tokens typically),
-    # not the entire skill body. The harness lazy-loads body content only on invocation.
-    EST_TOKENS=$((SKILL_COUNT * 300))
+    # Per-skill descriptor estimate calibrated against:
+    # - Reporter 1tbbove's measurement: 2,596 skills → 102K tokens (~40 tokens/skill avg)
+    # - Dogfooding measurement via eliransu/skill-tax against this author's install:
+    #   97 skills → 6,031 tokens (~62 tokens/skill avg, tiktoken cl100k_base)
+    # Conservative estimate at 80 tokens/skill captures verbose-metadata installs.
+    # For accurate per-skill measurement, use eliransu/skill-tax (tiktoken-based).
+    EST_TOKENS=$((SKILL_COUNT * 80))
 
-    # Reporter 1tbbove's data point: 2,596 skills → 102K tokens (~40 tokens per skill
-    # descriptor on average). Real-world ratio sits between 200-500 per skill depending
-    # on how verbose the metadata block is.
-
-    if (( EST_TOKENS > 50000 )); then
-        report HIGH "$SKILL_COUNT skills installed — heavy per-session token tax (~${EST_TOKENS} tokens)" \
-            "Every installed skill loads its descriptor (~300 tokens average) into every session regardless of invocation. Reporter 1tbbove measured ~\$91/month at 2,596 skills with 102K tokens/session. Your estimated cost at typical Pro usage: ~\$$(( EST_TOKENS / 1100 ))/month." \
+    if (( EST_TOKENS > 30000 )); then
+        report HIGH "$SKILL_COUNT skills installed — heavy per-session token tax (~${EST_TOKENS} tokens estimated)" \
+            "Every installed skill loads its descriptor into every session regardless of invocation. Reporter 1tbbove measured ~\$91/month at 2,596 skills with 102K tokens/session. Your estimated cost at typical Pro usage: ~\$$(( EST_TOKENS / 1100 ))/month. For accurate measurement use eliransu/skill-tax." \
             "Use eliransu/skill-tax (https://github.com/eliransu/skill-tax) for per-skill cost measurement and pruning. See book §1tbbove."
-    elif (( EST_TOKENS > 15000 )); then
-        report MEDIUM "$SKILL_COUNT skills installed — moderate per-session token tax (~${EST_TOKENS} tokens)" \
-            "Review which skills you actually invoke." \
-            "Run eliransu/skill-tax audit to identify never-invoked skills."
-    elif (( EST_TOKENS > 5000 )); then
-        report LOW "$SKILL_COUNT skills installed — minor per-session token tax (~${EST_TOKENS} tokens)" \
-            "Worth a periodic audit if invocation rate is low." \
+    elif (( EST_TOKENS > 10000 )); then
+        report MEDIUM "$SKILL_COUNT skills installed — moderate per-session token tax (~${EST_TOKENS} tokens estimated)" \
+            "Review which skills you actually invoke. For accurate measurement use eliransu/skill-tax." \
+            "Run eliransu/skill-tax report to identify never-invoked skills."
+    elif (( EST_TOKENS > 3000 )); then
+        report LOW "$SKILL_COUNT skills installed — minor per-session token tax (~${EST_TOKENS} tokens estimated)" \
+            "Worth a periodic audit if invocation rate is low. eliransu/skill-tax gives accurate per-skill costs." \
             ""
     else
-        report INFO "$SKILL_COUNT skills installed — token tax is negligible (~${EST_TOKENS} tokens)" \
+        report INFO "$SKILL_COUNT skills installed — token tax is negligible (~${EST_TOKENS} tokens estimated)" \
             "" \
             ""
     fi
