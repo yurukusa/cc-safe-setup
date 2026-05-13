@@ -8,8 +8,17 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
-const HOOKS_DIR = join(HOME, '.claude', 'hooks');
-const SETTINGS_PATH = join(HOME, '.claude', 'settings.json');
+
+// Install target resolves to CLAUDE_PROJECT_DIR if set (per-profile / per-project
+// installs where the env var points at the directory that hosts .claude/).
+// Falls back to HOME for the historical default behavior so existing single-profile
+// users see no change. Resolves issue #145.
+// Logs and profiles intentionally remain HOME-based (see joins later in this file)
+// because they aggregate state across projects; making them per-project would
+// silently change semantics for anyone running multiple projects today.
+const CLAUDE_BASE = process.env.CLAUDE_PROJECT_DIR || HOME;
+const HOOKS_DIR = join(CLAUDE_BASE, '.claude', 'hooks');
+const SETTINGS_PATH = join(CLAUDE_BASE, '.claude', 'settings.json');
 
 // Convert Windows backslash paths to bash-compatible forward slashes
 const toBashPath = (p) => p.replace(/\\/g, '/');
@@ -1654,7 +1663,7 @@ async function saveProfile(name) {
   }
 
   // Save current hook state
-  const hookDir = join(HOME, '.claude', 'hooks');
+  const hookDir = HOOKS_DIR;
   const hooks = existsSync(hookDir) ? readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py')) : [];
 
   const profile = {
@@ -1701,7 +1710,7 @@ async function scoreOnly() {
   let score = 0;
 
   // Hooks installed (max 50 points)
-  const hookDir = join(HOME, '.claude', 'hooks');
+  const hookDir = HOOKS_DIR;
   const hookCount = existsSync(hookDir) ? readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py')).length : 0;
   score += Math.min(hookCount * 3, 50);
 
@@ -2878,7 +2887,7 @@ async function analyze() {
 
   // 4. Hook health
   console.log(c.bold + '  Hook Health' + c.reset);
-  const hookDir = join(HOME, '.claude', 'hooks');
+  const hookDir = HOOKS_DIR;
   if (existsSync(hookDir)) {
     const hooks = readdirSync(hookDir).filter(f => f.endsWith('.sh') || f.endsWith('.py'));
     let execCount = 0, nonExec = 0;
