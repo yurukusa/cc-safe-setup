@@ -25,33 +25,87 @@
 
 set -uo pipefail
 
+# Parse args (single optional flag: --json for machine-readable output)
+JSON_MODE=0
+case "${1:-}" in
+    --json) JSON_MODE=1 ;;
+    -h|--help)
+        cat <<'USAGE'
+claim-verify-audit.sh — Diagnostic for Claude Code claim/reality divergence patterns
+
+Usage:
+  bash claim-verify-audit.sh             # human-readable text output
+  bash claim-verify-audit.sh --json      # machine-readable JSON (for CI integration)
+
+Exit codes:
+  0 — no HIGH-severity findings
+  1 — one or more HIGH-severity findings
+
+Read-only, MIT, no network access, runs in ~1 second.
+USAGE
+        exit 0
+        ;;
+esac
+
 # Severity counts
 HIGH=0
 MED=0
 LOW=0
 INFO=0
 
-# Color codes (respect NO_COLOR)
-if [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
+# JSON findings buffer (lines of pre-escaped JSON)
+JSON_FINDINGS=""
+
+# Color codes (respect NO_COLOR + JSON mode)
+if (( JSON_MODE )) || [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
     R="" Y="" B="" G="" N=""
 else
     R=$'\033[31m' Y=$'\033[33m' B=$'\033[34m' G=$'\033[32m' N=$'\033[0m'
 fi
 
+# JSON escape for string values (handles backslash, quote, newline, tab)
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
 report() {
     local sev="$1" title="$2" detail="$3" fix="$4"
     case "$sev" in
-        HIGH)   echo "${R}[HIGH]${N}    $title"; HIGH=$((HIGH+1)) ;;
-        MEDIUM) echo "${Y}[MEDIUM]${N}  $title"; MED=$((MED+1)) ;;
-        LOW)    echo "${B}[LOW]${N}     $title"; LOW=$((LOW+1)) ;;
-        INFO)   echo "${G}[INFO]${N}    $title"; INFO=$((INFO+1)) ;;
+        HIGH)   HIGH=$((HIGH+1)) ;;
+        MEDIUM) MED=$((MED+1)) ;;
+        LOW)    LOW=$((LOW+1)) ;;
+        INFO)   INFO=$((INFO+1)) ;;
     esac
-    [[ -n "$detail" ]] && echo "          $detail"
-    [[ -n "$fix" ]] && echo "          Fix: $fix"
-    echo
+    if (( JSON_MODE )); then
+        # Append JSON object for this finding
+        local obj="{\"severity\":\"$sev\",\"title\":\"$(json_escape "$title")\",\"detail\":\"$(json_escape "$detail")\",\"fix\":\"$(json_escape "$fix")\"}"
+        if [[ -z "$JSON_FINDINGS" ]]; then
+            JSON_FINDINGS="$obj"
+        else
+            JSON_FINDINGS="$JSON_FINDINGS,$obj"
+        fi
+    else
+        case "$sev" in
+            HIGH)   echo "${R}[HIGH]${N}    $title" ;;
+            MEDIUM) echo "${Y}[MEDIUM]${N}  $title" ;;
+            LOW)    echo "${B}[LOW]${N}     $title" ;;
+            INFO)   echo "${G}[INFO]${N}    $title" ;;
+        esac
+        [[ -n "$detail" ]] && echo "          $detail"
+        [[ -n "$fix" ]] && echo "          Fix: $fix"
+        echo
+    fi
 }
 
 section() {
+    if (( JSON_MODE )); then
+        return  # sections are suppressed in JSON mode
+    fi
     echo
     echo "=== $1 ==="
     echo
@@ -60,7 +114,8 @@ section() {
 # ============================================================
 # Header
 # ============================================================
-cat <<'HEADER'
+if (( JSON_MODE == 0 )); then
+    cat <<'HEADER'
 
 Claude Code Claim-Verify Audit
 ==============================
@@ -69,6 +124,7 @@ Each finding cites the source GitHub issue and the book chapter
 where the structural pattern + prevention defense are documented.
 
 HEADER
+fi
 
 # ============================================================
 # Platform detection
@@ -85,10 +141,12 @@ CLAUDE_DIR="${HOME}/.claude"
 SETTINGS_FILE="${CLAUDE_DIR}/settings.json"
 CACHE_DIR="${HOME}/.cache/claude-cli-nodejs"
 
-echo "Platform: $OS"
-echo "User: $USERNAME"
-echo "Claude dir: $CLAUDE_DIR"
-echo
+if (( JSON_MODE == 0 )); then
+    echo "Platform: $OS"
+    echo "User: $USERNAME"
+    echo "Claude dir: $CLAUDE_DIR"
+    echo
+fi
 
 # ============================================================
 # Check 1 — Settings file presence and JSON validity (issue #57491 family)
@@ -312,21 +370,28 @@ fi
 # ============================================================
 # Summary
 # ============================================================
-section "Audit Summary"
-
 TOTAL_FINDINGS=$((HIGH + MED + LOW))
-echo "Findings: ${R}${HIGH} HIGH${N}  ${Y}${MED} MEDIUM${N}  ${B}${LOW} LOW${N}  ${G}${INFO} INFO${N}"
-echo
 
-if (( HIGH > 0 )); then
-    echo "${R}Action required${N}: $HIGH high-severity finding(s) above. Each cites the source issue and the book chapter for structural prevention."
-elif (( MED > 0 )); then
-    echo "${Y}Review recommended${N}: $MED medium-severity finding(s) above. Worth addressing in your next operations review."
+if (( JSON_MODE )); then
+    # Emit single JSON object to stdout
+    TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf '{"schema":"claim-verify-audit/v1","timestamp":"%s","platform":"%s","user":"%s","claude_dir":"%s","summary":{"high":%d,"medium":%d,"low":%d,"info":%d},"findings":[%s]}\n' \
+        "$TIMESTAMP" "$OS" "$(json_escape "$USERNAME")" "$(json_escape "$CLAUDE_DIR")" \
+        "$HIGH" "$MED" "$LOW" "$INFO" "$JSON_FINDINGS"
 else
-    echo "${G}No high or medium-severity findings.${N} Continue periodic auditing as Claude Code ships changes."
-fi
+    section "Audit Summary"
+    echo "Findings: ${R}${HIGH} HIGH${N}  ${Y}${MED} MEDIUM${N}  ${B}${LOW} LOW${N}  ${G}${INFO} INFO${N}"
+    echo
 
-cat <<'FOOTER'
+    if (( HIGH > 0 )); then
+        echo "${R}Action required${N}: $HIGH high-severity finding(s) above. Each cites the source issue and the book chapter for structural prevention."
+    elif (( MED > 0 )); then
+        echo "${Y}Review recommended${N}: $MED medium-severity finding(s) above. Worth addressing in your next operations review."
+    else
+        echo "${G}No high or medium-severity findings.${N} Continue periodic auditing as Claude Code ships changes."
+    fi
+
+    cat <<'FOOTER'
 
 ────────────────────────────────────────────────────────────────
 Structural prevention reference:
@@ -341,6 +406,14 @@ Runtime prevention (hooks):
   https://github.com/eliransu/skill-tax
 
 This audit is read-only and stateless. Rerun anytime after updates.
+Run `bash claim-verify-audit.sh --json` for machine-readable output.
 Patches welcome: open an issue or PR against the gist.
 ────────────────────────────────────────────────────────────────
 FOOTER
+fi
+
+# Exit code: 1 if any HIGH-severity finding, 0 otherwise (for CI integration)
+if (( HIGH > 0 )); then
+    exit 1
+fi
+exit 0
