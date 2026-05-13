@@ -194,6 +194,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `read-before-edit` | Warns when Edit targets a file not recently Read (Read:Edit ratio dropped 70%, [#42796](https://github.com/anthropics/claude-code/issues/42796)) | [#42796](https://github.com/anthropics/claude-code/issues/42796) |
 | `replace-all-guard` | Warns/blocks Edit `replace_all:true` (prevents bulk data corruption) | [#41681](https://github.com/anthropics/claude-code/issues/41681) |
 | `ripgrep-permission-fix` | Auto-fixes vendored ripgrep +x permission on start (fixes broken commands/skills) | [#41933](https://github.com/anthropics/claude-code/issues/41933) |
+| `disabled-plugin-spawn-detector` | Warns when `enabledPlugins:false` plugins still have a `.mcp.json` reachable in Claude Code or Claude Desktop spawn paths (one user accumulated 22 OAuth tabs over weeks after nine cleanup attempts failed) | [#58520](https://github.com/anthropics/claude-code/issues/58520) [#58806](https://github.com/anthropics/claude-code/issues/58806) |
 
 ## All 49 Commands
 
