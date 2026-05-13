@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Stack Builder — Which Claude Code Safety Products Should You Combine?</title>
+<meta name="description" content="6-question stack calculator that recommends the right combination of cc-safe-setup, Token Book, Migration Playbook, Claim-Verify Handbook, and CC Safety Lab Founder Membership for your subscription tier, daily spend, autonomy level, and team size.">
+<meta property="og:title" content="Safety Stack Builder — Pick the Right Claude Code Safety Combination">
+<meta property="og:description" content="6 questions to identify which of the cc-safe-setup ecosystem products (free hooks + 4 books + monthly newsletter) actually fit your setup.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-stack-builder.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Safety Stack Builder — 6 Questions, Tailored Combo">
+<meta name="twitter:description" content="Find the right combination of free hooks, one-time books, and monthly subscription for your Claude Code setup.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-stack-builder.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Safety Stack Builder","description":"6-question calculator that recommends the right combination of cc-safe-setup ecosystem products for any Claude Code user.","url":"https://yurukusa.github.io/cc-safe-setup/safety-stack-builder.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.55rem;margin-bottom:.4rem;line-height:1.25}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:1.5rem;line-height:1.55}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:.5rem;font-weight:600;line-height:1.4}
+.q-help{color:#8b949e;font-size:.82rem;margin-bottom:1rem;line-height:1.5}
+.q-num{color:#7ee787;font-size:.8rem;margin-bottom:.3rem}
+.form-group{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem 1.2rem;margin:.8rem 0}
+.radio-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .3rem;cursor:pointer;border-radius:4px}
+.radio-row:hover{background:#1c2128}
+.radio-row input{accent-color:#7ee787;cursor:pointer}
+.radio-row label{cursor:pointer;color:#c9d1d9;font-size:.9rem;flex:1}
+.radio-row label .desc{display:block;color:#8b949e;font-size:.78rem;margin-top:.1rem;line-height:1.45}
+.actions{margin:1.5rem 0;display:flex;gap:.6rem;flex-wrap:wrap}
+.btn{background:#7ee787;color:#0d1117;border:none;padding:.7rem 1.4rem;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:700}
+.btn:hover{background:#56d364}
+.btn-secondary{background:transparent;color:#58a6ff;border:1px solid #30363d;padding:.7rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.9rem}
+.btn-secondary:hover{border-color:#58a6ff}
+#result{display:none}
+#result.show{display:block}
+
+.summary{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.3rem;margin:1rem 0}
+.summary h2{color:#f0f6fc;font-size:1.2rem;margin-bottom:.3rem;line-height:1.3}
+.summary .lede{color:#7ee787;font-size:.82rem;margin-bottom:.9rem;letter-spacing:.04em;text-transform:uppercase}
+.summary .total{background:#0a1f0a;border:1px solid #2ea043;border-radius:6px;padding:.65rem .9rem;margin:.7rem 0;display:flex;justify-content:space-between;align-items:center}
+.summary .total .label{color:#8b949e;font-size:.8rem}
+.summary .total .price{color:#7ee787;font-weight:700;font-size:1.05rem}
+.summary .why{color:#c9d1d9;font-size:.88rem;line-height:1.55;margin-top:.6rem}
+
+.prod-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.85rem 1rem;margin:.55rem 0;display:flex;gap:.85rem;align-items:flex-start}
+.prod-card.included{border-color:#2ea043;background:#0a1f0a}
+.prod-card.skip{opacity:.45;border-style:dashed}
+.prod-card .check{font-size:1.05rem;line-height:1;margin-top:.1rem}
+.prod-card .body{flex:1}
+.prod-card .name{color:#f0f6fc;font-weight:600;font-size:.92rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.2rem}
+.prod-card .name a{color:#f0f6fc}
+.prod-card .name a:hover{color:#7ee787}
+.prod-card .name .price-tag{color:#7ee787;font-size:.78rem;font-weight:600;white-space:nowrap}
+.prod-card.skip .name .price-tag{color:#6e7681}
+.prod-card .why-this{color:#8b949e;font-size:.8rem;line-height:1.5;margin-top:.18rem}
+.prod-card .why-skip{color:#6e7681;font-size:.78rem;line-height:1.45;font-style:italic;margin-top:.18rem}
+
+.footer-links{margin-top:2rem;color:#6e7681;font-size:.78rem;text-align:center;line-height:1.6}
+.footer-links a{color:#8b949e}
+.intro{color:#c9d1d9;font-size:.9rem;line-height:1.6;margin-bottom:1.2rem;background:#161b22;border-left:3px solid #7ee787;padding:.85rem 1rem;border-radius:0 6px 6px 0}
+.intro strong{color:#f0f6fc}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Safety Stack Builder</h1>
+<p class="sub">Six questions about your Claude Code setup. The result is a stack of cc-safe-setup ecosystem products (free hooks + four one-time books + optional monthly newsletter) sized for what your situation actually requires — nothing more.</p>
+
+<div class="intro">
+The full ecosystem: <strong>cc-safe-setup</strong> (free, MIT, 720+ example hooks); <strong>Token Book</strong> (¥2,500, 44k words on token consumption); <strong>Migration Playbook</strong> ($19, the stay/switch/mix decision tree, Edition 2 ships 2026-05-22); <strong>Claim-Verify Handbook</strong> ($19, 2026-05-22 launch, 49 cases of "tool said done but it didn't"); <strong>Incident Postmortems</strong> ($19, 10 forensic case studies); <strong>CC Safety Lab Founder Membership</strong> (¥500/month, Ko-fi, monthly incident newsletter). Most users do not need all of them. This tool picks the right combination.
+</div>
+
+<form id="form">
+
+<div class="form-group">
+  <div class="q-num">QUESTION 1 OF 6</div>
+  <div class="q">What's your subscription tier?</div>
+  <div class="q-help">Pro plans tend to cap the worst-case spend; Max plans expose you to per-token-inflation surprises; API only pays the full per-token rate.</div>
+  <div class="radio-row"><input type="radio" name="tier" id="t-pro" value="pro" checked><label for="t-pro">Pro plan ($20/month)<span class="desc">Light to moderate use, hard ceiling on per-token waste</span></label></div>
+  <div class="radio-row"><input type="radio" name="tier" id="t-max" value="max"><label for="t-max">Max plan ($100/$200/month)<span class="desc">Heavy use, still per-token accounting under the hood</span></label></div>
+  <div class="radio-row"><input type="radio" name="tier" id="t-api" value="api"><label for="t-api">API only<span class="desc">Pay-as-you-go, no subscription buffer</span></label></div>
+</div>
+
+<div class="form-group">
+  <div class="q-num">QUESTION 2 OF 6</div>
+  <div class="q">What's your adjusted daily Claude Code spend?</div>
+  <div class="q-help">Adjusted = visible /usage spend × 1.4 to account for token inflation and cache regressions. Round up.</div>
+  <div class="radio-row"><input type="radio" name="spend" id="s-low" value="low" checked><label for="s-low">Under $10/day<span class="desc">Hobby or part-time use</span></label></div>
+  <div class="radio-row"><input type="radio" name="spend" id="s-mid" value="mid"><label for="s-mid">$10–$30/day<span class="desc">Daily professional use</span></label></div>
+  <div class="radio-row"><input type="radio" name="spend" id="s-high" value="high"><label for="s-high">$30+/day<span class="desc">Heavy autonomous or team use</span></label></div>
+</div>
+
+<div class="form-group">
+  <div class="q-num">QUESTION 3 OF 6</div>
+  <div class="q">How autonomously does Claude Code run?</div>
+  <div class="q-help">Autonomy raises the cost of silent failures because you may not be watching when one happens.</div>
+  <div class="radio-row"><input type="radio" name="autonomy" id="a-manual" value="manual" checked><label for="a-manual">Manual<span class="desc">I review every step. Claude waits for me.</span></label></div>
+  <div class="radio-row"><input type="radio" name="autonomy" id="a-semi" value="semi"><label for="a-semi">Semi-autonomous<span class="desc">I let it run multi-step plans but stay nearby.</span></label></div>
+  <div class="radio-row"><input type="radio" name="autonomy" id="a-overnight" value="overnight"><label for="a-overnight">Overnight / unattended<span class="desc">I leave it running for hours. Auto-mode, /goal, /loop.</span></label></div>
+</div>
+
+<div class="form-group">
+  <div class="q-num">QUESTION 4 OF 6</div>
+  <div class="q">Have you been considering switching, or are you committed to Claude Code?</div>
+  <div class="q-help">Migration economics shift fast in 2026. If you're already considering Cursor or Codex, the Migration Playbook pays for itself in one good decision.</div>
+  <div class="radio-row"><input type="radio" name="migration" id="m-committed" value="committed" checked><label for="m-committed">Committed to Claude Code<span class="desc">Not actively shopping alternatives.</span></label></div>
+  <div class="radio-row"><input type="radio" name="migration" id="m-curious" value="curious"><label for="m-curious">Curious but not actively switching<span class="desc">Open to changing if the case is strong.</span></label></div>
+  <div class="radio-row"><input type="radio" name="migration" id="m-shopping" value="shopping"><label for="m-shopping">Actively evaluating alternatives<span class="desc">Cursor, Codex, Cline, mix-and-match.</span></label></div>
+</div>
+
+<div class="form-group">
+  <div class="q-num">QUESTION 5 OF 6</div>
+  <div class="q">How worried are you about silent tool failures? (Claude says "done" but it isn't)</div>
+  <div class="q-help">If you've already been bitten — sub-agent claimed work it didn't do, file silently truncated, MCP tool ran without confirmation — the handbook's 49 cases save you from rediscovering each pattern.</div>
+  <div class="radio-row"><input type="radio" name="claimverify" id="cv-low" value="low" checked><label for="cv-low">Not on my radar yet<span class="desc">Hasn't bitten me; I'd rather wait until it does.</span></label></div>
+  <div class="radio-row"><input type="radio" name="claimverify" id="cv-mid" value="mid"><label for="cv-mid">Bitten once or twice<span class="desc">A handful of these, painful but recoverable.</span></label></div>
+  <div class="radio-row"><input type="radio" name="claimverify" id="cv-high" value="high"><label for="cv-high">It's a regular problem<span class="desc">Multiple incidents per month, hard to triage.</span></label></div>
+</div>
+
+<div class="form-group">
+  <div class="q-num">QUESTION 6 OF 6</div>
+  <div class="q">Do you want monthly tracking, or one-time learning?</div>
+  <div class="q-help">The monthly Safety Lab newsletter (¥500/month, Ko-fi) tracks incidents and platform changes. The one-time books capture stable patterns. They complement each other.</div>
+  <div class="radio-row"><input type="radio" name="cadence" id="cd-onetime" value="onetime" checked><label for="cd-onetime">One-time only — I'll learn the patterns and move on<span class="desc">Books, not subscriptions.</span></label></div>
+  <div class="radio-row"><input type="radio" name="cadence" id="cd-monthly" value="monthly"><label for="cd-monthly">Monthly tracking — keep me informed of new issues<span class="desc">Newsletter as the continuous companion.</span></label></div>
+  <div class="radio-row"><input type="radio" name="cadence" id="cd-both" value="both"><label for="cd-both">Both — depth from books, currency from newsletter<span class="desc">Belt and suspenders.</span></label></div>
+</div>
+
+<div class="actions">
+  <button type="button" class="btn" onclick="buildStack()">Build my stack →</button>
+  <button type="reset" class="btn-secondary">Reset</button>
+</div>
+
+</form>
+
+<div id="result">
+  <div class="summary">
+    <div class="lede" id="result-lede">YOUR RECOMMENDED STACK</div>
+    <h2 id="result-title">Stack tailored to your inputs</h2>
+    <div class="total"><span class="label" id="result-cost-label">One-time:</span><span class="price" id="result-cost"></span></div>
+    <div class="total" id="result-monthly-row" style="display:none"><span class="label">Recurring:</span><span class="price" id="result-monthly"></span></div>
+    <div class="why" id="result-why"></div>
+    <div id="result-items"></div>
+  </div>
+  <div style="text-align:center;margin:1rem 0">
+    <button type="button" class="btn-secondary" onclick="document.getElementById('result').classList.remove('show');document.getElementById('form').scrollIntoView({behavior:'smooth'})">← Adjust answers</button>
+  </div>
+</div>
+
+<div class="footer-links">
+<a href="hub.html">All cc-safe-setup tools</a> · <a href="claim-verify-checkup.html">Claim-Verify Checkup</a> · <a href="migration-decision-tree.html">Migration Decision Tree</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a><br>
+<span style="color:#6e7681">All recommendations are heuristic. The Migration Playbook and Claim-Verify Handbook each include their own decision frameworks if you want more depth.</span>
+</div>
+
+</div>
+
+<script>
+const PRODUCTS = {
+  ccss: {
+    name: 'cc-safe-setup',
+    url: 'https://github.com/yurukusa/cc-safe-setup',
+    price: 'Free (MIT)',
+    desc: '720+ example hooks, one-command install. Catches rm -rf, force-push, secret leaks, sub-agent failures, claim-verify gaps. Everyone starts here.'
+  },
+  token: {
+    name: 'Token Book',
+    url: 'https://zenn.dev/yurukusa/books/token-savings-guide',
+    price: '¥2,500 (~$17)',
+    desc: '44,000 words on Claude Code token consumption — CLAUDE.md optimization, cache discipline, hook-based budget control, 24 documented waste symptoms. Chapter 1 free.'
+  },
+  migration: {
+    name: 'Migration Playbook',
+    url: 'https://yurukusa.gumroad.com/l/claude-code-migration-playbook',
+    price: '$19',
+    desc: 'The stay/switch/mix decision tree. 8 gates, 6 paths (Stay, Switch, Replace-model, Stack-of-tools, Proxy, Hybrid). Edition 2 ships 2026-05-22 free for existing buyers. 14,264 viewers and counting.'
+  },
+  handbook: {
+    name: 'Claim-Verify Handbook',
+    url: 'https://yurukusa.gumroad.com/l/claim-verify-handbook',
+    price: '$19',
+    desc: '49 cases (15 main + 34 appendix D) of "Claude Code or its sub-agents said done while the underlying action failed silently". 5 detection tools with 165+ tests, 14 defense procedures. 2026-05-22 launch.'
+  },
+  postmortems: {
+    name: 'Incident Postmortems',
+    url: 'https://yurukusa.gumroad.com/l/rhtptb',
+    price: '$19',
+    desc: '10 forensic case studies of major Claude Code incidents. The history book of how Claude Code can fail catastrophically and what could have prevented each.'
+  },
+  safetylab: {
+    name: 'CC Safety Lab Founder Membership',
+    url: 'https://yurukusa.github.io/cc-safe-setup/safety-lab.html',
+    price: '¥500/month (~$3.30)',
+    desc: 'Monthly Ko-fi newsletter. Each issue: 4–8 newly-found incidents (with fixes), 1 deep-dive failure case, 1–2 copy-paste hooks, updated safety checklist, product update notes. Founder price locked.',
+    recurring: true
+  }
+};
+
+function buildStack() {
+  const f = document.getElementById('form');
+  const tier = f.tier.value;
+  const spend = f.spend.value;
+  const autonomy = f.autonomy.value;
+  const migration = f.migration.value;
+  const claimverify = f.claimverify.value;
+  const cadence = f.cadence.value;
+
+  const included = new Set();
+  const skipped = new Set();
+  const reasons = {};
+
+  // Everyone gets cc-safe-setup
+  included.add('ccss');
+  reasons.ccss = 'Free MIT install. The baseline. No reason to skip.';
+
+  // Token Book: high spend, max tier, or daily-spend pressure
+  if (spend === 'high' || spend === 'mid' || tier === 'max' || tier === 'api') {
+    included.add('token');
+    if (spend === 'high') reasons.token = 'Daily spend $30+ means every 10% reduction is real money. The Token Book has documented 40% reductions from CLAUDE.md changes alone.';
+    else if (tier === 'max') reasons.token = 'Max plan still bills per-token under the hood. The Token Book\'s waste-symptom catalog is what makes Max actually unlimited in practice.';
+    else if (tier === 'api') reasons.token = 'API-only means token waste is direct dollar waste. The Token Book pays itself back in a week.';
+    else reasons.token = '$10–$30/day spend is right in the band where Token Book optimization moves the needle.';
+  } else {
+    skipped.add('token');
+    reasons.token = 'Low spend on Pro means token optimization isn\'t your bottleneck yet. Skip for now.';
+  }
+
+  // Migration Playbook: shopping or curious
+  if (migration === 'shopping' || migration === 'curious') {
+    included.add('migration');
+    if (migration === 'shopping') reasons.migration = 'Actively evaluating alternatives. The Playbook\'s 6-path decision tree (Stay / Switch / Replace-model / Stack / Proxy / Hybrid) saves you from picking the wrong path. One good decision = $19 paid back.';
+    else reasons.migration = 'Curious means you\'ll eventually have to decide. Edition 2 (2026-05-22) adds three new path postures including the GLM Coding Plan Path B-prime. Buy now, get Edition 2 free.';
+  } else {
+    skipped.add('migration');
+    reasons.migration = 'Committed to Claude Code with no shopping intent. The migration decision tree isn\'t your priority. Revisit if triggers stack up.';
+  }
+
+  // Claim-Verify Handbook: any claim-verify pain, overnight autonomy, high spend
+  if (claimverify === 'mid' || claimverify === 'high' || autonomy === 'overnight' || spend === 'high') {
+    included.add('handbook');
+    if (claimverify === 'high') reasons.handbook = 'Regular silent-failure problems. The Handbook\'s 49 cases let you recognize each pattern in advance instead of rediscovering it.';
+    else if (claimverify === 'mid') reasons.handbook = 'Already bitten. The Handbook\'s 5 detection tools (165+ tests) catch the next occurrence before it does damage.';
+    else if (autonomy === 'overnight') reasons.handbook = 'Unattended autonomous use is exactly where silent failures hurt most — you\'re not watching when it happens. The Handbook is the missing companion.';
+    else reasons.handbook = 'High daily spend amplifies the cost of every silent failure. The Handbook pays back in one prevented incident.';
+  } else {
+    skipped.add('handbook');
+    reasons.handbook = 'Not yet bitten by silent failures and not running unattended. You can come back when something surprises you.';
+  }
+
+  // Postmortems: high autonomy, team contexts, history-curious
+  if (autonomy === 'overnight' || (autonomy === 'semi' && spend !== 'low')) {
+    included.add('postmortems');
+    reasons.postmortems = 'Autonomous use means you should know the failure cases catastrophic enough to publish about. 10 forensic case studies, $19, history book of what went wrong before.';
+  } else {
+    skipped.add('postmortems');
+    reasons.postmortems = 'Less urgent for manual use cases. The Postmortems book is the history-book complement — useful but not blocking.';
+  }
+
+  // Safety Lab: monthly tracking, semi/overnight autonomy
+  if (cadence === 'monthly' || cadence === 'both' || autonomy === 'overnight') {
+    included.add('safetylab');
+    if (cadence === 'monthly') reasons.safetylab = 'You want continuous updates. ¥500/month tracks Claude Code\'s monthly incident cluster and platform changes — what the books can\'t capture because they\'re snapshots.';
+    else if (cadence === 'both') reasons.safetylab = 'Belt and suspenders. The books cover stable patterns, the monthly tracks new ones. Founder price (¥500/month) is locked for charter members.';
+    else reasons.safetylab = 'Overnight autonomous use changes monthly as Claude Code evolves. The newsletter is how you stay current without doom-scrolling GitHub Issues.';
+  } else {
+    skipped.add('safetylab');
+    reasons.safetylab = 'You prefer one-time learning. The newsletter complements the books — come back if your situation changes.';
+  }
+
+  // Pricing
+  let oneTime = 0;
+  const oneTimeBreakdown = [];
+  if (included.has('token')) { oneTime += 17; oneTimeBreakdown.push('Token Book ~$17'); }
+  if (included.has('migration')) { oneTime += 19; oneTimeBreakdown.push('Migration Playbook $19'); }
+  if (included.has('handbook')) { oneTime += 19; oneTimeBreakdown.push('Claim-Verify Handbook $19'); }
+  if (included.has('postmortems')) { oneTime += 19; oneTimeBreakdown.push('Postmortems $19'); }
+
+  const monthly = included.has('safetylab') ? 3.30 : 0;
+
+  // Build title + lede
+  let title, lede;
+  if (included.size === 1) {
+    title = 'Just the free baseline for now';
+    lede = 'BASELINE STACK';
+  } else if (included.size <= 3) {
+    title = 'A lean, targeted stack';
+    lede = 'LEAN STACK';
+  } else if (included.size <= 5) {
+    title = 'A full operator stack';
+    lede = 'FULL STACK';
+  } else {
+    title = 'The complete ecosystem';
+    lede = 'COMPLETE ECOSYSTEM';
+  }
+
+  // Why text
+  const whyParts = [];
+  whyParts.push(`Based on a ${tier === 'pro' ? 'Pro' : tier === 'max' ? 'Max' : 'API-only'} tier with ${spend === 'low' ? '<$10/day' : spend === 'mid' ? '$10–$30/day' : '$30+/day'} spend, ${autonomy === 'manual' ? 'manual oversight' : autonomy === 'semi' ? 'semi-autonomous runs' : 'overnight autonomy'}, ${migration === 'committed' ? 'no migration intent' : migration === 'curious' ? 'open to switching' : 'actively shopping'}, ${claimverify === 'low' ? 'no claim-verify pain yet' : claimverify === 'mid' ? 'occasional silent failures' : 'frequent silent failures'}, and a preference for ${cadence === 'onetime' ? 'one-time learning' : cadence === 'monthly' ? 'monthly tracking' : 'both modes'}.`);
+
+  // Render
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-lede').textContent = lede;
+  document.getElementById('result-cost-label').textContent = oneTime > 0 ? 'One-time total:' : 'One-time total:';
+  document.getElementById('result-cost').textContent = oneTime > 0 ? '$' + oneTime : '$0 (free)';
+  if (monthly > 0) {
+    document.getElementById('result-monthly-row').style.display = 'flex';
+    document.getElementById('result-monthly').textContent = '¥500/month (~$' + monthly.toFixed(2) + ')';
+  } else {
+    document.getElementById('result-monthly-row').style.display = 'none';
+  }
+  document.getElementById('result-why').textContent = whyParts.join(' ');
+
+  // Render product cards
+  const items = document.getElementById('result-items');
+  items.innerHTML = '';
+  const order = ['ccss', 'token', 'migration', 'handbook', 'postmortems', 'safetylab'];
+  for (const key of order) {
+    const p = PRODUCTS[key];
+    const isIncluded = included.has(key);
+    const card = document.createElement('div');
+    card.className = 'prod-card ' + (isIncluded ? 'included' : 'skip');
+    card.innerHTML = `
+      <div class="check">${isIncluded ? '✓' : '·'}</div>
+      <div class="body">
+        <div class="name"><a href="${p.url}" target="_blank" rel="noopener">${p.name}</a><span class="price-tag">${p.price}</span></div>
+        ${isIncluded ? `<div class="why-this">${reasons[key]}</div>` : `<div class="why-skip">Skip: ${reasons[key]}</div>`}
+        ${isIncluded ? `<div class="why-this" style="margin-top:.35rem;color:#c9d1d9">${p.desc}</div>` : ''}
+      </div>
+    `;
+    items.appendChild(card);
+  }
+
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
