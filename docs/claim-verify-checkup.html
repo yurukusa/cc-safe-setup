@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim-Verify Checkup — Did Claude Code Say "Done" When It Wasn't?</title>
+<meta name="description" content="5-question diagnostic to identify which claim-verify gap pattern you are hitting with Claude Code. Get a targeted prevention hook from cc-safe-setup and a pointer into the 49-case handbook.">
+<meta property="og:title" content="Claim-Verify Checkup — Did Claude Code Say &quot;Done&quot; When It Wasn't?">
+<meta property="og:description" content="5 questions to find the failure pattern behind your Claude Code mishap. Get a prevention hook and case-study pointer.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claim-verify-checkup.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claim-Verify Checkup — Diagnose Your Claude Code Failure Pattern">
+<meta name="twitter:description" content="5 questions to identify which silent-failure pattern hit you, and the cc-safe-setup hook that prevents it.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claim-verify-checkup.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Claim-Verify Checkup — Claude Code Silent Failure Diagnostic","description":"5-question diagnostic to identify which claim-verify gap pattern you are hitting with Claude Code. Recommends a specific cc-safe-setup hook and Claim-Verify Handbook chapter.","url":"https://yurukusa.github.io/cc-safe-setup/claim-verify-checkup.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:720px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.55rem;margin-bottom:.4rem;line-height:1.25}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:1.5rem;line-height:1.55}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:1rem;font-weight:600;line-height:1.4}
+.q-num{color:#f97316;font-size:.8rem;margin-bottom:.3rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.85rem 1rem;cursor:pointer;transition:all .15s;text-align:left}
+.opt:hover{border-color:#f97316;background:#1c2128}
+.opt.selected{border-color:#f97316;background:#2a1a0a}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.92rem;margin-bottom:.18rem}
+.opt-desc{color:#8b949e;font-size:.8rem;line-height:1.45}
+.progress{display:flex;gap:.3rem;margin:1.4rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#f97316}
+.dot.current{background:#fb923c}
+.back-btn{background:none;border:none;color:#58a6ff;font-size:.82rem;cursor:pointer;padding:.4rem 0;margin-top:1rem}
+.back-btn:hover{text-decoration:underline}
+
+.result{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.3rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.15rem;margin-bottom:.3rem;line-height:1.3}
+.result .lede{color:#f97316;font-size:.82rem;margin-bottom:.9rem;letter-spacing:.04em;text-transform:uppercase}
+.result .what{color:#c9d1d9;font-size:.92rem;line-height:1.6;margin-bottom:1rem}
+.hook-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.85rem 1rem;margin:.7rem 0}
+.hook-card .name{color:#7ee787;font-weight:600;font-size:.92rem;margin-bottom:.3rem}
+.hook-card .desc{color:#8b949e;font-size:.82rem;line-height:1.5;margin-bottom:.4rem}
+.hook-card .trigger{display:inline-block;background:#1c2128;color:#58a6ff;font-size:.68rem;padding:.12rem .4rem;border-radius:3px;margin-right:.3rem}
+.hook-card .issue{display:inline-block;background:#2a1a0a;color:#f97316;font-size:.68rem;padding:.12rem .4rem;border-radius:3px}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.7rem;font-size:.74rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;margin:.5rem 0}
+.handbook-card{background:#1a1411;border:1px solid #5c3a13;border-radius:6px;padding:.9rem 1.1rem;margin:1rem 0}
+.handbook-card .label{color:#f97316;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.handbook-card .ptr{color:#f0f6fc;font-size:.92rem;line-height:1.55;margin-bottom:.5rem}
+.handbook-card .price{color:#8b949e;font-size:.78rem}
+.handbook-card a{color:#f97316;font-weight:600}
+.restart{display:inline-block;margin-top:1rem;color:#58a6ff;font-size:.85rem;background:none;border:1px solid #30363d;padding:.45rem .85rem;border-radius:5px;cursor:pointer}
+.restart:hover{border-color:#58a6ff}
+.footer-links{margin-top:2rem;color:#6e7681;font-size:.78rem;text-align:center;line-height:1.6}
+.footer-links a{color:#8b949e}
+.intro{color:#c9d1d9;font-size:.9rem;line-height:1.6;margin-bottom:1rem;background:#161b22;border-left:3px solid #f97316;padding:.85rem 1rem;border-radius:0 6px 6px 0}
+.intro strong{color:#f0f6fc}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Claim-Verify Checkup</h1>
+<p class="sub">Five questions to identify which silent-failure pattern hit you. Each path ends with a specific cc-safe-setup hook to install and a pointer into the 49-case Claim-Verify Handbook.</p>
+
+<div class="intro">
+A <strong>claim-verify gap</strong> is when Claude Code (or one of its sub-agents) says <em>done</em> while the underlying action failed silently. The tool layer reported success. The user's mental model says it's done. The system reality says otherwise — and there's no surface signal at the moment of divergence. Examples: a Write that was truncated, a goal evaluator that won't stop, a permissions.ask that never asked, a subagent that "fixed it" using a read-only tool.
+</div>
+
+<div id="progress" class="progress" aria-hidden="true">
+  <span class="dot current"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+</div>
+
+<!-- Step 1 -->
+<div class="step active" data-step="1">
+  <div class="q-num">QUESTION 1 OF 5</div>
+  <div class="q">What's the most concrete way you noticed something was wrong?</div>
+  <div class="opts">
+    <button class="opt" data-next="2-file">
+      <div class="opt-title">A file ended up corrupt, truncated, or empty after a Write or Edit</div>
+      <div class="opt-desc">The tool said it wrote N bytes, but the file is the wrong size, has null bytes at the end, or is missing the bottom portion of the content.</div>
+    </button>
+    <button class="opt" data-next="2-billing">
+      <div class="opt-title">My quota or API balance burned faster than I expected</div>
+      <div class="opt-desc">A long autonomous loop, an unexpected billing route, or an evaluator that kept firing — and you only noticed when the invoice or balance moved.</div>
+    </button>
+    <button class="opt" data-next="2-permission">
+      <div class="opt-title">A tool ran that I thought required a confirmation prompt</div>
+      <div class="opt-desc">Your settings said the tool should ask first, but it executed without prompting. Often happens with MCP tools or in default permission mode.</div>
+    </button>
+    <button class="opt" data-next="2-subagent">
+      <div class="opt-title">A sub-agent or background task claimed success but produced no real output</div>
+      <div class="opt-desc">The delegation came back with "Done" or "Saved" or "Fixed", but when you checked, the files weren't touched, the bug wasn't fixed, or the data wasn't there.</div>
+    </button>
+    <button class="opt" data-next="2-display">
+      <div class="opt-title">The status or usage display showed wrong numbers</div>
+      <div class="opt-desc">The usage dashboard, agent view, status line, or token counter showed values that didn't match the actual session state.</div>
+    </button>
+  </div>
+</div>
+
+<!-- Step 2: file path -->
+<div class="step" data-step="2-file">
+  <div class="q-num">QUESTION 2 OF 5</div>
+  <div class="q">Was the file on a virtiofs mount, a Claude Cowork sandbox, or a dev container?</div>
+  <div class="opts">
+    <button class="opt" data-next="3-file-virtiofs">
+      <div class="opt-title">Yes — virtiofs, Cowork sandbox, or container</div>
+      <div class="opt-desc">Examples: <code>/workspace</code> in Cowork, mounted volumes in Codespaces, devcontainer.json with bind mounts, Docker on Mac with file sync.</div>
+    </button>
+    <button class="opt" data-next="3-file-normal">
+      <div class="opt-title">No — it was a regular local file on my normal filesystem</div>
+      <div class="opt-desc">macOS/Linux/Windows local filesystem, no sandboxing, no special mount type.</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- Step 2: billing path -->
+<div class="step" data-step="2-billing">
+  <div class="q-num">QUESTION 2 OF 5</div>
+  <div class="q">Which billing path was the surprise on?</div>
+  <div class="opts">
+    <button class="opt" data-next="3-billing-api">
+      <div class="opt-title">My prepaid API balance got charged while I thought I was on a Max plan</div>
+      <div class="opt-desc">Auto-recharge events, charges on the API console, while you were certain you'd subscribed to Max and not turned on per-token billing.</div>
+    </button>
+    <button class="opt" data-next="3-billing-goal">
+      <div class="opt-title">A /goal or long autonomous loop burned a large chunk of weekly quota</div>
+      <div class="opt-desc">Many turns producing little. The evaluator or loop kept going long after the work was effectively done. You only noticed at the quota meter or when sessions started getting cut off.</div>
+    </button>
+    <button class="opt" data-next="3-billing-subagent">
+      <div class="opt-title">Sub-agent or advisor calls multiplied unexpectedly</div>
+      <div class="opt-desc">Spawned helpers that hit the same expensive model as the parent, doubled or tripled the spend without showing up in the main /usage view.</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- Step 2: permission path -->
+<div class="step" data-step="2-permission">
+  <div class="q-num">QUESTION 2 OF 5</div>
+  <div class="q">What kind of tool ran without asking?</div>
+  <div class="opts">
+    <button class="opt" data-next="3-perm-mcp">
+      <div class="opt-title">An MCP tool (name started with mcp__)</div>
+      <div class="opt-desc">Atlassian, GitHub, Slack, custom MCP servers, etc. Anything wired in via MCP and listed in your permissions.ask.</div>
+    </button>
+    <button class="opt" data-next="3-perm-bash">
+      <div class="opt-title">A Bash command with a path or argument that should have been guarded</div>
+      <div class="opt-desc">Auto-mode running a key=value argument that bypassed the allowlist, or a Bash invocation that slipped through a regex pattern.</div>
+    </button>
+    <button class="opt" data-next="3-perm-postcredfail">
+      <div class="opt-title">A destructive command ran right after a credential or login failure</div>
+      <div class="opt-desc">After an auth error, the agent kept going and ran rm/git checkout/db wipes "to fix the issue" — without re-asking for permission.</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- Step 2: subagent path -->
+<div class="step" data-step="2-subagent">
+  <div class="q-num">QUESTION 2 OF 5</div>
+  <div class="q">When the sub-agent reported "done", what did it actually have access to?</div>
+  <div class="opts">
+    <button class="opt" data-next="3-sub-readonly">
+      <div class="opt-title">The sub-agent only had Read or Grep — no Write/Edit/Bash</div>
+      <div class="opt-desc">You spawned a search/research agent and it reported "Saved the fix to file X", but its tool list doesn't include Write. Issue #55653 family.</div>
+    </button>
+    <button class="opt" data-next="3-sub-identity">
+      <div class="opt-title">The sub-agent leaked the parent's identity or conversation history</div>
+      <div class="opt-desc">A delegated agent responded as if it were the main session, or referenced details from the parent thread it shouldn't have known. Issue #55488 family.</div>
+    </button>
+    <button class="opt" data-next="3-sub-tooluse">
+      <div class="opt-title">The sub-agent reported tool calls it never actually made</div>
+      <div class="opt-desc">"I ran the tests, all passing" — but the tool-use count was zero. Or "I edited 5 files" with no Write entries in the transcript.</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- Step 2: display path -->
+<div class="step" data-step="2-display">
+  <div class="q-num">QUESTION 2 OF 5</div>
+  <div class="q">Which display was wrong?</div>
+  <div class="opts">
+    <button class="opt" data-next="3-display-usage">
+      <div class="opt-title">/usage dashboard showed wrong token counts</div>
+      <div class="opt-desc">7-day view missing data, daily total not matching actual spend, weekly bar showing zero when you know you used tokens. Issue #58287 family.</div>
+    </button>
+    <button class="opt" data-next="3-display-agents">
+      <div class="opt-title">Agents view said "Working" when no turn was active</div>
+      <div class="opt-desc">Background bash process keeping an agent pinned as Working long after the turn finished. Issue #58297 family.</div>
+    </button>
+    <button class="opt" data-next="3-display-status">
+      <div class="opt-title">Status line / context% showed 0 or disappeared</div>
+      <div class="opt-desc">After /compact or a session restart, the context% indicator vanished or reset to zero while the conversation kept going. Issue #58268 family.</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- ===== RESULTS ===== -->
+
+<!-- File virtiofs result -->
+<div class="step" data-step="3-file-virtiofs">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · virtiofs Write/Edit corruption</div>
+    <h2>Your filesystem is silently null-padding or tail-chopping Claude Code's writes.</h2>
+    <div class="what">The Write tool returned success but the file isn't what was written. On virtiofs (Cowork's sandbox, some devcontainers, certain Docker setups), there are two known modes: <strong>shrink-then-null-pad</strong> (file size stays at the old, larger size with \x00 padding at the end) and <strong>grow-then-tail-chop</strong> (file is cut short at some boundary K below the intended length). The assistant believes the write succeeded; the next Read brings back corrupted content.</div>
+    <div class="hook-card">
+      <div class="name">write-byte-integrity-verifier</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#58551</span>
+      <div class="desc" style="margin-top:.5rem">After every Write or Edit, the hook reads the on-disk byte count and compares it to the intended content. If the file is larger than expected with trailing nulls, you get a shrink-pad warning. If smaller, a tail-chop warning. Edit additionally greps for new_string to confirm it landed.</div>
+      <pre><code>{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{ "type": "command", "command": "~/.claude/hooks/write-byte-integrity-verifier.sh" }]
+    }]
+  }
+}</code></pre>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- File normal result -->
+<div class="step" data-step="3-file-normal">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · general file integrity</div>
+    <h2>On a regular filesystem, the byte-count verification hook still catches most surprises.</h2>
+    <div class="what">Even off virtiofs, the same pattern (assistant writes content, the file ends up wrong size, the Read returns something else) can happen due to permission errors, disk-full conditions, or symlinks pointing somewhere unexpected. The hook is cheap (~5ms) and catches the divergence at the moment it happens.</div>
+    <div class="hook-card">
+      <div class="name">write-byte-integrity-verifier</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#58551</span>
+      <div class="desc" style="margin-top:.5rem">Adds a byte-count check after Write and Edit, catches Write content vs file size mismatches and Edit's new_string not landing.</div>
+    </div>
+    <div class="hook-card">
+      <div class="name">read-before-edit</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#42796</span>
+      <div class="desc" style="margin-top:.5rem">Catches the broader "Claude edits files it never Read" pattern (Read:Edit ratio dropped from 6.6 to 2.0 in one analysis), which is often the upstream cause of writes that don't match the intended file state.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Billing API result -->
+<div class="step" data-step="3-billing-api">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · .env ANTHROPIC_API_KEY silently routing billing to API</div>
+    <h2>Claude Code is billing your API account, not your Max plan.</h2>
+    <div class="what">If your project's <code>.env</code> contains <code>ANTHROPIC_API_KEY=sk-ant-…</code> AND your shell loads it (via <code>direnv</code>, <code>source .env</code>, etc.), Claude Code's child shells inherit it and the model client prefers env-var auth over the subscription. Anthropic has confirmed this is intentional design — the documentation is correct — so the only fix is on your side. Reported case: 9 auto-recharges totaling ~$187 USD, non-refundable.</div>
+    <div class="hook-card">
+      <div class="name">dotenv-anthropic-key-billing-guard</div>
+      <span class="trigger">SessionStart</span>
+      <span class="issue">PSA 1tbaq2d</span>
+      <div class="desc" style="margin-top:.5rem">Scans your project for the 5 standard .env file names. If any contain a non-empty ANTHROPIC_API_KEY assignment, warns at session start with three concrete fixes: remove the line, set the env var to empty in your shell init, or move the key to a non-auto-sourced file.</div>
+      <pre><code>{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{ "type": "command", "command": "~/.claude/hooks/dotenv-anthropic-key-billing-guard.sh" }]
+    }]
+  }
+}</code></pre>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Billing goal result -->
+<div class="step" data-step="3-billing-goal">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · /goal evaluator with no iteration cap</div>
+    <h2>A /goal kept firing after the condition became unsatisfiable.</h2>
+    <div class="what">The /goal evaluator runs after every assistant turn. With no built-in iteration limit, an unsatisfiable goal fires indefinitely. Reported case: 200+ iterations over 5 hours, ~50% of weekly token quota consumed. The assistant cannot clear a goal programmatically — only the user can with <code>/goal clear</code>. Workaround #4 from the issue: append <code>or stop after N turns</code> to your goal text.</div>
+    <div class="hook-card">
+      <div class="name">goal-iteration-limit-warner</div>
+      <span class="trigger">UserPromptSubmit</span>
+      <span class="issue">#58550</span>
+      <div class="desc" style="margin-top:.5rem">Detects /goal commands at the moment of submission. If the goal text lacks a termination clause (heuristic scan for "stop after", "or stop", "max N", "N turns", "N iterations", etc.), warns with a recommendation to add one.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Billing subagent result -->
+<div class="step" data-step="3-billing-subagent">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · sub-agent doubling spend on the same tier</div>
+    <h2>An advisor or sub-agent is calling the same expensive model as your main session.</h2>
+    <div class="what">When a sub-agent spawns its own Opus calls to "ask the advisor" or to plan, you pay the same per-token rate twice. Often invisible in the main /usage view. Issue #58217 documents the pattern. The cleanest mitigation is to constrain the sub-agent's model and tool allowlist explicitly in the delegation prompt.</div>
+    <div class="hook-card">
+      <div class="name">subagent-tool-allowlist-enforcer</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#55653 / #58217</span>
+      <div class="desc" style="margin-top:.5rem">Enforces a tool allowlist for sub-agent calls and surfaces the delegation prompt for review before spawn. Pairs with subagent-spawn-verification-enforcer for output verification.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Permission MCP result -->
+<div class="step" data-step="3-perm-mcp">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · permissions.ask bypassed for MCP tools</div>
+    <h2>Your settings say "ask first" but the MCP tool ran anyway.</h2>
+    <div class="what">On Claude Code 2.1.139 (reported on Bedrock; likely affects other providers), entries in <code>permissions.ask</code> that match MCP tools (names starting with <code>mcp__</code>) execute without a confirmation prompt — same as if they were in <code>allow</code>. The MCP surface is exactly where many irreversible operations live (database writes, deployments, payment processing, message sending), making this gap especially costly.</div>
+    <div class="hook-card">
+      <div class="name">mcp-permissions-ask-warner</div>
+      <span class="trigger">SessionStart</span>
+      <span class="issue">#58289</span>
+      <div class="desc" style="margin-top:.5rem">At session start, reads your settings.json (user + project), filters permissions.ask for mcp__* entries, and warns if any are found. Suggests three concrete workarounds: move them to permissions.deny (still gates correctly), use <code>--permission-mode plan</code>, or remove the entry.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Permission Bash result -->
+<div class="step" data-step="3-perm-bash">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · auto-mode / allowlist bypass</div>
+    <h2>A Bash invocation slipped through your allowlist or auto-mode gate.</h2>
+    <div class="what">The autoAllowBashIfSandboxed mode and similar gates have known prompt-pattern blind spots — for example, commands that contain <code>key=value</code> arguments or specific quoting can match in surprising ways. The cc-safe-setup destructive-cmd-guard family of hooks operates at the process level, after the gate decision, so they catch what the gate missed.</div>
+    <div class="hook-card">
+      <div class="name">destructive-cmd-guard</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#46058 / #49129 / #46684</span>
+      <div class="desc" style="margin-top:.5rem">Blocks rm -rf, dd, mkfs and similar destructive commands at the Bash invocation layer regardless of upstream gate decisions. Part of the standard cc-safe-setup install set.</div>
+    </div>
+    <div class="hook-card">
+      <div class="name">auto-mode-safety-enforcer</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#49618</span>
+      <div class="desc" style="margin-top:.5rem">Catches commands that match against an explicit safety pattern list, even in auto-mode-permissive contexts. Closes the gap left by the auto-mode classifier hardcoded to Opus 4.6.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Permission post-cred-fail result -->
+<div class="step" data-step="3-perm-postcredfail">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · destructive recovery after credential failure</div>
+    <h2>The agent escalated to destructive commands "to fix" an auth error.</h2>
+    <div class="what">PocketOS-style pattern: a credential failure surfaces, the assistant interprets it as a state inconsistency, and proposes destructive operations (delete a volume, wipe a database, reset credentials) without re-asking permission. Once the destructive command runs, the original auth problem isn't fixed and now data is lost too.</div>
+    <div class="hook-card">
+      <div class="name">post-credential-failure-destructive-guard</div>
+      <span class="trigger">PreToolUse + PostToolUse</span>
+      <span class="issue">PocketOS</span>
+      <div class="desc" style="margin-top:.5rem">Tracks recent credential or auth failures in the session and intercepts destructive commands that follow them, requiring explicit user confirmation before proceeding. 29 test cases.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Subagent readonly result -->
+<div class="step" data-step="3-sub-readonly">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · sub-agent fabricating Write success on read-only tools</div>
+    <h2>A research sub-agent reported "saved" while only having Read access.</h2>
+    <div class="what">The classic #55653 pattern. A spawned sub-agent without Write/Edit in its tool list returns text that says "I saved the changes to X" — language plausible enough that the parent agent treats it as truth. The user only discovers the gap when they read the file and find it untouched. The fix is on the parent side: verify each sub-agent's tool list before accepting its claim of having made changes.</div>
+    <div class="hook-card">
+      <div class="name">subagent-tool-allowlist-enforcer</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#55653</span>
+      <div class="desc" style="margin-top:.5rem">Inserts an explicit tool boundary into the delegation prompt and surfaces the parent-side verification steps to run after the sub-agent returns.</div>
+    </div>
+    <div class="hook-card">
+      <div class="name">subagent-spawn-verification-enforcer</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#55666</span>
+      <div class="desc" style="margin-top:.5rem">Forces the parent to verify the sub-agent's claimed outputs against actual file state and tool-call records before accepting "done".</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Subagent identity result -->
+<div class="step" data-step="3-sub-identity">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · sub-agent identity / context leak</div>
+    <h2>A delegated agent leaked the parent's identity or history.</h2>
+    <div class="what">Issue #55488: sub-agents inherit conversational context they shouldn't. The sub-agent responds as if it were the main session, may reference details from threads it wasn't given, and can produce outputs that look like the parent's voice. For autonomous setups where the sub-agent is supposed to operate under tighter constraints, this collapses the safety boundary.</div>
+    <div class="hook-card">
+      <div class="name">subagent-identity-leak-guard</div>
+      <span class="trigger">PreToolUse</span>
+      <span class="issue">#55488</span>
+      <div class="desc" style="margin-top:.5rem">Inspects the delegation prompt for identity-boundary markers and surfaces any leak surface in the prompt construction before the sub-agent spawns.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Subagent tool-use false result -->
+<div class="step" data-step="3-sub-tooluse">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · sub-agent reporting fabricated tool calls</div>
+    <h2>The sub-agent reported tool calls it never actually made.</h2>
+    <div class="what">Issue #57878 documented this in concrete numbers: 150 sub-agent dispatches, every single one with zero tool-use count, yet the sub-agents reported having run bash/read/write. The parent agent had no surface signal of the divergence between claimed and actual tool use. This is the strongest known case in the family and forms one of the main-body cases of the Claim-Verify Handbook.</div>
+    <div class="hook-card">
+      <div class="name">subagent-spawn-verification-enforcer</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#57878 / #55666</span>
+      <div class="desc" style="margin-top:.5rem">Forces the parent to verify the sub-agent's tool-call records via the transcript before accepting any "done" or "fixed" claim. Pairs naturally with the parent-side verification steps in Chapter 8 of the handbook.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Display usage result -->
+<div class="step" data-step="3-display-usage">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · /usage dashboard token-count drift</div>
+    <h2>The 7-day usage view doesn't match what you actually used.</h2>
+    <div class="what">Issue #58287 (2026-05-12, version 2.1.139, macOS): the /usage dashboard misreports input/output token counts for the 7-day period. This is a display-layer bug; no hook can fix the rendering, but you can compensate by tracking tokens with an independent logger.</div>
+    <div class="hook-card">
+      <div class="name">prompt-usage-logger</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#41249</span>
+      <div class="desc" style="margin-top:.5rem">Logs every prompt and response to a side file so you can reconstruct token consumption independently of the official dashboard. Pairs well with token-budget-guard for hard limits.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Display agents result -->
+<div class="step" data-step="3-display-agents">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · agents view false-pinning on background bash</div>
+    <h2>The agents view says "Working" because a background process is still alive.</h2>
+    <div class="what">Issue #58297: a long-lived subprocess (a dev server, <code>tail -f</code>, a polling loop) makes the agents view believe the agent is still mid-turn, even when no model call is in flight. Pure display bug; a hook can't repaint the UI. The mitigation is to make sure background processes are tracked separately from agent state.</div>
+    <div class="hook-card">
+      <div class="name">subagent-error-detector</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#41911</span>
+      <div class="desc" style="margin-top:.5rem">Doesn't fix the display, but catches subagent errors that would otherwise be hidden behind the "Working" state, surfacing the real status from a different angle.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Display status result -->
+<div class="step" data-step="3-display-status">
+  <div class="result">
+    <div class="lede">DIAGNOSIS · status line / context% display reset after /compact</div>
+    <h2>The context% indicator went to 0 or disappeared after compaction.</h2>
+    <div class="what">Issue #58268 (and the broader compaction-related cluster): after /compact, the status line shows 0.0k tokens or the ctx% indicator disappears, even though the session continues with real context. Another display-only divergence — the underlying state is fine, the indicator is wrong. The right mitigation is to track context% with an independent monitor.</div>
+    <div class="hook-card">
+      <div class="name">compact-alert-notification</div>
+      <span class="trigger">PostToolUse</span>
+      <span class="issue">#41788 / #58268</span>
+      <div class="desc" style="margin-top:.5rem">Notifies on every auto-compaction event so you have an out-of-band record of when context was compressed. Useful for reconstructing what the status line missed.</div>
+    </div>
+    <div class="hook-card">
+      <div class="name">pre-compact-transcript-backup</div>
+      <span class="trigger">PreCompact</span>
+      <span class="issue">#40352</span>
+      <div class="desc" style="margin-top:.5rem">Backs up the full JSONL transcript before each compaction so you can recover the pre-compact state if something goes wrong.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Shared handbook card injected after every result via JS -->
+<template id="handbook-template">
+  <div class="handbook-card">
+    <div class="label">Want the full pattern?</div>
+    <div class="ptr">The Claim-Verify Handbook ($19, 2026-05-22 launch) collects 49 cases of this divergence family — 15 main body + 34 appendix D continuing evidence — plus 5 detection tools (165+ test cases) and 14 defense procedures. The pattern you just diagnosed is one of the body chapters.</div>
+    <div><a href="https://yurukusa.gumroad.com/l/claim-verify-handbook">View product page →</a> · <a href="https://gist.github.com/yurukusa/6dd608049064ed66c54f1a545a7b47a8">Free try-read (1 chapter, ~9,400 chars) →</a></div>
+    <div class="price" style="margin-top:.45rem">Optional monthly companion: <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">CC Safety Lab Founder</a> (¥500/month). Each issue tracks 4–8 new incidents in this family.</div>
+  </div>
+</template>
+
+<div class="footer-links">
+<a href="hub.html">All 8 cc-safe-setup tools</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="https://gist.github.com/yurukusa/b01ea1a4ec8e8f44e2e6c7bad1f3d9b9">Three claim-verify gaps in May 2026 (long-form)</a><br>
+<span style="color:#6e7681">cc-safe-setup is MIT-licensed. The hooks listed here are public examples — no install required to read the source.</span>
+</div>
+
+</div>
+
+<script>
+(function(){
+  const STEP_NUMS = {
+    '1': 1,
+    '2-file': 2, '2-billing': 2, '2-permission': 2, '2-subagent': 2, '2-display': 2,
+    '3-file-virtiofs': 3, '3-file-normal': 3,
+    '3-billing-api': 3, '3-billing-goal': 3, '3-billing-subagent': 3,
+    '3-perm-mcp': 3, '3-perm-bash': 3, '3-perm-postcredfail': 3,
+    '3-sub-readonly': 3, '3-sub-identity': 3, '3-sub-tooluse': 3,
+    '3-display-usage': 3, '3-display-agents': 3, '3-display-status': 3
+  };
+  function showStep(key){
+    document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', el.dataset.step === key));
+    const n = STEP_NUMS[key] || 1;
+    const dots = document.querySelectorAll('#progress .dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('current', 'done');
+      if (i + 1 < n) d.classList.add('done');
+      else if (i + 1 === n) d.classList.add('current');
+    });
+    // If we landed on a result step (3-*), inject the handbook card if not already there
+    if (n === 3) {
+      const result = document.querySelector('.step.active .result');
+      if (result && !result.querySelector('.handbook-card')) {
+        const tpl = document.getElementById('handbook-template');
+        result.appendChild(tpl.content.cloneNode(true));
+      }
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.next;
+      if (next) showStep(next);
+    });
+  });
+  document.querySelectorAll('.back-btn, .restart').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const back = btn.dataset.back;
+      if (back) showStep(back);
+    });
+  });
+})();
+</script>
+</body>
+</html>
