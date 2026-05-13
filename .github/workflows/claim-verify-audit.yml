@@ -1,0 +1,68 @@
+name: Claim-Verify Audit (self-test)
+
+# Runs the bundled claim-verify-audit.sh against the runner's own (empty)
+# ~/.claude/ environment as a smoke test. Verifies the script:
+#   1. Runs without errors on a fresh Linux environment
+#   2. Emits valid JSON when invoked with --json
+#   3. Exits cleanly (no HIGH-severity findings) on an empty config
+#
+# This is dogfooding: the audit script tests itself in CI before users run it.
+
+on:
+  push:
+    paths:
+      - 'scripts/claim-verify-audit.sh'
+      - '.github/workflows/claim-verify-audit.yml'
+  pull_request:
+    paths:
+      - 'scripts/claim-verify-audit.sh'
+      - '.github/workflows/claim-verify-audit.yml'
+
+jobs:
+  audit-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Syntax check
+        run: bash -n scripts/claim-verify-audit.sh
+
+      - name: Default (text) mode runs without error
+        run: bash scripts/claim-verify-audit.sh
+
+      - name: --help flag prints usage
+        run: |
+          OUTPUT=$(bash scripts/claim-verify-audit.sh --help)
+          echo "$OUTPUT" | grep -q "Usage:" || { echo "FAIL: --help did not print Usage"; exit 1; }
+          echo "$OUTPUT" | grep -q "Exit codes:" || { echo "FAIL: --help did not print Exit codes"; exit 1; }
+
+      - name: --json mode emits valid JSON
+        run: |
+          bash scripts/claim-verify-audit.sh --json > /tmp/audit.json
+          jq empty /tmp/audit.json || { echo "FAIL: --json output not valid JSON"; cat /tmp/audit.json; exit 1; }
+
+      - name: --json output has expected schema
+        run: |
+          SCHEMA=$(jq -r '.schema' /tmp/audit.json)
+          [ "$SCHEMA" = "claim-verify-audit/v1" ] || { echo "FAIL: schema mismatch (got '$SCHEMA')"; exit 1; }
+          jq -e '.summary.high | type == "number"' /tmp/audit.json > /dev/null || { echo "FAIL: summary.high not numeric"; exit 1; }
+          jq -e '.findings | type == "array"' /tmp/audit.json > /dev/null || { echo "FAIL: findings not array"; exit 1; }
+
+      - name: Exit code 0 on clean environment
+        run: |
+          if bash scripts/claim-verify-audit.sh > /dev/null; then
+            echo "OK: exit 0 on empty ~/.claude"
+          else
+            echo "FAIL: exit non-zero on empty config (unexpected HIGH finding?)"
+            bash scripts/claim-verify-audit.sh
+            exit 1
+          fi
+
+      - name: Summary line
+        run: |
+          echo "claim-verify-audit.sh self-tests passed."
+          echo "Summary count from JSON output:"
+          jq '.summary' /tmp/audit.json
