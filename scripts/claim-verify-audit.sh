@@ -137,6 +137,25 @@ case "$(uname -s)" in
 esac
 
 USERNAME="${USER:-$(whoami 2>/dev/null || echo unknown)}"
+# Under WSL, $USER is the Linux distro account, not the Windows profile that owns
+# the C:\Users\... 8.3 short path issue #58614 actually triggers from. Derive the
+# Windows username from /mnt/c/Users/, skipping system pseudo-accounts (Default,
+# Public, ".NET v4.5", etc.) and accepting only profiles that contain a real
+# AppData subdirectory.
+WIN_USERNAME=""
+if [[ "$(uname -s)" == Linux* ]] && [[ -d /mnt/c/Users ]]; then
+    while IFS= read -r d; do
+        name="$(basename "$d")"
+        case "$name" in
+            .*|Default|Default*|Public|"All Users"|desktop.ini) continue ;;
+        esac
+        # Real user profiles have AppData; system pseudo-accounts don't.
+        if [[ -d "$d/AppData" ]]; then
+            WIN_USERNAME="$name"
+            break
+        fi
+    done < <(find /mnt/c/Users -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+fi
 CLAUDE_DIR="${HOME}/.claude"
 SETTINGS_FILE="${CLAUDE_DIR}/settings.json"
 CACHE_DIR="${HOME}/.cache/claude-cli-nodejs"
@@ -180,14 +199,22 @@ fi
 section "Check 2: Windows 8.3 short-name allow-rule bypass"
 
 if [[ "$OS" == "windows" ]] || [[ "$OS" == "wsl" ]]; then
-    # Non-ASCII username check (the trigger condition for issue #58614)
-    if [[ "$USERNAME" =~ [^[:ascii:]] ]] || [[ "$USERNAME" =~ [äöüåéÄÖÜÅÉàèìòùÀÈÌÒÙ] ]]; then
-        report HIGH "Username contains non-ASCII character — 8.3 scanner will bypass allow-rules" \
-            "Your Windows username ($USERNAME) generates an 8.3 short name (e.g. ${USERNAME:0:6}~1). Claude Code's path-pattern scanner runs above the permission/allow-list layer and forces manual approval on every Read/Write touching paths in that account, even when settings.json has an explicit allow rule." \
+    # Under WSL, the relevant username is the Windows profile owner, not the
+    # Linux distro account. Issue #58614 triggers when the Windows profile path
+    # contains non-ASCII chars and therefore gets an 8.3 short name.
+    CHECK_NAME="$USERNAME"
+    NAME_SOURCE="Linux user"
+    if [[ "$OS" == "wsl" ]] && [[ -n "$WIN_USERNAME" ]]; then
+        CHECK_NAME="$WIN_USERNAME"
+        NAME_SOURCE="Windows profile under /mnt/c/Users"
+    fi
+    if [[ "$CHECK_NAME" =~ [^[:ascii:]] ]] || [[ "$CHECK_NAME" =~ [äöüåéÄÖÜÅÉàèìòùÀÈÌÒÙ] ]]; then
+        report HIGH "Windows username contains non-ASCII character — 8.3 scanner will bypass allow-rules" \
+            "Username ($CHECK_NAME, source: $NAME_SOURCE) generates an 8.3 short name (e.g. ${CHECK_NAME:0:6}~1). Claude Code's path-pattern scanner runs above the permission/allow-list layer and forces manual approval on every Read/Write touching paths in that account, even when settings.json has an explicit allow rule." \
             "Issue #58614 — book Chapter 5 (silent override) extends to allow-rule site. Workarounds (none clean): rename Windows account / move %TEMP% to ASCII path / disable 8.3 generation system-wide. Track vendor fix: https://github.com/anthropics/claude-code/issues/58614"
     else
-        report INFO "Username is ASCII-clean — 8.3 short-name scanner won't trigger on you" \
-            "Username: $USERNAME" \
+        report INFO "Windows username is ASCII-clean — 8.3 short-name scanner won't trigger on you" \
+            "Checked: $CHECK_NAME (source: $NAME_SOURCE)" \
             ""
     fi
 else
@@ -254,18 +281,28 @@ if [[ -d "$PROJECTS_DIR" ]]; then
             "Newest: $NEWEST" \
             ""
 
-        # Check for any backup mechanism — both directory and at least one file
-        BACKUP_DIR="${CLAUDE_DIR}/backups"
+        # Check for any backup mechanism — accept either ~/.claude/backups or
+        # ~/.claude/session-backups (the latter is what this repo's own
+        # examples/session-backup-on-start.sh writes to per COOKBOOK.md).
         BACKUP_FILE_COUNT=0
-        [[ -d "$BACKUP_DIR" ]] && BACKUP_FILE_COUNT=$(find "$BACKUP_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+        FOUND_BACKUP_DIR=""
+        for cand in "${CLAUDE_DIR}/backups" "${CLAUDE_DIR}/session-backups"; do
+            if [[ -d "$cand" ]]; then
+                cand_count=$(find "$cand" -type f 2>/dev/null | wc -l | tr -d ' ')
+                if (( cand_count > 0 )); then
+                    BACKUP_FILE_COUNT=$((BACKUP_FILE_COUNT + cand_count))
+                    FOUND_BACKUP_DIR="${FOUND_BACKUP_DIR:+$FOUND_BACKUP_DIR, }$cand ($cand_count file(s))"
+                fi
+            fi
+        done
 
         if (( BACKUP_FILE_COUNT == 0 )); then
             report MEDIUM "No session backups present — protection against silent deletion is absent" \
-                "Issues #58608 (Windows auto-update), #57453 (session jsonl silent deletion), #58361 (transcript silent overwrite) all result in unrecoverable session loss. Without an off-system backup, weeks of conversation context can vanish without warning. (Backup directory: $([[ -d $BACKUP_DIR ]] && echo "exists but empty" || echo "missing").)" \
-                "Set up a periodic backup hook or external sync (rsync, restic, etc). Book defense #5 + Chapter 3."
+                "Issues #58608 (Windows auto-update), #57453 (session jsonl silent deletion), #58361 (transcript silent overwrite) all result in unrecoverable session loss. Without an off-system backup, weeks of conversation context can vanish without warning. Checked: ${CLAUDE_DIR}/backups and ${CLAUDE_DIR}/session-backups (the latter is where this repo's session-backup-on-start.sh writes)." \
+                "Install cc-safe-setup's session-backup-on-start.sh (writes to ~/.claude/session-backups) or set up rsync/restic. Book defense #5 + Chapter 3."
         else
             report INFO "Backup directory has $BACKUP_FILE_COUNT file(s)" \
-                "Path: $BACKUP_DIR" \
+                "Found: $FOUND_BACKUP_DIR" \
                 ""
         fi
     fi
@@ -280,45 +317,55 @@ fi
 # ============================================================
 section "Check 5: sub-agent .env protection inheritance"
 
-# Look for .env protection in settings.json
-if [[ -f "$SETTINGS_FILE" ]] && command -v jq >/dev/null 2>&1; then
+# First: classify what's present in cwd. The cwd .env risk is independent of
+# whether ~/.claude/settings.json exists or jq is installed — if settings is
+# missing/unparseable, the user definitely has no deny rules, which is the
+# worst case and must still surface a HIGH warning.
+ENV_IN_CWD=0
+if [[ -f .env ]] || ls .env.* >/dev/null 2>&1; then
+    ENV_IN_CWD=1
+fi
+
+DENY_ENV=0
+SETTINGS_USABLE=0
+if [[ -f "$SETTINGS_FILE" ]] && command -v jq >/dev/null 2>&1 && jq empty "$SETTINGS_FILE" >/dev/null 2>&1; then
+    SETTINGS_USABLE=1
     DENY_ENV=$(jq -r '.permissions.deny // [] | map(select(. | tostring | test("\\.env|credentials|secrets"; "i"))) | length' "$SETTINGS_FILE" 2>/dev/null || echo 0)
+fi
 
-    if (( DENY_ENV > 0 )); then
-        # Check for sub-agent definitions
-        AGENT_COUNT=0
-        [[ -d "${CLAUDE_DIR}/agents" ]] && AGENT_COUNT=$(find "${CLAUDE_DIR}/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if (( DENY_ENV > 0 )); then
+    # Settings has deny rules — check sub-agent inheritance
+    AGENT_COUNT=0
+    [[ -d "${CLAUDE_DIR}/agents" ]] && AGENT_COUNT=$(find "${CLAUDE_DIR}/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
 
-        if (( AGENT_COUNT > 0 )); then
-            # Check if any agent overrides permissions
-            INHERITED=0
-            for agent_file in "${CLAUDE_DIR}/agents"/*.md; do
-                [[ -f "$agent_file" ]] || continue
-                if grep -qE '^(allowed-tools|permissions):' "$agent_file" 2>/dev/null; then
-                    INHERITED=$((INHERITED+1))
-                fi
-            done
-
-            report MEDIUM "Parent has $DENY_ENV .env-related deny rules + $AGENT_COUNT sub-agents — verify inheritance" \
-                "Issue #57068: sub-agents do not inherit parent's .env deny rules by default. The parent's allow-list propagates, but the deny-list does not. Your sub-agents may be able to read .env files even though your parent settings deny it." \
-                "Add an explicit PreToolUse hook that blocks Read/Edit/Write against .env paths in the sub-agent dispatch chain. cc-safe-setup ships credential-exfil-guard.sh for this. Book Chapter 4 + defense #10."
-        else
-            report INFO ".env deny rules present + no sub-agents defined" \
-                "Deny rules: $DENY_ENV / Sub-agents: 0" \
-                ""
-        fi
+    if (( AGENT_COUNT > 0 )); then
+        report MEDIUM "Parent has $DENY_ENV .env-related deny rules + $AGENT_COUNT sub-agents — verify inheritance" \
+            "Issue #57068: sub-agents do not inherit parent's .env deny rules by default. The parent's allow-list propagates, but the deny-list does not. Your sub-agents may be able to read .env files even though your parent settings deny it." \
+            "Add an explicit PreToolUse hook that blocks Read/Edit/Write against .env paths in the sub-agent dispatch chain. cc-safe-setup ships credential-exfil-guard.sh for this. Book Chapter 4 + defense #10."
     else
-        # Check for any .env files in cwd that should be protected
-        if [[ -f .env ]] || ls .env.* 2>/dev/null | head -1 | grep -q .; then
-            report HIGH "Found .env file in current directory but NO deny rules in settings.json" \
-                "Your settings.json does not deny Read/Edit/Write on .env files. Claude Code or its sub-agents may read your credentials into a transcript. Issue #58173 reports leaks of GitHub PAT, Vercel token, Slack bot token, Supabase service key, Anthropic API key, Brave search key from this exact pattern." \
-                "Add to settings.json: \"permissions\": {\"deny\": [\"Read(./.env)\", \"Edit(./.env)\", \"Write(./.env)\"]}. Then test that sub-agents respect it (see #57068). Book Chapter 4 + defense #10."
-        else
-            report INFO "No .env in cwd, no .env deny rules — clean state" \
-                "" \
-                ""
-        fi
+        report INFO ".env deny rules present + no sub-agents defined" \
+            "Deny rules: $DENY_ENV / Sub-agents: 0" \
+            ""
     fi
+elif (( ENV_IN_CWD )); then
+    # No deny rules (settings missing, unparseable, or simply has none) but
+    # .env present in cwd. This is the worst case — always HIGH.
+    if (( SETTINGS_USABLE )); then
+        reason="Your settings.json does not deny Read/Edit/Write on .env files."
+    elif [[ ! -f "$SETTINGS_FILE" ]]; then
+        reason="No ~/.claude/settings.json — no deny rules anywhere."
+    elif ! command -v jq >/dev/null 2>&1; then
+        reason="jq not installed — could not parse settings.json to verify deny rules. Assuming no protection."
+    else
+        reason="~/.claude/settings.json failed to parse — cannot rely on any deny rule in it."
+    fi
+    report HIGH "Found .env file in current directory but NO usable deny rules" \
+        "$reason Claude Code or its sub-agents may read your credentials into a transcript. Issue #58173 reports leaks of GitHub PAT, Vercel token, Slack bot token, Supabase service key, Anthropic API key, Brave search key from this exact pattern." \
+        "Add to settings.json: \"permissions\": {\"deny\": [\"Read(./.env)\", \"Edit(./.env)\", \"Write(./.env)\"]}. Then test that sub-agents respect it (see #57068). Book Chapter 4 + defense #10."
+else
+    report INFO "No .env in cwd, no .env deny rules needed — clean state" \
+        "" \
+        ""
 fi
 
 # ============================================================
