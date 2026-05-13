@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migration Decision Tree — Stay, Switch, or Mix Your Claude Code Setup?</title>
+<meta name="description" content="6-question decision tree based on the Claude Code Migration Playbook Edition 2. Identifies which of six paths fits your trigger count, daily spend, and posture. Points to the exact chapter for your situation.">
+<meta property="og:title" content="Migration Decision Tree — Stay, Switch, or Mix Your Claude Code Setup?">
+<meta property="og:description" content="6 questions to identify which path (Stay / Switch / Replace model / Stack-of-tools / Proxy / Hybrid delegation) fits your Claude Code situation.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/migration-decision-tree.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Migration Decision Tree — 6 Paths, 6 Questions">
+<meta name="twitter:description" content="Find out which migration path (or non-migration) fits your trigger count, daily spend, and posture preference.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/migration-decision-tree.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Migration Decision Tree","description":"6-question interactive decision tree from the Migration Playbook Edition 2. Six paths covered: Stay and Fortify, Switch Platforms, Replace Model Keep Harness, Stack-of-tools, Backend-swap Proxy, Hybrid Delegation.","url":"https://yurukusa.github.io/cc-safe-setup/migration-decision-tree.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:740px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.55rem;margin-bottom:.4rem;line-height:1.25}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:1.5rem;line-height:1.55}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q{color:#f0f6fc;font-size:1.1rem;margin-bottom:.5rem;font-weight:600;line-height:1.4}
+.q-help{color:#8b949e;font-size:.82rem;margin-bottom:1rem;line-height:1.5}
+.q-num{color:#58a6ff;font-size:.8rem;margin-bottom:.3rem}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{background:#161b22;border:2px solid #30363d;border-radius:8px;padding:.85rem 1rem;cursor:pointer;transition:all .15s;text-align:left}
+.opt:hover{border-color:#58a6ff;background:#1c2128}
+.opt-title{color:#f0f6fc;font-weight:600;font-size:.92rem;margin-bottom:.18rem}
+.opt-desc{color:#8b949e;font-size:.8rem;line-height:1.45}
+.progress{display:flex;gap:.3rem;margin:1.4rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:#30363d;transition:background .2s}
+.dot.done{background:#58a6ff}
+.dot.current{background:#79c0ff}
+.back-btn{background:none;border:none;color:#58a6ff;font-size:.82rem;cursor:pointer;padding:.4rem 0;margin-top:1rem}
+.back-btn:hover{text-decoration:underline}
+
+.result{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.3rem;margin:1rem 0}
+.result h2{color:#f0f6fc;font-size:1.15rem;margin-bottom:.3rem;line-height:1.3}
+.result .lede{color:#58a6ff;font-size:.82rem;margin-bottom:.9rem;letter-spacing:.04em;text-transform:uppercase}
+.result .what{color:#c9d1d9;font-size:.92rem;line-height:1.6;margin-bottom:1rem}
+.path-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.85rem 1rem;margin:.7rem 0}
+.path-card .name{color:#7ee787;font-weight:600;font-size:.95rem;margin-bottom:.3rem}
+.path-card .chapter{display:inline-block;background:#1c2128;color:#58a6ff;font-size:.7rem;padding:.12rem .42rem;border-radius:3px;margin-right:.35rem}
+.path-card .cost{display:inline-block;background:#0a1f0a;color:#7ee787;font-size:.7rem;padding:.12rem .42rem;border-radius:3px}
+.path-card .desc{color:#c9d1d9;font-size:.85rem;line-height:1.55;margin-top:.4rem}
+.path-card .next{color:#8b949e;font-size:.78rem;line-height:1.5;margin-top:.5rem;border-top:1px dashed #30363d;padding-top:.4rem}
+.path-card .next strong{color:#c9d1d9}
+.handbook-card{background:#1a1411;border:1px solid #5c3a13;border-radius:6px;padding:.9rem 1.1rem;margin:1.1rem 0}
+.handbook-card .label{color:#f97316;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.handbook-card .ptr{color:#f0f6fc;font-size:.92rem;line-height:1.55;margin-bottom:.5rem}
+.handbook-card .price{color:#8b949e;font-size:.78rem}
+.handbook-card a{color:#f97316;font-weight:600}
+.restart{display:inline-block;margin-top:1rem;color:#58a6ff;font-size:.85rem;background:none;border:1px solid #30363d;padding:.45rem .85rem;border-radius:5px;cursor:pointer}
+.restart:hover{border-color:#58a6ff}
+.footer-links{margin-top:2rem;color:#6e7681;font-size:.78rem;text-align:center;line-height:1.6}
+.footer-links a{color:#8b949e}
+.intro{color:#c9d1d9;font-size:.9rem;line-height:1.6;margin-bottom:1rem;background:#161b22;border-left:3px solid #58a6ff;padding:.85rem 1rem;border-radius:0 6px 6px 0}
+.intro strong{color:#f0f6fc}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Migration Decision Tree</h1>
+<p class="sub">Six questions, six paths. Based on the Claude Code Migration Playbook Edition 2's eight-gate decision tree. Identifies which of six paths fits your trigger count, daily spend, subscription tier, and posture preference.</p>
+
+<div class="intro">
+The six paths in one line each: <strong>A — Stay and Fortify</strong> (keep Claude Code, add hook discipline). <strong>B — Switch Platforms</strong> (Cursor, Cline, Codex, Aider). <strong>B' — Replace the model, keep the harness</strong> (Claude Code IDE + Z.AI GLM or equivalent). <strong>C posture A — Stack-of-tools</strong> (terminal + routing CLI + sandbox + cloud env). <strong>C posture B — Backend-swap proxy</strong> (claude-code-router, deepclaude). <strong>C posture C — Hybrid delegation</strong> (Claude Code as primary, cheaper model for bulk tasks). The tree is structural — the answer depends on your trigger count, daily spend, and what you're willing to retrain on.
+</div>
+
+<div id="progress" class="progress" aria-hidden="true">
+  <span class="dot current"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+</div>
+
+<!-- Step 1: trigger count -->
+<div class="step active" data-step="1">
+  <div class="q-num">QUESTION 1 OF 6 · GATE 1</div>
+  <div class="q">How many of the Edition 2 triggers have tripped on your setup in the past 30 days?</div>
+  <div class="q-help">Triggers include things like the April 22 pricing change, cache_control regressions, tokenizer inflation, sub-agent CLAUDE.md skip (#40459), Opus 4.7 auto-mode classifier bug (#49618), silent permission bypass (#58289), virtiofs file corruption (#58551), goal-evaluator quota burn (#58550), .env API billing override, and the broader claim-verify gap cluster. Count anything that actively cost you time, money, or trust.</div>
+  <div class="opts">
+    <button class="opt" data-next="2-zero">
+      <div class="opt-title">0 — nothing has actually hit me</div>
+      <div class="opt-desc">I've read about issues but my workflow hasn't been disrupted. Sessions complete, files survive, billing matches expectations.</div>
+    </button>
+    <button class="opt" data-next="2-low">
+      <div class="opt-title">1–2 — a few isolated hits</div>
+      <div class="opt-desc">One or two real incidents I had to work around, but most days are still fine.</div>
+    </button>
+    <button class="opt" data-next="2-mid">
+      <div class="opt-title">3–5 — recurring pain</div>
+      <div class="opt-desc">Multiple distinct issues per week. I'm spending real time on workarounds and starting to question the platform.</div>
+    </button>
+    <button class="opt" data-next="2-high">
+      <div class="opt-title">6+ — structurally untenable</div>
+      <div class="opt-desc">Many active failure modes. Cost is up, trust is down, every session has some surprise. I need a plan, not another patch.</div>
+    </button>
+  </div>
+</div>
+
+<!-- Step 2 variants: subscription tier -->
+<div class="step" data-step="2-zero">
+  <div class="q-num">QUESTION 2 OF 6 · GATE 2</div>
+  <div class="q">What subscription tier are you on?</div>
+  <div class="q-help">Pro and Max plans have different cost economics; the gate logic in Chapter 8 routes them differently.</div>
+  <div class="opts">
+    <button class="opt" data-next="3-stay-pro"><div class="opt-title">Pro plan ($20/month)</div></button>
+    <button class="opt" data-next="3-stay-max"><div class="opt-title">Max plan ($100/$200/month)</div></button>
+    <button class="opt" data-next="3-stay-api"><div class="opt-title">Pay-as-you-go API only (no subscription)</div></button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<div class="step" data-step="2-low">
+  <div class="q-num">QUESTION 2 OF 6 · GATE 2</div>
+  <div class="q">Same question — subscription tier?</div>
+  <div class="q-help">With 1–2 triggers tripped, your output is most likely Path A with stronger hook discipline. The tier sets the per-month cost ceiling against which we'll size the fortification.</div>
+  <div class="opts">
+    <button class="opt" data-next="3-fortify-pro"><div class="opt-title">Pro plan ($20/month)</div></button>
+    <button class="opt" data-next="3-fortify-max"><div class="opt-title">Max plan ($100/$200/month)</div></button>
+    <button class="opt" data-next="3-fortify-api"><div class="opt-title">API only</div></button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<div class="step" data-step="2-mid">
+  <div class="q-num">QUESTION 2 OF 6 · GATE 3</div>
+  <div class="q">What's your adjusted daily Claude Code spend (or the API equivalent)?</div>
+  <div class="q-help">Adjusted = your visible /usage or invoice spend with token-inflation and cache-regression corrections applied. If you're unsure, take your last invoice and multiply daily spend by 1.4 to approximate.</div>
+  <div class="opts">
+    <button class="opt" data-next="3-spend-low">
+      <div class="opt-title">Under $20/day</div>
+    </button>
+    <button class="opt" data-next="3-spend-mid">
+      <div class="opt-title">$20–$50/day</div>
+    </button>
+    <button class="opt" data-next="3-spend-high">
+      <div class="opt-title">$50+/day</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<div class="step" data-step="2-high">
+  <div class="q-num">QUESTION 2 OF 6 · GATE 3</div>
+  <div class="q">Adjusted daily spend — same question, structurally tenser path ahead?</div>
+  <div class="q-help">With 6+ triggers tripping, the question is no longer "can hooks save us" but "which posture replaces the broken layer." Daily spend decides whether Path B (full switch), Path B' (replace model only), or Path C (some level of mix) is the cheapest landing.</div>
+  <div class="opts">
+    <button class="opt" data-next="3-untenable-low">
+      <div class="opt-title">Under $20/day</div>
+    </button>
+    <button class="opt" data-next="3-untenable-mid">
+      <div class="opt-title">$20–$50/day</div>
+    </button>
+    <button class="opt" data-next="3-untenable-high">
+      <div class="opt-title">$50+/day</div>
+    </button>
+  </div>
+  <button class="back-btn" data-back="1">← back</button>
+</div>
+
+<!-- ========== RESULTS ========== -->
+
+<!-- 0 triggers -->
+<div class="step" data-step="3-stay-pro">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 0 triggers · Pro tier</div>
+    <h2>Path A — Stay (no fortification required yet)</h2>
+    <div class="what">You haven't been actually bitten. The Edition 2 enterprise-concentration anchor (Apple v5.13, Reddit photo confirmation, Anthropic's $19B annualised revenue with 80% from enterprise, the May 2026 Blackstone/Goldman/H&F joint venture) is structurally strong — platform continuity is not the risk for you. Don't pre-emptively migrate. Reassess in 30 days.</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay</div>
+      <span class="chapter">Chapter 4</span>
+      <span class="cost">$20/month status quo</span>
+      <div class="desc">Continue with Claude Code, no hook stack required. Edition 2's enterprise concentration anchor makes the Stay output structurally sound for now.</div>
+      <div class="next"><strong>Next step:</strong> Run the Chapter 2 trigger checklist once a month. If your count crosses 1, return here and re-route through Gate 1.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-stay-max">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 0 triggers · Max tier</div>
+    <h2>Path A — Stay; consider downgrade audit at 90 days</h2>
+    <div class="what">You're paying Max tier premium with no actual triggers tripped. Edition 1's Chapter 7 worksheet routinely surfaces "Max-but-Pro-suffices" cases at the 90-day audit. If your monthly Claude spend on Max tier would fit inside a Pro ceiling, the savings are real ($80–$180/month).</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay (with tier audit)</div>
+      <span class="chapter">Chapters 4, 7</span>
+      <span class="cost">$100–$200/month current</span>
+      <div class="desc">Stay on the platform. Use Chapter 7's adjusted-daily-spend worksheet to check whether your usage profile fits a Pro tier; if yes, downgrade saves $80–$180/month with no functional loss.</div>
+      <div class="next"><strong>Next step:</strong> The Migration Playbook's adjusted-daily-spend worksheet runs in about 20 minutes. Run it monthly until you're confident the tier matches the workload.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-stay-api">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 0 triggers · API only</div>
+    <h2>Path A — Stay; consider Pro upgrade audit at any point</h2>
+    <div class="what">No subscription, no triggers, just API. Your per-token rate is the cleanest mental model but for steady use, Pro ($20/month) typically covers more workload-equivalent than $20 of API spend. The Edition 1 Chapter 7 worksheet will price-out whether Pro saves you money.</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay (with subscription audit)</div>
+      <span class="chapter">Chapter 7</span>
+      <span class="cost">Variable; bench against $20/month</span>
+      <div class="desc">Continue API-only. If your monthly Claude Code API spend regularly exceeds ~$15–20, the Pro plan typically wins on workload-equivalent. The Chapter 7 worksheet quantifies this.</div>
+      <div class="next"><strong>Next step:</strong> Look at your last three months of API spend. If average ≥ $20, run the Chapter 7 audit before next month closes.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- 1-2 triggers -->
+<div class="step" data-step="3-fortify-pro">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 1–2 triggers · Pro tier</div>
+    <h2>Path A — Stay and Fortify</h2>
+    <div class="what">A handful of triggers means hook fortification is doing the real work. On a Pro tier the cost is fixed, so the per-incident waste is what you're optimising for. Install the cc-safe-setup baseline (8 core hooks) plus the 3 May 2026 hooks targeted at the recent issue cluster.</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay + Fortify</div>
+      <span class="chapter">Chapter 4 (Edition 2 expanded)</span>
+      <span class="cost">$20/month + zero added recurring</span>
+      <div class="desc">Install the seven-hook fortification baseline. Edition 2 adds the May 2026 hook trio (dotenv-anthropic-key-billing-guard, write-byte-integrity-verifier, goal-iteration-limit-warner, mcp-permissions-ask-warner) as Path A reinforcement against the latest claim-verify gap cluster.</div>
+      <div class="next"><strong>Next step:</strong> Run <code>npx cc-safe-setup</code> for the baseline, then install the May 2026 hooks individually. The <a href="claim-verify-checkup.html">Claim-Verify Checkup</a> walks you through hook selection if you want a guided path.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-fortify-max">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 1–2 triggers · Max tier</div>
+    <h2>Path A — Stay and Fortify Hard</h2>
+    <div class="what">Max tier + active triggers = the cost of an incident is real ($100–$200/month already committed, plus your time). Edition 2 prescribes the seven-hook baseline plus monitoring discipline; Max tier especially benefits from token-budget-guard and pre-compact-transcript-backup because the headline tier doesn't shield you from waste inside the per-token accounting layer.</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay + Fortify Hard</div>
+      <span class="chapter">Chapter 4 (Edition 2)</span>
+      <span class="cost">$100–$200/month base + monitoring overhead</span>
+      <div class="desc">Beyond the seven-hook baseline, add token-budget-guard, pre-compact-transcript-backup, and the auto-mode-safety-enforcer for #49618 protection. Max plan does not shield you from claim-verify gaps that pre-burn quota.</div>
+      <div class="next"><strong>Next step:</strong> Install the baseline + the four monitoring hooks. Run the Chapter 7 adjusted-daily-spend worksheet to see if you're crossing into the Path C zone.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-fortify-api">
+  <div class="result">
+    <div class="lede">GATE 1 OUTPUT · 1–2 triggers · API only</div>
+    <h2>Path A — Stay and Fortify; audit Pro upgrade</h2>
+    <div class="what">Triggers are tripping on a per-token bill. Each incident costs you direct dollars. Two moves: install the hook stack to cut the incidents, and run the Pro-vs-API audit because per-incident cost is more painful on API.</div>
+    <div class="path-card">
+      <div class="name">Path A · Stay + Fortify (with subscription decision)</div>
+      <span class="chapter">Chapter 4, 7</span>
+      <span class="cost">Variable; hooks reduce incidents</span>
+      <div class="desc">Install the cc-safe-setup baseline plus the May 2026 hooks. Independently, the Chapter 7 worksheet will tell you whether Pro ($20/month) caps your downside more cheaply than API at your current usage profile.</div>
+      <div class="next"><strong>Next step:</strong> <code>npx cc-safe-setup</code> for the baseline. Then run the Chapter 7 worksheet within the next 7 days.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- 3-5 triggers, low spend -->
+<div class="step" data-step="3-spend-low">
+  <div class="result">
+    <div class="lede">GATE 3 OUTPUT · 3–5 triggers · &lt; $20/day</div>
+    <h2>Path A — Fortify Hard, with a Path B' / Path C-C optionality plan</h2>
+    <div class="what">Trigger pressure is meaningful but your spend isn't yet at the level where Switch or Stack-of-tools makes economic sense. The right move is to fortify hard and start a 60-day data collection. If trigger count keeps rising and crosses 6, you'll have a clean re-entry point at Gate 1 with the spending data already in hand.</div>
+    <div class="path-card">
+      <div class="name">Path A · Fortify Hard (primary)</div>
+      <span class="chapter">Chapter 4</span>
+      <span class="cost">Current + monitoring overhead</span>
+      <div class="desc">Full seven-hook fortification, plus the May 2026 hook trio, plus token-budget-guard. The trigger count is meaningful enough that hook discipline is justified, but spend is not yet at switching economics.</div>
+    </div>
+    <div class="path-card">
+      <div class="name">Path B' · Optionality (watching)</div>
+      <span class="chapter">Edition 2 Chapter 5 supplement</span>
+      <span class="cost">Z.AI GLM Coding Plan $18–$90/month</span>
+      <div class="desc">Watch the GLM Coding Plan benchmark/pricing trajectory. If Z.AI continues to publish Claude-comparable benchmarks at the lower price and your trigger count rises, B' becomes the no-retraining migration path. No move required today.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-spend-mid">
+  <div class="result">
+    <div class="lede">GATE 3 + 4' OUTPUT · 3–5 triggers · $20–$50/day</div>
+    <h2>Path B' — Replace the model, keep the harness</h2>
+    <div class="what">This is the band Gate 4' was added for in Edition 2. At $20–$50/day adjusted spend, with 3–5 triggers tripped, the dominant binding trigger is usually cache-TTL regression or tokenizer inflation. Path B' (Z.AI GLM Coding Plan, or equivalent Anthropic-compatible alternate vendor) replaces only the model layer. The CLI, hook stack, slash commands, MCP servers, CLAUDE.md ecosystem — all retained. The model is the only swap.</div>
+    <div class="path-card">
+      <div class="name">Path B' · Replace the model, keep the harness</div>
+      <span class="chapter">Edition 2 Chapter 5 supplement (Path B-prime)</span>
+      <span class="cost">$18–$90/month replacing per-token bill</span>
+      <div class="desc">Continue with Claude Code IDE. Replace ANTHROPIC_API_KEY-backed model calls with the GLM Coding Plan tier matching your Opus-grade work ratio. The seven-hook fortification surface remains intact. No retraining on a new IDE.</div>
+      <div class="next"><strong>Next step:</strong> Edition 2 Chapter 5 supplement details the GLM Coding Plan tier selection by Opus-grade work ratio and the migration script for ANTHROPIC_API_KEY rebinding.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-spend-high">
+  <div class="result">
+    <div class="lede">GATE 3 + 5 OUTPUT · 3–5 triggers · $50+/day</div>
+    <h2>Gate 5 — Path C posture decision (three sub-questions)</h2>
+    <div class="what">At $50+/day with 3–5 triggers, you're in the Path C zone. Edition 2's Gate 5 splits Path C into three postures. Pick the one whose discipline you can actually sustain.</div>
+    <div class="path-card">
+      <div class="name">Path C posture A · Stack-of-tools</div>
+      <span class="chapter">Edition 1 Chapter 6</span>
+      <span class="cost">Tyler Folkman's $45/month reference stack</span>
+      <div class="desc">Four components — terminal multiplexer, model-routing CLI (Cline against a personal API key), container-isolated sandbox, cloud development environment — coordinate to replace Claude Code's IDE surface. Pick this if you're willing to coordinate four tools and learn each separately.</div>
+    </div>
+    <div class="path-card">
+      <div class="name">Path C posture B · Backend-swap proxy</div>
+      <span class="chapter">Edition 2 Chapter 6 supplement (proxy)</span>
+      <span class="cost">claude-code-router / deepclaude + per-provider per-token</span>
+      <div class="desc">Claude Code remains the IDE; a proxy layer (claude-code-router with task-type routing across six providers, or deepclaude with single-default-backend-with-fallback) replaces only the model-calling layer. Narrower configuration surface than stack-of-tools. Pick this if you want the IDE preserved and per-token model substitution.</div>
+    </div>
+    <div class="path-card">
+      <div class="name">Path C posture C · Hybrid delegation</div>
+      <span class="chapter">Edition 2 Chapter 6 supplement (Path D)</span>
+      <span class="cost">Claude Code primary + cheaper-model side spend</span>
+      <div class="desc">Claude Code remains the IDE and the primary model. A cheaper second model (Kimi K2.5, GPT-4o-mini, DeepSeek V3) is exposed via a Bash-callable CLI script. CLAUDE.md routing rules describe which task shapes (bulk file reading, boilerplate generation, documentation rewrites) to delegate. Reddit case study: $0.38 cheaper-model spend over three weeks, weekly cap unhit. Pick this if you want to keep Claude Code intact and offload only the bulk-and-template tasks.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- 6+ triggers, low spend -->
+<div class="step" data-step="3-untenable-low">
+  <div class="result">
+    <div class="lede">GATE 1 + 3 OUTPUT · 6+ triggers · &lt; $20/day</div>
+    <h2>Path B — Switch Platforms (full migration)</h2>
+    <div class="what">Six-plus triggers tripping while spend is still low means the platform-vs-workload fit is wrong for your case. Hook fortification can't fix a structural mismatch. Path B's four-tool comparison (Cursor, Cline, Codex, Aider) maps onto common workload profiles. Edition 2 demotes Aider to a sidebar (nine months stagnation) and elevates Codex (v0.125.0 feature parity + permission profile round-trip).</div>
+    <div class="path-card">
+      <div class="name">Path B · Switch Platforms</div>
+      <span class="chapter">Chapter 5 (Edition 2 updated)</span>
+      <span class="cost">$0–$25/month depending on tool</span>
+      <div class="desc">Move from Claude Code to another AI coding tool. Edition 2's updated comparison: Cursor ($20/month, mature IDE), Cline (open-source, runs against your API key), Codex CLI ($0 / API rate), Aider (research/CLI use only). Pick by your IDE preferences and your willingness to retrain hooks for the new ecosystem.</div>
+      <div class="next"><strong>Next step:</strong> Chapter 5 has a 4-tool comparison matrix on 11 axes. Spend 30 minutes with the matrix before picking.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-untenable-mid">
+  <div class="result">
+    <div class="lede">GATE 1 + 3 + 4' OUTPUT · 6+ triggers · $20–$50/day</div>
+    <h2>Path B' — Replace the model first; Path B as fallback</h2>
+    <div class="what">High trigger count + mid-range spend = Path B' is the cheapest tested mitigation. Replacing only the model layer (Z.AI GLM Coding Plan, or another Anthropic-compatible alternate vendor) keeps every fortification you've built. If Path B' itself doesn't move the trigger count down within 30 days, you have a clean fallback to Path B.</div>
+    <div class="path-card">
+      <div class="name">Path B' · Replace the model, keep the harness</div>
+      <span class="chapter">Edition 2 Chapter 5 supplement</span>
+      <span class="cost">$18–$90/month replacing per-token bill</span>
+      <div class="desc">Same content as the 3–5 trigger / mid-spend output, but the urgency is higher. Edition 2 Chapter 5 supplement has the 30-day audit protocol baked in: if trigger count doesn't drop by 50% in 30 days, fall through to Path B.</div>
+    </div>
+    <div class="path-card">
+      <div class="name">Path B · Fallback if Path B' fails</div>
+      <span class="chapter">Chapter 5 (Edition 2)</span>
+      <div class="desc">Cursor or Codex CLI as the most likely landing. The 30-day Path B' audit gives you the data to decide between them.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<div class="step" data-step="3-untenable-high">
+  <div class="result">
+    <div class="lede">GATE 1 + 3 + 5 OUTPUT · 6+ triggers · $50+/day</div>
+    <h2>Path C posture A or B — full IDE replacement or proxy</h2>
+    <div class="what">High trigger count + high spend = Path A and B' have both been outpaced. Either coordinate the four-tool Stack-of-tools (Path C-A) or replace just the model layer with a proxy (Path C-B). Path C-C (hybrid delegation) is structurally weaker at this scale because the cheaper-model offload doesn't bend the curve enough.</div>
+    <div class="path-card">
+      <div class="name">Path C posture A · Stack-of-tools</div>
+      <span class="chapter">Edition 1 Chapter 6</span>
+      <span class="cost">Tyler Folkman $45/month reference</span>
+      <div class="desc">Pick this if you have time to coordinate four tools and want maximum cost control. Tyler Folkman's reference stack is the canonical Edition 1 layout. Hard-cap discipline is non-negotiable at this spend level.</div>
+    </div>
+    <div class="path-card">
+      <div class="name">Path C posture B · Backend-swap proxy</div>
+      <span class="chapter">Edition 2 Chapter 6 supplement (proxy)</span>
+      <span class="cost">Proxy layer + per-provider per-token routing</span>
+      <div class="desc">Claude Code remains the IDE; the proxy layer (claude-code-router or deepclaude) does the model routing. Configuration surface narrower than C-A, IDE retained. Pick this if you want to preserve the IDE investment while replacing the model spend.</div>
+    </div>
+  </div>
+  <button class="restart" data-back="1">← restart</button>
+</div>
+
+<!-- Shared playbook card injected after every result via JS -->
+<template id="playbook-template">
+  <div class="handbook-card">
+    <div class="label">Get the full decision tree</div>
+    <div class="ptr">The <strong>Claude Code Migration Playbook</strong> ($19) is live since 2026-04-25. Edition 2 (free auto-update for existing buyers, target 2026-05-22) adds the four new triggers, three new path postures (Path A' harness reduction, Path B' GLM Coding Plan at $18/month tier, Path D hybrid delegation with the 6.7× cost reduction case study), and the expanded 8-gate decision tree this tool runs against. ~120 pages.</div>
+    <div><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">View product page →</a> · One operator's monthly Claude Code spend moved from $200/month to $30/month — a 6.7× reduction — without abandoning the agent loop (canonical Path D case study).</div>
+    <div class="price" style="margin-top:.45rem">Companion: <a href="https://yurukusa.gumroad.com/l/claim-verify-handbook">Claim-Verify Handbook</a> ($19, 2026-05-22 launch) covers the failure patterns the May 2026 hook trio addresses. Optional monthly: <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">CC Safety Lab Founder</a> (¥500/month).</div>
+  </div>
+</template>
+
+<div class="footer-links">
+<a href="hub.html">All 8 cc-safe-setup tools</a> · <a href="claim-verify-checkup.html">Claim-Verify Checkup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a><br>
+<span style="color:#6e7681">This tool runs entirely in your browser. Nothing about your answers leaves this page.</span>
+</div>
+
+</div>
+
+<script>
+(function(){
+  const STEP_NUMS = {
+    '1': 1,
+    '2-zero': 2, '2-low': 2, '2-mid': 2, '2-high': 2,
+    '3-stay-pro': 3, '3-stay-max': 3, '3-stay-api': 3,
+    '3-fortify-pro': 3, '3-fortify-max': 3, '3-fortify-api': 3,
+    '3-spend-low': 3, '3-spend-mid': 3, '3-spend-high': 3,
+    '3-untenable-low': 3, '3-untenable-mid': 3, '3-untenable-high': 3
+  };
+  function showStep(key){
+    document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', el.dataset.step === key));
+    const n = STEP_NUMS[key] || 1;
+    const dots = document.querySelectorAll('#progress .dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('current', 'done');
+      if (i + 1 < n) d.classList.add('done');
+      else if (i + 1 === n) d.classList.add('current');
+    });
+    if (n === 3) {
+      const result = document.querySelector('.step.active .result');
+      if (result && !result.querySelector('.handbook-card')) {
+        const tpl = document.getElementById('playbook-template');
+        result.appendChild(tpl.content.cloneNode(true));
+      }
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.next;
+      if (next) showStep(next);
+    });
+  });
+  document.querySelectorAll('.back-btn, .restart').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const back = btn.dataset.back;
+      if (back) showStep(back);
+    });
+  });
+})();
+</script>
+</body>
+</html>
