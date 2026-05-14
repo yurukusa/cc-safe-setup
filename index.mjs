@@ -8,8 +8,16 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
-const HOOKS_DIR = join(HOME, '.claude', 'hooks');
-const SETTINGS_PATH = join(HOME, '.claude', 'settings.json');
+// CLAUDE_PROJECT_DIR env var lets operators install into a per-project .claude/
+// directory instead of the user-global ~/.claude/. Falls back to ~/.claude/ when
+// unset, preserving the original behavior for everyone who hasn't opted in.
+// See https://github.com/yurukusa/cc-safe-setup/issues/145.
+const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR;
+const CLAUDE_DIR = CLAUDE_PROJECT_DIR
+  ? join(CLAUDE_PROJECT_DIR, '.claude')
+  : join(HOME, '.claude');
+const HOOKS_DIR = join(CLAUDE_DIR, 'hooks');
+const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
 
 // Convert Windows backslash paths to bash-compatible forward slashes
 const toBashPath = (p) => p.replace(/\\/g, '/');
