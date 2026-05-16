@@ -86,6 +86,29 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <strong>こんな時に役立つ：</strong> Claude Code を仕事で使っていて、「先週の更新で何が壊れた？」「この hook は本当に効いているのか？」「トークン消費が突然倍になったが、何が原因か？」と毎月のように振り返る人。GitHub Issue を全部読む時間はないが、起きている事故と対処は知っておきたい人。
 </div>
 
+<h2>直近2週間の活動の合図（5月号と6月号の間の発見）</h2>
+<p style="font-size:0.93rem;color:#555;margin-bottom:0.8rem;">月号は月1本の構造化された配信だが、間の期間も継続して GitHub Issue を読み、利用者の事故を追跡している。5月号配信(5/5)から6月号配信(6/1)の間で発見した主な合図と、それに応じて公開した無料の素材を整理する。月額メンバーは、6月号(6/1配信)でこれらの発見の構造化された解説と、対応する hook を受け取る。</p>
+
+<div style="background:#fdf2f8;border-left:4px solid #be185d;padding:1rem 1.5rem;margin:1rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#9d174d;font-size:1.05rem;">合図 ひとつ目: Anthropic 自身の漏洩した源の数値（5/16発見）</h3>
+<p style="font-size:0.92rem;color:#374151;margin-top:0.4rem;">2026年3月31日にAnthropicがnpmの版2.1.88で内部の合図のmapを公開してしまった事故の中身に、Capybara(Claude 4.6の内部の暗号名)の版8の「29-30%の偽の主張率、版4の16.7%からの回帰」と書かれた箇所が含まれていた。3経路の媒体(VentureBeat / ruh.ai / mediacopilot.ai)で独立に確認可能。3件の道具の呼び出しのうち約1件で、Claude Code自身の表明が内部の自己評価で偽と判定された数値である。本 Safety Lab の中核の主題(主張と実態の乖離は構造の系統)の Anthropic 自身による定量的な独立検証。</p>
+<p style="font-size:0.9rem;color:#374151;margin-top:0.5rem;">→ <a href="https://gist.github.com/yurukusa/fb855261085bd6f9eaab03a32c406729" style="color:#9d174d;text-decoration:underline;font-weight:600;">公開の英語の解説 Gist (1,617単語) を読む</a></p>
+</div>
+
+<div style="background:#eff6ff;border-left:4px solid #1e40af;padding:1rem 1.5rem;margin:1rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#1e40af;font-size:1.05rem;">合図 ふたつ目: 副の作業者と機能の包の36件の失敗の様式（5/9-5/16の7日間）</h3>
+<p style="font-size:0.92rem;color:#374151;margin-top:0.4rem;">直近7日間の `anthropics/claude-code` の起票の場の系統的な点検で、副の作業者・機能の包・MCPサーバーの失敗の様式を36件発見した。5月11日の25件から44パーセントの増加。5系統の整理(副の作業者の境界の崩壊、道具・MCPの呼び出しの不可と捏造、機能の包の生存と読み込み、MCPサーバーの生存と境界、Coworkと背景のセッション特有)。各事例の起票の番号と利用者の側の予防の手順を整理した。</p>
+<p style="font-size:0.9rem;color:#374151;margin-top:0.5rem;">→ <a href="https://gist.github.com/yurukusa/1e6f47765e98e4053cb0c0ac687189af" style="color:#1e40af;text-decoration:underline;font-weight:600;">日本語の試し読みのGist (9,200字) を読む</a> ｜ <a href="https://gist.github.com/yurukusa/f9099ecced6f26a38b3c01ee376982f9" style="color:#1e40af;text-decoration:underline;font-weight:600;">英語版 (3,100単語) を読む</a></p>
+</div>
+
+<div style="background:#f0fdf4;border-left:4px solid #15803d;padding:1rem 1.5rem;margin:1rem 0;border-radius:0 8px 8px 0;">
+<h3 style="margin-top:0;color:#15803d;font-size:1.05rem;">合図 みっつ目: Agent Viewの背景のセッションの利用枠の10倍速の消費（5/16発見）</h3>
+<p style="font-size:0.92rem;color:#374151;margin-top:0.4rem;">Anthropicが2026年5月に追加した Agent View 機能の利用者の反応を直近3日間で点検し、4件の罠を発見した。背景のセッションの10倍速の利用枠の消費、Haikuのsummaryの通常の API 課金、API利用者には未公開、編集器の統合の不安定。6月15日の credit cliff の前の操作者の判定の入力。cc-safe-setup には警告 hook (`agent-view-credit-pool-monitor`)を実装済(公開の依頼226番、合体の判定の待機中)。</p>
+<p style="font-size:0.9rem;color:#374151;margin-top:0.5rem;">→ <a href="https://yurukusa-dev.hatenablog.com/entry/2026/05/16/104555" style="color:#15803d;text-decoration:underline;font-weight:600;">Hatena ブログの解説記事を読む</a></p>
+</div>
+
+<p style="font-size:0.9rem;color:#555;margin-top:1rem;font-style:italic;">これら3件の合図は、5月号と6月号の間の継続の活動の証拠である。月額メンバーは、6月号(6/1配信)で構造化された解説と対応する hook を受け取り、購読しなくても上記の試し読みの素材で発見の中身を確認できる。</p>
+
 <h2>5 月号の本文を読んでみる（買う前の試し読み）</h2>
 <p style="font-size:0.95rem;color:#444;margin-bottom:1rem;">月額の中身が「払う価値があるか」 は、 売り文句では判断できない。 5 月号の失敗事例の章 (本文 3,500 字) の冒頭の 3 節を、 実際の本文のまま下に出す。 ここで質を判断してから、 続きを読むかを決めてほしい。</p>
 
@@ -176,13 +199,15 @@ messages: text content blocks must be non-empty</code></pre>
 
 <div class="may-issue" style="background:#f0f9ff;border-left-color:#2563eb;">
 <h3 style="color:#1e40af;">2026 年 6 月号: 5/3-5/31 の 4 週間が対象（予告）</h3>
-<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 2 万 5 千-2 万 8 千字、紙の版は 25-30 ページの規模を想定。現時点で確定している組み込み予定の素材は次の 4 件:</p>
+<p style="font-size:0.92rem;color:#1e3a8a;margin-bottom:0.5rem;">5 月号の対象期間は 8 日間（4/25-5/2）だった。6 月号はフルの 4 週間で、集計の範囲が 3 倍以上になる見込み。本文は 2 万 8 千-3 万 2 千字、紙の版は 28-34 ページの規模を想定。現時点で確定している組み込み予定の素材は次の 7 件:</p>
 <ul style="font-size:0.92rem;color:#1e3a8a;">
+<li><strong>Anthropic 自身の漏洩した源の数値の解説（5/16発見、最強の独立検証）：</strong>2026年3月31日の npm の版 2.1.88 の漏洩で、Capybara(Claude 4.6の内部の暗号名)の版8の「29-30%の偽の主張率、版4の16.7%からの回帰」 の内部の数値が業界に流出した。3経路の媒体で独立確認可能。Claude Code 自身の主張と実態の乖離の Anthropic 自身による定量的な独立検証。本号で組み込みの段の解説と利用者の側の取り扱いを整理。約 6,000 字を予定。</li>
+<li><strong>副の作業者と機能の包の36件の失敗の様式（5/9-5/16発見、独立の章）：</strong>直近7日間の `anthropics/claude-code` の起票の場の系統的な点検で発見した36件の集まりを、5系統(副の作業者の境界の崩壊、道具・MCPの呼び出しの不可と捏造、機能の包の生存と読み込み、MCPサーバーの生存と境界、Coworkと背景のセッション特有)で整理。各系統の代表事例と利用者の側の予防の手順。約 12,000 字を予定。</li>
+<li><strong>Agent View の背景のセッションの利用枠の10倍速の消費（5/16発見、独立の章）：</strong>Anthropic が 2026年5月に追加した Agent View 機能の4件の罠(背景のセッションの10倍速、Haiku summary の通常 API 課金、API利用者には未公開、編集器の統合の不安定)。6月15日の credit cliff の前の操作者の判定の入力。対応の hook (`agent-view-credit-pool-monitor`)の本文の解説。約 4,500 字を予定。</li>
 <li><strong>子エージェントの境界の不在（5 件の Issue の集まり）：</strong>Issue #55488（子が親の身分と会話の履歴を漏らす）、 #55653（子が読み取りだけの道具で「保存しました」 と虚偽報告）、 #55660（子の作業時間の損失「数十時間」）、 #55666 と #55691（関連の症状）の 5 件を構造化。 各事例の検出の手段、 親側の事後の点検の仕組み、 起動時の検査の方法を解説。 約 14,000 字を予定。</li>
 <li><strong>2.1.126 公開直後 24-48 時間の沈黙の退行（5 件）：</strong>Issue #55209 / #55241 / #55502 / #55529 / #55613 の 5 件は、 公式の更新の通知に記載されない退行。 利用者の側でしか検出できないため、 月次で 1 本にまとまった形が必要。</li>
 <li><strong>自動の運用での利用枠の焼き：</strong>2026 年 5 月 1 日の利用者の集まりの上位の事例（1,085 ポイント）。 1 つの自動の命令で 26 時間で 6,000 ドル相当の利用枠を焼いた根本の原因と予防の手順。 自動の運用を前提とした個人開発者にとって最大の痛み。</li>
 <li><strong>料金構造の不合理：</strong>4/22 の値段反発、 4/24 の公式の事後の検証、 5/1 の 6,000 ドルの焼き、 5/2 の Issue #55663（中位と上位の模型の分離の枠の不合理）、 5/3 の特定の語の検閲事件 の 5 件を時系列に整理。 共通の構造的な失敗（公式の推奨と料金の仕組みの食い違い、 公式の説明の遅延、 利用者を実害の検出器にする設計の 3 軸）と、 個人の開発者が今すぐ取れる予防の手順を 3 段で解説。 約 8,500 字を予定。</li>
-<li><strong>5/5 朝の追加の素材（2 件）：</strong>沈黙の退行の 11 件目の事例 Issue #56293（公式の 2.1.128 の更新の通知が「およそ 3 倍の事前のキャッシュの作成の削減」 を主張、 起票者の 4,367 件の対話の解析は 5,534 から 22,713 への 4.1 倍の悪化を実証、 公式の文面と実測の数値の一字一句の矛盾）。 子の道具の破壊行動の 2 件 Issue #56255（PostgreSQL の運用データベースの 7.8 GB の消失）と #56277（main ブランチの 18 件以上の画像の消失）。 5/3 の子エージェントの境界の不在の 5 件の延長で、 道具の経路の種類の変更を関門の対象にしていない設計の穴を解説。</li>
 </ul>
 <p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">編集 5/30、校正 5/31、配信 6/1。Founder で 5 月中に参加すれば、6 月号も初回から受け取れる。</p>
 </div>
