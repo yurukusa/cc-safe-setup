@@ -267,6 +267,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | Know why a hook exists | `npx cc-safe-setup --why destructive-guard` |
 | Block silent memory file edits | `npx cc-safe-setup --install-example memory-write-guard` |
 | Stop built-in skills editing opaquely | `npx cc-safe-setup --install-example skill-gate` |
+| Warn when many skills risk silent description drop | `npx cc-safe-setup --install-example skill-cumulative-size-detector` |
 | Diagnose why hooks aren't working | `npx cc-safe-setup --doctor` |
 | Preview how hooks react to a command | `npx cc-safe-setup --simulate "git push origin main"` |
 | Protect a specific file from edits | `npx cc-safe-setup --protect .env` |
