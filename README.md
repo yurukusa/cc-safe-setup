@@ -197,6 +197,28 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `replace-all-guard` | Warns/blocks Edit `replace_all:true` (prevents bulk data corruption) | [#41681](https://github.com/anthropics/claude-code/issues/41681) |
 | `ripgrep-permission-fix` | Auto-fixes vendored ripgrep +x permission on start (fixes broken commands/skills) | [#41933](https://github.com/anthropics/claude-code/issues/41933) |
 
+## Claim-vs-Reality Defense Layer (May 2026)
+
+Three issues filed against `anthropics/claude-code` on 2026-05-18 documented the same structural failure observed at three different sites in the stack: a claim-emitting surface (input prompt reading, displayed model identity, completion claim) runs on a code path that does not depend on the corresponding state-verifying tool having executed. The cluster's response surface emits a definitive claim that the runtime never verified; the operator trusts the claim; the downstream cost appears in a different surface than where the claim was made.
+
+The three hooks below form a defense layer that addresses the pattern at all three sites, rather than three independent symptom-level fixes. Each hook is read-only on the session, never blocks the runtime, surfaces an advisory the operator can act on, and exposes a `CC_..._DISABLE=1` environment escape.
+
+| Hook | Trigger | What it surfaces | Issue |
+|------|---------|------------------|-------|
+| `rhetorical-verification-prompt-detector` | UserPromptSubmit | Verification-intent prompts (e.g. `are you sure?`, `本当に動いてる?`) attaches `additionalContext` instructing the model to either run a verification tool call or state explicitly that verification was not performed. | [#60107](https://github.com/anthropics/claude-code/issues/60107) |
+| `subscription-bypass-detector` | (session monitor) | Divergence between the UI-displayed model identity and the actual model executing the workload (the canonical case: $1,050 overcharge across three days with Sonnet displayed and Opus billed). | [#60093](https://github.com/anthropics/claude-code/issues/60093) |
+| `completion-claim-without-verification-detector` | Stop | Completion claims (`done`, `ready to test`, `fixed`, `完了しました`, `修正完了`) emitted when the recent forty tool-use entries contain no verification-shaped tool (`pytest`, `npm test`, `curl`, `status check`, log Read). Hedged phrasing (`I think`, `seems to`, `と思います`) is honored as the honest surface form and silences the hook. | [#60177](https://github.com/anthropics/claude-code/issues/60177) |
+
+Install individually:
+
+```bash
+npx cc-safe-setup --install-example rhetorical-verification-prompt-detector
+npx cc-safe-setup --install-example subscription-bypass-detector
+npx cc-safe-setup --install-example completion-claim-without-verification-detector
+```
+
+Full reasoning, with the L-ladder framing from #60177 and the architectural argument for the three-site reading: [Three Sites of Claim-vs-Reality Divergence in Claude Code](https://gist.github.com/yurukusa/576376eae458f20c21637eb66366473f) (2026-05-18 operator analysis, ~2,600 words, all issue and PR references verified HTTP 200).
+
 ## All 49 Commands
 
 | Command | What It Does |
