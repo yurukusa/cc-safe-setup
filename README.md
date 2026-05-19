@@ -475,6 +475,7 @@ Or browse all available examples in [`examples/`](examples/):
 - **verify-before-commit.sh**: Block git commit when lint/test commands haven't been run ([#37818](https://github.com/anthropics/claude-code/issues/37818))
 - **hook-debug-wrapper.sh**: Wrap any hook to log input/output/exit code/timing to `~/.claude/hook-debug.log`
 - **loop-detector.sh**: Detect and break command repetition loops (warn at 3, block at 5 repeats)
+- **same-correction-arrest.sh**: Detect the user repeating the same correction N=3 times in a session, then require a written plan before further Write/Edit. Operationalizes the model's own self-diagnosis in [#60506](https://github.com/anthropics/claude-code/issues/60506) ("I have no drift detector"), grounded in the recognition-without-arrest framework from [#60226](https://github.com/anthropics/claude-code/issues/60226).
 - **commit-quality-gate.sh**: Warn on vague commit messages ("update code"), long subjects, mega-commits
 - **session-handoff.sh**: Auto-save git state and session info to `~/.claude/session-handoff.md` on session end
 - **diff-size-guard.sh**: Warn/block when committing too many files at once (default: warn at 10, block at 50)
