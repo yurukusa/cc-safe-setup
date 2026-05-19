@@ -6,7 +6,7 @@
 
 > Listed on [Product Hunt](https://www.producthunt.com/products/cc-safe-setup) since April 21, 2026.
 
-**One command to make Claude Code safe for autonomous operation.** 736 example hooks · 71+ Anthropic Issues addressed by hook · 9,228+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
+**One command to make Claude Code safe for autonomous operation.** 737 example hooks · 72+ Anthropic Issues addressed by hook · 9,241+ tests · 30K+ total installs · [日本語](docs/README.ja.md)
 
 ```bash
 npx cc-safe-setup
