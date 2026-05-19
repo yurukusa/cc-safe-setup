@@ -103,6 +103,8 @@ Each hook exists because a real incident happened without it.
 | **[Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html)** | 5 questions → find where your tokens are going (30 seconds) |
 | **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
 | **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
+| **[CLAUDE.md Audit (single-page)](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/35b65185a850e262f6c7c27aeb690750/raw/claudemd-audit.html)** | Paste your `CLAUDE.md` → instant diagnosis against 9 dangerous patterns from the recognition-without-arrest cluster (rules without weights, lists without rules, missing closure-word verification gates, EN/JP/TR multilingual rule conflicts). Findings map to the [Claim-Verify Handbook](https://yurukusa.gumroad.com/l/claim-verify-handbook) chapters that cover each pattern. Read-only, runs in your browser, no data leaves the page. |
+| **[CLAUDE.md Audit (CLI)](https://gist.github.com/yurukusa/535522c29d66fa2994791159b4e756bc)** | Same nine-pattern audit as a ~200-line bash + python script. `curl | sh` or save and run locally — produces a JSON report you can pipe into CI. Multilingual rule detection across English, 日本語, and Türkçe. |
 
 ### Free guides
 
