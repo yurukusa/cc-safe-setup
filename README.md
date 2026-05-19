@@ -16,7 +16,7 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 > **What's a hook?** A checkpoint that runs before Claude executes a command. Like airport security, it inspects what's about to happen and blocks anything dangerous before it reaches the gate.
 
-[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (90 real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Defense Kit**](https://gist.github.com/yurukusa/c44e28ea04acdad7e7ed48c3e01dbb78) (10 incidents → 10 hooks, narrative-per-incident)
+[**▶ Live Demo**](https://yurukusa.github.io/cc-safe-setup/demo.html) (see hooks block rm -rf in your browser) · [**Incident Tracker**](https://yurukusa.github.io/cc-safe-setup/incidents.html) (90 real incidents) · [**Token Checkup**](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) (what type are you?) · [**All 8 Tools**](https://yurukusa.github.io/cc-safe-setup/hub.html) · [**Defense Kit**](https://gist.github.com/yurukusa/c44e28ea04acdad7e7ed48c3e01dbb78) (11 incidents → 11 hooks, narrative-per-incident) · [**Drift Matrix**](https://gist.github.com/yurukusa/becd28b2c121ac22e5344a074db530c8) (14 May 2026 cases × 10 hooks, "if I saw X install Y")
 
 ```
   cc-safe-setup
