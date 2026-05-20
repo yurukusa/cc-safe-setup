@@ -145,6 +145,14 @@ These are unaffiliated projects that pair well with the cc-safe-setup hooks, the
 
 **Or use the [interactive 5-question selector](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/5a8e883a86f5ead454d9bf9d322d8124/raw/wb-quiz.html)** if you want the longer form: maps your specific recent pain (cost, silent regression, irreversible incident, billing surprise, team posture) to one of the three books, the launch bundle, or the "free preview is enough" path. In-browser, no telemetry, free.
 
+**Pre-flight audit before deciding.** Run a 60-second read-only scan of your current Claude Code defense posture (Bash gate / format hook / claim-verify Stop / drift arrest / subagent boundary — the five layers the Claim-Verify Handbook prescribes), output as a shareable ASCII card with grade A-F and a named top suspect:
+
+```bash
+curl -sL https://gist.githubusercontent.com/yurukusa/6c54bf2788840f84aaa67e3410e8e1ec/raw/cvh-pre-flight.sh | bash
+```
+
+Local read-only, no network calls beyond the curl, no data collection. Source: [gist 6c54bf27](https://gist.github.com/yurukusa/6c54bf2788840f84aaa67e3410e8e1ec).
+
 ### v2.1.85: `if` Field Support
 
 Hooks now support an `if` field for conditional execution. The hook process only spawns when the command matches the pattern, `ls` won't trigger a git-only hook.
