@@ -143,6 +143,8 @@ These are unaffiliated projects that pair well with the cc-safe-setup hooks, the
 
 **Pick one path.** *Cost out of control?* → Token Book. *Considering a switch (Cursor / Codex / Cline)?* → Migration Playbook. *Need to know what's already broken in production?* → Incident Postmortems. *Need to keep up with what's breaking now?* → Safety Lab.
 
+**Or use the [interactive 5-question selector](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/5a8e883a86f5ead454d9bf9d322d8124/raw/wb-quiz.html)** if you want the longer form: maps your specific recent pain (cost, silent regression, irreversible incident, billing surprise, team posture) to one of the three books, the launch bundle, or the "free preview is enough" path. In-browser, no telemetry, free.
+
 ### v2.1.85: `if` Field Support
 
 Hooks now support an `if` field for conditional execution. The hook process only spawns when the command matches the pattern, `ls` won't trigger a git-only hook.
