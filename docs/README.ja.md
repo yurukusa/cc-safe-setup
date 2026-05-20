@@ -58,7 +58,9 @@ Claude Codeを再起動。完了。
 
 > 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
 
-> 🔁 月次の追跡が欲しい？ [CC Safety Lab Founder](safety-lab.html)（¥500/月・[Ko-fiで参加](https://ko-fi.com/yurukusa/tiers)）で毎月 4-8 件の事故事例（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次チェックリスト差分、 商品更新案内を届ける。 [5 月号の中身](safety-lab.html#may-issue) ｜ [6 月号予告](safety-lab.html#next-issue)。 Founder 価格は 12 ヶ月で ¥6,000、 据え置き。
+> 🔁 月次の追跡が欲しい？ [CC Safety Lab Founder](safety-lab.html?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=paid-products)（¥500/月・[Ko-fiで参加](https://ko-fi.com/yurukusa/tiers?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=paid-products)）で毎月 4-8 件の事故事例（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次チェックリスト差分、 商品更新案内を届ける。 [5 月号の中身](safety-lab.html#may-issue) ｜ [6 月号予告](safety-lab.html#next-issue)。 Founder 価格は 12 ヶ月で ¥6,000、 据え置き。
+
+> 🚀 2026-05-22 同日発売の英語の2冊。 [Migration Playbook 第2版](https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=launch-day)（Stay/Switch/Stack の判断の整理、 15 件の移行の合図 + 15 件の防衛の手順、 $19）と [Claim-Verify Handbook](https://yurukusa.gumroad.com/l/claim-verify-handbook?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=launch-day)（130 件の主張と実態の乖離の事例集、 14 件の防衛の手順、 $19）。 日本語の試し読みは [移行の手引きの第2版](https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=launch-day-preview)（約 9,500 字）と [事例集](https://gist.github.com/yurukusa/6dd608049064ed66c54f1a545a7b47a8?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=launch-day-preview)（約 9,900 字）で無料公開済。 [事故報告本（4 月から 5 月の事故の総括、 ¥4,350）](https://yurukusa.gumroad.com/l/rhtptb?utm_source=cc-safe-setup-readme-ja&utm_medium=repo&utm_campaign=paid-products)も併設。
 
 **既知の制限:**
 
