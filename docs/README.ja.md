@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 736個のexample hook · 71件超のAnthropic公式Issueに対応 · 9,228+テスト · 30K+ 累計インストール
+**Claude Codeを安全にするワンコマンドツール。** 746個のexample hook · 73件超のAnthropic公式Issueに対応 · 9,250+テスト · 30K+ 累計インストール
 
 ```bash
 npx cc-safe-setup
@@ -16,7 +16,7 @@ npx cc-safe-setup
 |---|---|
 | `npx cc-safe-setup` | 8個の安全フックをインストール |
 | `--shield` | 最大安全（スタック検出+推奨hook自動選択） |
-| `--install-example <name>` | 719個のexampleから個別インストール |
+| `--install-example <name>` | 727個のexampleから個別インストール |
 | `--examples` | 全exampleを一覧表示 |
 | `--create "説明"` | 自然言語でカスタムフック生成 |
 | `--verify` | 各フックの動作確認 |
@@ -59,6 +59,8 @@ Claude Codeを再起動。完了。
 > 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
 
 > 🔁 月次の追跡が欲しい？ [CC Safety Lab Founder](safety-lab.html)（¥500/月・[Ko-fiで参加](https://ko-fi.com/yurukusa/tiers)）で毎月 4-8 件の事故事例（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次チェックリスト差分、 商品更新案内を届ける。 [5 月号の中身](safety-lab.html#may-issue) ｜ [6 月号予告](safety-lab.html#next-issue)。 Founder 価格は 12 ヶ月で ¥6,000、 据え置き。
+
+> 📚 **2026 年 5 月 22 日発売** ｜ [Claim-Verify Handbook](https://yurukusa.gumroad.com/l/claim-verify-handbook?utm_source=cc-safe-setup-readme-ja&utm_medium=readme&utm_campaign=handbook-launch-2026-05-22)（$19）。 Claude Code が「成功した」「設定された」「比較した」 と主張するのに実態は完了していない事例を 130 件（本文 15 件 + 付録 D の継続の証拠 115 件、 2026-05-09 から 5-17 朝の 233 時間で、 過去 30 日の基準より 32 倍の加速）整理。 3 段階の枠組み + 14 件の防衛の手順 + 5 件の自動の点検の道具（5 件全件が実装と試験済、 165 件以上の試験が全件通過。 うち 4 件は cc-safe-setup の枝で取り込み待機、 1 件は本書の付録の標準の道具）。 Anthropic 自身の v2.1.144 の沈黙の修正の 6 件と起票 #60226（認識はあるが止まらない、 9 件の事例の集まり）を中核に articulate。 移行の手引きの第 2 版（同日発売）の姉妹商品。 [試し読み Gist (JP)](https://gist.github.com/yurukusa/6dd608049064ed66c54f1a545a7b47a8?utm_source=cc-safe-setup-readme-ja&utm_medium=readme&utm_campaign=handbook-preview) で本書の冒頭と 2 件の事例と全章立てを公開（無料、 約 9,900 字）。
 
 **既知の制限:**
 
