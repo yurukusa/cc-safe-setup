@@ -197,6 +197,29 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `replace-all-guard` | Warns/blocks Edit `replace_all:true` (prevents bulk data corruption) | [#41681](https://github.com/anthropics/claude-code/issues/41681) |
 | `ripgrep-permission-fix` | Auto-fixes vendored ripgrep +x permission on start (fixes broken commands/skills) | [#41933](https://github.com/anthropics/claude-code/issues/41933) |
 
+## Receipt-Persistence Layer (cross-boundary audit trail)
+
+A family of five sibling hooks that share one architectural pattern: at every boundary where Claude Code (or a sub-agent) could claim a successful action while the underlying runtime did not match, write a structured JSONL receipt before or after the boundary fires. The receipt corpus becomes a one-line `jq` query against the silent-failure shape. Originated as a response to the *recognition-without-arrest* cluster ([#60226](https://github.com/anthropics/claude-code/issues/60226)).
+
+| Boundary | Hook | What it records | Issue |
+|----------|------|-----------------|-------|
+| Session close | `closure-word-verify-gate` | "done" / "completed" claims at session end without a matching artifact | [#60506](https://github.com/anthropics/claude-code/issues/60506) |
+| Scope expansion | `scope-expansion-receipt` | Tool calls touching paths outside the declared work-tree | [#61102](https://github.com/anthropics/claude-code/issues/61102) |
+| Dispatch end | `dispatch-receipt` | Every `Task` / `Agent` invocation (with optional allowlist refusal) | [#61167](https://github.com/anthropics/claude-code/issues/61167) |
+| Edit / Write tool | `post-edit-disk-verify` | Claimed Edit/Write content vs. post-write on-disk content | [#61303](https://github.com/anthropics/claude-code/issues/61303) |
+| Dispatch start | `dispatch-allowlist-preflight` | Background sub-agent dispatches that reference MCP tools the parent's allowlist won't propagate | [#61315](https://github.com/anthropics/claude-code/issues/61315) |
+
+Each hook ships in three modes (`warn`, `refuse`, `off`) for safe adoption. Receipts are PHI-safe — prompts and full command content are hashed (sha256), never persisted. Audit query is consistent across boundaries:
+
+```bash
+find ~/.claude/receipts -name '*.jsonl' -mtime -7 -exec cat {} \; | \
+  jq -c 'select(.decision == "refuse" or .mcp_tools_referenced // [] | length > 0)'
+```
+
+The architectural rationale is documented in the [Receipt-Persistence Layer gist](https://gist.github.com/yurukusa/8c0d19d59730868672270e7312492d1d). The full taxonomy and 130 case studies appear in the [Claim-Verify Handbook](https://yurukusa.gumroad.com/l/claim-verify-handbook).
+
+Install any one of them: `npx cc-safe-setup --install-example <name>`.
+
 ## All 49 Commands
 
 | Command | What It Does |
