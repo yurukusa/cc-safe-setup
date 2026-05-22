@@ -144,6 +144,31 @@ PROMPT_LEN=$(printf '%s' "$PROMPT" | wc -c | tr -d ' ')
 PROMPT_HASH=$(printf '%s' "$PROMPT" | sha256sum 2>/dev/null | awk '{print $1}')
 [ -z "$PROMPT_HASH" ] && PROMPT_HASH="$(printf '%s' "$PROMPT" | shasum -a 256 2>/dev/null | awk '{print $1}')"
 
+# Schema v2 — read the operator's verbatim UserPromptSubmit text from the
+# companion log written by examples/userprompt-submit-receipt.sh, if any.
+# This lets the receipt corpus answer MAST 2.6 (Action-Reasoning Mismatch)
+# operationally — the executed argv vs the operator's articulated scope
+# at the prompt boundary — distinct from the LLM-judge labelled definition
+# of reasoning-vs-action mismatch. The architecture rationale is at:
+#   https://github.com/anthropics/claude-code/issues/61102#issuecomment-4514215413
+# When the companion log is absent, the fields are written as null so the
+# corpus stays joinable on the rest of the schema.
+ARTICULATED_HASH_JSON="null"
+ARTICULATED_LEN_JSON="null"
+COMPANION_LOG="${CC_DISPATCH_RECEIPT_DIR:-${HOME}/.claude/receipts}/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+if [ -f "$COMPANION_LOG" ]; then
+    # The companion writes one JSONL entry per UserPromptSubmit event.
+    # The most recent entry within the current session is the closest
+    # articulated scope for this dispatch.
+    LAST_USERPROMPT=$(tail -1 "$COMPANION_LOG" 2>/dev/null)
+    if [ -n "$LAST_USERPROMPT" ]; then
+        ART_HASH=$(printf '%s' "$LAST_USERPROMPT" | jq -r '.prompt_hash // empty' 2>/dev/null)
+        ART_LEN=$(printf '%s' "$LAST_USERPROMPT" | jq -r '.prompt_length // empty' 2>/dev/null)
+        [ -n "$ART_HASH" ] && ARTICULATED_HASH_JSON="\"$ART_HASH\""
+        [ -n "$ART_LEN" ] && ARTICULATED_LEN_JSON="$ART_LEN"
+    fi
+fi
+
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 TYPE_JSON=$(printf '%s' "$SUBAGENT_TYPE" | jq -Rs -c .)
 
@@ -208,8 +233,8 @@ RECEIPT_DIR="${CC_DISPATCH_RECEIPT_DIR:-${HOME}/.claude/receipts}"
 mkdir -p "$RECEIPT_DIR" 2>/dev/null
 RECEIPT_FILE="${RECEIPT_DIR}/dispatch-preflight-$(date +%Y-%m-%d).jsonl"
 
-printf '{"ts":"%s","subagent_type":%s,"run_in_background":%s,"prompt_hash":"%s","prompt_length":%s,"mcp_tools_referenced":%s,"coverage":%s,"decision":"%s"}\n' \
-    "$TS" "$TYPE_JSON" "$RUN_BG" "$PROMPT_HASH" "$PROMPT_LEN" "$REFS_JSON" "$COVERAGE_JSON" "$DECISION" \
+printf '{"ts":"%s","subagent_type":%s,"run_in_background":%s,"prompt_hash":"%s","prompt_length":%s,"articulated_scope_hash":%s,"articulated_scope_length":%s,"mcp_tools_referenced":%s,"coverage":%s,"decision":"%s","schema_version":2}\n' \
+    "$TS" "$TYPE_JSON" "$RUN_BG" "$PROMPT_HASH" "$PROMPT_LEN" "$ARTICULATED_HASH_JSON" "$ARTICULATED_LEN_JSON" "$REFS_JSON" "$COVERAGE_JSON" "$DECISION" \
     >> "$RECEIPT_FILE" 2>/dev/null
 
 # Emit warnings / refusal output.

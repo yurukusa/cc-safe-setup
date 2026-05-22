@@ -281,8 +281,101 @@ reset_state
 echo '{"tool_name":"Agent","tool_input":{"subagent_type":"a","prompt":"plain","run_in_background":true}}' | bash "$HOOK" >/dev/null 2>&1
 echo '{"tool_name":"Agent","tool_input":{"subagent_type":"b","prompt":"use mcp__svc__tool","run_in_background":true}}' | bash "$HOOK" >/dev/null 2>&1
 echo '{"tool_name":"Agent","tool_input":{"subagent_type":"c","prompt":"use mcp__other__one mcp__other__two","run_in_background":true}}' | bash "$HOOK" >/dev/null 2>&1
-MCP_DISPATCHES=$(cat "$CC_DISPATCH_RECEIPT_DIR"/*.jsonl 2>/dev/null | jq -c 'select(.mcp_tools_referenced | length > 0)' | wc -l)
+MCP_DISPATCHES=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null | jq -c 'select(.mcp_tools_referenced | length > 0)' | wc -l)
 if [ "$MCP_DISPATCHES" = "2" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: audit query expected 2 MCP-ref dispatches, got $MCP_DISPATCHES"; fi
+
+# ----------------------------------------------------------------
+# Group 10: Schema v2 — articulated_scope fields from companion log
+#
+# Schema v2 adds articulated_scope_hash and articulated_scope_length
+# fields to the receipt, populated from the most recent
+# userprompt-submit-YYYY-MM-DD.jsonl companion log entry. When the
+# companion log is absent, both fields are written as null.
+#
+# Architecture rationale at:
+# https://github.com/anthropics/claude-code/issues/61102#issuecomment-4514215413
+# ----------------------------------------------------------------
+
+# Test 26: receipt includes schema_version 2
+reset_state
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" >/dev/null 2>&1
+RECEIPT_BODY=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null)
+assert_contains "receipt has schema_version 2" "$RECEIPT_BODY" '"schema_version":2'
+
+# Test 27: without companion log, articulated_scope_hash is null
+reset_state
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" >/dev/null 2>&1
+RECEIPT_BODY=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null)
+assert_contains "no companion → articulated_scope_hash null" "$RECEIPT_BODY" '"articulated_scope_hash":null'
+assert_contains "no companion → articulated_scope_length null" "$RECEIPT_BODY" '"articulated_scope_length":null'
+
+# Test 28: with companion log, articulated_scope fields populated
+reset_state
+COMPANION="$CC_DISPATCH_RECEIPT_DIR/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+cat > "$COMPANION" <<JSON
+{"ts":"2026-05-22T00:00:00Z","prompt_hash":"abcdef0123456789","prompt_length":42,"schema_version":1}
+JSON
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" >/dev/null 2>&1
+RECEIPT_BODY=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null)
+assert_contains "with companion → articulated_scope_hash populated" "$RECEIPT_BODY" '"articulated_scope_hash":"abcdef0123456789"'
+assert_contains "with companion → articulated_scope_length populated" "$RECEIPT_BODY" '"articulated_scope_length":42'
+
+# Test 29: companion log with multiple entries — only the last is used
+reset_state
+COMPANION="$CC_DISPATCH_RECEIPT_DIR/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+cat > "$COMPANION" <<JSON
+{"ts":"2026-05-22T00:00:00Z","prompt_hash":"first0000000000","prompt_length":10,"schema_version":1}
+{"ts":"2026-05-22T00:00:01Z","prompt_hash":"last1111111111","prompt_length":20,"schema_version":1}
+JSON
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" >/dev/null 2>&1
+RECEIPT_BODY=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null)
+assert_contains "last entry wins (hash)" "$RECEIPT_BODY" '"articulated_scope_hash":"last1111111111"'
+assert_contains "last entry wins (length)" "$RECEIPT_BODY" '"articulated_scope_length":20'
+
+# Test 30: malformed companion log entry — fields stay null, no crash
+reset_state
+COMPANION="$CC_DISPATCH_RECEIPT_DIR/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+echo 'not valid json at all' > "$COMPANION"
+OUT=$(echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" 2>&1)
+RC=$?
+assert_exit "malformed companion exit 0" "$RC" "0"
+RECEIPT_BODY=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null)
+assert_contains "malformed companion → hash null" "$RECEIPT_BODY" '"articulated_scope_hash":null'
+
+# Test 31: receipt is still valid JSONL with schema v2 fields
+reset_state
+COMPANION="$CC_DISPATCH_RECEIPT_DIR/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+cat > "$COMPANION" <<JSON
+{"ts":"2026-05-22T00:00:00Z","prompt_hash":"abcd1234","prompt_length":50,"schema_version":1}
+JSON
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"p1"}}' | bash "$HOOK" >/dev/null 2>&1
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"y","prompt":"p2 with mcp__a__b","run_in_background":true}}' | bash "$HOOK" >/dev/null 2>&1
+LINES_OK=0
+LINES_TOTAL=0
+while IFS= read -r line; do
+    LINES_TOTAL=$((LINES_TOTAL+1))
+    if echo "$line" | jq . >/dev/null 2>&1; then
+        LINES_OK=$((LINES_OK+1))
+    fi
+done < "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl
+if [ "$LINES_OK" = "2" ] && [ "$LINES_TOTAL" = "2" ]; then
+    PASS=$((PASS+1))
+else
+    FAIL=$((FAIL+1))
+    echo "FAIL: v2 receipt JSONL not valid (got $LINES_OK/$LINES_TOTAL valid)"
+fi
+
+# Test 32: schema v2 receipt is joinable on articulated_scope_hash
+reset_state
+COMPANION="$CC_DISPATCH_RECEIPT_DIR/userprompt-submit-$(date +%Y-%m-%d).jsonl"
+cat > "$COMPANION" <<JSON
+{"ts":"2026-05-22T00:00:00Z","prompt_hash":"joinable_hash_1","prompt_length":33,"schema_version":1}
+JSON
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"x","prompt":"plain"}}' | bash "$HOOK" >/dev/null 2>&1
+# Audit query: find dispatches whose articulated_scope is known
+JOINABLE=$(cat "$CC_DISPATCH_RECEIPT_DIR"/dispatch-preflight-*.jsonl 2>/dev/null | \
+    jq -c 'select(.articulated_scope_hash != null)' | wc -l)
+if [ "$JOINABLE" = "1" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: joinable receipt count expected 1, got $JOINABLE"; fi
 
 echo ""
 echo "===================="
