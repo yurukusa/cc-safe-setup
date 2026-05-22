@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+- **New hook**:
+  - articulated-scope-capture — UserPromptSubmit hook recording sha256 + byte length of user prompt as Mode 2.6 (Action-Reasoning Mismatch) measurement primitive. Pairs with scope-expansion-receipt (PR #282, destructive-bash boundary), dispatch-receipt (PR #283, agent-dispatch boundary), and dispatch-allowlist-preflight (PR #286). PHI-safe by design (hash + length only, raw prompt never persisted). Schema source: [@yurukusa #61102#issuecomment-4514215413](https://github.com/anthropics/claude-code/issues/61102#issuecomment-4514215413). ([waitdeadai PR #288](https://github.com/yurukusa/cc-safe-setup/pull/288))
+- **New script**:
+  - receipts-aggregate.py — stdlib-only Python 3.10+ CLI denormalizing JSONL receipts across boundary types into a wide table. CSV (default) or JSON output; `--boundary <type>` filter; forward-compatible via `additional_fields` for schema v3+. Downstream-consumable by pandas, polars, jq, or duckdb. Operator-side measurement substrate for the `effective_arrest_rate = gate_installation_rate × gate_recall` decomposition. ([waitdeadai PR #288](https://github.com/yurukusa/cc-safe-setup/pull/288))
+- **Tests**: +18 (9 for articulated-scope-capture, 9 for receipts-aggregate)
+- **Docs**: README examples list + Standalone Tools table updated; index.mjs CATEGORIES.Monitoring entry
+
 ## [29.6.38] - 2026-04-01
 - **New hooks (8)**:
   - session-index-repair — rebuild sessions-index.json on exit ([#25032](https://github.com/anthropics/claude-code/issues/25032))
