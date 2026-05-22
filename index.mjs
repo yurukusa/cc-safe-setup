@@ -924,6 +924,7 @@ function examples() {
     },
     'Monitoring': {
       'api-rate-limit-tracker.sh': 'Track API call frequency and warn on burst',
+      'articulated-scope-capture.sh': 'Capture sha256+length of user prompt for receipt-corpus joining (Mode 2.6 measurement)',
       'cost-tracker.sh': 'Estimate session token cost',
       'cross-session-error-log.sh': 'Persist error patterns across sessions',
       'daily-usage-tracker.sh': 'Track daily tool call count',
