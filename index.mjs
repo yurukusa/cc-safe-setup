@@ -31,6 +31,21 @@ const c = {
 
 const SCRIPTS = JSON.parse(readFileSync(join(__dirname, 'scripts.json'), 'utf-8'));
 
+function june15Countdown() {
+  const cliff = new Date('2026-06-15T00:00:00Z');
+  const now = new Date();
+  const ms = cliff.getTime() - now.getTime();
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+  return days;
+}
+
+function june15Phrase() {
+  const d = june15Countdown();
+  if (d > 0) return `in ${d} day${d === 1 ? '' : 's'}`;
+  if (d === 0) return 'today';
+  return `${-d} day${d === -1 ? '' : 's'} ago`;
+}
+
 const HOOKS = {
   'destructive-guard': {
     name: 'Destructive Command Blocker',
@@ -322,7 +337,7 @@ function status() {
   console.log(c.dim + '  Tip: --validate to check health · --simulate "cmd" to test · --shield for max safety' + c.reset);
   console.log();
 
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in 23 days.' + c.reset);
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing ' + june15Phrase() + '.' + c.reset);
   console.log('  ' + c.dim + '  Diagnose any unexpected charge: https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log();
   // Exit code for CI: 0 = all installed, 1 = missing hooks
@@ -6001,7 +6016,7 @@ async function main() {
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Save $:' + c.reset + '   https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html (free)');
   console.log();
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in 23 days. claude -p invocations route to a separate credit bucket.');
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing ' + june15Phrase() + '. claude -p invocations route to a separate credit bucket.');
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
