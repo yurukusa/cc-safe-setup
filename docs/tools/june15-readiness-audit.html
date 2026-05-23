@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>June 15 Readiness Audit — Claude Code Pre-Cliff Assessment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="10-question audit tool to assess your Claude Code setup's readiness for the 2026-06-15 programmatic billing split. Browser-only, no signup, no telemetry. CC0.">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.6; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.cliff { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.score { font-size: 3rem; font-weight: 700; text-align: center; }
+.score-label { text-align: center; color: var(--muted); margin-bottom: 1rem; }
+.score-good { color: var(--green); }
+.score-mid { color: var(--amber); }
+.score-bad { color: var(--red); }
+.gap { background: #fef2f2; border-left: 4px solid var(--red); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.92rem; }
+.gap.mid { background: #fffbeb; border-color: var(--amber); }
+.gap.minor { background: #f0fdf4; border-color: var(--green); }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.ack { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>June 15 Readiness Audit — Claude Code Pre-Cliff Assessment</h1>
+<div class="meta">10 questions · ~5 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-05-24)</div>
+
+<div class="cliff">
+<strong>The cliff:</strong> On 2026-06-15 (UTC), Anthropic splits programmatic billing. <code>claude -p</code> and Claude Agent SDK invocations route to a separate credit bucket (Pool 2). Documentation: <a href="https://docs.claude.com/en/api/billing" target="_blank">docs.claude.com/en/api/billing</a>. This audit estimates how much of your current setup is exposed to the change.
+</div>
+
+<div class="disclosure">
+<strong>Disclosure:</strong> the recommendations below cite the <em>Migration Playbook Edition 2</em> ($19, released 2026-05-22) where its chapters address a specific gap. The free <a href="https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9" target="_blank">Chapter 1 preview Gist</a> and the free <a href="https://gist.github.com/yurukusa/d41780db34f27eba298092cb57255679" target="_blank">Trigger 15 chapter Gist</a> may already be enough; the book is only useful if multiple gaps below score high.
+</div>
+
+<h2>Audit</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1" data-weight="15">
+<div class="label">1. How often do you invoke <code>claude -p</code> (one-shot) or Claude Agent SDK?</div>
+<div class="hint">Includes cron jobs, CI runners, automated agents.</div>
+<label><input type="radio" name="q1" value="0"> Never. Only interactive <code>claude</code> REPL.</label>
+<label><input type="radio" name="q1" value="5"> Rarely. 1–5 times/month.</label>
+<label><input type="radio" name="q1" value="10"> Sometimes. 5–50 times/month.</label>
+<label><input type="radio" name="q1" value="15"> Frequently. 50+ times/month or cron-scheduled.</label>
+</div>
+
+<div class="q" data-id="q2" data-weight="12">
+<div class="label">2. What is your current monthly Claude Code spend?</div>
+<div class="hint">Combine subscription plan cost (Pro/Max) and any overage API charges.</div>
+<label><input type="radio" name="q2" value="0"> Under $20 (Pro plan, no overage).</label>
+<label><input type="radio" name="q2" value="4"> $20–$100 (Pro with overage or Max 5x).</label>
+<label><input type="radio" name="q2" value="8"> $100–$200 (Max 20x).</label>
+<label><input type="radio" name="q2" value="12"> Over $200 (Max + API overage).</label>
+</div>
+
+<div class="q" data-id="q3" data-weight="10">
+<div class="label">3. Do you have a <code>/cost</code> baseline from before 2026-06-14?</div>
+<div class="hint">A snapshot of <code>claude /cost --json</code> output you can compare against post-cliff.</div>
+<label><input type="radio" name="q3" value="0"> Yes, saved to file.</label>
+<label><input type="radio" name="q3" value="5"> No, but I plan to capture one before 2026-06-15.</label>
+<label><input type="radio" name="q3" value="10"> No, and I haven't planned for one.</label>
+</div>
+
+<div class="q" data-id="q4" data-weight="10">
+<div class="label">4. Do you have a cost-guard hook on PreToolUse to detect runaway burns?</div>
+<div class="hint">A hook that aborts or warns when daily token consumption exceeds a threshold.</div>
+<label><input type="radio" name="q4" value="0"> Yes, installed and tested.</label>
+<label><input type="radio" name="q4" value="5"> Aware of the concept, not installed.</label>
+<label><input type="radio" name="q4" value="10"> Not familiar with the pattern.</label>
+</div>
+
+<div class="q" data-id="q5" data-weight="10">
+<div class="label">5. How many sub-agents (.claude/agents/*.md) does your project define?</div>
+<div class="hint">Sub-agent invocations from headless parent contexts may route to Pool 2.</div>
+<label><input type="radio" name="q5" value="0"> None.</label>
+<label><input type="radio" name="q5" value="3"> 1–3.</label>
+<label><input type="radio" name="q5" value="7"> 4–10.</label>
+<label><input type="radio" name="q5" value="10"> 10+ or heavy parallel dispatch.</label>
+</div>
+
+<div class="q" data-id="q6" data-weight="10">
+<div class="label">6. How many high-frequency Skills (SKILL.md with broad triggers) does your setup load?</div>
+<div class="hint">Skills that activate on most user prompts compound the cache_creation cost.</div>
+<label><input type="radio" name="q6" value="0"> None or only narrow-trigger Skills.</label>
+<label><input type="radio" name="q6" value="3"> 1–3 broad-trigger Skills.</label>
+<label><input type="radio" name="q6" value="7"> 4–7 broad-trigger Skills.</label>
+<label><input type="radio" name="q6" value="10"> 8+ broad-trigger Skills.</label>
+</div>
+
+<div class="q" data-id="q7" data-weight="8">
+<div class="label">7. Have you verified your CLAUDE.md is under 5,000 tokens per turn?</div>
+<div class="hint">Bloated CLAUDE.md compounds with every session, especially under Pool 2 calculations.</div>
+<label><input type="radio" name="q7" value="0"> Yes, measured and below 5,000 tokens.</label>
+<label><input type="radio" name="q7" value="4"> Roughly checked, probably fine.</label>
+<label><input type="radio" name="q7" value="8"> Never measured.</label>
+</div>
+
+<div class="q" data-id="q8" data-weight="8">
+<div class="label">8. Do you know which alternative AI providers cover your top 3 use cases?</div>
+<div class="hint">If Pool 2 charges spike post-cliff, can you switch a workload to Codex / DeepSeek / local LLM?</div>
+<label><input type="radio" name="q8" value="0"> Yes, I have tested alternatives for my top use cases.</label>
+<label><input type="radio" name="q8" value="4"> Aware of alternatives, never tested.</label>
+<label><input type="radio" name="q8" value="8"> Have not considered alternatives.</label>
+</div>
+
+<div class="q" data-id="q9" data-weight="8">
+<div class="label">9. Have you set a billing alert in your Anthropic account?</div>
+<div class="hint">Independent of in-app /cost — the actual Anthropic billing dashboard alert.</div>
+<label><input type="radio" name="q9" value="0"> Yes, alerts configured.</label>
+<label><input type="radio" name="q9" value="4"> Aware of the feature, not configured.</label>
+<label><input type="radio" name="q9" value="8"> Not familiar.</label>
+</div>
+
+<div class="q" data-id="q10" data-weight="9">
+<div class="label">10. Do you have a refund/escalation template ready for unexpected charges?</div>
+<div class="hint">A pre-written Issue body that captures plan tier, /cost JSON snapshots, and the specific cap breach pattern.</div>
+<label><input type="radio" name="q10" value="0"> Yes, template prepared.</label>
+<label><input type="radio" name="q10" value="4"> Know the pattern, no template.</label>
+<label><input type="radio" name="q10" value="9"> Would not know where to start.</label>
+</div>
+
+<button type="button" id="submit-btn" class="btn">Compute readiness score</button>
+</form>
+
+<div id="result" class="result">
+<div class="score" id="score-display">0</div>
+<div class="score-label">out of 100 — Higher score means LESS prepared (more exposure to the cliff)</div>
+<h2 style="margin-top:2rem">Your top gaps</h2>
+<div id="gaps"></div>
+<div class="ack">
+The full migration framework — including Pool 1/Pool 2 attribution Chapter 7, cache_creation Chapter 8, Path B' (Codex) Chapter 5, and Path D (local LLM) Chapter 6 — is in <strong><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=june15-readiness-audit&utm_medium=tool&utm_campaign=mp-v2-from-audit" target="_blank">Migration Playbook Edition 2</a></strong> ($19, 241 pages, released 2026-05-22). Free <a href="https://gist.github.com/yurukusa/d66ffbe472df1231b59445f26fd25da9" target="_blank">Chapter 1 preview</a> and free <a href="https://gist.github.com/yurukusa/d41780db34f27eba298092cb57255679" target="_blank">Trigger 15 chapter</a> may be enough — the book is only useful if multiple gaps above score high.
+</div>
+</div>
+
+<footer>
+This tool is a single static HTML page. Input data is processed entirely in your browser. Nothing is sent to any server.
+<br><br>
+Related free tools: <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html" target="_blank">Pool 2 Estimator</a> · <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html" target="_blank">Wrong Charge Diagnostic</a> · <a href="https://gist.github.com/yurukusa/9ff373bd344335e16e5834c87a3f1466" target="_blank">23-Day Preparation Checklist</a>
+<br><br>
+License: CC0 (public domain). Reuse and adapt freely.
+</footer>
+
+<script>
+const GAPS = {
+  q1: {
+    high: { label: "High Pool 2 exposure", desc: "Frequent <code>claude -p</code> or SDK use means most cost moves to Pool 2 post-cliff. Migration Playbook Edition 2 Chapter 7 covers Pool 1/Pool 2 attribution and the daily measurement loop." },
+    mid: { label: "Moderate Pool 2 exposure", desc: "Occasional headless invocations. Worth checking your <code>history | grep -c 'claude -p'</code> count before the cliff." },
+  },
+  q2: {
+    high: { label: "Higher overage risk", desc: "Spend above $100/month exposes more dollars to the Pool 2 split. Use the <a href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html' target='_blank'>Pool 2 Estimator</a> to model the exact impact." },
+    mid: { label: "Moderate spend exposure", desc: "Your monthly spend means the Pool 2 split is meaningful. Migration Playbook Edition 2 Chapter 4 (Path A vs A') walks through the stay-and-fortify decision." },
+  },
+  q3: {
+    high: { label: "No baseline = no measurement", desc: "Without a pre-cliff <code>/cost</code> snapshot, you cannot tell whether post-cliff billing matches the documented behavior. Run <code>claude /cost --json &gt; baseline-2026-06-14.json</code> before the cliff." },
+    mid: { label: "Plan to capture a baseline", desc: "Add a calendar reminder for 2026-06-14 to capture the <code>/cost --json</code> snapshot." },
+  },
+  q4: {
+    high: { label: "No cost-guard hook", desc: "A PreToolUse cost-guard hook would have caught the €84.68 overage in Issue #61704. Migration Playbook Edition 2 Chapter 7 ships a tested cost-guard template." },
+    mid: { label: "Cost-guard hook not installed", desc: "Worth installing before the cliff. Examples in <code>cc-safe-setup</code> repo." },
+  },
+  q5: {
+    high: { label: "Heavy sub-agent dispatch", desc: "Sub-agents from headless parents may route to Pool 2. The dispatch pattern affects which credit bucket carries the load. Migration Playbook Edition 2 Chapter 4 (Path A') extends the safe-dispatch framework." },
+    mid: { label: "Some sub-agent use", desc: "Audit which sub-agents run under headless contexts. The boundary matters post-cliff." },
+  },
+  q6: {
+    high: { label: "Skills compound cache cost", desc: "Broad-trigger Skills compound with cache_creation inflation (Issue #55445). Migration Playbook Edition 2 Chapter 8 covers the trigger-frequency tuning loop." },
+    mid: { label: "Some Skills exposure", desc: "Audit the broad-trigger Skills for activation frequency. The compound effect is non-linear." },
+  },
+  q7: {
+    high: { label: "CLAUDE.md never measured", desc: "Bloated CLAUDE.md compounds every session. Free tool: <a href='https://yurukusa.github.io/skill-md-token-cliff-ja/' target='_blank'>SKILL.md Token Cliff</a> (in-browser scanner)." },
+    mid: { label: "CLAUDE.md roughly checked", desc: "Run the SKILL.md Token Cliff tool for a concrete number." },
+  },
+  q8: {
+    high: { label: "No alternative AI tested", desc: "If Pool 2 charges spike, lack of tested alternatives forces you to absorb the increase. Migration Playbook Edition 2 Chapter 5 (Path B') and Chapter 6 (Path D) walk through Codex and local LLM evaluation." },
+    mid: { label: "Alternatives not tested", desc: "Worth running a small workload on Codex or DeepSeek to know the actual quality/cost tradeoff." },
+  },
+  q9: {
+    high: { label: "No billing alert", desc: "Set a billing alert in your Anthropic account dashboard. Independent of in-app metrics." },
+    mid: { label: "Billing alert not configured", desc: "Takes 2 minutes to set up. Worth doing before the cliff." },
+  },
+  q10: {
+    high: { label: "No refund template", desc: "If you encounter the €84.68/$80-style overage pattern post-cliff, a pre-written Issue body cuts your filing time from 30 minutes to 3 minutes. The free <a href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' target='_blank'>Wrong Charge Diagnostic</a> tool generates the template." },
+    mid: { label: "Pattern known, no template", desc: "Use the Wrong Charge Diagnostic tool to prepare the template in advance." },
+  },
+};
+
+document.getElementById('submit-btn').addEventListener('click', function() {
+  let total = 0;
+  let gaps = [];
+  const qs = document.querySelectorAll('.q');
+  let unanswered = 0;
+  qs.forEach(q => {
+    const id = q.dataset.id;
+    const weight = parseInt(q.dataset.weight);
+    const selected = q.querySelector('input[type="radio"]:checked');
+    if (!selected) {
+      unanswered++;
+      return;
+    }
+    const v = parseInt(selected.value);
+    total += v;
+    if (v >= weight * 0.8) {
+      gaps.push({ id, severity: 'high' });
+    } else if (v >= weight * 0.4) {
+      gaps.push({ id, severity: 'mid' });
+    }
+  });
+  if (unanswered > 0) {
+    alert(`Please answer all 10 questions. ${unanswered} remaining.`);
+    return;
+  }
+  const display = document.getElementById('score-display');
+  display.textContent = total;
+  display.className = 'score ' + (total >= 60 ? 'score-bad' : total >= 30 ? 'score-mid' : 'score-good');
+  const gapsDiv = document.getElementById('gaps');
+  gapsDiv.innerHTML = '';
+  if (gaps.length === 0) {
+    gapsDiv.innerHTML = '<p>No significant gaps detected. Your setup is well prepared for the June 15 cliff.</p>';
+  } else {
+    gaps.sort((a, b) => (a.severity === 'high' ? -1 : 1));
+    gaps.forEach(g => {
+      const info = GAPS[g.id][g.severity];
+      const div = document.createElement('div');
+      div.className = 'gap ' + g.severity;
+      div.innerHTML = `<strong>${info.label}:</strong> ${info.desc}`;
+      gapsDiv.appendChild(div);
+    });
+  }
+  const result = document.getElementById('result');
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth' });
+});
+</script>
+
+</body>
+</html>
