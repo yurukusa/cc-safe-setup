@@ -183,8 +183,10 @@ messages: text content blocks must be non-empty</code></pre>
 <li><strong>自動の運用での利用枠の焼き：</strong>2026 年 5 月 1 日の利用者の集まりの上位の事例（1,085 ポイント）。 1 つの自動の命令で 26 時間で 6,000 ドル相当の利用枠を焼いた根本の原因と予防の手順。 自動の運用を前提とした個人開発者にとって最大の痛み。</li>
 <li><strong>料金構造の不合理：</strong>4/22 の値段反発、 4/24 の公式の事後の検証、 5/1 の 6,000 ドルの焼き、 5/2 の Issue #55663（中位と上位の模型の分離の枠の不合理）、 5/3 の特定の語の検閲事件 の 5 件を時系列に整理。 共通の構造的な失敗（公式の推奨と料金の仕組みの食い違い、 公式の説明の遅延、 利用者を実害の検出器にする設計の 3 軸）と、 個人の開発者が今すぐ取れる予防の手順を 3 段で解説。 約 8,500 字を予定。</li>
 <li><strong>5/5 朝の追加の素材（2 件）：</strong>沈黙の退行の 11 件目の事例 Issue #56293（公式の 2.1.128 の更新の通知が「およそ 3 倍の事前のキャッシュの作成の削減」 を主張、 起票者の 4,367 件の対話の解析は 5,534 から 22,713 への 4.1 倍の悪化を実証、 公式の文面と実測の数値の一字一句の矛盾）。 子の道具の破壊行動の 2 件 Issue #56255（PostgreSQL の運用データベースの 7.8 GB の消失）と #56277（main ブランチの 18 件以上の画像の消失）。 5/3 の子エージェントの境界の不在の 5 件の延長で、 道具の経路の種類の変更を関門の対象にしていない設計の穴を解説。</li>
+<li><strong>5/22-5/23 発火の集積の追加の確定の素材:</strong>5月22日の Claim-Verify Handbook の発火の30時間で第14軸 (運用者の側の architectural convergence) の集積が9件から13件への拡張。 weasel (jaswalmohit8-collab、 5/20公開、 1,600時間以上の Polymarket の実機の運用、 Claude Opus と Kimi K2 の模型横断の証拠) と Kane Sajdak (KJ88-source/claude-config、 5/22公開、 「Layer 3 is the next durability gap to close」 の独立な言い回し) と djd1m (evidence-wiki、 5/23公開、 「3-pillar discipline」 と「/triple-check」 の4階級の receipt) の3件は本書 (Claim-Verify Handbook) の中核の主題と直接の並行の独立な収束。 6月号の中核の章として「運用者の側の独立な収束の継続の節」 の新規追加 (約4,000-6,000字を予定)。</li>
+<li><strong>6月15日の課金分離の準備の事例集の章 (新規確定):</strong>6月15日に Anthropic は Claude Agent SDK と claude -p と Claude Code GitHub Actions と third-party agents を subscription pool から separate monthly credit pool ($20 Pro / $100 Max 5x / $200 Max 20x、 full API rates、 no rollover) へ移行。 退役の識別子の単一の探索の手順、 7段の準備の点検表 (audit、 credit 請求、 overage の選択、 plan の調整、 予算の関門、 完了の関門、 早期の出荷の検証)、 PreToolUse の予算の関門と Stop の完了の関門の hook の具体な実装の例を含む。 公開済の英語の手引きの Gist (https://gist.github.com/yurukusa/9ff373bd344335e16e5834c87a3f1466、 1,587単語) の延長で、 月額の購読者向けの深い節を準備中。 約3,500-5,000字を予定。</li>
 </ul>
-<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">編集 5/30、校正 5/31、配信 6/1。Founder で 5 月中に参加すれば、6 月号も初回から受け取れる。</p>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">編集 5/30、校正 5/31、配信 6/1。Founder で 5 月中に参加すれば、6 月号も初回から受け取れる。<strong>6月号は5/22発火の30時間の集積の最強の現代の合図と、 6/15の課金分離の準備の手引きの2軸で本号の規模は5月号より大幅に拡張の見込み</strong>。</p>
 </div>
 
 <div style="background:#f9fafb;border-left:4px solid #6b7280;padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 8px 8px 0;">
@@ -287,6 +289,8 @@ messages: text content blocks must be non-empty</code></pre>
 <p style="margin-top:0.5rem;color:#555;">「事故が起きてから知る」 ではなく「事故が起きる前に予防」 を選ぶ人向け。中小企業の経営層向けの無料の予防策ガイドが既に流通しているが、こちらは個人開発者向けの月次の実践に絞る。</p>
 
 <p style="margin-top:1rem;color:#555;font-size:0.93rem;"><strong>単発の解説記事との違い：</strong>3/31 の流出事件のような大きな事案は、セキュリティ企業（SQAT、TrendMicro）、大手 SI（サーバーワークス）、主要技術媒体（@IT、SBBit）、個人開発者（Zenn、Qiita）が単発の解説記事を出す。これらは事件の全体像と対策をその時点で押さえるには有効だが、翌月以降に新しい事故が起きた時の続報の経路がない。Safety Lab は「事件の後追い」 ではなく「日々の運用の更新」 を月次で続ける位置づけ。中小企業の経営層向けの予防啓発（無料領域）とも、単発解説（個別記事）とも重ならない、個人開発者の月次実践のスロットを埋める。</p>
+
+<p style="margin-top:1rem;color:#555;font-size:0.93rem;background:#f0fdf4;border-left:4px solid #16a34a;padding:0.7rem 1rem;border-radius:0 6px 6px 0;"><strong>2026-05-23 競合の景観の追跡の更新：</strong>5件の英語圏の月額の媒体 (Claude Code Masterclass 7万件、 Claude Code for Non-Coders 3.3万件、 claude-news.today の日次、 codewithandrea.com 2.2万件の月次、 MKT1) を再調査した結果、 運用の側の防衛の規律と関門の hook の実装と失敗の事例の集積の niche は5件全件で不在の状態が確定。 Safety Lab はこの niche を単独で占める。 詳細な競合の調査の整理は <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/safety-lab.html" style="color:#16a34a;text-decoration:underline;">本日の戦略の memo</a> に保存済。</p>
 
 <h2>よくある質問</h2>
 
