@@ -88,7 +88,7 @@ Anthropic [splits programmatic billing on 2026-06-15](https://docs.claude.com/en
 - **Free billing-axis writeup** (no install): [The Model Can't Verify Its Own Billing](https://gist.github.com/yurukusa/4ca735cb192219581d303afe5f63d2eb) — 4 filed cases, 9-row recognition-without-arrest cluster catalog, 4 operator-side defenses, the refund argument that lands ([日本語版](https://gist.github.com/yurukusa/65d9ce96fab8d767ed0a088fb1e20152))
 - **Free June 15 calculator** (browser-only, no signup): paste your last 30 days of usage, get your projected post-June-15 spend → [Pool 2 estimator](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html)
 - **Decision framework**: [Claude Code Migration Playbook ($19, Edition 2 included)](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) — 14 dated triggers, 3 migration paths, decision tree from your daily burn rate to one of stay/switch/hybridize
-- **Monthly continuing-evidence subscription**: [CC Safety Lab Founder Membership (¥500/month, Founder pricing locked)](https://ko-fi.com/yurukusa/tiers) — June 2026 issue centers on the 23-day cliff preparation playbook
+- **Monthly continuing-evidence subscription**: [CC Safety Lab Founder Membership (¥500/month, Founder pricing locked)](https://ko-fi.com/yurukusa/tiers) — June 2026 issue centers on the 23-day cliff preparation playbook. [Free May 2026 issue preview Gist](https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d) — ~8,000 words, full table of contents + first case study; reading is enough to decide if the recurring track fits your operation.
 ## What Gets Installed
 
 | Hook | Prevents | Related Issues |
