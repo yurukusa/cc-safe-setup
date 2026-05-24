@@ -64,6 +64,13 @@
 #   DRG_KUBECTL_DEPLOYMENT — for kubectl adapter, deployment name
 #     (required for kubectl adapter)
 #
+#   DRG_KUBECTL_REQUIRE_ROLLOUT_COMPLETE=1 — for kubectl adapter, additionally
+#     verify that .status.readyReplicas == .spec.replicas (rollout is complete,
+#     not just that the revision annotation has been bumped). Without this flag
+#     the revision annotation match is sufficient; with this flag, a mid-rollout
+#     state (revision bumped, pods still terminating) is treated as a query
+#     failure.
+#
 #   DRG_TERRAFORM_OUTPUT — for terraform adapter, name of the
 #     terraform output to query (required for terraform adapter)
 #
@@ -177,6 +184,21 @@ case "$ADAPTER" in
                 -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' 2>/dev/null)
             if [ -z "$QUERIED_VERSION" ]; then
                 QUERY_FAILED=1
+            elif [ "${DRG_KUBECTL_REQUIRE_ROLLOUT_COMPLETE:-0}" = "1" ]; then
+                # When the operator requires rollout completion (not just the revision
+                # annotation), check that all replicas are up-to-date. Without this check,
+                # the hook can pass on a deployment that's mid-rollout — the revision is
+                # already bumped but pods are still terminating/starting.
+                READY=$(kubectl get deployment "$DEPLOY" -n "$NS" \
+                    -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+                DESIRED=$(kubectl get deployment "$DEPLOY" -n "$NS" \
+                    -o jsonpath='{.spec.replicas}' 2>/dev/null)
+                if [ -z "$READY" ] || [ -z "$DESIRED" ] || [ "$READY" != "$DESIRED" ]; then
+                    # Rollout not complete; treat as query failure (strict-mode operators
+                    # can refuse, non-strict default to receipt-only).
+                    QUERIED_VERSION="${QUERIED_VERSION}-rollout-incomplete"
+                    QUERY_FAILED=1
+                fi
             fi
         fi
         ;;

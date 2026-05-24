@@ -262,6 +262,64 @@ OUT=$(echo '{"closeout_text":"Deployed v1 to prod."}' | bash "$HOOK" 2>&1)
 RC=$?
 assert_exit "kubectl missing deployment refuse" "$RC" "2"
 
+# Test 22b: kubectl rollout-complete check, ready=desired → execute
+reset_env; reset_receipts
+export DRG_ADAPTER="kubectl"
+export DRG_KUBECTL_NAMESPACE="production"
+export DRG_KUBECTL_DEPLOYMENT="api"
+export DRG_KUBECTL_REQUIRE_ROLLOUT_COMPLETE=1
+# Mock kubectl: each invocation returns the next configured value via a counter
+cat > "$TMPDIR_MOCKS/kubectl" <<'KEOF'
+#!/bin/bash
+COUNTER_FILE="${TMPDIR_MOCKS:-/tmp}/kubectl-counter"
+N=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
+N=$((N + 1))
+echo "$N" > "$COUNTER_FILE"
+case "$N" in
+    1) printf '42' ;;        # revision annotation
+    2) printf '3' ;;          # readyReplicas
+    3) printf '3' ;;          # spec.replicas
+esac
+exit 0
+KEOF
+chmod +x "$TMPDIR_MOCKS/kubectl"
+export TMPDIR_MOCKS
+rm -f "$TMPDIR_MOCKS/kubectl-counter"
+OUT=$(echo '{"closeout_text":"Rolled out v42 to production."}' | bash "$HOOK" 2>&1)
+RC=$?
+assert_exit "kubectl rollout-complete ready=desired execute" "$RC" "0"
+
+# Test 22c: kubectl rollout-complete check, ready<desired → query failure
+reset_env; reset_receipts
+export DRG_ADAPTER="kubectl"
+export DRG_KUBECTL_NAMESPACE="production"
+export DRG_KUBECTL_DEPLOYMENT="api"
+export DRG_KUBECTL_REQUIRE_ROLLOUT_COMPLETE=1
+cat > "$TMPDIR_MOCKS/kubectl" <<'KEOF'
+#!/bin/bash
+COUNTER_FILE="${TMPDIR_MOCKS:-/tmp}/kubectl-counter"
+N=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
+N=$((N + 1))
+echo "$N" > "$COUNTER_FILE"
+case "$N" in
+    1) printf '42' ;;
+    2) printf '1' ;;  # only 1 ready
+    3) printf '3' ;;  # 3 desired
+esac
+exit 0
+KEOF
+chmod +x "$TMPDIR_MOCKS/kubectl"
+rm -f "$TMPDIR_MOCKS/kubectl-counter"
+OUT=$(echo '{"closeout_text":"Rolled out v42 to production."}' | bash "$HOOK" 2>&1)
+RC=$?
+# Non-strict mode default: query failure → execute (receipt only)
+assert_exit "kubectl rollout-incomplete non-strict execute" "$RC" "0"
+RECEIPT_BODY=$(cat "$DRG_RECEIPT_DIR"/*.jsonl 2>/dev/null)
+assert_contains "rollout-incomplete recorded in receipt" "$RECEIPT_BODY" "rollout-incomplete"
+
+# Restore the simple kubectl mock for subsequent tests
+make_mock kubectl 0 '42'
+
 # ----------------------------------------------------------------
 # Group 5: terraform adapter behavior (3 tests)
 # ----------------------------------------------------------------
