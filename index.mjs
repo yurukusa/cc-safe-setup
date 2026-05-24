@@ -6001,6 +6001,12 @@ async function main() {
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Save $:' + c.reset + '   https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html (free)');
   console.log();
+  console.log('  ' + c.bold + 'Stay current with what\'s breaking now:' + c.reset);
+  console.log('  ' + c.dim + '  Monthly digest (4-8 incidents with fixes, copy-paste hooks, deep-dive case):' + c.reset);
+  console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=safety-lab' + c.reset);
+  console.log('  ' + c.dim + '    ¥500/mo founder pricing locked. Free May 2026 preview:' + c.reset);
+  console.log('  ' + c.dim + '      https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d' + c.reset);
+  console.log();
   console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in 23 days. claude -p invocations route to a separate credit bucket.');
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
