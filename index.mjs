@@ -325,6 +325,9 @@ function status() {
   console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in 23 days.' + c.reset);
   console.log('  ' + c.dim + '  Diagnose any unexpected charge: https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log();
+  console.log('  ' + c.dim + 'Monthly continuing-evidence subscription: CC Safety Lab Founder (¥500/mo, ~$3.30, locked).' + c.reset);
+  console.log('  ' + c.dim + '  4-8 new incidents with fixes + 1-2 copy-paste hooks each month. Free preview: https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d' + c.reset);
+  console.log();
   // Exit code for CI: 0 = all installed, 1 = missing hooks
   if (missing > 0) process.exit(1);
 }
