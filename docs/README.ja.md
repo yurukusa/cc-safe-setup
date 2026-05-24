@@ -99,7 +99,7 @@ Anthropic は[2026年6月15日に programmatic の課金を分離](https://docs.
 - **無料の billing-axis の整理** (install 不要): [日本語版の長編 Gist](https://gist.github.com/yurukusa/65d9ce96fab8d767ed0a088fb1e20152) — 4件の filed cases、 9行の cluster の目録、 4件の利用者の側の防衛、 効く返金の論理 ([英語版](https://gist.github.com/yurukusa/4ca735cb192219581d303afe5f63d2eb))
 - **無料の6月15日の見積もりの道具** (browser のみ、 signup 不要): 直近30日の利用を貼り付けて post-June-15 の見積もりを取得 → [Pool 2 の estimator](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html)
 - **判定の枠組み**: [Claude Code Migration Playbook ($19、 Edition 2 同梱)](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) — 14件の dated の triggers、 3件の移行の経路、 日々の burn rate から stay / switch / hybridize の判定
-- **月額の継続の証拠の購読**: [CC Safety Lab Founder Membership (¥500/月、 Founder の値段で locked)](https://ko-fi.com/yurukusa/tiers) — 2026年6月号は23日の崖の準備の playbook を中核に
+- **月額の継続の証拠の購読**: [CC Safety Lab Founder Membership (¥500/月、 Founder の値段で locked)](https://ko-fi.com/yurukusa/tiers) — 2026年6月号は23日の崖の準備の playbook を中核に。 [5月号の無料の試し読みの Gist (約8,000字)](https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d) — 購読の前に読める。
 ## ドキュメント
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html) — 5分で安全に
