@@ -209,6 +209,19 @@ if (HELP) {
   process.exit(0);
 }
 
+// Compute the June 15, 2026 billing-split countdown message dynamically.
+// Returns the days-remaining variant before the cliff, the active-since variant after.
+function june15Message(suffix = '') {
+  const target = new Date('2026-06-15T00:00:00Z');
+  const now = new Date();
+  const days = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  const trailing = suffix ? ' ' + suffix : '';
+  if (days > 0) {
+    return `Anthropic splits programmatic billing in ${days} day${days === 1 ? '' : 's'}.${trailing}`;
+  }
+  return `Anthropic billing split active since 2026-06-15.${trailing}`;
+}
+
 function ask(question) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
@@ -322,7 +335,7 @@ function status() {
   console.log(c.dim + '  Tip: --validate to check health · --simulate "cmd" to test · --shield for max safety' + c.reset);
   console.log();
 
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in 23 days.' + c.reset);
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' ' + june15Message() + c.reset);
   console.log('  ' + c.dim + '  Diagnose any unexpected charge: https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log();
   // Exit code for CI: 0 = all installed, 1 = missing hooks
@@ -6001,7 +6014,7 @@ async function main() {
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Save $:' + c.reset + '   https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html (free)');
   console.log();
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in 23 days. claude -p invocations route to a separate credit bucket.');
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' ' + june15Message('claude -p invocations route to a separate credit bucket.'));
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
