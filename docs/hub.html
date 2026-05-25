@@ -39,7 +39,7 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <body>
 
 <div style="background:linear-gradient(90deg,#da552f,#f97316);padding:.5rem 1rem;text-align:center;font-size:.9rem">
-<span style="color:#fff;font-weight:600">⚠️ June 15: Anthropic splits programmatic billing in 22 days.</span>
+<span style="color:#fff;font-weight:600">⚠️ June 15, 2026: Anthropic splits programmatic billing.</span>
 <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-hub&utm_medium=top-banner&utm_campaign=june15-cliff" style="color:#fff;margin-left:.5rem;text-decoration:underline">Decide stay / switch / hybridize →</a>
 </div>
 
@@ -67,6 +67,46 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 <div class="start-step"><div class="start-num">1</div><div class="start-text">Run <code>npx cc-safe-setup --shield</code>, installs hooks, detects your stack, generates CLAUDE.md</div></div>
 <div class="start-step"><div class="start-num">2</div><div class="start-text">Run <code>npx cc-safe-setup --verify</code>, confirms all hooks block correctly</div></div>
 <div class="start-step"><div class="start-num">3</div><div class="start-text">For teams: <code>npx cc-safe-setup --team</code>, commit <code>.claude/</code> to share with everyone</div></div>
+</div>
+
+<div class="section-title">June 15 Preparation Tools</div>
+
+<div class="grid">
+<a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html" class="card" style="border-color:#f97316">
+<div class="card-icon">💰</div>
+<div class="card-title">June 15 Pool 2 Estimator</div>
+<div class="card-desc">5-minute self-assessment: paste your past-30-day usage, get estimated monthly cost after June 15 with Pool 1 / Pool 2 split. Browser-only, no signup, no telemetry.</div>
+<span class="card-tag" style="background:#f97316">free tool</span>
+</a>
+<a href="tools/june15-readiness-audit.html" class="card" style="border-color:#f97316">
+<div class="card-icon">📋</div>
+<div class="card-title">June 15 Readiness Audit (10-question)</div>
+<div class="card-desc">10-question audit returns a readiness score (0-100) with each gap mapped to a specific Migration Playbook chapter. Browser-only, no signup.</div>
+<span class="card-tag" style="background:#f97316">free tool</span>
+</a>
+<a href="https://gist.github.com/yurukusa/f87c20636bbb12dfe03d5f0598768937" class="card" style="border-color:#da3633">
+<div class="card-icon">🔥</div>
+<div class="card-title">Three Cost Catastrophes (May 22-24)</div>
+<div class="card-desc">Structural analysis of $47K/3-day subagent runaway, 887K-tokens/min parallel-49 burn, and $6K-overnight cache-TTL surprise. Three operator-side preventions mapped to PR #298, #286, #283.</div>
+<span class="card-tag" style="background:#da3633">analysis</span>
+</a>
+<a href="https://gist.github.com/yurukusa/9ff373bd344335e16e5834c87a3f1466" class="card" style="border-color:#1f6feb">
+<div class="card-icon">📘</div>
+<div class="card-title">21-Day Preparation Checklist (EN)</div>
+<div class="card-desc">7-step preparation checklist, hook patterns for closure-claim arrest and budget gates, parallel-agent cost reality, and the four official-doc blind spots. CC BY 4.0, ~1,800 words.</div>
+<span class="card-tag" style="background:#1f6feb">checklist</span>
+</a>
+</div>
+
+<div class="section-title">Sub-Agent Observability Handbook · Ships May 27</div>
+
+<div class="grid">
+<a href="https://yurukusa.gumroad.com/l/sub-agent-observability-handbook?utm_source=cc-safe-setup-hub&utm_medium=card&utm_campaign=soh-pre-launch" class="card" style="border:2px solid #a371f7;">
+<div class="card-icon">📗</div>
+<div class="card-title">Sub-Agent Observability Handbook ($19)</div>
+<div class="card-desc">Four sub-patterns of sub-agent failure articulated from the May 20-22 cluster of 7 independent reports (#60987, #61102, #61107, #61167, #61315, #61405, #61547). Operator-side defense hooks for each sub-pattern, mapped to cc-safe-setup PR #283, #286, #298, #282. Chapter 1 free as a <a href="https://gist.github.com/yurukusa/03a4526fbc56f9c53e729893264a2870" style="color:#a371f7;">Gist preview</a>.</div>
+<span class="card-tag" style="background:#a371f7">ships 2026-05-27</span>
+</a>
 </div>
 
 <div class="section-title">Latest: Critical Safety Fixes</div>
