@@ -454,6 +454,61 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;">Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> documents zero Anthropic staff engagement across 30+ issues over 9 months. One workaround comment in September 2025 didn't fix anything. No milestones, no Anthropic-authored PRs, no roadmap, no tracking issue. The community is now writing custom Python <code>PreToolUse</code> hooks to reimplement permission enforcement (#18846), which is the option the meta-issue identifies as "what people are actually doing." This is a security-relevant subsystem where the documented contract diverges materially from the runtime behavior.</p>
 </div>
 
+<h2 id="cluster-skills">Cluster 7: Skills metadata and loading</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">10+ open issues in 14 days across area:skills, four failure modes, zero Anthropic-side fix</span>
+<span class="cluster-status status-active">ACTIVE (May 2026, expanding)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 10+ (area:skills) + 20+ (area:agent-view related)</span>
+<span><strong>Reactions:</strong> ~100+ combined (cluster is new; reaction-count growth signal)</span>
+<span><strong>First filed:</strong> 2026-05 (area:skills label rolled out 2026-05-17)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code's Skills feature (added in v2.x) exhibits a coherent class of failures in metadata fabrication, frontmatter respect, discovery, and partial loading. The runtime accepts non-existent settings fields without validation; the documented <code>paths:</code> auto-load trigger does not fire; the <code>argument-hint:</code> frontmatter is not displayed; the agent view loads skills incompletely. No first-class observability for which skill is active during a given tool call exists.</p>
+
+<h4>The four failure modes</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Settings fabrication.</strong> Sub-agents write non-existent fields (e.g. <code>disabledSkills</code>) into <code>~/.claude/settings.json</code> with no validation. The write succeeds, restart succeeds, the targeted skills remain active. Silent no-op. (<a href="https://github.com/anthropics/claude-code/issues/62421">#62421</a>)</li>
+<li><strong>Frontmatter not honored.</strong> The documented <code>paths:</code> auto-load trigger never fires; <code>argument-hint:</code> is replaced by <code>...</code> ellipsis in the slash command hint area. (<a href="https://github.com/anthropics/claude-code/issues/62049">#62049</a>, <a href="https://github.com/anthropics/claude-code/issues/62127">#62127</a>)</li>
+<li><strong>Discovery doesn't match docs.</strong> <code>.claude/skills/</code> discovery via parent walk and <code>additionalDirectories</code> does not produce the documented effect in nested git repo layouts. (<a href="https://github.com/anthropics/claude-code/issues/62237">#62237</a>)</li>
+<li><strong>Partial loading and hook integration gaps.</strong> The "claude agents" interface starts the sub-agent before skills finish loading; PreToolUse hooks have no first-class way to know which skill is active. (<a href="https://github.com/anthropics/claude-code/issues/62386">#62386</a>, <a href="https://github.com/anthropics/claude-code/issues/62108">#62108</a>, <a href="https://github.com/anthropics/claude-code/issues/62078">#62078</a>)</li>
+</ol>
+
+<h4>Representative cases (top 9 of the 14-day window)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>State</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62421">#62421</a></td><td>2026-05-26</td><td>open</td><td>LLM agents fabricate non-existent <code>disabledSkills</code> setting — silent no-op</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62049">#62049</a></td><td>2026-05-24</td><td>open</td><td><code>paths:</code> frontmatter never triggers skill auto-loading</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62127">#62127</a></td><td>2026-05-25</td><td>open</td><td><code>argument-hint</code> frontmatter not displayed in slash command hint area</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62237">#62237</a></td><td>2026-05-25</td><td>open</td><td>Skill discovery via parent-walk and <code>additionalDirectories</code> doesn't match docs</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62386">#62386</a></td><td>2026-05-26</td><td>open</td><td>Claude agents interface: incomplete skill loading</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62108">#62108</a></td><td>2026-05-25</td><td>open</td><td>Add <code>active_skill</code> field to PreToolUse hook input</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62078">#62078</a></td><td>2026-05-24</td><td>open</td><td>Expose current skill name as env var to hooks</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62259">#62259</a></td><td>2026-05-25</td><td>open</td><td>Allow user override of sandbox auto-deny on <code>.claude/skills/</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62409">#62409</a></td><td>2026-05-26</td><td>open</td><td>Plugin skill shadows built-in <code>/release-notes</code> slash command</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (hook integration in design)</h4>
+<p style="font-size: 0.93rem;">Three hook designs in the pipeline (June 2026):</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>skills-settings-validator.sh</code></strong> — SessionStart hook that detects non-existent fields like <code>disabledSkills</code> in <code>settings.json</code> and warns. Addresses Mode 1 (settings fabrication).</li>
+<li><strong><code>skills-load-verifier.sh</code></strong> — UserPromptSubmit hook that compares loaded skills against <code>~/.claude/skills/</code> and <code>.claude/skills/</code> directory contents. Addresses Mode 2 and Mode 4.</li>
+<li><strong><code>skills-context-recorder.sh</code></strong> — PreToolUse/PostToolUse hook that records the active skill at each tool call. Workaround for Mode 4 hook integration gap.</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">All area:skills issues filed since the label rollout (2026-05-17) remain open. No Anthropic staff engagement signal across the cluster. Skills is a v2.x feature; the 14-day filing rate of 10+ issues since label rollout is the strongest signal that the feature shipped without the validation and observability primitives that the documented behavior implies.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/d00b2d32505ef67572baacbd6fad3d77">Skills Metadata and Loading cluster field report</a> (2,106 words, four failure modes, six issues with deep-dive, three detection paths, four defense paths). For the cross-cluster framework synthesis, see the <a href="https://gist.github.com/yurukusa/f6b5524b0e88fd9443d62fb44ba1619e">7-Cluster Framework</a> (2,233 words).</p>
+</div>
+
 <h2>How clusters are detected and tracked</h2>
 
 <p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
@@ -465,7 +520,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The six clusters tracked here represent <strong>~11,400 combined user reactions across 50+ issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses (hooks or terminal-level workarounds) cover five of six clusters at the symptom level; the permission matching cluster has one partial hook with four more in design.</p>
+<p style="font-size: 0.93rem; color: #475569;">The seven clusters tracked here represent <strong>~11,500 combined user reactions across 60+ issues</strong>. None has an official upstream fix as of 2026-05-27. Operator-side defenses (hooks or terminal-level workarounds) cover five of seven clusters at the symptom level; the permission matching cluster (Cluster 6) has one partial hook with four more in design, and the Skills metadata cluster (Cluster 7) has three hooks in design for June 2026.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
@@ -474,7 +529,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 4-8 incidents per month, 1 deep-dive failure case, 1-2 copy-paste safety hooks, updated checklist, product update notes.
 </p>
 <p style="margin: 0; font-size: 0.9rem; color: #78350f;">
-<strong>Coming up:</strong> June issue (multi-account cluster, 12,000 chars), July issue (AGENTS.md interop, ~14,000 chars), August candidate (Pro Max quota anomaly).
+<strong>Coming up:</strong> June (multi-account), July (AGENTS.md interop), August (Pro Max quota anomaly), September (Permission matching), October (Skills metadata).
 </p>
 <div style="margin-top: 1rem;">
 <a href="https://ko-fi.com/yurukusa/tiers" class="btn">Join as Founder → Ko-fi</a>
@@ -501,7 +556,7 @@ Free previews: <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a4
 </ul>
 
 <p class="footnote">
-This page is updated as clusters evolve. Last update: 2026-05-26. Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
+This page is updated as clusters evolve. Last update: 2026-05-27 (Cluster 7 Skills metadata and loading added). Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
 </p>
 
 </body>
