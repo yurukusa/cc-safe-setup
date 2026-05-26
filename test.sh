@@ -18181,6 +18181,15 @@ test_ex compact-alert-notification.sh '{"message":""}' 0 "compact-alert-notifica
 test_ex compact-alert-notification.sh '{"message":"Context compaction complete"}' 0 "compact-alert-notification: compaction complete exits 0"
 test_ex compact-alert-notification.sh '{"message":"COMPACT: reducing context from 900K to 200K"}' 0 "compact-alert-notification: uppercase COMPACT exits 0"
 
+# --- runtime-binary-change-detector tests ---
+# Hook always exits 0 (advisory). Full state-machine tests live in
+# tests/test-runtime-binary-change-detector.sh.
+test_ex runtime-binary-change-detector.sh '{}' 0 "runtime-binary-change-detector: empty input exits 0"
+test_ex runtime-binary-change-detector.sh '{"event":"session_start"}' 0 "runtime-binary-change-detector: session_start exits 0"
+test_ex runtime-binary-change-detector.sh '{"event":"SessionStart"}' 0 "runtime-binary-change-detector: PascalCase SessionStart exits 0"
+test_ex runtime-binary-change-detector.sh '{"hook_event_name":"SessionStart"}' 0 "runtime-binary-change-detector: hook_event_name fallback exits 0"
+test_ex runtime-binary-change-detector.sh '{"event":"pre_tool_use","tool_name":"Bash"}' 0 "runtime-binary-change-detector: non-session event exits 0"
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
