@@ -6015,7 +6015,7 @@ async function main() {
   console.log('  ' + c.dim + 'More:' + c.reset + '    npx cc-safe-setup --shield  (maximum safety)');
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
-  console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (6 open clusters, ~11,400 user reactions across 50+ issues)');
+  console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (7 open clusters, ~11,500 user reactions across 60+ issues)');
   console.log();
   const daysLeft2 = daysUntilJune15();
   const daySuffix2 = daysLeft2 === 1 ? 'day' : 'days';
