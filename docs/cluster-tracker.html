@@ -400,14 +400,14 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 </div>
 <div class="cluster-meta">
 <span><strong>Issues:</strong> 25+ (30+ via meta-issue #30519)</span>
-<span><strong>Reactions:</strong> ~804 (combined, top 25 area:permissions issues)</span>
+<span><strong>Reactions:</strong> ~804+ (combined, top 25 area:permissions issues, plus the newly surfaced Axis 8 in #62437)</span>
 <span><strong>First filed:</strong> 2025-08 (#5140)</span>
 <span><strong>Cluster framing:</strong> 2026-05-26</span>
 </div>
 
-<p>Users configure <code>allow</code>, <code>deny</code>, and <code>ask</code> rules in <code>settings.json</code> expecting them to match the bash commands Claude generates. The matching engine has seven independent failure axes that combine to make wildcards, "Always Allow," and scope hierarchy unreliable in practice. Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (filed 2026-03-03, 71 reactions) articulates the seven axes with 13 referenced sub-issues and documents zero Anthropic staff engagement across 9 months. A second meta-issue, <a href="https://github.com/anthropics/claude-code/issues/39523">#39523</a> (16 reactions), tracks specifically the bypass-mode regression with "9-month trail, 12+ duplicates."</p>
+<p>Users configure <code>allow</code>, <code>deny</code>, and <code>ask</code> rules in <code>settings.json</code> expecting them to match the bash commands Claude generates. The matching engine has eight independent failure axes (seven from meta-issue #30519, plus an eighth surfaced 2026-05-26 in #62437) that combine to make wildcards, "Always Allow," scope hierarchy, and PreToolUse hook enforcement unreliable in practice. Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (filed 2026-03-03, 71 reactions) articulates the original seven axes with 13 referenced sub-issues and documents zero Anthropic staff engagement across 9 months. A second meta-issue, <a href="https://github.com/anthropics/claude-code/issues/39523">#39523</a> (16 reactions), tracks specifically the bypass-mode regression with "9-month trail, 12+ duplicates."</p>
 
-<h4>The seven failure axes</h4>
+<h4>The eight failure axes</h4>
 <ol style="font-size: 0.93rem;">
 <li><strong>Wildcards don't match compound commands.</strong> <code>Bash(git:*)</code> doesn't match <code>git add file &amp;&amp; git commit -m "msg"</code>. The <code>*</code> only spans a single simple command, but Claude generates compound bash constantly.</li>
 <li><strong>"Always Allow" saves dead rules.</strong> Approving <code>git commit -m "fix typo"</code> saves the verbatim string; next time the message differs, it prompts again. <code>settings.local.json</code> accumulates hundreds of one-off rules.</li>
@@ -416,6 +416,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Deny rules have the same bugs.</strong> Multiline commands and flag-reordering bypass deny rules — so the system isn't just annoying, it's not enforcing the safety constraints users configured.</li>
 <li><strong>Colon vs space syntax contradicts.</strong> <code>Bash(git:*)</code> and <code>Bash(git *)</code> behave differently; docs disagree on which is correct; "Always Allow" generates one syntax while users configure the other.</li>
 <li><strong>Bypass-mode is partially broken.</strong> <code>--dangerously-skip-permissions</code> doesn't bypass Edit prompts (#36192), Cowork scheduled tasks ignore "Always allow" (#47180), and the flag itself stopped working entirely after v2.1.77 (#36168).</li>
+<li><strong>Session approval suppresses PreToolUse hook deny (2026-05-26).</strong> Once a static <code>ask</code> rule like <code>Bash(docker --host:*)</code> is session-approved, subsequent matching commands bypass the PreToolUse hook entirely — the hook's <code>permissionDecision: deny</code> output is never reached. A session-cached approval of a broad pattern silently whitelists destructive subcommands the hook is explicitly denying. New axis surfaced by issue <a href="https://github.com/anthropics/claude-code/issues/62437">#62437</a>.</li>
 </ol>
 
 <h4>Representative cases (top 14 by reactions)</h4>
@@ -436,6 +437,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <tr><td><a href="https://github.com/anthropics/claude-code/issues/35954">#35954</a></td><td>2026-03</td><td>26</td><td>open</td><td>Add option to disable "Contains backslash-escaped whitespace" warning</td></tr>
 <tr><td><a href="https://github.com/anthropics/claude-code/issues/32985">#32985</a></td><td>2026-03</td><td>24</td><td>open</td><td>Allow configuring auto-approval for <code>cd+git</code> compound commands</td></tr>
 <tr><td><a href="https://github.com/anthropics/claude-code/issues/47180">#47180</a></td><td>2026-05</td><td>23</td><td>open</td><td>Cowork scheduled tasks ignore "Always allow" folder/tool permissions</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62437">#62437</a></td><td>2026-05-26</td><td>0</td><td>open</td><td>PreToolUse hook not invoked after a static ask rule receives session-level approval (Axis 8)</td></tr>
 </tbody>
 </table>
 
