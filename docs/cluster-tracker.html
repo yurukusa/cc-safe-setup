@@ -102,7 +102,7 @@ code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-si
 A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-26.
 </div>
 
-<h2>The four clusters being tracked (May 2026)</h2>
+<h2>The five clusters being tracked (May 2026)</h2>
 
 <table class="summary-table">
 <thead>
@@ -148,10 +148,18 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>2 (PRs #340, #342: drift/version detectors)</td>
 <td>Unresolved (5+ months)</td>
 </tr>
+<tr>
+<td><a href="#cluster-tui-ux">TUI / Terminal UX</a></td>
+<td>6</td>
+<td>~2,106</td>
+<td>2025-04-12 (#769)</td>
+<td>0 (operator-side terminal alternatives only)</td>
+<td>Unresolved (13+ months, area:tui label acknowledged)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~8,500 user reactions across 23 issues</strong>, all four clusters currently open as of 2026-05-26. The combined volume is roughly equivalent to the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~10,600 user reactions across 29 issues</strong>, all five clusters currently open as of 2026-05-26. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -331,6 +339,50 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;">No upstream fix as of 2026-05-26. The cluster spans 5 months without an official statement on the cache_creation inflation. Candidate theme for CC Safety Lab's <strong>August 2026 issue</strong>.</p>
 </div>
 
+<h2 id="cluster-tui-ux">Cluster 5: TUI / Terminal UX</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Thirteen-month rendering-layer divergence cluster</span>
+<span class="cluster-status status-active">ACTIVE (13+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 6</span>
+<span><strong>Reactions:</strong> ~2,106 (combined)</span>
+<span><strong>First filed:</strong> 2025-04-12 (#769)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code's TUI text buffer and rendering layer (built on a custom Ink/React-for-CLI stack) does not integrate cleanly with terminal emulator native behaviors — scroll, redraw, copy buffer, IME composition. Six issues filed across 13 months describe distinct surface symptoms (scroll-to-top, flicker, IME composition, copy/paste indentation) that share one architectural root: the TUI re-renders screen state in a way that competes with the emulator's native scroll buffer and input handling. Five of six issues carry the official <code>area:tui</code> label (and three carry <code>oncall</code>), so Anthropic acknowledges the cluster — but no structural fix has shipped in 13 months.</p>
+
+<h4>The six cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>Platform</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/826">#826</a></td><td>2025-04-19</td><td>819</td><td>macOS / iTerm2</td><td>Console scrolls to top of history when text is added (long sessions)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/769">#769</a></td><td>2025-04-12</td><td>329</td><td>Windows / Ubuntu</td><td>In-progress call causes screen flickering</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/1913">#1913</a></td><td>2025-06-10</td><td>316</td><td>multi</td><td>Terminal flickering (video repro attached)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/1547">#1547</a></td><td>2025-06-04</td><td>259</td><td>macOS</td><td>IME input causes performance issues + duplicate conversion candidates</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18170">#18170</a></td><td>2026-01-14</td><td>250</td><td>multi</td><td>Copy/paste from terminal includes unwanted indentation + trailing spaces</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36582">#36582</a></td><td>2026-03-20</td><td>133</td><td>macOS</td><td>Terminal scrolls to top when conversation gets long</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (terminal-level workarounds)</h4>
+<p style="font-size: 0.93rem;">No cc-safe-setup hook ships for this cluster — the failure surface is at the terminal emulator boundary, not at the Claude Code hook surface. Operator-side mitigations documented in the field:</p>
+<ul style="font-size: 0.93rem;">
+<li><strong>Alternative terminal emulator selection</strong> — Alacritty, WezTerm, kitty have different scroll/flicker characteristics than iTerm2/Windows Terminal. The #826 macOS/iTerm2 symptom is reportedly absent or muted in Alacritty and kitty.</li>
+<li><strong>tmux as intermediary</strong> — Run Claude Code inside tmux; rely on tmux's scroll buffer and copy-mode for the operations the TUI breaks. Trades terminal-native UX for tmux's known-good behavior.</li>
+<li><strong>Transcript-based review</strong> — Use <code>~/.claude/projects/*.jsonl</code> session logs for review/grep rather than scrolling the TUI. This is the cc-safe-setup core integration point, but the use case here is post-hoc review, not in-session interaction.</li>
+</ul>
+
+<h4>Why this cluster matters operationally (even without direct $$ impact)</h4>
+<p style="font-size: 0.93rem;">This is the only cluster of the five with no direct revenue or quota impact — the failure mode is friction, not loss. But the cluster partly explains the 964 unique CLI users / 30 stars disparity on cc-safe-setup (a 3.1% star rate, well below the 5-10% baseline for actively-used dev tools): users who hit TUI friction tend to disengage from public surfaces (stars, issues, PRs) even when they continue using the underlying tool. The cluster is included here for completeness — it shapes user behavior, but it is not a Safety Lab monthly theme candidate.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Five of six issues acknowledged with <code>area:tui</code> label; three with <code>oncall</code>. No structural fix in 13 months. The TUI rendering layer is a Claude Code architectural choice (custom React-for-CLI stack) and fixing the cluster requires either rebuilding on a different TUI layer or extensive integration work with terminal emulators' scroll/redraw protocols.</p>
+</div>
+
 <h2>How clusters are detected and tracked</h2>
 
 <p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
@@ -342,7 +394,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The four clusters tracked here represent <strong>~8,500 combined user reactions across 23 issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses cover 8 of the 10 documented failure shapes.</p>
+<p style="font-size: 0.93rem; color: #475569;">The five clusters tracked here represent <strong>~10,600 combined user reactions across 29 issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses (hooks or terminal-level workarounds) cover all five clusters at the symptom level; structural fixes remain upstream-only.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
