@@ -441,13 +441,13 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 </tbody>
 </table>
 
-<h4>Operator-side defenses (hook integration in progress)</h4>
-<p style="font-size: 0.93rem;">One hook ships for a permission-adjacent case: <code>subagent-permission-mode-guard.sh</code> covers the sub-agent <code>permissionMode</code> override boundary (Issue #55691). The seven failure axes above are not yet covered. Four hook designs in the pipeline (2026-05 to 2026-06):</p>
+<h4>Operator-side defenses (1 of 4 axis-specific hooks shipped, 3 in design)</h4>
+<p style="font-size: 0.93rem;">Two hooks ship now: <code>subagent-permission-mode-guard.sh</code> (permission-adjacent, Issue #55691) covers the sub-agent <code>permissionMode</code> override boundary, and <code>always-allow-pattern-suggester.sh</code> (PR #359, main-merged 2026-05-27) addresses Axis 2 directly. Three hook designs remain in the pipeline (2026-05 to 2026-06):</p>
 <ul style="font-size: 0.93rem;">
-<li><strong><code>compound-bash-permission-resolver.sh</code></strong> — PreToolUse hook that parses compound bash and re-checks each component against permission rules independently. Addresses Axis 1 (wildcard compound mismatch).</li>
-<li><strong><code>always-allow-pattern-suggester.sh</code></strong> — PreToolUse hook that, when "Always Allow" is invoked, suggests a wildcard pattern instead of the verbatim string. Addresses Axis 2 (dead rule accumulation).</li>
-<li><strong><code>deny-rule-integrity-verifier.sh</code></strong> — PreToolUse hook that normalizes commands before deny-rule comparison so multiline and flag-reordering variants are caught. Addresses Axis 5 (deny rule bypass).</li>
-<li><strong><code>bypass-mode-effective-verifier.sh</code></strong> — SessionStart hook that, when <code>--dangerously-skip-permissions</code> is active, tests whether the bypass actually applies to all tool surfaces and warns the operator about known exceptions (Edit, Cowork). Addresses Axis 7 (partial bypass).</li>
+<li><strong><code>compound-bash-permission-resolver.sh</code></strong> — PreToolUse hook that parses compound bash and re-checks each component against permission rules independently. Addresses Axis 1 (wildcard compound mismatch). <em>In design.</em></li>
+<li><strong><code>always-allow-pattern-suggester.sh</code></strong> — PreToolUse Bash hook that suggests a wildcard <code>Bash(&lt;bin&gt; &lt;subcommand&gt;:*)</code> pattern as a stderr advisory instead of the verbatim string "Always Allow" would save. 42 tests, never blocks, four-config-location existing-pattern suppression, environment toggles (<code>CC_PATTERN_SUGGESTER_DISABLE</code>, <code>CC_PATTERN_SUGGESTER_VERBOSE</code>). Addresses Axis 2 (dead rule accumulation). <em>Shipped 2026-05-27 in <a href="https://github.com/yurukusa/cc-safe-setup/pull/359">PR #359</a>.</em></li>
+<li><strong><code>deny-rule-integrity-verifier.sh</code></strong> — PreToolUse hook that normalizes commands before deny-rule comparison so multiline and flag-reordering variants are caught. Addresses Axis 5 (deny rule bypass). <em>In design.</em></li>
+<li><strong><code>bypass-mode-effective-verifier.sh</code></strong> — SessionStart hook that, when <code>--dangerously-skip-permissions</code> is active, tests whether the bypass actually applies to all tool surfaces and warns the operator about known exceptions (Edit, Cowork). Addresses Axis 7 (partial bypass). <em>In design.</em></li>
 </ul>
 
 <h4>Upstream status</h4>
@@ -520,7 +520,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The seven clusters tracked here represent <strong>~11,500 combined user reactions across 60+ issues</strong>. None has an official upstream fix as of 2026-05-27. Operator-side defenses (hooks or terminal-level workarounds) cover five of seven clusters at the symptom level; the permission matching cluster (Cluster 6) has one partial hook with four more in design, and the Skills metadata cluster (Cluster 7) has three hooks in design for June 2026.</p>
+<p style="font-size: 0.93rem; color: #475569;">The seven clusters tracked here represent <strong>~11,500 combined user reactions across 60+ issues</strong>. None has an official upstream fix as of 2026-05-27. Operator-side defenses (hooks or terminal-level workarounds) cover five of seven clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, and the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
