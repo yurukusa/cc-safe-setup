@@ -103,6 +103,7 @@ Each hook exists because a real incident happened without it.
 | **[Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html)** | 5 questions → find where your tokens are going (30 seconds) |
 | **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
 | **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
+| **[Runtime Trust Surface Audit](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/857407d5f781dc1b72270fd284141cbc/raw/runtime-trust-surface-audit.html)** | 5 questions → map your customization level + update path + detection setup to a three-tier recommendation. Companion to the v2.1.150 runtime-prompt-injection [HN finding](https://news.ycombinator.com/item?id=48259288) and the [runtime-binary-change-detector hook](https://github.com/yurukusa/cc-safe-setup/pull/370). |
 
 ### Free guides
 
