@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Failure-Mode Cluster Tracker — CC Safety Lab</title>
+<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly. Issue counts, reactions, defense hooks shipped, upstream status.">
+<meta property="og:title" content="Claude Code Failure-Mode Cluster Tracker — CC Safety Lab">
+<meta property="og:description" content="Public tracker for four structural failure clusters in Claude Code (Apr-May 2026): combined 8,500+ user reactions across 25+ issues, with cc-safe-setup defense hooks shipped for each.">
+<meta property="og:type" content="article">
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #1a1a1a;
+  line-height: 1.6;
+  background: #ffffff;
+}
+h1 { font-size: 1.85rem; line-height: 1.3; margin-bottom: 0.4rem; }
+h2 { font-size: 1.4rem; margin-top: 2.5rem; padding-bottom: 0.3rem; border-bottom: 2px solid #e5e7eb; }
+h3 { font-size: 1.15rem; margin-top: 1.8rem; color: #1e293b; }
+h4 { font-size: 1rem; margin-top: 1.2rem; margin-bottom: 0.3rem; color: #475569; }
+.subtitle { font-size: 1.05rem; color: #475569; margin-bottom: 1.2rem; }
+.lead {
+  background: #f1f5f9; border-left: 4px solid #2563eb;
+  padding: 1rem 1.2rem; border-radius: 0 6px 6px 0;
+  margin-bottom: 1.5rem; font-size: 0.96rem;
+}
+.lead strong { color: #1e3a8a; }
+.summary-table {
+  width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem;
+}
+.summary-table th, .summary-table td {
+  padding: 0.55rem 0.7rem; border: 1px solid #e5e7eb; text-align: left; vertical-align: top;
+}
+.summary-table th { background: #f8fafc; font-weight: 600; }
+.summary-table tr:nth-child(even) td { background: #fafbfc; }
+.cluster {
+  margin-top: 2rem; padding: 1.2rem 1.4rem; border: 1px solid #e5e7eb;
+  border-radius: 8px; background: #fefefe;
+}
+.cluster-header {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.8rem;
+}
+.cluster-title { font-size: 1.2rem; font-weight: 600; color: #0f172a; }
+.cluster-status {
+  font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 12px; font-weight: 600;
+}
+.status-active { background: #fef3c7; color: #92400e; }
+.status-monitoring { background: #dbeafe; color: #1e40af; }
+.cluster-meta {
+  font-size: 0.88rem; color: #475569; margin-bottom: 0.8rem;
+}
+.cluster-meta span { display: inline-block; margin-right: 1.2rem; }
+.cluster-meta strong { color: #0f172a; }
+.cases-table {
+  width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.6rem 0;
+}
+.cases-table th, .cases-table td {
+  padding: 0.4rem 0.6rem; border: 1px solid #e5e7eb; text-align: left; vertical-align: top;
+}
+.cases-table th { background: #f8fafc; }
+.hooks-list {
+  background: #f0fdf4; border-left: 3px solid #16a34a;
+  padding: 0.7rem 1rem; margin: 0.8rem 0; font-size: 0.9rem; border-radius: 0 6px 6px 0;
+}
+.hooks-list a { color: #15803d; text-decoration: underline; }
+.cta-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: 1px solid #f59e0b; padding: 1.4rem 1.6rem; border-radius: 10px;
+  margin: 2.5rem 0; text-align: center;
+}
+.cta-box h2 { border-bottom: none; margin-top: 0; }
+.btn {
+  display: inline-block; background: #16a34a; color: white !important;
+  padding: 0.7rem 1.5rem; border-radius: 6px; text-decoration: none;
+  font-weight: 600; font-size: 1.02rem; margin: 0.4rem 0.3rem;
+}
+.btn:hover { background: #15803d; }
+.btn-secondary { background: #475569; }
+.btn-secondary:hover { background: #334155; }
+a { color: #2563eb; }
+a:hover { color: #1e3a8a; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.88em; }
+.footnote { font-size: 0.85rem; color: #64748b; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+.tag {
+  display: inline-block; background: #e0e7ff; color: #3730a3;
+  font-size: 0.78rem; padding: 0.15rem 0.5rem; border-radius: 10px; margin-right: 0.4rem;
+}
+</style>
+</head>
+<body>
+
+<h1>Claude Code Failure-Mode Cluster Tracker</h1>
+<p class="subtitle">Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status. Updated as clusters evolve.</p>
+
+<div class="lead">
+A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-26.
+</div>
+
+<h2>The four clusters being tracked (May 2026)</h2>
+
+<table class="summary-table">
+<thead>
+<tr>
+<th>Cluster</th>
+<th>Issues</th>
+<th>Reactions</th>
+<th>First detected</th>
+<th>Hooks shipped</th>
+<th>Upstream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#cluster-soh">Sub-Agent Observability (SOH)</a></td>
+<td>8</td>
+<td>~800</td>
+<td>2026-05-20</td>
+<td>4 (PRs #282, #283, #286, #298)</td>
+<td>Unresolved</td>
+</tr>
+<tr>
+<td><a href="#cluster-multi-account">Multi-account session management</a></td>
+<td>3</td>
+<td>1,178</td>
+<td>2025-09 (#18435)</td>
+<td>2 (PR #328: routing-preflight, billing-log)</td>
+<td>Unresolved (8+ months)</td>
+</tr>
+<tr>
+<td><a href="#cluster-agents-md">AGENTS.md interop</a></td>
+<td>2+</td>
+<td>5,405</td>
+<td>2025-04-21 (#6235)</td>
+<td>0 (operator-side route exists)</td>
+<td>Unresolved (13+ months)</td>
+</tr>
+<tr>
+<td><a href="#cluster-pro-max">Pro Max quota anomaly</a></td>
+<td>10</td>
+<td>~2,200</td>
+<td>2026-01-03 (#16157)</td>
+<td>2 (PRs #340, #342: drift/version detectors)</td>
+<td>Unresolved (5+ months)</td>
+</tr>
+</tbody>
+</table>
+
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~8,500 user reactions across 23 issues</strong>, all four clusters currently open as of 2026-05-26. The combined volume is roughly equivalent to the top-10 most-reacted issues in the entire repository.</p>
+
+<h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Subagent silent-failure cluster — 72-hour convergence window</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 8</span>
+<span><strong>Reactions:</strong> ~800 (combined)</span>
+<span><strong>First filed:</strong> 2026-05-20</span>
+<span><strong>Cluster framing:</strong> 2026-05-23</span>
+</div>
+
+<p>Between 2026-05-20 21:48 UTC and 2026-05-22 09:05 UTC, six independent users filed issues describing the same architectural gap from different angles. A seventh case landed three hours after the Claim-Verify Handbook launch on 2026-05-22 evening. An eighth case (parallel-Bash 14-hour silent gap) was filed 2026-05-25. All cases converge on four distinct sub-patterns of subagent failure, all rooted in the same surface-level observability gap.</p>
+
+<h4>The 7+1 cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reporter</th><th>Sub-pattern</th><th>One-line summary</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/60987">#60987</a></td><td>MarkAWard</td><td>silent stall</td><td>pty-less spawn → subprocess dies → parent reports "spawned successfully"</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61102">#61102</a></td><td>Awis13</td><td>scope expansion</td><td>subagent recommends, parent treats recommendation as authorization (~120GB deletion)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61107">#61107</a></td><td>nvst18</td><td>dispatch fabrication</td><td>structurally correct code generated, validated input silently discarded in dead branch</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61167">#61167</a></td><td>nvst18</td><td>dispatch fabrication</td><td>OpenClaw deploy: "39 agents dispatched" narrated, session log shows 5 dispatched and 0 aggregated</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61315">#61315</a></td><td>mitselek</td><td>silent stall</td><td>MCP permission gate stops subagent indefinitely, no signal to parent UI</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61405">#61405</a></td><td>meefs</td><td>missing observation/control</td><td>12-hour subagent hang, no timeout / progress / abort primitive at Agent-tool surface</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61547">#61547</a></td><td>alanrezendeee</td><td>silent stall</td><td>subagent idle at entry-tool-dispatch gate (since confirmed: <code>bypassPermissions</code> not propagated from parent)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62161">#62161</a></td><td>(independent)</td><td>missing observation/control</td><td>parallel-Bash 14-hour silent gap (8th case, 2026-05-25)</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong>Four MIT defense hooks in cc-safe-setup, one per sub-pattern:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/283">PR #283 dispatch-receipt</a> — sub-pattern 1 (dispatch fabrication). Parent hook issues receipt at dispatch; closure refuses narratives without matching receipt.</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/286">PR #286 dispatch-allowlist-preflight</a> — sub-pattern 2 (silent stall). Cross-checks allowlist before dispatch to prevent gate-induced stall.</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/298">PR #298 dispatch-liveness-watchdog</a> — sub-pattern 3 (missing observation/control). Surfaces operator-side timeout/liveness windows on dispatch.</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/282">PR #282 scope-expansion-receipt</a> — sub-pattern 4 (scope expansion). Re-checks authorization scope before parent acts on subagent recommendation.</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/yurukusa/bc61438321b369dbd3765e2bd9702a80">English Chapter 1 preview (Sub-Agent Observability Handbook)</a> · <a href="https://gist.github.com/yurukusa/9857a9ed407696ba8483b354917ff161">meta-analysis Gist</a> · <a href="https://gist.github.com/yurukusa/cf477f03f03d9f93c184f1fb7d894f96">nested-spawn cluster Gist</a> · <a href="https://github.com/anthropics/claude-code/issues/61993">issue #61993</a> (4-architecture convergence discussion).
+</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix as of 2026-05-26. <a href="https://github.com/anthropics/claude-code/issues/62153">Issue #62153</a> tracks the IPC positive-path work. The four-architecture convergence (contract-vs-runtime, file-based handoff.md, hook-emitted receipts, separate-process dispatch) suggests the upstream fix surface is exposing ephemeral spawn primitives in nested contexts with a depth limit.</p>
+</div>
+
+<h2 id="cluster-multi-account">Cluster 2: Multi-account session management</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Three-surface multi-account primitive absence</span>
+<span class="cluster-status status-active">ACTIVE (8+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 3</span>
+<span><strong>Reactions:</strong> 1,178 (combined)</span>
+<span><strong>First filed:</strong> 2025-09 (#18435)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Three independent users on three different surfaces (desktop, web, mobile) filed separate issues describing the same primitive absence — Claude Code provides no way to manage multiple accounts simultaneously. Surface symptoms differ; the architectural gap is identical.</p>
+
+<h4>The cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reporter</th><th>Surface</th><th>Reactions</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18435">#18435</a></td><td>Agentic-Marketer</td><td>Desktop app</td><td>542</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/27302">#27302</a></td><td>nathanmargaglio</td><td>Web app (Connectors)</td><td>327</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36151">#36151</a></td><td>CorneAussems</td><td>Mobile app</td><td>309</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/328">PR #328</a> — two hooks targeting the multi-account boundary:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><code>account-routing-preflight.sh</code> — SessionStart hook that refuses execution when the active account doesn't match the working-directory's expected account (prevents accidental cross-account commits).</li>
+<li><code>account-billing-log.sh</code> — Stop hook that logs per-account billing reconciliation events so usage can be attributed correctly post-hoc.</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/yurukusa/d880ecc984af5d664f003daf85f956e3">English operator field guide (5 alternative routes)</a> · <a href="https://gist.github.com/yurukusa/13f46cf96093ef487760efcfb2c1c2b8">Japanese operator field guide</a> · <a href="https://gist.github.com/yurukusa/fc73fec611cc277c756e2102e067e807">7-question persona-based self-audit (interactive HTML)</a>.
+</p>
+
+<h4>Competitive landscape</h4>
+<p style="font-size: 0.93rem;">Independent OSS tools targeting this gap total ~348 stars across 8+ repos (e.g., <code>tickernelz/opencode-kiro-auth</code> 134★, <code>andyvandaric/opencode-ag-auth</code> 68★, <code>quinnjr/claude-code-profiles</code> 38★, <code>KarpelesLab/teamclaude</code> 27★). Market is saturated for direct switching tools; cc-safe-setup hooks target the adjacent reconciliation/safety surface where existing tools are weak.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix. #18435 has been open 8+ months. Will be the core theme of CC Safety Lab's <strong>June 2026 issue</strong> (ships 6/1, edit 5/30, proof 5/31).</p>
+</div>
+
+<h2 id="cluster-agents-md">Cluster 3: AGENTS.md interop</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Largest single feature request in Claude Code's tracker</span>
+<span class="cluster-status status-active">ACTIVE (13+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 2 primary + 173 mentions</span>
+<span><strong>Reactions:</strong> 5,405 (combined)</span>
+<span><strong>First filed:</strong> 2025-04-21 (#6235)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code uses its own <code>CLAUDE.md</code> instruction-file format; the rest of the agent ecosystem (Codex, Cursor, Amp, Aider) is converging on <a href="https://agents.md/">AGENTS.md</a> as a shared standard. Users who run multiple agent tools must maintain duplicate instruction files. <a href="https://github.com/anthropics/claude-code/issues/6235">#6235</a> is the largest single feature request in the Claude Code repository — 5,185 reactions over 13+ months without an official position.</p>
+
+<h4>The cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reactions</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/6235">#6235</a></td><td>5,185</td><td>open</td><td>Filed 2025-04-21, the largest feature request in the tracker</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/31005">#31005</a></td><td>220</td><td>open</td><td>Filed 2026-03, follow-up requesting AGENTS.md + .agents/skills/</td></tr>
+<tr><td colspan="2"><em>173 additional issues</em></td><td colspan="2"><em>mention AGENTS.md in body or comments</em></td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses</h4>
+<p style="font-size: 0.93rem;">No cc-safe-setup hook shipped yet. Five operator-side routes documented: symlink (<code>ln -s CLAUDE.md AGENTS.md</code>), pre-commit hook sync, SessionStart hook integrity check, <code>direnv</code> environment variable, CI sync verification. <a href="https://gist.github.com/yurukusa/d36197848911f025add142abefcde685">English field guide (3,500 words)</a>. <a href="https://gist.github.com/yurukusa/bb22e61a75904771e0c88a0335f5fbfa">6-question interactive self-audit</a>.</p>
+
+<h4>Competitive landscape</h4>
+<p style="font-size: 0.93rem;">Direct sync tools total ~400 stars: <code>agent-sh/agnix</code> (258★, active development as of 2026-05-24, validation tool), <code>iannuttall/source-agents</code> (125★, sync tool), <code>intellectronica/claude-agentsmd</code> (17★, Claude Code-specific). Adjacent context: <code>ciembor/agent-rules-books</code> (1,593★), <code>wshobson/agents</code> (35,933★).</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No official statement. Will be the core theme of CC Safety Lab's <strong>July 2026 issue</strong> (early draft already at ~20,000 characters as of 2026-05-26).</p>
+</div>
+
+<h2 id="cluster-pro-max">Cluster 4: Pro Max quota anomaly</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Five-month quota-consumption divergence cluster</span>
+<span class="cluster-status status-active">ACTIVE (5+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 10</span>
+<span><strong>Reactions:</strong> ~2,200 (combined)</span>
+<span><strong>First filed:</strong> 2026-01-03 (#16157)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Ten independent issues over five months describing the same family of symptoms: Pro Max plan users hitting quota limits abnormally fast, with multiple time-window boundary signals (2026-03-23, v2.1.89, v2.1.100, v2.1.1). The cluster includes server-side measurable evidence (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> with reproducible cache_creation inflation of ~20K tokens).</p>
+
+<h4>The core three cases (1,460 combined reactions)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>One-line summary</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a></td><td>2026-01-03</td><td>717</td><td>Instantly hitting Max-plan usage limits after 3-day non-use</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a></td><td>2026-03-24</td><td>525</td><td>5-hour window quota exhausting abnormally fast since 2026-03-23 (specific boundary date)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a></td><td>2026-04-12</td><td>218</td><td>v2.1.100+ inflates cache_creation by ~20K tokens vs v2.1.98 (server-side, reproducible)</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong>Two cc-safe-setup hooks targeting the cluster:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/340">PR #340 cache-creation-drift-detector</a> — PostToolUse hook that compares per-session cache_creation against a trailing-window average and surfaces drift warnings (operator-side analog of #46917's server-side evidence).</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup/pull/342">PR #342 version-bump-detector</a> — SessionStart hook that warns when the active Claude Code version crosses a documented boundary (2.1.89, 2.1.100, 2.1.1).</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/yurukusa/158436e88d169406593d55bd84f0d7e9">English operator field guide (Pro Max quota anomaly: 5 measurement routes, 2,639 words)</a>. Cites <code>ccusage</code> (14,647★, the dominant external measurement tool), raw JSONL inspection, the claude-code-logger proxy, the cc-safe-setup hook, and Anthropic Console comparison.
+</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix as of 2026-05-26. The cluster spans 5 months without an official statement on the cache_creation inflation. Candidate theme for CC Safety Lab's <strong>August 2026 issue</strong>.</p>
+</div>
+
+<h2>How clusters are detected and tracked</h2>
+
+<p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
+
+<ol style="font-size: 0.94rem;">
+<li><strong>Continuous Issue scanning.</strong> The top ~50 most-reacted open issues in <code>anthropics/claude-code</code> are reviewed weekly. Reaction-count growth + filing-date proximity surface candidate clusters.</li>
+<li><strong>Sub-pattern articulation.</strong> Once 3+ issues share a structural shape, the cluster is framed (architectural axis, sub-pattern enumeration, lifecycle event mapping).</li>
+<li><strong>Defense hook implementation.</strong> Where possible, an operator-side cc-safe-setup hook is built that detects or prevents the failure shape. Each hook ships as a PR with tests.</li>
+<li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
+</ol>
+
+<p style="font-size: 0.93rem; color: #475569;">The four clusters tracked here represent <strong>~8,500 combined user reactions across 23 issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses cover 8 of the 10 documented failure shapes.</p>
+
+<div class="cta-box">
+<h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
+<p style="margin: 0.6rem 0 1rem 0; color: #78350f; font-size: 0.98rem;">
+<strong>CC Safety Lab Founder</strong> — ¥500/month (~$3.50), Founder pricing grandfathered.<br>
+4-8 incidents per month, 1 deep-dive failure case, 1-2 copy-paste safety hooks, updated checklist, product update notes.
+</p>
+<p style="margin: 0; font-size: 0.9rem; color: #78350f;">
+<strong>Coming up:</strong> June issue (multi-account cluster, 12,000 chars), July issue (AGENTS.md interop, ~14,000 chars), August candidate (Pro Max quota anomaly).
+</p>
+<div style="margin-top: 1rem;">
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Join as Founder → Ko-fi</a>
+<a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en" class="btn btn-secondary">Read the full Safety Lab page →</a>
+</div>
+<p style="margin: 1rem 0 0 0; font-size: 0.85rem; color: #78350f;">
+Free preview: <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a45a5150a6d" style="color: #78350f;">May 2026 issue, full first chapter (3,500 words, English)</a>
+</p>
+</div>
+
+<h2>Related artifacts</h2>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>One-time books that capture frozen snapshots of clusters:</strong>
+  <ul>
+    <li><a href="https://yurukusa.gumroad.com/l/claim-verify-handbook">Claim-Verify Handbook</a> ($19, 130 cases of claim-vs-runtime divergence)</li>
+    <li><a href="https://gist.github.com/yurukusa/bc61438321b369dbd3765e2bd9702a80">Sub-Agent Observability Handbook</a> ($19, ships 2026-05-27, the SOH cluster in depth)</li>
+    <li><a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook Edition 2</a> ($19, the 9-layer claim-vs-reality cluster + 4 migration paths)</li>
+    <li><a href="https://yurukusa.gumroad.com/l/rhtptb">Incident Postmortems Edition 2</a> (10 production incidents with hooks)</li>
+  </ul>
+</li>
+<li><strong>Operator-side defense library:</strong> <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> (all hooks MIT, ~340 PRs as of 2026-05-26)</li>
+<li><strong>Diagnostic tools (free, browser-only):</strong> <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html">Token Checkup</a>, <a href="https://yurukusa.github.io/cc-safe-setup/security-checkup.html">Security Checkup</a>, <a href="https://yurukusa.github.io/cc-safe-setup/version-check.html">Version Check</a></li>
+</ul>
+
+<p class="footnote">
+This page is updated as clusters evolve. Last update: 2026-05-26. Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
+</p>
+
+</body>
+</html>
