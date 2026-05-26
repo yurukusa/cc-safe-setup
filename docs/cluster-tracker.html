@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Failure-Mode Cluster Tracker — CC Safety Lab</title>
-<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly. Issue counts, reactions, defense hooks shipped, upstream status.">
+<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching. Issue counts, reactions, defense hooks shipped, upstream status.">
 <meta property="og:title" content="Claude Code Failure-Mode Cluster Tracker — CC Safety Lab">
-<meta property="og:description" content="Public tracker for four structural failure clusters in Claude Code (Apr-May 2026): combined 8,500+ user reactions across 25+ issues, with cc-safe-setup defense hooks shipped for each.">
+<meta property="og:description" content="Public tracker for six structural failure clusters in Claude Code (Apr-May 2026): combined ~11,400 user reactions across 50+ issues, with cc-safe-setup defense hooks shipped for most clusters.">
 <meta property="og:type" content="article">
 <style>
 * { box-sizing: border-box; }
@@ -102,7 +102,7 @@ code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-si
 A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-26.
 </div>
 
-<h2>The five clusters being tracked (May 2026)</h2>
+<h2>The six clusters being tracked (May 2026)</h2>
 
 <table class="summary-table">
 <thead>
@@ -156,10 +156,18 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>0 (operator-side terminal alternatives only)</td>
 <td>Unresolved (13+ months, area:tui label acknowledged)</td>
 </tr>
+<tr>
+<td><a href="#cluster-permission">Permission matching boundary</a></td>
+<td>25+ (30+ via meta-issue)</td>
+<td>~804</td>
+<td>2025-08 (#5140)</td>
+<td>1 partial (subagent-permission-mode-guard.sh)</td>
+<td>Unresolved (9+ months, meta-issue #30519 with no staff engagement)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~10,600 user reactions across 29 issues</strong>, all five clusters currently open as of 2026-05-26. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,400 user reactions across 50+ issues</strong>, all six clusters currently open as of 2026-05-26. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -383,6 +391,67 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;">Five of six issues acknowledged with <code>area:tui</code> label; three with <code>oncall</code>. No structural fix in 13 months. The TUI rendering layer is a Claude Code architectural choice (custom React-for-CLI stack) and fixing the cluster requires either rebuilding on a different TUI layer or extensive integration work with terminal emulators' scroll/redraw protocols.</p>
 </div>
 
+<h2 id="cluster-permission">Cluster 6: Permission matching boundary</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Nine-month permission-rule enforcement gap, 30+ issues, meta-issue with no staff engagement</span>
+<span class="cluster-status status-active">ACTIVE (9+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 25+ (30+ via meta-issue #30519)</span>
+<span><strong>Reactions:</strong> ~804 (combined, top 25 area:permissions issues)</span>
+<span><strong>First filed:</strong> 2025-08 (#5140)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Users configure <code>allow</code>, <code>deny</code>, and <code>ask</code> rules in <code>settings.json</code> expecting them to match the bash commands Claude generates. The matching engine has seven independent failure axes that combine to make wildcards, "Always Allow," and scope hierarchy unreliable in practice. Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (filed 2026-03-03, 71 reactions) articulates the seven axes with 13 referenced sub-issues and documents zero Anthropic staff engagement across 9 months. A second meta-issue, <a href="https://github.com/anthropics/claude-code/issues/39523">#39523</a> (16 reactions), tracks specifically the bypass-mode regression with "9-month trail, 12+ duplicates."</p>
+
+<h4>The seven failure axes</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Wildcards don't match compound commands.</strong> <code>Bash(git:*)</code> doesn't match <code>git add file &amp;&amp; git commit -m "msg"</code>. The <code>*</code> only spans a single simple command, but Claude generates compound bash constantly.</li>
+<li><strong>"Always Allow" saves dead rules.</strong> Approving <code>git commit -m "fix typo"</code> saves the verbatim string; next time the message differs, it prompts again. <code>settings.local.json</code> accumulates hundreds of one-off rules.</li>
+<li><strong>User-level scope doesn't apply at project level.</strong> Rules in <code>~/.claude/settings.json</code> appear in <code>/permissions</code> output but match nothing; same rules in project-level <code>settings.local.json</code> work.</li>
+<li><strong>Quote-tracking bypasses allow list.</strong> Commands with quote characters in <code>#</code> comments trigger a safety warning that ignores all allow rules.</li>
+<li><strong>Deny rules have the same bugs.</strong> Multiline commands and flag-reordering bypass deny rules — so the system isn't just annoying, it's not enforcing the safety constraints users configured.</li>
+<li><strong>Colon vs space syntax contradicts.</strong> <code>Bash(git:*)</code> and <code>Bash(git *)</code> behave differently; docs disagree on which is correct; "Always Allow" generates one syntax while users configure the other.</li>
+<li><strong>Bypass-mode is partially broken.</strong> <code>--dangerously-skip-permissions</code> doesn't bypass Edit prompts (#36192), Cowork scheduled tasks ignore "Always allow" (#47180), and the flag itself stopped working entirely after v2.1.77 (#36168).</li>
+</ol>
+
+<h4>Representative cases (top 14 by reactions)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>State</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/28240">#28240</a></td><td>2026-02-22</td><td>180</td><td>open</td><td>Permission prompt triggers on <code>cd</code> in compound bash, not the actual command</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (meta)</td><td>2026-03-03</td><td>71</td><td>open</td><td>Permissions matching fundamentally broken — 30+ open issues, no staff engagement</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/29214">#29214</a></td><td>2026-02-25</td><td>71</td><td>open</td><td>Remote Control: mobile app shows permission prompts despite <code>--dangerously-skip-permissions</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/11380">#11380</a></td><td>2025-11</td><td>64</td><td>closed</td><td>Claude continually asks for permission even after "always allow"</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36168">#36168</a></td><td>2026-03</td><td>63</td><td>open</td><td>Bypass/dangerously-skip-permissions broken in all CC versions newer than v2.1.77</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/43713">#43713</a></td><td>2026-04</td><td>50</td><td>open</td><td><code>autoAllowBashIfSandboxed</code> bypassed for commands with shell expansions</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/6850">#6850</a></td><td>2025-08</td><td>45</td><td>open</td><td><code>settings.local.json</code> allow not working — keeps asking, wants to re-add existing items</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18160">#18160</a></td><td>2026-01</td><td>41</td><td>open</td><td>Claude ignoring <code>allow</code> permissions in global <code>settings.json</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/30435">#30435</a></td><td>2026-03</td><td>39</td><td>open</td><td>Allow suppressing bash safety heuristic prompts via settings</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/5140">#5140</a></td><td>2025-08</td><td>33</td><td>open</td><td>Permissions from user <code>settings.json</code> not applied at project level</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/31373">#31373</a></td><td>2026-03</td><td>31</td><td>open</td><td>Should not encourage <code>$(...)</code> in system prompt — causes prompt spam</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/35954">#35954</a></td><td>2026-03</td><td>26</td><td>open</td><td>Add option to disable "Contains backslash-escaped whitespace" warning</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/32985">#32985</a></td><td>2026-03</td><td>24</td><td>open</td><td>Allow configuring auto-approval for <code>cd+git</code> compound commands</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/47180">#47180</a></td><td>2026-05</td><td>23</td><td>open</td><td>Cowork scheduled tasks ignore "Always allow" folder/tool permissions</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (hook integration in progress)</h4>
+<p style="font-size: 0.93rem;">One hook ships for a permission-adjacent case: <code>subagent-permission-mode-guard.sh</code> covers the sub-agent <code>permissionMode</code> override boundary (Issue #55691). The seven failure axes above are not yet covered. Four hook designs in the pipeline (2026-05 to 2026-06):</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>compound-bash-permission-resolver.sh</code></strong> — PreToolUse hook that parses compound bash and re-checks each component against permission rules independently. Addresses Axis 1 (wildcard compound mismatch).</li>
+<li><strong><code>always-allow-pattern-suggester.sh</code></strong> — PreToolUse hook that, when "Always Allow" is invoked, suggests a wildcard pattern instead of the verbatim string. Addresses Axis 2 (dead rule accumulation).</li>
+<li><strong><code>deny-rule-integrity-verifier.sh</code></strong> — PreToolUse hook that normalizes commands before deny-rule comparison so multiline and flag-reordering variants are caught. Addresses Axis 5 (deny rule bypass).</li>
+<li><strong><code>bypass-mode-effective-verifier.sh</code></strong> — SessionStart hook that, when <code>--dangerously-skip-permissions</code> is active, tests whether the bypass actually applies to all tool surfaces and warns the operator about known exceptions (Edit, Cowork). Addresses Axis 7 (partial bypass).</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> documents zero Anthropic staff engagement across 30+ issues over 9 months. One workaround comment in September 2025 didn't fix anything. No milestones, no Anthropic-authored PRs, no roadmap, no tracking issue. The community is now writing custom Python <code>PreToolUse</code> hooks to reimplement permission enforcement (#18846), which is the option the meta-issue identifies as "what people are actually doing." This is a security-relevant subsystem where the documented contract diverges materially from the runtime behavior.</p>
+</div>
+
 <h2>How clusters are detected and tracked</h2>
 
 <p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
@@ -394,7 +463,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The five clusters tracked here represent <strong>~10,600 combined user reactions across 29 issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses (hooks or terminal-level workarounds) cover all five clusters at the symptom level; structural fixes remain upstream-only.</p>
+<p style="font-size: 0.93rem; color: #475569;">The six clusters tracked here represent <strong>~11,400 combined user reactions across 50+ issues</strong>. None has an official upstream fix as of 2026-05-26. Operator-side defenses (hooks or terminal-level workarounds) cover five of six clusters at the symptom level; the permission matching cluster has one partial hook with four more in design.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
