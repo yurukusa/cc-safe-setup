@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Failure-Mode Cluster Tracker — CC Safety Lab</title>
-<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata. Issue counts, reactions, defense hooks shipped, upstream status.">
+<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata, v2.1.150 server-side prompt injection, AUP false-positive on Opus. Issue counts, reactions, defense hooks shipped, upstream status.">
 <meta property="og:title" content="Claude Code Failure-Mode Cluster Tracker — CC Safety Lab">
 <meta property="og:description" content="Public tracker for seven structural failure clusters in Claude Code (Apr-May 2026): combined ~11,500 user reactions across 60+ issues, with cc-safe-setup defense hooks shipped for most clusters.">
 <meta property="og:type" content="article">
@@ -172,10 +172,26 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>1 (PR #357: skills-settings-validator)</td>
 <td>Unresolved (no staff engagement since label rollout)</td>
 </tr>
+<tr>
+<td><a href="#cluster-server-side-injection">Server-side prompt injection (v2.1.150+)</a></td>
+<td>42+ (co-occurring regression bundle) + #62061 (core)</td>
+<td>46+ (#62061 anchor)</td>
+<td>2026-05-24 (#62061)</td>
+<td>1 (PR #383: server-side-prompt-injection-detector)</td>
+<td>Acknowledged intentional (Anthropic same-day comment), 2 opt-out env vars provided, audit trail gap remains</td>
+</tr>
+<tr>
+<td><a href="#cluster-aup-false-positive">Usage Policy classifier over-trigger (AUP)</a></td>
+<td>25+ (filed 2026-05-18 to 2026-05-27)</td>
+<td>~40 (wide-and-thin reaction shape)</td>
+<td>2026-05-18 (#60366)</td>
+<td>1 (PR #388, #389: aup-false-positive-helper)</td>
+<td>Unresolved (no Anthropic comment, github-actions[bot] auto-grouped 3 duplicate chains)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,500 user reactions across 60+ issues</strong>, all seven clusters currently open as of 2026-05-27. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,590 user reactions across 145+ issues</strong>, all nine clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -514,7 +530,88 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;">All area:skills issues filed since the label rollout (2026-05-17) remain open. No Anthropic staff engagement signal across the cluster. Skills is a v2.x feature; the 14-day filing rate of 10+ issues since label rollout is the strongest signal that the feature shipped without the validation and observability primitives that the documented behavior implies.</p>
 
 <h4>Where to read more</h4>
-<p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/d00b2d32505ef67572baacbd6fad3d77">Skills Metadata and Loading cluster field report</a> (2,106 words, four failure modes, six issues with deep-dive, three detection paths, four defense paths). For the cross-cluster framework synthesis, see the <a href="https://gist.github.com/yurukusa/f6b5524b0e88fd9443d62fb44ba1619e">7-Cluster Framework</a> (2,233 words).</p>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/d00b2d32505ef67572baacbd6fad3d77">Skills Metadata and Loading cluster field report</a> (2,106 words, four failure modes, six issues with deep-dive, three detection paths, four defense paths). For the cross-cluster framework synthesis, see the <a href="https://gist.github.com/yurukusa/f6b5524b0e88fd9443d62fb44ba1619e">9-Cluster Framework</a> (3,300 words).</p>
+</div>
+
+<div class="cluster">
+<h2 id="cluster-server-side-injection">Cluster 8: Server-side prompt injection (v2.1.150+)</h2>
+
+<p>Claude Code v2.1.150 introduces a function (named <code>nAA</code> in the minified source) that reads an arbitrary string from two network-backed channels and registers it as a peer-level section of the system prompt — sitting alongside the documented <code>anti_verbosity</code>, <code>thinking_guidance</code>, and <code>action_caution</code> sections. The two channels are the <code>bootstrap</code> API <code>client_data</code> field (validated only as <code>z.record(z.unknown())</code>, cached to disk) and the GrowthBook feature flag <code>tengu_heron_brook</code> (refreshing every 60 seconds in the background, also cached to disk). Whatever value Anthropic assigns to these channels gets injected into the agent's instructions, with shell access, with no client-side audit trail.</p>
+
+<h4>Anthropic's stance</h4>
+<p style="font-size: 0.93rem;">Confirmed intentional on the issue thread: "We sometimes run experiments on changes to our system prompt." Two opt-out env vars exist: <code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1</code> (disables bootstrap client_data) and <code>DISABLE_GROWTHBOOK=1</code> (disables tengu_heron_brook sync). The opt-outs close the injection channel but do not produce an audit trail of what was injected before the operator opted out, or what would have been injected after.</p>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/62061">#62061</a> — 46+ reactions in 3 days, central report by @vladkens with bytecode-level evidence of the injection channel.</li>
+<li>Predecessor: <a href="https://github.com/anthropics/claude-code/issues/25141">#25141</a> (transparency for experimental features) and <a href="https://github.com/anthropics/claude-code/issues/28941">#28941</a> (unauthorized server-side feature flag push).</li>
+<li>Parallel v2.1.150 regression bundle: 42+ co-occurring issues forming a parallel regression cluster.</li>
+</ul>
+
+<h4>Defense path shipped (1 of 4)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/383"><code>server-side-prompt-injection-detector.sh</code></a></strong> — SessionStart hook, advisory-only, never blocks. Prints a one-line stderr advisory if either opt-out env var is missing. Self-silences with <code>CC_PROMPT_INJECTION_DETECTOR_QUIET=1</code>.</li>
+</ul>
+
+<h4>Defense paths in design (3 of 4)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>cache-residue-detector.sh</code></strong> — Detects old injected values cached to disk that persist after opt-out.</li>
+<li><strong><code>proxy-capture-suggester.sh</code></strong> — Surfaces the HTTPS proxy capture path for compliance-bound operators.</li>
+<li><strong><code>system-prompt-baseline-checker.sh</code></strong> — Diffs the operator's baseline system prompt against the runtime system prompt (requires proxy capture).</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Acknowledged intentional in the same-day Anthropic comment. Opt-out env vars provided. Audit trail gap remains as the structural concern: operators in regulated industries cannot reconstruct what their agent was instructed at the time of a given logged action.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/03839b3c3f88e1cce38fb0f2c127544d">v2.1.150 server-side prompt injection audit paths</a> (1,133 words, four audit paths). The 2026-11 Safety Lab issue covers this cluster in full.</p>
+</div>
+
+<div class="cluster">
+<h2 id="cluster-aup-false-positive">Cluster 9: Usage Policy classifier over-trigger (AUP)</h2>
+
+<p>Starting 2026-05-18, the Anthropic server-side Usage Policy classifier began over-triggering on benign Claude Code prompts. 25+ open issues filed between 2026-05-18 and 2026-05-27, including single-word "hi" greetings, ordinary code reads, and non-English benign input (Russian, Polish, Spanish). The block fires server-side before the prompt reaches the model. The classifier is non-deterministic on identical input — the same prompt blocks one attempt and passes the next.</p>
+
+<h4>Cluster signature (three converging axes)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong>Model-specific.</strong> Opus 4.7, 4.6, and 1M variants are affected. Sonnet variants of the same user with the same workflow are not. The split is consistent across all 25+ reports.</li>
+<li><strong>Multilingual.</strong> False positives reproduce on English, Russian (<a href="https://github.com/anthropics/claude-code/issues/62065">#62065</a>), Polish (<a href="https://github.com/anthropics/claude-code/issues/62373">#62373</a>), and Spanish input.</li>
+<li><strong>Domain-independent.</strong> Kernel security audits, biomedical research, FPGA waveform analysis, compression algorithm work, and plain greetings all trigger the block.</li>
+</ul>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/60366">#60366</a> — 16 reactions, 30 comments, single-word "hi" blocked. Earliest filed report (2026-05-18).</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/62190">#62190</a> — 10 reactions, non-deterministic blocks on benign prompts.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/61889">#61889</a> — CVP-approved user still blocked on benign queries. Indicates CVP approval is not currently sufficient to exempt approved users from this cluster.</li>
+<li>20+ lower-reaction independent reports between <a href="https://github.com/anthropics/claude-code/issues/61056">#61056</a> and <a href="https://github.com/anthropics/claude-code/issues/62712">#62712</a>.</li>
+<li>Single-day peak: 12 independent reports filed 2026-05-23.</li>
+</ul>
+
+<h4>Four operator-side mitigation paths</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Swap to Sonnet</strong> for affected sessions (<code>export ANTHROPIC_MODEL=claude-sonnet-4-7</code>). Highest-leverage immediate workaround; the cluster signature is Opus-specific.</li>
+<li><strong>Warm up the session</strong> with project context before sensitive prompts. Cold sessions hit the classifier at a noticeably higher rate than warmed sessions.</li>
+<li><strong>Apply for the Cyber Verification Program (CVP)</strong>. Long-term path; note that #61889 reports CVP approval is not currently sufficient to exempt approved users from this specific cluster.</li>
+<li><strong>Retry on identical input</strong>. The classifier is non-deterministic; reports describe the same prompt passing on attempt 2 or 3 with no other change.</li>
+</ol>
+
+<h4>Defense path shipped (1 of 3)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/388"><code>aup-false-positive-helper.sh</code></a></strong> — SessionStart hook, opt-in advisory only, never blocks. Inspects <code>ANTHROPIC_MODEL</code>; when an Opus variant is pinned and <code>CC_AUP_FALSE_POSITIVE_HELPER_REMIND=1</code> is set, emits a four-path advisory to stderr. 16 tests covering all 6 state paths.</li>
+</ul>
+
+<h4>Defense paths in design (2 of 3)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>aup-block-pattern-logger.sh</code></strong> (2027-01) — PostToolUse hook that logs AUP block patterns for ongoing classifier-shift detection.</li>
+<li><strong><code>model-swap-suggester.sh</code></strong> (2027-02) — Runtime detector for AUP blocks that suggests model swap automatically.</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No explicit Anthropic comment on the cluster as of 2026-05-28. <code>github-actions[bot]</code> has auto-grouped at least three duplicate chains, confirming intake-side recognition. No public fix timeline.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/4fa4751044be45bd83345601ee79c2db">Claude Code's AUP False-Positive Cluster: 4 Operator-Side Paths Through It</a> (1,462 words, the four paths with reproducible examples). Companion <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/ddd7b7487fb114543b33479cacaa36b6/raw/cluster-9-aup-diagnostic.html">interactive 4-question diagnostic</a> outputs the highest-leverage path tailored to your model / frequency / domain / CVP status. The 2026-12 Safety Lab issue covers this cluster in full.</p>
 </div>
 
 <h2>How clusters are detected and tracked</h2>
@@ -528,7 +625,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The seven clusters tracked here represent <strong>~11,500 combined user reactions across 60+ issues</strong>. None has an official upstream fix as of 2026-05-27. Operator-side defenses (hooks or terminal-level workarounds) cover five of seven clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, and the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026.</p>
+<p style="font-size: 0.93rem; color: #475569;">The nine clusters tracked here represent <strong>~11,590 combined user reactions across 145+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover seven of nine clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, and the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
@@ -537,7 +634,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 4-8 incidents per month, 1 deep-dive failure case, 1-2 copy-paste safety hooks, updated checklist, product update notes.
 </p>
 <p style="margin: 0; font-size: 0.9rem; color: #78350f;">
-<strong>Coming up:</strong> June (multi-account), July (AGENTS.md interop), August (Pro Max quota anomaly), September (Permission matching), October (Skills metadata).
+<strong>Coming up:</strong> June (multi-account), July (AGENTS.md interop), August (Pro Max quota anomaly), September (Permission matching), October (Skills metadata), November (v2.1.150 server-side prompt injection), December (AUP false-positive on Opus).
 </p>
 <div style="margin-top: 1rem;">
 <a href="https://ko-fi.com/yurukusa/tiers" class="btn">Join as Founder → Ko-fi</a>
@@ -578,7 +675,7 @@ Free previews: <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a4
 </ul>
 
 <p class="footnote">
-This page is updated as clusters evolve. Last update: 2026-05-27 (Cluster 7 Skills metadata and loading added). Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
+This page is updated as clusters evolve. Last update: 2026-05-28 (Clusters 8 and 9 added: server-side prompt injection v2.1.150+, and Usage Policy classifier over-trigger on Opus). Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
 </p>
 
 </body>
