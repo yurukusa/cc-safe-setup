@@ -129,7 +129,7 @@ Each hook exists because a real incident happened without it.
 | **[Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html)** | 5 questions → find where your tokens are going (30 seconds) |
 | **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
 | **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
-| **[Failure-Mode Cluster Tracker](https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html)** | Public registry of structural failure clusters in Claude Code (SOH, multi-account, AGENTS.md, Pro Max quota — combined ~8,500 user reactions across 23 open issues), with shipped defense hooks and upstream status. Updated as clusters evolve. |
+| **[Failure-Mode Cluster Tracker](https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html)** | Public registry of structural failure clusters in Claude Code (SOH, multi-account, AGENTS.md, Pro Max quota, TUI/UX, permission matching, Skills metadata — combined ~11,500 user reactions across 60+ open issues), with shipped defense hooks and upstream status. Updated as clusters evolve. |
 
 ### Free guides
 

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Failure-Mode Cluster Tracker — CC Safety Lab</title>
-<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching. Issue counts, reactions, defense hooks shipped, upstream status.">
+<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata. Issue counts, reactions, defense hooks shipped, upstream status.">
 <meta property="og:title" content="Claude Code Failure-Mode Cluster Tracker — CC Safety Lab">
-<meta property="og:description" content="Public tracker for six structural failure clusters in Claude Code (Apr-May 2026): combined ~11,400 user reactions across 50+ issues, with cc-safe-setup defense hooks shipped for most clusters.">
+<meta property="og:description" content="Public tracker for seven structural failure clusters in Claude Code (Apr-May 2026): combined ~11,500 user reactions across 60+ issues, with cc-safe-setup defense hooks shipped for most clusters.">
 <meta property="og:type" content="article">
 <style>
 * { box-sizing: border-box; }
@@ -99,10 +99,10 @@ code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-si
 <p class="subtitle">Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status. Updated as clusters evolve.</p>
 
 <div class="lead">
-A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-26.
+A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-27.
 </div>
 
-<h2>The six clusters being tracked (May 2026)</h2>
+<h2>The seven clusters being tracked (May 2026)</h2>
 
 <table class="summary-table">
 <thead>
@@ -164,10 +164,18 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>1 partial (subagent-permission-mode-guard.sh)</td>
 <td>Unresolved (9+ months, meta-issue #30519 with no staff engagement)</td>
 </tr>
+<tr>
+<td><a href="#cluster-skills">Skills metadata and loading</a></td>
+<td>10+ (area:skills) + 20+ (area:agent-view related)</td>
+<td>~100+ (new, growth signal)</td>
+<td>2026-05 (label rollout 2026-05-17)</td>
+<td>1 (PR #357: skills-settings-validator)</td>
+<td>Unresolved (no staff engagement since label rollout)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,400 user reactions across 50+ issues</strong>, all six clusters currently open as of 2026-05-26. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,500 user reactions across 60+ issues</strong>, all seven clusters currently open as of 2026-05-27. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -385,7 +393,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 </ul>
 
 <h4>Why this cluster matters operationally (even without direct $$ impact)</h4>
-<p style="font-size: 0.93rem;">This is the only cluster of the five with no direct revenue or quota impact — the failure mode is friction, not loss. But the cluster partly explains the 964 unique CLI users / 30 stars disparity on cc-safe-setup (a 3.1% star rate, well below the 5-10% baseline for actively-used dev tools): users who hit TUI friction tend to disengage from public surfaces (stars, issues, PRs) even when they continue using the underlying tool. The cluster is included here for completeness — it shapes user behavior, but it is not a Safety Lab monthly theme candidate.</p>
+<p style="font-size: 0.93rem;">This is the only cluster of the seven with no direct revenue or quota impact — the failure mode is friction, not loss. But the cluster partly explains the 1,127 unique CLI users / 30 stars disparity on cc-safe-setup (a 2.7% star rate, well below the 5-10% baseline for actively-used dev tools): users who hit TUI friction tend to disengage from public surfaces (stars, issues, PRs) even when they continue using the underlying tool. The cluster is included here for completeness — it shapes user behavior, but it is not a Safety Lab monthly theme candidate.</p>
 
 <h4>Upstream status</h4>
 <p style="font-size: 0.93rem;">Five of six issues acknowledged with <code>area:tui</code> label; three with <code>oncall</code>. No structural fix in 13 months. The TUI rendering layer is a Claude Code architectural choice (custom React-for-CLI stack) and fixing the cluster requires either rebuilding on a different TUI layer or extensive integration work with terminal emulators' scroll/redraw protocols.</p>

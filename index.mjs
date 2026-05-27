@@ -29,6 +29,20 @@ const c = {
   blue: '\x1b[36m',
 };
 
+// Days remaining until Anthropic's 2026-06-15 programmatic-billing split.
+// Computed at run time so the CLI banner stays accurate without daily edits —
+// hardcoded counts drifted (lines once read "23 days" and "20 days" on the same
+// install) and that drift is the exact claim-vs-reality pattern CVH warns about.
+// Compares calendar dates in the local timezone so the count matches what users
+// would naturally count off a calendar (UTC-based math drifts by a day for JST).
+function daysUntilJune15() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(2026, 5, 15);
+  const diff = Math.round((target - today) / 86400000);
+  return Math.max(0, diff);
+}
+
 const SCRIPTS = JSON.parse(readFileSync(join(__dirname, 'scripts.json'), 'utf-8'));
 
 const HOOKS = {
@@ -322,7 +336,9 @@ function status() {
   console.log(c.dim + '  Tip: --validate to check health · --simulate "cmd" to test · --shield for max safety' + c.reset);
   console.log();
 
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in 23 days.' + c.reset);
+  const daysLeft1 = daysUntilJune15();
+  const daySuffix1 = daysLeft1 === 1 ? 'day' : 'days';
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in ' + daysLeft1 + ' ' + daySuffix1 + '.' + c.reset);
   console.log('  ' + c.dim + '  Diagnose any unexpected charge: https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log();
   // Exit code for CI: 0 = all installed, 1 = missing hooks
@@ -5999,9 +6015,11 @@ async function main() {
   console.log('  ' + c.dim + 'More:' + c.reset + '    npx cc-safe-setup --shield  (maximum safety)');
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
-  console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (4 open clusters, 8,500+ user reactions)');
+  console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (7 open clusters, ~11,500 user reactions across 60+ issues)');
   console.log();
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in 20 days. claude -p invocations route to a separate credit bucket.');
+  const daysLeft2 = daysUntilJune15();
+  const daySuffix2 = daysLeft2 === 1 ? 'day' : 'days';
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in ' + daysLeft2 + ' ' + daySuffix2 + '. claude -p invocations route to a separate credit bucket.');
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
