@@ -624,6 +624,7 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [27 Token Symptoms Quick Reference](https://gist.github.com/yurukusa/03a379854fa0f8eca091a75f7aab593b), all 27 known token failure modes with top 5 killers table and April 2026 new symptoms
 - [Token Saving Checklist (15 Items)](https://gist.github.com/yurukusa/6bd0d0a38a4887fc36475dd1f765ecd1), ordered by impact: critical (30-50%), important (10-20%), good practice (5-10%)
 - [Opus 4.7 Survival Cheatsheet](https://gist.github.com/yurukusa/f2d6e261338eeda70f0ed9507f995c13), 46 known problems, quick fixes under 60 seconds, full reference table
+- [Token-Usage Leaderboard Anti-Pattern](https://gist.github.com/yurukusa/ac41d467d97f3711129070d8e311db4f), why internal token leaderboards fail (Goodhart's law), 5 better metrics, and the Uber case study (Fortune 2026-05-26: AI budget burnt in 4 months after leaderboard rollout)
 
 ### Professional Services
 

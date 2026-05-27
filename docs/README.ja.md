@@ -107,6 +107,7 @@ Anthropic は[2026年6月15日に programmatic の課金を分離](https://docs.
 - [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html) — 許可プロンプトを減らす
 - [OWASP MCP対応表](https://yurukusa.github.io/cc-safe-setup/owasp-mcp-hooks.html) — OWASP MCP Top 10全リスク対策
 - [Defense Kit](https://gist.github.com/yurukusa/823f76c4783e45809735c92b660bd2ed) — 事故10件と対応するhook 10件と即時のinstallコマンド10件
+- [トークン消費の順位表のアンチパターン](https://gist.github.com/yurukusa/ac41d467d97f3711129070d8e311db4f) — 社内のトークン消費の順位表が Goodhart の法則で失敗する理由、 5 つの代替の指標、 Uber の事例 (Fortune 2026-05-26: 順位表の導入で 2026 年の AI 予算を 4 ヶ月で消耗)
 - [settings.jsonリファレンス](../SETTINGS_REFERENCE.md) — 全設定の解説
 - [COOKBOOK](../COOKBOOK.md) — レシピ集
 - [トラブルシューティング](../TROUBLESHOOTING.md) — 動かない時の対処法
