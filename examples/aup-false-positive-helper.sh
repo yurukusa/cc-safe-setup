@@ -31,7 +31,7 @@
 #   the four operator-side workarounds when a user is most likely to hit the block (Opus
 #   pinned, false-positive flood window still active).
 #
-#   Reference: https://gist.github.com/yurukusa/<TBD>  (4 operator-side paths through the
+#   Reference: https://gist.github.com/yurukusa/4fa4751044be45bd83345601ee79c2db  (4 operator-side paths through the
 #   false-positive flood — model swap, prompt warmup, CVP application, retry harness)
 #
 # What this hook does:
