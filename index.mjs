@@ -6037,10 +6037,10 @@ async function main() {
   console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,185 reactions).' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'One-time books:' + c.reset + ' Sister handbooks ($19 each, free chapter previews)');
-  console.log('  ' + c.dim + '  Sub-Agent Observability Handbook (ships 2026-05-27, the 7-case cluster + 4 defense hooks)' + c.reset);
+  console.log('  ' + c.blue + 'Sister handbooks (preview):' + c.reset + ' Free Gist previews live; full PDF release pending');
+  console.log('  ' + c.dim + '  Sub-Agent Observability Handbook (7-case sub-agent cluster + 4 defense hooks)' + c.reset);
   console.log('  ' + c.dim + '    https://gist.github.com/yurukusa/bc61438321b369dbd3765e2bd9702a80  (free Chapter 1 preview, EN)' + c.reset);
-  console.log('  ' + c.dim + '  Claim-Verify Handbook (130 cases of operator-vs-runtime divergence, $19)' + c.reset);
+  console.log('  ' + c.dim + '  Claim-Verify Handbook (130 cases of operator-vs-runtime divergence)' + c.reset);
   console.log('  ' + c.dim + '    https://gist.github.com/yurukusa/5242a540c43769df76a448269e2f182b  (free preview Gist)' + c.reset);
   console.log();
   console.log('  ' + c.dim + 'Feedback:' + c.reset + ' https://github.com/yurukusa/cc-safe-setup/discussions  (questions / patterns that worked)');
