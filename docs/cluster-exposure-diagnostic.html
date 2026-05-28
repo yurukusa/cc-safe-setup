@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cluster Exposure Diagnostic — Which of the 12 Claude Code failure clusters are hitting you?</title>
+<meta name="description" content="7 questions, 3 minutes. Identify which of the 12 tracked Claude Code failure clusters you are most exposed to, with concrete hook and resource recommendations.">
+<meta property="og:title" content="Cluster Exposure Diagnostic — Claude Code">
+<meta property="og:description" content="7 questions → list of likely-affected clusters with operator-side defenses for each.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/cluster-exposure-diagnostic.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.55; }
+.c { max-width: 760px; margin: 0 auto; }
+header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #21262d; }
+h1 { color: #f0f6fc; font-size: 1.5rem; margin-bottom: 0.5rem; }
+.sub { color: #8b949e; font-size: 0.9rem; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.step { display: none; animation: fadeIn 0.25s ease; }
+.step.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.progress { background: #21262d; height: 4px; border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+.progress-bar { background: #58a6ff; height: 100%; transition: width 0.3s ease; width: 0%; }
+.q { color: #f0f6fc; font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600; }
+.q-hint { color: #8b949e; font-size: 0.85rem; margin-bottom: 1rem; }
+.opt { display: block; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; color: #c9d1d9; }
+.opt:hover { background: #1c2128; border-color: #58a6ff; }
+.opt.selected { background: #1f6feb22; border-color: #58a6ff; color: #f0f6fc; }
+.opt-multi { user-select: none; }
+.opt-multi::before { content: '☐ '; color: #8b949e; }
+.opt-multi.selected::before { content: '☑ '; color: #58a6ff; }
+.actions { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.6rem 1.4rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+button:hover:not(:disabled) { background: #30363d; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: #238636; border-color: #2ea043; color: white; }
+button.primary:hover:not(:disabled) { background: #2ea043; }
+.result { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.2rem; margin-top: 1rem; }
+.cluster-card { background: #0d1117; border: 1px solid #30363d; border-left: 3px solid #58a6ff; border-radius: 6px; padding: 0.9rem 1.1rem; margin: 0.8rem 0; }
+.cluster-card.high { border-left-color: #f85149; }
+.cluster-card.medium { border-left-color: #d29922; }
+.cluster-card.low { border-left-color: #3fb950; }
+.cluster-name { color: #f0f6fc; font-weight: 600; font-size: 1rem; margin-bottom: 0.3rem; }
+.cluster-meta { color: #8b949e; font-size: 0.82rem; margin-bottom: 0.5rem; }
+.cluster-action { color: #c9d1d9; font-size: 0.9rem; }
+.cluster-action code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+.cta { background: #1f6feb22; border: 1px solid #58a6ff; border-radius: 8px; padding: 1rem; margin-top: 1.2rem; }
+.cta-title { color: #f0f6fc; font-weight: 600; margin-bottom: 0.5rem; }
+.empty-msg { color: #8b949e; font-style: italic; padding: 1rem 0; }
+.intro { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+.intro p { font-size: 0.92rem; margin-bottom: 0.5rem; }
+.intro p:last-child { margin-bottom: 0; }
+.intro strong { color: #f0f6fc; }
+footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #21262d; color: #8b949e; font-size: 0.82rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="c">
+
+<header>
+<h1>Cluster Exposure Diagnostic</h1>
+<p class="sub">Which of the 12 tracked Claude Code failure clusters are most likely hitting you right now?</p>
+</header>
+
+<div class="progress"><div class="progress-bar" id="pb"></div></div>
+
+<div class="step active" id="step0">
+<div class="intro">
+<p><strong>What this is.</strong> Over six weeks (mid-April to end of May 2026), 12 structural failure clusters surfaced in the public <code>anthropics/claude-code</code> issue tracker — 11,820+ reactions across 400+ open issues. None has an official upstream fix yet. Operator-side defenses cover nine of the twelve at the symptom level.</p>
+<p><strong>What this diagnostic does.</strong> Seven multi-select questions about your Claude Code setup map to specific clusters. The result lists the clusters most likely affecting your workflow, with concrete hook installs and reading material per cluster.</p>
+<p><strong>Three minutes. Local-only. No tracking.</strong></p>
+</div>
+<div class="actions">
+<button class="primary" onclick="next()">Start →</button>
+</div>
+</div>
+
+<div class="step" id="step1">
+<p class="q">1. Which Claude Code surfaces do you use regularly?</p>
+<p class="q-hint">Select all that apply.</p>
+<div class="opt opt-multi" data-q="1" data-v="cli">CLI (terminal <code>claude</code> command)</div>
+<div class="opt opt-multi" data-q="1" data-v="desktop">Desktop app (Claude.app)</div>
+<div class="opt opt-multi" data-q="1" data-v="cowork">Cowork (Desktop sandbox / remote control)</div>
+<div class="opt opt-multi" data-q="1" data-v="web">Web (claude.ai)</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+<button class="primary" onclick="next()" id="next1">Next →</button>
+</div>
+</div>
+
+<div class="step" id="step2">
+<p class="q">2. Do you also use other coding agents on the same repositories?</p>
+<p class="q-hint">Codex, Cursor, Amp, Aider, GitHub Copilot, etc. Select all that apply.</p>
+<div class="opt opt-multi" data-q="2" data-v="codex">OpenAI Codex (CLI or IDE)</div>
+<div class="opt opt-multi" data-q="2" data-v="cursor">Cursor</div>
+<div class="opt opt-multi" data-q="2" data-v="other-agents">Amp / Aider / Copilot CLI / others</div>
+<div class="opt opt-multi" data-q="2" data-v="claude-only">Claude Code only</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+<button class="primary" onclick="next()">Next →</button>
+</div>
+</div>
+
+<div class="step" id="step3">
+<p class="q">3. Do you manage multiple Claude accounts on the same machine?</p>
+<p class="q-hint">For example, a personal account and a work account. Or two Pro Max subscriptions across teams.</p>
+<div class="opt" data-q="3" data-v="yes">Yes — I switch between accounts</div>
+<div class="opt" data-q="3" data-v="no">No — single account only</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+</div>
+</div>
+
+<div class="step" id="step4">
+<p class="q">4. Have you hit any of these in the last 30 days?</p>
+<p class="q-hint">Select all that apply.</p>
+<div class="opt opt-multi" data-q="4" data-v="quota-anomaly">Pro Max quota burned faster than usage suggests</div>
+<div class="opt opt-multi" data-q="4" data-v="malformed">"malformed and could not be parsed" error on tool calls</div>
+<div class="opt opt-multi" data-q="4" data-v="aup-block">An ordinary prompt blocked by usage policy (AUP)</div>
+<div class="opt opt-multi" data-q="4" data-v="silent-compact">Auto-compact silently failed to fire near token limit</div>
+<div class="opt opt-multi" data-q="4" data-v="none-of-these">None of these</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+<button class="primary" onclick="next()">Next →</button>
+</div>
+</div>
+
+<div class="step" id="step5">
+<p class="q">5. Do you actively use sub-agents (Task tool spawns)?</p>
+<p class="q-hint">For research, parallel work, or code review delegation.</p>
+<div class="opt" data-q="5" data-v="heavy">Heavy use — multiple sub-agents per session</div>
+<div class="opt" data-q="5" data-v="some">Occasional use</div>
+<div class="opt" data-q="5" data-v="rare">Rare or never</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+</div>
+</div>
+
+<div class="step" id="step6">
+<p class="q">6. Has a permission rule in <code>settings.json</code> ever surprised you?</p>
+<p class="q-hint">For example, an <code>allow</code> rule that didn't match, a <code>deny</code> that was bypassed, or a session-approval persisting unexpectedly.</p>
+<div class="opt" data-q="6" data-v="yes">Yes — at least once</div>
+<div class="opt" data-q="6" data-v="no">No — rules behave as expected</div>
+<div class="opt" data-q="6" data-v="no-rules">I don't use custom permission rules</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+</div>
+</div>
+
+<div class="step" id="step7">
+<p class="q">7. Do you use Claude Skills?</p>
+<p class="q-hint">The <code>~/.claude/skills/</code> or project <code>.claude/skills/</code> directories.</p>
+<div class="opt" data-q="7" data-v="yes">Yes</div>
+<div class="opt" data-q="7" data-v="no">No</div>
+<div class="opt" data-q="7" data-v="dont-know">Not sure what these are</div>
+<div class="actions">
+<button onclick="prev()">← Back</button>
+</div>
+</div>
+
+<div class="step" id="result">
+<h2 style="color:#f0f6fc;font-size:1.25rem;margin-bottom:0.5rem;">Your cluster exposure</h2>
+<p class="sub" style="margin-bottom:1rem;">Each card below is a cluster you are likely exposed to based on your answers, ordered by probability. Cards highlighted red are higher-probability for your setup; yellow are moderate; green are lower-priority background risks.</p>
+<div id="cluster-list"></div>
+<div class="cta">
+<div class="cta-title">Get monthly cluster updates with install-ready hooks</div>
+<p style="font-size:0.9rem;margin-bottom:0.6rem;">CC Safety Lab Founder — ¥500/month (~$3.50), Founder pricing grandfathered. Each issue covers one cluster in depth (12,000–20,000 characters), with operator-side defenses, evidence links, and checklist updates. Subscribing in May means the May issue is in your hands now and the June issue (5 clusters, 25,000+ characters) lands June 1.</p>
+<p><a href="https://ko-fi.com/yurukusa/tiers"><strong>Subscribe on Ko-fi →</strong></a> · <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">Full Safety Lab page →</a> · <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a45a5150a6d">Read May issue chapter 1 free →</a></p>
+</div>
+<div class="actions">
+<button onclick="restart()">Start over</button>
+<button class="primary" onclick="copyResult()">Copy result</button>
+</div>
+</div>
+
+<footer>
+<p>Cluster framings reconstructed from public GitHub Issues. Full tracker: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a> · Source: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub</a> · Updated 2026-05-29.</p>
+</footer>
+
+</div>
+
+<script>
+const answers = { 1: [], 2: [], 3: null, 4: [], 5: null, 6: null, 7: null };
+let current = 0;
+const totalSteps = 8;
+
+document.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
+        const q = el.dataset.q;
+        const v = el.dataset.v;
+        const isMulti = el.classList.contains('opt-multi');
+        if (isMulti) {
+            const arr = answers[q];
+            const idx = arr.indexOf(v);
+            if (idx === -1) {
+                arr.push(v);
+                el.classList.add('selected');
+            } else {
+                arr.splice(idx, 1);
+                el.classList.remove('selected');
+            }
+        } else {
+            answers[q] = v;
+            document.querySelectorAll(`[data-q="${q}"]`).forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            setTimeout(next, 200);
+        }
+    });
+});
+
+function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    if (n < 8) {
+        document.getElementById('step' + n).classList.add('active');
+    } else {
+        document.getElementById('result').classList.add('active');
+        renderResult();
+    }
+    document.getElementById('pb').style.width = (n / totalSteps * 100) + '%';
+    current = n;
+}
+
+function next() { if (current < 8) showStep(current + 1); }
+function prev() { if (current > 0) showStep(current - 1); }
+function restart() {
+    Object.keys(answers).forEach(k => { answers[k] = Array.isArray(answers[k]) ? [] : null; });
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    showStep(0);
+}
+
+const clusterData = {
+    1: { name: 'Cluster 1: Sub-Agent Observability (SOH)', meta: '8+ issues, ~600 reactions, four failure modes', action: 'Install <code>subagent-closure-verify-gate.sh</code> and related hooks (PRs #283 / #286 / #298 / #282). Read the SOH chapter selector (5 questions, 3 min) to pick the right entry into the field guide.' },
+    2: { name: 'Cluster 2: Multi-account session management', meta: '3 issues across desktop / web / mobile, 1,178+ reactions', action: 'Install <code>account-routing-preflight.sh</code> and <code>account-billing-log.sh</code> (PR #328). See the multi-account interactive self-audit (6 questions).' },
+    3: { name: 'Cluster 3: AGENTS.md interop', meta: '#6235 has 5,233 reactions — the largest single feature request in the tracker, 13+ months unresolved', action: 'Install <code>agents-md-sync-checker.sh</code> (PR #377, SessionStart) and <code>agents-md-edit-drift-warner.sh</code> (PR #420, PostToolUse). Symlink <code>ln -s CLAUDE.md AGENTS.md</code> for the single-source-of-truth path.' },
+    4: { name: 'Cluster 4: Pro Max quota anomaly', meta: '10 issues, 5 months, 2,200+ reactions', action: 'Install <code>quota-anomaly-detector.sh</code> (PR #348), <code>session-rate-monitor.sh</code> (PR #349), and <code>cache-creation-drift-detector.sh</code> (PR #340).' },
+    5: { name: 'Cluster 5: TUI / Terminal UX', meta: '6 issues, 13 months, 5/6 carry official labels', action: 'No hook-shaped defenses possible (TUI renders at a layer hooks cannot reach). Terminal-emulator-level workarounds in the cluster-tracker page.' },
+    6: { name: 'Cluster 6: Permission matching boundary', meta: '8 axes from meta-issue #30519 (71 reactions), 9-month silence', action: 'Install <code>always-allow-pattern-suggester.sh</code> (PR #359) and <code>bypass-mode-effective-verifier.sh</code> (PR #360). Three more axis-specific hooks in design.' },
+    7: { name: 'Cluster 7: Skills metadata', meta: 'Coherent failures in metadata fabrication, frontmatter respect, discovery', action: 'One shipped hook with two more in design for June 2026. Watch <code>cluster-tracker.html</code> for updates.' },
+    8: { name: 'Cluster 8: v2.1.150 server-side prompt injection', meta: 'Function nAA injects from bootstrap client_data + GrowthBook tengu_heron_brook', action: 'Set <code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1</code> and <code>DISABLE_GROWTHBOOK=1</code>. Install <code>runtime-binary-change-detector.sh</code> (PR #370).' },
+    9: { name: 'Cluster 9: AUP false-positive on Opus', meta: '25+ issues since 2026-05-18, server-side classifier', action: 'Install <code>opus-degradation-tracker.sh</code> (PR #394). Two more axis-specific hooks in design for January-February 2027.' },
+    10: { name: 'Cluster 10: GrowthBook A/B flag overrides', meta: '58 issues, 2-week surge, settings.json silently overwritten every ~9 minutes', action: 'Install <code>growthbook-flag-monitor.sh</code> (PR #413), <code>compact-dispatch-watchdog.sh</code> (PR #402), <code>permission-mode-drift-guard.sh</code>.' },
+    11: { name: 'Cluster 11: Cowork sandbox', meta: '195 issues in 14 days — largest cluster by volume; 4 sub-clusters (filesystem / platform / subscription / infrastructure)', action: 'Install <code>cowork-claude-md-load-checker.sh</code> (PR #409), <code>cowork-fuse-staleness-watcher.sh</code> (PR #410), <code>cowork-model-picker-advisor.sh</code> (PR #411).' },
+    12: { name: 'Cluster 12: Tool Call Parsing failures in Opus 4.7', meta: '5 issues, 28+ reactions, 4 sub-pattern hypotheses', action: 'Install <code>long-session-malformed-tool-call-detector.sh</code> (PR #406, sub-pattern 12A) and <code>extended-thinking-tool-use-mismatch-detector.sh</code> (PR #419, sub-pattern 12B).' }
+};
+
+function score() {
+    const s = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 };
+    // Q1: surfaces
+    if (answers[1].includes('cli')) { s[5] += 1; s[12] += 1; s[6] += 1; }
+    if (answers[1].includes('desktop')) { s[10] += 2; s[11] += 1; }
+    if (answers[1].includes('cowork')) { s[11] += 3; }
+    // Q2: other agents
+    if (answers[2].includes('codex') || answers[2].includes('cursor') || answers[2].includes('other-agents')) { s[3] += 3; }
+    if (answers[2].includes('claude-only')) { s[3] -= 1; }
+    // Q3: multi-account
+    if (answers[3] === 'yes') { s[2] += 3; }
+    // Q4: symptoms
+    if (answers[4].includes('quota-anomaly')) { s[4] += 3; }
+    if (answers[4].includes('malformed')) { s[12] += 3; }
+    if (answers[4].includes('aup-block')) { s[9] += 3; }
+    if (answers[4].includes('silent-compact')) { s[10] += 2; }
+    // Q5: sub-agents
+    if (answers[5] === 'heavy') { s[1] += 3; }
+    if (answers[5] === 'some') { s[1] += 1; }
+    // Q6: permissions
+    if (answers[6] === 'yes') { s[6] += 3; s[10] += 1; }
+    // Q7: skills
+    if (answers[7] === 'yes') { s[7] += 2; }
+    return s;
+}
+
+function renderResult() {
+    const s = score();
+    const ranked = Object.entries(s).sort((a, b) => b[1] - a[1]);
+    const high = ranked.filter(([_, v]) => v >= 3);
+    const medium = ranked.filter(([_, v]) => v === 2);
+    const low = ranked.filter(([_, v]) => v === 1);
+
+    const list = document.getElementById('cluster-list');
+    list.innerHTML = '';
+
+    if (high.length === 0 && medium.length === 0 && low.length === 0) {
+        list.innerHTML = '<div class="empty-msg">Your answers do not strongly indicate exposure to any single cluster. This either means a low-volume setup, or that the failure modes have not yet surfaced for you. The 12-cluster page is worth scanning anyway: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a>.</div>';
+        return;
+    }
+
+    function renderCard(id, severity) {
+        const d = clusterData[id];
+        if (!d) return '';
+        return `<div class="cluster-card ${severity}">
+            <div class="cluster-name">${d.name}</div>
+            <div class="cluster-meta">${d.meta}</div>
+            <div class="cluster-action">${d.action}</div>
+        </div>`;
+    }
+
+    let html = '';
+    high.forEach(([id]) => { html += renderCard(id, 'high'); });
+    medium.forEach(([id]) => { html += renderCard(id, 'medium'); });
+    low.forEach(([id]) => { html += renderCard(id, 'low'); });
+    list.innerHTML = html;
+}
+
+function copyResult() {
+    const s = score();
+    const ranked = Object.entries(s).filter(([_, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    let txt = 'Cluster exposure diagnostic (Claude Code):\n';
+    ranked.forEach(([id, v]) => {
+        const sev = v >= 3 ? '[HIGH]' : v === 2 ? '[MED]' : '[LOW]';
+        const name = clusterData[id]?.name || `Cluster ${id}`;
+        txt += `${sev} ${name}\n`;
+    });
+    txt += '\nFull tracker: https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html\n';
+    txt += 'Diagnostic: https://yurukusa.github.io/cc-safe-setup/cluster-exposure-diagnostic.html\n';
+    navigator.clipboard.writeText(txt).then(() => {
+        alert('Copied to clipboard.');
+    });
+}
+
+showStep(0);
+</script>
+</body>
+</html>
