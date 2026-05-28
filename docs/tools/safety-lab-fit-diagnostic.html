@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Should I Subscribe to CC Safety Lab? — 5-Question Fit Diagnostic</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="5-question diagnostic to decide whether the ¥500/month CC Safety Lab Founder Membership matches your Claude Code operator setup. Browser-only, no signup, no telemetry. CC0.">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.6; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.score { font-size: 3rem; font-weight: 700; text-align: center; }
+.score-label { text-align: center; color: var(--muted); margin-bottom: 1rem; }
+.score-good { color: var(--green); }
+.score-mid { color: var(--amber); }
+.score-bad { color: var(--red); }
+.rec { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.rec.mid { background: #fffbeb; border-color: var(--amber); }
+.rec.bad { background: #fef2f2; border-color: var(--red); }
+.rec h3 { margin-top: 0; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.ack { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
+.cta-btn { display: inline-block; background: var(--accent); color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 4px; font-weight: 600; margin-top: 0.5rem; }
+.cta-btn:hover { background: #c2410c; color: white; }
+</style>
+</head>
+<body>
+
+<h1>Should I Subscribe to CC Safety Lab?</h1>
+<div class="meta">5 questions · ~3 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-05-29)</div>
+
+<div class="intro">
+<strong>The decision:</strong> CC Safety Lab Founder Membership is ¥500/month (about $3.30) for monthly updates on Claude Code's emerging failure clusters with fixes and copy-paste defense hooks. This 5-question diagnostic estimates whether the subscription matches your operator setup — or whether the free hooks in this repository are enough.
+</div>
+
+<div class="disclosure">
+<strong>Disclosure:</strong> The recommendation below routes to the <em>CC Safety Lab Founder Membership</em> (¥500/month, hosted on Ko-fi) where the score indicates a strong fit. The free hooks at <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup</a> and the free <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1 preview Gist</a> (~6,000 words) cover the core defenses; the membership is only useful if multiple factors below indicate ongoing exposure to new incident patterns.
+</div>
+
+<h2>5 Questions</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1" data-weight="20">
+<div class="label">1. What is your current monthly Claude Code spend?</div>
+<div class="hint">Combine subscription plan cost (Pro/Max) and any overage API charges.</div>
+<label><input type="radio" name="q1" value="0"> Under ¥3,000 ($20, Pro plan, no overage).</label>
+<label><input type="radio" name="q1" value="8"> ¥3,000–¥15,000 ($20–$100, Pro overage or Max 5x).</label>
+<label><input type="radio" name="q1" value="16"> ¥15,000–¥30,000 ($100–$200, Max 20x).</label>
+<label><input type="radio" name="q1" value="20"> Over ¥30,000 ($200+, Max with API overage).</label>
+</div>
+
+<div class="q" data-id="q2" data-weight="20">
+<div class="label">2. How many Claude Code incidents have you experienced in the past 90 days?</div>
+<div class="hint">Incidents that cost time or money: data loss, runaway tokens, silent failures, rule violations.</div>
+<label><input type="radio" name="q2" value="0"> None that caused measurable cost.</label>
+<label><input type="radio" name="q2" value="8"> 1–2 minor incidents (less than ¥3,000 / 1 hour of work lost).</label>
+<label><input type="radio" name="q2" value="16"> 3+ incidents or 1 major incident (¥3,000+ / hours of work).</label>
+<label><input type="radio" name="q2" value="20"> 1+ catastrophic incident (¥30,000+ / day+ of work lost).</label>
+</div>
+
+<div class="q" data-id="q3" data-weight="15">
+<div class="label">3. How do you currently track Claude Code's emerging failure patterns?</div>
+<div class="hint">GitHub Issues, Reddit r/ClaudeAI, HN posts, official changelogs.</div>
+<label><input type="radio" name="q3" value="0"> Daily review of GitHub Issues and operator channels.</label>
+<label><input type="radio" name="q3" value="5"> Weekly skim of major signals.</label>
+<label><input type="radio" name="q3" value="10"> Occasional checks when I have time.</label>
+<label><input type="radio" name="q3" value="15"> I don't track them; I find out when something breaks.</label>
+</div>
+
+<div class="q" data-id="q4" data-weight="15">
+<div class="label">4. What is your operator setup?</div>
+<div class="hint">Determines how much exposure each new failure cluster represents.</div>
+<label><input type="radio" name="q4" value="2"> Solo, personal projects only (no production exposure).</label>
+<label><input type="radio" name="q4" value="8"> Solo, mixed (personal + consulting).</label>
+<label><input type="radio" name="q4" value="12"> Production code or client work daily.</label>
+<label><input type="radio" name="q4" value="15"> Production fleet (multiple repositories, automated dispatch).</label>
+</div>
+
+<div class="q" data-id="q5" data-weight="15">
+<div class="label">5. How important is preventing the next incident (vs cleaning up after one)?</div>
+<div class="hint">Reflects your risk tolerance and operational maturity.</div>
+<label><input type="radio" name="q5" value="0"> Cleanup is acceptable; I can revert and retry.</label>
+<label><input type="radio" name="q5" value="5"> Prevention is preferred but not critical.</label>
+<label><input type="radio" name="q5" value="10"> Prevention is important; one incident affects my work significantly.</label>
+<label><input type="radio" name="q5" value="15"> Prevention is critical; downtime or data loss has cascading costs.</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>Calculate Fit Score</button>
+
+</form>
+
+<div class="result" id="result">
+<div class="score-label">Your Safety Lab Fit Score</div>
+<div class="score" id="score-display">—</div>
+<div id="recommendation"></div>
+</div>
+
+<h2>About the Score</h2>
+
+<p>The diagnostic produces a 0–85 score across five factors. The bands are calibrated to the cost-of-one-avoided-incident vs ¥500/month subscription cost:</p>
+
+<ul>
+<li><strong>Score 55–85 (Strong fit):</strong> Multiple factors indicate ongoing exposure to new failure patterns. The ¥500/month subscription typically pays for itself in 1–3 months through avoided incidents.</li>
+<li><strong>Score 30–54 (Moderate fit):</strong> Some exposure to new patterns. Consider the Founder tier (price locked) and evaluate over 2–3 months. The free hooks in this repository may cover most of your needs.</li>
+<li><strong>Score 0–29 (Weak fit):</strong> Your current setup has low exposure to new failure clusters. The free hooks at <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> and the free <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d">May 2026 issue Part 1 preview Gist</a> likely cover what you need.</li>
+</ul>
+
+<h2>What You Get</h2>
+
+<p>If the score indicates a fit, here is what each monthly issue contains:</p>
+
+<ul>
+<li><strong>4–8 newly-emerged failure clusters</strong> with reproduction steps and fixes, sourced from GitHub Issues, Reddit r/ClaudeAI, HN, and ~800 hours of autonomous operation.</li>
+<li><strong>1 deep-dive failure case</strong> with forensic analysis (recovery path, prevention pattern, hook integration).</li>
+<li><strong>1–2 copy-paste defense hooks</strong> ready to drop into <code>~/.claude/hooks/</code> with installation instructions.</li>
+<li><strong>An updated safety checklist</strong> reflecting the month's new patterns.</li>
+<li><strong>Product update notes</strong> linking to the one-time companion books (Token Book, Migration Playbook, Postmortems, Claim-Verify Handbook, Sub-Agent Observability Handbook).</li>
+</ul>
+
+<p>Cadence guarantee: each issue ships within 14 days of each cluster's emergence in the public signal sources. The <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">Cluster Tracker</a> page shows 12 structural clusters across 11,820+ cumulative reactions as of 2026-05-29, with the most recent (Cluster 12, Tool Call Parsing failures in Opus 4.7) shipping defense hooks within 24 hours of cluster articulation.</p>
+
+<h2>Free Materials First</h2>
+
+<p>Before subscribing, these free materials cover the core defenses and may already be enough:</p>
+
+<ul>
+<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 8 essential safety hooks installable via <code>npx cc-safe-setup</code>. MIT licensed.</li>
+<li><a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d">May 2026 issue Part 1 preview Gist</a> — ~6,000 words covering 9 incident clusters from 2026-04-25 to 2026-05-02 with issue numbers and remediation steps. Full Part 1 is free.</li>
+<li><a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">Cluster Tracker</a> — public registry of the 12 tracked failure clusters with shipped defense hooks.</li>
+<li><a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html">Safety Lab landing page</a> — full description of the subscription, monthly cadence, and value proposition.</li>
+</ul>
+
+<footer>
+CC Safety Lab Fit Diagnostic v1.0 · 2026-05-29 · CC0 · No signup, no telemetry · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>
+</footer>
+
+<script>
+const form = document.getElementById('audit-form');
+const submitBtn = document.getElementById('submit-btn');
+const result = document.getElementById('result');
+const scoreDisplay = document.getElementById('score-display');
+const recommendation = document.getElementById('recommendation');
+
+function checkComplete() {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  return questions.every(q => form.querySelector(`input[name="${q}"]:checked`));
+}
+
+form.addEventListener('change', () => {
+  submitBtn.disabled = !checkComplete();
+});
+
+submitBtn.addEventListener('click', () => {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  const score = questions.reduce((sum, q) => {
+    const v = parseInt(form.querySelector(`input[name="${q}"]:checked`).value, 10);
+    return sum + v;
+  }, 0);
+
+  scoreDisplay.textContent = score;
+  let band, recHTML;
+
+  if (score >= 55) {
+    scoreDisplay.className = 'score score-good';
+    band = 'Strong fit';
+    recHTML = `
+      <div class="rec">
+        <h3>Strong fit — Subscribe</h3>
+        <p>Your score (${score}/85) indicates ongoing exposure to new Claude Code failure clusters. At ¥500/month, the subscription typically pays for itself in 1–3 months through avoided incidents. The Founder tier locks the price permanently.</p>
+        <p><a href="https://ko-fi.com/yurukusa/tiers" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month)</a></p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Want to evaluate first? The <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1</a> (~6,000 words, 9 clusters) is free to read in full so you can judge the writing depth before subscribing.</p>
+      </div>
+    `;
+  } else if (score >= 30) {
+    scoreDisplay.className = 'score score-mid';
+    band = 'Moderate fit';
+    recHTML = `
+      <div class="rec mid">
+        <h3>Moderate fit — Consider Founder tier</h3>
+        <p>Your score (${score}/85) suggests some exposure to new patterns. The free hooks in this repository may cover most of your needs. If you want monthly updates on emerging clusters, the Founder tier (price locked at ¥500/month) lets you try it for 2–3 months and decide.</p>
+        <p><strong>Recommended sequence:</strong> Read the <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1</a> (free, ~6,000 words). If the writing depth matches what you want monthly, join at the Founder price.</p>
+        <p><a href="https://ko-fi.com/yurukusa/tiers" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month)</a></p>
+      </div>
+    `;
+  } else {
+    scoreDisplay.className = 'score score-bad';
+    band = 'Weak fit';
+    recHTML = `
+      <div class="rec bad">
+        <h3>Weak fit — Use free materials</h3>
+        <p>Your score (${score}/85) indicates low current exposure to new failure clusters. The free <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> hooks and the free <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d">May 2026 issue Part 1 preview Gist</a> likely cover what you need.</p>
+        <p>If your situation changes (higher spend, more incidents, production exposure), revisit this diagnostic. The Founder tier price (¥500/month) is locked permanently for charter members, so the option remains open.</p>
+      </div>
+    `;
+  }
+
+  document.querySelector('.score-label').textContent = `Your Safety Lab Fit Score — ${band}`;
+  recommendation.innerHTML = recHTML;
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
