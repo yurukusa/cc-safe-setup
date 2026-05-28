@@ -196,10 +196,26 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>0 (cluster framing date)</td>
 <td>Unresolved (5 documented override paths; no Anthropic acknowledgment of the broader pattern)</td>
 </tr>
+<tr>
+<td><a href="#cluster-cowork">Cowork sandbox / Desktop remote-control failure surface</a></td>
+<td>195 (2-week window, filed 2026-05-14 onward, ~17/day pace)</td>
+<td>0-1 per issue (wide-and-thin; volume-driven cluster)</td>
+<td>2026-05-28 (cluster framing date)</td>
+<td>1 standalone script (cowork-claudemd-helper.sh, PR #403)</td>
+<td>Unresolved (4 sub-clusters: filesystem/mount/path, platform/binary mismatch, subscription/access boundary, infrastructure incident)</td>
+</tr>
+<tr>
+<td><a href="#cluster-tool-call-parsing">Tool Call Parsing failures in Opus 4.7</a></td>
+<td>5+ (filed 2026-04-17 to 2026-05-27; central case #62123 has 21 reactions)</td>
+<td>28+ (cumulative across 5 filings; 21 on #62123 alone)</td>
+<td>2026-05-25 (#62123)</td>
+<td>0 (recovery surface narrower than other clusters; advisory hooks in design)</td>
+<td>Unresolved (4 root-cause hypotheses: in-context few-shot poisoning, extended-thinking serialization defect, spurious malformed notice, legacy XML format mix)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,620 user reactions across 200+ issues</strong>, all ten clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,820 user reactions across 400+ issues</strong>, all twelve clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -675,6 +691,76 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;">The 2026-12 Safety Lab issue treats this cluster as the lead chapter, including the full 5-override-path enumeration and the diagnostic <code>jq</code> queries against <code>cachedGrowthBookFeatures</code>.</p>
 </div>
 
+<h2 id="cluster-cowork">Cluster 11: Cowork sandbox / Desktop remote-control failure surface</h2>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>Claude Code's new Cowork surface (the Claude desktop app's sandboxed remote-control session) is a different distribution path than the CLI or the existing Desktop surfaces. Hooks defined in <code>~/.claude/settings.json</code> do not fire in the Cowork sandbox, which narrows the operator-side defense surface relative to clusters 1-10. The 2-week filing surge (195 open issues filed between 2026-05-14 and 2026-05-28, ~17/day pace) does not show in any single high-reaction issue — instead it shows in the volume of independent users hitting different failure modes at the boundary of the new surface.</p>
+
+<h4>Sub-clusters within Cluster 11</h4>
+
+<p style="font-size: 0.94rem; margin-bottom: 0.5rem;">Four sub-clusters articulated from the 195-issue window:</p>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>11A — Filesystem / mount / path:</strong> <a href="https://github.com/anthropics/claude-code/issues/63013">#63013</a> (Live Artifacts folder path migration with no auto-migrate), <a href="https://github.com/anthropics/claude-code/issues/62933">#62933</a> (Dropbox mount failure on macOS), <a href="https://github.com/anthropics/claude-code/issues/62932">#62932</a> (FUSE mount serving stale inodes session-wide, silently corrupting bash git output — structurally the SOH cluster shape on a different surface), <a href="https://github.com/anthropics/claude-code/issues/62859">#62859</a> (Cowork doesn't load <code>~/.claude/CLAUDE.md</code> at session start).</li>
+<li><strong>11B — Platform / binary mismatch:</strong> <a href="https://github.com/anthropics/claude-code/issues/63000">#63000</a> (Linux ELF binary downloaded on macOS Sonoma 14.8.7), <a href="https://github.com/anthropics/claude-code/issues/62984">#62984</a> (Tailscale VPN detection blocks Cowork).</li>
+<li><strong>11C — Subscription boundary / access:</strong> <a href="https://github.com/anthropics/claude-code/issues/62893">#62893</a> (Cowork and Code chat history becomes inaccessible after subscription ends), <a href="https://github.com/anthropics/claude-code/issues/62949">#62949</a> (Cowork Desktop only shows Sonnet 4.6 1M, standard 200K tier missing).</li>
+<li><strong>11D — Infrastructure incident reports:</strong> <a href="https://github.com/anthropics/claude-code/issues/62873">#62873</a> (Cowork Infrastructure Incident Report from an individual user perspective).</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong><code>cowork-claudemd-helper.sh</code></strong> — Standalone script (not a hook, because hooks don't fire in Cowork) that reads <code>~/.claude/CLAUDE.md</code> and the project's <code>.claude/CLAUDE.md</code>, formats them with section headers Cowork's chat can render, and optionally copies the result to the clipboard via <code>pbcopy</code> / <code>wl-copy</code> / <code>xclip</code>. Workaround for <a href="https://github.com/anthropics/claude-code/issues/62859">#62859</a>. <em>Shipped 2026-05-28 in PR #403, 40 tests passing.</em></li>
+<li><strong><code>fuse-inode-staleness-watcher</code></strong> — Detects when transcript-visible git state diverges from on-disk git state, as an extension of the Claim-Verify Handbook surface to the FUSE mount case. <em>In design for June-July 2026.</em></li>
+<li><strong><code>cowork-capability-detector</code></strong> — Surfaces the available-model / available-tier set in Cowork sessions so operators can detect <a href="https://github.com/anthropics/claude-code/issues/62949">#62949</a>-shaped surprises before committing to a session. <em>In design for June-July 2026.</em></li>
+</ul>
+
+<h4>Why the defense surface is narrow</h4>
+<p style="font-size: 0.93rem;">Cowork runs in the Claude desktop app's GUI sandbox, not the CLI. Hooks defined in <code>~/.claude/settings.json</code> do not fire in that environment. This is the same constraint that made the original cluster framing acknowledge the narrow defense surface. Standalone scripts (the <code>cowork-claudemd-helper</code> shape) and operator workflow changes are the only operator-side surfaces that reach the user before they start their Cowork session.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Cowork is a new surface (rolled out in May 2026), so the 195-issue volume reflects launch-window discovery rather than a long-standing failure pattern. Anthropic has acknowledged individual infrastructure incidents (<a href="https://github.com/anthropics/claude-code/issues/62873">#62873</a> is a public incident report) but the broader cross-issue pattern is not formally articulated upstream.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">The original cluster-framing research note: <code>~/ops/customer-pain-cowork-cluster11-candidate-2026-05-28.md</code>. The 2027-02 or 2027-03 Safety Lab issue is the candidate slot for the chapter-length treatment, once the FUSE-staleness and capability-detector hooks are shipped.</p>
+</div>
+
+<h2 id="cluster-tool-call-parsing">Cluster 12: Tool Call Parsing failures in Opus 4.7</h2>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>Opus 4.7 reaches a turn where the model intends to call a tool. The model emits a tool-use block. The harness reports back: <em>the model's tool call could not be parsed; retry also failed</em>. The session halts. Five filings between 2026-04-17 and 2026-05-27 pin four independent root-cause hypotheses for the same surface symptom — each consistent with the data the filer observed, none colliding with the others, together articulating four distinct mechanisms that could produce the central <a href="https://github.com/anthropics/claude-code/issues/62123">#62123</a> symptom.</p>
+
+<h4>Sub-clusters within Cluster 12</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>12A — In-context few-shot poisoning</strong> (<a href="https://github.com/anthropics/claude-code/issues/62344">#62344</a>): Once one malformed tool call lands in conversation history, the model anchors on it and subsequent calls of the same type copy the broken format. Self-perpetuating; not self-recoverable. <code>/clear</code> is the only recovery, at the cost of the accumulated session state.</li>
+<li><strong>12B — Extended-thinking serialization defect</strong> (<a href="https://github.com/anthropics/claude-code/issues/62467">#62467</a>): When Opus 4.7's extended thinking is active, the assistant turn can have <code>stop_reason="tool_use"</code> but no parseable tool_use block in the message — only a thinking block. The reporter observed ~20 retry prompts across 6 sessions. Output size and special characters are not the cause; the common factor is Opus 4.7 + extended thinking.</li>
+<li><strong>12C — Spurious malformed notice</strong> (<a href="https://github.com/anthropics/claude-code/issues/62700">#62700</a>): The tool call <em>actually executes successfully</em> at the harness layer (git commits land, gh queries return, file writes take effect), and then the harness emits the system message <em>"Your tool call was malformed and could not be parsed. Please retry."</em> The model's narrative matches reality; the harness's articulation is the false negative — structurally a peer of the SOH dispatch-fabrication shape but in the opposite direction.</li>
+<li><strong>12D — Legacy XML format mix precursor</strong> (<a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a>, filed 2026-04-17): On longer payloads, Opus 4.7 mixes legacy XML tool-use format into what should be JSON tool calls. The model's training data contains both formats; the current API contract uses JSON exclusively; on long payloads, attention dilution lets XML leak into the JSON stream. This filing predates the May 25-27 surge by more than a month and is the precursor signal for the cluster.</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<p style="font-size: 0.93rem;">The cluster's recovery surface is structurally narrower than the previously catalogued clusters. The earlier clusters (sub-agent observability, permission matching, etc.) all had operator-side defenses that could be installed via hooks — cc-safe-setup ships forty-plus production hooks against those clusters. The tool-call parsing cluster's recovery surface is narrower because the recovery requires interventions at layers (model attention, harness parser, serialization layer) that hooks cannot reach. The closest hook-shaped defenses are <em>advisory</em>:</p>
+
+<ul style="font-size: 0.93rem;">
+<li><strong><code>long-session-malformed-tool-call-detector</code></strong> — Surfaces the recurrence pattern (sub-pattern 12A's in-context few-shot poisoning shape) to the operator before the session reaches an unrecoverable state. <em>In design for January 2027.</em></li>
+<li><strong><code>extended-thinking-tool-use-retry-watchdog</code></strong> — Detects repeated retry failures while extended thinking is active and advises temporary disable. <em>In design for January 2027.</em></li>
+<li><strong><code>spurious-malformed-notice-cross-checker</code></strong> — Compares the harness's malformed notice against the tool's actual execution result and flags the discrepancy. <em>In design for January-February 2027.</em></li>
+<li><strong><code>long-payload-attention-dilution-advisory</code></strong> — Warns when payload size crosses a threshold correlated with sub-pattern 12D's XML-mix shape. <em>In design for February 2027.</em></li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic acknowledgment of the broader pattern as of 2026-05-28. The central case <a href="https://github.com/anthropics/claude-code/issues/62123">#62123</a> has 21 reactions and 10 comments but no engineering response. The four sub-clusters pin distinct mechanisms; the upstream fix surface depends on which mechanism Anthropic prioritizes.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">Free preview Gist articulating all four sub-clusters and the recovery limits: <a href="https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8">Tool Call Parsing Failures in Opus 4.7 — A Five-Issue Cluster</a> (1,982 words, MIT). The 2027-01 Safety Lab issue treats this cluster as the lead chapter, including the four advisory hook designs with installation surfaces, configurations, and known limits.</p>
+</div>
+
 <h2>How clusters are detected and tracked</h2>
 
 <p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
@@ -686,7 +772,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The ten clusters tracked here represent <strong>~11,620 combined user reactions across 200+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover seven of ten clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027, and the GrowthBook A/B override cluster (Cluster 10) has zero shipped hooks with three observational hooks in design for June-July 2026.</p>
+<p style="font-size: 0.93rem; color: #475569;">The twelve clusters tracked here represent <strong>~11,820 combined user reactions across 400+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover eight of twelve clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027, the GrowthBook A/B override cluster (Cluster 10) has zero shipped hooks with three observational hooks in design for June-July 2026, the Cowork sandbox cluster (Cluster 11) has one shipped standalone script (the helper script — hooks don't fire in the Cowork sandbox) with two more workarounds in design for June-July 2026, and the Tool Call Parsing cluster (Cluster 12) has zero shipped hooks with four advisory hooks in design for January-February 2027 (the recovery surface is structurally narrower because hooks cannot reach the layers — model attention, harness parser, serialization layer — where the failure originates).</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
@@ -736,7 +822,7 @@ Free previews: <a href="https://gist.github.com/yurukusa/3559ac89670576709f5b7a4
 </ul>
 
 <p class="footnote">
-This page is updated as clusters evolve. Last update: 2026-05-28 (Clusters 8 and 9 added: server-side prompt injection v2.1.150+, and Usage Policy classifier over-trigger on Opus). Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
+This page is updated as clusters evolve. Last update: 2026-05-28 (Clusters 11 and 12 added: Cowork sandbox / Desktop remote-control failure surface, and Tool Call Parsing failures in Opus 4.7). Author: <a href="https://github.com/yurukusa">yurukusa</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
 </p>
 
 </body>
