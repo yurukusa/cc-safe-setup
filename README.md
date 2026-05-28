@@ -414,6 +414,12 @@ Verify your setup:
 npx cc-health-check
 ```
 
+### Keep up with what's breaking next
+
+The hooks in this repo defend against failure patterns that have *already* been articulated. New ones surface every week. As of 2026-05-29, the [cluster tracker](https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html) tracks 12 structural failure clusters across 11,820+ cumulative GitHub Issue reactions on `anthropics/claude-code`. Most-recent example: Cluster 12 (Tool Call Parsing failures in Opus 4.7) was articulated 2026-05-28 from five filings, and the four sub-pattern advisory hooks shipped within 24 hours (PRs [#406](https://github.com/yurukusa/cc-safe-setup/pull/406) / [#419](https://github.com/yurukusa/cc-safe-setup/pull/419) / [#423](https://github.com/yurukusa/cc-safe-setup/pull/423) / [#424](https://github.com/yurukusa/cc-safe-setup/pull/424), 194 tests). The [free Cluster 12 field guide](https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8) (2,860 words) walks the install path for all four hooks.
+
+If you want this kind of cluster-to-defense walkthrough delivered monthly — 4-8 newly-found incidents with fixes, one deep-dive failure case, 1-2 copy-paste safety hooks, an updated safety checklist, all archived month-by-month — that's the [CC Safety Lab Founder Membership](https://yurukusa.github.io/cc-safe-setup/safety-lab.html) (¥500/month, Founder pricing locked). One avoided Max-plan incident covers a year of membership. The [May 2026 issue is free to preview](https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d) (~8,000 words: full TOC + opening of the cache_control empty-text-block case study) so you can judge the writing quality before subscribing.
+
 ## Full Kit
 
 cc-safe-setup gives you 8 essential hooks. Want to know what else your setup needs?
