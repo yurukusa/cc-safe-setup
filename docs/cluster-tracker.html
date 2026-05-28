@@ -188,10 +188,18 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>1 (PR #388, #389: aup-false-positive-helper)</td>
 <td>Unresolved (no Anthropic comment, github-actions[bot] auto-grouped 3 duplicate chains)</td>
 </tr>
+<tr>
+<td><a href="#cluster-growthbook">GrowthBook A/B flag client-side overrides</a></td>
+<td>58 (2-week surge, filed 2026-05-14 onward)</td>
+<td>~30 (root-cause analysis in #62205)</td>
+<td>2026-05-25 (#62205)</td>
+<td>0 (cluster framing date)</td>
+<td>Unresolved (5 documented override paths; no Anthropic acknowledgment of the broader pattern)</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,590 user reactions across 145+ issues</strong>, all nine clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,620 user reactions across 200+ issues</strong>, all ten clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -614,6 +622,59 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <p style="font-size: 0.93rem;"><a href="https://gist.github.com/yurukusa/4fa4751044be45bd83345601ee79c2db">Claude Code's AUP False-Positive Cluster: 4 Operator-Side Paths Through It</a> (1,462 words, the four paths with reproducible examples). Companion <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/ddd7b7487fb114543b33479cacaa36b6/raw/cluster-9-aup-diagnostic.html">interactive 4-question diagnostic</a> outputs the highest-leverage path tailored to your model / frequency / domain / CVP status. The 2026-12 Safety Lab issue covers this cluster in full.</p>
 </div>
 
+<h2 id="cluster-growthbook">Cluster 10: GrowthBook A/B flag client-side overrides</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Server-pushed feature flags rewriting client-side state and dispatch behavior</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 58</span>
+<span><strong>Reactions:</strong> ~30</span>
+<span><strong>First filing:</strong> 2026-05-14</span>
+<span><strong>Root-cause analysis:</strong> 2026-05-25 (<a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a>)</span>
+<span><strong>Cluster framing:</strong> 2026-05-28</span>
+</div>
+
+<p>Starting around 2026-05-14 a 2-week surge of bug reports surfaced one common shape: client behavior changing without a release boundary or changelog entry. The reporter <a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a> (2026-05-25) traced the macOS Desktop variant to GrowthBook A/B feature flags being sync'd from the server every ~9 minutes and silently overriding the user's local <code>settings.json</code> — <code>permissions.defaultMode: bypassPermissions</code> flipping back to <code>acceptEdits</code>. The same shape applies on different surfaces: <a href="https://github.com/anthropics/claude-code/issues/63015">#63015</a> (2026-05-28) suspects <code>tengu_compact_cache_prefix</code> gating an auto-compact dispatch rewrite that silently fails to fire.</p>
+
+<h4>Cluster signature (three converging axes)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong>Periodic re-sync.</strong> Even after the user deletes a flag from <code>~/Library/Application Support/Claude/cachedGrowthBookFeatures</code>, the next ~9-minute sync restores it. Local edits do not persist.</li>
+<li><strong>No release boundary.</strong> Behavior changes mid-version (within v2.1.X). Changelog entries are absent because no client release happened.</li>
+<li><strong>Five override paths documented.</strong> <code>claude_desktop_config.json</code>, <code>~/Library/Application Support/Claude/</code>, <code>epitaxy-folder-permission-mode</code>, <code>cachedGrowthBookFeatures</code>, and Harbor-related flags. The set is observed, not exhaustive.</li>
+</ul>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a> — 0 reactions, 4 comments. The decisive root-cause analysis: <code>tengu_permission_friction</code> and <code>tengu_quill_harbor</code> overriding <code>permissions.defaultMode</code> on ~9-minute cadence.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/63015">#63015</a> — 0 reactions, 2 comments. Auto-compact never triggers despite client statusline reporting "100% context used". Suspects <code>tengu_compact_cache_prefix</code> gating a new compaction implementation. Quantitative evidence: 5 timestamps + token deltas + monotonic growth past trigger.</li>
+<li>56 additional issues filed 2026-05-14 onward sharing the "behavior changed but no version bump" shape.</li>
+</ul>
+
+<h4>Operator-side diagnostic paths</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Inspect the cache directly.</strong> <code>cat ~/Library/Application\ Support/Claude/cachedGrowthBookFeatures | jq '.features | keys'</code> (macOS Desktop) or grep for <code>tengu_</code> prefixed keys in <code>~/.claude.json</code> (CLI). Lists the flags currently sync'd to your account.</li>
+<li><strong>Watch for re-sync.</strong> <code>stat -f %m ~/Library/Application\ Support/Claude/cachedGrowthBookFeatures</code> every 30s for 15 minutes. If the mtime advances on the same ~9-minute cadence #62205 documented, you're being re-sync'd.</li>
+<li><strong>Compare transcripts across versions.</strong> When a behavior regression is suspected, diffing a transcript from the prior version against the current version for the affected event (e.g., <code>compact_boundary</code> events) is the cleanest local confirmation that a dispatch path went silent.</li>
+</ol>
+
+<h4>Defense paths in design (0 of 3 shipped)</h4>
+<p style="font-size: 0.93rem; color: #475569;">Operator-side surface for this cluster is narrow: neither hooks nor <code>settings.json</code> overrides reach the dispatch path or the server-side flag rollout. The shipable defenses are observational, not preventive.</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>growthbook-flag-monitor.sh</code></strong> (2026-06) — SessionStart hook that snapshots <code>cachedGrowthBookFeatures</code> and emits a one-line stderr advisory when the set changes between sessions.</li>
+<li><strong><code>compact-dispatch-watchdog.sh</code></strong> (2026-06) — Stop hook that tracks token usage and warns when usage crosses ~85% without a recent <code>compact_boundary</code> event in the transcript. Recovery is manual <code>/compact</code>.</li>
+<li><strong><code>permission-mode-drift-detector.sh</code></strong> (2026-07) — SessionStart hook that compares the active <code>permissions.defaultMode</code> against a declared expectation file and warns on drift. Re-applies the expected mode on each session start (does not prevent within-session re-sync).</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic acknowledgment of the broader pattern as of 2026-05-28. <a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a>'s root-cause analysis has 4 comments but no engineering response. The 5 override paths are observed in production, not in any official documentation.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">The 2026-12 Safety Lab issue treats this cluster as the lead chapter, including the full 5-override-path enumeration and the diagnostic <code>jq</code> queries against <code>cachedGrowthBookFeatures</code>.</p>
+</div>
+
 <h2>How clusters are detected and tracked</h2>
 
 <p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
@@ -625,7 +686,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Monthly synthesis.</strong> The CC Safety Lab monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
 </ol>
 
-<p style="font-size: 0.93rem; color: #475569;">The nine clusters tracked here represent <strong>~11,590 combined user reactions across 145+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover seven of nine clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, and the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027.</p>
+<p style="font-size: 0.93rem; color: #475569;">The ten clusters tracked here represent <strong>~11,620 combined user reactions across 200+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover seven of ten clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027, and the GrowthBook A/B override cluster (Cluster 10) has zero shipped hooks with three observational hooks in design for June-July 2026.</p>
 
 <div class="cta-box">
 <h2 style="font-size: 1.3rem;">Get the monthly synthesis of new clusters as they emerge</h2>
