@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cluster 12 Tool Call Parsing Diagnostic — Which Sub-Pattern Are You Hitting?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="4-question diagnostic to identify which of the four Opus 4.7 tool call parsing failure sub-patterns (12A/12B/12C/12D) is hitting your session. Each sub-pattern has a different recovery — misapplied /clear burns context. Browser-only, no signup, no telemetry. CC0.">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626; --blue: #2563eb;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.6; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.bars { margin: 1rem 0; }
+.bar-row { display: flex; align-items: center; margin: 0.4rem 0; }
+.bar-label { width: 90px; font-weight: 600; font-size: 0.95rem; }
+.bar-track { flex: 1; background: #f3f4f6; border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.4s; }
+.bar-12a { background: var(--blue); }
+.bar-12b { background: var(--green); }
+.bar-12c { background: var(--amber); }
+.bar-12d { background: var(--red); }
+.bar-pct { width: 50px; text-align: right; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+.top-pattern { background: #fef2f2; border-left: 4px solid var(--red); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.top-pattern h3 { margin-top: 0; color: var(--red); }
+.recovery { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.recovery h3 { margin-top: 0; color: var(--green); }
+.hook-install { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.92rem; font-family: ui-monospace, monospace; }
+.warning { background: #fffbeb; border-left: 4px solid var(--amber); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.92rem; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<h1>Cluster 12 Tool Call Parsing Diagnostic</h1>
+<div class="meta">4 questions · ~2 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-05-29)</div>
+
+<div class="intro">
+<strong>The cluster:</strong> Five filings (<a href="https://github.com/anthropics/claude-code/issues/62123" target="_blank">#62123</a>, <a href="https://github.com/anthropics/claude-code/issues/62344" target="_blank">#62344</a>, <a href="https://github.com/anthropics/claude-code/issues/62467" target="_blank">#62467</a>, <a href="https://github.com/anthropics/claude-code/issues/62700" target="_blank">#62700</a>, <a href="https://github.com/anthropics/claude-code/issues/49747" target="_blank">#49747</a>) document four distinct sub-patterns where Opus 4.7 produces tool calls the harness cannot parse. Each sub-pattern has a different recovery — misapplied <code>/clear</code> burns context on the wrong ones. This diagnostic asks four questions to identify which sub-pattern is most likely hitting your session.
+</div>
+
+<div class="disclosure">
+<strong>Disclosure:</strong> The recovery section links to four advisory hooks in this repository (cc-safe-setup PRs #406, #419, #423, #424) that detect each sub-pattern at the boundary. The hooks are advisory only — they don't replace the upstream fix (the model attention layer for 12A/12B, the harness parser for 12C, the serialization boundary for 12D) — but they tell you <em>which</em> sub-pattern you're seeing so the right recovery is applied. Free, MIT-licensed.
+</div>
+
+<h2>4 Questions</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1">
+<div class="label">1. Did the same prompt that worked yesterday now fail?</div>
+<div class="hint">A session-progression signal. If yes, something accumulated in the running session that pollutes new tool calls.</div>
+<label><input type="radio" name="q1" value="a"> Yes — same prompt, worked before, now fails.</label>
+<label><input type="radio" name="q1" value="b"> No — failure is specific to this new prompt, fresh session.</label>
+<label><input type="radio" name="q1" value="c"> Mixed — sometimes works, sometimes fails on the same content.</label>
+</div>
+
+<div class="q" data-id="q2">
+<div class="label">2. Do you have extended thinking enabled?</div>
+<div class="hint">If the failure stops when you turn extended thinking off, that's evidence of the serialization-boundary defect.</div>
+<label><input type="radio" name="q2" value="a"> Yes — extended thinking is on, and the failure happens during thinking-heavy turns.</label>
+<label><input type="radio" name="q2" value="b"> Yes — extended thinking is on but disabling it doesn't help.</label>
+<label><input type="radio" name="q2" value="c"> No — extended thinking is off.</label>
+<label><input type="radio" name="q2" value="d"> Unsure — haven't tried toggling it.</label>
+</div>
+
+<div class="q" data-id="q3">
+<div class="label">3. What does the actual tool output area show after the "parse failed" notice?</div>
+<div class="hint">Inspect the tool output panel beneath the failure notice. If it has content, the tool actually executed and the notice is spurious.</div>
+<label><input type="radio" name="q3" value="a"> Has content — the tool's output is there, it actually ran, the notice is wrong.</label>
+<label><input type="radio" name="q3" value="b"> Empty — no tool output, the call truly didn't dispatch.</label>
+<label><input type="radio" name="q3" value="c"> Mixed — sometimes empty, sometimes shows fragments like the word "call" leaking out.</label>
+</div>
+
+<div class="q" data-id="q4">
+<div class="label">4. How long are the failing tool call arguments?</div>
+<div class="hint">Long arguments increase the chance of legacy-format tag leakage into the new format, tripping the parser.</div>
+<label><input type="radio" name="q4" value="a"> Short — single short argument, like <code>git status</code> or a small file edit.</label>
+<label><input type="radio" name="q4" value="b"> Medium — multi-line file edit, or 2-3 arguments of moderate size.</label>
+<label><input type="radio" name="q4" value="c"> Long — large file content as argument, or many arguments combined.</label>
+<label><input type="radio" name="q4" value="d"> Very long — multi-thousand-character single argument, or chain of multiple long calls.</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>Identify Sub-Pattern</button>
+
+</form>
+
+<div class="result" id="result">
+<h2 style="border: none; margin-top: 0;">Sub-Pattern Likelihood</h2>
+<div class="bars" id="bars"></div>
+<div id="top-pattern-section"></div>
+<div id="recovery-section"></div>
+<div id="hook-section"></div>
+</div>
+
+<h2>About the Four Sub-Patterns</h2>
+
+<h3 class="bar-12a" style="color: var(--blue);">12A — Long-session few-shot poisoning</h3>
+<p>Source: <a href="https://github.com/anthropics/claude-code/issues/62344">#62344</a>. Errors accumulate as the session grows. Past malformed-recovery attempts pollute the recent-tool-call context, biasing subsequent tool calls toward the same malformed shape. <strong>Recovery:</strong> <code>/clear</code>. <strong>Defense hook:</strong> <code>long-session-malformed-tool-call-detector.sh</code> (<a href="https://github.com/yurukusa/cc-safe-setup/pull/406">PR #406</a>, 40 tests).</p>
+
+<h3 class="bar-12b" style="color: var(--green);">12B — Extended-thinking serialization defect</h3>
+<p>Source: <a href="https://github.com/anthropics/claude-code/issues/62467">#62467</a>. The tool call generated inside a <code>thinking</code> block becomes inconsistent at the serialization boundary. Surfaces specifically with reasoning effort enabled. <strong>Recovery:</strong> turn off extended thinking, or switch model temporarily. <code>/clear</code> does not help because the defect re-occurs on the next thinking-enabled turn. <strong>Defense hook:</strong> <code>extended-thinking-tool-use-mismatch-detector.sh</code> (<a href="https://github.com/yurukusa/cc-safe-setup/pull/419">PR #419</a>, 43 tests).</p>
+
+<h3 class="bar-12c" style="color: var(--amber);">12C — Spurious "parse failed" notice on a successful call</h3>
+<p>Source: <a href="https://github.com/anthropics/claude-code/issues/62700">#62700</a>. The tool call actually executed correctly, but the notice fires anyway. The fragment-of-"call" leakage some users describe is a candidate for this — the runtime shows artifact output even though the tool dispatched. <strong>Recovery:</strong> check the actual tool output before retrying. <strong>Both <code>/clear</code> and model switch make it worse</strong> by burning context. <strong>Defense hook:</strong> <code>spurious-malformed-notice-detector.sh</code> (<a href="https://github.com/yurukusa/cc-safe-setup/pull/423">PR #423</a>, 53 tests).</p>
+
+<h3 class="bar-12d" style="color: var(--red);">12D — Legacy XML format mix in tool arguments</h3>
+<p>Source: <a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a>. Specific to long tool-call inputs. The legacy XML closing tag leaks into the new format and trips the parser. <strong>Recovery:</strong> shorten arguments, split one long call into multiple shorter ones, reduce argument verbosity. <code>/clear</code> does not help because the same long input will reproduce. <strong>Defense hook:</strong> <code>xml-format-leak-detector.sh</code> (<a href="https://github.com/yurukusa/cc-safe-setup/pull/424">PR #424</a>, 58 tests).</p>
+
+<h2>Free Materials</h2>
+
+<ul>
+<li><a href="https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8">Cluster 12 field guide Gist</a> — 2,860 words covering all four sub-patterns with reproduction details and install path for the four hooks.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/62123#issuecomment-4568820131">Comment on the central issue #62123</a> — sub-pattern map with the identification path you just walked through.</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — the four hooks in their installable form, plus 740+ other defensive hooks for the other tracked clusters.</li>
+</ul>
+
+<footer>
+Cluster 12 Sub-Pattern Diagnostic v1.0 · 2026-05-29 · CC0 · No signup, no telemetry · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>
+</footer>
+
+<script>
+const form = document.getElementById('audit-form');
+const submitBtn = document.getElementById('submit-btn');
+const result = document.getElementById('result');
+const barsContainer = document.getElementById('bars');
+const topPatternSection = document.getElementById('top-pattern-section');
+const recoverySection = document.getElementById('recovery-section');
+const hookSection = document.getElementById('hook-section');
+
+function checkComplete() {
+  return ['q1', 'q2', 'q3', 'q4'].every(q => form.querySelector(`input[name="${q}"]:checked`));
+}
+
+form.addEventListener('change', () => {
+  submitBtn.disabled = !checkComplete();
+});
+
+const SCORING = {
+  q1: {
+    a: { '12A': 4, '12D': 1 },
+    b: { '12C': 2, '12B': 2 },
+    c: { '12B': 2, '12C': 2, '12D': 1 },
+  },
+  q2: {
+    a: { '12B': 5 },
+    b: { '12A': 2, '12C': 1, '12D': 1 },
+    c: { '12A': 1, '12C': 1, '12D': 1 },
+    d: { '12A': 1, '12B': 1, '12C': 1, '12D': 1 },
+  },
+  q3: {
+    a: { '12C': 5 },
+    b: { '12A': 2, '12B': 2, '12D': 2 },
+    c: { '12C': 3, '12D': 2 },
+  },
+  q4: {
+    a: { '12A': 2, '12B': 1, '12C': 1 },
+    b: { '12A': 1, '12D': 1 },
+    c: { '12D': 3, '12A': 1 },
+    d: { '12D': 5 },
+  },
+};
+
+const PATTERN_LABELS = {
+  '12A': 'Long-session few-shot poisoning',
+  '12B': 'Extended-thinking serialization defect',
+  '12C': 'Spurious "parse failed" notice on a successful call',
+  '12D': 'Legacy XML format mix in tool arguments',
+};
+
+const RECOVERIES = {
+  '12A': { recovery: 'Run <code>/clear</code> to reset the session context, then re-issue the prompt. The poisoned few-shot context is what was biasing the model.', warning: null },
+  '12B': { recovery: 'Turn off extended thinking for the next few turns. If that stops the failure, you confirmed 12B. To proceed with thinking, switch to a different model temporarily.', warning: '<code>/clear</code> does not help — the defect re-occurs on the next thinking-enabled turn.' },
+  '12C': { recovery: 'Look at the actual tool output panel beneath the "parse failed" notice. If content is there, the tool succeeded. Continue with the next prompt as if the call worked; don\'t retry.', warning: 'Both <code>/clear</code> and model switch <strong>burn useful context for no benefit</strong> in this case.' },
+  '12D': { recovery: 'Shorten the failing call: split one long call into multiple shorter ones, reduce argument verbosity, or limit the file content size you\'re passing as an argument.', warning: '<code>/clear</code> does not help — the same long input will reproduce the failure.' },
+};
+
+const HOOKS = {
+  '12A': { name: 'long-session-malformed-tool-call-detector.sh', pr: '#406', tests: 40, gist: 'https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8' },
+  '12B': { name: 'extended-thinking-tool-use-mismatch-detector.sh', pr: '#419', tests: 43, gist: 'https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8' },
+  '12C': { name: 'spurious-malformed-notice-detector.sh', pr: '#423', tests: 53, gist: 'https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8' },
+  '12D': { name: 'xml-format-leak-detector.sh', pr: '#424', tests: 58, gist: 'https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8' },
+};
+
+submitBtn.addEventListener('click', () => {
+  const scores = { '12A': 0, '12B': 0, '12C': 0, '12D': 0 };
+  ['q1', 'q2', 'q3', 'q4'].forEach(q => {
+    const ans = form.querySelector(`input[name="${q}"]:checked`).value;
+    const contrib = SCORING[q][ans] || {};
+    Object.entries(contrib).forEach(([k, v]) => { scores[k] += v; });
+  });
+
+  const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+  const pcts = Object.fromEntries(
+    Object.entries(scores).map(([k, v]) => [k, Math.round((v / total) * 100)])
+  );
+
+  // Render bars
+  const order = ['12A', '12B', '12C', '12D'];
+  barsContainer.innerHTML = order.map(p => `
+    <div class="bar-row">
+      <div class="bar-label">${p}</div>
+      <div class="bar-track"><div class="bar-fill bar-${p.toLowerCase()}" style="width:${pcts[p]}%"></div></div>
+      <div class="bar-pct">${pcts[p]}%</div>
+    </div>
+  `).join('');
+
+  // Determine top pattern
+  const topPattern = order.reduce((max, p) => scores[p] > scores[max] ? p : max, order[0]);
+
+  topPatternSection.innerHTML = `
+    <div class="top-pattern">
+      <h3>Most likely: ${topPattern} — ${PATTERN_LABELS[topPattern]}</h3>
+      <p>Based on your four answers, the strongest match is sub-pattern <strong>${topPattern}</strong>. The likelihood bars above show the distribution across all four — if two are close, walk through both recovery paths.</p>
+    </div>
+  `;
+
+  recoverySection.innerHTML = `
+    <div class="recovery">
+      <h3>Recovery path for ${topPattern}</h3>
+      <p>${RECOVERIES[topPattern].recovery}</p>
+      ${RECOVERIES[topPattern].warning ? `<div class="warning"><strong>Important:</strong> ${RECOVERIES[topPattern].warning}</div>` : ''}
+    </div>
+  `;
+
+  const hook = HOOKS[topPattern];
+  hookSection.innerHTML = `
+    <h3>Operator-side defense hook for ${topPattern}</h3>
+    <p>If you want an advisory hook that detects this sub-pattern at the boundary and surfaces the recovery hint, install:</p>
+    <div class="hook-install">
+      <code>${hook.name}</code> — <a href="https://github.com/yurukusa/cc-safe-setup/pull/${hook.pr.replace('#', '')}">PR ${hook.pr}</a>, ${hook.tests} tests
+    </div>
+    <p>Install instructions are in <a href="${hook.gist}" target="_blank">the Cluster 12 field guide Gist</a> (Section 5 has copy-paste install for all four hooks).</p>
+  `;
+
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
