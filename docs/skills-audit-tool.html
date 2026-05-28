@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Skills Audit — Find Which Installed Skills Never Fire</title>
+<meta name="description" content="Drop your Claude Code session log (~/.claude/projects/*.jsonl) and find out which of your installed Skills actually fire in practice. Half of installed skills don't activate; each unused skill burns ~200-500 context tokens per session. Browser-only, no upload, no telemetry.">
+<style>
+:root {
+  --bg: #fafaf9; --card: #ffffff; --border: #e7e5e4; --ink: #1c1917; --muted: #57534e;
+  --accent: #c2410c; --accent-light: #fff7ed; --green: #15803d; --green-light: #f0fdf4;
+  --warn: #b45309; --warn-light: #fffbeb; --danger: #b91c1c; --danger-light: #fef2f2;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 1.5rem; line-height: 1.55; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin: 0 0 0.5rem 0; color: var(--ink); }
+h2 { font-size: 1.2rem; margin: 1.5rem 0 0.6rem 0; color: var(--ink); }
+h3 { font-size: 1rem; margin: 1rem 0 0.4rem 0; color: var(--ink); }
+.subtitle { color: var(--muted); margin: 0 0 1.5rem 0; font-size: 0.95rem; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1rem 0; }
+.upload-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 2rem; text-align: center; background: var(--accent-light); cursor: pointer; transition: border-color 0.15s; }
+.upload-zone:hover { border-color: var(--accent); }
+.upload-zone.dragover { border-color: var(--accent); background: #ffe9d6; }
+.upload-zone p { margin: 0.5rem 0; color: var(--muted); }
+.upload-zone strong { color: var(--accent); }
+input[type=file] { display: none; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; font-weight: 600; }
+.btn:hover { background: #9a3412; }
+.btn-secondary { background: var(--card); color: var(--ink); border: 1px solid var(--border); }
+.results { display: none; }
+.results.show { display: block; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
+.stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); margin: 0 0 0.25rem 0; }
+.stat-label { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.stat.green .stat-value { color: var(--green); }
+.stat.green { background: var(--green-light); border-color: #bbf7d0; }
+.stat.warn .stat-value { color: var(--warn); }
+.stat.warn { background: var(--warn-light); border-color: #fde68a; }
+.stat.danger .stat-value { color: var(--danger); }
+.stat.danger { background: var(--danger-light); border-color: #fecaca; }
+table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+th { background: #f5f5f4; text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--border); font-weight: 600; }
+td { padding: 0.4rem 0.7rem; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr.unused td { background: var(--danger-light); }
+tr.used td { background: var(--green-light); }
+.skill-name { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 0.85em; }
+.cta { background: var(--accent-light); border: 1px solid #fed7aa; border-left: 4px solid var(--accent); padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; }
+.cta h3 { margin-top: 0; color: var(--accent); }
+.cta a { color: var(--accent); font-weight: 600; }
+.footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 2rem 0 1rem 0; }
+.footer a { color: var(--accent); }
+.error { background: var(--danger-light); border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem 1rem; color: var(--danger); margin: 1rem 0; }
+.privacy { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 0.5rem; }
+details { margin: 0.5rem 0; }
+summary { cursor: pointer; font-weight: 600; padding: 0.4rem 0; }
+.snippet { background: #f5f5f4; border-radius: 4px; padding: 0.5rem; font-family: ui-monospace, monospace; font-size: 0.8em; overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Claude Code Skills Audit</h1>
+  <p class="subtitle">Drop your Claude Code session log and find out which of your installed Skills actually fire in practice. Half of installed skills don't activate per session — each unused one burns hundreds to thousands of context tokens.</p>
+
+  <div class="card">
+    <h2>1. Find your session log</h2>
+    <p>Claude Code session logs live in <code>~/.claude/projects/&lt;project-slug&gt;/&lt;session-id&gt;.jsonl</code>. Pick a recent, long session (10K+ lines) for the most representative audit.</p>
+    <p>Quick shell command to list recent logs:</p>
+    <div class="snippet">ls -lhSt ~/.claude/projects/*/*.jsonl | head -5</div>
+  </div>
+
+  <div class="card">
+    <h2>2. Drop the .jsonl file here</h2>
+    <label class="upload-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".jsonl,.json,.txt">
+      <p><strong>Click to choose</strong> or drag-and-drop your .jsonl file</p>
+      <p class="privacy">Browser-only. Nothing leaves this page. No telemetry, no upload, no signup.</p>
+    </label>
+    <p class="privacy" style="margin-top: 0.75rem;">Or paste log contents below if file upload is awkward:</p>
+    <textarea id="pasteArea" style="width: 100%; min-height: 80px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.8em;" placeholder="Paste first 1000 lines of session JSONL here..."></textarea>
+    <button class="btn" id="pasteBtn" style="margin-top: 0.5rem;">Audit pasted text</button>
+  </div>
+
+  <div id="errorMsg"></div>
+
+  <div class="results" id="results">
+    <h2>Audit results</h2>
+    <div class="stat-grid">
+      <div class="stat"><p class="stat-value" id="totalSkills">—</p><p class="stat-label">Installed skills</p></div>
+      <div class="stat green"><p class="stat-value" id="usedSkills">—</p><p class="stat-label">Actually invoked</p></div>
+      <div class="stat danger"><p class="stat-value" id="unusedSkills">—</p><p class="stat-label">Never fired</p></div>
+      <div class="stat warn"><p class="stat-value" id="wastedTokens">—</p><p class="stat-label">Tokens wasted / session</p></div>
+    </div>
+
+    <div class="cta" id="summaryBox">
+      <p id="summaryText"></p>
+    </div>
+
+    <h3>Per-skill breakdown</h3>
+    <details open>
+      <summary>Show full table</summary>
+      <table id="skillTable">
+        <thead><tr><th>Skill</th><th>Invocations</th><th>Estimated tokens loaded</th><th>Status</th></tr></thead>
+        <tbody id="skillTableBody"></tbody>
+      </table>
+    </details>
+
+    <h3>Recommendations</h3>
+    <ol id="recommendations" style="line-height: 1.7;"></ol>
+  </div>
+
+  <div class="cta">
+    <h3>Where this comes from</h3>
+    <p>This pattern was first surfaced in a r/ClaudeAI post (2026-05) auditing session logs and finding that approximately half of installed Skills never fired — burning roughly 23,000 context tokens per session for the average power user. The mechanism is structural: Claude Code loads <em>every</em> installed skill's instruction text into context at session start, regardless of whether the model auto-activates it.</p>
+    <p>For the full operator-side cost catalog (13 token-spike patterns including this one, with 800 hours of measured before/after data), see the <a href="https://zenn.dev/yurukusa/books/token-savings-guide" target="_blank">Token Book on Zenn</a> (¥2,500, ~15 chapters, free preview includes Chapter 1).</p>
+    <p>For the broader cluster framework (13 structural failure clusters in Claude Code, ~11,800 cumulative GitHub reactions), see the <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html" target="_blank">cluster tracker</a>. Skills metadata loading sits in Cluster 7 with this 23K-per-session waste as the operationally-tractable sub-pattern.</p>
+    <p>For the monthly continuation — newly-found incidents, defensive hooks, safety checklist, archived month-by-month — see <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html" target="_blank">CC Safety Lab Founder Membership</a> (¥500/month, locked price for charter members).</p>
+  </div>
+
+  <div class="footer">
+    <p>v1.0 · 2026-05-29 · MIT · No data leaves your browser. No analytics. No signup.</p>
+    <p><a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup repo</a> · <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html" target="_blank">Cluster tracker</a> · <a href="https://gist.github.com/yurukusa/12f64f34cef016917824af913bc6f1b8" target="_blank">Cluster 12 field guide</a></p>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const pasteBtn = document.getElementById('pasteBtn');
+const pasteArea = document.getElementById('pasteArea');
+const results = document.getElementById('results');
+const errorMsg = document.getElementById('errorMsg');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleFile(e.target.files[0]);
+});
+pasteBtn.addEventListener('click', () => {
+  if (pasteArea.value.trim()) audit(pasteArea.value);
+  else showError('Paste some JSONL log content first.');
+});
+
+function handleFile(file) {
+  errorMsg.innerHTML = '';
+  if (file.size > 200 * 1024 * 1024) {
+    showError('File is larger than 200 MB. Try a smaller session log or copy a representative slice (first 50K lines) into the paste area.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => audit(e.target.result);
+  reader.onerror = () => showError('Could not read the file.');
+  reader.readAsText(file);
+}
+
+function showError(msg) {
+  errorMsg.innerHTML = `<div class="error">${msg}</div>`;
+  results.classList.remove('show');
+}
+
+function audit(text) {
+  errorMsg.innerHTML = '';
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length === 0) { showError('Empty input.'); return; }
+
+  let skillListing = '';
+  const skillInvocations = {};
+
+  for (const line of lines) {
+    let obj;
+    try { obj = JSON.parse(line); } catch { continue; }
+
+    // Find the most recent skill_listing event (full installed-skills inventory)
+    if (obj.attachment && obj.attachment.type === 'skill_listing' && obj.attachment.content) {
+      if (obj.attachment.content.length > skillListing.length) {
+        skillListing = obj.attachment.content;
+      }
+    }
+
+    // Find Skill tool invocations recursively in message content
+    const findSkillUses = (node) => {
+      if (!node || typeof node !== 'object') return;
+      if (Array.isArray(node)) { node.forEach(findSkillUses); return; }
+      if (node.type === 'tool_use' && node.name === 'Skill' && node.input && node.input.skill) {
+        const s = node.input.skill;
+        skillInvocations[s] = (skillInvocations[s] || 0) + 1;
+      }
+      for (const k in node) {
+        if (typeof node[k] === 'object' && node[k] !== null) findSkillUses(node[k]);
+      }
+    };
+    findSkillUses(obj);
+  }
+
+  if (!skillListing) {
+    showError('No <code>skill_listing</code> event found in this log. Either no Skills are installed, or this session predates the Skills feature, or the log slice is too short. Try a longer session log that starts from session-init.');
+    return;
+  }
+
+  // Parse the skill_listing content into individual skills and their token costs
+  // Format: "- skill-name: description text...\n- next-skill: ..."
+  const skills = {};
+  const skillRegex = /^- ([a-zA-Z0-9_\-:.]+):\s*([\s\S]*?)(?=\n- [a-zA-Z0-9_\-:.]+:|$)/gm;
+  let match;
+  while ((match = skillRegex.exec(skillListing)) !== null) {
+    const name = match[1];
+    const desc = match[2].trim();
+    // Token estimate: rough 1 token per 4 characters for English prose
+    const estimatedTokens = Math.ceil((name.length + 2 + desc.length) / 4);
+    skills[name] = {
+      name,
+      description: desc.slice(0, 200),
+      tokens: estimatedTokens,
+      invocations: skillInvocations[name] || 0
+    };
+  }
+
+  const skillList = Object.values(skills);
+  if (skillList.length === 0) {
+    showError('Found a skill_listing event but could not parse any skills from it. The format may have changed; please file an issue on cc-safe-setup with a redacted snippet.');
+    return;
+  }
+
+  const totalTokens = skillList.reduce((s, x) => s + x.tokens, 0);
+  const usedSkills = skillList.filter(s => s.invocations > 0);
+  const unusedSkills = skillList.filter(s => s.invocations === 0);
+  const wastedTokens = unusedSkills.reduce((s, x) => s + x.tokens, 0);
+
+  document.getElementById('totalSkills').textContent = skillList.length;
+  document.getElementById('usedSkills').textContent = usedSkills.length;
+  document.getElementById('unusedSkills').textContent = unusedSkills.length;
+  document.getElementById('wastedTokens').textContent = wastedTokens.toLocaleString();
+
+  // Summary text
+  const wastePct = ((wastedTokens / totalTokens) * 100).toFixed(0);
+  // Cost estimate at Opus 4.7 input rate (~$15 / 1M tokens)
+  const dailyCost = (wastedTokens * 10 * 0.000015).toFixed(2); // 10 sessions/day
+  const monthlyCost = (dailyCost * 30).toFixed(0);
+  document.getElementById('summaryText').innerHTML = `
+    Of <strong>${skillList.length}</strong> installed skills, <strong>${unusedSkills.length}</strong>
+    (<strong>${((unusedSkills.length / skillList.length) * 100).toFixed(0)}%</strong>)
+    did not fire in the audited session. That waste accounts for
+    <strong>${wastedTokens.toLocaleString()} of ${totalTokens.toLocaleString()} tokens</strong>
+    (${wastePct}%) loaded into context per session at startup. At 10 sessions/day on Opus 4.7,
+    the estimated monthly cost of the unused-skills overhead is roughly
+    <strong>$${monthlyCost}</strong> (input-token cost only; figure is a lower bound).
+  `;
+
+  // Per-skill table
+  const tbody = document.getElementById('skillTableBody');
+  tbody.innerHTML = '';
+  skillList.sort((a, b) => b.tokens - a.tokens).forEach(s => {
+    const tr = document.createElement('tr');
+    tr.className = s.invocations > 0 ? 'used' : 'unused';
+    tr.innerHTML = `
+      <td><code class="skill-name">${s.name}</code></td>
+      <td>${s.invocations}</td>
+      <td>${s.tokens.toLocaleString()}</td>
+      <td>${s.invocations > 0 ? '✅ Fired' : '⚠️ Never fired'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Recommendations
+  const ol = document.getElementById('recommendations');
+  ol.innerHTML = '';
+  const recs = [];
+  if (unusedSkills.length === 0) {
+    recs.push('All installed skills fired in this session. No changes recommended — your skill set is well-tuned to this workload.');
+  } else {
+    const topWaste = [...unusedSkills].sort((a, b) => b.tokens - a.tokens).slice(0, 5);
+    recs.push(`Consider uninstalling or disabling the top ${topWaste.length} unused skills first (largest token cost): ${topWaste.map(s => `<code>${s.name}</code>`).join(', ')}.`);
+    if (wastedTokens > 10000) {
+      recs.push('Your wasted-token figure exceeds 10,000 per session, which puts you above the population average for power users. The savings from pruning are likely material.');
+    }
+    if (wastedTokens > 23000) {
+      recs.push('Your wasted-token figure exceeds the 23K-per-session baseline observed in the original r/ClaudeAI audit. Pruning is high-priority.');
+    }
+    recs.push('Re-run this audit against a different session (different workload, different project) before uninstalling — a skill that fires zero times in one session may fire frequently in another. Audit at least two sessions before deciding.');
+    recs.push('Skills with high token cost AND zero invocations across multiple sessions are the strongest candidates for removal. Skills with low token cost but rare use are usually fine to keep.');
+  }
+  recs.forEach(r => {
+    const li = document.createElement('li');
+    li.innerHTML = r;
+    ol.appendChild(li);
+  });
+
+  results.classList.add('show');
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
