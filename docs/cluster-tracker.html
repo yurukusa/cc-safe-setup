@@ -102,7 +102,7 @@ code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-si
 A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en"><strong>CC Safety Lab</strong></a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-27.
 </div>
 
-<h2>The seven clusters being tracked (May 2026)</h2>
+<h2>The fifteen clusters being tracked (May 2026)</h2>
 
 <table class="summary-table">
 <thead>
@@ -220,10 +220,26 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>1 shipped + 3 in design (PR #445: extended-thinking-resume-warning for sub-pattern 13A; 13B / 13C / 13D advisory hooks remaining in pipeline)</td>
 <td>Unresolved (4 sub-patterns: resume serialization corruption, AskUserQuestion cancellation poisoning, parallel-tool-batch cancellation corruption, intermittent signed-thinking-block replay)</td>
 </tr>
+<tr>
+<td><a href="#cluster-silent-data-loss">Silent data loss (transcript GC + consent-boundary collapse + edit/write corruption)</a></td>
+<td>18+ filed 2026-05-23 through 2026-05-28, all carrying the <code>data-loss</code> label or matching the failure shape</td>
+<td>Wide-and-thin (1-4 reactions per issue is typical for data-loss reports; cumulative volume is the cluster signal)</td>
+<td>2026-05-29 (cluster framing date)</td>
+<td>1 shipped (consent-boundary-defender PR #344 for sub-axis 14B) + 2 in design (14A sidecar-copy Stop hook; 14C size-mismatch advisory)</td>
+<td>Unresolved (3 sub-axes: silent transcript garbage collection, consent-boundary collapse on destructive commands, edit/write file corruption)</td>
+</tr>
+<tr>
+<td><a href="#cluster-nonenglish-quality">Non-English language quality regression (Opus 4.7 / 2.1.121+)</a></td>
+<td>4 known filings across 2 languages (Korean: #62961 with rigorous Kiwi morpheme analysis, #54339, #57748; Turkish: #57233)</td>
+<td>~9 (cumulative; 7 on #62961 alone — the rigorous-methodology anchor case)</td>
+<td>2026-05-29 (cluster framing date; underlying defect traces to 2026-05-03 / v2.1.126)</td>
+<td>0 shipped, 3 in design (system-prompt register advisory, model-downgrade advisory for non-English sessions, post-hoc frequency analysis tool)</td>
+<td>Unresolved — upstream-only fix surface. Operator-side defense is limited to model downgrade and system-prompt register enforcement; defect is structural to training data shift.</td>
+</tr>
 </tbody>
 </table>
 
-<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,960 user reactions across 415+ issues</strong>, all thirteen clusters currently open as of 2026-05-29. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~12,000 user reactions across 440+ issues</strong>, all fifteen clusters currently open as of 2026-05-29. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
 
 <h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
 
@@ -805,6 +821,93 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 
 <h4>Where to read more</h4>
 <p style="font-size: 0.93rem;">Free field guide articulating all four sub-patterns, the identification path per sub-pattern, the recovery surface limits, and the operator-side advisory hooks: <a href="https://gist.github.com/yurukusa/8c6be069f602399238356a9c9b719a45">Extended-Thinking Session Wedging — A 36-Hour Surge with 4 Sub-Patterns and Operator-Side Recovery Paths</a> (~2,800 words, MIT). The 2027-02 Safety Lab issue treats this cluster as the lead chapter, including the four advisory hook installation surfaces, configurations, and known limits.</p>
+</div>
+
+<h2 id="cluster-silent-data-loss">Cluster 14: Silent Data Loss</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Silent data loss across three structural axes (transcript GC, consent-boundary collapse, edit/write corruption)</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Filings:</strong> 18+ in the 6-day window 2026-05-23 through 2026-05-28</span>
+<span><strong>Reaction profile:</strong> wide-and-thin (volume-driven cluster, not single-issue-driven)</span>
+<span><strong>Cluster framing:</strong> 2026-05-29</span>
+</div>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>The Claude Code client mutates or deletes user-owned state outside the consent window the user thought applied. The 18+ filings carrying the <code>data-loss</code> label or matching the failure shape split cleanly into three structural sub-axes that each fail through a different mechanism: client-internal scheduling (transcript GC), tool-call enforcement (consent-boundary collapse on destructive commands), and file write integrity (edit/write corruption). The unifying shape across all three: state the user expected to persist or expected to be protected gets unilaterally modified by the client without surfacing the action through a hook-visible path. Recovery is uneven — sub-axis 14B is hook-defensible today (the consent-boundary defender in PR #344 raises a refusal at the moment the destructive command is about to dispatch outside the user's allowlisted paths); sub-axes 14A and 14C require complementary defenses (sidecar copy on Stop, size-mismatch advisory on PostToolUse) that are in design but not yet shipped.</p>
+
+<h4>Sub-axes within Cluster 14</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>14A — Silent transcript garbage collection.</strong> Past session transcripts (<code>~/.claude/projects/&lt;slug&gt;/&lt;sid&gt;.jsonl</code>) disappear without notice, often on client startup or after configuration changes the user did not initiate. Central filings: <a href="https://github.com/anthropics/claude-code/issues/62041">#62041</a> (startup GC silently deletes all session transcripts), <a href="https://github.com/anthropics/claude-code/issues/62272">#62272</a> (<code>cleanupPeriodDays</code> retention bypassed), <a href="https://github.com/anthropics/claude-code/issues/62959">#62959</a> (silent 30-day auto-delete with sidebar ghost entries), <a href="https://github.com/anthropics/claude-code/issues/61852">#61852</a>, <a href="https://github.com/anthropics/claude-code/issues/61952">#61952</a> (~20 sessions lost; 2 months of paid work, gone), <a href="https://github.com/anthropics/claude-code/issues/62997">#62997</a> (Desktop reinstall destroys Code chat history while regular Chat history survives), <a href="https://github.com/anthropics/claude-code/issues/63082">#63082</a> (2.1.144+ startup scanner deletes <code>cliSessionId</code>), <a href="https://github.com/anthropics/claude-code/issues/63187">#63187</a> (auto-compaction deletes main JSONL before verifying summary completed). The deletion is performed by client-internal scheduling, not by user-facing tool calls — no hook surface sees the moment the file gets unlinked.</li>
+<li><strong>14B — Consent-boundary collapse on destructive commands.</strong> The client dispatches destructive commands (<code>rm -rf</code>, <code>git clean -fd</code>, <code>git reset --hard</code>, <code>git checkout -- .</code>) against paths the user did not consent to — typically because the agent inferred the path from in-context reasoning rather than user-explicit allowlist. The wider the consent boundary, the more the agent treats it as a license. <strong>This sub-axis is hook-defensible.</strong></li>
+<li><strong>14C — Edit/Write file corruption.</strong> The Edit/Write tools occasionally produce file contents that diverge from what the model intended to write — silent truncation, encoding corruption (the U+FFFD CJK case <a href="https://github.com/anthropics/claude-code/issues/43746">#43746</a> is the closed canonical example), or partial-write states where the operator sees a valid file structure but content is incomplete. Hook-defensible partially via PostToolUse size-mismatch detection (advisory only; cannot reconstruct content).</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong><code>consent-boundary-defender.sh</code></strong> — PreToolUse hook on Bash <code>rm</code> / <code>git clean</code> / <code>git reset --hard</code> / <code>git checkout -- .</code> commands. When the target path is not inside an explicitly allowlisted directory (via the <code>CC_CONSENT_PATHS</code> environment variable), the hook refuses the call with a one-line stderr advisory naming sub-axis 14B and the allowlist mechanism. Operators who genuinely need destructive commands set <code>CC_CONSENT_PATHS</code> per session; operators who don't get the protection by default. Addresses sub-axis 14B. <em>Shipped 2026-05-26 in <a href="https://github.com/yurukusa/cc-safe-setup/pull/344">PR #344</a>.</em></li>
+<li><strong><code>transcript-sidecar-copier.sh</code></strong> — Stop hook that copies the just-finished session's transcript to a sidecar directory outside <code>~/.claude/projects/</code>. Once outside the directory the client's GC scans, the sidecar survives startup-GC, config-bypass, and Desktop-reinstall failure modes. Addresses sub-axis 14A. <em>In design.</em></li>
+<li><strong><code>edit-write-size-mismatch-detector.sh</code></strong> — PostToolUse hook that compares the byte length of the Edit/Write tool's <code>new_string</code> argument against the actual file size after the write. A divergence outside a small tolerance window surfaces a stderr advisory naming sub-axis 14C and recommends manual verification before the next dependent operation. Cannot reconstruct lost content; preventive advisory only. Addresses sub-axis 14C. <em>In design.</em></li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic engineering response on sub-axis 14A (the highest-volume sub-axis) as of 2026-05-29. Sub-axis 14C's canonical CJK case <a href="https://github.com/anthropics/claude-code/issues/43746">#43746</a> shipped a fix in earlier release; the current 14C surface is what remains after that fix landed. Each sub-axis requires a different upstream fix surface (scheduler hardening for 14A, agent-side consent-checking for 14B, tool-call write-path integrity for 14C); no single client-side patch covers all three.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">Free field guide articulating the three sub-axes, the central filings for each, the recovery surface limits per sub-axis, and the operator-side defenses where they exist: <a href="https://gist.github.com/yurukusa/9997820b03732d62699145f174fde35b">Silent Data Loss in Claude Code — A May 2026 Cluster Across Three Axes</a> (~1,617 words, MIT). The 2027-04 Safety Lab issue treats this cluster as the lead chapter.</p>
+</div>
+
+<h2 id="cluster-nonenglish-quality">Cluster 15: Non-English Language Quality Regression</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Non-English output quality regression on Opus 4.7 / Claude Code 2.1.121+ (Korean, Turkish, candidate other languages)</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Filings:</strong> 4 known across 2 languages</span>
+<span><strong>Reaction profile:</strong> ~9 cumulative (7 on #62961 — the rigorous-methodology anchor)</span>
+<span><strong>Cluster framing:</strong> 2026-05-29 (underlying defect traces to v2.1.126, 2026-05-03)</span>
+</div>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>Opus 4.7 (Claude Code 2.1.121 onwards) produces non-English output with measurable register, naturalness, and lexical-fixation defects that earlier Opus generations did not exhibit. The defect is upstream of any client-side surface — it shows up in raw model output before Claude Code's harness touches it — and cannot be detected via tool-call introspection. The unifying root cause, articulated by reporters in both Korean and Turkish self-explanations from the model itself, is that "training data is heavily English-weighted, internal patterns follow English structures, and non-English output is generated by lexically substituting target-language words onto English skeletons." Native intuition (the "this doesn't sound right" feeling) is missing in the output, surfacing through different surface symptoms per language: register drift in Korean (#62961 with 18× baseline shift via Kiwi morpheme analysis across 4,666 sessions), lexical fixation in Korean (#54339's repeated <code>영역</code> insertion), Turkish English-templated structure (#57233's six-category articulation), and the meta-issue that the model cannot reliably self-diagnose the regression from inside the affected mode (#57748).</p>
+
+<h4>Sub-patterns within Cluster 15</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>15A — Korean register drift</strong> (<a href="https://github.com/anthropics/claude-code/issues/62961">#62961</a>, 7 reactions, has-repro, area:model, 2026-05-28). Kiwi morpheme-level analysis (v0.23.1) across 114.9M output tokens / 4,666 sessions documents <code>박/VV</code> (the verb <code>박다</code>, a colloquial "hammer/nail in" used as a substitute for formal verbs like <code>명시하다</code> / <code>기록하다</code> / <code>삽입하다</code>) at 18× baseline frequency after v2.1.132 — persisted through v2.1.143. The only sub-pattern with quantitative ground truth so far; analogous to an English-language model suddenly using "shove it in" where "insert" or "specify" would be expected.</li>
+<li><strong>15B — Korean lexical fixation</strong> (<a href="https://github.com/anthropics/claude-code/issues/54339">#54339</a>, 8 comments, 2026-04-28). Token <code>영역</code> (region/area/domain) inserted repeatedly into unrelated Korean output. Reproduced on v2.1.121 + Opus 4.7 / 4.7[1m] at <code>effort=xhigh</code>. Same token-distribution defect as 15A surfacing as fixation rather than register drift.</li>
+<li><strong>15C — Korean in-vivo self-diagnosis limit</strong> (<a href="https://github.com/anthropics/claude-code/issues/57748">#57748</a>, 2026-05-10). The model's self-diagnosis quality is itself a function of orchestration state — the affected mode cannot reliably do the diagnosis from inside. Structurally analogous to the SOH (Cluster 1) dispatch-fabrication pattern: agent self-narrative diverges from runtime reality. Operator-side verification cannot rely on the model's own articulation.</li>
+<li><strong>15D — Turkish English-templated structure</strong> (<a href="https://github.com/anthropics/claude-code/issues/57233">#57233</a>, 2026-05-08). Native Turkish speaker observation that Opus 4.7 (1M context) produces grammatically valid but unnatural Turkish — six error categories (calque, word order, register, grammatical particles, idiom literalism, context-inappropriate vocabulary) traced to English-templated reasoning lexically translated into Turkish. The model's own self-explanation matches 15C's framing: "training data is heavily English-weighted; internal patterns follow English structures; native intuition is missing."</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<p style="font-size: 0.93rem;">Cluster 15's recovery surface is the narrowest of the fifteen clusters tracked here. The defect is upstream of every client-side surface — it lives in the model's training-data distribution and surfaces in raw output before Claude Code's harness can introspect it. No hook can detect or prevent the defect at the point of generation. The operator-side options are:</p>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>Model downgrade</strong> — <code>/model claude-opus-4-6</code> or <code>/model claude-sonnet-4-6</code> for non-English-heavy tasks. Trades the Opus 4.7 capability for register fidelity. Workable when the non-English work doesn't strictly need 4.7-specific reasoning capabilities.</li>
+<li><strong>System-prompt register enforcement</strong> — adding "Use formal Korean register; avoid colloquial verbs like 박다 in technical contexts" (or the Turkish-language equivalent) to CLAUDE.md or the system prompt. Advisory only; the model can ignore the instruction under attention pressure.</li>
+<li><strong>Post-hoc frequency analysis</strong> — Kiwi-based methodology (or equivalent morpheme analyzer per language) applied to a session's output, surfacing the shift as a measurable signal. Doesn't scale to high-volume usage; useful for individual operator confirmation.</li>
+</ul>
+
+<p style="font-size: 0.93rem;">A PostToolUse hook that scans output for documented register markers (<code>박다</code>, <code>영역</code>, etc.) and surfaces an advisory when frequency exceeds a baseline is a candidate for the hook library but is operator-specific (each operator's baseline differs) and false-positive-prone. Lower-priority shape than the cluster 13 hooks because the failure mode is degradation rather than session-killing.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic engineering response on <a href="https://github.com/anthropics/claude-code/issues/62961">#62961</a> as of 2026-05-29 despite the rigorous methodology. The persistence of the 18× shift across v2.1.132, v2.1.143 (one month of releases) suggests the regression is structural to a training-data weighting shift rather than a deployable client-side bug. The next data point that would change the framing: whether v2.1.155+ corrects the shift (defect is fixable in the training-data pipeline) or it persists (defect is structural to the Opus 4.7 generation and requires a full retrain at a different family member to address).</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">Internal research document (Japanese, ~8,000 chars): <code>customer-pain-cluster15-nonenglish-quality-2026-05-29.md</code> in the cc-loop repository. English-language field guide articulating the four sub-patterns, the version-anchor trace from #62961's longitudinal data, and the three operator-side mitigations is in design for publication. The 2027-03 Safety Lab issue is targeted to treat this cluster as the lead chapter.</p>
 </div>
 
 <h2>How clusters are detected and tracked</h2>
