@@ -169,7 +169,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>10+ (area:skills) + 20+ (area:agent-view related)</td>
 <td>~100+ (new, growth signal)</td>
 <td>2026-05 (label rollout 2026-05-17)</td>
-<td>1 (PR #357: skills-settings-validator)</td>
+<td>3 (skills-settings-validator PR #357; skills-load-verifier; skills-context-recorder 2026-05-29)</td>
 <td>Unresolved (no staff engagement since label rollout)</td>
 </tr>
 <tr>
@@ -577,12 +577,11 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 </tbody>
 </table>
 
-<h4>Operator-side defenses (hook integration in design)</h4>
-<p style="font-size: 0.93rem;">Three hook designs in the pipeline (June 2026):</p>
+<h4>Operator-side defenses (3 of 3 shipped 2026-05-29)</h4>
 <ul style="font-size: 0.93rem;">
-<li><strong><code>skills-settings-validator.sh</code></strong> — SessionStart hook that detects non-existent fields like <code>disabledSkills</code> in <code>settings.json</code> and warns. Addresses Mode 1 (settings fabrication).</li>
-<li><strong><code>skills-load-verifier.sh</code></strong> — UserPromptSubmit hook that compares loaded skills against <code>~/.claude/skills/</code> and <code>.claude/skills/</code> directory contents. Addresses Mode 2 and Mode 4.</li>
-<li><strong><code>skills-context-recorder.sh</code></strong> — PreToolUse/PostToolUse hook that records the active skill at each tool call. Workaround for Mode 4 hook integration gap.</li>
+<li><strong><code>skills-settings-validator.sh</code></strong> — SessionStart hook that detects non-existent fields like <code>disabledSkills</code> in <code>settings.json</code> and warns. Addresses Mode 1 (settings fabrication). <em>Shipped in PR #357.</em></li>
+<li><strong><code>skills-load-verifier.sh</code></strong> — UserPromptSubmit hook that compares loaded skills against <code>~/.claude/skills/</code> and <code>.claude/skills/</code> directory contents. Addresses Mode 2 and Mode 4. <em>Shipped.</em></li>
+<li><strong><code>skills-context-recorder.sh</code></strong> — UserPromptSubmit hook that records the most recent skill invocation per session to a persistent log. Workaround for the Mode 4 hook integration gap (Issues <a href="https://github.com/anthropics/claude-code/issues/62108">#62108</a> and <a href="https://github.com/anthropics/claude-code/issues/62078">#62078</a>) which ask for an <code>active_skill</code> hook input field and an env var exposing the current skill name. Detects three activation sources in priority order: <code>CC_ACTIVE_SKILL</code> env override (<code>manual</code>), slash command at the start of the first non-blank line (<code>slash</code>), or <code>[skill: name]</code> marker (<code>marker</code>). Appends a 4-field pipe-delimited record (timestamp / session id / source / skill name) to <code>~/.claude/skills-context.log</code>; other hooks read this log to look up "most recent skill for the current session" — the closest operator-side approximation of the missing <code>active_skill</code> field. 24 tests covering all three activation sources, priority ordering, log rotation, schema preservation, jq fallback, and never-blocks invariant. Privacy: records skill names only, no prompt content, no tool args. Environment toggles: <code>CC_SKILLS_CONTEXT_RECORDER_DISABLE</code>, <code>CC_SKILLS_CONTEXT_RECORDER_QUIET</code>, <code>CC_SKILLS_CONTEXT_LOG_PATH</code>, <code>CC_SKILLS_CONTEXT_MAX_LINES</code>, <code>CC_ACTIVE_SKILL</code>. <em>Shipped 2026-05-29.</em></li>
 </ul>
 
 <h4>Upstream status</h4>
