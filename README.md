@@ -706,6 +706,18 @@ Different goals. claude-token-efficient optimizes CLAUDE.md to make Claude's res
 
 If cc-safe-setup saved you from a disaster (or just saved you time), a ⭐ helps others find it too.
 
+## Why I keep giving these away
+
+I'm a non-engineer running Claude Code autonomously for 800+ hours. In that span I lost files twice, watched a session burn through 887K tokens per minute, and ate a $569 surprise charge from a misread setting.
+
+Every time, I built a small defensive hook for myself and put it here — free, MIT, no signup. That's roughly 800 hooks across three months.
+
+I expected giving away the hooks would cannibalize my paid books. The opposite happened: a steady trickle of users who tried the hooks ended up buying one of the [5 Zenn books](https://zenn.dev/yurukusa) (¥10,071 total over 3 months, 6 buyers including one who bought all 5, and two readers from outside Japan).
+
+The hooks stay free because the same failure happening to a stranger is the same failure happening to me — just on a different machine. The paid books exist for the parts hooks can't solve: the judgment calls, the timing questions, the trade-offs that no shell script can answer.
+
+— yurukusa, [full story](https://yurukusa-dev.hatenablog.com/entry/2026/05/30/015308) (2026-05-30)
+
 ## Affiliate Program
 
 If you write or teach about Claude Code, you can earn 30% commission promoting our paid books and kits. Apply with any Gumroad account, no application form, 30-day cookie window, automatic Gumroad payouts:
