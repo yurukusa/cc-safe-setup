@@ -185,7 +185,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>25+ (filed 2026-05-18 to 2026-05-27)</td>
 <td>~40 (wide-and-thin reaction shape)</td>
 <td>2026-05-18 (#60366)</td>
-<td>1 (PR #388, #389: aup-false-positive-helper)</td>
+<td>2 (PR #388/#389: aup-false-positive-helper; aup-block-pattern-logger 2026-05-29)</td>
 <td>Unresolved (no Anthropic comment, github-actions[bot] auto-grouped 3 duplicate chains)</td>
 </tr>
 <tr>
@@ -655,14 +655,14 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li><strong>Retry on identical input</strong>. The classifier is non-deterministic; reports describe the same prompt passing on attempt 2 or 3 with no other change.</li>
 </ol>
 
-<h4>Defense path shipped (1 of 3)</h4>
+<h4>Defense paths shipped (2 of 3)</h4>
 <ul style="font-size: 0.93rem;">
 <li><strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/388"><code>aup-false-positive-helper.sh</code></a></strong> — SessionStart hook, opt-in advisory only, never blocks. Inspects <code>ANTHROPIC_MODEL</code>; when an Opus variant is pinned and <code>CC_AUP_FALSE_POSITIVE_HELPER_REMIND=1</code> is set, emits a four-path advisory to stderr. 16 tests covering all 6 state paths.</li>
+<li><strong><code>aup-block-pattern-logger.sh</code></strong> — PostToolUse hook, advisory-only, never blocks. Pairs with <code>aup-false-positive-helper.sh</code> by closing the evidence-and-trend gap: the helper surfaces the four workarounds at SessionStart, but operators have no way to reconstruct which sessions actually hit the block, on which model, or how the rate is shifting over time. Detects five distinct AUP block patterns in tool output (<code>cyber-safeguards</code>, <code>safety-guardrails</code>, <code>rephrase-rewind</code>, <code>usage-policy</code>, <code>usage-policy-api</code> fallback) and appends a five-field pipe-delimited line to <code>~/.claude/aup-block-history.log</code> (timestamp / model / tool / pattern kind / 120-char excerpt). Default mode prints a one-line stderr advisory showing the cumulative count for the current model, naming the partner hook, and pointing at the Sonnet-swap workaround. 23 tests covering all five patterns, pattern priority, log rotation, schema preservation, jq fallback, and never-blocks invariant. Environment toggles: <code>CC_AUP_BLOCK_LOGGER_DISABLE</code>, <code>CC_AUP_BLOCK_LOGGER_QUIET</code>, <code>CC_AUP_BLOCK_LOG_PATH</code>, <code>CC_AUP_BLOCK_LOGGER_MAX_LINES</code>. <em>Shipped 2026-05-29.</em></li>
 </ul>
 
-<h4>Defense paths in design (2 of 3)</h4>
+<h4>Defense path in design (1 of 3)</h4>
 <ul style="font-size: 0.93rem;">
-<li><strong><code>aup-block-pattern-logger.sh</code></strong> (2027-01) — PostToolUse hook that logs AUP block patterns for ongoing classifier-shift detection.</li>
 <li><strong><code>model-swap-suggester.sh</code></strong> (2027-02) — Runtime detector for AUP blocks that suggests model swap automatically.</li>
 </ul>
 
