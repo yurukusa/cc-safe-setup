@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cluster 13 Extended-Thinking Wedge Diagnostic — Which Sub-Pattern Are You Hitting? Plus the /loop Trap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="5-question diagnostic for the Cluster 13 extended-thinking session wedge (400 thinking blocks cannot be modified). Identifies sub-pattern 13A/B/C/D, plus the new /loop autonomous-run amplification vector reported 2026-05-29. Recovery + prevention path per situation. Browser-only, no signup, no telemetry. CC0.">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626; --blue: #2563eb; --purple: #7c3aed;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.6; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.bars { margin: 1rem 0; }
+.bar-row { display: flex; align-items: center; margin: 0.4rem 0; }
+.bar-label { width: 90px; font-weight: 600; font-size: 0.95rem; }
+.bar-track { flex: 1; background: #f3f4f6; border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.4s; }
+.bar-13a { background: var(--blue); }
+.bar-13b { background: var(--green); }
+.bar-13c { background: var(--amber); }
+.bar-13d { background: var(--red); }
+.bar-loop { background: var(--purple); }
+.bar-pct { width: 50px; text-align: right; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+.top-pattern { background: #fef2f2; border-left: 4px solid var(--red); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.top-pattern h3 { margin-top: 0; color: var(--red); }
+.loop-warning { background: #f5f3ff; border-left: 4px solid var(--purple); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.loop-warning h3 { margin-top: 0; color: var(--purple); }
+.recovery { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.recovery h3 { margin-top: 0; color: var(--green); }
+.prevention { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.prevention h3 { margin-top: 0; color: var(--blue); }
+.warning { background: #fffbeb; border-left: 4px solid var(--amber); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.92rem; }
+.hook-install { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.92rem; font-family: ui-monospace, monospace; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+.kbd { background: #f3f4f6; border: 1px solid var(--border); border-radius: 3px; padding: 0.1rem 0.35rem; font-size: 0.85em; font-family: ui-monospace, monospace; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; vertical-align: top; }
+th { background: #f9fafb; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Cluster 13 Extended-Thinking Wedge Diagnostic</h1>
+<div class="meta">5 questions · ~2 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-05-30)</div>
+
+<div class="intro">
+<strong>The wedge:</strong> When extended thinking is enabled, a session can hit <code>API Error: 400 messages.N.content.M: thinking or redacted_thinking blocks in the latest assistant message cannot be modified</code> and never recover within that session. The corrupted message persists in the transcript; every subsequent turn re-sends and re-fails identically. Documented across 15+ open issues (central case <a href="https://github.com/anthropics/claude-code/issues/63147" target="_blank">#63147</a>, 33 reactions) — reproduces on v2.1.143 through v2.1.156. <strong>The cluster has four sub-patterns with different triggers and different recoveries.</strong> Misapplied <code>/clear</code> burns context on 13B/C/D when a transcript edit could have preserved it.
+</div>
+
+<div class="loop-warning">
+<strong>New as of 2026-05-29:</strong> Under <code>/loop</code> or other autonomous-resume harnesses, a one-time 400 becomes an <strong>unrecoverable infinite loop</strong> — the loop queues another continuation, the latest assistant message is unchanged on disk, the next request hits the same 400, the loop replays. <a href="https://github.com/anthropics/claude-code/issues/63147#issuecomment-4571317923" target="_blank">@LMS927369 reported this on the #63147 thread</a>. Question 5 below detects this amplification.
+</div>
+
+<div class="disclosure">
+<strong>Disclosure:</strong> The prevention section links to two SessionStart hooks in this repository (PR #445 advisory + PR #469 opt-in BLOCK for autonomous run) and the published field guide. The hooks detect the 13A precursor before resume actually fires the 400. Free, MIT-licensed. No signup, no telemetry, no analytics beacons — this page is a single self-contained HTML file you can save and run offline.
+</div>
+
+<h2>5 Questions</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1">
+<div class="label">1. When did the 400 first fire?</div>
+<div class="hint">The triggering action narrows which sub-pattern's recovery surface applies.</div>
+<label><input type="radio" name="q1" value="a"> On the first turn after a <code>resume</code> or <code>continue</code> of an older session.</label>
+<label><input type="radio" name="q1" value="b"> Right after I pressed <span class="kbd">Esc</span> on an <code>AskUserQuestion</code> prompt.</label>
+<label><input type="radio" name="q1" value="c"> Right after a parallel tool batch where one tool errored and the rest were auto-cancelled.</label>
+<label><input type="radio" name="q1" value="d"> Without an obvious trigger — it just started failing mid-session, no resume / cancel / batch.</label>
+</div>
+
+<div class="q" data-id="q2">
+<div class="label">2. What does the on-disk transcript look like?</div>
+<div class="hint">Run: <code>jq -rc 'select(.type=="assistant") | .message.content[]? | select(.type=="thinking") | [(.thinking|length),(.signature|length)] | @tsv' &lt;your-session&gt;.jsonl | head -20</code> against <code>~/.claude/projects/&lt;slug&gt;/&lt;id&gt;.jsonl</code>.</div>
+<label><input type="radio" name="q2" value="a"> Many thinking blocks show <code>0 &lt;long-number&gt;</code> — empty text, non-empty signature.</label>
+<label><input type="radio" name="q2" value="b"> A single thinking block shows the pattern; most have real text.</label>
+<label><input type="radio" name="q2" value="c"> I can't read the transcript / haven't checked / unsure.</label>
+</div>
+
+<div class="q" data-id="q3">
+<div class="label">3. Did you switch models mid-session (<code>/model</code>) while extended thinking was active?</div>
+<div class="hint">Mid-session model switches persist thinking signatures from the previous model in transcript history.</div>
+<label><input type="radio" name="q3" value="a"> Yes — switched between Opus 4.7 and 4.8, or to/from Sonnet, while thinking was on.</label>
+<label><input type="radio" name="q3" value="b"> No — same model for the entire session.</label>
+<label><input type="radio" name="q3" value="c"> Used <code>alwaysThinkingEnabled: true</code>; model may have switched without me noticing.</label>
+</div>
+
+<div class="q" data-id="q4">
+<div class="label">4. How many thinking blocks does the wedged session contain (rough order of magnitude)?</div>
+<div class="hint">Scale is the precondition: 13A often fires at the high end, while 13B/13C can wedge a session with few thinking blocks.</div>
+<label><input type="radio" name="q4" value="a"> Tens — fairly fresh session, fewer than 100 thinking blocks total.</label>
+<label><input type="radio" name="q4" value="b"> Hundreds — session has been running for a while, 100–1000 thinking blocks.</label>
+<label><input type="radio" name="q4" value="c"> Thousands — long-running session, 1000+ thinking blocks (e.g., 1M context variant, weeks of session age).</label>
+<label><input type="radio" name="q4" value="d"> Unknown / unable to check.</label>
+</div>
+
+<div class="q" data-id="q5">
+<div class="label">5. Is the session running under <code>/loop</code>, headless agent fleet, or scheduled autonomous resume?</div>
+<div class="hint">Critical: under autonomous resume, the one-time 400 becomes an infinite loop because nothing in the loop layer reads stderr to bail.</div>
+<label><input type="radio" name="q5" value="a"> Yes — <code>/loop</code>, cron, scheduled job, headless agent driver, or similar autonomous re-entry.</label>
+<label><input type="radio" name="q5" value="b"> No — interactive use, I see the 400 in my terminal and can take action.</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>See diagnosis →</button>
+</form>
+
+<div class="result" id="result-box">
+<h2>Diagnosis</h2>
+
+<div class="bars" id="bars"></div>
+
+<div class="top-pattern" id="top-pattern-box">
+<h3 id="top-pattern-title">Top likely sub-pattern</h3>
+<p id="top-pattern-body"></p>
+</div>
+
+<div class="loop-warning" id="loop-warning-box" style="display:none">
+<h3>Autonomous-run amplification detected</h3>
+<p>Your session runs under autonomous resume. The wedge becomes an <strong>unrecoverable infinite loop</strong> — every loop iteration re-fires the 400. <strong>Stop the loop now</strong> before it burns API tokens / Pool 2 quota / Max-plan rate-limit budget on requests that cannot succeed.</p>
+<ul>
+<li><strong>Immediate:</strong> Kill the loop process. The wedged transcript will not heal itself.</li>
+<li><strong>Then:</strong> Apply the recovery path below (typically the JSONL strip) on the transcript before any re-entry.</li>
+<li><strong>Then:</strong> Install <code>extended-thinking-loop-guard.sh</code> (PR #469 below) before resuming autonomous run.</li>
+</ul>
+</div>
+
+<div class="recovery">
+<h3>Recovery (apply matching the top sub-pattern)</h3>
+<div id="recovery-body"></div>
+</div>
+
+<div class="prevention">
+<h3>Prevention (going forward)</h3>
+<div id="prevention-body"></div>
+</div>
+
+<h3>Reference materials</h3>
+<ul>
+<li><strong>Field guide</strong> (English, ~2,800 words, 2026-05-29 with 2026-05-30 update): <a href="https://gist.github.com/yurukusa/8c6be069f602399238356a9c9b719a45" target="_blank">Extended-Thinking Session Wedging — A 36-Hour Surge with 4 Sub-Patterns and Operator-Side Recovery Paths</a> — articulates each sub-pattern's evidence, recovery, and prevention. Free, MIT.</li>
+<li><strong>PR #445</strong> (cc-safe-setup, shipped 2026-05-29): <code>extended-thinking-resume-warning.sh</code> — SessionStart hook that detects the 13A precursor and emits a non-blocking advisory before resume fires the 400. 54 tests.</li>
+<li><strong>PR #469</strong> (cc-safe-setup, shipped 2026-05-30): <code>extended-thinking-loop-guard.sh</code> — opt-in BLOCKING SessionStart hook for autonomous-run users. Same detection as PR #445 but exits 2 with decision JSON when armed, breaking the <code>/loop</code> retry cycle. 49 tests.</li>
+<li><strong>Community fix</strong>: <a href="https://github.com/miteshashar/claude-code-thinking-blocks-fix" target="_blank">miteshashar/claude-code-thinking-blocks-fix</a> — post-hoc transcript repair tool for sessions currently wedged.</li>
+<li><strong>Proxy with monitor + auto-strip</strong>: <a href="https://github.com/cnighswonger/claude-code-cache-fix/releases/tag/v3.8.0" target="_blank">cnighswonger/claude-code-cache-fix v3.8.0</a> — opt-in <code>CACHE_FIX_THINKING_SANITIZE=on</code> strips empty-signed blocks per request, plus early-warning on context size + thinking block count.</li>
+<li><strong>Central case</strong>: <a href="https://github.com/anthropics/claude-code/issues/63147" target="_blank">anthropics/claude-code#63147</a> — original root cause analysis by @jdrolls.</li>
+</ul>
+
+<h3>If you keep hitting this category of failure</h3>
+<p>This page covers Cluster 13 specifically. If extended thinking failures are a recurring tax on your operation — burning quota, killing sessions, derailing long-horizon runs — the published material extends to:</p>
+<ul>
+<li><a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup</a> ships ~800 hooks for Claude Code, MIT-licensed, 1,330 14-day-unique users. Free.</li>
+<li><a href="https://zenn.dev/yurukusa/books/token-savings-guide" target="_blank">Token Book ¥2,500</a> includes Chapter 13 on the Cluster 13 wedge specifically — recovery, prevention, and the token economics of mid-session failure. First two chapters are free preview.</li>
+<li><a href="https://ko-fi.com/yurukusa/tiers" target="_blank">Safety Lab ¥500/month</a> — monthly issue treating each emerging cluster with the shipped hooks, operator checklist, and upstream-status tracking. Cluster 13 is the February 2027 lead chapter.</li>
+</ul>
+
+</div>
+
+<footer>
+v1.0 published 2026-05-30. Browser-only diagnostic — no analytics, no signup, no telemetry, no tracking pixels. Save the HTML and run offline. CC0 / public domain. Source on <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/cluster-13-extended-thinking-wedge-diagnostic.html">GitHub</a>. Updates appended as additional sub-patterns surface or as the upstream fix lands.
+</footer>
+
+<script>
+(function () {
+  const form = document.getElementById('audit-form');
+  const btn = document.getElementById('submit-btn');
+  const resultBox = document.getElementById('result-box');
+  const bars = document.getElementById('bars');
+  const topTitle = document.getElementById('top-pattern-title');
+  const topBody = document.getElementById('top-pattern-body');
+  const loopBox = document.getElementById('loop-warning-box');
+  const recoveryBody = document.getElementById('recovery-body');
+  const preventionBody = document.getElementById('prevention-body');
+
+  // Scoring matrix: each answer adds points to one or more sub-patterns.
+  const scoring = {
+    q1: {
+      a: { '13A': 3 },
+      b: { '13B': 3 },
+      c: { '13C': 3 },
+      d: { '13D': 3 }
+    },
+    q2: {
+      a: { '13A': 2, '13B': 1, '13C': 1, '13D': 1 },  // empty-signed shape confirms cluster 13 broadly; biases toward 13A
+      b: { '13B': 1, '13C': 1 },                       // single block hints at single-event corruption
+      c: { '13A': 0.3, '13B': 0.3, '13C': 0.3, '13D': 0.3 } // neutral if unknown
+    },
+    q3: {
+      a: { '13C': 1, '13D': 1 },  // model switch can wedge via either path
+      b: { '13A': 0.3, '13B': 0.3, '13C': 0.3, '13D': 0.3 },
+      c: { '13C': 1, '13D': 1 }
+    },
+    q4: {
+      a: { '13B': 1, '13C': 1 },              // small sessions: single-event triggers more likely
+      b: { '13A': 0.5, '13B': 0.5, '13C': 0.5, '13D': 1 },
+      c: { '13A': 2, '13D': 1 },              // huge sessions: 13A more likely per #63147 evidence
+      d: { '13A': 0.3, '13B': 0.3, '13C': 0.3, '13D': 0.3 }
+    },
+    q5: {
+      a: { 'LOOP': 5 },  // amplification flag, separate from sub-pattern
+      b: {}
+    }
+  };
+
+  function getAnswers() {
+    const data = new FormData(form);
+    return { q1: data.get('q1'), q2: data.get('q2'), q3: data.get('q3'), q4: data.get('q4'), q5: data.get('q5') };
+  }
+
+  function enableSubmit() {
+    const a = getAnswers();
+    btn.disabled = !(a.q1 && a.q2 && a.q3 && a.q4 && a.q5);
+  }
+
+  form.addEventListener('change', enableSubmit);
+
+  function calculate() {
+    const a = getAnswers();
+    const scores = { '13A': 0, '13B': 0, '13C': 0, '13D': 0, 'LOOP': 0 };
+    for (const k of ['q1', 'q2', 'q3', 'q4', 'q5']) {
+      const ans = a[k]; if (!ans) continue;
+      const delta = scoring[k][ans] || {};
+      for (const [p, v] of Object.entries(delta)) {
+        scores[p] += v;
+      }
+    }
+    return scores;
+  }
+
+  const subPatternInfo = {
+    '13A': {
+      title: '13A — Resume serialization corruption',
+      body: 'Claude Code persists thinking blocks to disk with <code>thinking: ""</code> + retained <code>signature</code>. On resume the client re-sends them; the API validates signature against text, fails. Most common path. Central case: <a href="https://github.com/anthropics/claude-code/issues/63147" target="_blank">#63147</a>.',
+      recovery: '<strong>Two paths depending on whether you want to keep context.</strong><br><br><strong>Path 1 — preserve context (recommended):</strong><ol><li>Stop the client.</li><li>Back up <code>~/.claude/projects/&lt;slug&gt;/&lt;id&gt;.jsonl</code>.</li><li>Strip every <code>thinking</code> / <code>redacted_thinking</code> block from assistant <code>content</code> arrays in-place. Don\'t delete rows — leave <code>uuid</code> / <code>parentUuid</code> chains intact. For rows whose only content was a thinking block, replace content with <code>[{"type":"text","text":"[thinking]"}]</code> placeholder so arrays aren\'t empty.</li><li>Resume with <code>--resume</code>.</li></ol>Or use <a href="https://github.com/cnighswonger/claude-code-cache-fix/releases/tag/v3.8.0" target="_blank">cnighswonger/claude-code-cache-fix v3.8.0</a> proxy with <code>CACHE_FIX_THINKING_SANITIZE=on</code> — it does the strip per request, no manual JSONL editing.<br><br><strong>Path 2 — accept context loss:</strong> <code>/exit</code> and start fresh. Lose all working context.'
+    },
+    '13B': {
+      title: '13B — Cancel-during-AskUserQuestion poisoning',
+      body: 'Cancelling or pressing Escape on an <code>AskUserQuestion</code> while extended thinking was active corrupts the in-flight assistant message. Compounding bug: multiple <code>AskUserQuestion</code> prompts in one turn render concurrently and overwrite each other on screen, prompting instinctive Escape. <a href="https://github.com/anthropics/claude-code/issues/63143" target="_blank">#63143</a>.',
+      recovery: 'No in-session recovery once it fires. <code>/exit</code> and start fresh. The JSONL strip in 13A may work for some 13B wedges if the corruption shape matches — try it on a backup first.'
+    },
+    '13C': {
+      title: '13C — Parallel-tool-batch cancellation corruption',
+      body: 'When extended thinking is enabled and a parallel tool batch is auto-cancelled (one tool errors, rest cancel), thinking blocks in the cancelled batch\'s assistant message are corrupted. <a href="https://github.com/anthropics/claude-code/issues/63192" target="_blank">#63192</a>.',
+      recovery: 'No in-session recovery. <code>/exit</code>. The JSONL strip from 13A often works for 13C — strip the cancelled-turn\'s thinking blocks, resume.'
+    },
+    '13D': {
+      title: '13D — Intermittent signed-thinking-block replay',
+      body: 'Failure fires without 13A/B/C trigger — no resume, no cancel, no parallel batch. Reproduced across v2.1.143–v2.1.156 — version-independent. Trigger surface not yet pinned. <a href="https://github.com/anthropics/claude-code/issues/63335" target="_blank">#63335</a> + 10+ duplicate-flagged reports.',
+      recovery: '<code>/clear</code> is the most reliable escape (loses context). <code>/rewind</code> may work if you can identify the wedging turn. The JSONL strip may or may not work — try it on a backup first. The most durable user-side workaround is disabling thinking entirely (capability downgrade).'
+    }
+  };
+
+  function buildBars(scores) {
+    const sub = ['13A','13B','13C','13D'];
+    const total = sub.reduce((a,p)=>a+scores[p],0) || 1;
+    const html = sub.map(p => {
+      const pct = Math.round(scores[p]/total*100);
+      return `<div class="bar-row"><span class="bar-label">${p}</span><span class="bar-track"><span class="bar-fill bar-${p.toLowerCase()}" style="width:${pct}%"></span></span><span class="bar-pct">${pct}%</span></div>`;
+    }).join('');
+    bars.innerHTML = html;
+  }
+
+  function showResult() {
+    const scores = calculate();
+    buildBars(scores);
+
+    // Top sub-pattern by score.
+    const sub = ['13A','13B','13C','13D'];
+    const top = sub.reduce((a,b) => scores[b] > scores[a] ? b : a);
+    const info = subPatternInfo[top];
+    topTitle.textContent = info.title;
+    topBody.innerHTML = info.body;
+    recoveryBody.innerHTML = info.recovery;
+
+    // Loop amplification.
+    if (scores['LOOP'] > 0) {
+      loopBox.style.display = '';
+    } else {
+      loopBox.style.display = 'none';
+    }
+
+    // Prevention block, including conditional loop-guard.
+    const envVarBlock = '<strong>Disable thinking entirely</strong> (if you don\'t need it for the in-flight task): set one of these env vars. Per <a href="https://github.com/anthropics/claude-code/issues/63147#issuecomment-4574730571" target="_blank">@cnighswonger\'s 2.1.148 binary disassembly</a>, only these actually stop generation:<table><tr><th>Var</th><th>Stops empty-signed blocks?</th></tr><tr><td><code>CLAUDE_CODE_DISABLE_THINKING=1</code></td><td><strong>Yes</strong> — gated directly.</td></tr><tr><td><code>MAX_THINKING_TOKENS=0</code></td><td><strong>Yes</strong> — enable check is <code>parseInt &gt; 0</code>.</td></tr><tr><td><code>DISABLE_INTERLEAVED_THINKING=1</code></td><td><strong>No</strong> — drops the beta header only; blocks still generate. <em>Widely-circulated as a workaround but doesn\'t actually prevent the failure.</em></td></tr></table>';
+
+    const advisoryBlock = '<strong>Install the SessionStart advisory hook</strong> (PR #445, non-blocking):<div class="hook-install">cp ~/cc-safe-setup/examples/extended-thinking-resume-warning.sh ~/.claude/hooks/<br>chmod +x ~/.claude/hooks/extended-thinking-resume-warning.sh<br># wire as SessionStart hook in ~/.claude/settings.json</div>The hook detects the 13A precursor on disk and emits a stderr advisory before resume actually fires the 400. Never blocks (always exits 0). Safe to install broadly.';
+
+    let loopBlock = '';
+    if (scores['LOOP'] > 0) {
+      loopBlock = '<strong>Install the autonomous-run BLOCK hook</strong> (PR #469, opt-in):<div class="hook-install">cp ~/cc-safe-setup/examples/extended-thinking-loop-guard.sh ~/.claude/hooks/<br>chmod +x ~/.claude/hooks/extended-thinking-loop-guard.sh<br># wire as SessionStart hook in ~/.claude/settings.json<br>export CC_LOOP_GUARD_ENABLED=1   # arms the guard</div>Same detection as PR #445 but exits 2 with decision JSON when armed, so the blocking exit propagates into the <code>/loop</code> layer and breaks the retry cycle. Silent no-op by default — only fires when the env var is set, so it\'s safe to drop into broadly-applied <code>settings.json</code> templates. For the recovery session itself, set <code>CC_LOOP_GUARD_DISABLE=1</code> to bypass.';
+    }
+
+    const transcriptBlock = '<strong>Watch the transcript size proactively</strong>: <a href="https://github.com/cnighswonger/claude-code-cache-fix/releases/tag/v3.8.0" target="_blank">cnighswonger\'s proxy v3.8.0</a> ships a read-only early-warning (on by default) that monitors context size + thinking-block count and warns before the danger zone. Lets you retire a long session deliberately instead of having it die mid-turn.';
+
+    preventionBody.innerHTML = envVarBlock + '<br><br>' + advisoryBlock + (loopBlock ? '<br><br>' + loopBlock : '') + '<br><br>' + transcriptBlock;
+
+    resultBox.classList.add('show');
+    resultBox.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  btn.addEventListener('click', showResult);
+})();
+</script>
+
+</body>
+</html>
