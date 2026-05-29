@@ -177,7 +177,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <td>42+ (co-occurring regression bundle) + #62061 (core)</td>
 <td>46+ (#62061 anchor)</td>
 <td>2026-05-24 (#62061)</td>
-<td>1 (PR #383: server-side-prompt-injection-detector)</td>
+<td>3 (PR #383, #453, proxy-capture-suggester 2026-05-29)</td>
 <td>Acknowledged intentional (Anthropic same-day comment), 2 opt-out env vars provided, audit trail gap remains</td>
 </tr>
 <tr>
@@ -607,15 +607,15 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <li>Parallel v2.1.150 regression bundle: 42+ co-occurring issues forming a parallel regression cluster.</li>
 </ul>
 
-<h4>Defense paths shipped (2 of 4)</h4>
+<h4>Defense paths shipped (3 of 4)</h4>
 <ul style="font-size: 0.93rem;">
 <li><strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/383"><code>server-side-prompt-injection-detector.sh</code></a></strong> — SessionStart hook, advisory-only, never blocks. Prints a one-line stderr advisory if either opt-out env var is missing. Self-silences with <code>CC_PROMPT_INJECTION_DETECTOR_QUIET=1</code>.</li>
 <li><strong><a href="https://github.com/yurukusa/cc-safe-setup/pull/453"><code>cache-residue-detector.sh</code></a></strong> — SessionStart hook, advisory-only, never blocks. Pairs with <code>server-side-prompt-injection-detector.sh</code> by closing the gap that opt-out env vars do not perform: cached values written before opt-out continue to register as peer-level system prompt sections until physical removal. Inspects <code>~/.claude.json</code> for <code>cachedGrowthBookFeatures</code>, <code>cachedExperimentFeatures</code>, and <code>cachedStatsigGates</code> keys with per-key entry counts; detects macOS Desktop's <code>cachedGrowthBookFeatures</code> file as informational. Default mode warns only when at least one opt-out env var is set (closing the opt-out gap); <code>CC_CACHE_RESIDUE_DETECTOR_STRICT=1</code> flips to forward-looking advisory. Emits idempotent <code>jq</code>-based cleanup commands. 28 tests, fail-open on missing/unreadable/malformed JSON, grep fallback when <code>jq</code> is missing, environment toggles (<code>CC_CACHE_RESIDUE_DETECTOR_DISABLE</code>, <code>CC_CACHE_RESIDUE_DETECTOR_QUIET</code>, <code>CC_CACHE_RESIDUE_DETECTOR_STRICT</code>, <code>CC_CACHE_RESIDUE_CLAUDE_JSON</code>). <em>Shipped 2026-05-29 in <a href="https://github.com/yurukusa/cc-safe-setup/pull/453">PR #453</a>.</em></li>
+<li><strong><code>proxy-capture-suggester.sh</code></strong> — SessionStart hook, opt-in advisory only, never blocks. Surfaces the HTTPS proxy capture path for operators in regulated industries (SOX, HIPAA, FedRAMP, PCI-DSS, EU AI Act Article 12) who need a reconstructible audit trail of the exact system prompt sent at the time of any logged tool execution. The opt-out env vars and cache-residue cleanup close the injection channel going forward but produce no audit trail; proxy capture is the only operator-side path. When opted in via <code>CC_PROXY_CAPTURE_SUGGESTER_ENABLE=1</code>: with no <code>HTTPS_PROXY</code>/<code>https_proxy</code>/<code>ALL_PROXY</code> active, emits a four-tool advisory (mitmproxy with concrete <code>--save-stream-file</code> invocation, Burp Suite Community, Charles Proxy, Anthropic SDK <code>ANTHROPIC_LOG=debug</code> direct logging) including the HTTPS_PROXY bridge and SSL_CERT_FILE setup; with a proxy active but <code>ANTHROPIC_LOG_DIR</code> unset, emits a shorter audit-sink advisory. 19 tests covering all 6 state paths, four-tool enumeration, partner hook cross-reference, never-blocks invariant. Privacy: reads only the env var names, never the values. <em>Shipped 2026-05-29.</em></li>
 </ul>
 
-<h4>Defense paths in design (2 of 4)</h4>
+<h4>Defense path in design (1 of 4)</h4>
 <ul style="font-size: 0.93rem;">
-<li><strong><code>proxy-capture-suggester.sh</code></strong> — Surfaces the HTTPS proxy capture path for compliance-bound operators.</li>
 <li><strong><code>system-prompt-baseline-checker.sh</code></strong> — Diffs the operator's baseline system prompt against the runtime system prompt (requires proxy capture).</li>
 </ul>
 
