@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6月15日の Claude Code 課金分離の前の16日間の確認の手引き (5月30日始まり)</title>
+<meta name="description" content="2026年6月15日の Anthropic の Claude Code の課金分離 (Pool 1 と Pool 2 の経路) の前16日間の利用者の側の準備の確認の手引き。 5月30日から6月14日まで日次の整備の経路の整理。 道具の経路、 移行の判定、 監視の整備、 緊急の対応の整理。">
+<meta name="keywords" content="Claude Code, June 15, 課金分離, Pool 1, Pool 2, Migration, checklist, 確認">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/june-15-cliff-checklist.html">
+<meta property="og:title" content="6月15日の Claude Code 課金分離の前の16日間の確認の手引き">
+<meta property="og:description" content="2026年6月15日まで16日間の日次の整備の経路の整理。 道具の経路、 移行の判定、 監視の整備、 緊急の対応の整理。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"6月15日の Claude Code 課金分離の前の16日間の確認の手引き","description":"6月15日までの16日間の日次の準備の経路。","datePublished":"2026-05-30","author":{"@type":"Person","name":"yurukusa"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.phase{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.2rem 1.5rem;margin:1.8rem 0}
+.phase-title{color:#3fb950;font-weight:600;font-size:1.1rem;margin-bottom:.5rem}
+.phase-meta{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+.day{margin:1rem 0;padding-left:1rem;border-left:2px solid #30363d}
+.day-num{color:#58a6ff;font-weight:600;font-size:.95rem}
+.day-task{margin-top:.3rem;font-size:.95rem}
+.day-detail{color:#8b949e;font-size:.88rem;margin-top:.3rem}
+.cliff-day{background:#3d1a1a;border:1px solid #f85149;border-radius:8px;padding:1.2rem 1.5rem;margin:1.8rem 0}
+.cliff-day .phase-title{color:#f85149}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="hub.html">&larr; cc-safe-setup hub</a></p>
+<h1>6月15日の Claude Code 課金分離の前の16日間の確認の手引き</h1>
+<p class="meta">2026年6月15日の Anthropic の Claude Code の課金の分離 (Pool 1 と Pool 2 の2軸の経路の分離) まで残り16日 (5月30日の段)。 業界の解析の合図で、 軽い作業の負荷で12倍、 重い Sonnet の自動の作業で150倍以上の費用の倍率の合図が観察されています。 利用者の側の16日間の日次の整備の経路の整理を本頁で公開します。</p>
+
+<div class="meta-block">
+<strong>本頁の整備の経路の整理:</strong> 日次の5分から10分の整備の経路を16日間継続することで、 6月15日の段で「予期しない費用の合図」 の予防の経路の整備。 各段の整備の合図の整理。 道具の経路 (cc-safe-setup の hook の整備) は無料の経路、 移行の判定の框架は <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook 第2版</a> (¥19、 90秒の費用の計算の道具は無料) の経路。<br><br>
+<strong>整備の段の合図:</strong> 4段の整備の経路 (各4日間)。 段1 (基準の合図の整備、 5/30 から 6/2)、 段2 (判定の框架、 6/3 から 6/6)、 段3 (準備の整備、 6/7 から 6/10)、 段4 (最終の整備、 6/11 から 6/14)、 加えて当日 (6/15) の対応の整理。
+</div>
+
+<div class="phase">
+<div class="phase-title">段 1 (5月30日から6月2日): 基準の合図の整備</div>
+<div class="phase-meta">現状の整理の段。 利用者の経路の現状の合図の整備で、 6月15日の段の判定の入力の整備の経路。</div>
+
+<div class="day">
+  <span class="day-num">残り16日 (5月30日、 金曜)</span>
+  <div class="day-task">本日の段の <code>/cost</code> と <code>/usage</code> の経路の合図の取得。</div>
+  <div class="day-detail">Claude Code の経路の中で <code>/cost</code> の経路を実行、 過去30日の合図の整備。 加えて <code>/usage</code> の経路で残りの枠の合図の整備。 取得した数の合図は、 次の段の判定の入力の基準の合図。 保存の場所は任意 (テキストの経路または notion の経路)。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り15日 (5月31日、 土曜)</span>
+  <div class="day-task">過去30日の最大の5つのセッションの整理。</div>
+  <div class="day-detail">過去30日の経路の最大の5つの token の消費の合図のセッションの整理。 ccusage の経路 (<code>npx ccusage@latest</code>) または直接の <code>~/.claude/projects/*/</code> の経路の取得の経路。 各セッションの目的の合図の整理 (記事の起稿、 道具の整備、 調査の経路、 など)。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り14日 (6月1日、 日曜)</span>
+  <div class="day-task">6月15日の課金分離の経路の公式の文書の経路の確認。</div>
+  <div class="day-detail">Anthropic の公式の文書の経路 (<code>docs.claude.com/en/api/billing</code>) の整備の合図の確認の経路。 加えて、 第三者の経路 (The Register、 InfoQ、 Apiyi) の利用者の合図の整理の経路。 Pool 1 と Pool 2 の経路の合図の整理の前提の整備。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り13日 (6月2日、 月曜)</span>
+  <div class="day-task">Pool 1 と Pool 2 の経路の利用の分布の整理。</div>
+  <div class="day-detail">残り15日の経路の整理で、 5つのセッションのうち、 各セッションが Pool 1 (対話の経路の <code>claude</code> の経路) または Pool 2 (Claude Agent SDK の経路) のどちらの経路の合図の整理。 SDK の経路の合図のセッションが Pool 2 の経路の合図で、 6月15日の段の費用の倍率の合図の主の経路。</div>
+</div>
+</div>
+
+<div class="phase">
+<div class="phase-title">段 2 (6月3日から6月6日): 判定の框架の整備</div>
+<div class="phase-meta">判定の段。 現状の合図の整理を踏まえた、 移行 / 継続 / 折衷の経路の判定の整備。</div>
+
+<div class="day">
+  <span class="day-num">残り12日 (6月3日、 火曜)</span>
+  <div class="day-task">3軸の費用の合図の予測の整理 (軽い / 中 / 重い)。</div>
+  <div class="day-detail">残り13日の経路の合図 (Pool 1 と Pool 2 の分布) を入力に、 6月15日以降の費用の合図の3軸の予測の整備の経路。 軽い経路 (Pool 1 が主、 2-3倍の経路)、 中の経路 (Pool 1 と Pool 2 の半分、 5-8倍の経路)、 重い経路 (Pool 2 が主、 100-150倍以上の経路)。 自分の経路がどの段の合図の経路の判定の入力の整備。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り11日 (6月4日、 水曜)</span>
+  <div class="day-task">代替の経路の調査 (Codex / Cursor / DeepSeek の費用の合図)。</div>
+  <div class="day-detail">代替の経路の費用の合図の整理 (Codex の経路の月額、 Cursor の経路の月額、 DeepSeek の経路の token の値段)。 残り12日の経路の3軸の予測の合図と比較で、 移行の経路の費用の合図の整理。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り10日 (6月5日、 木曜)</span>
+  <div class="day-task">単一の業務の流れの代替の経路の経験の整備。</div>
+  <div class="day-detail">残り11日の経路の整理した代替の経路の中で、 1件の経路 (Codex または DeepSeek) で、 自分の業務の流れの単一の作業の経路の経験の整備。 5-10分の経路で、 質の合図と費用の合図の取得の経路。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り9日 (6月6日、 金曜)</span>
+  <div class="day-task">移行 / 継続 / 折衷の経路の判定の確定。</div>
+  <div class="day-detail">残り10日から13日の経路の合図を入力に、 3軸の判定の経路の整理。 継続の経路 (現状の整備の維持)、 折衷の経路 (Pool 2 の重い経路のみ代替の経路に移行)、 移行の経路 (全体の経路の代替の経路への移行)。 各経路の費用の合図と質の合図の比較の整理。 詳細な框架は <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook 第2版</a> (¥19) の経路。</div>
+</div>
+</div>
+
+<div class="phase">
+<div class="phase-title">段 3 (6月7日から6月10日): 準備の整備</div>
+<div class="phase-meta">準備の段。 判定の経路に応じた、 道具の経路と監視の経路の整備。</div>
+
+<div class="day">
+  <span class="day-num">残り8日 (6月7日、 土曜)</span>
+  <div class="day-task">現状の設定の経路の保存と project の経路の整備。</div>
+  <div class="day-detail">現状の <code>~/.claude/settings.json</code> の経路の保存 (timestamp の経路の整備)、 project の <code>.claude/</code> の経路の整理、 重要の経路の context の合図の文書化。 移行の経路または継続の経路の判定の後の、 元の経路への復旧の整備の経路の前提。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り7日 (6月8日、 日曜)</span>
+  <div class="day-task">cc-safe-setup の利用枠の監視の道具の整備。</div>
+  <div class="day-detail"><code>npx cc-safe-setup</code> の経路で、 <code>cache-creation-drift-detector</code> と <code>quota-anomaly-detector</code> と <code>session-rate-monitor</code> の3件の道具の取り込みの整備。 集積8 (Pro Max の利用枠の異常) の対応の3件の道具で、 6月15日の段の費用の合図の異常の早期の検出の整備の経路。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り6日 (6月9日、 月曜)</span>
+  <div class="day-task">Stripe の経路の email の警告の閾値の整備。</div>
+  <div class="day-detail">Stripe の経路の email の警告の閾値の整備。 月額の経路の費用の合図の上限の経路の整備 (現状の月額の費用の2倍の経路を上限の合図の整備)。 加えて、 <a href="billing-incident-detection.html">billing-incident-detection.html</a> の5つの確認の経路の整備の整理。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り5日 (6月10日、 火曜)</span>
+  <div class="day-task">緊急の対応の経路の文書化。</div>
+  <div class="day-detail">6月15日以降の段の費用の合図の異常の合図の経路の発火の時の、 緊急の対応の手順の文書化。 月額の plan の降格の経路、 セッションの上限の整備の経路、 代替の経路への即時の移行の経路の手順の整備の経路。</div>
+</div>
+</div>
+
+<div class="phase">
+<div class="phase-title">段 4 (6月11日から6月14日): 最終の整備</div>
+<div class="phase-meta">最終の段。 整備の経路の検証と、 6月15日の当日の整備の前の最終の確認。</div>
+
+<div class="day">
+  <span class="day-num">残り4日 (6月11日、 水曜)</span>
+  <div class="day-task">監視の経路の発火の合図の検証。</div>
+  <div class="day-detail">残り7日の経路で取り込みの3件の道具の経路の発火の合図の検証の経路。 試験の経路の整備で、 道具の経路の発火の合図の正常の経路の確認。 偽の警告の合図の経路の整備の経路の確認。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り3日 (6月12日、 木曜)</span>
+  <div class="day-task">復旧の経路の試験の経路の整備。</div>
+  <div class="day-detail">月額の plan の降格の経路 (Pro から Free または Max から Pro の降格の経路の試験)、 セッションの上限の整備の経路の試験、 代替の経路への即時の移行の経路の試験。 各経路の所要の時間の合図の整理の整備。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り2日 (6月13日、 金曜)</span>
+  <div class="day-task">Pool 1 の予算の上限の整備。</div>
+  <div class="day-detail">Pool 1 の経路の予算の上限の整備の経路 (Anthropic の経路の整備の合図の段の取り込み)。 加えて、 セッションの長さの既定の合図の整備 (短い経路の整備で、 6月15日の段の費用の合図の予防の経路)。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">残り1日 (6月14日、 土曜)</span>
+  <div class="day-task">最終の確認の整理。</div>
+  <div class="day-detail">残り16日から残り2日の経路の整備の合図の累計の整理。 4段の整備の経路の合図の最終の確認。 6月15日の段の整備の経路の最終の準備の整備。 残り1日の経路の段で、 道具の経路と監視の経路と緊急の対応の経路の全件の整備の確認の合図の経路。</div>
+</div>
+</div>
+
+<div class="cliff-day">
+<div class="phase-title">当日 (6月15日、 日曜): 課金分離の段</div>
+<div class="phase-meta">課金分離の段の対応の整理。</div>
+
+<div class="day">
+  <span class="day-num">課金分離の段</span>
+  <div class="day-task">実際の課金の経路の整備の合図の確認。</div>
+  <div class="day-detail">6月15日の段で、 実際の課金の経路の整備の合図の確認の経路。 公式の合図の整備の経路と、 実機の合図の整備の経路の比較の整備。 加えて、 当日の最初のセッションの後の <code>/cost</code> の経路の即時の整備で、 残り16日の経路の基準の合図との比較の整備。 予測の経路 (3軸の合図) との整合の整理。</div>
+</div>
+
+<div class="day">
+  <span class="day-num">段の整備の経路の判定</span>
+  <div class="day-task">予測との差分の整理と、 戦略の経路の整備の判定。</div>
+  <div class="day-detail">予測の経路の合図と実機の合図の差分の整理の経路。 軽い経路の予測で、 中の経路または重い経路の合図が出た場合、 緊急の対応の経路 (残り5日の経路で文書化済) の即時の整備の経路。 加えて、 残り11日の経路の代替の経路への即時の移行の経路の判定。</div>
+</div>
+</div>
+
+<h2>関連の整備の経路</h2>
+
+<p>本頁の整備の経路の延長で、 関連の整備の経路の整理。</p>
+
+<ul>
+  <li><strong>移行の判定の框架の整備</strong>: <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook 第2版</a> (¥19) で、 6月15日の段の判定の框架と、 90秒の費用の計算の道具 (無料の経路)、 9つの章の整備の経路。</li>
+  <li><strong>cc-safe-setup の道具の整備</strong>: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> (MIT、 14日で約1,000人の独立な利用者の経路) で、 3件の道具 (cache-creation-drift-detector、 quota-anomaly-detector、 session-rate-monitor) の取り込みの経路。 残り7日の経路の整備の主の道具。</li>
+  <li><strong>5月号の試し読みの整備の経路</strong>: <a href="safety-lab-may-preview.html">5月号 Part 1 全文の試し読みの頁</a> で、 9件の事故事例の articulate の整理。 cache_control の集積の対応の経路、 Cowork の予定タスクの silent skip の対応の経路、 子の作業者の身分の漏れの対応の経路の整理。</li>
+  <li><strong>課金の事故の経路の整備</strong>: <a href="billing-incident-detection.html">課金の事故の早期の検出の5つの確認の頁</a> で、 6件以上の独立な合図の集積の整理と、 利用者の側の早期の検出の経路の整備。 残り6日の経路の整備の主の整備の経路。</li>
+</ul>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>月額の便りの整備の経路</strong><br>6月15日の段の費用の合図の整備の継続の経路は、 月額の便りの中核の経路。</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Safety Lab Founder Membership</a>
+<a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook" class="btn btn-outline">Migration Playbook 第2版</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">月額¥500 (Founder 価格、 永久固定)、 5月号は配信済、 6月号は6月1日配信予定 (6月15日の段の前14日の準備の章を含む)。</p>
+</div>
+
+<footer>
+<p>本頁の整備の経路は、 yurukusa (Claude Code を800時間以上自律で運用している独立の運営者) の整備の経路。 公式の経路の合図の整備は Anthropic の経路の整備の段の合図、 第三者の経路の合図の整備は5月の段の利用者の声の経路の整理。 整備の経路の合図は2026年5月30日の段の整備の経路。</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+</footer>
+
+</body>
+</html>
