@@ -576,6 +576,8 @@ This detects Windows backslash paths (`C:\Users\...` → `C:/Users/...`) and mis
 
 See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
+**Free Windows safety guide:** [Claude Code on Windows — Safety Guide for the Issues That Don't Exist on macOS/Linux](https://gist.github.com/yurukusa/df363bbbc5fea6c2e8d86ea19201c303) (~1,735 words, MIT) — five Windows-specific failure modes from the May 2026 tracker (BSOD with HVCI, runaway PowerShell spawn cascade, empty Bash output, PowerShell unavailable under MINGW64, OAuth paste freeze) with operator-side mitigations and a "WSL2 vs native Windows" decision tree. Written in response to the volume of Windows-specific issues that surfaced during May 2026, including [#62193](https://github.com/anthropics/claude-code/issues/62193) (nested PowerShell spawn → cross-window crash on Windows 11).
+
 ## Troubleshooting
 
 **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**: "Hook doesn't work" → step-by-step diagnosis. Covers every common failure pattern.
