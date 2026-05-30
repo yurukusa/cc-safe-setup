@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年8月号 Part 1 — Pro Max の利用枠が想定より早く枯渇する経路の3つの自己診断 — CC Safety Lab 試し読み</title>
+<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年8月号 Part 1 を全文公開。 Pro / Max 5x / Max 20x の購読の枠が想定より早く尽きる事案の集積の articulate と、 3つの独立な経路 (サーバ側のキャッシュの膨張、 副の作業者の並行、 セッション初期の文脈の読み込み) の自己診断の手順、 約6,500字、 読了7分。">
+<meta name="keywords" content="Claude Code, Pro Max, クォータ, トークン, cache_creation, ccusage, 月額, 月次便, Safety Lab, Ko-fi">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-august-preview.html">
+<meta property="og:title" content="2026年8月号 Part 1 — Pro Max の利用枠が想定より早く枯渇する経路の3つの自己診断">
+<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年8月号 Part 1 を全文公開。 Pro Max の利用枠の集積 (10件起票、 累計2,200反応) と利用者の側の3つの自己診断の手順、 約6,500字、 読了7分。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"2026年8月号 Part 1 — Pro Max の利用枠が想定より早く枯渇する経路の3つの自己診断","description":"CC Safety Lab 2026年8月号の Part 1 全文公開。 Pro / Max 5x / Max 20x の購読の枠が想定より早く尽きる経路と利用者の側の3つの自己診断の手順の articulate。","datePublished":"2026-08-01","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.subscribe{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.subscribe strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.step-block{background:#161b22;border-left:3px solid #58a6ff;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.step-block strong{color:#f0f6fc}
+.warn-block{background:#1c1310;border-left:3px solid #f85149;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.warn-block strong{color:#f85149}
+.stat-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0}
+.stat-block strong{color:#f0f6fc}
+.issue-list{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0;font-size:.9rem}
+.issue-list li{margin:.3rem 0;color:#c9d1d9}
+.issue-list strong{color:#f0f6fc}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年8月号 Part 1 全文</span></p>
+<h1>2026年8月号 Part 1: Pro Max の利用枠が想定より早く枯渇する経路の3つの自己診断</h1>
+<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年8月号 Part 1 の全文公開です。 8月号は8月1日に配信予定。 8月号全体は約22,000字 (紙の体裁で約22頁)、 そのうち Part 1 (約6,500字、 Pro Max の利用枠が想定より早く尽きる事案の3つの独立な経路の articulate と、 利用者の側の3つの自己診断の手順) を本頁で全文公開します。</p>
+
+<div class="subscribe">
+<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 8月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (10件の起票の事案の深掘りと版の境界の4つの独立な合図の articulate)、 Part 3 (3軸の防衛 hook の組み合わせの設定例)、 Part 4-5 (警告の発火の後の即座の対応の手順と6月15日の課金分離以降のAPIの鍵への切替の判断の入力の整備)、 Part 6 (cc-safe-setup の関連の道具の整備の整理) は Founder 会員の月次の届け物に含まれます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の Part 1 の本文は8月1日配信の8月号からの抜粋で、 改編はしていません。 集積10件の起票 (累計2,200反応) は2026年5月31日の段で全件 OPEN の合図の継続中、 公式の修正の応答は未到達の状態。</p>
+</div>
+
+<div class="meta-block">
+<strong>集計範囲:</strong> 2026-03 から 2026-05 の3ヶ月の窓、 Pro / Max 5x / Max 20x の購読の枠の枯渇の集積の10件の起票、 累計約2,200件の反応<br>
+<strong>読了の目安:</strong> 7分<br>
+<strong>収録の中身:</strong> 3つの独立な経路の articulate (サーバ側のキャッシュの膨張、 副の作業者の並行、 セッション初期の文脈の読み込み)、 10件の起票の集積の整理、 利用者の側の3つの自己診断の手順、 3軸の防衛 hook の経路
+</div>
+
+<h2>何が起きるか</h2>
+
+<p>Pro / Max 5x / Max 20x の購読の枠が、 同じ作業の流れを使っていても、 想定より早く尽きる事案。 代表的な見え方は3種類で、 利用者の側からは区別がつきにくい合図です。 1つめは「利用の上限に到達、 リセットまで何時間」 の通知。 2つめは「率の制限の到達」 の通知。 3つめは「セッションのクォータの枯渇」 の通知。</p>
+
+<p>「同じ依頼の調子」「同じ規模の作業」 で1日に5時間以上使えていたところから、 突然1時間で枯渇する状態に切り替わる事例が、 2026年3月以降の集積で10件の起票として記録されました。 累計の反応は約2,200件、 すべて公開のまま継続中です。</p>
+
+<h2>なぜ詰まるか</h2>
+
+<p>3つの独立な経路で、 同じ症状が発生しうる経路です。 利用者の側の自己診断の手順の整備の前に、 3つの経路の articulate を整理します。</p>
+
+<div class="stat-block">
+<strong>第1の経路: サーバ側のキャッシュ作成のトークン数の膨張</strong>
+<p>起票46917 で、 同じ形の <code>--print</code> の呼び出しが、 v2.1.98 では 49,726 トークンを報告し、 v2.1.100 では 69,922 トークンを報告する事実が確認されました。 差の20,000トークンは利用者の側から見えない位置で消費される経路。</p>
+</div>
+
+<div class="stat-block">
+<strong>第2の経路: 副の作業者の集まりの並行の起動</strong>
+<p>同時に4件から5件の副の作業者を立ち上げると、 各々が独立な文脈の窓を持つため、 同じ規模の作業を実行しても、 累積のトークンの消費が並列の度合いに応じて増大する経路。</p>
+</div>
+
+<div class="stat-block">
+<strong>第3の経路: セッションの開始の初期の意図しない大量の文脈の読み込み</strong>
+<p>既定の <code>hooks</code> や <code>AGENTS.md</code> などの設定の連鎖で、 セッションの最初の数分以内に5万から10万トークンの読み込みが発生し、 本来の作業の枠を圧迫する経路。</p>
+</div>
+
+<p>3つの経路は同じ「想定より早く枯渇する」 という症状の表面に出ますが、 内部の原因は別物で、 必要な対応も別です。 利用者の側から見ると、 自分の症状がどの経路に該当するかを判定できる計測の道具が、 公式の側にはまだ用意されていません (起票13585 で「クォータの情報を CLI から取得する」 要望が2025年12月から継続中)。</p>
+
+<h2>集積の事例 (2026年3月から5月の状況)</h2>
+
+<p>10件の起票で、 累計の反応は約2,200件。 累計の反応の上位の起票から並べた集積の表。</p>
+
+<div class="issue-list">
+<ul>
+<li><strong>起票16157</strong> (反応717件) — Max の購読で瞬時に利用の上限に到達</li>
+<li><strong>起票38335</strong> (反応525件) — 2026年3月23日以降、 Max のセッションの上限が異常に早く尽きる</li>
+<li><strong>起票46917</strong> (反応218件) — v2.1.100 以降でキャッシュ作成のトークン数がサーバ側で約20,000膨張</li>
+<li><strong>起票45756</strong> (反応158件) — Pro Max の5倍の枠が1.5時間で枯渇</li>
+<li><strong>起票29579</strong> (反応92件) — 利用が16%の表示の時点で上限に到達</li>
+<li><strong>起票41788</strong> (反応84件) — v2.1.89 以降の Max 20 の枠が70分で100%消費</li>
+<li><strong>起票13585</strong> (反応82件) — クォータの情報を CLI から取得する要望</li>
+<li><strong>起票23706</strong> (反応77件) — Opus 4.6 のトークン消費が Opus 4.5 より顕著に高い</li>
+<li><strong>起票16856</strong> (反応76件) — CC 2.1.1 のトークン消費の率が以前の版の4倍</li>
+<li><strong>起票19673</strong> (反応76件) — 利用が84%の表示で上限の合図</li>
+</ul>
+</div>
+
+<p>4件の起票で版の境界の独立な合図 (2026年3月23日、 v2.1.89、 v2.1.100、 2.1.1)。 これは利用者の側の知覚のずれではなく、 サーバ側または CLI 側の何かが版の境界で変化した合図です。</p>
+
+<h2>利用者の側の3つの自己診断の手順</h2>
+
+<p>自分の症状が、 3つの経路のどれに該当するかを判定する手順。 5分以内で完了する整備です。</p>
+
+<div class="step-block">
+<strong>手順1、 <code>ccusage</code> で過去7日の集計の取得</strong>
+<p>セッション別、 モデル別の集計と、 各セッションの開始時刻と最終時刻と総トークン数の取得。 過去7日間で、 同じ規模の作業を実施したセッションを2件選び、 総トークン数を比較する。 顕著な差がある場合、 手順2に進む。</p>
+</div>
+
+<div class="step-block">
+<strong>手順2、 直近のセッションの記録の生の取得</strong>
+<p><code>~/.claude/projects/</code> の下の最新の <code>.jsonl</code> を選び、 <code>jq '.message.usage'</code> で各往復の <code>cache_creation_input_tokens</code> と <code>cache_read_input_tokens</code> と <code>input_tokens</code> と <code>output_tokens</code> の4つの数値を取り出す。 通常は <code>cache_read</code> の数値が <code>cache_creation</code> の10倍から100倍の規模になる。 もし <code>cache_creation</code> が <code>cache_read</code> の規模に近い、 あるいはそれを超える場合、 第1の経路 (サーバ側の膨張) の可能性が高い合図。 起票46917 の症状。</p>
+</div>
+
+<div class="step-block">
+<strong>手順3、 セッションの開始からの経過時間と消費の率の計算</strong>
+<p><code>jq -s</code> で4つのトークンの合計と、 開始から最終までの経過秒数の取得。 毎分のトークン数の計算。 毎分のトークン数が50,000を超える場合、 第2または第3の経路の可能性が高い合図。 副の作業者を並行で起動していた場合は第2の経路、 セッションの開始の最初の数分で集中していた場合は第3の経路。</p>
+</div>
+
+<h2>3軸の防衛の hook の導入</h2>
+
+<p><code>cc-safe-setup</code> の3件の hook を同時に導入すると、 3つの経路の検出を背景で自動化できます。 <code>npx</code> の <code>cc-safe-setup --install-example</code> の経路で、 各々の hook を個別に取り込み可能。</p>
+
+<div class="step-block">
+<strong>第1の hook: <code>cache-creation-drift-detector</code></strong>
+<p>単発のリクエストごとに <code>cache_creation_input_tokens</code> を蓄積し、 直近200サンプルの平均と比較し、 既定の1.25倍を超えた時に警告を発火。 起票46917 のサーバ側の膨張の検出が主目的。 20サンプル以上の履歴が必要なため、 最初の数日間は警告が発火しない経路。</p>
+</div>
+
+<div class="step-block">
+<strong>第2の hook: <code>quota-anomaly-detector</code></strong>
+<p>入力と出力とキャッシュ読込とキャッシュ作成の4つのトークンの合計を蓄積し、 直近10分の毎分のトークン数と直近24時間の毎分のトークン数を比較し、 既定の1.5倍を超えた時に警告を発火。 セッションをまたぐ消費の率の異常の検出が主目的。 30サンプル以上の履歴が必要。</p>
+</div>
+
+<div class="step-block">
+<strong>第3の hook: <code>session-rate-monitor</code></strong>
+<p>セッションの開始からの経過時間と累積のトークン数を追跡し、 毎分のトークン数が絶対の上限 (既定は毎分50,000トークン) を超えた時に警告を発火。 過去の基準のデータが不要で、 5サンプル以上かつ60秒以上の経過で警告が可能。 新規セッションの最初の5分以内の異常な消費の検出が主目的。</p>
+</div>
+
+<p>3軸は互いに独立で、 1件だけの導入では1つの経路の異常しか捉えられません。 推奨は3件の同時の導入。 各々の hook を <code>~/.claude/settings.json</code> の <code>PostToolUse</code> の <code>matcher: ""</code> の下に <code>command</code> として追記します。</p>
+
+<h2>3つの警告の予兆</h2>
+
+<div class="warn-block">
+<strong>予兆1、 <code>cache_creation</code> の値が <code>cache_read</code> に近づく</strong>
+<p>通常は <code>cache_read</code> が <code>cache_creation</code> の10-100倍の規模ですが、 <code>cache_creation</code> が <code>cache_read</code> に近い、 あるいは超える場合、 サーバ側のキャッシュ作成の膨張の合図。 起票46917 の症状で、 v2.1.100 以降の版の境界の合図の継続中。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆2、 セッションの最初の5分の消費の率の急増</strong>
+<p>セッションの開始の最初の5分以内の累積のトークン数が、 過去の同じ作業の規模の中央値の2倍を超える場合、 設定の連鎖の累積の合図。 既定の hook、 AGENTS.md、 環境変数、 副の作業者の集まりの設定の累計の規模の月次の確認の整備が予防の経路。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆3、 同じ作業の規模の総トークン数の版の境界での跳ね</strong>
+<p>同じ依頼の調子と同じ規模の作業で、 CLI の版の更新の前後で総トークン数が顕著に異なる場合、 サーバ側または CLI 側の版の境界の合図。 v2.1.89、 v2.1.100、 2.1.1 の3件の版の境界で集積の合図の継続中。 月次の <code>ccusage</code> の集計の取得で、 版の境界の前後の差分の取得が可能。</p>
+</div>
+
+<h2>本号の購入の経路</h2>
+
+<p>8月号の全6 Part (約22,000字、 紙の体裁で約22頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 8月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">8月号は8月1日配信予定。 5月号と6月号と7月号の試し読みで中身の質と書き方の深さを判断できます。 <a href="safety-lab-may-preview.html" style="color:#58a6ff">5月号の Part 1</a> &middot; <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号の Part 1</a> &middot; <a href="safety-lab-july-preview.html" style="color:#58a6ff">7月号の Part 1</a></p>
+</div>
+
+<h2>次の段の整備の経路</h2>
+
+<p>8月号の Part 2 で、 10件の起票の事案の深掘りと、 4件の版の境界の独立な合図 (2026-03-23、 v2.1.89、 v2.1.100、 2.1.1) の articulate を整備。 Part 3 で3軸の hook の組み合わせの設定例 (3件同時の <code>settings.json</code> の articulate と、 各 hook の環境変数の整備、 衝突の予防の手順)。 Part 4-5 で警告の発火の後の即座の対応の手順と、 6月15日の課金分離以降の API の直接の鍵への切替の判断の入力の整備。 Part 6 で <code>cc-safe-setup</code> の関連の道具の整備の整理。</p>
+
+<p>9月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。 9月号は権限の照合の境界の集積の主題、 12月号は AUP の判別器の誤発火の集積の主題、 2027年1月号は道具の呼び出しの解析の失敗の集積の主題。</p>
+
+<footer>
+<p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
+<p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code (10 issues totaling ~2,200 reactions: #16157, #38335, #46917, #45756, #29579, #41788, #13585, #23706, #16856, #19673). No private or unpublished information is included.</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-may-preview.html">5月号 Part 1</a> &middot; <a href="safety-lab-june-preview.html">6月号 Part 1</a> &middot; <a href="safety-lab-july-preview.html">7月号 Part 1</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+</footer>
+
+</body>
+</html>
