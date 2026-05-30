@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年5月号 Part 1 全文 (9件の事故事例) — CC Safety Lab 試し読み</title>
+<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年5月号 Part 1 を全文公開。 cache_control の API 400、 利用量表示のずれ、 Cowork の予定タスク silent skip、 Worktree、 Skill、 UI、 Cmd+F、 子の作業者の身分の漏れ、 2.1.126 の沈黙の退行 の9件の事故事例の整理。 約6,000字、 読了5分。">
+<meta name="keywords" content="Claude Code, 事故事例, 月額, 月次便, cache_control, Cowork, Worktree, Skills, Safety Lab, Ko-fi">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-may-preview.html">
+<meta property="og:title" content="2026年5月号 Part 1 全文 (9件の事故事例) — CC Safety Lab 試し読み">
+<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年5月号 Part 1 を全文公開。 9件の事故事例の整理、 約6,000字、 読了5分。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"2026年5月号 Part 1 全文 (9件の事故事例)","description":"CC Safety Lab 2026年5月号の Part 1 全文公開。 cache_control の集積、 利用量表示のずれ、 Cowork、 Worktree、 Skill、 UI、 同期問題、 身分の漏れ、 2.1.126 の沈黙の退行 の9件。","datePublished":"2026-05-05","dateModified":"2026-05-30","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.subscribe{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.subscribe strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.issue-block{background:#161b22;border-left:3px solid #58a6ff;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.issue-block strong{color:#f0f6fc}
+.issue-list{font-size:.88rem;color:#8b949e;font-family:'SF Mono',Monaco,monospace}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年5月号 Part 1 全文</span></p>
+<h1>2026年5月号 Part 1: 今月の事故と仕様変更</h1>
+<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年5月号 Part 1 の全文公開です。 5月号は5月5日に配信済、 6月号は6月1日配信予定。 5月号全体は約22,701字 (紙の体裁で22頁)、 そのうち Part 1 (約6,000字、 9件の事故事例) を本頁で全文公開します。</p>
+
+<div class="subscribe">
+<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 5月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (深掘りの事例 + Python の復旧手順)、 Part 3 (安全チェックリスト)、 Part 4-5 (コピペで使える hook の設定例2件)、 Part 6 (既存商品の今月の更新) は Founder 会員の月次の届け物に含まれます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁は2026年5月30日の整備で、 GitHub Gist の経路から HTML の頁の経路へ移管。 Part 1 の本文は5月5日配信の5月号からの抜粋で、 改編はしていません。</p>
+</div>
+
+<div class="meta-block">
+<strong>集計範囲:</strong> 2026-04-25 から 2026-05-02 の GitHub Issue の公開情報、 Reddit / HN の表面化した様式<br>
+<strong>読了の目安:</strong> 5分<br>
+<strong>収録の事故事例:</strong> 9件 (cache_control / 利用量表示 / Cowork / Worktree / Skill / UI / クライアント切り替え / 子の作業者の身分の漏れ / 2.1.126 の沈黙の退行)
+</div>
+
+<h2>事故 1: cache_control 空テキストブロックの API 400 集積</h2>
+
+<p>同根の API 400 エラーが14本の別々の Issue として立っている。 Anthropic API が空のテキストブロックに <code>cache_control</code> 印を付けた状態を拒否し、 一度履歴に入ると <code>claude --resume</code> も「Try again」 も同じ理由で落ちる。</p>
+
+<p class="issue-list">該当 Issue: #55369 / #55156 / #55302 / #55283 / #55118 / #54988 / #54421 / #54314 / #53632 / #53491 / #50738 / #50681 / #50082 / #50010</p>
+
+<p>きっかけは4種類の経路が観察できる:</p>
+<ul>
+  <li>画像をキャプションなしで貼り付けた直後</li>
+  <li>ストリームの待機タイムアウト後の自動再送</li>
+  <li>AskUserQuestion の回答が空のまま送られたとき</li>
+  <li>session の再開直後に履歴が壊れていたとき</li>
+</ul>
+
+<p>復旧手順 (文脈を保持したままの経路) と Python のスクリプトは Part 2 で本文整理。</p>
+
+<h2>事故 2: 利用量表示の実態とのずれ</h2>
+
+<p>利用量の表示が実際とずれて見える様式が複数の Issue で報告されている。</p>
+
+<div class="issue-block">
+<strong>#55383:</strong> Claude Desktop で「Usage limit reached」 が出るのに、 実 session 11% / weekly 29% しか使っていない。 CLI 側は問題なく動く。
+</div>
+
+<div class="issue-block">
+<strong>#55377:</strong> 新しい session の起動直後に利用量パーセントが実態とずれて表示。
+</div>
+
+<div class="issue-block">
+<strong>#55150:</strong> 週次リセットの時刻がずれる。
+</div>
+
+<div class="issue-block">
+<strong>Reddit r/ClaudeAI:</strong> "Usage window greater than 4/5 hours" 系の質問が複数 (4時間または5時間の枠でリセットされず長く保持される)。
+</div>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>表示を頼りにして手を止めず、 実際の API 応答 (429 が返るか) で判断する</li>
+  <li>重要な作業の前に <code>/usage</code> または <code>/cost</code> の出力を控える。 表示が信用できなくなった時の基準点になる</li>
+  <li>週次リセットは「金曜23:59 UTC」 などの仕様準拠と書いてあっても、 現状ずれが報告されているので、 目安以上の意味を持たせない</li>
+</ul>
+
+<h2>事故 3: Cowork mode の予定タスクの silent skip</h2>
+
+<p>Claude Code CLI ではなく Claude Desktop の Cowork mode の話だが、 課金プランで運用に組み込んでいる人が複数の経路。</p>
+
+<div class="issue-block">
+<strong>#55378:</strong> 予定タスクが silent に skip される。 <code>lastRunAt</code> が次の実行枠に進まず <code>nextRunAt</code> が翌日に飛ぶ。 エラー出力も通知もなし。 連続する3週末 (4/19, 4/25, 4/26) と平日夜 (4/30, 5/1) で観察。
+</div>
+
+<div class="issue-block">
+<strong>#55361:</strong> Cowork on Windows 11 で kernel の non-paged pool が NtFC タグでリーク (NTFS FCB)、 長時間運用で OS 全体に影響。
+</div>
+
+<div class="issue-block">
+<strong>#55358:</strong> <code>CronCreate</code> の <code>durable=true</code> が永続化されない、 <code>.claude/cron.json</code> に書き戻されない。
+</div>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>Cowork に依存している重要タスク (朝のまとめ生成など) は、 外部の cron や Google Apps Script の時刻きっかけで起こす作業に並列化しておく。 Cowork の scheduler 自身が落ちたとき、 その scheduler に依存した監視は通知できない</li>
+  <li>Windows での長時間運用は、 定期的に再起動する運用にする</li>
+  <li>予定タスクの動作確認は、 <code>mcp__scheduled-tasks__list_scheduled_tasks</code> の <code>lastRunAt</code> が予定の窓ごとに進んでいるかを別の場所からチェックする</li>
+</ul>
+
+<h2>事故 4: Worktree の submodule.recurse 設定の干渉</h2>
+
+<div class="issue-block">
+<strong>#55387:</strong> バックグラウンドの worktree のフル checkout が、 リポジトリに <code>submodule.recurse=true</code> の設定があると「not-a-git-repo」 エラーで失敗。
+</div>
+
+<div class="issue-block">
+<strong>#55386:</strong> EnterWorktree が session の cwd は正しく切り替えるが、 Desktop の side-panel の branch インジケータが古いまま。
+</div>
+
+<div class="issue-block">
+<strong>#55359:</strong> Claude Code が現在のディレクトリで初期化に失敗する報告。
+</div>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>worktree 利用の前に submodule の設定を確認、 エラーが出たら一時的に <code>submodule.recurse=false</code> にして起動</li>
+  <li>branch の表示は CLI 側 (<code>git branch --show-current</code>) で確認する習慣にする</li>
+</ul>
+
+<h2>事故 5: Skill / Plugin の変数展開の失敗</h2>
+
+<div class="issue-block">
+<strong>#55382:</strong> <code>${CLAUDE_SKILL_DIR}</code> が SKILL.md の frontmatter <code>allowed-tools</code> のパターンで置換されない。
+</div>
+
+<div class="issue-block">
+<strong>#55381:</strong> Cowork の ElevenLabs プラグインで <code>${user_config.output_dir}</code> が一切置換されない、 TTS / music の出力が全部 default 経路に落ちる。
+</div>
+
+<div class="issue-block">
+<strong>#55379:</strong> Windows でグローバルの git config が正しく設定されない。
+</div>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>新しい Skill または plugin を入れるときは、 テンプレ変数が実際に置換されるかを1回手動で動作確認する</li>
+  <li>重要な Skill の <code>allowed-tools</code> は変数展開ではなく絶対手順で書くと安全</li>
+</ul>
+
+<h2>事故 6: UI の探索と同期の問題</h2>
+
+<div class="issue-block">
+<strong>#55388:</strong> 会話検索 Cmd+F に Unicode のトークン化のバグ、 絵文字や短い CJK の文字列が見つからない。
+</div>
+
+<div class="issue-block">
+<strong>#55385:</strong> Android アプリと Web の会話履歴が同期しない。
+</div>
+
+<div class="issue-block">
+<strong>#55384:</strong> Warp ターミナルで terminal の clear 後に Claude Code が UI を二重表示。
+</div>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>重要な会話は絵文字や短い CJK の経路ではなく、 英数字の一意の符号 (Issue 番号など) で印を残す</li>
+  <li>会話の引き継ぎは Android と Web の経路の同期に依存せず、 export の経路で固定する</li>
+</ul>
+
+<h2>事故 7: クライアントの切り替えと身分の漏れ</h2>
+
+<p>Claude の SDK や API の経路で、 別の AI の経路への切り替えの段で、 認証の情報や身分の合図の漏れの様式が複数の経路の起票で観察される (4月25日から5月2日の集積で4件以上)。 別の経路への切り替えの整備の前に、 身分の合図の経路の整理が必要。</p>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>SDK の経路の切り替えの前に、 既存の経路の認証の情報の整理 (環境変数、 設定ファイル、 一時的な合図) を確認</li>
+  <li>切り替えの後の段で、 身分の合図の経路の検査の整備</li>
+</ul>
+
+<h2>事故 8: 子の作業者の身分の漏れ</h2>
+
+<p>副の作業者 (Task の経路) の整備の段で、 親の作業者の認証の情報や境界の合図が、 副の作業者の経路に漏れる様式の起票が複数の経路で観察される。 これは集積11 (Cowork) の延長の経路の合図でもあり、 5月の集積の整備の中核の経路。</p>
+
+<p>対処の方向の整理:</p>
+<ul>
+  <li>副の作業者の派遣の前に、 渡す合図の境界の整理</li>
+  <li>機密の合図 (API key、 設定の経路) は副の作業者の経路に渡さない整備</li>
+</ul>
+
+<h2>事故 9: Claude Code 2.1.126 の沈黙の退行</h2>
+
+<p>2.1.126 の発火の段で、 既存の整備の経路の中で複数の沈黙の退行の合図が観察されている。 利用者の経路の整備の継続の確認の経路。</p>
+
+<p>5月号の Part 2 で、 9件の事故事例の中で深掘りが必要な事例 (cache_control の集積、 Cowork の予定タスク、 子の作業者の身分の漏れ) の経路を、 復旧の手順と Python のスクリプトと一緒に整理。 Part 3 で月次の安全チェックリストの経路の整備。 Part 4-5 で2件の hook の設定例 (cache_control の予防の hook、 子の作業者の身分の漏れの予防の hook) の整備。 Part 6 で既存の商品 (cc-safe-setup、 Token Book、 Migration Playbook、 Postmortems、 Survival Guide) の5月の段の合図の整理。</p>
+
+<h2>本号の購入の経路</h2>
+
+<p>5月号の全6 Part (約22,701字、 紙の体裁で22頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 5月号と6月号と7月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">5月号は配信済、 6月号は6月1日配信予定 (6月15日の課金分離の前14日の整備の中核の章を含む)。</p>
+</div>
+
+<h2>次の段の整備の経路</h2>
+
+<p>6月号は5月の集積の延長で、 6月15日の課金分離 (Pool 1 と Pool 2 の経路) の前14日の整備の中核の章を含む。 7月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。</p>
+
+<p>加えて、 集積9 (利用方針の判別器の誤発火) の4件の防衛の道具の集まりの整備の経路は、 12月号の主題の合図で、 5月30日の段で4件の道具の全件で出荷の完成段。 cc-safe-setup の README で動線の整備の経路。</p>
+
+<footer>
+<p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
+<p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code, public Reddit r/ClaudeAI threads, and public HN discussions. No private or unpublished information is included.</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+</footer>
+
+</body>
+</html>
