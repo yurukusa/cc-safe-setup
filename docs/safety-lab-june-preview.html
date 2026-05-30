@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年6月号 Part 1 — 6月15日の課金分離の22日の準備の手引き — CC Safety Lab 試し読み</title>
+<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年6月号 Part 1 を全文公開。 6月15日の Anthropic の課金分離の発火まで22日。 自動の運用者の7つの準備の手順 (受領の便りの到来の準備、 自動の経路の棚卸し、 現在の使用量の取得、 事前飛行の検査、 上限の自動の停止の整備、 公式の鍵への切替の判定、 発火の前後の差分の取得) と3つの警告の予兆の articulate。 約6,500字、 読了7分。">
+<meta name="keywords" content="Claude Code, 6月15日, 課金分離, Pool 1, Pool 2, Anthropic, 月額, 月次便, Safety Lab, Ko-fi">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-june-preview.html">
+<meta property="og:title" content="2026年6月号 Part 1 — 6月15日の課金分離の22日の準備の手引き">
+<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年6月号 Part 1 を全文公開。 6月15日の課金分離の発火の前22日の整備の7つの手順と3つの警告の予兆、 約6,500字、 読了7分。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"2026年6月号 Part 1 — 6月15日の課金分離の22日の準備の手引き","description":"CC Safety Lab 2026年6月号の Part 1 全文公開。 Anthropic の6月15日の課金分離の発火まで22日の段の、 自動の運用者の7つの準備の手順と3つの警告の予兆の articulate。","datePublished":"2026-06-01","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.subscribe{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.subscribe strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.step-block{background:#161b22;border-left:3px solid #58a6ff;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.step-block strong{color:#f0f6fc}
+.warn-block{background:#1c1310;border-left:3px solid #f85149;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.warn-block strong{color:#f85149}
+.countdown{background:#3b1d12;border:1px solid #f85149;border-radius:6px;padding:.6rem 1rem;margin:1rem 0;text-align:center;font-weight:600;color:#f0f6fc}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年6月号 Part 1 全文</span></p>
+<h1>2026年6月号 Part 1: 6月15日の課金分離の22日の準備の手引き</h1>
+<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年6月号 Part 1 の全文公開です。 6月号は6月1日に配信予定、 7月号は7月1日配信予定。 6月号全体は約24,000字 (紙の体裁で約24頁)、 そのうち Part 1 (約6,500字、 7つの準備の手順と3つの警告の予兆) を本頁で全文公開します。</p>
+
+<div class="countdown">本日2026年5月31日、 6月15日の課金分離の発火まで15日。</div>
+
+<div class="subscribe">
+<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 6月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (3つの事故の事例の延長と Python の事前飛行の検査の手順)、 Part 3 (月次の整備の点検の表の整備)、 Part 4-5 (上限の自動の停止の hook と日次の警告の hook の2件の設定例)、 Part 6 (cc-safe-setup の Pool 2 関連の道具の整備の整理) は Founder 会員の月次の届け物に含まれます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の Part 1 の本文は6月1日配信の6月号からの抜粋で、 改編はしていません。 5月13日の Anthropic の通知、 5月22日の業界の独立な分析、 5月23日の起票61704 の€84.68の損失の事例を時間軸の準備の入力として統合した整備です。</p>
+</div>
+
+<div class="meta-block">
+<strong>集計範囲:</strong> 2026-05-13 の Anthropic の通知から 2026-05-31 までの公開情報、 GitHub Issue の集積、 Reddit / HN の表面化した様式<br>
+<strong>読了の目安:</strong> 7分<br>
+<strong>収録の中身:</strong> 課金分離の構造の整理、 7つの準備の手順、 3つの警告の予兆
+</div>
+
+<h2>6月15日の課金分離の構造の整理</h2>
+
+<p>5月13日に Anthropic は購読者に通知の便りを発送しました。 6月15日の発火の後、 自動の使用は購読の利用枠から別の月次の枠に分離されます。 対象は4つの経路。</p>
+
+<ul>
+  <li><code>claude -p</code> の対話なしの派遣</li>
+  <li>公式の自動の道具の組の経路</li>
+  <li>GitHub の自動の実行の経路</li>
+  <li>第三者の作業者の道具の経路</li>
+</ul>
+
+<p>対話の経路は変化なし。 各 plan の月次の枠の金額は購読の料金と同じ目盛りで、 <code>Pro</code> が20ドル、 <code>Max 5x</code> が100ドル、 <code>Max 20x</code> が200ドル。 枠は次月への繰越なし。</p>
+
+<p>中核の単一の合図は、 枠が公式の値段で消費される事実。 同じ作業の量で、 購読の換算と公式の値段の換算には、 軽い作業で約12倍、 重い作業で150倍以上の幅の値段の差があります (5月13日の独立な分析と、 5月22日の業界の累計)。 業界の典型として、 独立な開発者の1日4件の <code>PR</code> の対の評価の自動の経路で、 公式の値段で約25ドル/月の消費の見込み。 <code>Pro</code> の枠の20ドルでは3週目で枯渇の予測。 5名の開発者が10件/日の自動の作業で運用する場合、 月の合計の消費は340から1,125ドルの幅。</p>
+
+<h2>22日の準備の7つの手順</h2>
+
+<div class="step-block">
+<strong>第1、 受領の通知の便りの到来の準備</strong>
+<p>Anthropic は6月8日頃に対象の購読者に受領の便りを発送する見込み。 受領は1回の手動の発火で、 以後は自動の更新。 月額の購読者の準備は2つ。 第1、 購読の口座の便りの配送の確認 (迷惑の箱への振り分けの点検)。 第2、 受領を忘れた場合の影響の認識 (20、 100、 200ドルの枠の取得の遅延、 6月15日の発火の後の自動の経路の停止の可能性)。</p>
+</div>
+
+<div class="step-block">
+<strong>第2、 自動の経路の棚卸し</strong>
+<p>自分の運用の中で6月15日の影響を受ける経路を全件で書き出します。 観察の対象は4つ。 <code>claude -p</code> を呼ぶシェルの文書や定期実行の経路、 GitHub の自動の実行で Claude Code の発火を含む経路、 公式の自動の道具の組を経由する自前の道具の経路、 第三者の作業者の道具の経路。</p>
+<p>棚卸しの素案は、 月次の整備の点検の表に組み込み。 月の頻度の作業の上位3件、 日の頻度の作業の上位3件、 1回限りの自動の作業の上位3件の合計9件を最低の整備の対象として列挙します。</p>
+</div>
+
+<div class="step-block">
+<strong>第3、 現在の使用量の取得</strong>
+<p>3つの公式の経路と1つの自前の経路があります。 Anthropic の請求の頁の利用量の閲覧、 公式の使用量と費用の API 経路 (<code>/v1/organizations/cost_report</code>、 管理の鍵が必要で <code>sk-ant-admin</code> で始まる)、 Claude Code の分析の API の日次の集計の取得、 加えて自前の経路は Claude Code が対話ごとに書き出す jsonl の経路 (<code>~/.claude/projects/*/session-*.jsonl</code>) を集計する経路。</p>
+<p>5月の残りの期間で、 自動の経路の各々の入力と出力の字句の数、 蓄えの作成と読み出しの字句の数の月次の合計を記録。 6月15日の発火の後の差分の比較の基準値の整備。</p>
+</div>
+
+<div class="step-block">
+<strong>第4、 事前飛行の検査の手順</strong>
+<p>起票61704 の€84.68の損失の事例で、 同じ起票の別の投稿者が articulate した防衛の手順。 自動の派遣の定期実行や作業者の群の起動の前に、 1件の手動の <code>claude -p</code> の派遣を発火し、 直後に Anthropic の請求の頁で実際の振り分けを観察し、 期待と実態の合致を確認する経路。</p>
+<p>5月の残りの期間の整備の素案。 6月8日頃 (受領の便りの前後)、 6月15日の発火の翌日、 6月22日 (発火の1週間後) の3回の事前飛行の検査の手順を月次の作業に組み込み。 各々の結果は、 請求の頁の画面の写し、 自前の jsonl の集計の差分の記録で残す経路。</p>
+</div>
+
+<div class="step-block">
+<strong>第5、 上限の自動の停止の仕組みの整備</strong>
+<p>起票61704 の損失の根本の原因は、 自動の派遣の経路が請求の上限を超過した時に停止しなかった事実。 月額の購読者の整備の素案は3つ。 日次の集計の閾値の警告の定期実行の整備 (枠の80%の時に便りや通知の発火)、 90%の時の自動の派遣の経路の停止の機構の整備、 99%の時の強制の停止の機構 (例えば仮想の鍵の経路で予算の鍵の自動の無効化、 観察の道具の経路で予算の警告の発火)。</p>
+<p>自前の道具の素案として、 簡単な経路は定期実行で日次の <code>curl</code> での費用の API の取得と、 閾値を超えた時の通知の発火の組み合わせ。 詳しい設定例は Part 4-5 の hook の整備の節で articulate。</p>
+</div>
+
+<div class="step-block">
+<strong>第6、 公式の鍵への切替の判定</strong>
+<p>自前の自動の経路の合計の月次の消費が、 自分の plan の枠 (20、 100、 200ドル) を超える見込みの場合、 別途の公式の鍵の経路への切替の判定が入ります。</p>
+<p>判定の入力の3つ。 既存の自動の経路の月次の合計の消費の見込み (第3の手順の取得の結果)、 公式の鍵の経路の月次の追加の費用 (公式の値段で換算)、 OAuth の経路の禁止の事実 (2026年2月の公式の文書の更新で、 購読の OAuth の鍵を自動の道具の組で使う経路は禁止、 2026年1月に Anthropic は利用規約の違反として実機の措置を実行)。</p>
+<p>切替の合図。 月次の合計の自動の消費が枠の200%を超える見込みの場合、 公式の鍵の経路の方が経済の側で合理。 100%から200%の幅の場合、 自動の経路の整理 (頻度の低下、 模型の切替) の素案。 100%未満の場合、 現状の枠の経路で持続。</p>
+</div>
+
+<div class="step-block">
+<strong>第7、 6月15日の発火の前後の差分の取得</strong>
+<p>5月22日から6月22日の31日の固定の定期実行の負荷を維持し、 6月15日の発火の前後の差分を観察します。 観察の対象は4つ。 同じ作業の量の月次の合計の入力と出力の字句の差分、 蓄えの命中の率の差分、 同じ作業の量の月次の合計の費用の差分 (購読の換算から公式の値段の換算への変化の幅)、 自動の経路の停止の発生の有無 (枠の枯渇の経路)。</p>
+<p>差分の整理の素案は、 6月22日 (発火の1週間後) と6月30日 (発火の2週間後) の2回の整理の段で記録。 整備の結果は月額の購読者の自己診断の経路の入力。</p>
+</div>
+
+<h2>警告の3つの予兆</h2>
+
+<div class="warn-block">
+<strong>予兆1、 OAuth の鍵の経路を自動の道具の組で使う</strong>
+<p>2026年2月の公式の文書の更新で、 購読の OAuth の鍵を自動の道具の組の経路で使う事は禁止。 2026年1月に Anthropic は利用規約の違反として、 OAuth の鍵を抽出して別の作業者の経路で使う第三者の道具に対して実機の措置を実行しました。 自前の作業者の群の整備で、 購読の OAuth の鍵を抽出して連続の派遣を発火する経路は、 利用規約の違反で口座の停止の経路。 整備の素案は、 自動の経路は全件で公式の <code>claude -p</code> の道具の経路で発火するか、 別途の公式の鍵の経路に切替で運用する経路。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆2、 模型に請求の経路を聞く</strong>
+<p>起票61704 の€84.68の損失の根本の原因。 模型は Anthropic の請求の仕組みを構造的に読まない、 にもかかわらず「これは課金されますか」 の問いに対して確信の説明を生成します。 整備の素案は、 請求の経路の判定の入力は全件で公式の文書と請求の頁の実機の取得から取得し、 模型からの説明は信頼の源としない規律。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆3、 受領を忘れる</strong>
+<p>6月8日頃の受領の便りを見落とすか迷惑の箱に振り分けされた場合、 枠の取得の遅延の経路。 5月の残りの期間の整備の素案は、 Anthropic の便りの白の名簿への登録 (<code>@anthropic.com</code> の経路の優先の整備)、 加えて、 6月8日から6月14日の期間に毎日受領の便りの到来を点検する手順の月次の作業の追加。</p>
+</div>
+
+<h2>本号の購入の経路</h2>
+
+<p>6月号の全6 Part (約24,000字、 紙の体裁で約24頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 6月号と7月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">6月号は6月1日配信予定 (6月15日の課金分離の前14日の整備の中核の章を含む)。 5月号は5/5配信済で、 <a href="safety-lab-may-preview.html" style="color:#58a6ff">5月号の Part 1 の試し読み</a> で中身の質と書き方の深さを判断できます。</p>
+</div>
+
+<h2>次の段の整備の経路</h2>
+
+<p>6月号の Part 2 で、 3つの事故の事例 (起票61704 の€84.68の損失の事例、 5月の Cowork 急増の集積の延長、 Pool 2 の枠の早期の枯渇の事例) の延長と Python の事前飛行の検査の手順を整理。 Part 3 で月次の整備の点検の表の整備。 Part 4-5 で2件の hook の設定例 (上限の自動の停止の hook、 日次の警告の hook) の整備。 Part 6 で cc-safe-setup の Pool 2 関連の道具の整備の整理。</p>
+
+<p>7月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。 7月号は AGENTS.md の interop の集積の主題、 8月号は Pro Max の利用枠の異常の集積の主題、 9月号は権限の照合の境界の集積の主題、 12月号は AUP の判別器の誤発火の集積の主題。</p>
+
+<p>加えて、 集積9 (利用方針の判別器の誤発火) の4件の防衛の道具の集まりの整備の経路は、 12月号の主題の合図で、 5月30日の段で5件の道具の全件で出荷の完成段。 cc-safe-setup の README で動線の整備の経路。</p>
+
+<footer>
+<p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
+<p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code (notably #61704), the 2026-05-13 Anthropic billing notification, and public Reddit r/ClaudeAI threads. No private or unpublished information is included.</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-may-preview.html">5月号 Part 1</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+</footer>
+
+</body>
+</html>
