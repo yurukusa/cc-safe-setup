@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路 — CC Safety Lab 試し読み</title>
+<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年7月号 Part 1 を全文公開。 過剰な設計の単発の事案での発見の難しさと、 累積の数値の長い時間の軸での発見の経路。 thecatfix さんの16ヶ月の62件の記録の集まり (起票61101) の累積の数値 (968M トークン、 2,109件の計画、 19% の実装の率) を中核に、 利用者の側の3つの自己点検の手順を articulate。 約6,500字、 読了7分。">
+<meta name="keywords" content="Claude Code, 過剰な設計, 複雑性の中毒, thecatfix, 月額, 月次便, Safety Lab, Ko-fi">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-july-preview.html">
+<meta property="og:title" content="2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路">
+<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年7月号 Part 1 を全文公開。 過剰な設計の累積の数値の発見の経路と利用者の側の3つの自己点検の手順、 約6,500字、 読了7分。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路","description":"CC Safety Lab 2026年7月号の Part 1 全文公開。 過剰な設計の単発の事案での発見の難しさと、 累積の数値の長い時間の軸での発見の経路の articulate。","datePublished":"2026-07-01","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.subscribe{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.subscribe strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.step-block{background:#161b22;border-left:3px solid #58a6ff;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.step-block strong{color:#f0f6fc}
+.warn-block{background:#1c1310;border-left:3px solid #f85149;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.warn-block strong{color:#f85149}
+.stat-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0}
+.stat-block strong{color:#f0f6fc}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年7月号 Part 1 全文</span></p>
+<h1>2026年7月号 Part 1: 過剰な設計の累積の数値の発見の経路</h1>
+<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年7月号 Part 1 の全文公開です。 7月号は7月1日に配信予定。 7月号全体は約22,000字 (紙の体裁で約22頁)、 そのうち Part 1 (約6,500字、 過剰な設計の単発の事案での発見の難しさと、 累積の数値の経路の articulate、 利用者の側の3つの自己点検の手順) を本頁で全文公開します。</p>
+
+<div class="subscribe">
+<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 7月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (thecatfix さんの62件の記録の集まりの中の7件の独立な事案の延長)、 Part 3 (16ヶ月の窓の累積の数値の取得の手順と Python の素案)、 Part 4-5 (発見の経路の hook の2件の設定例)、 Part 6 (cc-safe-setup の関連の道具の整備の整理) は Founder 会員の月次の届け物に含まれます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の Part 1 の本文は7月1日配信の7月号からの抜粋で、 改編はしていません。 thecatfix さん (起票61101) の2026年5月24日の公開の手書きの分析の文書 (27,000字、 16ヶ月の62件の記録の整理) を時間軸の累積の数値の入力として統合した整備です。</p>
+</div>
+
+<div class="meta-block">
+<strong>集計範囲:</strong> 2025-01 から 2026-04 の16ヶ月の窓、 起票61101 (thecatfix さんの公開の解約の合図の利用者) の手書きの分析の文書、 関連の公開の起票の集まり<br>
+<strong>読了の目安:</strong> 7分<br>
+<strong>収録の中身:</strong> 過剰な設計の単発の事案での発見の難しさ、 累積の数値の経路、 16ヶ月の62件の記録の集まりの中核の数値の整理、 利用者の側の3つの自己点検の手順
+</div>
+
+<h2>過剰な設計の単発の事案での発見の難しさ</h2>
+
+<p>過剰な設計の事案は、 利用者の側の発見の経路の整備が単発の事案では難しい系統です。 単発の事案の局面で、 過剰な設計は「丁寧な書き込み」「念のための予防の追加」「将来の拡張への備え」 と区別が付きません。 利用者は事案の発生の時点で、 過剰な設計を発見できません。</p>
+
+<p>過剰な設計の発見は、 累積の数値の長い時間の軸の取得でのみ可能です。 「起稿した計画の文書の数」 と「実装に到達した計画の数」 の比率、 「派遣した代理の数」 と「成果物を出した代理の数」 の比率、 「設計の文書の長さ」 と「実機の動作の単純さ」 の比率。 単発の局面では見えない比率が、 4ヶ月から16ヶ月の窓で取得すると激しい乖離を示します。</p>
+
+<p>本号 Part 1 は、 thecatfix さんの公開の解約の合図の起票の中の累積の数値を中核に、 過剰な設計の長い時間の軸の発見の経路の整理と、 利用者の側の自己の点検の手順の articulate を扱います。 6月号の主張と実態の乖離の系統 (単発の事案の経路) と並ぶ、 累積の事案の経路の中核の主題。</p>
+
+<h2>thecatfix さんの16ヶ月の62件の記録の集まりの累積の数値</h2>
+
+<p>利用者の thecatfix さんは、 2025年1月から2026年4月の16ヶ月の窓で、 Claude の代理の作業の事案を62件の起票として記録しました。 2026年4月23日に、 62件の事案の整理として27,000字の手書きの分析の文書を起稿。 起票の場の公開は2026年5月24日 (口座の解約の合図と同時)。</p>
+
+<p>文書の中の累積の数値の整理は、 過剰な設計の系統の最強の現代の公開の証拠です。</p>
+
+<div class="stat-block">
+<strong>4ヶ月の窓の累積のトークンの消費</strong>
+<p>2025年7月から10月の4ヶ月の窓で、 968M のトークンの消費。 推定の費用は$1,220 米ドル相当。</p>
+</div>
+
+<div class="stat-block">
+<strong>1年の累積の計画の文書の数と実装の率</strong>
+<p>2025年の累計の計画の文書の起稿の数は2,109件。 同じ年の累計の計画の文書の実装の率は19%。 81% は実装に到達せず。</p>
+</div>
+
+<div class="stat-block">
+<strong>git の作業の樹の累計の数値</strong>
+<p>2025年の git の作業の樹の累計の計画の数は750件、 累計の実装の数は18件。 実装の率は2.4%。</p>
+</div>
+
+<div class="stat-block">
+<strong>5日間の代理の量産と全件の削除</strong>
+<p>2025年10月1日から5日の5日間で、 60件の代理を起稿。 10月7日に全件を「過剰な専門化、 利用なし」 の理由で削除。</p>
+</div>
+
+<p>文書の中の事案の分類で、 過剰な設計の独立な事案は7件で、 全体の62件の11%。 累積の数値の系統と単発の事案の系統の双方が、 同じ利用者の運用の中で同時に観察されます。</p>
+
+<h2>利用者の側の3つの自己点検の手順</h2>
+
+<div class="step-block">
+<strong>手順1、 計画の文書の起稿の数と実装の率の取得</strong>
+<p>月の単位で、 起稿した計画の文書の数と、 そのうち実装に到達した数の取得。 計画の文書は、 markdown の起稿で「実装する予定」 と書いた文書、 もしくは task-list の起稿の単位。 実装の率が30% を下回る場合、 計画の起稿が現実の作業の輪と乖離している合図。 月の閉じの段で、 計画の起稿の数の上限の自己の整備を入れる。</p>
+</div>
+
+<div class="step-block">
+<strong>手順2、 代理の起稿の数と成果物の数の比率の取得</strong>
+<p>代理 (sub-agent、 task、 worker) の起稿の数と、 成果物 (commit、 PR、 公開) を出した数の比率の取得。 比率が10:1 を超える場合、 代理の量産が累積の費用の源泉になっている合図。 5日間で60件の代理の事例のように、 短い期間の極端の集中の合図の検出は、 日次の代理の起稿の数の取得で可能。</p>
+</div>
+
+<div class="step-block">
+<strong>手順3、 設計の文書の長さと実機の動作の単純さの比率の取得</strong>
+<p>設計の文書の起稿の段の累計の字数と、 実機の動作の単純さ (実装の中の行の数、 もしくは公開の頁の文字数) の比率の取得。 文書の長さが実機の動作の10倍を超える場合、 設計の文書の起稿が実機の整備の代理の経路になっている合図。 月の閉じの段で、 設計の文書の起稿の前の段で「これは1行で書けないか」 の自問の手順の追加。</p>
+</div>
+
+<h2>3つの警告の予兆</h2>
+
+<div class="warn-block">
+<strong>予兆1、 計画の文書の起稿の中の「将来の拡張」 の頻度</strong>
+<p>計画の文書の中の「将来の拡張」「念のため」「後で必要になるかもしれない」 の表現の頻度の上昇。 表現の頻度の monthly の取得は grep の経路で可能。 頻度が前月の2倍を超える場合、 過剰な設計の累積の経路に入っている合図。 整備の素案は、 計画の起稿の前の段で「現在の作業の問題は何か」 の問いの整理を強制する手順の追加。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆2、 一日の代理の起稿の数の急増</strong>
+<p>一日の代理の起稿の数が前週の中央値の3倍を超える場合、 過剰な設計の集中の発火の合図。 5日間で60件の代理の事例は、 1日12件の代理の起稿の率で、 通常の運用の3-5倍の中央値の合図。 整備の素案は、 1日の代理の起稿の数の上限の手元の整備 (例えば1日5件以上の代理を起稿しない手元の自分の規律の整備)。</p>
+</div>
+
+<div class="warn-block">
+<strong>予兆3、 設計の文書の起稿の中の「整理」「articulate」「経路」 の累積</strong>
+<p>設計の文書の中の整理の動詞の累積。 「整理」「articulate」「経路」「準備」「整備」 の表現が、 実機の動作の延長ではなく、 整理の経路の延長として累積する場合、 過剰な設計の中毒の合図。 整備の素案は、 設計の文書の起稿の段で、 実機の動作の合図 (1行の commit、 1件の公開、 1件の購入) の起稿の合図を強制する手順の追加。</p>
+</div>
+
+<h2>本号の購入の経路</h2>
+
+<p>7月号の全6 Part (約22,000字、 紙の体裁で約22頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 7月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">7月号は7月1日配信予定。 5月号と6月号の試し読みで中身の質と書き方の深さを判断できます。 <a href="safety-lab-may-preview.html" style="color:#58a6ff">5月号の Part 1</a> &middot; <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号の Part 1</a></p>
+</div>
+
+<h2>次の段の整備の経路</h2>
+
+<p>7月号の Part 2 で、 thecatfix さんの62件の記録の集まりの中の7件の独立な事案 (作業の起稿の段の過剰な構造化、 不要な抽象化の累積、 念のための予防の追加の集積、 将来の拡張のための整備の累積、 計画の文書の起稿の中毒、 代理の量産の発火、 設計の文書の起稿の代理化) の延長を articulate。 Part 3 で16ヶ月の窓の累積の数値の取得の手順と Python の素案の整備。 Part 4-5 で発見の経路の hook の2件の設定例 (計画の文書の起稿の率の追跡の hook、 代理の起稿の数の急増の警告の hook) の整備。 Part 6 で cc-safe-setup の関連の道具の整備の整理。</p>
+
+<p>8月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。 8月号は Pro Max の利用枠の異常の集積の主題、 9月号は権限の照合の境界の集積の主題、 12月号は AUP の判別器の誤発火の集積の主題。</p>
+
+<footer>
+<p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
+<p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code (notably #61101 by thecatfix), and the 2026-04-23 dated public analysis document. No private or unpublished information is included.</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-may-preview.html">5月号 Part 1</a> &middot; <a href="safety-lab-june-preview.html">6月号 Part 1</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+</footer>
+
+</body>
+</html>
