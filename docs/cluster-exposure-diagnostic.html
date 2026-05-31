@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cluster Exposure Diagnostic — Which of the 12 Claude Code failure clusters are hitting you?</title>
-<meta name="description" content="7 questions, 3 minutes. Identify which of the 12 tracked Claude Code failure clusters you are most exposed to, with concrete hook and resource recommendations.">
+<meta name="description" content="7 questions, 3 minutes. Identify which of the 16 tracked plus 7 candidate Claude Code failure clusters you are most exposed to, with concrete hook and resource recommendations.">
 <meta property="og:title" content="Cluster Exposure Diagnostic — Claude Code">
 <meta property="og:description" content="7 questions → list of likely-affected clusters with operator-side defenses for each.">
 <meta property="og:type" content="website">
@@ -62,14 +62,14 @@ footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #21262d; col
 
 <header>
 <h1>Cluster Exposure Diagnostic</h1>
-<p class="sub">Which of the 12 tracked Claude Code failure clusters are most likely hitting you right now?</p>
+<p class="sub">Which of the 16 tracked plus 7 candidate Claude Code failure clusters are most likely hitting you right now?</p>
 </header>
 
 <div class="progress"><div class="progress-bar" id="pb"></div></div>
 
 <div class="step active" id="step0">
 <div class="intro">
-<p><strong>What this is.</strong> Over six weeks (mid-April to end of May 2026), 12 structural failure clusters surfaced in the public <code>anthropics/claude-code</code> issue tracker — 11,820+ reactions across 400+ open issues. None has an official upstream fix yet. Operator-side defenses cover nine of the twelve at the symptom level.</p>
+<p><strong>What this is.</strong> Over the seven-week window from mid-April through 2026-06-01, 16 tracked plus 7 candidate structural failure clusters surfaced in the public <code>anthropics/claude-code</code> issue tracker — 12,000+ reactions across 480+ open issues. None has an official upstream fix yet. Operator-side defenses ship continuously: as of 2026-06-01, 13 of the 16 tracked clusters and 5 of the 7 candidate clusters have at least one shipped defense hook in cc-safe-setup, with new hooks landing within 24-48 hours of each cluster's emergence.</p>
 <p><strong>What this diagnostic does.</strong> Seven multi-select questions about your Claude Code setup map to specific clusters. The result lists the clusters most likely affecting your workflow, with concrete hook installs and reading material per cluster.</p>
 <p><strong>Three minutes. Local-only. No tracking.</strong></p>
 </div>
@@ -177,7 +177,7 @@ footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #21262d; col
 </div>
 
 <footer>
-<p>Cluster framings reconstructed from public GitHub Issues. Full tracker: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a> · Source: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub</a> · Updated 2026-05-29.</p>
+<p>Cluster framings reconstructed from public GitHub Issues. Full tracker: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a> · Source: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub</a> · Updated 2026-06-01.</p>
 </footer>
 
 </div>
