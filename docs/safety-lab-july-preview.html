@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路 — CC Safety Lab 試し読み</title>
-<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年7月号 Part 1 を全文公開。 過剰な設計の単発の事案での発見の難しさと、 累積の数値の長い時間の軸での発見の経路。 thecatfix さんの16ヶ月の62件の記録の集まり (起票61101) の累積の数値 (968M トークン、 2,109件の計画、 19% の実装の率) を中核に、 利用者の側の3つの自己点検の手順を articulate。 約6,500字、 読了7分。">
+<title>過剰な設計は単発の事案では見えない: 16ヶ月の62件の記録の累積の数値からの発見の経路 — CC Safety Lab 試し読み</title>
+<meta name="description" content="Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークン、 2,109件の計画、 19% の実装の率 という累積の数値として表面化します。 thecatfix さんの起票61101 の手書きの分析の文書を中核に、 利用者の側の3つの自己点検の手順を全文公開 (約6,500字、 読了7分)。">
 <meta name="keywords" content="Claude Code, 過剰な設計, 複雑性の中毒, thecatfix, 月額, 月次便, Safety Lab, Ko-fi">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-july-preview.html">
-<meta property="og:title" content="2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路">
-<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年7月号 Part 1 を全文公開。 過剰な設計の累積の数値の発見の経路と利用者の側の3つの自己点検の手順、 約6,500字、 読了7分。">
+<meta property="og:title" content="過剰な設計は単発の事案では見えない: 16ヶ月の累積の数値からの発見の経路">
+<meta property="og:description" content="Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークンの累積の数値として表面化します。 利用者の側の3つの自己点検の手順を全文公開 (約6,500字、 読了7分)。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"2026年7月号 Part 1 — 過剰な設計の累積の数値の発見の経路","description":"CC Safety Lab 2026年7月号の Part 1 全文公開。 過剰な設計の単発の事案での発見の難しさと、 累積の数値の長い時間の軸での発見の経路の articulate。","datePublished":"2026-07-01","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+{"@context":"https://schema.org","@type":"Article","headline":"過剰な設計は単発の事案では見えない: 16ヶ月の累積の数値からの発見の経路","description":"Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークンの累積の数値として表面化します。 利用者の側の3つの自己点検の手順の全文公開。","datePublished":"2026-05-31","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -45,13 +45,13 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 </head>
 <body>
 
-<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年7月号 Part 1 全文</span></p>
-<h1>2026年7月号 Part 1: 過剰な設計の累積の数値の発見の経路</h1>
-<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年7月号 Part 1 の全文公開です。 7月号は7月1日に配信予定。 7月号全体は約22,000字 (紙の体裁で約22頁)、 そのうち Part 1 (約6,500字、 過剰な設計の単発の事案での発見の難しさと、 累積の数値の経路の articulate、 利用者の側の3つの自己点検の手順) を本頁で全文公開します。</p>
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 7月号の冒頭の章の全文</span></p>
+<h1>過剰な設計は単発の事案では見えない: 16ヶ月の62件の記録の累積の数値からの発見の経路</h1>
+<p class="meta">Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークン、 2,109件の計画、 19% の実装の率 という累積の数値として表面化します。 thecatfix さん (起票61101) の2026年5月24日の手書きの分析の文書を中核に、 利用者の側の3つの自己点検の手順を整理しました。 本頁は CC Safety Lab の7月号の冒頭の章 (約6,500字、 読了7分) の全文公開です。</p>
 
 <div class="subscribe">
-<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 7月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (thecatfix さんの62件の記録の集まりの中の7件の独立な事案の延長)、 Part 3 (16ヶ月の窓の累積の数値の取得の手順と Python の素案)、 Part 4-5 (発見の経路の hook の2件の設定例)、 Part 6 (cc-safe-setup の関連の道具の整備の整理) は Founder 会員の月次の届け物に含まれます。
-<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の Part 1 の本文は7月1日配信の7月号からの抜粋で、 改編はしていません。 thecatfix さん (起票61101) の2026年5月24日の公開の手書きの分析の文書 (27,000字、 16ヶ月の62件の記録の整理) を時間軸の累積の数値の入力として統合した整備です。</p>
+<strong>本頁の位置づけ。</strong> 月額の購入の前に中身の質と書き方の深さを判断していただくため、 7月号の冒頭の章を全文で公開します。 続きの章では、 62件の記録の集まりの中の7件の独立な事案の延長、 16ヶ月の窓の累積の数値の取得の手順と Python の素案、 発見の経路の2件の設定例 (hook) の整備が届きます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の本文は7月1日配信の7月号からの抜粋で、 改編はしていません。 thecatfix さん (起票61101) の2026年5月24日の公開の手書きの分析の文書 (27,000字、 16ヶ月の62件の記録の整理) を時間軸の累積の数値の入力として統合した整備です。</p>
 </div>
 
 <div class="meta-block">
@@ -66,7 +66,7 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 
 <p>過剰な設計の発見は、 累積の数値の長い時間の軸の取得でのみ可能です。 「起稿した計画の文書の数」 と「実装に到達した計画の数」 の比率、 「派遣した代理の数」 と「成果物を出した代理の数」 の比率、 「設計の文書の長さ」 と「実機の動作の単純さ」 の比率。 単発の局面では見えない比率が、 4ヶ月から16ヶ月の窓で取得すると激しい乖離を示します。</p>
 
-<p>本号 Part 1 は、 thecatfix さんの公開の解約の合図の起票の中の累積の数値を中核に、 過剰な設計の長い時間の軸の発見の経路の整理と、 利用者の側の自己の点検の手順の articulate を扱います。 6月号の主張と実態の乖離の系統 (単発の事案の経路) と並ぶ、 累積の事案の経路の中核の主題。</p>
+<p>本頁は、 thecatfix さんの公開の解約の合図の起票の中の累積の数値を中核に、 過剰な設計の長い時間の軸の発見の経路の整理と、 利用者の側の自己の点検の手順の articulate を扱います。 6月号の主張と実態の乖離の系統 (単発の事案の経路) と並ぶ、 累積の事案の経路の中核の主題。</p>
 
 <h2>thecatfix さんの16ヶ月の62件の記録の集まりの累積の数値</h2>
 
@@ -132,25 +132,25 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 
 <h2>本号の購入の経路</h2>
 
-<p>7月号の全6 Part (約22,000字、 紙の体裁で約22頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 7月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+<p>7月号の続きの章 (約22,000字) の購入の経路は、 月額¥500 の Founder Membership の経路で、 7月号と以降の毎月の届け物の経路。 Founder 価格は永久固定で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
 
 <div class="cta">
 <p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
 <a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
-<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
-<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">7月号は7月1日配信予定。 5月号と6月号の試し読みで中身の質と書き方の深さを判断できます。 <a href="safety-lab-may-preview.html" style="color:#58a6ff">5月号の Part 1</a> &middot; <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号の Part 1</a></p>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁を見る</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">7月号は7月1日配信予定。 <a href="safety-lab-may-preview.html" style="color:#58a6ff">5月号の試し読み</a> と <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号の試し読み</a> で書き方の深さの目安を判断できます。</p>
 </div>
 
-<h2>次の段の整備の経路</h2>
+<h2>続きの章の中身</h2>
 
-<p>7月号の Part 2 で、 thecatfix さんの62件の記録の集まりの中の7件の独立な事案 (作業の起稿の段の過剰な構造化、 不要な抽象化の累積、 念のための予防の追加の集積、 将来の拡張のための整備の累積、 計画の文書の起稿の中毒、 代理の量産の発火、 設計の文書の起稿の代理化) の延長を articulate。 Part 3 で16ヶ月の窓の累積の数値の取得の手順と Python の素案の整備。 Part 4-5 で発見の経路の hook の2件の設定例 (計画の文書の起稿の率の追跡の hook、 代理の起稿の数の急増の警告の hook) の整備。 Part 6 で cc-safe-setup の関連の道具の整備の整理。</p>
+<p>7月号の続きの章では、 thecatfix さんの62件の記録の集まりの中の7件の独立な事案 (作業の起稿の段の過剰な構造化、 不要な抽象化の累積、 念のための予防の追加の集積、 将来の拡張のための整備の累積、 計画の文書の起稿の中毒、 代理の量産の発火、 設計の文書の起稿の代理化) の articulate、 16ヶ月の窓の累積の数値の取得の手順と Python の素案、 発見の経路の2件の設定例 (hook、 計画の文書の起稿の率の追跡、 代理の起稿の数の急増の警告) が届きます。</p>
 
-<p>8月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。 8月号は Pro Max の利用枠の異常の集積の主題、 9月号は権限の照合の境界の集積の主題、 12月号は AUP の判別器の誤発火の集積の主題。</p>
+<p>8月号以降の主題の予告 (Pro Max の利用枠の異常、 権限の判定の境界、 利用方針の判別の異常など) は <a href="safety-lab.html">商品の頁</a> で公開済です (9ヶ月分の runway)。</p>
 
 <footer>
 <p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
 <p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code (notably #61101 by thecatfix), and the 2026-04-23 dated public analysis document. No private or unpublished information is included.</p>
-<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-may-preview.html">5月号 Part 1</a> &middot; <a href="safety-lab-june-preview.html">6月号 Part 1</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-may-preview.html">5月号の試し読み</a> &middot; <a href="safety-lab-june-preview.html">6月号の試し読み</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
 </footer>
 
 </body>
