@@ -72,25 +72,25 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <span class="price-badge">¥500/月</span>
 <span class="founder-badge">Founder（価格据え置き）</span>
 
-<h1>CC Safety Lab: 毎月、Claude Code の事故と安全運用を整理して届ける</h1>
-<p class="subtitle">800 時間以上、 Claude Code を自律で動かしてきた非エンジニアが、 毎月の事故と対処を整理して届けます。 GitHub Issue を全部読む時間はないが、 起きている事故と対処は知っておきたい人のための月 1 本のレポート、 Ko-fi メンバーシップ。</p>
+<h1>毎月の Claude Code の事故と対処を、 自分で全部読まずに 1 本のレポートで受け取る</h1>
+<p class="subtitle">Claude Code の GitHub Issue は月数百件で、 全部読む時間は取れない。 けれど、 起きている事故と版の変更と利用枠の異常は知っておきたい。 800 時間以上 Claude Code を自律で動かしてきた非エンジニアの著者が、 毎月の事故と対処と再発予防の hook を 1 本のレポートに整理してお届けします。 月額 ¥500 の Ko-fi メンバーシップ。</p>
 
 <div style="margin-bottom:1.5rem;">
 <a href="https://ko-fi.com/yurukusa/tiers" class="btn-primary">Founder で参加する → Ko-fi</a>
 <p style="margin-top:8px;font-size:0.85em;color:#16a34a;font-weight:600">Max plan ($200/月) の事故 1 件分で 1 年分の費用を回収</p>
 <p style="margin-top:4px;font-size:0.85em;color:#666">5 月号: 本文 23,951 字 / 紙の版 23 ページ ｜ 配信 2026-05-05 ｜ 次号 6 月号は 6/1 配信 ｜ <a href="#future-issues" style="color:#666;text-decoration:underline;">2027 年 1 月号までの予告を見る ↓</a></p>
-<p style="margin-top:4px;font-size:0.85em;color:#666">月 4-8 件の事故 + チェックリスト + hook + 商品更新 ｜ 無料の試し読み (Part 1 全文): <a href="safety-lab-may-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">5 月号 →</a> ｜ <a href="safety-lab-june-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">6 月号 (6/15 課金分離の準備) →</a> ｜ <a href="safety-lab-july-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">7 月号 (過剰な設計の集積) →</a> ｜ <a href="safety-lab-august-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">8 月号 (Pro Max 利用枠) →</a> ｜ <a href="#may-issue" style="color:#666;text-decoration:underline;">中身一覧を見る ↓</a></p>
+<p style="margin-top:4px;font-size:0.85em;color:#666">月 4-8 件の事故 + チェックリスト + hook + 商品更新 ｜ 無料の試し読み (冒頭の章の全文): <a href="safety-lab-may-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">5 月号 (9 件の事故事例) →</a> ｜ <a href="safety-lab-june-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">6 月号 (6/15 課金分離の準備) →</a> ｜ <a href="safety-lab-july-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">7 月号 (過剰な設計の累積) →</a> ｜ <a href="safety-lab-august-preview.html" style="color:#16a34a;text-decoration:underline;font-weight:600;">8 月号 (Pro Max 利用枠) →</a> ｜ <a href="#may-issue" style="color:#666;text-decoration:underline;">中身一覧を見る ↓</a></p>
 </div>
 
 <div style="background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #ea580c;padding:1rem 1.5rem;margin:1rem 0 1.5rem 0;border-radius:6px;">
-<div style="font-size:0.85rem;color:#9a3412;font-weight:600;margin-bottom:0.4rem;">📍 本日の合図 (2026-05-31、 6 月 15 日まで残り 15 日)</div>
-<p style="font-size:0.93rem;color:#7c2d12;margin:0 0 0.5rem 0;"><strong>5/31 で 8 月号の Part 1 全文 (約 6,500 字) の HTML 試し読みの頁が main 取り込み完了。 4 つの月号の Part 1 が背中合わせで配信中の段に到達。</strong> 8 月号の中核の章は「Pro Max の利用枠が想定より早く枯渇する経路の 3 つの自己診断」 で、 10 件の起票 (累計約 2,200 件の反応) の集積の articulate と、 利用者の側の 3 つの自己診断の手順 (<code>ccusage</code> の集計、 <code>jq</code> の生の解析、 経過時間と消費の率の計算) と、 3 軸の防衛 hook (<code>cache-creation-drift-detector</code> / <code>quota-anomaly-detector</code> / <code>session-rate-monitor</code>) の整備の経路。</p>
-<p style="font-size:0.92rem;color:#7c2d12;margin:0;">本日 5/31 の出荷の整理:
-<a href="safety-lab-august-preview.html" style="color:#c2410c;font-weight:600;">8 月号の Part 1 全文 HTML 試し読み (Pro Max 利用枠、 ~6,500 字)</a> ｜
-<a href="safety-lab-july-preview.html" style="color:#c2410c;font-weight:600;">7 月号の Part 1 全文 HTML 試し読み (過剰な設計の集積、 ~6,500 字)</a> ｜
-<a href="safety-lab-june-preview.html" style="color:#c2410c;font-weight:600;">6 月号の Part 1 全文 HTML 試し読み (PR #495)</a> ｜
-<a href="safety-lab-may-preview.html" style="color:#c2410c;font-weight:600;">5 月号の Part 1 全文 HTML 試し読み (PR #482)</a> ｜
-4 つの月号の Part 1 が背中合わせで配信中。 これが Safety Lab の月次の中身の質の合図の最強の現代の proof です — Founder 価格 ¥500/月 で、 6/15 の課金分離の前に 6 月号の中核の準備の章が初回から手元に入る経路。</p>
+<div style="font-size:0.85rem;color:#9a3412;font-weight:600;margin-bottom:0.4rem;">📍 6 月 15 日の課金分離まで残り 15 日 (2026-05-31)</div>
+<p style="font-size:0.93rem;color:#7c2d12;margin:0 0 0.5rem 0;"><strong>2026 年 6 月 15 日に Anthropic は claude -p や GitHub の自動の経路の利用を購読の枠から別の月次の枠に分離します。 自前の経路で月の予算を超過する見込みがある場合、 発火の前の準備の有無で 6 月の請求の金額が大きく変わります。</strong> 6 月号 (明日 6/1 配信) の冒頭の章は「6 月 15 日の課金分離の発火まで 15 日: 自動の経路を持つ方の 22 日の準備の手引き」 で、 7 つの準備の手順 (受領の便りの到来の準備、 自動の経路の棚卸し、 現在の使用量の取得、 事前飛行の検査、 上限の自動の停止の整備、 公式の鍵への切替の判定、 発火の前後の差分の取得) と 3 つの警告の予兆を全文で先に確認できます。</p>
+<p style="font-size:0.92rem;color:#7c2d12;margin:0;">5 月号 + 6 月号 + 7 月号 + 8 月号の 4 ヶ月分の冒頭の章の試し読みが背中合わせで配信中:
+<a href="safety-lab-june-preview.html" style="color:#c2410c;font-weight:600;">6 月号の試し読み (6/15 課金分離の準備、 約 6,500 字)</a> ｜
+<a href="safety-lab-may-preview.html" style="color:#c2410c;font-weight:600;">5 月号の試し読み (9 件の事故事例、 約 6,000 字)</a> ｜
+<a href="safety-lab-july-preview.html" style="color:#c2410c;font-weight:600;">7 月号の試し読み (過剰な設計の累積、 約 6,500 字)</a> ｜
+<a href="safety-lab-august-preview.html" style="color:#c2410c;font-weight:600;">8 月号の試し読み (Pro Max の利用枠、 約 6,500 字)</a>。
+Founder 価格 ¥500/月 で本日中に参加すれば、 5 月号が即時に手元に届き、 6 月号 (6/15 の課金分離の中核の準備の章) が初回から配信されます。</p>
 </div>
 
 <div style="background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #16a34a;padding:1rem 1.5rem;margin:1rem 0 1.5rem 0;border-radius:6px;">
@@ -109,7 +109,7 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <div style="font-size:0.85rem;color:#0e7490;font-weight:600;margin-bottom:0.4rem;">⏱ 本日 (2026-05-31) 参加すべき具体的な理由 — 6/15 課金分離まで残り 15 日</div>
 <p style="font-size:0.93rem;color:#155e75;margin:0 0 0.5rem 0;">本日 (5/31) の段で参加すれば、 5 月号 (本文 23,951 字、 既に配信済) が即時に届き、 6 月号 (本日 5/31 校正、 明日 6/1 配信) が初回から手元に入る。 6 月号は副の作業者の沈黙の失敗の集積 (8 件)、 子エージェントの境界の不在 (5 件)、 v2.1.126 の沈黙の退行 (5 件)、 利用者の口座の複数の同時の管理の集積 (3 件で累計 1,178 件の反応)、 5/28 から 5/31 で articulate した Cluster 10 (GrowthBook A/B、 58 件の起票) と Cluster 11 (Cowork、 195 件の起票) と Cluster 12 (Tool Call Parsing、 5 件の起票で 28 件の反応) の合計 6 件の集積の章を含む予定で、 本文 25,000 字以上の規模。</p>
 <p style="font-size:0.93rem;color:#155e75;margin:0 0 0.5rem 0;"><strong>14 日後 (2026-06-14) に参加した場合との差分:</strong> 5 月号は既に「過去号」 として archive される。 6 月号は配信後 13 日経過の状態で、 6/15 の課金分離まで残り 1 日で手元に届く。 5/31 参加の場合は 5 月号と 6 月号の 2 号分の現代の素材が 15 日の準備期間と同時に手元にあり、 14 日後参加の場合は 6 月号 1 号分のみで準備期間 1 日。 課金分離の前の準備の段の素材の差は約 15 倍の経路。</p>
-<p style="font-size:0.93rem;color:#155e75;margin:0;"><strong>¥500 で受け取る 5 月号の中身 (即時):</strong> 月次の事故の集積 9 件、 安全の checklist (5 領域)、 hook の事例 2 件 (料金の監視と圧縮の前の保存)、 失敗の事例の深掘り (cache_control の空テキストの集積、 GitHub Issue 12 件以上の集積)、 既存 6 商品の更新の案内。 紙の版は 23 ページ。 本文の冒頭の Part 1 (~6,000 字、 9 件の事故事例) は <a href="safety-lab-may-preview.html" style="color:#0891b2;font-weight:600;">無料の HTML 試し読みの頁</a> で先に確認できる。 6/15 課金分離の準備の整備の章は <a href="safety-lab-june-preview.html" style="color:#0891b2;font-weight:600;">6 月号の Part 1 全文 (~6,500 字)</a> も配信中。</p>
+<p style="font-size:0.93rem;color:#155e75;margin:0;"><strong>¥500 で受け取る 5 月号の中身 (即時):</strong> 月次の事故の集積 9 件、 安全の checklist (5 領域)、 hook の事例 2 件 (料金の監視と圧縮の前の保存)、 失敗の事例の深掘り (cache_control の空テキストの集積、 GitHub Issue 12 件以上の集積)、 既存 6 商品の更新の案内。 紙の版は 23 ページ。 本文の冒頭の章 (約 6,000 字、 9 件の事故事例) は <a href="safety-lab-may-preview.html" style="color:#0891b2;font-weight:600;">無料の試し読みの頁</a> で先に確認できる。 6/15 課金分離の準備の整備の章は <a href="safety-lab-june-preview.html" style="color:#0891b2;font-weight:600;">6 月号の冒頭の章の全文 (約 6,500 字)</a> も配信中。</p>
 </div>
 <div class="pain-point">
 <strong>こんな時に役立つ：</strong> Claude Code を仕事で使っていて、「先週の更新で何が壊れた？」「この hook は本当に効いているのか？」「トークン消費が突然倍になったが、何が原因か？」と毎月のように振り返る人。GitHub Issue を全部読む時間はないが、起きている事故と対処は知っておきたい人。
@@ -143,10 +143,10 @@ messages: text content blocks must be non-empty</code></pre>
 
 <div class="preview-cta">
 ここから先 (約 2,500 字) には、 壊れた行の見え方、 検出の grep 一行、 復旧の Python スクリプト、 予防の 3 件の手順、 自分の環境での月次の点検の項目が続く。<br>
-→ <a href="safety-lab-may-preview.html">5 月号の Part 1 全文 (~6,000 字、 9 件の事故事例) を HTML で無料で読む</a><br>
-→ <a href="safety-lab-june-preview.html">6 月号の Part 1 全文 (~6,500 字、 6/15 課金分離の準備の 7 つの手順) を HTML で無料で読む</a><br>
-→ <a href="safety-lab-july-preview.html">7 月号の Part 1 全文 (~6,500 字、 過剰な設計の集積と 3 つの自己点検の手順) を HTML で無料で読む</a><br>
-→ <a href="safety-lab-august-preview.html">8 月号の Part 1 全文 (~6,500 字、 Pro Max 利用枠の枯渇の集積と 3 つの自己診断) を HTML で無料で読む</a><br>
+→ <a href="safety-lab-may-preview.html">5 月号の冒頭の章 (約 6,000 字、 9 件の事故事例) を無料で読む</a><br>
+→ <a href="safety-lab-june-preview.html">6 月号の冒頭の章 (約 6,500 字、 6/15 課金分離の準備の 7 つの手順) を無料で読む</a><br>
+→ <a href="safety-lab-july-preview.html">7 月号の冒頭の章 (約 6,500 字、 過剰な設計の累積の数値と 3 つの自己点検の手順) を無料で読む</a><br>
+→ <a href="safety-lab-august-preview.html">8 月号の冒頭の章 (約 6,500 字、 Pro Max の利用枠の枯渇の経路と 3 つの自己診断) を無料で読む</a><br>
 → <a href="https://ko-fi.com/yurukusa/tiers">Founder で参加して 5 月号と 6 月号と 7 月号と 8 月号の全章を受け取る</a>
 </div>
 </div>
@@ -220,7 +220,7 @@ messages: text content blocks must be non-empty</code></pre>
 <li><strong>Cluster 10: GrowthBook A/B flag の上書きの集積 (5/28 articulate、 58 件 / 5 件の上書きの経路):</strong>Issue <a href="https://github.com/anthropics/claude-code/issues/62205" style="color:#1e40af;">#62205</a> (root cause 解析、 約 9 分間隔で server から sync される A/B flag が settings.json の `permissions.defaultMode` を silent で上書き)、 <a href="https://github.com/anthropics/claude-code/issues/63015" style="color:#1e40af;">#63015</a> (`tengu_compact_cache_prefix` の gating で auto-compact の silent failure)、 関連の 56 件の起票の整理。 利用者の側の 5 件の上書きの経路 (`claude_desktop_config.json` / Library Application Support / project epitaxy / cachedGrowthBookFeatures / harbor flag) の articulate と、 5/28 main 取り込み完了の 3 件の防衛 hook (<a href="https://github.com/yurukusa/cc-safe-setup/pull/413" style="color:#1e40af;">growthbook-flag-monitor PR #413</a>、 28 件試験 / compact-dispatch-watchdog PR #402 / permission-mode-drift-guard) の install の手順を含む。 約 10,000 字を予定。</li>
 <li><strong>Cluster 11: Cowork sandbox の 195 件の集積 (5/28 articulate、 14 日間で最大の集積):</strong>2026-05-14 以降の 14 日間で 195 件の独立な起票が `anthropics/claude-code` に蓄積、 直近 6 日で 1 日 17 件のペース。 個別の起票の反応は 0-1 件と弱いが、 集合の大きさが構造の合図の様式 (既存の高反応集積とは別軸)。 4 軸の sub-cluster (ファイルシステム / mount、 プラットフォーム / binary、 購読 / access、 インフラ事故) の articulate。 中核の 3 件の起票への直接の対応の経路: <a href="https://github.com/anthropics/claude-code/issues/62859" style="color:#1e40af;">#62859</a> (CLAUDE.md の auto-load の不在)、 <a href="https://github.com/anthropics/claude-code/issues/62932" style="color:#1e40af;">#62932 P1</a> (FUSE mount の silent な stale)、 <a href="https://github.com/anthropics/claude-code/issues/62949" style="color:#1e40af;">#62949</a> (model picker の 1m default)。 5/28 main 取り込み完了の 3 件の CLI 側の防衛 hook (<a href="https://github.com/yurukusa/cc-safe-setup/pull/409" style="color:#1e40af;">cowork-claude-md-load-checker PR #409</a> / <a href="https://github.com/yurukusa/cc-safe-setup/pull/410" style="color:#1e40af;">cowork-fuse-staleness-watcher PR #410</a> / <a href="https://github.com/yurukusa/cc-safe-setup/pull/411" style="color:#1e40af;">cowork-model-picker-advisor PR #411</a>) の install の手順を含む。 約 14,000 字を予定。</li>
 </ul>
-<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">本日 5/31 校正、明日 6/1 配信。 Founder で本日中に参加すれば、 6 月号も初回から受け取れる。 6 月号の Part 1 全文 (~6,500 字、 6/15 課金分離の準備の 7 つの手順と 3 つの警告の予兆) は <a href="safety-lab-june-preview.html" style="color:#1e40af;font-weight:600;">HTML で無料で読む →</a> で確認できる。</p>
+<p style="margin-top:0.7rem;font-size:0.9rem;color:#1e3a8a;">本日 5/31 校正、明日 6/1 配信。 Founder で本日中に参加すれば、 6 月号も初回から受け取れる。 6 月号の冒頭の章 (約 6,500 字、 6/15 課金分離の準備の 7 つの手順と 3 つの警告の予兆) は <a href="safety-lab-june-preview.html" style="color:#1e40af;font-weight:600;">無料の試し読みの頁 →</a> で確認できる。</p>
 </div>
 
 <h3 id="future-issues" style="font-size:1.1rem;color:#854d0e;margin-top:1.5rem;">7 月号から 2027 年 1 月号までの予告（9 ヶ月分の runway、 5/28 update）</h3>
