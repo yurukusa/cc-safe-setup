@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026年5月号 Part 1 全文 (9件の事故事例) — CC Safety Lab 試し読み</title>
-<meta name="description" content="月額¥500の Claude Code 月次安全便 (CC Safety Lab) の2026年5月号 Part 1 を全文公開。 cache_control の API 400、 利用量表示のずれ、 Cowork の予定タスク silent skip、 Worktree、 Skill、 UI、 Cmd+F、 子の作業者の身分の漏れ、 2.1.126 の沈黙の退行 の9件の事故事例の整理。 約6,000字、 読了5分。">
+<title>2026年5月の Claude Code の9件の事故事例の整理 — CC Safety Lab 試し読み</title>
+<meta name="description" content="2026年5月の Claude Code の運用で発生した9件の事故事例 (cache_control の API 400、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落とし、 Worktree、 Skill、 UI、 Cmd+F、 子の作業者の身分の漏れ、 2.1.126 の沈黙の退行) の整理を全文公開。 月額の Safety Lab の中身の質と書き方の深さの目安 (約6,000字、 読了5分)。">
 <meta name="keywords" content="Claude Code, 事故事例, 月額, 月次便, cache_control, Cowork, Worktree, Skills, Safety Lab, Ko-fi">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-may-preview.html">
-<meta property="og:title" content="2026年5月号 Part 1 全文 (9件の事故事例) — CC Safety Lab 試し読み">
-<meta property="og:description" content="月額¥500 の Claude Code 月次安全便の 2026年5月号 Part 1 を全文公開。 9件の事故事例の整理、 約6,000字、 読了5分。">
+<meta property="og:title" content="2026年5月の Claude Code の9件の事故事例の整理 — CC Safety Lab 試し読み">
+<meta property="og:description" content="2026年5月の Claude Code の9件の事故事例の整理を全文公開 (cache_control の API 400、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落とし、 など)。 月額の Safety Lab の中身の目安 (約6,000字、 読了5分)。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"2026年5月号 Part 1 全文 (9件の事故事例)","description":"CC Safety Lab 2026年5月号の Part 1 全文公開。 cache_control の集積、 利用量表示のずれ、 Cowork、 Worktree、 Skill、 UI、 同期問題、 身分の漏れ、 2.1.126 の沈黙の退行 の9件。","datePublished":"2026-05-05","dateModified":"2026-05-30","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+{"@context":"https://schema.org","@type":"Article","headline":"2026年5月の Claude Code の9件の事故事例の整理","description":"2026年5月の Claude Code の9件の事故事例 (cache_control の API 400、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落とし、 など) の整理を全文公開。","datePublished":"2026-05-05","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -42,13 +42,13 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 </head>
 <body>
 
-<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 2026年5月号 Part 1 全文</span></p>
-<h1>2026年5月号 Part 1: 今月の事故と仕様変更</h1>
-<p class="meta">毎月の Claude Code の事故事例と再発予防を月¥500 で届ける月次便 (CC Safety Lab) の2026年5月号 Part 1 の全文公開です。 5月号は5月5日に配信済、 6月号は6月1日配信予定。 5月号全体は約22,701字 (紙の体裁で22頁)、 そのうち Part 1 (約6,000字、 9件の事故事例) を本頁で全文公開します。</p>
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 5月号の冒頭の章の全文</span></p>
+<h1>2026年5月の Claude Code の9件の事故事例の整理</h1>
+<p class="meta">2026年5月の Claude Code の運用で、 cache_control の API 400 の集積から、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落としまで、 9件の事故事例の経路が表面化しました。 本頁は CC Safety Lab の5月号の冒頭の章 (約6,000字、 読了5分) の全文公開です。</p>
 
 <div class="subscribe">
-<strong>本頁の位置づけ。</strong> 月額の購入の前に「中身の質と書き方の深さ」 を判断していただくため、 5月号の Part 1 を冒頭の1,200字ではなく全文で公開します。 Part 2 (深掘りの事例 + Python の復旧手順)、 Part 3 (安全チェックリスト)、 Part 4-5 (コピペで使える hook の設定例2件)、 Part 6 (既存商品の今月の更新) は Founder 会員の月次の届け物に含まれます。
-<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁は2026年5月30日の整備で、 GitHub Gist の経路から HTML の頁の経路へ移管。 Part 1 の本文は5月5日配信の5月号からの抜粋で、 改編はしていません。</p>
+<strong>本頁の位置づけ。</strong> 月額の購入の前に中身の質と書き方の深さを判断していただくため、 5月号の冒頭の章を全文で公開します。 続きの章では、 深掘りの事例の延長と Python の復旧の手順、 月次の安全の点検の表、 コピペで使える2件の設定例 (hook) が届きます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁は2026年5月30日の整備で、 GitHub Gist の経路から HTML の頁の経路へ移管。 本文は5月5日配信の5月号からの抜粋で、 改編はしていません。</p>
 </div>
 
 <div class="meta-block">
@@ -71,7 +71,7 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
   <li>session の再開直後に履歴が壊れていたとき</li>
 </ul>
 
-<p>復旧手順 (文脈を保持したままの経路) と Python のスクリプトは Part 2 で本文整理。</p>
+<p>復旧手順 (文脈を保持したままの経路) と Python のスクリプトは続きの章で本文整理。</p>
 
 <h2>事故 2: 利用量表示の実態とのずれ</h2>
 
@@ -207,29 +207,23 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-t
 
 <p>2.1.126 の発火の段で、 既存の整備の経路の中で複数の沈黙の退行の合図が観察されている。 利用者の経路の整備の継続の確認の経路。</p>
 
-<p>5月号の Part 2 で、 9件の事故事例の中で深掘りが必要な事例 (cache_control の集積、 Cowork の予定タスク、 子の作業者の身分の漏れ) の経路を、 復旧の手順と Python のスクリプトと一緒に整理。 Part 3 で月次の安全チェックリストの経路の整備。 Part 4-5 で2件の hook の設定例 (cache_control の予防の hook、 子の作業者の身分の漏れの予防の hook) の整備。 Part 6 で既存の商品 (cc-safe-setup、 Token Book、 Migration Playbook、 Postmortems、 Survival Guide) の5月の段の合図の整理。</p>
+<p>5月号の続きの章では、 9件の事故事例の中で深掘りが必要な事例 (cache_control の集積、 仕事の共有の予定の沈黙の見落とし、 子の作業者の身分の漏れ) の経路の復旧の手順と Python の素案、 月次の安全の点検の表、 2件の設定例 (hook) の整備、 既存の商品 (cc-safe-setup、 Token Book、 Migration Playbook、 Postmortems、 Survival Guide) の5月の段の合図の整理が届きます。</p>
 
 <h2>本号の購入の経路</h2>
 
-<p>5月号の全6 Part (約22,701字、 紙の体裁で22頁) の購入の経路は、 月額¥500 の Founder Membership の経路で、 5月号と6月号と7月号と以降の全号の毎月の届け物の経路。 Founder 価格は永久固定の整備で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+<p>5月号の続きの章 (約22,701字) の購入の経路は、 月額¥500 の Founder Membership の経路で、 5月号と6月号と以降の毎月の届け物の経路。 Founder 価格は永久固定で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
 
 <div class="cta">
 <p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
 <a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
-<a href="safety-lab.html" class="btn btn-outline">商品の頁の整備の合図</a>
-<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">5月号は配信済、 6月号は6月1日配信予定 (6月15日の課金分離の前14日の整備の中核の章を含む)。</p>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁を見る</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">5月号は配信済、 6月号は6月1日配信予定 (6月15日の課金分離の前14日の整備の中核の章を含む)。 <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号の試し読み</a> も公開済。</p>
 </div>
-
-<h2>次の段の整備の経路</h2>
-
-<p>6月号は5月の集積の延長で、 6月15日の課金分離 (Pool 1 と Pool 2 の経路) の前14日の整備の中核の章を含む。 7月号以降の予告の整備は <a href="safety-lab.html">商品の頁の経路</a> で公開済 (9ヶ月分の runway)。</p>
-
-<p>加えて、 集積9 (利用方針の判別器の誤発火) の4件の防衛の道具の集まりの整備の経路は、 12月号の主題の合図で、 5月30日の段で4件の道具の全件で出荷の完成段。 cc-safe-setup の README で動線の整備の経路。</p>
 
 <footer>
 <p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
 <p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code, public Reddit r/ClaudeAI threads, and public HN discussions. No private or unpublished information is included.</p>
-<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> &middot; <a href="hub.html">hub</a></p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-june-preview.html">6月号の試し読み</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
 </footer>
 
 </body>
