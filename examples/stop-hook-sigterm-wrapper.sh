@@ -66,6 +66,14 @@ if [ -n "${CC_STOP_SIGTERM_DISABLE:-}" ]; then
     exec "${CC_STOP_SIGTERM_WRAPPER_CMD:-claude}" "$@"
 fi
 
+# No-op when invoked with no args. The cc-safe-setup CI smoke-tests every
+# example/*.sh by piping an empty stdin and expecting exit 0 — this wrapper
+# is invoked with claude's CLI arguments, never with stdin alone, so a no-args
+# invocation is unambiguously the smoke-test path.
+if [ $# -eq 0 ]; then
+    exit 0
+fi
+
 MARKER_DIR="${CC_STOP_SIGTERM_MARKER_DIR:-$HOME/.claude/run-state}"
 WRAPPED_CMD="${CC_STOP_SIGTERM_WRAPPER_CMD:-claude}"
 STATE_FILE="$MARKER_DIR/state.json"
