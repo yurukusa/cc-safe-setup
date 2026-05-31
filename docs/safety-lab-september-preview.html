@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設定の権限の照合が動作しない7つの失敗の様式と利用者の側の3つの選択肢 — CC Safety Lab 試し読み</title>
+<meta name="description" content="settings.json の allow / deny / ask のルールが期待通りに照合しない事案が30件以上の起票 (累計約804反応、 area:permissions の上位25件の合計) で9ヶ月以上の継続の合図。 7軸の失敗の様式の articulate と、 利用者の側の3つの選択肢 (すべて欠陥) と、 4件の防衛のhookのうち2件の出荷状態を全文公開 (約6,800字、 読了8分)。">
+<meta name="keywords" content="Claude Code, permissions, settings.json, dangerously-skip-permissions, allow rule, deny rule, Always Allow, Safety Lab, Ko-fi">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-lab-september-preview.html">
+<meta property="og:title" content="設定の権限の照合が動作しない7つの失敗の様式と利用者の側の3つの選択肢">
+<meta property="og:description" content="settings.json の allow/deny の照合が動作しない事案 (30件以上の起票、 累計約804反応、 9ヶ月以上の継続) と、 利用者の側の3つの選択肢 (すべて欠陥) と、 4件の防衛のhookのうち2件の出荷状態を全文公開 (約6,800字、 読了8分)。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"設定の権限の照合が動作しない7つの失敗の様式と利用者の側の3つの選択肢","description":"settings.json の権限の照合の7軸の失敗と利用者の側の3つの選択肢の全文公開。","datePublished":"2026-05-31","dateModified":"2026-05-31","author":{"@type":"Person","name":"yurukusa"},"isPartOf":{"@type":"Periodical","name":"CC Safety Lab","url":"https://yurukusa.github.io/cc-safe-setup/safety-lab.html"}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:1.7rem;color:#f0f6fc;margin-bottom:.3rem;line-height:1.3}
+h2{font-size:1.25rem;color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.5rem}
+h3{font-size:1.05rem;color:#f0f6fc;margin:1.5rem 0 .5rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.88rem;color:#f0f6fc}
+ol,ul{margin:.8rem 0;padding-left:1.5rem}
+li{margin:.4rem 0}
+.free-badge{display:inline-block;background:#238636;color:#fff;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.meta-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:.9rem}
+.meta-block strong{color:#f0f6fc}
+.subscribe{background:#0d2818;border:1px solid #238636;border-radius:8px;padding:1.2rem 1.5rem;margin:2rem 0}
+.subscribe strong{color:#3fb950}
+.cta{text-align:center;margin:2.5rem 0;padding:1.5rem;border:1px solid #30363d;border-radius:8px;background:#161b22}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;margin:.3rem}
+.btn:hover{background:#2ea043;text-decoration:none}
+.btn-outline{background:transparent;border:1px solid #58a6ff;color:#58a6ff}
+.meta{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+.step-block{background:#161b22;border-left:3px solid #58a6ff;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.step-block strong{color:#f0f6fc}
+.warn-block{background:#1c1310;border-left:3px solid #f85149;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.warn-block strong{color:#f85149}
+.choice-block{background:#1c1810;border-left:3px solid #e3b341;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:0 6px 6px 0}
+.choice-block strong{color:#e3b341}
+.stat-block{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0}
+.stat-block strong{color:#f0f6fc}
+.issue-list{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0;font-size:.9rem}
+.issue-list li{margin:.3rem 0;color:#c9d1d9}
+.issue-list strong{color:#f0f6fc}
+.shipped-badge{display:inline-block;background:#1f6feb;color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600;margin-left:.4rem}
+.design-badge{display:inline-block;background:#6e7681;color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600;margin-left:.4rem}
+footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d}
+</style>
+</head>
+<body>
+
+<p style="margin-bottom:.5rem"><a href="safety-lab.html">&larr; CC Safety Lab</a> <span class="free-badge">無料公開 — 9月号の冒頭の章の全文</span></p>
+<h1>設定の権限の照合が動作しない7つの失敗の様式と利用者の側の3つの選択肢</h1>
+<p class="meta"><code>~/.claude/settings.json</code> と <code>settings.local.json</code> の <code>allow</code> と <code>deny</code> と <code>ask</code> のルールを配置したのに、 Claude Code が期待通りに照合しない事案が、 30件以上の起票 (累計約804反応、 <code>area:permissions</code> の上位25件の合計) で2025年8月から9ヶ月以上の継続の合図。 本頁は CC Safety Lab の9月号の冒頭の章 (約6,800字、 読了8分) の全文公開です。</p>
+
+<div class="subscribe">
+<strong>本頁の位置づけ。</strong> 月額の購入の前に中身の質と書き方の深さを判断していただくため、 9月号の冒頭の章を全文で公開します。 続きの章では、 7軸の失敗の様式の全件の深掘りと25件の起票の集積の表、 4件の防衛のhookの取り込み済の2件の設定の articulate、 残る2件のhookの設計の整理 (compound-bash と deny-rule-integrity)、 警告の発火の後の即座の対応の手順、 設定の点検の月次の作業の整備が届きます。
+<p style="margin-top:.8rem;font-size:.85rem;color:#8b949e">本頁の本文は9月1日配信の9月号からの抜粋で、 改編はしていません。 メタ起票 #30519 (71反応) と #39523 (16反応) の状態は2026年5月31日の段で OPEN の合図の継続中、 公式の修正の応答は2025年9月の暫定の案内のコメント1件のみで、 その後の応答なし。</p>
+</div>
+
+<div class="meta-block">
+<strong>集計範囲:</strong> 2025-08 から 2026-05 の9ヶ月以上の窓、 <code>area:permissions</code> のラベルの上位25件の起票、 累計約804件の反応<br>
+<strong>読了の目安:</strong> 8分<br>
+<strong>収録の中身:</strong> 7軸の失敗の様式の articulate、 14件の代表の起票の集積の表、 利用者の側の3つの選択肢の整理 (すべて欠陥)、 4件の防衛のhookの取り込み済の2件と設計の中の2件の articulate
+</div>
+
+<h2>何が起きるか</h2>
+
+<p>3つの典型の症状で利用者の側に表面化します。 内部の原因は7軸の独立な失敗の様式のどれかですが、 症状の表面からは区別がつきません。</p>
+
+<p>1つめは「Always Allow を押したのに、 翌日も同じ命令で確認の窓が出る」。 2つめは「<code>Bash(git:*)</code> のルールがあるのに、 <code>git add &amp;&amp; git commit</code> の複合の命令で確認の窓が出る」。 3つめは「<code>--dangerously-skip-permissions</code> を有効にしたのに、 Edit の確認の窓や Cowork の予定の作業の確認の窓は出る」。</p>
+
+<p>3つの症状はすべて、 公式の権限の照合の仕組みの7つの独立な失敗の様式の表面の側に出るもの。 30以上の起票が9ヶ月以上の継続で立ち、 累計の反応は約804件。 公式の対応はメタ起票で「1件の暫定の案内のコメント (2025年9月)、 その後の応答なし」 と整理されています。</p>
+
+<h2>なぜ詰まるか (7軸の失敗の様式の冒頭の3軸)</h2>
+
+<p>メタ起票 #30519 (71反応、 2026年3月3日に提出) が整理した7軸の分類のうち、 本頁では冒頭の3軸を articulate します (残る4軸の articulate と各々の対応の経路は本号の続きの章)。</p>
+
+<div class="stat-block">
+<strong>第1の様式: <code>*</code> の指定が複合の命令と不一致</strong>
+<p><code>Bash(git:*)</code> は <code>git add file &amp;&amp; git commit -m "msg"</code> と照合しません。 <code>*</code> は単一の単純な命令の中だけで動作します。 Claude Code は複合の命令を頻繁に生成するため、 <code>*</code> の指定は実機で使い物にならない経路。 起票 #28240 (180反応、 2026年2月22日) と起票 #32985 (24反応、 2026年3月) で「<code>cd</code>+<code>git</code> の複合の命令の自動の承認」 の要望の累計204反応の集積。</p>
+</div>
+
+<div class="stat-block">
+<strong>第2の様式: Always Allow が無効なルールを保存</strong>
+<p><code>git commit -m "fix typo"</code> で Always Allow を選択すると、 その文字列の全体 (命令の本文と commit message の全部) が保存されます。 次回の <code>git commit -m "different message"</code> とは照合しません。 <code>settings.local.json</code> が時間とともに数百件の使い捨ての文字列で膨張する経路。 起票 #11380 (64反応、 2025年11月、 closed の状態だが症状は継続中) と起票 #6850 (45反応、 2025年8月) の累計109件以上の反応の集積。</p>
+</div>
+
+<div class="stat-block">
+<strong>第3の様式: 利用者の側の設定が project の側で適用されない</strong>
+<p><code>~/.claude/settings.json</code> のルールが <code>/permissions</code> の表示には出ますが、 何にも照合しません。 project の側の <code>settings.local.json</code> では同じルールが機能します。 誤りも警告も出ず、 黙って無効の状態で進行する経路。 起票 #18160 (41反応、 2026年1月) と起票 #5140 (33反応、 2025年8月) の累計74件以上の反応の集積。</p>
+</div>
+
+<p>残る4軸 (第4: 引用符の追跡が allow を回避、 第5: deny のルールも同じ欠陥、 第6: コロンと空白の構文の矛盾、 第7: <code>--dangerously-skip-permissions</code> の部分的な不動作) の深掘りと各々の対応の経路は本号の続きの章で articulate します。</p>
+
+<h2>集積の事例 (2025年8月から2026年5月の状況)</h2>
+
+<p>30以上の起票で、 累計の反応は約804件。 累計の反応の上位の起票から並べた集積の表 (上位10件)。</p>
+
+<div class="issue-list">
+<ul>
+<li><strong>起票28240</strong> (180反応、 2026年2月22日) — 確認の窓が複合の <code>bash</code> の <code>cd</code> で誤って発火、 実際の命令ではなく</li>
+<li><strong>起票30519</strong> (71反応、 メタ、 2026年3月3日) — 権限の照合が根本的に動作しない、 30以上の起票、 公式の対応なし</li>
+<li><strong>起票29214</strong> (71反応、 2026年2月25日) — mobile Remote Control が <code>--dangerously-skip-permissions</code> を尊重しない</li>
+<li><strong>起票11380</strong> (64反応、 2025年11月、 closed) — Claude が確認の窓を継続で要求、 Always allow の後も</li>
+<li><strong>起票36168</strong> (63反応、 2026年3月) — <code>--dangerously-skip-permissions</code> が v2.1.77 より新しい全部の版で動作しない</li>
+<li><strong>起票43713</strong> (50反応、 2026年4月) — <code>autoAllowBashIfSandboxed</code> が shell の展開を含む命令で回避される</li>
+<li><strong>起票6850</strong> (45反応、 2025年8月) — <code>settings.local.json</code> の allow が機能しない、 既存の項目の再追加を要求</li>
+<li><strong>起票18160</strong> (41反応、 2026年1月) — Claude が global <code>settings.json</code> の allow の権限を無視</li>
+<li><strong>起票30435</strong> (39反応、 2026年3月) — bash の安全の確認の窓を設定で抑制したい</li>
+<li><strong>起票5140</strong> (33反応、 2025年8月) — 権限が user の <code>settings.json</code> から project の側で適用されない</li>
+</ul>
+</div>
+
+<p>5件の起票が closed の状態ですが、 症状は follow-up の起票で継続中。 メタ起票 #30519 (71反応) と #39523 (16反応、 9ヶ月の累計の articulate) の状態は2026年5月31日の段で OPEN の合図の継続中。</p>
+
+<h2>利用者の側の3つの選択肢 (すべて欠陥)</h2>
+
+<p>公式の照合の仕組みの修正がまだない現状で、 利用者の側の選択肢は3件のみ。 3件のすべてに構造的な欠陥があり、 利用者の側は「どの欠陥を許容するか」 の判断を強いられる状態です。</p>
+
+<div class="choice-block">
+<strong>選択肢1: 全部の確認の窓を読まずに承認する</strong>
+<p>これは権限の存在意義を消す経路。 利用者の側が配置した <code>allow</code> と <code>deny</code> のルールの整理の崩壊。 安全の制約が実機で機能しなくなる経路で、 最悪の事案は意図しない破壊的な命令の自動の実行。</p>
+</div>
+
+<div class="choice-block">
+<strong>選択肢2: <code>--dangerously-skip-permissions</code> を有効にする</strong>
+<p><code>deny</code> のルールを含めて全部を無効化する経路。 利用者が「絶対にやってはいけない」 と整理した命令も、 黙って実行する状態。 加えて、 第7の様式で部分的に動作しない状態が継続中 (Edit、 Cowork、 mobile Remote Control、 v2.1.77以降の regression)。 「全部を無効化したつもりが、 一部は依然として確認の窓が出る」 という二重の欠陥。</p>
+</div>
+
+<div class="choice-block">
+<strong>選択肢3: <code>PreToolUse</code> の hook を書いて、 権限の照合を再実装する</strong>
+<p>起票 #18846 で整理されているように、 community が実機で採用している経路。 ただし、 これは「公式の system が機能しないため、 利用者の側で安全の subsystem を再構築する」 状態。 community が書いた単独の hook の利用は、 安全の検査、 試験、 敵対的な入力への正しさの保証なしの状況での運用。</p>
+</div>
+
+<p>3件のすべてに欠陥があるという articulate そのものが、 9ヶ月以上の継続の集積の中で公式の対応がない事実の意味です。 続きの章では、 第3の選択肢の経路を「community の単独の hook」 ではなく「試験ありの hook の library の利用」 として整備する経路の articulate と、 そのための4件の防衛の hook の取り込みの予定を articulate します。</p>
+
+<h2>4件の防衛のhookの取り込み状態 (2026年5月31日の段)</h2>
+
+<p><code>cc-safe-setup</code> の hook の library から、 第3の選択肢の安全の整備の経路として、 4件の hook の予定。 2026年5月27日の段で2件が取り込み済、 残る2件は設計の中の状態。</p>
+
+<div class="step-block">
+<strong>第1のhook: <code>always-allow-pattern-suggester.sh</code><span class="shipped-badge">出荷済</span></strong>
+<p>第2の様式 (Always Allow が無効なルールを保存) の対応。 PreToolUse の Bash の hook で、 命令が確認の窓を発火する時に、 利用者が "Always Allow" で文字通りの命令の文字列を保存する代わりに、 推奨の <code>*</code> の整理された pattern を stderr の advisory に articulate。 hook は常に exit 0 で blocking しない様式 (利用者が判断を残す経路)。 取り込みの依頼 #359、 5/27 02:43 JST 取り込み完了、 42件の試験で全件で通過。</p>
+</div>
+
+<div class="step-block">
+<strong>第2のhook: <code>bypass-mode-effective-verifier.sh</code><span class="shipped-badge">出荷済</span></strong>
+<p>第7の様式 (<code>--dangerously-skip-permissions</code> の部分的な不動作) の対応。 SessionStart の hook で、 bypass が active の時に、 実際にカバーしない4件の表面 (Edit の tool、 Cowork scheduled tasks、 Mobile Remote Control、 v2.1.77以降の regression) を stderr の advisory に articulate。 取り込みの依頼 #360、 5/27 02:53 JST 取り込み完了。 累計の対応の起票は #29214 (71反応) と #36168 (63反応) と #47180 (23反応) の累計157件以上の反応の集積。</p>
+</div>
+
+<div class="step-block">
+<strong>第3のhook: <code>compound-bash-permission-resolver.sh</code><span class="design-badge">設計中</span></strong>
+<p>第1の様式 (<code>*</code> の複合の命令の不一致) の対応。 PreToolUse の Bash の hook で、 複合の命令を shell の解析のルールで読み取り、 <code>&amp;&amp;</code>、 <code>||</code>、 <code>;</code>、 パイプの境界で分割、 各部分を <code>allow</code> の patterns で個別に照合。 enforcement の様式 (decision の経路を変える) のため、 取り込みの前により高い threat model の articulate が必要。 取り込みは2026年5月から6月の予定。</p>
+</div>
+
+<div class="step-block">
+<strong>第4のhook: <code>deny-rule-integrity-verifier.sh</code><span class="design-badge">設計中</span></strong>
+<p>第5の様式 (deny のルールも同じ欠陥) の対応。 受け取った命令を正規化 (引数の標準の順序、 1行の表現、 安全な shell の置換の展開) してから <code>deny</code> の patterns と比較。 多行と引数の入れ替えの回避の様式の捕捉が主目的。 enforcement の様式のため、 取り込みの前に threat model の articulate が必要。 取り込みは2026年5月から6月の予定。</p>
+</div>
+
+<p>2件の出荷済の hook は両方とも "advisory" の様式 (decision の経路を変えない、 情報の articulate のみ追加する) の構造です。 これは security-relevant な subsystem (permissions) で安全に取り込み可能な最強の様式で、 hook の誤りの場合の最悪の事案は誤解を招く stderr の articulate のみで、 security regression にはなりません。</p>
+
+<h2>本号の購入の経路</h2>
+
+<p>9月号の続きの章 (約24,000字) の購入の経路は、 月額¥500 の Founder Membership の経路で、 9月号と以降の毎月の届け物の経路。 Founder 価格は永久固定で、 後で枠の値段を上げる時も Founder の方々は¥500 のまま。</p>
+
+<div class="cta">
+<p style="margin-bottom:1rem"><strong>CC Safety Lab Founder Membership</strong><br>¥500/月 (Founder 価格、 永久固定)</p>
+<a href="https://ko-fi.com/yurukusa/tiers" class="btn">Founder で参加する → Ko-fi</a>
+<a href="safety-lab.html" class="btn btn-outline">商品の頁を見る</a>
+<p style="margin-top:1rem;font-size:.85rem;color:#8b949e">9月号は9月1日配信予定。 <a href="safety-lab-june-preview.html" style="color:#58a6ff">6月号</a> と <a href="safety-lab-july-preview.html" style="color:#58a6ff">7月号</a> と <a href="safety-lab-august-preview.html" style="color:#58a6ff">8月号</a> の試し読みで書き方の深さの目安を判断できます。</p>
+</div>
+
+<h2>続きの章の中身</h2>
+
+<p>9月号の続きの章では、 残る4軸の失敗の様式 (第4から第7) の深掘りと25件の起票の集積の全件の表、 4件の防衛の hook の取り込み済の2件の <code>~/.claude/settings.json</code> の articulate の例 (3件の環境変数 <code>CC_PATTERN_SUGGESTER_DISABLE</code> 等の整理)、 残る2件の hook (compound-bash と deny-rule-integrity) の設計の中身と threat model の articulate、 警告の発火の後の即座の対応の4手順、 設定の点検の月次の作業の4軸の予防の整備が届きます。</p>
+
+<p>10月号以降の主題の予告 (利用方針の判別の異常、 道具の呼び出しの解析の失敗、 静かなデータの消失、 認証の沈黙の失敗など) は <a href="safety-lab.html">商品の頁</a> で公開済です (9ヶ月分の runway)。</p>
+
+<footer>
+<p>CC Safety Lab is operated by yurukusa, an independent Claude Code operator who has logged 800+ hours of autonomous runtime since 2026-Q1.</p>
+<p>Sources cited in this preview are public GitHub Issues on anthropics/claude-code (10 representative issues totaling ~588 reactions out of the cluster's ~804 total: #28240, #30519, #29214, #11380, #36168, #43713, #6850, #18160, #30435, #5140, plus meta issue #39523). No private or unpublished information is included.</p>
+<p style="margin-top:.5rem"><a href="safety-lab.html">CC Safety Lab</a> &middot; <a href="safety-lab-june-preview.html">6月号の試し読み</a> &middot; <a href="safety-lab-july-preview.html">7月号の試し読み</a> &middot; <a href="safety-lab-august-preview.html">8月号の試し読み</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
+</footer>
+
+</body>
+</html>
