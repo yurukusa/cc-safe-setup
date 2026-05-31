@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Opus 4.8 Dual Cluster Exposure — 5-Question Diagnostic (Cluster 22 + Cluster 23 candidates)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="5-question browser-only diagnostic. Estimates whether you're exposed to the Opus 4.8 dual cluster (Cluster 22 correctness + Cluster 23 cost). 11 independent filings 2026-05-30 to 2026-05-31. No signup, no telemetry. CC0.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/cluster-22-23-opus48-dual-diagnostic.html">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.6; }
+h1 { font-size: 1.55rem; margin-bottom: 0.5rem; line-height: 1.3; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.score { font-size: 3rem; font-weight: 700; text-align: center; }
+.score-label { text-align: center; color: var(--muted); margin-bottom: 1rem; }
+.score-good { color: var(--green); }
+.score-mid { color: var(--amber); }
+.score-bad { color: var(--red); }
+.rec { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.rec.mid { background: #fffbeb; border-color: var(--amber); }
+.rec.bad { background: #fef2f2; border-color: var(--red); }
+.rec h3 { margin-top: 0; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.cta-btn { display: inline-block; background: var(--accent); color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 4px; font-weight: 600; margin-top: 0.5rem; margin-right: 0.5rem; }
+.cta-btn:hover { background: #c2410c; color: white; }
+.cta-btn-outline { background: white; color: var(--accent); border: 2px solid var(--accent); }
+.cta-btn-outline:hover { background: #fff5ed; color: var(--accent); }
+code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.88em; }
+</style>
+</head>
+<body>
+
+<h1>Are You Exposed to the Opus 4.8 Dual Cluster? — 5-Question Diagnostic</h1>
+<div class="meta">5 questions · ~2 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-06-01)</div>
+
+<div class="intro">
+<strong>What this diagnoses:</strong> Between 2026-05-30 and 2026-05-31, 11 independent issues filed on <code>anthropics/claude-code</code> documented two structurally distinct Opus 4.8 regressions sharing the same version window (v2.1.156–v2.1.158). <strong>Cluster 22 candidate</strong> (6 filings, correctness hazard) — model asserts specific tool-output values before tools return. <strong>Cluster 23 candidate</strong> (5 filings, cost hazard) — routine coding turns burn 40-50k output tokens where Opus 4.6/4.7 produce 2-3k. This 5-question diagnostic estimates your exposure and routes you to the right operator-side response.
+</div>
+
+<div class="disclosure">
+<strong>Disclosure:</strong> The recommendation routes high-exposure operators to the <em>Token Book</em> (¥2,500, Cluster 23 technical deep-dive) and <em>事故防止本</em> (¥800, operator-experience framing). The five defense hooks at <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup</a> (PR #519, #537, #529, #535) are MIT-licensed and free; the books are the deeper monthly-updated reference. Low-exposure operators get the free Path 1 recommendation only.
+</div>
+
+<h2>5 Questions</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1">
+<div class="label">1. Are you using Opus 4.8 (<code>claude-opus-4-8</code>) as your primary model?</div>
+<div class="hint">Both Cluster 22 and Cluster 23 are Opus 4.8-specific. Check via <code>/model</code> or <code>echo $ANTHROPIC_MODEL</code>.</div>
+<label><input type="radio" name="q1" value="0"> No, I'm on Opus 4.7, Opus 4.6, Sonnet, or Haiku.</label>
+<label><input type="radio" name="q1" value="10"> Mixed — Opus 4.8 sometimes, other models other times.</label>
+<label><input type="radio" name="q1" value="20"> Yes, Opus 4.8 is my default model (or <code>ANTHROPIC_MODEL</code> is unset and 4.8 is the platform default).</label>
+</div>
+
+<div class="q" data-id="q2">
+<div class="label">2. Have you seen unusual <code>output_tokens</code> magnitudes for routine coding turns?</div>
+<div class="hint">Routine turns (file reads, simple refactors, scans) normally produce 1-5k output_tokens. Run <code>jq -s 'map(.message.usage.output_tokens // 0) | sort | .[length/2]' ~/.claude/projects/**/recent.jsonl</code> to get your median.</div>
+<label><input type="radio" name="q2" value="0"> Median is under 5k tokens (normal range).</label>
+<label><input type="radio" name="q2" value="8"> Median is 5-10k tokens (slightly elevated).</label>
+<label><input type="radio" name="q2" value="14"> Median is 10-20k tokens (Cluster 23 candidate signal).</label>
+<label><input type="radio" name="q2" value="20"> Median is over 20k tokens (strong Cluster 23 signal — #64153 anchor magnitude).</label>
+</div>
+
+<div class="q" data-id="q3">
+<div class="label">3. Have you seen the model assert specific tool-output values before the tool returned?</div>
+<div class="hint">Cluster 22 anchor signatures: quoted prices/SHAs/file contents stated before web/git/file tools complete, then self-corrected 1-2 messages later. Also: "I confirmed X" followed by no actual tool call, or "the file shows" with content that doesn't match the actual file.</div>
+<label><input type="radio" name="q3" value="0"> No, the model's tool-output claims always match the actual tool result.</label>
+<label><input type="radio" name="q3" value="8"> Maybe once or twice in the past week — unsure if it was fabrication or a real disagreement.</label>
+<label><input type="radio" name="q3" value="14"> Yes, I've caught the model 1-2 times asserting values that didn't match the eventual tool output.</label>
+<label><input type="radio" name="q3" value="20"> Yes, multiple times — including the self-recognition mechanic (model promises not to repeat, repeats anyway).</label>
+</div>
+
+<div class="q" data-id="q4">
+<div class="label">4. What's your typical effort tier (<code>/effort</code> setting) for routine work?</div>
+<div class="hint">Cluster 23 Axis 23B documents that <code>medium</code> effort behaves much closer to <code>high</code>/<code>xhigh</code> on Opus 4.8. The mismatch surfaces only on <code>medium</code> or above.</div>
+<label><input type="radio" name="q4" value="0"> <code>low</code> for routine turns (avoids the tier-mismatch range).</label>
+<label><input type="radio" name="q4" value="6"> <code>medium</code> for routine turns (default — Cluster 23 23B trigger range).</label>
+<label><input type="radio" name="q4" value="10"> <code>high</code> for everything (still surfaces the 23A absolute magnitude signal).</label>
+<label><input type="radio" name="q4" value="14"> <code>xhigh</code> or I leave it unset and let the model decide.</label>
+</div>
+
+<div class="q" data-id="q5">
+<div class="label">5. What's your monthly Claude Code budget exposure?</div>
+<div class="hint">Cluster 23 burns 5-10× the expected per-turn budget. Pre-cliff (before 2026-06-15) this hits your Pool 2 quota; post-cliff it hits your dollar overage at API rates.</div>
+<label><input type="radio" name="q5" value="0"> Under $20/month — Pro plan, low usage, cliff exposure minimal.</label>
+<label><input type="radio" name="q5" value="6"> $20-$100/month — Pro overage or Max 5x.</label>
+<label><input type="radio" name="q5" value="12"> $100-$200/month — Max 20x or equivalent.</label>
+<label><input type="radio" name="q5" value="16"> Over $200/month — Max with consistent overage (highest cliff sensitivity).</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>Calculate Exposure Score</button>
+
+</form>
+
+<div class="result" id="result">
+<div class="score-label">Your Opus 4.8 Dual Cluster Exposure Score</div>
+<div class="score" id="score-display">—</div>
+<div id="recommendation"></div>
+</div>
+
+<h2>About the Score</h2>
+
+<p>The diagnostic produces a 0-90 score across five factors. The bands reflect both the probability you're hitting the cluster and the dollar magnitude of the impact:</p>
+
+<ul>
+<li><strong>Score 55-90 (High exposure):</strong> Multiple signals indicate active Cluster 22 and/or Cluster 23 firing. The Opus 4.7 switch (Path 1) typically pays for itself within hours via the per-turn token reduction. The cc-safe-setup hooks surface ongoing events for verification.</li>
+<li><strong>Score 25-54 (Moderate exposure):</strong> Some signals present but not load-bearing. Path 1 is still the highest-leverage move; the diagnostic logs and hooks help you decide whether to make the switch permanent.</li>
+<li><strong>Score 0-24 (Low exposure):</strong> You're either not on Opus 4.8, or your usage pattern doesn't trigger the cluster signatures. The free hooks at <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> remain useful for other failure clusters but the Opus 4.8 dual cluster is not your highest-priority concern.</li>
+</ul>
+
+<h2>Source Material</h2>
+
+<p>This diagnostic draws on the 11 independent issue filings 2026-05-30 to 2026-05-31:</p>
+
+<ul>
+<li><strong>Cluster 22 candidate (6 filings, correctness hazard):</strong> <a href="https://github.com/anthropics/claude-code/issues/64048">#64048</a> (confabulated prompt-injection markers), <a href="https://github.com/anthropics/claude-code/issues/64055">#64055</a> (unwanted file modifications), <a href="https://github.com/anthropics/claude-code/issues/64065">#64065</a> (anchor: flight prices before web search), <a href="https://github.com/anthropics/claude-code/issues/64076">#64076</a> (model admits fabrication when pressed), <a href="https://github.com/anthropics/claude-code/issues/64095">#64095</a> (git log returning different SHAs), <a href="https://github.com/anthropics/claude-code/issues/64103">#64103</a> (parallel bash false success reports).</li>
+<li><strong>Cluster 23 candidate (5 filings, cost hazard):</strong> <a href="https://github.com/anthropics/claude-code/issues/64153">#64153</a> (anchor: 46,433 output tokens / 22m 43s on routine rename-impact scan), <a href="https://github.com/anthropics/claude-code/issues/64152">#64152</a> (over-engineering simple tasks), <a href="https://github.com/anthropics/claude-code/issues/64143">#64143</a> (silent session-limit drain), <a href="https://github.com/anthropics/claude-code/issues/64102">#64102</a> (excessive consumption + API disconnects), <a href="https://github.com/anthropics/claude-code/issues/63455">#63455</a> (simple tasks consuming 40-50k tokens).</li>
+</ul>
+
+<p>Cluster tracker: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a> · English field guides: <a href="https://gist.github.com/yurukusa/36f91a19a44d106666ec978eb6b86863">Cluster 22</a> · <a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d">Cluster 23</a></p>
+
+<footer>
+Opus 4.8 Dual Cluster Exposure Diagnostic v1.0 · 2026-06-01 · CC0 · No signup, no telemetry · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>
+</footer>
+
+<script>
+const form = document.getElementById('audit-form');
+const submitBtn = document.getElementById('submit-btn');
+const result = document.getElementById('result');
+const scoreDisplay = document.getElementById('score-display');
+const recommendation = document.getElementById('recommendation');
+
+function checkComplete() {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  return questions.every(q => form.querySelector(`input[name="${q}"]:checked`));
+}
+
+form.addEventListener('change', () => {
+  submitBtn.disabled = !checkComplete();
+});
+
+submitBtn.addEventListener('click', () => {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  const score = questions.reduce((sum, q) => {
+    const v = parseInt(form.querySelector(`input[name="${q}"]:checked`).value, 10);
+    return sum + v;
+  }, 0);
+
+  // Read per-axis signals for the verdict body
+  const q1 = parseInt(form.querySelector('input[name="q1"]:checked').value, 10);
+  const q2 = parseInt(form.querySelector('input[name="q2"]:checked').value, 10);
+  const q3 = parseInt(form.querySelector('input[name="q3"]:checked').value, 10);
+
+  scoreDisplay.textContent = score;
+  let band, recHTML;
+
+  // Pre-compute axis-specific notes
+  const onOpus48 = q1 >= 10;
+  const cluster23Signal = q2 >= 14;
+  const cluster22Signal = q3 >= 14;
+
+  if (score >= 55) {
+    scoreDisplay.className = 'score score-good';
+    band = 'High exposure — act now';
+    let axisNote = '';
+    if (cluster22Signal && cluster23Signal) {
+      axisNote = 'Both Cluster 22 (correctness) and Cluster 23 (cost) signatures present in your workflow.';
+    } else if (cluster23Signal) {
+      axisNote = 'Strong Cluster 23 (cost) signature — your routine turns are burning 10×+ the expected token budget.';
+    } else if (cluster22Signal) {
+      axisNote = 'Strong Cluster 22 (correctness) signature — the model has fabricated tool-output values in your sessions.';
+    } else {
+      axisNote = 'High aggregate exposure via Opus 4.8 + spend pattern, even without confirmed individual sightings yet.';
+    }
+    recHTML = `
+      <div class="rec">
+        <h3>High exposure (${score}/90) — Switch to Opus 4.7 today</h3>
+        <p>${axisNote}</p>
+        <p><strong>Path 1 (recommended, 30 seconds):</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>export ANTHROPIC_MODEL=claude-opus-4-7</code></pre>
+        <p>The <a href="https://github.com/anthropics/claude-code/issues/64153" target="_blank">#64153 reporter's own comparison</a> shows Opus 4.6/4.7 produce 2-3k tokens for the same prompt that Opus 4.8 burns 46,433 on. My own audit after switching: routine-turn median dropped from ~12k to ~2.4k (5× reduction). Both clusters resolve via this single change.</p>
+        <p><strong>Optional install: the five defense hooks for ongoing monitoring</strong></p>
+        <ul style="margin: 0.5rem 0;">
+          <li><code>tool-result-correlation-checker.sh</code> (Cluster 22 Axis 22B)</li>
+          <li><code>pre-execution-claim-detector.sh</code> (Cluster 22 Axis 22A)</li>
+          <li><code>opus48-routine-task-warning.sh</code> (Cluster 23 SessionStart)</li>
+          <li><code>output-token-spike-detector.sh</code> (Cluster 23 Axis 23A)</li>
+          <li><code>thinking-budget-effort-mismatch-detector.sh</code> (Cluster 23 Axis 23B)</li>
+        </ul>
+        <p style="margin-top: 1rem;"><strong>Deeper articulation:</strong></p>
+        <p><a href="https://zenn.dev/yurukusa/books/token-savings-guide/viewer/24-2026-05-31-opus48-effort-budget-cluster" class="cta-btn" target="_blank">→ Token Book Ch24 (¥2,500)</a><a href="https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/13-may-2026-opus48-effort-budget" class="cta-btn cta-btn-outline" target="_blank">→ 事故防止本 Ch13 (¥800)</a></p>
+        <p style="margin-top:1rem; font-size:0.9rem;">English: <a href="https://gist.github.com/yurukusa/36f91a19a44d106666ec978eb6b86863" target="_blank">Cluster 22 field guide</a> · <a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d" target="_blank">Cluster 23 field guide</a></p>
+      </div>
+    `;
+  } else if (score >= 25) {
+    scoreDisplay.className = 'score score-mid';
+    band = 'Moderate exposure — audit first';
+    recHTML = `
+      <div class="rec mid">
+        <h3>Moderate exposure (${score}/90) — Run the audit, then decide</h3>
+        <p>You have some signals but not all of them yet. Two diagnostics will tell you whether to switch:</p>
+        <p><strong>1. Per-turn output_tokens audit:</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>jq -s 'map(.message.usage.output_tokens // 0) | sort | .[length/2]' \\
+  ~/.claude/projects/**/recent.jsonl</code></pre>
+        <p>Median above 10k = Cluster 23 active in your workflow. Switch via <code>export ANTHROPIC_MODEL=claude-opus-4-7</code>.</p>
+        <p><strong>2. Install the spike detector hook:</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>curl -sSL https://raw.githubusercontent.com/yurukusa/cc-safe-setup/main/examples/output-token-spike-detector.sh \\
+  -o ~/.claude/hooks/output-token-spike-detector.sh
+chmod +x ~/.claude/hooks/output-token-spike-detector.sh</code></pre>
+        <p>Then add to <code>~/.claude/settings.json</code> PostToolUse. Fires per-turn when output_tokens exceed 3× your trailing baseline.</p>
+        <p style="margin-top:1rem;"><strong>If you want the full deep-dive before deciding:</strong></p>
+        <p><a href="https://zenn.dev/yurukusa/books/token-savings-guide/viewer/24-2026-05-31-opus48-effort-budget-cluster" class="cta-btn" target="_blank">→ Token Book Ch24 (¥2,500)</a><a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d" class="cta-btn cta-btn-outline" target="_blank">→ Free Cluster 23 Gist</a></p>
+      </div>
+    `;
+  } else {
+    scoreDisplay.className = 'score score-bad';
+    band = 'Low exposure — keep the free hooks';
+    recHTML = `
+      <div class="rec bad">
+        <h3>Low exposure (${score}/90) — You're not the target audience</h3>
+        <p>Either you're not on Opus 4.8, or your usage pattern doesn't trigger the cluster signatures. The Opus 4.8 dual cluster is not your highest-priority concern right now.</p>
+        <p><strong>What's still useful:</strong> The 5 defense hooks at <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> are opt-in and pay zero noise cost on non-Opus-4.8 sessions. Installing them is forward-protection in case you switch to Opus 4.8 later or the cluster signatures appear in your workflow.</p>
+        <p><strong>If your situation changes</strong> (you start using Opus 4.8, your routine-turn token median drifts above 10k, you spot fabrication signatures), revisit this diagnostic. The Opus 4.7 switch remains the 30-second elimination path.</p>
+        <p style="margin-top:1rem;font-size:0.9rem;">Other free resources: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster tracker</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
+      </div>
+    `;
+  }
+
+  document.querySelector('.score-label').textContent = `Your Opus 4.8 Dual Cluster Exposure — ${band}`;
+  recommendation.innerHTML = recHTML;
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
