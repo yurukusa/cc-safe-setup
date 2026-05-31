@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Opus 4.8の双子の事例の利用者の影響の5問の診断 (集積22 + 集積23)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="5問でOpus 4.8の双子の事例 (集積22 correctness + 集積23 cost) の利用者の影響を判定する診断道具。 11件の独立な起票 (5/30-5/31)。 ブラウザのみで動作、 登録なし、 計測なし。 CC0。">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/cluster-22-23-opus48-dual-diagnostic-jp.html">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.7; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.3rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.score { font-size: 3rem; font-weight: 700; text-align: center; }
+.score-label { text-align: center; color: var(--muted); margin-bottom: 1rem; }
+.score-good { color: var(--green); }
+.score-mid { color: var(--amber); }
+.score-bad { color: var(--red); }
+.rec { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.rec.mid { background: #fffbeb; border-color: var(--amber); }
+.rec.bad { background: #fef2f2; border-color: var(--red); }
+.rec h3 { margin-top: 0; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.cta-btn { display: inline-block; background: var(--accent); color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 4px; font-weight: 600; margin-top: 0.5rem; margin-right: 0.5rem; }
+.cta-btn:hover { background: #c2410c; color: white; }
+.cta-btn-outline { background: white; color: var(--accent); border: 2px solid var(--accent); }
+.cta-btn-outline:hover { background: #fff5ed; color: var(--accent); }
+code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.88em; }
+</style>
+</head>
+<body>
+
+<h1>Opus 4.8の双子の事例の利用者の影響の5問の診断 (集積22 + 集積23)</h1>
+<div class="meta">5問・約2分・ブラウザのみで動作・登録なし・計測なし・CC0・v1.0 (2026-06-01)</div>
+
+<div class="intro">
+<strong>この道具の判定の対象:</strong> 2026年5月30日から31日の48時間で、 <code>anthropics/claude-code</code> の起票の追跡で Opus 4.8 の双子の事例が表面化しました (合計11件の独立な起票)。 <strong>集積22 (correctness の危険、 6件):</strong> 模型が道具の呼び出しの結果の値を、 道具の完了の前に断言する事例。 <strong>集積23 (cost の危険、 5件):</strong> routine の作業で出力トークンが想定の10倍以上になる事例。 anchor の起票 #64153 で 46,433 token / 22分43秒の thinking。 双方とも <code>/model claude-opus-4-7</code> で解消する事例。 本道具は5問でご自身の影響の程度を判定し、 即時の対応の経路の articulate を出力します。
+</div>
+
+<div class="disclosure">
+<strong>動線の articulate:</strong> 高い影響の判定の利用者には、 <em>Token Book 第24章</em> (¥2,500、 集積23の技術深掘りの章) と <em>事故防止本 第13章</em> (¥800、 非エンジニアの体験記の章) の動線を articulate します。 5件の防衛 hook (PR #519/#537/#529/#535) は <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup</a> の段で MIT で無料の経路です。 低い影響の判定の利用者には、 Path 1 (Opus 4.7 への切替) の段の articulate のみの整備の経路です。
+</div>
+
+<h2>5問</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1">
+<div class="label">1. Opus 4.8 (<code>claude-opus-4-8</code>) を主の模型として利用していますか？</div>
+<div class="hint">集積22 と集積23 は Opus 4.8 特有の合図です。 <code>/model</code> もしくは <code>echo $ANTHROPIC_MODEL</code> の段で確認してください。</div>
+<label><input type="radio" name="q1" value="0"> いいえ、 Opus 4.7、 Opus 4.6、 Sonnet、 もしくは Haiku を利用。</label>
+<label><input type="radio" name="q1" value="10"> 混在、 時々 Opus 4.8、 時々他の模型。</label>
+<label><input type="radio" name="q1" value="20"> はい、 Opus 4.8 が既定の模型 (もしくは <code>ANTHROPIC_MODEL</code> 未設定で 4.8 が platform の既定)。</label>
+</div>
+
+<div class="q" data-id="q2">
+<div class="label">2. routine の作業の <code>output_tokens</code> の量で異常を観察しましたか？</div>
+<div class="hint">通常の routine の作業 (ファイルの読み取り、 simple な refactor、 scan) は 1,000-5,000 トークンの範囲です。 <code>jq -s 'map(.message.usage.output_tokens // 0) | sort | .[length/2]' ~/.claude/projects/**/recent.jsonl</code> で中央値を取得できます。</div>
+<label><input type="radio" name="q2" value="0"> 中央値は 5,000 トークン以下 (通常の範囲)。</label>
+<label><input type="radio" name="q2" value="8"> 中央値は 5,000-10,000 トークン (少し高めの合図)。</label>
+<label><input type="radio" name="q2" value="14"> 中央値は 10,000-20,000 トークン (集積23 候補の合図)。</label>
+<label><input type="radio" name="q2" value="20"> 中央値は 20,000 トークン以上 (集積23 の強い合図、 #64153 anchor の規模)。</label>
+</div>
+
+<div class="q" data-id="q3">
+<div class="label">3. 模型が道具の出力の値を、 道具の完了の前に断言する事例を観察しましたか？</div>
+<div class="hint">集積22 anchor の合図: 価格 / SHA / ファイルの中身が、 web / git / file の道具の完了の前に断言され、 1-2 メッセージの後で訂正される事例。 加えて: 「確認しました X」 と articulate されるが実際の道具の呼び出しがない、 もしくは 「ファイルの中身」 と articulate される内容が実際のファイルと一致しない事例。</div>
+<label><input type="radio" name="q3" value="0"> いいえ、 模型の道具の出力の articulate は常に実際の道具の結果と一致。</label>
+<label><input type="radio" name="q3" value="8"> 過去1週間で1-2回くらいの合図 — 偽造か通常の不一致か判別が不明。</label>
+<label><input type="radio" name="q3" value="14"> はい、 模型が断言した値が実際の道具の出力と一致しない事例を1-2回観察。</label>
+<label><input type="radio" name="q3" value="20"> はい、 複数回の合図 — 自己認識ありで予防なしの機構を含む (模型が「もう繰り返さない」 と articulate した直後に同型の偽造を再現)。</label>
+</div>
+
+<div class="q" data-id="q4">
+<div class="label">4. routine の作業の <code>/effort</code> の段の typical な指定は？</div>
+<div class="hint">集積23 軸 23B では、 Opus 4.8 の <code>medium</code> の指定が <code>high</code> / <code>xhigh</code> の挙動を示す合図。 <code>medium</code> 以上の指定で不一致が表面化します。</div>
+<label><input type="radio" name="q4" value="0"> <code>low</code> for routine 作業 (tier の不一致の範囲を回避)。</label>
+<label><input type="radio" name="q4" value="6"> <code>medium</code> for routine 作業 (既定の指定、 集積23 軸 23B の発火の範囲)。</label>
+<label><input type="radio" name="q4" value="10"> <code>high</code> for 全件 (まだ軸 23A の絶対の量の合図が表面化)。</label>
+<label><input type="radio" name="q4" value="14"> <code>xhigh</code> もしくは未指定で模型に判断を委ねている。</label>
+</div>
+
+<div class="q" data-id="q5">
+<div class="label">5. 月の Claude Code の費用の規模は？</div>
+<div class="hint">集積23 では 5-10× の per-turn の予算が消費される合図。 6月15日の課金分離の前は Pool 2 の枠の段の影響、 課金分離の後は API rate の段の dollar の影響。</div>
+<label><input type="radio" name="q5" value="0"> $20/月 以下 — Pro plan、 低い利用、 cliff の影響は最小。</label>
+<label><input type="radio" name="q5" value="6"> $20-$100/月 — Pro overage もしくは Max 5x。</label>
+<label><input type="radio" name="q5" value="12"> $100-$200/月 — Max 20x もしくは同等。</label>
+<label><input type="radio" name="q5" value="16"> $200/月 以上 — Max + consistent overage (cliff sensitivity が最大)。</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>影響の score を計算</button>
+
+</form>
+
+<div class="result" id="result">
+<div class="score-label">Opus 4.8 の双子の事例の影響の score</div>
+<div class="score" id="score-display">—</div>
+<div id="recommendation"></div>
+</div>
+
+<h2>判定の段の articulate</h2>
+
+<p>0-90 点の score で 3段の判定の経路:</p>
+
+<ul>
+<li><strong>55-90 点 (高い影響):</strong> 集積22 もしくは集積23 が活性の段の合図。 Opus 4.7 への切替の経路 (Path 1) が30秒の作業で大幅な per-turn の token の削減の合図。 cc-safe-setup の段の hook の段の継続の検出の経路。</li>
+<li><strong>25-54 点 (中程度の影響):</strong> 一部の合図が表面化したが load-bearing ではない段。 Path 1 は最強の梃子の経路、 診断の log と hook の段で切替の判定の判断の入力。</li>
+<li><strong>0-24 点 (低い影響):</strong> Opus 4.8 を利用していない、 もしくは利用の様式が集積の合図を発火しない段。 cc-safe-setup の段の hook は他の集積の段の経路で有用、 集積22 と集積23 は優先の段の対象外。</li>
+</ul>
+
+<h2>典拠の段の articulate</h2>
+
+<p>本診断は5月30日から31日の11件の独立な起票の段の合図に基づいています:</p>
+
+<ul>
+<li><strong>集積22 candidate (6件、 correctness の危険):</strong> <a href="https://github.com/anthropics/claude-code/issues/64048">#64048</a> (prompt-injection の marker の偽造)、 <a href="https://github.com/anthropics/claude-code/issues/64055">#64055</a> (依頼外のファイルの変更)、 <a href="https://github.com/anthropics/claude-code/issues/64065">#64065</a> (anchor: flight の価格の事前の断言)、 <a href="https://github.com/anthropics/claude-code/issues/64076">#64076</a> (偽造の合図の自認)、 <a href="https://github.com/anthropics/claude-code/issues/64095">#64095</a> (git log の異なる SHA の合図)、 <a href="https://github.com/anthropics/claude-code/issues/64103">#64103</a> (並列の bash の偽の成功の合図)。</li>
+<li><strong>集積23 candidate (5件、 cost の危険):</strong> <a href="https://github.com/anthropics/claude-code/issues/64153">#64153</a> (anchor: 46,433 出力トークン / 22分43秒の thinking)、 <a href="https://github.com/anthropics/claude-code/issues/64152">#64152</a> (simple task の over-engineering)、 <a href="https://github.com/anthropics/claude-code/issues/64143">#64143</a> (利用枠の沈黙の消費)、 <a href="https://github.com/anthropics/claude-code/issues/64102">#64102</a> (excessive な consumption + API disconnect)、 <a href="https://github.com/anthropics/claude-code/issues/63455">#63455</a> (simple task の 40-50k トークンの消費)。</li>
+</ul>
+
+<p>cluster tracker: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster-tracker.html</a> · 英語の field guide: <a href="https://gist.github.com/yurukusa/36f91a19a44d106666ec978eb6b86863">集積22</a> · <a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d">集積23</a></p>
+
+<footer>
+Opus 4.8 Dual Cluster Exposure Diagnostic (日本語版) v1.0 · 2026-06-01 · CC0 · 登録なし、 計測なし · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="cluster-22-23-opus48-dual-diagnostic.html">English version</a>
+</footer>
+
+<script>
+const form = document.getElementById('audit-form');
+const submitBtn = document.getElementById('submit-btn');
+const result = document.getElementById('result');
+const scoreDisplay = document.getElementById('score-display');
+const recommendation = document.getElementById('recommendation');
+
+function checkComplete() {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  return questions.every(q => form.querySelector(`input[name="${q}"]:checked`));
+}
+
+form.addEventListener('change', () => {
+  submitBtn.disabled = !checkComplete();
+});
+
+submitBtn.addEventListener('click', () => {
+  const questions = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  const score = questions.reduce((sum, q) => {
+    const v = parseInt(form.querySelector(`input[name="${q}"]:checked`).value, 10);
+    return sum + v;
+  }, 0);
+
+  const q1 = parseInt(form.querySelector('input[name="q1"]:checked').value, 10);
+  const q2 = parseInt(form.querySelector('input[name="q2"]:checked').value, 10);
+  const q3 = parseInt(form.querySelector('input[name="q3"]:checked').value, 10);
+
+  scoreDisplay.textContent = score;
+  let band, recHTML;
+
+  const onOpus48 = q1 >= 10;
+  const cluster23Signal = q2 >= 14;
+  const cluster22Signal = q3 >= 14;
+
+  if (score >= 55) {
+    scoreDisplay.className = 'score score-good';
+    band = '高い影響 — 即時の対応の経路';
+    let axisNote = '';
+    if (cluster22Signal && cluster23Signal) {
+      axisNote = '集積22 (correctness) と集積23 (cost) の双方の合図が活性の段。';
+    } else if (cluster23Signal) {
+      axisNote = '集積23 (cost) の強い合図 — routine の作業で 10×+ の token の予算の消費の段。';
+    } else if (cluster22Signal) {
+      axisNote = '集積22 (correctness) の強い合図 — 模型が道具の出力の値の偽造の段の事例。';
+    } else {
+      axisNote = '個別の合図の確認の段の前の段ですが、 Opus 4.8 の利用 + 費用の規模で集計の影響が高い段。';
+    }
+    recHTML = `
+      <div class="rec">
+        <h3>高い影響 (${score}/90) — Opus 4.7 への切替の即時の整備</h3>
+        <p>${axisNote}</p>
+        <p><strong>Path 1 (推奨、 30秒の作業):</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>export ANTHROPIC_MODEL=claude-opus-4-7</code></pre>
+        <p>起票 <a href="https://github.com/anthropics/claude-code/issues/64153" target="_blank">#64153 の reporter の比較</a> の段で、 Opus 4.6 / 4.7 の段で 2-3k トークンの量を Opus 4.8 では 46,433 トークンの消費の段。 私自身の audit の段で、 切替の前の段の中央値の 12,000 トークンから、 切替の後の段の 2,400 トークンへの 5倍の量の削減の合図。 双方の集積が同じ Path 1 で解消する経路。</p>
+        <p><strong>付加: 5件の防衛 hook の整備の段の経路</strong></p>
+        <ul style="margin: 0.5rem 0;">
+          <li><code>tool-result-correlation-checker.sh</code> (集積22 軸 22B)</li>
+          <li><code>pre-execution-claim-detector.sh</code> (集積22 軸 22A)</li>
+          <li><code>opus48-routine-task-warning.sh</code> (集積23 SessionStart)</li>
+          <li><code>output-token-spike-detector.sh</code> (集積23 軸 23A)</li>
+          <li><code>thinking-budget-effort-mismatch-detector.sh</code> (集積23 軸 23B)</li>
+        </ul>
+        <p style="margin-top: 1rem;"><strong>深い articulate の経路:</strong></p>
+        <p><a href="https://zenn.dev/yurukusa/books/token-savings-guide/viewer/24-2026-05-31-opus48-effort-budget-cluster" class="cta-btn" target="_blank">→ Token Book 第24章 (¥2,500)</a><a href="https://zenn.dev/yurukusa/books/3c3c3baee85f0a19/viewer/13-may-2026-opus48-effort-budget" class="cta-btn cta-btn-outline" target="_blank">→ 事故防止本 第13章 (¥800)</a></p>
+        <p style="margin-top:1rem; font-size:0.9rem;">英語の field guide: <a href="https://gist.github.com/yurukusa/36f91a19a44d106666ec978eb6b86863" target="_blank">集積22</a> · <a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d" target="_blank">集積23</a></p>
+      </div>
+    `;
+  } else if (score >= 25) {
+    scoreDisplay.className = 'score score-mid';
+    band = '中程度の影響 — audit の段の経路';
+    recHTML = `
+      <div class="rec mid">
+        <h3>中程度の影響 (${score}/90) — audit の段の経路の判定の判断の入力</h3>
+        <p>一部の合図が表面化していますが、 load-bearing ではない段。 2件の診断の経路で切替の判断の入力:</p>
+        <p><strong>1. per-turn の output_tokens の audit:</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>jq -s 'map(.message.usage.output_tokens // 0) | sort | .[length/2]' \\
+  ~/.claude/projects/**/recent.jsonl</code></pre>
+        <p>中央値が 10,000 トークン以上の段の合図 = 集積23 が活性の段。 <code>export ANTHROPIC_MODEL=claude-opus-4-7</code> の経路で解消。</p>
+        <p><strong>2. spike detector の hook の整備の段:</strong></p>
+        <pre style="background:#1f2937;color:#f9fafb;padding:0.8rem;border-radius:4px;overflow-x:auto;"><code>curl -sSL https://raw.githubusercontent.com/yurukusa/cc-safe-setup/main/examples/output-token-spike-detector.sh \\
+  -o ~/.claude/hooks/output-token-spike-detector.sh
+chmod +x ~/.claude/hooks/output-token-spike-detector.sh</code></pre>
+        <p><code>~/.claude/settings.json</code> の PostToolUse の段に追加。 per-turn の段で output_tokens が trailing baseline の 3倍以上の段の合図で発火。</p>
+        <p style="margin-top:1rem;"><strong>深い articulate の経路:</strong></p>
+        <p><a href="https://zenn.dev/yurukusa/books/token-savings-guide/viewer/24-2026-05-31-opus48-effort-budget-cluster" class="cta-btn" target="_blank">→ Token Book 第24章 (¥2,500)</a><a href="https://gist.github.com/yurukusa/6b469dcaa1c933fca6f90dcd47fdb81d" class="cta-btn cta-btn-outline" target="_blank">→ 集積23 の無料の Gist</a></p>
+      </div>
+    `;
+  } else {
+    scoreDisplay.className = 'score score-bad';
+    band = '低い影響 — 無料の経路の整備';
+    recHTML = `
+      <div class="rec bad">
+        <h3>低い影響 (${score}/90) — 集積の影響の対象外</h3>
+        <p>Opus 4.8 を利用していない、 もしくは利用の様式が集積の合図を発火しない段。 集積22 と集積23 は優先の段の対象外。</p>
+        <p><strong>有用の段の経路:</strong> <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の段の5件の防衛 hook は opt-in で、 Opus 4.8 以外の段の利用で騒音の量は0件の段。 整備の段で forward-protection の経路 (将来の Opus 4.8 への切替の段、 もしくは集積の合図の表面化の段) で有用。</p>
+        <p><strong>状況の変化の段</strong> (Opus 4.8 の利用の開始、 routine の中央値の 10,000 トークン以上への drift、 偽造の合図の観察) で本診断を再実行してください。 Path 1 (Opus 4.7 への切替) の段の30秒の elimination の経路は継続。</p>
+        <p style="margin-top:1rem;font-size:0.9rem;">他の無料の経路の整備: <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">cluster tracker</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a></p>
+      </div>
+    `;
+  }
+
+  document.querySelector('.score-label').textContent = `Opus 4.8 の双子の事例の影響 — ${band}`;
+  recommendation.innerHTML = recHTML;
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
