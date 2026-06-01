@@ -268,6 +268,46 @@ else
     PASS=$((PASS + 1))
 fi
 
+# --- Test 26: References #62199 (broader CLI/VS Code 1M default) ---
+output=$(run_hook_with_env ANTHROPIC_MODEL='claude-sonnet-4-6[1m]')
+if echo "$output" | grep -q "#62199"; then
+    echo "  PASS: references #62199"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: should reference #62199"
+    FAIL=$((FAIL + 1))
+fi
+
+# --- Test 27: Shows in-session /model workaround for mid-session drain ---
+output=$(run_hook_with_env ANTHROPIC_MODEL='claude-sonnet-4-6[1m]')
+if echo "$output" | grep -q -- "/model claude-opus-4-7"; then
+    echo "  PASS: shows in-session /model workaround"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: should show in-session /model workaround"
+    FAIL=$((FAIL + 1))
+fi
+
+# --- Test 28: Documents CLAUDE_CODE_DISABLE_1M_CONTEXT env-var caveat ---
+output=$(run_hook_with_env ANTHROPIC_MODEL='claude-sonnet-4-6[1m]')
+if echo "$output" | grep -q "CLAUDE_CODE_DISABLE_1M_CONTEXT"; then
+    echo "  PASS: documents the env-var caveat"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: should document CLAUDE_CODE_DISABLE_1M_CONTEXT caveat"
+    FAIL=$((FAIL + 1))
+fi
+
+# --- Test 29: Mentions VS Code extension (the channel where env var fails) ---
+output=$(run_hook_with_env ANTHROPIC_MODEL='claude-sonnet-4-6[1m]')
+if echo "$output" | grep -qi "VS Code"; then
+    echo "  PASS: mentions VS Code extension"
+    PASS=$((PASS + 1))
+else
+    echo "  FAIL: should mention VS Code extension"
+    FAIL=$((FAIL + 1))
+fi
+
 # --- Summary ---
 echo ""
 echo "Tests: $((PASS + FAIL)) total, $PASS passed, $FAIL failed"

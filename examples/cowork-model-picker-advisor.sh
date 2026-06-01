@@ -11,6 +11,13 @@
 #         users have no workaround until the picker is fixed. Related:
 #         #61869, #62100, #61692.
 #
+#         Also covers #62199 — the same silent 1M default reaches the plain
+#         CLI and the VS Code extension, where CLAUDE_CODE_DISABLE_1M_CONTEXT=1
+#         is reported NOT to be respected. For users already mid-session
+#         draining their 5h/weekly limit, the reliable fix is the in-session
+#         `/model claude-opus-4-7` (or any non-[1m] model), not just the
+#         launch-time `--model`.
+#
 # WHO THIS PROTECTS:
 #   CLI users who:
 #     - leave ANTHROPIC_MODEL unset and may inherit the same silent 1M
@@ -84,7 +91,14 @@ CLI workaround (Cowork has none until the picker is fixed):
   --model claude-haiku-4-5       # smaller, plan-included
   Or: export ANTHROPIC_MODEL=claude-sonnet-4-6 in your shell init.
 
-Related issues: #61869 #62100 #61692
+The same silent 1M default also hits the plain CLI and the VS Code
+extension, not only Cowork (#62199). CLAUDE_CODE_DISABLE_1M_CONTEXT=1 is
+reported NOT to be respected by the VS Code extension, so if you are
+already inside a session and watching the 5h/weekly limit drain, the
+reliable fix is the in-session command (no restart needed):
+  /model claude-opus-4-7         # switches immediately; any non-[1m] model
+
+Related issues: #62199 #61869 #62100 #61692
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 else
