@@ -6025,7 +6025,7 @@ async function main() {
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=june15-cliff' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — ¥10,071 / 11 purchases / 3 months');
+  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — ¥11,373 / 12 purchases / 3 months');
   console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, monthly cluster digest)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
@@ -6034,7 +6034,7 @@ async function main() {
   console.log();
   console.log('  ' + c.blue + 'Recurring track:' + c.reset + ' CC Safety Lab Founder (¥500/mo, Ko-fi, grandfathered)');
   console.log('  ' + c.dim + '  Monthly digest of new failure clusters + cc-safe-setup hooks shipped that month.' + c.reset);
-  console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,185 reactions).' + c.reset);
+  console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,196 reactions).' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Sister handbooks:' + c.reset + ' Claim-Verify Handbook live ($19); Sub-Agent Observability Handbook preview (full PDF pending)');
