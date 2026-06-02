@@ -2115,6 +2115,61 @@ test_deploy_in_repo "terraform apply" dirty 2 "terraform apply blocked (uncommit
 test_ex deploy-guard.sh '{}' 0 "empty passes"
 echo ""
 
+# ========== agents-md-sync-setup (scripts/, manual tool for #6235) ==========
+echo "agents-md-sync-setup.sh (scripts/):"
+SYNC_SETUP="$(cd "$(dirname "$0")" && pwd)/scripts/agents-md-sync-setup.sh"
+
+# Only CLAUDE.md present -> AGENTS.md becomes a symlink resolving to CLAUDE's content.
+T=$(mktemp -d); echo rules > "$T/CLAUDE.md"
+CC_AGENTS_SYNC_DIR="$T" bash "$SYNC_SETUP" --apply >/dev/null 2>&1 || true
+if [ -L "$T/AGENTS.md" ] && [ "$(cat "$T/AGENTS.md")" = "rules" ]; then
+    echo "  PASS: sync-setup links AGENTS.md -> CLAUDE.md"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: sync-setup links AGENTS.md -> CLAUDE.md"; FAIL=$((FAIL + 1))
+fi
+rm -rf "$T"
+
+# Dry-run (no --apply) must not modify anything.
+T=$(mktemp -d); echo rules > "$T/CLAUDE.md"
+CC_AGENTS_SYNC_DIR="$T" bash "$SYNC_SETUP" >/dev/null 2>&1 || true
+if [ ! -e "$T/AGENTS.md" ]; then
+    echo "  PASS: sync-setup dry-run makes no changes"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: sync-setup dry-run makes no changes"; FAIL=$((FAIL + 1))
+fi
+rm -rf "$T"
+
+# Both present with DIFFERENT content -> refuse; both files left untouched.
+T=$(mktemp -d); echo claude-content > "$T/CLAUDE.md"; echo agents-different > "$T/AGENTS.md"
+CC_AGENTS_SYNC_DIR="$T" bash "$SYNC_SETUP" --apply >/dev/null 2>&1 || true
+if [ "$(cat "$T/CLAUDE.md")" = "claude-content" ] && [ "$(cat "$T/AGENTS.md")" = "agents-different" ] && [ ! -L "$T/AGENTS.md" ]; then
+    echo "  PASS: sync-setup refuses to touch conflicting files"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: sync-setup refuses to touch conflicting files"; FAIL=$((FAIL + 1))
+fi
+rm -rf "$T"
+
+# Both present, identical -> AGENTS.md symlinked, original backed up (never lost).
+T=$(mktemp -d); echo same > "$T/CLAUDE.md"; echo same > "$T/AGENTS.md"
+CC_AGENTS_SYNC_DIR="$T" CC_AGENTS_SYNC_TIMESTAMP=TEST bash "$SYNC_SETUP" --apply >/dev/null 2>&1 || true
+if [ -L "$T/AGENTS.md" ] && [ -f "$T/AGENTS.md.bak-TEST" ]; then
+    echo "  PASS: sync-setup backs up before replacing identical file"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: sync-setup backs up before replacing identical file"; FAIL=$((FAIL + 1))
+fi
+rm -rf "$T"
+
+# copy mode -> AGENTS.md is a regular file copy, not a symlink.
+T=$(mktemp -d); echo c > "$T/CLAUDE.md"
+CC_AGENTS_SYNC_DIR="$T" CC_AGENTS_SYNC_MODE=copy bash "$SYNC_SETUP" --apply >/dev/null 2>&1 || true
+if [ -f "$T/AGENTS.md" ] && [ ! -L "$T/AGENTS.md" ] && [ "$(cat "$T/AGENTS.md")" = "c" ]; then
+    echo "  PASS: sync-setup copy mode writes a real file"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: sync-setup copy mode writes a real file"; FAIL=$((FAIL + 1))
+fi
+rm -rf "$T"
+echo ""
+
 echo "network-guard.sh:"
 test_ex network-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 "gh command safe"
 test_ex network-guard.sh '{"tool_input":{"command":"git push origin main"}}' 0 "git push safe"
