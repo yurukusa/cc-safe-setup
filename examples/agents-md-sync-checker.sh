@@ -65,7 +65,7 @@ else
 fi
 [ ${#FINDINGS[@]} -eq 0 ] && exit 0
 MSG="DETECTED: AGENTS.md / CLAUDE.md state requires operator review.
-Multiple coding agents (Codex, Amp, Cursor, Aider, others) are converging on AGENTS.md as a shared instruction standard. Claude Code does not read AGENTS.md natively as of this session — the only operator-side mitigation while issue #6235 (5,196 reactions, 13+ months open) is unresolved is to maintain CLAUDE.md alongside.
+Multiple coding agents (Codex, Amp, Cursor, Aider, others) are converging on AGENTS.md as a shared instruction standard. Claude Code does not read AGENTS.md natively as of this session — the only operator-side mitigation while issue #6235 (5,268 reactions, 13+ months open) is unresolved is to maintain CLAUDE.md alongside.
 Findings:"
 for finding in "${FINDINGS[@]}"; do
     MSG="$MSG
@@ -73,7 +73,7 @@ for finding in "${FINDINGS[@]}"; do
 done
 MSG="$MSG
 Mitigation patterns:
-  1. Single source of truth: write instructions in CLAUDE.md, symlink AGENTS.md to it (or vice versa). Other agents read AGENTS.md; Claude Code reads CLAUDE.md; one edit updates both.
+  1. Single source of truth: write instructions in CLAUDE.md, symlink AGENTS.md to it (or vice versa). Other agents read AGENTS.md; Claude Code reads CLAUDE.md; one edit updates both. Run scripts/agents-md-sync-setup.sh to do this safely in one command (dry-run by default; backs up any file before replacing it; refuses to touch the files when their contents differ).
   2. Git pre-commit hook that fails when AGENTS.md and CLAUDE.md content drifts.
   3. Pick one tool and remove the other file. Multi-agent workflows are not required.
 See https://github.com/anthropics/claude-code/issues/6235 for the upstream feature request thread.
