@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-02T10:37:11+09:00
+Updated: 2026-06-02T10:38:05+09:00
 
 ## Git
 - Branch: `feat/multi-vendor-concurrent-warner-2026-06-02`
@@ -7,13 +7,13 @@ Updated: 2026-06-02T10:37:11+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: fff0b8fe checkpoint: auto-save 10:37:10
+- Last commit: 3132643d checkpoint: pre-compact auto-save (1 files, 20260602-013712)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-06-02.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-06-02.md
 ./test.sh
 ./README.md
 ./examples/multi-vendor-concurrent-warner.sh
