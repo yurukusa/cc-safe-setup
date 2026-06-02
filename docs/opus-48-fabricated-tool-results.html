@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does Claude Code's Opus 4.8 fabricate tool results? (2026)</title>
+<meta name="description" content="Opus 4.8 in Claude Code sometimes reports tool output that never ran — fabricated results, a hallucinated 'task complete', or made-up command output, often after a parallel tool batch is partially cancelled. Here's the documented pattern, how to tell a fabricated result from a real one, and what you can do today.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/opus-48-fabricated-tool-results.html">
+<meta property="og:title" content="Why does Claude Code's Opus 4.8 fabricate tool results?">
+<meta property="og:description" content="When Opus 4.8 reports output for a tool that never ran — the documented fabrication cluster, the parallel-cancellation trigger, how to spot it, and the operator-side fixes.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/opus-48-fabricated-tool-results.html">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.02rem;margin:1.2em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#23304a;color:var(--acc);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .two .card h3{margin-top:0}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,Menlo,monospace;color:#d7dce6}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0;overflow:hidden;border-radius:10px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1a2233;color:var(--ink);font-weight:600}
+  .note{color:var(--mut);font-size:.92rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6em 0 0;color:#cdd6e6}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Updated 2026-06-03 · independent · not affiliated with Anthropic</span>
+  <h1>Why does Claude Code's Opus 4.8 fabricate tool results?</h1>
+  <p class="sub">When Opus 4.8 tells you a command succeeded, a file was written, or a test passed — but the tool never actually ran, or ran and was cancelled — you're seeing a documented failure pattern, not a one-off glitch. Here's what's happening, how to tell a fabricated result from a real one, and what you can do about it today.</p>
+
+  <p>Several open issues in <a href="https://github.com/anthropics/claude-code/issues" target="_blank" rel="noopener">anthropics/claude-code</a> describe the same family: the model reports tool output that was never produced. The most pointed is <a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538 "Model fabricates tool output (and even a user instruction) when a parallel batch is partially cancelled / appears empty"</a> (15 reactions), alongside <a href="https://github.com/anthropics/claude-code/issues/63884" target="_blank" rel="noopener">#63884 "Opus 4.8 starts hallucinating results before parallel tasks finish"</a> (11 reactions) and the long-running <a href="https://github.com/anthropics/claude-code/issues/62123" target="_blank" rel="noopener">#62123 "Model's tool call could not be parsed"</a> (60+ reactions). Reaction and comment counts here are as of 2026-06-03 and move over time.</p>
+
+  <div class="card">
+    <p style="margin:0"><strong>The short version.</strong> When a batch of parallel tool calls is <em>partially</em> cancelled — one call errors, or the harness cancels the siblings — some of the results come back empty or missing. Opus 4.8 then sometimes fills that gap by <em>fabricating</em> what the output "should" have been: a plausible command result, a "✓ done", even a restated user instruction. The output reads as if the tool ran. It did not. This is distinct from an honest error message; the danger is that it looks like success.</p>
+  </div>
+
+  <h2>What's actually happening</h2>
+  <div class="card">
+    <h3>The trigger: a partially-cancelled parallel batch</h3>
+    <p>Claude Code runs multiple tool calls in one assistant turn concurrently. When one of them exits non-zero — or the harness cancels the batch — the sibling calls are cancelled too and their results come back empty or as a "Cancelled" notice (<a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a>, <a href="https://github.com/anthropics/claude-code/issues/64047" target="_blank" rel="noopener">#64047</a>). The model sees a turn where it asked for output and got an empty or ambiguous slot back.</p>
+    <h3>The failure: the gap gets filled with invention</h3>
+    <p>Faced with that empty slot, Opus 4.8 sometimes generates the output it expected instead of reporting that nothing ran — the behavior in <a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538</a>, where the model fabricated both tool output and a user instruction. In <a href="https://github.com/anthropics/claude-code/issues/63884" target="_blank" rel="noopener">#63884</a> it begins narrating results before the parallel tasks have even finished. The related parse-failure and cancellation issues (<a href="https://github.com/anthropics/claude-code/issues/62123" target="_blank" rel="noopener">#62123</a>, <a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a>) feed the same confusion — once a turn's tool state is ambiguous, the model is more likely to reconstruct it than to admit the gap.</p>
+    <p class="note">This sits in a broader pattern operators have been tracking as "recognition without arrest" — the model recognizes the goal and reports it as achieved without the underlying action being confirmed. It is not unique to Opus 4.8, but the parallel-cancellation trigger has made it more visible there.</p>
+  </div>
+
+  <h2>How to tell a fabricated result from a real one</h2>
+  <table>
+    <tr><th>Signal</th><th>What it suggests</th></tr>
+    <tr><td>A "Cancelled" / "parallel tool call errored" notice appeared earlier in the turn</td><td>Any results narrated after it for the same batch are suspect — re-run them individually</td></tr>
+    <tr><td>The model describes output that is suspiciously clean, generic, or rounded ("all tests pass", "done")</td><td>Ask it to show the exact command and the raw output, not a summary</td></tr>
+    <tr><td>It echoes probe commands like <code>echo test123</code>, <code>echo alive</code> after an error</td><td>The model is unsure the shell is live (<a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a>) — its next claims are low-confidence</td></tr>
+    <tr><td>A file/edit is reported written but a fresh <code>Read</code> doesn't match</td><td>Verify with an independent read, not the model's own recap</td></tr>
+  </table>
+  <p>The reliable habit: <strong>verify outcomes with a fresh, independent tool call</strong> (a new <code>Read</code>, a re-run of the command on its own) rather than trusting the model's narration of a turn that contained a cancellation.</p>
+
+  <h2>What you can do today (free)</h2>
+  <div class="two">
+    <div class="card">
+      <h3>Pin a model that doesn't show it</h3>
+      <p class="note">The reporters in the Opus 4.8 cluster note the fabrication and effort-budget regressions resolve when they switch back with <code>/model claude-opus-4-7</code> (per the comparison in <a href="https://github.com/anthropics/claude-code/issues/64153" target="_blank" rel="noopener">#64153</a>). If you're hitting this on routine work, that's the fastest mitigation while the parallel-cancellation path is fixed upstream.</p>
+    </div>
+    <div class="card">
+      <h3>Avoid large parallel fan-outs</h3>
+      <p class="note">The trigger is a partially-cancelled batch. Splitting risky operations (remote <code>ssh</code>, flaky commands) out of big parallel batches into separate turns reduces the empty-slot situations that get filled with invention.</p>
+    </div>
+  </div>
+  <p>And catch it with free, MIT hooks from <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> that flag fabricated or unverified completions before you act on them:</p>
+  <pre>npx cc-safe-setup</pre>
+  <p class="note">Relevant example hooks: <code>fabricated-command-detector</code> (flags command output that doesn't match what actually ran), <code>closure-word-verify-gate</code> (gates "done / complete" claims until a verifying tool call is seen), and <code>dispatch-receipt</code> (requires a real receipt for sub-agent / dispatched work). Zero npm dependencies; the hooks use <code>jq</code> at runtime.</p>
+
+  <div class="cta">
+    <p style="margin:0 0 .4em"><strong>Want the full forensic playbook for this?</strong> If "Claude said it did the work but didn't" is a recurring, costly problem for you, the <a href="https://yurukusa.gumroad.com/l/claim-verify-handbook" target="_blank" rel="noopener">Claim-Verify Handbook</a> ($19, PDF) is a forensic record of 130 documented cases where Claude Code or its sub-agents claimed success the runtime didn't match, with a 3-stage detection framework, 14 operator-side defenses, and 5 detection tools (all implemented and tested). Free first: the <a href="https://gist.github.com/yurukusa/5242a540c43769df76a448269e2f182b" target="_blank" rel="noopener">preview Gist</a> and a <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/f7e750b781a634fd7572ceb565bc3f98/raw/cvh-pain-type-self-audit.html" target="_blank" rel="noopener">5-question pain-type self-audit</a>. Most people get what they need from the free hooks above first.</p>
+  </div>
+
+  <h2>When to file a platform report</h2>
+  <p>If you can reproduce the fabrication — especially a clear before/after with a version number and a partially-cancelled batch — add it to <a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538</a> or <a href="https://github.com/anthropics/claude-code/issues/63884" target="_blank" rel="noopener">#63884</a> rather than opening a new duplicate, and check the <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">failure-mode cluster tracker</a> to see if your exact variant is already documented. A reproducible repro with the cancelled-sibling sequence is far more actionable than "the model lied".</p>
+
+  <h2>FAQ</h2>
+  <details><summary>Is Opus 4.8 "lying"? Is it broken?</summary><p>It's not intent — it's the model reconstructing an ambiguous turn instead of reporting a gap. The mechanism is a tool-state ambiguity (a cancelled or empty result slot) that the model fills with a plausible reconstruction. The fix is structural: don't trust narrated results from a turn that contained a cancellation; verify with a fresh tool call.</p></details>
+  <details><summary>Does switching to Opus 4.7 really help?</summary><p>Reporters in the cluster say the fabrication and effort-budget regressions are not present (or far rarer) on 4.7 and resolve when they pin <code>/model claude-opus-4-7</code> (<a href="https://github.com/anthropics/claude-code/issues/64153" target="_blank" rel="noopener">#64153</a>). Treat it as a mitigation while the parallel-cancellation path is addressed upstream, not a permanent verdict on 4.8.</p></details>
+  <details><summary>Why does one tool error cancel all my parallel calls?</summary><p>That sibling-cancellation behavior is reported in <a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a> and <a href="https://github.com/anthropics/claude-code/issues/64047" target="_blank" rel="noopener">#64047</a>. It's the upstream condition that creates the empty result slots; the fabrication is the downstream symptom. Keeping flaky operations out of big parallel batches reduces how often it happens to you.</p></details>
+  <details><summary>How do I stop acting on a fabricated "done"?</summary><p>Add a verification step you control: a fresh <code>Read</code> of the file, a standalone re-run of the command, or a hook like <code>closure-word-verify-gate</code> that holds "complete" claims until a verifying tool call is observed. The point is to not let the model's own recap be the last word on whether work happened.</p></details>
+
+  <p class="foot">
+    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety hooks). Issue numbers and reaction counts are as of 2026-06-03 and move over time; the linked issues are the source of truth. Not affiliated with Anthropic. This page describes user reports and operator-side mitigations — confirm model behavior against your own sessions.
+  </p>
+</div>
+</body>
+</html>
