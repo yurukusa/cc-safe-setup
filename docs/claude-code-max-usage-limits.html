@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why is Claude Code hitting usage limits so fast on Max? (2026)</title>
+<meta name="description" content="Claude Code Max users keep hitting usage limits faster than expected — sometimes at 16% usage, or 70 minutes after a reset. Here's the documented issue cluster, why you can't see your real quota, how to measure your own consumption, and when it's a platform report to file.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-max-usage-limits.html">
+<meta property="og:title" content="Why is Claude Code hitting usage limits so fast on Max?">
+<meta property="og:description" content="A 10-issue cluster (2,000+ reactions) of Max-subscription quota anomalies, the three reasons you can't verify your own usage, and what you can actually measure today.">
+<meta property="og:type" content="article">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.02rem;margin:1.2em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#23304a;color:var(--acc);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .two .card h3{margin-top:0}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,Menlo,monospace;color:#d7dce6}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0;overflow:hidden;border-radius:10px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1a2233;color:var(--ink);font-weight:600}
+  .pill{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px}
+  .pill.n{background:#1f3a31;color:var(--ok)}
+  .pill.c{background:#3a341f;color:var(--warn)}
+  .note{color:var(--mut);font-size:.92rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6em 0 0;color:#cdd6e6}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Updated 2026-06-02 · independent · not affiliated with Anthropic</span>
+  <h1>Why is Claude Code hitting usage limits so fast on Max?</h1>
+  <p class="sub">If your Max subscription says you're at 16% — and then refuses the next prompt with a rate-limit error — you are not imagining it, and you are not alone. Here's the documented pattern, why you can't see your real quota from inside Claude Code, and what you can actually measure today.</p>
+
+  <p>This is one of the largest sustained complaint clusters in <a href="https://github.com/anthropics/claude-code/issues" target="_blank" rel="noopener">anthropics/claude-code</a>. The anchor issue, <a href="https://github.com/anthropics/claude-code/issues/16157" target="_blank" rel="noopener">#16157 "Instantly hitting usage limits with Max subscription"</a>, has <strong>720+ reactions</strong> and over a thousand comments. It is one of about ten open issues — together well over 2,000 reactions — describing the same family of problems on Max plans, filed steadily from December 2025 through 2026. As of this writing they are all still open.</p>
+
+  <div class="card">
+    <p style="margin:0"><strong>The short version.</strong> Three separate things stack up: (1) Claude Code gives you no built-in way to see your real remaining quota, (2) the percentage it <em>does</em> show sometimes disagrees with when it actually cuts you off, and (3) several release boundaries appear to have changed how fast quota is consumed. You can't fix the platform side — but you <a href="#measure">can measure your own consumption</a> so you know whether a limit is normal usage or an anomaly worth reporting.</p>
+  </div>
+
+  <h2>The three things stacking up</h2>
+
+  <h3>1. You can't see your real quota</h3>
+  <p>There is no CLI command that tells you "you have X% of your 5-hour window left" with the same numbers the limiter uses. Operators have asked for exactly this — <a href="https://github.com/anthropics/claude-code/issues/13585" target="_blank" rel="noopener">#13585 "Add Quota Information Access to Claude Code CLI"</a>. Without it, every other symptom below is something you experience but can't independently verify.</p>
+
+  <h3>2. The displayed percentage disagrees with the cutoff</h3>
+  <p>Multiple users report being blocked while the usage indicator still shows plenty of headroom:</p>
+  <ul>
+    <li><a href="https://github.com/anthropics/claude-code/issues/29579" target="_blank" rel="noopener">#29579</a> — "Rate limit reached despite Claude Max subscription and only 16% usage."</li>
+    <li><a href="https://github.com/anthropics/claude-code/issues/19673" target="_blank" rel="noopener">#19673</a> — "You've hit your limit · while usage is still at 84%."</li>
+  </ul>
+  <p class="note">When the number you're shown and the number that gates you don't match, you can't plan your session around it — which is why measuring independently matters.</p>
+
+  <h3>3. Release boundaries where consumption seems to change</h3>
+  <p>The strongest signal that this isn't just one person's misconfiguration is that several <em>independent</em> reporters name a specific version or date after which their quota started draining faster:</p>
+  <table>
+    <thead><tr><th>Reported boundary</th><th>Issue</th><th>What changed for them</th></tr></thead>
+    <tbody>
+      <tr><td>v2.1.1</td><td><a href="https://github.com/anthropics/claude-code/issues/16856" target="_blank" rel="noopener">#16856</a></td><td>~4× faster rate consumption than previous versions</td></tr>
+      <tr><td>Opus 4.6 (vs 4.5)</td><td><a href="https://github.com/anthropics/claude-code/issues/23706" target="_blank" rel="noopener">#23706</a></td><td>Noticeably higher token consumption per task</td></tr>
+      <tr><td>v2.1.89</td><td><a href="https://github.com/anthropics/claude-code/issues/41788" target="_blank" rel="noopener">#41788</a></td><td>Max 20 plan hit 100% ~70 min after reset — "never happened before v2.1.89"</td></tr>
+      <tr><td>March 23, 2026</td><td><a href="https://github.com/anthropics/claude-code/issues/38335" target="_blank" rel="noopener">#38335</a></td><td>5-hour session limits exhausted abnormally fast from that date</td></tr>
+      <tr><td>v2.1.100+</td><td><a href="https://github.com/anthropics/claude-code/issues/46917" target="_blank" rel="noopener">#46917</a></td><td>One operator's reproducible report: identical payload, <code>cache_creation</code> ~20K tokens higher than v2.1.98 (server-side)</td></tr>
+    </tbody>
+  </table>
+  <p class="note">These are user reports, not a confirmed Anthropic changelog entry — but four-plus independent version boundaries pointing the same direction is a different shape from a single misconfiguration.</p>
+
+  <h2>Is it a bug or is it just heavy usage?</h2>
+  <div class="card">
+    <p>Honestly: some of each, and from inside Claude Code you can't always tell which. Long agentic sessions, large contexts, extended thinking, and cache creation all legitimately burn quota fast — and Opus burns it faster than Sonnet. The way to separate "I'm using a lot" from "something changed" is to <strong>measure your own token consumption over time</strong> and look for a step change, not just a high number. If you see a sudden jump that lines up with an update, that's the report worth filing.</p>
+  </div>
+
+  <h2 id="measure">What you can measure today (free)</h2>
+  <div class="two">
+    <div class="card">
+      <h3>See where the tokens go</h3>
+      <p class="note">Read your own session logs instead of guessing. <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html">Token Checkup</a> and <a href="https://yurukusa.github.io/cc-safe-setup/token-consumption-diagnosis.html">Token Consumption Diagnosis</a> are browser-only, no signup. <code>ccusage</code> (open-source, npm) parses your local JSONL for a per-session breakdown.</p>
+    </div>
+    <div class="card">
+      <h3>Get warned when consumption deviates</h3>
+      <p class="note">Free MIT hooks in <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> watch your own usage and warn at session open or after a tool call: <code>quota-anomaly-detector</code>, <code>session-rate-monitor</code>, <code>session-quota-tracker</code>, and <code>cache-creation-drift-detector</code> (built for the #46917 inflation pattern).</p>
+    </div>
+  </div>
+  <p>Install the hooks in about ten seconds:</p>
+  <pre>npx cc-safe-setup</pre>
+  <p class="note">It installs the safety hooks and lists the optional quota/rate monitors you can enable. Zero npm dependencies; the hooks need <code>jq</code> at runtime.</p>
+
+  <h2>When to file a platform report</h2>
+  <p>If your own measurement shows a <em>step change</em> in consumption that lines up with an update — not just a generally high number — that's a useful, verifiable report. Add it to the matching issue above (a reproducible before/after with version numbers is far more actionable than "limits feel wrong"), and check the <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">failure-mode cluster tracker</a> to see if it's already documented.</p>
+
+  <div class="cta">
+    <strong>Want to spend less quota in the first place?</strong> The free tools above tell you where it's going. If you want a structured approach to cutting Claude Code token usage — caching, context discipline, model choice, and the measurement workflow — there's a Japanese handbook, <a href="https://zenn.dev/yurukusa/books/token-savings-guide" target="_blank" rel="noopener">Claude Codeのトークン消費を半分にする</a> (¥2,500, Chapters 1–3 free). Most people get what they need from the free Token Checkup and the hooks first.</p>
+  </div>
+
+  <h2>FAQ</h2>
+  <details><summary>Why does my Max plan hit 100% only ~70 minutes after a reset?</summary><p>Several operators report this starting around v2.1.89 (<a href="https://github.com/anthropics/claude-code/issues/41788" target="_blank" rel="noopener">#41788</a>). Heavy agentic loops, large contexts, and extended thinking can genuinely exhaust a 5-hour window fast — but if it started suddenly after an update for you too, measure before/after and add it to that issue.</p></details>
+  <details><summary>It says I'm at 16% but I'm rate-limited — is that a bug?</summary><p>That display-vs-cutoff mismatch is reported in <a href="https://github.com/anthropics/claude-code/issues/29579" target="_blank" rel="noopener">#29579</a> and <a href="https://github.com/anthropics/claude-code/issues/19673" target="_blank" rel="noopener">#19673</a>. Because Claude Code exposes no authoritative quota number (<a href="https://github.com/anthropics/claude-code/issues/13585" target="_blank" rel="noopener">#13585</a>), you can't confirm it from inside — the practical move is to log your own usage and report the discrepancy.</p></details>
+  <details><summary>How do I see my actual remaining quota?</summary><p>There's no built-in command for it yet. The closest is reading your local session JSONL with <code>ccusage</code> or the browser tools above to track cumulative consumption, then comparing against your plan's window.</p></details>
+  <details><summary>Did v2.1.100 really inflate token usage?</summary><p>One operator posted a reproducible case (<a href="https://github.com/anthropics/claude-code/issues/46917" target="_blank" rel="noopener">#46917</a>): the same payload showed <code>cache_creation</code> ~20K tokens higher than on v2.1.98, server-side. Treat it as a well-documented single report, not a confirmed platform-wide regression — the <code>cache-creation-drift-detector</code> hook exists to flag it if it's happening to you.</p></details>
+  <details><summary>Does Opus use more quota than Sonnet?</summary><p>Yes, materially — Opus is the heavier model. <a href="https://github.com/anthropics/claude-code/issues/23706" target="_blank" rel="noopener">#23706</a> tracks the 4.6-vs-4.5 jump specifically. If you're hitting limits fast, switching routine work to Sonnet is one of the most direct levers.</p></details>
+
+  <p class="foot">
+    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety + quota-monitoring hooks). Issue numbers and reaction counts are as of 2026-06-02 and move over time; the linked issues are the source of truth. Not affiliated with Anthropic. This page describes user reports and operator-side measurement — for billing or quota questions, confirm against Anthropic's own documentation and support.
+  </p>
+</div>
+</body>
+</html>
