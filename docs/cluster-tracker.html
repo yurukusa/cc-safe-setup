@@ -419,7 +419,7 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 <table class="cases-table">
 <thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>One-line summary</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a></td><td>2026-01-03</td><td>717</td><td>Instantly hitting Max-plan usage limits after 3-day non-use</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a></td><td>2026-01-03</td><td>722</td><td>Instantly hitting Max-plan usage limits after 3-day non-use</td></tr>
 <tr><td><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a></td><td>2026-03-24</td><td>525</td><td>5-hour window quota exhausting abnormally fast since 2026-03-23 (specific boundary date)</td></tr>
 <tr><td><a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a></td><td>2026-04-12</td><td>218</td><td>v2.1.100+ inflates cache_creation by ~20K tokens vs v2.1.98 (server-side, reproducible)</td></tr>
 </tbody>
@@ -436,7 +436,8 @@ A <strong>cluster</strong> here means a group of independent user-filed issues t
 
 <h4>Reading material</h4>
 <p style="font-size: 0.93rem;">
-<a href="https://gist.github.com/yurukusa/158436e88d169406593d55bd84f0d7e9">English operator field guide (Pro Max quota anomaly: 5 measurement routes, 2,639 words)</a>. Cites <code>ccusage</code> (14,647★, the dominant external measurement tool), raw JSONL inspection, the claude-code-logger proxy, the cc-safe-setup hook, and Anthropic Console comparison.
+<a href="https://yurukusa.github.io/cc-safe-setup/claude-code-max-usage-limits.html">Reader explainer: "Why is Claude Code hitting usage limits so fast on Max?"</a> — the plain-language walkthrough of this cluster (the three stacking causes, how to tell heavy usage from a step change, and what you can measure today). Start here if you're new to the cluster.<br>
+<a href="https://gist.github.com/yurukusa/158436e88d169406593d55bd84f0d7e9">English operator field guide (Pro Max quota anomaly: 5 measurement routes, 2,639 words)</a>. The deeper, measurement-focused companion. Cites <code>ccusage</code> (14,647★, the dominant external measurement tool), raw JSONL inspection, the claude-code-logger proxy, the cc-safe-setup hook, and Anthropic Console comparison.
 </p>
 
 <h4>Upstream status</h4>
