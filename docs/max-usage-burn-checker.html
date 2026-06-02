@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code hitting Max limits too fast — is it you or the platform? (shareable check)</title>
+<meta name="description" content="#16157 'Instantly hitting usage limits with Max' has 720+ reactions. Your Pro/Max quota is shared across Claude and Claude Code. In 20 seconds, check how much of your fast burn is self-explainable (shared surfaces, Opus, big context) versus a possible platform anomaly worth reporting — and get a shareable card. Nothing leaves your browser.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/max-usage-burn-checker.html">
+<meta property="og:title" content="Claude Code hitting Max limits too fast — you or the platform?">
+<meta property="og:description" content="Your Pro/Max quota is shared across Claude and Claude Code. Check how much of your fast burn is self-explainable vs a possible anomaly, and share the card.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/max-usage-burn-checker.html">
+<meta property="og:image" content="https://yurukusa.github.io/cc-safe-setup/max-usage-burn-checker-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://yurukusa.github.io/cc-safe-setup/max-usage-burn-checker-og.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem}
+.container{max-width:680px;width:100%}
+.back{display:block;margin-bottom:1rem;color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.92rem;text-align:center;margin-bottom:1.5rem;line-height:1.55}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:1.25rem}
+.q{font-weight:600;color:#f0f6fc;font-size:.95rem;margin:.9rem 0 .5rem}
+.q:first-child{margin-top:0}
+.opts{display:flex;gap:.5rem;flex-wrap:wrap}
+.opt{background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:.45rem .85rem;cursor:pointer;font-size:.85rem;color:#c9d1d9;transition:all .15s}
+.opt:hover{border-color:#58a6ff}
+.opt.on{border-color:#1f6feb;background:#15233f;color:#cfe0ff}
+.shared .opt.on{border-color:#d29922;background:#2b2410;color:#ffd479}
+.note{color:#8b949e;font-size:.82rem;margin-top:.35rem;line-height:1.45}
+.note code,.subtitle code{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:0 .25rem;font-size:.95em}
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.1rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;text-decoration:none}
+.btn-primary{background:#238636;color:#fff}.btn-primary:hover{background:#2ea043}
+.btn-x{background:#1da1f2;color:#fff}
+.btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.cta{margin-top:1.75rem;background:#16243b;border:1px solid #1f6feb;border-radius:10px;padding:1rem 1.2rem;font-size:.9rem;line-height:1.55}
+.cta a{color:#79c0ff;font-weight:600;text-decoration:none}
+.footer{margin-top:2rem;font-size:.75rem;color:#484f58;text-align:center;line-height:1.7}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; cc-safe-setup</a>
+<h1>Hitting Max limits too fast — you or the platform?</h1>
+<p class="subtitle"><a href="https://github.com/anthropics/claude-code/issues/16157" style="color:#8b949e">#16157</a> "Instantly hitting usage limits with Max" has 720+ reactions. Before you conclude it's a bug, the first thing most people miss: your Pro/Max quota is <strong>shared across Claude and Claude&nbsp;Code</strong>. This check sorts how much of your fast burn is self-explainable from a possible anomaly worth reporting. Nothing leaves your browser.</p>
+
+<div class="panel">
+  <div class="q">Your plan</div>
+  <div class="opts" id="plan"></div>
+  <div class="q">Other Claude surfaces you use <em>heavily</em> on the same plan (these share the quota)</div>
+  <div class="opts shared" id="shared"></div>
+  <div class="note">Anthropic's docs: usage limits are "shared across Claude and Claude Code — all activity in both tools counts against the same usage limits." A heavy morning in the <code>claude.ai</code> app eats directly into your Claude Code window.</div>
+  <div class="q">Default model for routine work</div>
+  <div class="opts" id="model"></div>
+  <div class="q">Typical session shape</div>
+  <div class="opts" id="session"></div>
+</div>
+
+<div class="cardwrap">
+<canvas id="card" width="1320" height="1100"></canvas>
+<div class="actions">
+<button class="btn btn-primary" onclick="downloadPNG()">⬇ Download card</button>
+<button class="btn btn-ghost" onclick="copyImage()">⧉ Copy image</button>
+<button class="btn btn-ghost" onclick="copyLink()">🔗 Copy share link</button>
+<a class="btn btn-x" id="xshare" target="_blank" rel="noopener">Share on X</a>
+</div>
+</div>
+
+<div class="cta">
+This card sorts cause from anomaly — it deliberately doesn't read your quota, because Claude Code exposes no real-time quota number (<a href="https://github.com/anthropics/claude-code/issues/13585" target="_blank" rel="noopener">#13585</a>). Measure your real consumption for free with <a href="https://github.com/ryoppippi/ccusage" target="_blank" rel="noopener">ccusage</a> and read the <a href="claude-code-max-usage-limits.html">full why-am-I-hitting-limits explainer</a>. To make the quota you do have go much further, the <a href="https://yurukusa.gumroad.com/l/azrdt" target="_blank" rel="noopener">Token &amp; Cost Survival Guide ($19)</a> has the 13 cost-spike patterns and the per-run token-reduction playbook (cache hygiene, model routing, context trimming).
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · Shared-quota quote from Anthropic's own help docs — confirm exact terms against Anthropic's site.<br>
+This is a self-assessment of likely cause, not a quota reading or financial advice.
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// The biggest sustained pain cluster for Claude Code on Max is "usage limits hit too
+// fast" (#16157, 720+ reactions; ~10 issues, 2,000+ reactions, all open). The proven
+// reach mechanic in this niche is a compact artifact people want to share. This is the
+// scorecard pattern applied to that cluster: it asks the few factors that are documented
+// self-causes (shared surfaces, Opus, heavy context) and returns an honest verdict —
+// "mostly explainable" vs "looks anomalous, worth measuring/reporting" — encoded in the
+// URL so a shared link reproduces it. It never invents a quota number (Claude Code has
+// none to read, #13585); it points to ccusage to actually measure.
+var PLANS = [
+  {id:'pro', label:'Pro ($20)'},
+  {id:'max5', label:'Max 5× ($100)'},
+  {id:'max20', label:'Max 20× ($200)'},
+];
+// Each shared surface independently draws on the same plan quota (official).
+var SHARED = [
+  {id:'webapp', label:'claude.ai web / app'},
+  {id:'desktop', label:'Claude Desktop'},
+  {id:'cowork', label:'Cowork'},
+  {id:'multi', label:'Other CC sessions / machines'},
+];
+var MODELS = [
+  {id:'opus', label:'Opus 4.x', burn:2},
+  {id:'mixed', label:'Mixed', burn:1},
+  {id:'sonnet', label:'Sonnet', burn:0},
+  {id:'haiku', label:'Haiku', burn:0},
+];
+var SESSIONS = [
+  {id:'heavy', label:'Long sessions, big context (MCP, many files)', burn:1},
+  {id:'lean', label:'Lean, frequent /clear', burn:0},
+];
+
+var state = { plan:'max5', shared:{}, model:'opus', session:'heavy' };
+
+function readURL(){
+  var p = new URLSearchParams(location.search);
+  if(PLANS.some(function(x){return x.id===p.get('p')})) state.plan = p.get('p');
+  if(MODELS.some(function(x){return x.id===p.get('m')})) state.model = p.get('m');
+  if(['heavy','lean'].indexOf(p.get('e'))>=0) state.session = p.get('e');
+  var s = p.get('s')||'';
+  SHARED.forEach(function(x){ state.shared[x.id] = s.indexOf(x.id)>=0; });
+}
+function writeURL(){
+  var s = SHARED.filter(function(x){return state.shared[x.id]}).map(function(x){return x.id}).join('.');
+  var url = location.origin + location.pathname + '?p='+state.plan+'&m='+state.model+'&e='+state.session+(s?'&s='+s:'');
+  history.replaceState(null,'',url);
+  return url;
+}
+
+function renderControls(){
+  mk('plan', PLANS, function(x){return state.plan===x.id}, function(x){state.plan=x.id;});
+  mk('shared', SHARED, function(x){return state.shared[x.id]}, function(x){state.shared[x.id]=!state.shared[x.id];});
+  mk('model', MODELS, function(x){return state.model===x.id}, function(x){state.model=x.id;});
+  mk('session', SESSIONS, function(x){return state.session===x.id}, function(x){state.session=x.id;});
+}
+function mk(id, list, isOn, onPick){
+  var e=document.getElementById(id); e.innerHTML='';
+  list.forEach(function(x){
+    var d=document.createElement('div'); d.className='opt'+(isOn(x)?' on':''); d.textContent=x.label;
+    d.onclick=function(){ onPick(x); renderControls(); render(); };
+    e.appendChild(d);
+  });
+}
+
+function sharedCount(){ return SHARED.filter(function(x){return state.shared[x.id]}).length; }
+function modelObj(){ return MODELS.filter(function(x){return x.id===state.model})[0]; }
+function sessionObj(){ return SESSIONS.filter(function(x){return x.id===state.session})[0]; }
+// Self-cause score: each documented self-cause adds weight.
+// shared surfaces (cap 2) + Opus(2)/mixed(1) + heavy context(1)  -> 0..5
+function selfCause(){ return Math.min(2, sharedCount()) + modelObj().burn + sessionObj().burn; }
+function verdict(){
+  var sc = selfCause();
+  if(sc >= 3) return {key:'explainable', label:'MOSTLY EXPLAINABLE', accent:'#3fb950'};
+  if(sc >= 1) return {key:'partly', label:'PARTLY EXPLAINABLE', accent:'#d29922'};
+  return {key:'anomaly', label:'LOOKS ANOMALOUS', accent:'#f0883e'};
+}
+
+var canvas=document.getElementById('card'), ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height, S=2;
+function px(v){return v*S;}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function render(){
+  var v=verdict(), plan=PLANS.filter(function(x){return x.id===state.plan})[0], sc=selfCause(), sh=sharedCount();
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=px(1.5); roundRect(px(8),px(8),W-px(16),H-px(16),px(16)); ctx.stroke();
+  var padX=px(40); var y=px(58);
+  ctx.textBaseline='alphabetic';
+  ctx.font='700 '+px(26)+'px -apple-system,sans-serif'; ctx.fillStyle='#58a6ff'; ctx.fillText('Max Usage Burn',padX,y);
+  var w1=ctx.measureText('Max Usage Burn').width;
+  ctx.fillStyle='#8b949e'; ctx.fillText('  ·  you or the platform?',padX+w1,y);
+  // verdict
+  y+=px(64);
+  ctx.font='700 '+px(44)+'px -apple-system,sans-serif'; ctx.fillStyle=v.accent;
+  ctx.fillText(v.label, padX, y);
+  y+=px(40);
+  ctx.font='400 '+px(20)+'px -apple-system,sans-serif'; ctx.fillStyle='#c9d1d9';
+  var line2 = v.key==='anomaly'
+    ? 'Few self-causes set — your fast burn may be a real anomaly.'
+    : (sc>=3 ? 'Much of your fast burn is documented self-causes you control.'
+             : 'Some of your fast burn is self-caused; the rest is worth measuring.');
+  ctx.fillText(line2, padX, y);
+  // shared-quota fact line
+  y+=px(50);
+  ctx.font='700 '+px(20)+'px -apple-system,sans-serif'; ctx.fillStyle='#f0f6fc';
+  ctx.fillText(sh>0 ? (sh+' shared surface'+(sh>1?'s':'')+' draining the same '+plan.label+' quota') : 'No shared surfaces — Claude Code has the '+plan.label+' quota to itself', padX, y);
+  // self-cause meter box
+  y+=px(36);
+  ctx.fillStyle='#161b22'; roundRect(padX,y,W-padX*2,px(78),px(10)); ctx.fill();
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=px(1); roundRect(padX,y,W-padX*2,px(78),px(10)); ctx.stroke();
+  ctx.font='400 '+px(17)+'px -apple-system,sans-serif'; ctx.fillStyle='#8b949e';
+  ctx.fillText('Self-cause weight (shared + Opus + heavy context):', padX+px(18), y+px(31));
+  // meter dots 0..5
+  var dotX=padX+px(18), dotY=y+px(56), R=px(11), gap=px(34);
+  for(var i=0;i<5;i++){ ctx.beginPath(); ctx.arc(dotX+i*gap+R, dotY, R, 0, Math.PI*2); ctx.fillStyle = i<sc ? v.accent : '#30363d'; ctx.fill(); }
+  ctx.font='700 '+px(22)+'px -apple-system,sans-serif'; ctx.fillStyle='#f0f6fc';
+  var scTxt=sc+' / 5';
+  ctx.fillText(scTxt, W-padX-px(18)-ctx.measureText(scTxt).width, y+px(56));
+  // actions
+  y+=px(98);
+  ctx.font='700 '+px(18)+'px -apple-system,sans-serif'; ctx.fillStyle='#c9d1d9';
+  ctx.fillText(v.key==='anomaly' ? 'Measure, then report:' : 'Cut the self-causes first:', padX, y);
+  y+=px(34);
+  var acts = v.key==='anomaly'
+    ? ['Measure real consumption with ccusage (Claude Code shows no quota)',
+       'Compare the displayed % against when it actually cuts you off',
+       'If truly disproportionate, add your numbers to issue #16157']
+    : ['Stop double-spending: keep claude.ai light during Claude Code hours',
+       'Pin a cheaper model for routine work: /model sonnet (or opus-4-7)',
+       'Trim context: /clear between tasks, prune MCP and loaded files'];
+  ctx.font='400 '+px(17)+'px -apple-system,sans-serif';
+  acts.forEach(function(a){ ctx.fillStyle=v.accent; ctx.fillText('•',padX,y); ctx.fillStyle='#c9d1d9'; ctx.fillText(a,padX+px(22),y); y+=px(30); });
+  // footer
+  y=H-px(50);
+  ctx.strokeStyle='#21262d'; ctx.lineWidth=px(1); ctx.beginPath(); ctx.moveTo(padX,y-px(22)); ctx.lineTo(W-padX,y-px(22)); ctx.stroke();
+  ctx.font='700 '+px(17)+'px -apple-system,sans-serif'; ctx.fillStyle='#58a6ff';
+  ctx.fillText('cc-safe-setup.github.io · Max usage burn check', padX, y);
+  ctx.font='400 '+px(14)+'px -apple-system,sans-serif'; ctx.fillStyle='#6e7681';
+  var f='quota shared across Claude & Claude Code';
+  ctx.fillText(f, W-padX-ctx.measureText(f).width, y);
+
+  var url=writeURL();
+  var msg = v.key==='anomaly'
+    ? 'My Claude Code Max burn looks anomalous (few self-causes) — measuring with ccusage before reporting to #16157. Checked with this:'
+    : 'Turns out '+(sc>=3?'most':'some')+' of my "instant Max limit" is self-caused: quota is shared across Claude & Claude Code (#16157). Checked mine:';
+  document.getElementById('xshare').href = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(msg)+'&url='+encodeURIComponent(url);
+}
+
+function toast(t){var el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},1800);}
+function downloadPNG(){var a=document.createElement('a');a.download='max-usage-burn.png';a.href=canvas.toDataURL('image/png');a.click();toast('Card downloaded');}
+function copyImage(){canvas.toBlob(function(b){try{navigator.clipboard.write([new ClipboardItem({'image/png':b})]).then(function(){toast('Image copied')},function(){toast('Use Download card')});}catch(e){toast('Use Download card');}},'image/png');}
+function copyLink(){try{navigator.clipboard.writeText(writeURL()).then(function(){toast('Share link copied')});}catch(e){toast('Link is in your address bar');}}
+
+readURL(); renderControls(); render();
+</script>
+</body>
+</html>
