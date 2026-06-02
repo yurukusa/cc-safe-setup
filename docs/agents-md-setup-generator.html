@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AGENTS.md ↔ CLAUDE.md Setup Generator — one source of truth across your AI tools</title>
+<meta name="description" content="Pick the AI coding tools you use and get the exact, copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one instruction file. Free, MIT, no telemetry.">
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212a; --ink:#e6e9ef; --mut:#9aa3b2;
+    --acc:#5b9cff; --acc2:#7ee0c0; --line:#2a2f3a; --warn:#ffcf6b; --ok:#7ee0c0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 18px 80px}
+  h1{font-size:1.55rem;line-height:1.25;margin:.2em 0 .1em}
+  .sub{color:var(--mut);margin:0 0 22px}
+  .sub a{color:var(--acc)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;margin:0 0 18px}
+  .card h2{font-size:1.02rem;margin:.1em 0 .7em;letter-spacing:.01em}
+  .hint{color:var(--mut);font-size:.86rem;margin:-.3em 0 .9em}
+  .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  label.opt{display:flex;align-items:flex-start;gap:9px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 11px;cursor:pointer;transition:border-color .15s,background .15s}
+  label.opt:hover{border-color:#3a4150}
+  label.opt input{margin-top:3px}
+  label.opt.on{border-color:var(--acc);background:#16243b}
+  .opt .nm{font-weight:600}
+  .opt .rd{display:block;color:var(--mut);font-size:.78rem;font-weight:400}
+  .row{display:flex;flex-wrap:wrap;gap:10px}
+  .seg{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:transparent;border:0;color:var(--mut);padding:9px 14px;cursor:pointer;font:inherit;font-size:.9rem}
+  .seg button.on{background:var(--acc);color:#06101f;font-weight:600}
+  .qlabel{font-size:.9rem;color:var(--mut);margin:0 0 6px}
+  .qblock{margin:0 0 14px}
+  #out .step{margin:0 0 16px}
+  #out .step h3{font-size:.96rem;margin:.2em 0 .5em;display:flex;align-items:center;gap:8px}
+  .pill{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;background:#23304a;color:var(--acc)}
+  .pill.native{background:#1f3a31;color:var(--ok)}
+  pre{position:relative;background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:14px 14px;margin:.3em 0;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;color:#d7dce6}
+  .copy{position:absolute;top:8px;right:8px;background:#222836;border:1px solid var(--line);color:var(--mut);border-radius:7px;padding:4px 9px;font-size:.74rem;cursor:pointer}
+  .copy:hover{color:var(--ink)}
+  .copy.done{color:var(--ok);border-color:var(--ok)}
+  .note{color:var(--mut);font-size:.86rem;margin:.2em 0 0}
+  .warn{color:var(--warn)}
+  .foot{color:var(--mut);font-size:.86rem;border-top:1px solid var(--line);padding-top:16px;margin-top:26px}
+  .foot a{color:var(--acc)}
+  .empty{color:var(--mut);font-style:italic}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.85em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AGENTS.md ↔ CLAUDE.md Setup Generator</h1>
+  <p class="sub">One source of truth across your AI coding tools. Pick what you use — get the exact, copy-paste setup. Built for the <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a> pain (5,200+ reactions: "Claude Code reads CLAUDE.md, my other tools read AGENTS.md"). Free, MIT, runs entirely in your browser — no upload, no telemetry.</p>
+
+  <div class="card">
+    <h2>1 · Which AI coding tools do you use in this repo?</h2>
+    <p class="hint">AGENTS.md is the shared standard. Tools that read it natively need no setup; the others get a one-line link to it.</p>
+    <div class="tools" id="tools"></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · A couple of details</h2>
+    <div class="qblock">
+      <p class="qlabel">Do you need <strong>Claude-Code-specific</strong> instructions on top of the shared ones?</p>
+      <div class="seg" data-q="extras">
+        <button data-v="no" class="on">No, identical for all tools</button>
+        <button data-v="yes">Yes, a few Claude-only lines</button>
+      </div>
+    </div>
+    <div class="qblock">
+      <p class="qlabel">Your platform</p>
+      <div class="seg" data-q="os">
+        <button data-v="unix" class="on">macOS / Linux</button>
+        <button data-v="win">Windows / WSL</button>
+      </div>
+    </div>
+    <div class="qblock">
+      <p class="qlabel">Solo or a team sharing this repo?</p>
+      <div class="seg" data-q="team">
+        <button data-v="solo" class="on">Solo</button>
+        <button data-v="team">Team</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Your setup</h2>
+    <div id="out"></div>
+  </div>
+
+  <p class="foot">
+    Method picked for you follows the official Claude Code memory docs (the <code>@AGENTS.md</code> import is the documented default; symlink is the lighter option when you need no Claude-only additions). Want the why, the edge cases, and the four other patterns (pre-commit, SessionStart hook, direnv, CI drift check)? →
+    <a href="https://gist.github.com/yurukusa/d36197848911f025add142abefcde685" target="_blank" rel="noopener">AGENTS.md interop field guide (English, MIT)</a>
+    · <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT hooks incl. an AGENTS.md/CLAUDE.md drift checker).
+    A deeper Japanese handbook with rollback-safe migration steps and ready templates is on <a href="https://zenn.dev/yurukusa/books/agents-md-interop" target="_blank" rel="noopener">Zenn (¥1,500, free preview)</a>.
+    <br><br>Independent operator tool, MIT-licensed. Conventions verified 2026-06-02 against each tool's docs; recheck before relying on it, since tool conventions change.
+  </p>
+</div>
+
+<script>
+// Tool conventions (verified 2026-06-02). reads: "agents" = reads AGENTS.md natively;
+// otherwise the legacy single-file name it reads.
+const TOOLS = [
+  {id:"claude",  nm:"Claude Code", rd:"reads CLAUDE.md",            kind:"claude"},
+  {id:"codex",   nm:"Codex",       rd:"reads AGENTS.md natively",   kind:"native"},
+  {id:"amp",     nm:"Amp",         rd:"reads AGENTS.md natively",   kind:"native"},
+  {id:"cursor",  nm:"Cursor",      rd:"reads .cursorrules",         kind:"file", file:".cursorrules"},
+  {id:"windsurf",nm:"Windsurf",    rd:"reads .windsurfrules",       kind:"file", file:".windsurfrules"},
+  {id:"cline",   nm:"Cline",       rd:"reads .clinerules",          kind:"file", file:".clinerules"},
+  {id:"aider",   nm:"Aider",       rd:"AGENTS.md-aware",            kind:"native"},
+];
+const state = {tools:new Set(["claude","cursor"]), extras:"no", os:"unix", team:"solo"};
+
+const toolsEl = document.getElementById("tools");
+TOOLS.forEach(t=>{
+  const l=document.createElement("label"); l.className="opt"+(state.tools.has(t.id)?" on":"");
+  l.innerHTML=`<input type="checkbox" ${state.tools.has(t.id)?"checked":""}><span><span class="nm">${t.nm}</span><span class="rd">${t.rd}</span></span>`;
+  l.querySelector("input").addEventListener("change",e=>{
+    e.target.checked?state.tools.add(t.id):state.tools.delete(t.id);
+    l.classList.toggle("on",e.target.checked); render();
+  });
+  toolsEl.appendChild(l);
+});
+document.querySelectorAll(".seg").forEach(seg=>{
+  const q=seg.dataset.q;
+  seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    state[q]=b.dataset.v;
+    seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+    render();
+  }));
+});
+
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function block(code){
+  return `<pre><button class="copy">Copy</button>${esc(code)}</pre>`;
+}
+
+function render(){
+  const out=document.getElementById("out");
+  const sel=TOOLS.filter(t=>state.tools.has(t.id));
+  if(!sel.length){ out.innerHTML=`<p class="empty">Pick at least one tool above.</p>`; return; }
+  const useClaude=state.tools.has("claude");
+  const fileTools=sel.filter(t=>t.kind==="file");
+  const nativeTools=sel.filter(t=>t.kind==="native");
+  // Decide Claude Code method
+  const importMethod = useClaude && (state.extras==="yes" || state.os==="win");
+  let html="";
+
+  // Step 0: the source of truth
+  html+=`<div class="step"><h3>1. Make <code>AGENTS.md</code> your single source of truth</h3>
+    <p class="note">Put all your shared project instructions (conventions, test setup, security rules) in <code>AGENTS.md</code> at the repo root. Every tool below reads from this one file.</p></div>`;
+
+  // Step for Claude Code
+  if(useClaude){
+    if(importMethod){
+      const extra = state.extras==="yes"
+        ? "\n\n## Claude Code only\n(put any Claude-specific instructions here — the other tools never see them)"
+        : "";
+      html+=`<div class="step"><h3>2. Claude Code <span class="pill">@AGENTS.md import</span></h3>
+        <p class="note">Create <code>CLAUDE.md</code> with just this — Claude loads <code>AGENTS.md</code> at session start. One real file, so it can never drift${state.os==="win"?", and unlike a symlink it needs no Admin / Developer Mode on Windows":""}.</p>
+        ${block("@AGENTS.md"+extra)}
+        <p class="note">First run shows a one-time approval for the external import; accept it. If <code>AGENTS.md</code> already exists, <code>/init</code> can also fold it into CLAUDE.md.</p></div>`;
+    } else {
+      html+=`<div class="step"><h3>2. Claude Code <span class="pill">symlink</span></h3>
+        <p class="note">One file on disk, two names — edits to <code>AGENTS.md</code> are instantly live for Claude Code.</p>
+        ${block("ln -sf AGENTS.md CLAUDE.md")}
+        <p class="note">Verify it resolved as a link (some clones bring symlinks through as plain text): <code>ls -l CLAUDE.md</code> should show <code>CLAUDE.md -&gt; AGENTS.md</code>.</p></div>`;
+    }
+  }
+
+  // Native tools
+  if(nativeTools.length){
+    html+=`<div class="step"><h3>${useClaude?"3":"2"}. ${nativeTools.map(t=>t.nm).join(", ")} <span class="pill native">no setup</span></h3>
+      <p class="note">${nativeTools.map(t=>t.nm).join(", ")} read <code>AGENTS.md</code> directly. Nothing to do — they already share the source of truth.</p></div>`;
+  }
+
+  // File-based tools
+  if(fileTools.length){
+    const stepNo = 2 + (useClaude?1:0) + (nativeTools.length?1:0);
+    const cmds = fileTools.map(t=>`ln -sf AGENTS.md ${t.file}   # ${t.nm}`).join("\n");
+    html+=`<div class="step"><h3>${stepNo}. ${fileTools.map(t=>t.nm).join(", ")} <span class="pill">symlink to AGENTS.md</span></h3>
+      <p class="note">These read their own filename. Point each at <code>AGENTS.md</code> with a symlink so there's still one real file.</p>
+      ${block(cmds)}
+      ${state.os==="win"?`<p class="note warn">On Windows, symlinks need Admin or Developer Mode. If that's a problem, keep these as real copies and add the drift check in the next step.</p>`:""}
+      <p class="note">Each tool also supports a newer directory format (<code>.cursor/rules/</code>, <code>.windsurf/rules/</code>, <code>.clinerules/</code>) that can't be symlinked from one file — only use those for genuinely tool-specific content.</p></div>`;
+  }
+
+  // Team / drift guard
+  const hasCopies = fileTools.length>0 || (useClaude && !importMethod) || state.os==="win";
+  if(state.team==="team" && hasCopies){
+    const stepNo = 2 + (useClaude?1:0) + (nativeTools.length?1:0) + (fileTools.length?1:0);
+    const links = ["CLAUDE.md", ...fileTools.map(t=>t.file)];
+    const hook =
+`#!/bin/sh
+# .git/hooks/pre-commit  — fail the commit if the instruction files drift apart.
+# (run: chmod +x .git/hooks/pre-commit)
+src=AGENTS.md
+for f in ${links.join(" ")}; do
+  [ -e "$f" ] || continue
+  if ! diff -q "$src" "$f" >/dev/null 2>&1; then
+    echo "✗ $f has drifted from $src — re-sync before committing." >&2
+    exit 1
+  fi
+done`;
+    html+=`<div class="step"><h3>${stepNo}. Team drift guard <span class="pill">pre-commit</span></h3>
+      <p class="note">On a team, symlinks don't always survive every clone, so make drift <em>loud</em>: this hook blocks a commit when any copy diverges from <code>AGENTS.md</code>.</p>
+      ${block(hook)}
+      <p class="note">For CI, run the same <code>diff</code> loop as a step and fail the job on mismatch.</p></div>`;
+  }
+
+  out.innerHTML=html;
+  out.querySelectorAll(".copy").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const code=btn.parentElement.textContent.replace(/^Copy/,"");
+      navigator.clipboard.writeText(code).then(()=>{
+        btn.textContent="Copied"; btn.classList.add("done");
+        setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("done");},1400);
+      });
+    });
+  });
+}
+render();
+</script>
+</body>
+</html>
