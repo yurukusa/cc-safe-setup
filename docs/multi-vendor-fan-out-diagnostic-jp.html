@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複数社の並列運用の自己診断 — あなたは4社のfleetを動かしているか</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; line-height: 1.75; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 2rem; }
+.question { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.5rem 1.7rem; margin: 1.2rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.question h2 { font-size: 1.05rem; margin-bottom: 0.9rem; color: #1f2937; line-height: 1.6; }
+.option { display: block; padding: 0.6rem 0.8rem; margin: 0.4rem 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: background 0.15s; }
+.option:hover { background: #f3f4f6; }
+.option input { margin-right: 0.6rem; }
+.option.selected { background: #dbeafe; border-color: #2563eb; }
+#scoreBtn { display: block; width: 100%; padding: 1rem; margin: 2rem 0 1rem; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+#scoreBtn:hover { background: #15803d; }
+#scoreBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+#result { background: white; border-radius: 10px; padding: 1.8rem; margin: 2rem 0; border: 2px solid #e2e8f0; display: none; }
+#result h2 { font-size: 1.3rem; margin-bottom: 0.5rem; line-height: 1.5; }
+#result .verdict { padding: 0.4rem 1rem; border-radius: 999px; font-weight: bold; display: inline-block; margin-bottom: 1rem; }
+#result .high { background: #16a34a; color: white; }
+#result .mid { background: #f59e0b; color: white; }
+#result .low { background: #94a3b8; color: white; }
+#result .score-display { font-size: 0.95rem; color: #555; margin-bottom: 1rem; }
+#result h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
+#result ul { padding-left: 1.3rem; margin-bottom: 0.8rem; }
+#result li { margin: 0.5rem 0; font-size: 0.95rem; }
+#result a { color: #2563eb; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #555; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>複数社の並列運用の自己診断</h1>
+<p class="subtitle">5つの質問で、あなたが複数社のAIの道具を並列で動かす運用に当てはまるか、当てはまるならどの費用の形が一番重いかを見分けます。詳しくは<a href="https://gist.github.com/yurukusa/6b9ddcd105597e830711ab0c0b24b8ce">複数社の並列運用の手引き（日本語の要点）</a>へ。</p>
+
+<div class="question" data-q="1">
+<h2>1. いま本番で、いくつの会社のモデルに対して作業者（worker）を並列で走らせていますか。</h2>
+<label class="option"><input type="radio" name="q1" value="0"> 1社だけ（Claude Code だけ、または Codex だけ、など1社のみ）</label>
+<label class="option"><input type="radio" name="q1" value="10"> 2社を同時に</label>
+<label class="option"><input type="radio" name="q1" value="20"> 3社以上を同時に（Claude Code + Codex + Gemini など）</label>
+</div>
+
+<div class="question" data-q="2">
+<h2>2. 自分で作った指揮役（supervisor）の処理が、作業者の処理に仕事を割り振っていますか。</h2>
+<label class="option"><input type="radio" name="q2" value="0"> いいえ — 各社のCLIやAPIを、束ねる層なしに直接使っている</label>
+<label class="option"><input type="radio" name="q2" value="10"> 一部 — 各社のCLIの周りに少し自作の処理があるが、状態は保持していない</label>
+<label class="option"><input type="radio" name="q2" value="20"> はい — 状態を持つ指揮役（Redis / Neo4j / SQL など）が作業者の生死を管理している</label>
+</div>
+
+<div class="question" data-q="3">
+<h2>3. 作業者が同じ仕事を少し違う引数でやり直し、それを指揮役が取りこぼした、という現象を見たことがありますか。</h2>
+<label class="option"><input type="radio" name="q3" value="0"> いいえ — 見たことがない、または指揮役を使っていない</label>
+<label class="option"><input type="radio" name="q3" value="10"> 疑っている — 衝突らしき症状はあるが、まだ追跡できていない</label>
+<label class="option"><input type="radio" name="q3" value="20"> はい — ログやトレースで確認済みで、直した、または直している最中の既知の失敗の型だ</label>
+</div>
+
+<div class="question" data-q="4">
+<h2>4. 全社を合わせた月のAPIの費用は、どのあたりですか。</h2>
+<label class="option"><input type="radio" name="q4" value="0"> 合計で月100ドル未満</label>
+<label class="option"><input type="radio" name="q4" value="6"> 合計で月100ドルから500ドル</label>
+<label class="option"><input type="radio" name="q4" value="14"> 合計で月500ドルから2,000ドル</label>
+<label class="option"><input type="radio" name="q4" value="20"> 合計で月2,000ドル超（規模の大きい複数社の並列運用）</label>
+</div>
+
+<div class="question" data-q="5">
+<h2>5. 作業者を並列で走らせるとき、「指揮役が取りこぼさずに捕まえたやり直し」と「捕まえる前に完了してしまったやり直し」の比率を計測する仕組みはありますか。</h2>
+<label class="option"><input type="radio" name="q5" value="0"> 計測の仕組みはない</label>
+<label class="option"><input type="radio" name="q5" value="10"> 基本的なログだけ — やり直しの回数は数えられるが、捕捉の比率は出せない</label>
+<label class="option"><input type="radio" name="q5" value="20"> はい — 指揮役の捕捉率を明示的に追跡し、方向性のある比率を示せる</label>
+</div>
+
+<button id="scoreBtn" disabled>結果を見る</button>
+
+<div id="result">
+<h2 id="verdictTitle"></h2>
+<span class="verdict" id="verdictBadge"></span>
+<div class="score-display" id="scoreText"></div>
+<div id="verdictBody"></div>
+</div>
+
+<div class="disclosure">
+この診断は、<a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">複数社の並列運用の手引き（英語の長編）</a>と、<a href="https://github.com/anthropics/claude-code/issues/64080">anthropics/claude-code#64080</a> での palios-taey 氏との設計の議論を下敷きにしています。回答は収集も送信もしません。採点は全てあなたのブラウザの中だけで動きます。推奨は手引きを読んだ前提の道しるべで、手引きの費用の形と判断の整理の代わりにはなりません。
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-02 · <a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">英語の手引き</a> · <a href="https://gist.github.com/yurukusa/6b9ddcd105597e830711ab0c0b24b8ce">日本語の要点</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>
+</footer>
+
+</div>
+
+<script>
+const btn = document.getElementById('scoreBtn');
+const result = document.getElementById('result');
+const verdictTitle = document.getElementById('verdictTitle');
+const verdictBadge = document.getElementById('verdictBadge');
+const scoreText = document.getElementById('scoreText');
+const verdictBody = document.getElementById('verdictBody');
+const options = document.querySelectorAll('.option');
+
+function checkComplete() {
+  const answered = [1,2,3,4,5].every(n => document.querySelector(`input[name="q${n}"]:checked`));
+  btn.disabled = !answered;
+}
+
+options.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const q = opt.parentElement.dataset.q;
+    document.querySelectorAll(`.question[data-q="${q}"] .option`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    setTimeout(checkComplete, 10);
+  });
+});
+
+btn.addEventListener('click', () => {
+  let score = 0;
+  for (let i = 1; i <= 5; i++) {
+    const v = document.querySelector(`input[name="q${i}"]:checked`);
+    score += parseInt(v.value, 10);
+  }
+
+  let title, verdict, body;
+
+  if (score >= 55) {
+    title = 'あなたは本番規模で複数社の並列運用をしています';
+    verdict = '<span class="verdict high">よく当てはまる</span>';
+    body = `
+      <p>あなたの点数（${score}/100）は、手引きが想定する読者の中心にしっかり入っています。具体的な次の一手です。</p>
+      <h3>一番効く計測の一手</h3>
+      <ul>
+        <li><strong>書き込みの増幅の計測。</strong>「指揮役が捕まえた作業者のやり直し」と「捕まえる前に完了してしまったやり直し」の比率を計測してください。手引きでは、これを一番効く計測の一手として挙げています。そして、ほとんどの複数社の運用者がまだ計測していない一手でもあります。この方向性のある比率を見れば、指揮役の重複の排除が、本来塞ぐべき沈黙の衝突の窓を実際に閉じているかが分かります。</li>
+      </ul>
+      <h3>あなたの並列運用に Claude Code の作業者が含まれるなら</h3>
+      <ul>
+        <li><a href="https://github.com/yurukusa/cc-safe-setup/pull/519"><code>tool-result-correlation-checker.sh</code></a> を、指揮役の側の重複の排除を補う、Claude Code の側の観測の層として入れてください。</li>
+        <li>Claude Code の作業者は、起動の設定で <code>ANTHROPIC_MODEL=claude-opus-4-7</code> として Opus 4.7 に固定してください。Opus 4.8 で現在進行中の捏造の集積（Cluster 22）と労力の配分の劣化（Cluster 23）は運用上の費用が高く、この固定で避けられます。</li>
+      </ul>
+      <h3>追いかける価値のある集積の候補</h3>
+      <ul>
+        <li>「作業者が違う引数でやり直し、指揮役が衝突を捕まえられない」という型は、Claude Code がそのまま並列で動く形とは構造的に別物で、それ自体を独立した集積の候補として追う価値があります。Claude Code + Codex + Gemini + Grok でこれがほぼ均等に出るなら、会社をまたぐ合図として起票する価値があります。</li>
+      </ul>
+    `;
+  } else if (score >= 25) {
+    title = 'あなたは並列運用の入口にいますが、まだ本番規模ではありません';
+    verdict = '<span class="verdict mid">部分的に当てはまる</span>';
+    body = `
+      <p>あなたの点数（${score}/100）は、1社の運用と、本番規模の複数社の並列運用の、移行の途中の位置にあります。指揮役の層にまだ達していなくても、規模を広げると当たる費用の形を手引きが整理しています。</p>
+      <h3>いま当たっている可能性が一番高い費用の形</h3>
+      <ul>
+        <li>月の費用が増えてきていて、書き込みの増幅や主張の競合の形をまだ見ていないなら、推論の費用の形（Opus 4.8 の Cluster 22 / 23 の領域）が支配的な可能性が高いです。この段階では、指揮役の設計の仕事より、<a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book（¥2,500）</a>や<a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook（$19）</a>の、1社の運用の最適化の方が効きます。</li>
+      </ul>
+      <h3>次に進むかどうかの判断</h3>
+      <ul>
+        <li><a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">英語の手引き</a>の「architectural split（構造の分かれ目）」の節を読んで、自分の段階が指揮役で束ねる分配に進む価値があるかを判断してください。2社か3社を動かしているが指揮役はなく、費用が月500ドル未満なら、答えはたいてい「まだ早い」です。先に1社ごとの費用を直してください。</li>
+      </ul>
+    `;
+  } else {
+    title = 'あなたは1社の運用者です（この手引きは一番効く資料ではありません）';
+    verdict = '<span class="verdict low">あまり当てはまらない</span>';
+    body = `
+      <p>あなたの点数（${score}/100）は、1社の運用の層に入ります。複数社の並列運用の手引きは興味深くはあっても、いまのあなたに一番効く資料ではありません。</p>
+      <h3>いまのあなたに、より効く資料</h3>
+      <ul>
+        <li><strong>1社の費用の最適化:</strong> <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book（¥2,500）</a> — Claude Code の費用を下げる型。</li>
+        <li><strong>事故の予防:</strong> <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本（¥800）</a> — 集積ごとの防御の面。</li>
+        <li><strong>乗り換えの判断:</strong> <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook（$19）</a> — 残るか乗り換えるか組み合わせるかの判断の木。</li>
+        <li><strong>無料の防御フック:</strong> <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 記録された事故の集積に対する800件以上のフック。</li>
+      </ul>
+      <h3>この診断に戻ってくる目安</h3>
+      <ul>
+        <li>複数社を合わせた月の費用が500ドルを超えたとき、または自分で指揮役を書き始めたときに戻ってきてください。どちらの合図も、あなたが複数社の運用者の層に入ったことを意味します。</li>
+      </ul>
+    `;
+  }
+
+  verdictTitle.textContent = title;
+  verdictBadge.outerHTML = verdict;
+  scoreText.textContent = `点数: ${score} / 100`;
+  verdictBody.innerHTML = body;
+  result.style.display = 'block';
+  result.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+</script>
+</body>
+</html>
