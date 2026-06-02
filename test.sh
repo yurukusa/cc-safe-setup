@@ -2170,6 +2170,70 @@ fi
 rm -rf "$T"
 echo ""
 
+# ========== multi-vendor-concurrent-warner (examples/, SessionStart advisory) ==========
+# Process listing is injected via CC_MULTI_VENDOR_PS_OUTPUT so tests stay
+# deterministic and never depend on the real process table.
+echo "multi-vendor-concurrent-warner.sh:"
+MV_WARN="$(cd "$(dirname "$0")" && pwd)/examples/multi-vendor-concurrent-warner.sh"
+
+# Another AI CLI (codex) running alongside -> advisory names it.
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT="bash
+codex
+node" bash "$MV_WARN" 2>&1) || true
+if echo "$OUT" | grep -q "codex"; then
+    echo "  PASS: warns when codex runs alongside"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: warns when codex runs alongside"; FAIL=$((FAIL + 1))
+fi
+
+# No other AI CLI in the process list -> stay silent.
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT="bash
+node
+python3" bash "$MV_WARN" 2>&1) || true
+if [ -z "$OUT" ]; then
+    echo "  PASS: silent when no other AI CLI present"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: silent when no other AI CLI present"; FAIL=$((FAIL + 1))
+fi
+
+# Several vendors at once -> all are named.
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT="codex
+gemini
+aider" bash "$MV_WARN" 2>&1) || true
+if echo "$OUT" | grep -q "codex" && echo "$OUT" | grep -q "gemini" && echo "$OUT" | grep -q "aider"; then
+    echo "  PASS: names every concurrent vendor"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: names every concurrent vendor"; FAIL=$((FAIL + 1))
+fi
+
+# Whole-token match only: "codexfoo" must not trip the codex rule.
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT="codexfoo
+mygemini" bash "$MV_WARN" 2>&1) || true
+if [ -z "$OUT" ]; then
+    echo "  PASS: substring names do not false-match"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: substring names do not false-match"; FAIL=$((FAIL + 1))
+fi
+
+# Full-path ps format -> basename still matches.
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT="/usr/local/bin/gemini
+/bin/bash" bash "$MV_WARN" 2>&1) || true
+if echo "$OUT" | grep -q "gemini"; then
+    echo "  PASS: matches vendor given as full path"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: matches vendor given as full path"; FAIL=$((FAIL + 1))
+fi
+
+# Empty process list -> exit cleanly and silently (no real ps fallback).
+MV_EXIT=0
+OUT=$(echo '{}' | CC_MULTI_VENDOR_PS_OUTPUT=" " bash "$MV_WARN" 2>&1) || MV_EXIT=$?
+if [ "$MV_EXIT" -eq 0 ] && [ -z "$OUT" ]; then
+    echo "  PASS: empty process list exits clean and silent"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: empty process list exits clean and silent"; FAIL=$((FAIL + 1))
+fi
+echo ""
+
 echo "network-guard.sh:"
 test_ex network-guard.sh '{"tool_input":{"command":"gh pr list"}}' 0 "gh command safe"
 test_ex network-guard.sh '{"tool_input":{"command":"git push origin main"}}' 0 "git push safe"

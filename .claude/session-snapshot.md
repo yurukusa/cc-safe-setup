@@ -1,25 +1,25 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-05-08T17:17:39+09:00
+Updated: 2026-06-02T10:38:47+09:00
 
 ## Git
-- Branch: `fix/deploy-friday-test-day-aware-2026-05-08`
+- Branch: `feat/multi-vendor-concurrent-warner-2026-06-02`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 6444cf73 recovery: pre-compact checkpoint (1 files, 20260508-081739)
+- Last commit: 9f8dc860 recovery: pre-compact checkpoint (1 files, 20260602-013847)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-05-08.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-06-02.md
 ./test.sh
-./examples/sql-bulk-delete-warn.sh
-./tests/test-sql-bulk-delete-warn.sh
 ./README.md
-./CHANGELOG.md
-./tests/test-windows-destructive-command-guard.sh
-./examples/windows-destructive-command-guard.sh
+./examples/multi-vendor-concurrent-warner.sh
+./examples/agents-md-sync-checker.sh
+./scripts/agents-md-sync-setup.sh
+./docs/june-15-cliff-14-day-plan.md
+./examples/cowork-model-picker-advisor.sh
 ```
 
