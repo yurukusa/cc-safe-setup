@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENTS.md ↔ CLAUDE.md Interop Scorecard — score your one-source-of-truth setup</title>
+<meta name="description" content="Check whether your AGENTS.md is actually wired into every AI coding tool you use. Get an honest X/6 interop score you can screenshot and share. Based on the #6235 pain. Runs entirely in your browser — no npm, no upload.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/agents-md-interop-scorecard.html">
+<meta property="og:title" content="AGENTS.md ↔ CLAUDE.md Interop Scorecard">
+<meta property="og:description" content="Score how drift-proof your AGENTS.md setup is across Claude Code, Codex, Cursor, Aider, Amp and more. Honest X/6 coverage, a card you'll want to share. Runs in your browser — nothing leaves it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/agents-md-interop-scorecard.html">
+<meta property="og:image" content="https://yurukusa.github.io/cc-safe-setup/agents-md-interop-scorecard-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://yurukusa.github.io/cc-safe-setup/agents-md-interop-scorecard-og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AGENTS.md Interop Scorecard","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Self-assessment scorecard for whether AGENTS.md is wired as a single source of truth across your AI coding tools, based on the GitHub #6235 pain.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem}
+.container{max-width:680px;width:100%}
+.back{display:block;margin-bottom:1rem;color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:1.75rem;line-height:1.5}
+.checklist{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:.5rem;margin-bottom:1.5rem}
+.item{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem .9rem;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.item:hover{background:#0d1117}
+.item.on{background:#0d1117;border-color:#1f6feb}
+.box{flex:0 0 22px;width:22px;height:22px;border:2px solid #484f58;border-radius:6px;margin-top:.1rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;transition:all .15s}
+.item.on .box{background:#1f6feb;border-color:#1f6feb}
+.item.on .box::after{content:"✓"}
+.txt .name{color:#f0f6fc;font-weight:600;font-size:.95rem}
+.txt .why{color:#8b949e;font-size:.8rem;margin-top:.2rem;line-height:1.4}
+.txt .why code{background:#161b22;border:1px solid #30363d;border-radius:4px;padding:0 .25rem;font-size:.92em;color:#c9d1d9}
+.controls{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.75rem}
+.mini{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .9rem;border-radius:6px;font-size:.8rem;cursor:pointer}
+.mini:hover{border-color:#58a6ff;color:#58a6ff}
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;text-decoration:none}
+.btn-primary{background:#1f6feb;color:#fff}.btn-primary:hover{background:#388bfd}
+.btn-x{background:#1da1f2;color:#fff}.btn-x:hover{filter:brightness(1.1)}
+.btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:#1f6feb;color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.install{margin-top:2rem;text-align:center}
+.install p{color:#8b949e;font-size:.85rem;margin-top:.6rem;line-height:1.6}
+.install a{color:#58a6ff;text-decoration:none}
+.fix{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.3rem;margin-top:2rem}
+.fix h2{color:#f0f6fc;font-size:1rem;margin-bottom:.5rem}
+.fix p{color:#8b949e;font-size:.85rem;line-height:1.6}
+.fix a{color:#58a6ff;text-decoration:none}
+.fix code{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:0 .25rem;color:#c9d1d9}
+.footer{margin-top:2.5rem;font-size:.75rem;color:#484f58;text-align:center;line-height:1.7}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; cc-safe-setup</a>
+<h1>AGENTS.md ↔ CLAUDE.md Interop Scorecard</h1>
+<p class="subtitle">You wrote one <strong>AGENTS.md</strong> — but does every tool actually read it? Check what's wired, get an honest <strong>X / 6</strong> interop score you can screenshot and share.<br>Built for the <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener" style="color:#58a6ff">#6235</a> pain (5,200+ reactions). Nothing leaves your browser.</p>
+
+<div class="checklist" id="checklist"></div>
+
+<div class="controls">
+<button class="mini" onclick="setAll(true)">Check all</button>
+<button class="mini" onclick="setAll(false)">Clear all</button>
+</div>
+
+<div class="cardwrap">
+<canvas id="card" width="1320" height="1000"></canvas>
+<div class="actions">
+<button class="btn btn-primary" onclick="downloadPNG()">⬇ Download PNG</button>
+<button class="btn btn-ghost" onclick="copyImage()">⧉ Copy image</button>
+<button class="btn btn-ghost" onclick="copyLink()">🔗 Copy share link</button>
+<a class="btn btn-x" id="xshare" target="_blank" rel="noopener">Share on X</a>
+</div>
+</div>
+
+<div class="fix">
+<h2>Anything not checked? Wire it in minutes</h2>
+<p>The free <a href="agents-md-setup-generator.html">AGENTS.md ↔ CLAUDE.md Setup Generator</a> takes the tools you use and prints the exact copy-paste setup — the <code>@AGENTS.md</code> import for Claude Code, the <code>.aider.conf.yml</code> line for Aider, symlinks for Cursor/Windsurf/Cline, and a drift guard. The <a href="https://gist.github.com/yurukusa/d36197848911f025add142abefcde685" target="_blank" rel="noopener">AGENTS.md interop field guide (English, MIT)</a> explains the why and the edge cases, and <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> ships a free MIT hook that fails a commit when any copy drifts from AGENTS.md.</p>
+</div>
+
+<div class="install">
+<p>Conventions verified 2026-06-02 against each tool's own docs — recheck before relying on them, since tool conventions change.<br>
+Want the full 9-tool matrix, all six wiring paths, and a rollback-safe migration runbook in one place? → <a href="https://yurukusa.gumroad.com/l/swpeu" target="_blank" rel="noopener">AGENTS.md × Claude Code Interop Handbook (English, $12)</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop" target="_blank" rel="noopener">Japanese edition on Zenn</a>.</p>
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="agents-md-vs-claude-md.html">AGENTS.md vs CLAUDE.md</a><br>
+This is a self-assessment: the score reflects what you checked, not a scan of your repo. The interop requirements are real and verified.
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// The reach mechanic that works in this niche is a compact artifact people *want*
+// to share (the ccusage cost scorecard, Karpathy's CLAUDE.md), not launch posts.
+// This is the AGENTS.md twin of the Safety Scorecard: it targets the #6235 pain
+// (the single largest Claude Code demand) and encodes the score in the URL so a
+// shared link reproduces the exact card. Each check is a verified interop
+// requirement (conventions confirmed 2026-06-02 against each tool's docs), so the
+// score stays honest when screenshotted — never an invented points total.
+const CHECKS = [
+  {id:'single-source', name:'One source of truth', why:'All shared instructions live in a single <code>AGENTS.md</code> at the repo root — not duplicated per tool. The #6235 pain is N files quietly saying different things.', card:'One AGENTS.md, not N drifting copies'},
+  {id:'claude-bridge', name:'Claude Code bridged to it', why:'Claude Code reads <code>CLAUDE.md</code>, never <code>AGENTS.md</code>. Add a one-line <code>@AGENTS.md</code> import to CLAUDE.md (the official documented default) or a verified symlink — otherwise Claude ignores your source of truth.', card:'Claude Code reads it (@AGENTS.md import)'},
+  {id:'native-root', name:'Native readers at repo root', why:'Codex, Amp and GitHub Copilot read <code>AGENTS.md</code> directly — but only if it actually sits at the repo root they open. No setup, just confirm the file is where they look.', card:'Native readers (Codex/Amp/Copilot) see it'},
+  {id:'config-wired', name:'Config tools pointed at it', why:'Aider and Gemini CLI do <em>not</em> read AGENTS.md by default. Aider needs <code>read: AGENTS.md</code> in <code>.aider.conf.yml</code>; Gemini needs it in <code>.gemini/settings.json</code>. (Aider being "native" is a common myth.)', card:'Config tools (Aider/Gemini) wired in'},
+  {id:'filename-linked', name:'Filename tools symlinked', why:'Cursor, Windsurf and Cline read their own filename only. Symlink <code>.cursorrules</code> / <code>.windsurfrules</code> / <code>.clinerules</code> to <code>AGENTS.md</code> so there is still one real file — not a stale separate copy.', card:'Filename tools (Cursor/Windsurf/Cline) linked'},
+  {id:'drift-guard', name:'Drift guard in place', why:'Symlinks don\'t survive every clone and copies silently diverge on a team. A pre-commit hook, SessionStart hook or CI check that fails loudly on divergence keeps the one-source-of-truth honest over time.', card:'Drift guard fails loudly on divergence'},
+];
+const N = CHECKS.length;
+let state = new Array(N).fill(false);
+
+// ---- URL state (?s=110100) so a shared link reproduces the exact card ----
+function readURL(){
+  const p = new URLSearchParams(location.search).get('s');
+  if(p && p.length === N && /^[01]+$/.test(p)){
+    state = p.split('').map(c => c === '1');
+  }
+}
+function writeURL(){
+  const s = state.map(b => b?'1':'0').join('');
+  const url = location.origin + location.pathname + '?s=' + s;
+  history.replaceState(null,'',url);
+  return url;
+}
+
+// ---- checklist UI ----
+const checklist = document.getElementById('checklist');
+function renderList(){
+  checklist.innerHTML = '';
+  CHECKS.forEach((p,i) => {
+    const el = document.createElement('div');
+    el.className = 'item' + (state[i]?' on':'');
+    el.onclick = () => { state[i] = !state[i]; renderList(); render(); };
+    el.innerHTML = '<div class="box"></div><div class="txt"><div class="name">'+p.name+'</div><div class="why">'+p.why+'</div></div>';
+    checklist.appendChild(el);
+  });
+}
+function setAll(v){
+  state = new Array(N).fill(!!v);
+  renderList(); render();
+}
+
+// ---- honest score tiers ----
+function tier(n){
+  if(n === N) return {label:'Fully unified', color:'#3fb950'};
+  if(n >= 4)  return {label:'Mostly unified', color:'#3fb950'};
+  if(n >= 1)  return {label:'Partially drifting', color:'#d29922'};
+  return {label:'Fragmented', color:'#f85149'};
+}
+
+// ---- canvas card (the shareable artifact) ----
+const canvas = document.getElementById('card');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, S = 2; // logical units scaled by S
+function px(v){ return v * S; }
+function render(){
+  const n = state.filter(Boolean).length;
+  const t = tier(n);
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = px(1.5);
+  roundRect(px(8),px(8),W-px(16),H-px(16),px(16)); ctx.stroke();
+
+  const padX = px(40);
+  let y = px(58);
+
+  // header
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '700 ' + px(26) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#58a6ff'; ctx.fillText('cc-safe-setup', padX, y);
+  const w1 = ctx.measureText('cc-safe-setup').width;
+  ctx.fillStyle = '#8b949e'; ctx.fillText('  ·  AGENTS.md Interop Scorecard', padX + w1, y);
+
+  // score line
+  y += px(56);
+  ctx.font = '700 ' + px(54) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = t.color;
+  ctx.fillText(n + '/' + N, padX, y);
+  const ws = ctx.measureText(n + '/' + N).width;
+  ctx.font = '600 ' + px(20) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#c9d1d9';
+  ctx.fillText('interop checks', padX + ws + px(14), y - px(20));
+  ctx.fillStyle = t.color;
+  ctx.fillText(t.label, padX + ws + px(14), y + px(6));
+
+  // coverage bar
+  y += px(34);
+  const barW = W - padX*2, barH = px(14);
+  ctx.fillStyle = '#21262d'; roundRect(padX, y, barW, barH, px(7)); ctx.fill();
+  if(n > 0){ ctx.fillStyle = t.color; roundRect(padX, y, Math.max(barH, barW*(n/N)), barH, px(7)); ctx.fill(); }
+
+  // check rows
+  y += px(50);
+  const rowH = px(40);
+  CHECKS.forEach((p,i) => {
+    const on = state[i];
+    ctx.fillStyle = on ? '#3fb950' : '#6e7681';
+    ctx.font = '700 ' + px(20) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillText(on ? '✓' : '✕', padX, y);
+    ctx.font = '500 ' + px(19) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillStyle = on ? '#c9d1d9' : '#6e7681';
+    ctx.fillText(p.card, padX + px(30), y);
+    y += rowH;
+  });
+
+  // footer
+  y = H - px(56);
+  ctx.strokeStyle = '#21262d'; ctx.lineWidth = px(1);
+  ctx.beginPath(); ctx.moveTo(padX, y - px(22)); ctx.lineTo(W - padX, y - px(22)); ctx.stroke();
+  ctx.font = '700 ' + px(19) + 'px ui-monospace,Menlo,monospace';
+  ctx.fillStyle = '#58a6ff'; ctx.fillText('one AGENTS.md → every tool', padX, y);
+  ctx.font = '400 ' + px(15) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#6e7681';
+  const foot = 'free · github.com/yurukusa/cc-safe-setup';
+  const fw = ctx.measureText(foot).width;
+  ctx.fillText(foot, W - padX - fw, y);
+
+  // update share affordances
+  const url = writeURL();
+  const missing = CHECKS.filter((_,i)=>!state[i]).map(p=>p.name);
+  let msg = 'My AGENTS.md interop: ' + n + '/' + N + ' checks (' + t.label.toLowerCase() + ')';
+  if(n < N && missing.length) msg += '. Still drifting on: ' + missing.slice(0,2).join(', ') + (missing.length>2?' +'+(missing.length-2)+' more':'');
+  msg += '. Score yours:';
+  const xurl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '&url=' + encodeURIComponent(url);
+  document.getElementById('xshare').href = xurl;
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+// ---- actions ----
+function toast(t){
+  const el = document.getElementById('toast');
+  el.textContent = t; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1800);
+}
+function downloadPNG(){
+  const n = state.filter(Boolean).length;
+  const a = document.createElement('a');
+  a.download = 'agents-md-interop-scorecard-' + n + 'of' + N + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  toast('Scorecard downloaded');
+}
+async function copyImage(){
+  try{
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+    toast('Image copied to clipboard');
+  }catch(e){ toast('Copy not supported — use Download PNG'); }
+}
+async function copyLink(){
+  try{
+    await navigator.clipboard.writeText(writeURL());
+    toast('Share link copied');
+  }catch(e){ toast('Copy failed — link is in your address bar'); }
+}
+
+// ---- init ----
+readURL();
+renderList();
+render();
+</script>
+</body>
+</html>
