@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AGENTS.md vs CLAUDE.md — what's the difference, and do you need both? (2026)</title>
+<meta name="description" content="AGENTS.md vs CLAUDE.md explained: Claude Code reads CLAUDE.md, every other tool reads AGENTS.md. A verified 9-tool matrix, whether you need both, and how to make them share one file. Updated 2026-06-02.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/agents-md-vs-claude-md.html">
+<meta property="og:title" content="AGENTS.md vs CLAUDE.md — what's the difference, and do you need both?">
+<meta property="og:description" content="Claude Code reads CLAUDE.md; Codex, Copilot, Cursor and others read AGENTS.md. A verified 9-tool matrix and the one-line way to make them share a single file.">
+<meta property="og:type" content="article">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.02rem;margin:1.2em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#23304a;color:var(--acc);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .two .card h3{margin-top:0}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,Menlo,monospace;color:#d7dce6}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0;overflow:hidden;border-radius:10px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1a2233;color:var(--ink);font-weight:600}
+  td .n{color:var(--ok);font-weight:600}
+  td .c{color:var(--warn)}
+  td .f{color:var(--acc)}
+  .pill{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px}
+  .pill.n{background:#1f3a31;color:var(--ok)}
+  .pill.c{background:#3a341f;color:var(--warn)}
+  .pill.f{background:#23304a;color:var(--acc)}
+  .note{color:var(--mut);font-size:.92rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6em 0 0;color:#cdd6e6}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Updated 2026-06-02 · independent, verified against each tool's docs</span>
+  <h1>AGENTS.md vs CLAUDE.md</h1>
+  <p class="sub">Claude Code reads <code>CLAUDE.md</code>. Almost every other AI coding tool reads <code>AGENTS.md</code>. Here's the difference, whether you need both, and the one-line way to make them share a single file.</p>
+
+  <p>If you use Claude Code <em>and</em> another tool — Codex, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Cline, Amp, or Aider — you've probably ended up maintaining the same project rules in two files. This is the single largest open feature request in Claude Code: <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">issue #6235</a>, with <strong>5,270+ reactions</strong>, asking Claude Code to read <code>AGENTS.md</code> too. As of mid-2026 it is still open.</p>
+
+  <h2>The short answer</h2>
+  <div class="card">
+    <p><strong><code>AGENTS.md</code></strong> is the cross-tool standard — a plain-Markdown instruction file at the repo root that most coding agents read. <strong><code>CLAUDE.md</code></strong> is Claude Code's own instruction file. They serve the same purpose; they're just different filenames.</p>
+    <p style="margin-bottom:0">You don't have to choose. Make <code>AGENTS.md</code> your single source of truth and point Claude Code at it with a one-line import (or a symlink). One real file, every tool reads it, nothing drifts. <a href="#how">Jump to how →</a></p>
+  </div>
+
+  <h2>What each file is</h2>
+  <div class="two">
+    <div class="card">
+      <h3><code>CLAUDE.md</code></h3>
+      <p class="note">Claude Code's instruction file. Read from the repo root and from <code>~/.claude/CLAUDE.md</code> (global). Claude Code does <strong>not</strong> read <code>AGENTS.md</code> on its own today.</p>
+    </div>
+    <div class="card">
+      <h3><code>AGENTS.md</code></h3>
+      <p class="note">The cross-tool convention (<a href="https://agents.md/" target="_blank" rel="noopener">agents.md</a>). Generic name, plain Markdown, repo root. Codex, Amp, and GitHub Copilot read it natively; others read it with one line of config or a symlink.</p>
+    </div>
+  </div>
+  <p class="note">Why did everyone converge on <code>AGENTS.md</code>? The name isn't vendor-specific, the format is plain Markdown (no DSL), and it lives at the repo root next to <code>README.md</code>. It's the obvious shared choice once tools decide to interoperate.</p>
+
+  <h2 id="matrix">Which tool reads which file (verified 2026-06-02)</h2>
+  <table>
+    <thead><tr><th>Tool</th><th>Reads by default</th><th>To share <code>AGENTS.md</code></th></tr></thead>
+    <tbody>
+      <tr><td>Claude Code</td><td><code>CLAUDE.md</code></td><td><span class="pill f">import / symlink</span></td></tr>
+      <tr><td>Codex</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
+      <tr><td>Amp</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
+      <tr><td>GitHub Copilot</td><td class="n">AGENTS.md (agent/chat)</td><td><span class="pill n">nothing</span></td></tr>
+      <tr><td>Cursor</td><td><code>.cursorrules</code></td><td><span class="pill f">symlink</span></td></tr>
+      <tr><td>Windsurf</td><td><code>.windsurfrules</code></td><td><span class="pill f">symlink</span></td></tr>
+      <tr><td>Cline</td><td><code>.clinerules</code></td><td><span class="pill f">symlink</span></td></tr>
+      <tr><td>Aider</td><td class="c">— (must be told)</td><td><span class="pill c">config: <code>read: AGENTS.md</code></span></td></tr>
+      <tr><td>Gemini CLI</td><td><code>GEMINI.md</code></td><td><span class="pill c">config: <code>context.fileName</code></span></td></tr>
+    </tbody>
+  </table>
+  <p class="note"><span class="pill n">native</span> reads <code>AGENTS.md</code> already · <span class="pill c">config</span> needs one line in a settings file · <span class="pill f">file/symlink</span> reads its own filename, point it at <code>AGENTS.md</code> with a symlink. Conventions change — recheck against each tool's docs before relying on it.</p>
+
+  <h2>Do you need both files?</h2>
+  <div class="card">
+    <p><strong>If every rule is shared</strong> (conventions, test commands, security rules): no — keep one real <code>AGENTS.md</code> and link Claude Code to it. Nothing to maintain twice.</p>
+    <p style="margin-bottom:0"><strong>If you have a few Claude-Code-only rules</strong> (a specific hook, a <code>/command</code>, sub-agent behavior): keep a tiny <code>CLAUDE.md</code> that imports <code>AGENTS.md</code> and holds just those extra lines underneath. Still one shared source of truth.</p>
+  </div>
+
+  <h2 id="how">How to make them share one file</h2>
+  <h3>Recommended: the <code>@AGENTS.md</code> import</h3>
+  <p>This is the method documented in Claude Code's own memory docs. Make <code>CLAUDE.md</code> contain just this — Claude loads <code>AGENTS.md</code> at session start, so there's one real file and it can't drift:</p>
+  <pre>@AGENTS.md</pre>
+  <p class="note">Add any Claude-only rules <em>below</em> that line; the other tools never see them. On Windows this needs no Admin/Developer Mode (unlike a symlink). First run shows a one-time approval for the import — accept it.</p>
+  <h3>Lighter: a symlink (when you need no Claude-only section)</h3>
+  <pre>ln -sf AGENTS.md CLAUDE.md
+ls -l CLAUDE.md      # confirm:  CLAUDE.md -&gt; AGENTS.md</pre>
+  <p class="note">On a team, symlinks don't always survive every clone — add a pre-commit check that fails when copies drift.</p>
+
+  <div class="cta">
+    <strong>Get the exact setup for your stack (free).</strong> The <a href="https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html">AGENTS.md Setup Generator</a> prints the precise commands and files for whichever tools you pick (Claude Code, Codex, Copilot, Cursor, Windsurf, Cline, Aider, Gemini CLI) — including the team drift guard. Browser-only, no signup. There's also a free <a href="https://gist.github.com/yurukusa/d36197848911f025add142abefcde685" target="_blank" rel="noopener">field-guide</a> and an <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">MIT drift-checker hook</a>.
+  </div>
+
+  <h2>FAQ</h2>
+  <details><summary>Does Claude Code read AGENTS.md?</summary><p>Not on its own, as of mid-2026 (issue #6235 is still open). You bridge it with a one-line <code>@AGENTS.md</code> import in <code>CLAUDE.md</code>, or a symlink. Some blogs claim Claude Code reads <code>AGENTS.md</code> "as a fallback" — that is not accurate; the import is the supported bridge.</p></details>
+  <details><summary>Which should I name my file — AGENTS.md or CLAUDE.md?</summary><p>Make <code>AGENTS.md</code> the real file (it's the cross-tool standard) and point <code>CLAUDE.md</code> at it. That way every other tool works with zero extra config and Claude Code reads it via the import/symlink.</p></details>
+  <details><summary>Can I use both with no duplication?</summary><p>Yes. The <code>@AGENTS.md</code> import keeps one real file. A symlink does too. Only avoid keeping two real copies edited by hand — that's what drifts.</p></details>
+  <details><summary>What about Cursor's <code>.cursor/rules/</code> or Windsurf's <code>.windsurf/rules/</code>?</summary><p>Those newer directory formats can't be symlinked from one file. Use them only for genuinely tool-specific rules; keep shared rules in <code>AGENTS.md</code> and symlink the legacy single-file name (<code>.cursorrules</code>, <code>.windsurfrules</code>) to it.</p></details>
+  <details><summary>How do I keep AGENTS.md and CLAUDE.md in sync on a team?</summary><p>Prefer the import or symlink (one real file). Where real copies are unavoidable, add a pre-commit hook (and a CI step) that fails when any copy diverges from <code>AGENTS.md</code>. The <a href="https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html">generator</a> emits both.</p></details>
+
+  <p class="foot">
+    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety hooks). Want the full kit — the verified matrix, all six interop paths, copy-paste templates, and a rollback-safe migration runbook — in one place? <a href="https://yurukusa.gumroad.com/l/swpeu" target="_blank" rel="noopener">AGENTS.md × Claude Code Interop Handbook</a> ($12, English) · a deeper <a href="https://zenn.dev/yurukusa/books/agents-md-interop" target="_blank" rel="noopener">Japanese edition</a> is on Zenn. Not affiliated with Anthropic, OpenAI, GitHub, or Google. Tool conventions verified 2026-06-02; recheck before relying on any single line.
+  </p>
+</div>
+</body>
+</html>
