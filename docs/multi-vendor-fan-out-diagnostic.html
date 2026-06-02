@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Vendor Fan-Out Diagnostic — Are you running a fleet?</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.7rem; margin-bottom: 0.5rem; line-height: 1.3; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 2rem; }
+.question { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.5rem 1.7rem; margin: 1.2rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.question h2 { font-size: 1.1rem; margin-bottom: 0.9rem; color: #1f2937; }
+.option { display: block; padding: 0.6rem 0.8rem; margin: 0.4rem 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: background 0.15s; }
+.option:hover { background: #f3f4f6; }
+.option input { margin-right: 0.6rem; }
+.option.selected { background: #dbeafe; border-color: #2563eb; }
+#scoreBtn { display: block; width: 100%; padding: 1rem; margin: 2rem 0 1rem; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+#scoreBtn:hover { background: #15803d; }
+#scoreBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+#result { background: white; border-radius: 10px; padding: 1.8rem; margin: 2rem 0; border: 2px solid #e2e8f0; display: none; }
+#result h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+#result .verdict { padding: 0.4rem 1rem; border-radius: 999px; font-weight: bold; display: inline-block; margin-bottom: 1rem; }
+#result .high { background: #16a34a; color: white; }
+#result .mid { background: #f59e0b; color: white; }
+#result .low { background: #94a3b8; color: white; }
+#result .score-display { font-size: 0.95rem; color: #555; margin-bottom: 1rem; }
+#result h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
+#result ul { padding-left: 1.3rem; margin-bottom: 0.8rem; }
+#result li { margin: 0.4rem 0; font-size: 0.95rem; }
+#result a { color: #2563eb; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #555; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Multi-Vendor Fan-Out Diagnostic</h1>
+<p class="subtitle">Five questions → are you running a multi-vendor agentic fleet, and if so, which cost shape is hitting you hardest? Maps to the <a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">Multi-Vendor Fan-Out Field Guide</a>.</p>
+
+<div class="question" data-q="1">
+<h2>1. How many distinct LLM vendors are you currently running workers against in production?</h2>
+<label class="option"><input type="radio" name="q1" value="0"> Just one (Claude Code, or just Codex, or just one vendor)</label>
+<label class="option"><input type="radio" name="q1" value="10"> Two vendors concurrently</label>
+<label class="option"><input type="radio" name="q1" value="20"> Three or more vendors concurrently (CC + Codex + Gemini, etc.)</label>
+</div>
+
+<div class="question" data-q="2">
+<h2>2. Do you operate a supervisor process you wrote that dispatches tasks to worker processes?</h2>
+<label class="option"><input type="radio" name="q2" value="0"> No — I use each vendor's native CLI/API directly without a coordinating layer</label>
+<label class="option"><input type="radio" name="q2" value="10"> Partial — some scripting around vendor CLIs, no persistent state</label>
+<label class="option"><input type="radio" name="q2" value="20"> Yes — a persistent supervisor with state (Redis / Neo4j / SQL / similar) that manages worker lifecycle</label>
+</div>
+
+<div class="question" data-q="3">
+<h2>3. Have you observed workers retrying the same task with slightly different parameters, where the supervisor failed to catch the collision?</h2>
+<label class="option"><input type="radio" name="q3" value="0"> No — I haven't seen this or I don't run a supervisor</label>
+<label class="option"><input type="radio" name="q3" value="10"> Suspected but not confirmed — the symptoms look like collision but I haven't traced it</label>
+<label class="option"><input type="radio" name="q3" value="20"> Yes — confirmed with logs / traces, this is a known failure mode I've fixed or am fixing</label>
+</div>
+
+<div class="question" data-q="4">
+<h2>4. Where does your monthly API spend across all vendors sit?</h2>
+<label class="option"><input type="radio" name="q4" value="0"> Under $100/month total</label>
+<label class="option"><input type="radio" name="q4" value="6"> $100 to $500/month total</label>
+<label class="option"><input type="radio" name="q4" value="14"> $500 to $2,000/month total</label>
+<label class="option"><input type="radio" name="q4" value="20"> Over $2,000/month total (multi-vendor fleet at scale)</label>
+</div>
+
+<div class="question" data-q="5">
+<h2>5. When workers run in parallel, do you have any instrumentation that measures the ratio of (worker retries caught by supervisor) vs (worker retries that completed before being caught)?</h2>
+<label class="option"><input type="radio" name="q5" value="0"> No instrumentation</label>
+<label class="option"><input type="radio" name="q5" value="10"> Basic logging — I can count retries but not the catch ratio</label>
+<label class="option"><input type="radio" name="q5" value="20"> Yes — I track the supervisor catch rate explicitly and can show a directional ratio</label>
+</div>
+
+<button id="scoreBtn" disabled>Calculate fit</button>
+
+<div id="result">
+<h2 id="verdictTitle"></h2>
+<span class="verdict" id="verdictBadge"></span>
+<div class="score-display" id="scoreText"></div>
+<div id="verdictBody"></div>
+</div>
+
+<div class="disclosure">
+This diagnostic is based on the <a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">Multi-Vendor Fan-Out Field Guide</a> and the architectural discussion in <a href="https://github.com/anthropics/claude-code/issues/64080">anthropics/claude-code#64080</a> with @palios-taey. It does not collect or transmit your answers — all scoring runs in your browser. The recommendations assume you have read the field guide; they are pointers, not a substitute for the guide's full articulation of the cost shapes and trade-offs.
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-01 · <a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">Multi-Vendor Fan-Out Field Guide</a> · <a href="https://gist.github.com/yurukusa/6b9ddcd105597e830711ab0c0b24b8ce">日本語の preview</a> · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>
+</footer>
+
+</div>
+
+<script>
+const btn = document.getElementById('scoreBtn');
+const result = document.getElementById('result');
+const verdictTitle = document.getElementById('verdictTitle');
+const verdictBadge = document.getElementById('verdictBadge');
+const scoreText = document.getElementById('scoreText');
+const verdictBody = document.getElementById('verdictBody');
+const options = document.querySelectorAll('.option');
+
+function checkComplete() {
+  const answered = [1,2,3,4,5].every(n => document.querySelector(`input[name="q${n}"]:checked`));
+  btn.disabled = !answered;
+}
+
+options.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const q = opt.parentElement.dataset.q;
+    document.querySelectorAll(`.question[data-q="${q}"] .option`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    setTimeout(checkComplete, 10);
+  });
+});
+
+btn.addEventListener('click', () => {
+  let score = 0;
+  for (let i = 1; i <= 5; i++) {
+    const v = document.querySelector(`input[name="q${i}"]:checked`);
+    score += parseInt(v.value, 10);
+  }
+
+  let title, verdict, body;
+
+  if (score >= 55) {
+    title = 'You are running a multi-vendor fleet at production scale';
+    verdict = '<span class="verdict high">High-fit</span>';
+    body = `
+      <p>Your score (${score}/100) places you firmly in the field guide's target population. Concrete next steps:</p>
+      <h3>Highest-leverage instrumentation step</h3>
+      <ul>
+        <li><strong>The write-amplification measurement.</strong> Instrument the ratio of worker retries caught by your supervisor vs worker retries that completed before being caught. This is named in the field guide as the highest-leverage instrumentation step and the one most multi-vendor fleet operators have not yet measured. The directional ratio tells you whether your supervisor's dedup is closing the silent-collision window.</li>
+      </ul>
+      <h3>If you are running CC workers in your fleet</h3>
+      <ul>
+        <li>Install <a href="https://github.com/yurukusa/cc-safe-setup/pull/519"><code>tool-result-correlation-checker.sh</code></a> as the CC-side observability companion to your supervisor-side dedup.</li>
+        <li>Pin Opus 4.7 for the CC workers via <code>ANTHROPIC_MODEL=claude-opus-4-7</code> in the worker spawn config — the active Cluster 22 (fabrication) and Cluster 23 (effort-budget regression) on Opus 4.8 are operationally costly and eliminated by the pin.</li>
+      </ul>
+      <h3>Cluster-candidate to watch</h3>
+      <ul>
+        <li>The "worker retrying with different params, supervisor not catching the collision" pattern is structurally distinct from the CC-native fan-out shape and worth tracking as a candidate cluster in its own right. If you see this on CC + Codex + Gemini + Grok roughly evenly, that's a cross-vendor signal worth filing.</li>
+      </ul>
+    `;
+  } else if (score >= 25) {
+    title = 'You are partially in fleet territory but not yet at production scale';
+    verdict = '<span class="verdict mid">Partial-fit</span>';
+    body = `
+      <p>Your score (${score}/100) places you in the transition zone between single-vendor and multi-vendor production fleets. The field guide articulates the cost shapes you will hit as you scale, even if you are not at the dispatch-supervisor layer yet.</p>
+      <h3>Most likely cost shape you are hitting today</h3>
+      <ul>
+        <li>If your monthly spend is climbing and you have not seen the write-amplification or claim-race shapes yet, the reasoning cost shape (Cluster 22 / 23 territory on Opus 4.8) is likely the dominant one. The single-vendor optimization paths in the <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book (¥2,500)</a> and the <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook ($19)</a> are higher-leverage than supervisor architecture work at your stage.</li>
+      </ul>
+      <h3>Path-forward decision</h3>
+      <ul>
+        <li>Read the <a href="https://gist.github.com/yurukusa/82055eb27c65b09b07b02dcfab48e611">field guide</a>'s "architectural split" section to decide whether your stage warrants moving to supervisor-coordinated dispatch. If you are running 2-3 vendors but no supervisor and your spend is under $500/month, the answer is usually "not yet" — fix the per-vendor cost first.</li>
+      </ul>
+    `;
+  } else {
+    title = 'You are a single-vendor operator (the field guide is not your highest leverage)';
+    verdict = '<span class="verdict low">Low-fit</span>';
+    body = `
+      <p>Your score (${score}/100) places you in the single-vendor population. The Multi-Vendor Fan-Out Field Guide is interesting but not the highest-leverage resource for your situation.</p>
+      <h3>Higher-leverage resources for your situation</h3>
+      <ul>
+        <li><strong>Single-vendor cost optimization:</strong> <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book (¥2,500)</a> for Claude Code cost reduction patterns.</li>
+        <li><strong>Incident prevention:</strong> <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本 (¥800)</a> for the cluster-by-cluster defense surface.</li>
+        <li><strong>Migration decision:</strong> <a href="https://yurukusa.gumroad.com/l/claude-code-migration-playbook">Migration Playbook ($19)</a> for the stay/switch/hybridize decision tree.</li>
+        <li><strong>Free defense hooks:</strong> <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 750+ hooks for the documented incident clusters.</li>
+      </ul>
+      <h3>When to revisit this diagnostic</h3>
+      <ul>
+        <li>Come back if your monthly spend crosses $500 across multiple vendors, or if you find yourself writing your own dispatch supervisor. Either signal puts you in the fleet operator population.</li>
+      </ul>
+    `;
+  }
+
+  verdictTitle.textContent = title;
+  verdictBadge.outerHTML = verdict;
+  scoreText.textContent = `Score: ${score} / 100`;
+  verdictBody.innerHTML = body;
+  result.style.display = 'block';
+  result.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+</script>
+</body>
+</html>
