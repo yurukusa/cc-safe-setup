@@ -53,6 +53,10 @@
     <p style="margin:0"><strong>The short version.</strong> Three separate things stack up: (1) Claude Code gives you no built-in way to see your real remaining quota, (2) the percentage it <em>does</em> show sometimes disagrees with when it actually cuts you off, and (3) several release boundaries appear to have changed how fast quota is consumed. You can't fix the platform side — but you <a href="#measure">can measure your own consumption</a> so you know whether a limit is normal usage or an anomaly worth reporting.</p>
   </div>
 
+  <div class="card" style="border-color:var(--warn)">
+    <p style="margin:0"><strong>First, the thing most people miss: the quota is shared.</strong> Anthropic's own documentation states that <em>"both Pro and Max plans offer usage limits that are shared across Claude and Claude Code, meaning all activity in both tools counts against the same usage limits"</em> (<a href="https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan" target="_blank" rel="noopener">official help article</a>). So a heavy morning in the Claude.ai chat app (or other surfaces that draw on the same plan) eats directly into the window you have left in Claude Code — which is the most common reason a session dies "too early" when your Claude Code usage alone looked light. Check your <em>total</em> plan usage, not just Claude Code, before concluding something is broken.</p>
+  </div>
+
   <h2>The three things stacking up</h2>
 
   <h3>1. You can't see your real quota</h3>
@@ -76,6 +80,7 @@
       <tr><td>v2.1.89</td><td><a href="https://github.com/anthropics/claude-code/issues/41788" target="_blank" rel="noopener">#41788</a></td><td>Max 20 plan hit 100% ~70 min after reset — "never happened before v2.1.89"</td></tr>
       <tr><td>March 23, 2026</td><td><a href="https://github.com/anthropics/claude-code/issues/38335" target="_blank" rel="noopener">#38335</a></td><td>5-hour session limits exhausted abnormally fast from that date</td></tr>
       <tr><td>v2.1.100+</td><td><a href="https://github.com/anthropics/claude-code/issues/46917" target="_blank" rel="noopener">#46917</a></td><td>One operator's reproducible report: identical payload, <code>cache_creation</code> ~20K tokens higher than v2.1.98 (server-side)</td></tr>
+      <tr><td>Late April 2026</td><td><a href="https://github.com/anthropics/claude-code/issues/54714" target="_blank" rel="noopener">#54714</a></td><td>Max 20x daily limit hit on Apr 28–29 with <em>reduced</em> usage — "limits appear silently tightened"</td></tr>
     </tbody>
   </table>
   <p class="note">These are user reports, not a confirmed Anthropic changelog entry — but four-plus independent version boundaries pointing the same direction is a different shape from a single misconfiguration.</p>
@@ -108,6 +113,7 @@
   </div>
 
   <h2>FAQ</h2>
+  <details><summary>Does my Claude.ai chat usage count against Claude Code?</summary><p>Yes. Anthropic's help article states the usage limits are <em>"shared across Claude and Claude Code, meaning all activity in both tools counts against the same usage limits"</em> (<a href="https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan" target="_blank" rel="noopener">source</a>). If Claude Code dies early but its own usage looked light, check whether you spent the window in the chat app first.</p></details>
   <details><summary>Why does my Max plan hit 100% only ~70 minutes after a reset?</summary><p>Several operators report this starting around v2.1.89 (<a href="https://github.com/anthropics/claude-code/issues/41788" target="_blank" rel="noopener">#41788</a>). Heavy agentic loops, large contexts, and extended thinking can genuinely exhaust a 5-hour window fast — but if it started suddenly after an update for you too, measure before/after and add it to that issue.</p></details>
   <details><summary>It says I'm at 16% but I'm rate-limited — is that a bug?</summary><p>That display-vs-cutoff mismatch is reported in <a href="https://github.com/anthropics/claude-code/issues/29579" target="_blank" rel="noopener">#29579</a> and <a href="https://github.com/anthropics/claude-code/issues/19673" target="_blank" rel="noopener">#19673</a>. Because Claude Code exposes no authoritative quota number (<a href="https://github.com/anthropics/claude-code/issues/13585" target="_blank" rel="noopener">#13585</a>), you can't confirm it from inside — the practical move is to log your own usage and report the discrepancy.</p></details>
   <details><summary>How do I see my actual remaining quota?</summary><p>There's no built-in command for it yet. The closest is reading your local session JSONL with <code>ccusage</code> or the browser tools above to track cumulative consumption, then comparing against your plan's window.</p></details>
