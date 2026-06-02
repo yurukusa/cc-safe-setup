@@ -1013,6 +1013,23 @@ if echo "$SHARE_OUT" | grep -q "yurukusa.github.io"; then echo "  PASS: --share 
 echo ""
 
 # ========================
+# --scorecard tests
+# ========================
+echo "--- --scorecard tests ---"
+
+SCORECARD_OUT=$(node "$CLI" --scorecard 2>&1) || true
+if echo "$SCORECARD_OUT" | grep -q "Safety Scorecard"; then echo "  PASS: --scorecard renders card"; PASS=$((PASS + 1)); else echo "  FAIL: --scorecard should render card"; FAIL=$((FAIL + 1)); fi
+if echo "$SCORECARD_OUT" | grep -q "core hooks active"; then echo "  PASS: --scorecard shows coverage"; PASS=$((PASS + 1)); else echo "  FAIL: --scorecard should show coverage"; FAIL=$((FAIL + 1)); fi
+CARD_ALIAS_OUT=$(node "$CLI" --card 2>&1) || true
+if echo "$CARD_ALIAS_OUT" | grep -q "Safety Scorecard"; then echo "  PASS: --card alias works"; PASS=$((PASS + 1)); else echo "  FAIL: --card alias should work"; FAIL=$((FAIL + 1)); fi
+SCORECARD_JSON=$(node "$CLI" --scorecard --json 2>&1) || true
+if echo "$SCORECARD_JSON" | grep -q "coreHooksActive"; then echo "  PASS: --scorecard --json has coreHooksActive"; PASS=$((PASS + 1)); else echo "  FAIL: --scorecard --json should have coreHooksActive"; FAIL=$((FAIL + 1)); fi
+# --score (existing CI bare-number scorer) must remain a number, not the card
+SCORE_NUM=$(node "$CLI" --score 2>&1) || true
+if echo "$SCORE_NUM" | grep -qE "^[0-9]+$"; then echo "  PASS: --score still outputs bare number (unchanged)"; PASS=$((PASS + 1)); else echo "  FAIL: --score should stay a bare number"; FAIL=$((FAIL + 1)); fi
+echo ""
+
+# ========================
 # --benchmark tests
 # ========================
 echo "--- --benchmark tests ---"

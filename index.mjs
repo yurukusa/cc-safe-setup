@@ -112,6 +112,7 @@ const LINT = process.argv.includes('--lint');
 const DIFF_IDX = process.argv.findIndex(a => a === '--diff');
 const DIFF_FILE = DIFF_IDX !== -1 ? process.argv[DIFF_IDX + 1] : null;
 const SHARE = process.argv.includes('--share');
+const SCORECARD = process.argv.includes('--scorecard') || process.argv.includes('--card');
 const BENCHMARK = process.argv.includes('--benchmark');
 const DASHBOARD = process.argv.includes('--dashboard');
 const ISSUES = process.argv.includes('--issues');
@@ -187,6 +188,7 @@ if (HELP) {
     --status / --verify            Check installed hooks / test them
     --doctor                       13-point diagnostic
     --audit [--fix] [--json]       Safety score 0-100
+    --scorecard [--json]           Shareable safety scorecard (screenshot it)
     --watch                        Live blocked command feed
     --health                       Hook health dashboard
     --suggest                      Predict risks from project analysis
@@ -336,7 +338,7 @@ function status() {
     console.log('  ' + c.dim + '+ ' + installedExamples.length + ' example hooks' + c.reset);
   }
   console.log();
-  console.log(c.dim + '  Tip: --validate to check health · --simulate "cmd" to test · --shield for max safety' + c.reset);
+  console.log(c.dim + '  Tip: --validate to check health · --scorecard for a shareable safety card · --shield for max safety' + c.reset);
   console.log();
 
   const daysLeft1 = daysUntilJune15();
@@ -4118,6 +4120,66 @@ function share() {
   console.log();
 }
 
+// Shareable, screenshot-worthy safety posture card. The reach mechanic that
+// works in this niche is a compact artifact users *want* to share (the ccusage
+// cost scorecard, Karpathy's CLAUDE.md), not launch announcements. The score is
+// honest — it reports real installed-hook coverage (X of N core hooks), never an
+// invented points total — so it stays credible when screenshotted.
+function scorecard() {
+  const PRIORITY = ['destructive-guard', 'secret-guard', 'branch-guard', 'syntax-check', 'context-monitor', 'api-error-alert', 'comment-strip', 'cd-git-allow'];
+  const LABELS = {
+    'destructive-guard': 'Destructive commands (rm -rf, force-push)',
+    'secret-guard': 'Secret leaks (git add .env, key commits)',
+    'branch-guard': 'Direct pushes to main / master',
+    'syntax-check': 'Syntax errors after every edit',
+    'context-monitor': 'Silent context loss past tool call 150',
+    'api-error-alert': 'Silent autonomous-session death (rate limits)',
+    'comment-strip': 'Allowlist bypass via bash comments',
+    'cd-git-allow': 'Permission-prompt spam on read-only git',
+  };
+
+  const active = Object.keys(HOOKS).filter(id => existsSync(join(HOOKS_DIR, id + '.sh')));
+  const total = Object.keys(HOOKS).length;
+  const n = active.length;
+
+  if (JSON_OUTPUT) {
+    console.log(JSON.stringify({ tool: 'cc-safe-setup', coreHooksActive: n, coreHooksTotal: total, active }, null, 2));
+    return;
+  }
+
+  const filled = Math.round((n / total) * 12);
+  const bar = '█'.repeat(filled) + '░'.repeat(12 - filled);
+  const INNER = 52;
+  const visLen = (s) => s.replace(/\x1b\[[0-9;]*m/g, '').length;
+  const line = (s = '') => console.log('  ' + c.dim + '│' + c.reset + ' ' + s + ' '.repeat(Math.max(0, INNER - visLen(s))) + c.dim + '│' + c.reset);
+  const rule = (l, r) => console.log('  ' + c.dim + l + '─'.repeat(INNER + 2) + r + c.reset);
+
+  console.log();
+  rule('┌', '┐');
+  line(c.bold + 'cc-safe-setup · Safety Scorecard' + c.reset);
+  line();
+  line('Coverage  ' + c.green + bar + c.reset + '  ' + c.bold + n + '/' + total + c.reset + ' core hooks active');
+  line();
+  if (n === 0) {
+    line(c.yellow + 'No core hooks installed yet.' + c.reset);
+    line('Run ' + c.bold + 'npx cc-safe-setup' + c.reset + ' to install in ~10s.');
+  } else {
+    line('Now blocking:');
+    const shown = PRIORITY.filter(id => active.includes(id)).slice(0, 4);
+    for (const id of shown) line('  ' + c.green + '✓' + c.reset + ' ' + LABELS[id]);
+    if (n > shown.length) line('  ' + c.dim + '… and ' + (n - shown.length) + ' more' + c.reset);
+  }
+  line();
+  line(c.dim + 'Part of a 746-hook library mapped to 73+' + c.reset);
+  line(c.dim + 'documented Claude Code incidents.' + c.reset);
+  line();
+  line(c.blue + 'npx cc-safe-setup' + c.reset + c.dim + '      MIT · free' + c.reset);
+  rule('└', '┘');
+  console.log();
+  console.log('  ' + c.dim + 'Screenshot it · share your score · github.com/yurukusa/cc-safe-setup' + c.reset);
+  console.log();
+}
+
 function diff(otherFile) {
   console.log();
   console.log(c.bold + '  cc-safe-setup --diff' + c.reset);
@@ -5909,6 +5971,7 @@ async function main() {
   if (DASHBOARD) return dashboard();
   if (BENCHMARK) return benchmark();
   if (SHARE) return share();
+  if (SCORECARD) return scorecard();
   if (DIFF_FILE) return diff(DIFF_FILE);
   if (LINT) return lint();
   if (CREATE_DESC) return createHook(CREATE_DESC);
