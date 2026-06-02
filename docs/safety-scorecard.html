@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Safety Scorecard — score your setup, share the card</title>
+<meta name="description" content="Check off the protections you have, get an honest X/8 coverage scorecard you can screenshot and share. Based on 8 real Claude Code incidents. No npm, runs entirely in your browser.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-scorecard.html">
+<meta property="og:title" content="Claude Code Safety Scorecard">
+<meta property="og:description" content="Score your Claude Code safety setup in 30 seconds. X/8 core protections, honest coverage, a card you'll want to share. Runs in your browser — nothing leaves it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-scorecard.html">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Safety Scorecard","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Self-assessment scorecard for Claude Code safety hook coverage, based on 8 documented incidents.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem}
+.container{max-width:680px;width:100%}
+.back{display:block;margin-bottom:1rem;color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:1.75rem;line-height:1.5}
+.checklist{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:.5rem;margin-bottom:1.5rem}
+.item{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem .9rem;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.item:hover{background:#0d1117}
+.item.on{background:#0d1117;border-color:#238636}
+.box{flex:0 0 22px;width:22px;height:22px;border:2px solid #484f58;border-radius:6px;margin-top:.1rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;transition:all .15s}
+.item.on .box{background:#238636;border-color:#238636}
+.item.on .box::after{content:"✓"}
+.txt .name{color:#f0f6fc;font-weight:600;font-size:.95rem}
+.txt .why{color:#8b949e;font-size:.8rem;margin-top:.2rem;line-height:1.4}
+.controls{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.75rem}
+.mini{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .9rem;border-radius:6px;font-size:.8rem;cursor:pointer}
+.mini:hover{border-color:#58a6ff;color:#58a6ff}
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;text-decoration:none}
+.btn-primary{background:#238636;color:#fff}.btn-primary:hover{background:#2ea043}
+.btn-x{background:#1da1f2;color:#fff}.btn-x:hover{filter:brightness(1.1)}
+.btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.install{margin-top:2rem;text-align:center}
+.install pre{display:inline-block;background:#161b22;border:1px solid #30363d;padding:.7rem 1.4rem;border-radius:8px;color:#f0f6fc;font-size:1rem}
+.install p{color:#8b949e;font-size:.85rem;margin-top:.6rem}
+.install a{color:#58a6ff;text-decoration:none}
+.footer{margin-top:2.5rem;font-size:.75rem;color:#484f58;text-align:center;line-height:1.7}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; cc-safe-setup</a>
+<h1>Claude Code Safety Scorecard</h1>
+<p class="subtitle">Check the protections your setup has. Get an honest <strong>X / 8</strong> coverage card you can screenshot and share.<br>Each line is a real, documented incident. Nothing leaves your browser.</p>
+
+<div class="checklist" id="checklist"></div>
+
+<div class="controls">
+<button class="mini" onclick="setAll(true)">Check all</button>
+<button class="mini" onclick="setAll(false)">Clear all</button>
+<button class="mini" onclick="setAll('cc')">I run npx cc-safe-setup</button>
+</div>
+
+<div class="cardwrap">
+<canvas id="card" width="1320" height="1120"></canvas>
+<div class="actions">
+<button class="btn btn-primary" onclick="downloadPNG()">⬇ Download PNG</button>
+<button class="btn btn-ghost" onclick="copyImage()">⧉ Copy image</button>
+<button class="btn btn-ghost" onclick="copyLink()">🔗 Copy share link</button>
+<a class="btn btn-x" id="xshare" target="_blank" rel="noopener">Share on X</a>
+</div>
+</div>
+
+<div class="install">
+<pre>npx cc-safe-setup</pre>
+<p>Installs all 8 hooks in ~10 seconds. Zero npm dependencies. MIT, free.<br>
+<a href="incidents.html">Browse 90 real incidents</a> · <a href="demo.html">See hooks block rm -rf live</a> · <a href="hub.html">All tools</a></p>
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · 746 example hooks · 73+ Anthropic Issues addressed<br>
+This is a self-assessment: the score reflects what you checked, not a scan of your machine. The incidents are real.
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// The reach mechanic that works in this niche is a compact artifact people *want*
+// to share (the ccusage cost scorecard, Karpathy's CLAUDE.md), not launch posts.
+// This is the browser twin of `npx cc-safe-setup --scorecard`: it reaches everyone
+// without needing npm, and encodes the score in the URL so a shared link reproduces
+// the exact card. The score stays honest — real coverage of 8 documented incidents,
+// never an invented points total — so it holds up when screenshotted.
+const PROTECTIONS = [
+  {id:'destructive-guard', name:'Destructive commands', why:'rm -rf, force-push, git reset --hard. A user lost their entire C:\\Users directory when rm -rf followed NTFS junctions.', card:'Destructive commands (rm -rf, force-push)'},
+  {id:'secret-guard', name:'Secret leaks', why:'git add .env, API keys committed. One slip pushed real keys to a public repo.', card:'Secret leaks (git add .env, key commits)'},
+  {id:'branch-guard', name:'Direct pushes to main', why:'Autonomous Claude Code pushed untested code straight to main at 3am.', card:'Direct pushes to main / master'},
+  {id:'syntax-check', name:'Cascading syntax errors', why:'A syntax error cascaded through 30+ files before anyone noticed.', card:'Syntax errors after every edit'},
+  {id:'context-monitor', name:'Silent context loss', why:'Sessions silently lost all state past tool call 150 with no warning.', card:'Silent context loss past tool call 150'},
+  {id:'api-error-alert', name:'Silent session death', why:'Autonomous sessions died from rate limits with no notification.', card:'Silent autonomous-session death'},
+  {id:'comment-strip', name:'Allowlist bypass', why:'Comments in bash commands break permission allowlists (GitHub #29582).', card:'Allowlist bypass via bash comments'},
+  {id:'cd-git-allow', name:'Permission-prompt spam', why:'cd+git spams permission prompts for read-only git (GitHub #32985).', card:'Permission-prompt spam on read-only git'},
+];
+const N = PROTECTIONS.length;
+let state = new Array(N).fill(false);
+
+// ---- URL state (?s=11010110) so a shared link reproduces the exact card ----
+function readURL(){
+  const p = new URLSearchParams(location.search).get('s');
+  if(p && p.length === N && /^[01]+$/.test(p)){
+    state = p.split('').map(c => c === '1');
+  }
+}
+function writeURL(){
+  const s = state.map(b => b?'1':'0').join('');
+  const url = location.origin + location.pathname + '?s=' + s;
+  history.replaceState(null,'',url);
+  return url;
+}
+
+// ---- checklist UI ----
+const checklist = document.getElementById('checklist');
+function renderList(){
+  checklist.innerHTML = '';
+  PROTECTIONS.forEach((p,i) => {
+    const el = document.createElement('div');
+    el.className = 'item' + (state[i]?' on':'');
+    el.onclick = () => { state[i] = !state[i]; renderList(); render(); };
+    el.innerHTML = '<div class="box"></div><div class="txt"><div class="name">'+p.name+'</div><div class="why">'+p.why+'</div></div>';
+    checklist.appendChild(el);
+  });
+}
+function setAll(v){
+  if(v === 'cc'){ state = new Array(N).fill(true); }
+  else { state = new Array(N).fill(!!v); }
+  renderList(); render();
+}
+
+// ---- honest score tiers ----
+function tier(n){
+  if(n === N) return {label:'Fully covered', color:'#3fb950'};
+  if(n >= 5)  return {label:'Mostly covered', color:'#3fb950'};
+  if(n >= 1)  return {label:'Partially exposed', color:'#d29922'};
+  return {label:'Unprotected', color:'#f85149'};
+}
+
+// ---- canvas card (the shareable artifact; pixel size 1320x990 = 4:3 @ ~2x) ----
+const canvas = document.getElementById('card');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, S = 2; // logical units scaled by S
+function px(v){ return v * S; }
+function render(){
+  const n = state.filter(Boolean).length;
+  const t = tier(n);
+  ctx.clearRect(0,0,W,H);
+  // background
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
+  // border
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = px(1.5);
+  roundRect(px(8),px(8),W-px(16),H-px(16),px(16)); ctx.stroke();
+
+  const padX = px(40);
+  let y = px(58);
+
+  // header
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '700 ' + px(26) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#3fb950'; ctx.fillText('cc-safe-setup', padX, y);
+  const w1 = ctx.measureText('cc-safe-setup').width;
+  ctx.fillStyle = '#8b949e'; ctx.fillText('  ·  Safety Scorecard', padX + w1, y);
+
+  // score line
+  y += px(56);
+  ctx.font = '700 ' + px(54) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = t.color;
+  ctx.fillText(n + '/' + N, padX, y);
+  const ws = ctx.measureText(n + '/' + N).width;
+  ctx.font = '600 ' + px(20) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#c9d1d9';
+  ctx.fillText('core protections', padX + ws + px(14), y - px(20));
+  ctx.fillStyle = t.color;
+  ctx.fillText(t.label, padX + ws + px(14), y + px(6));
+
+  // coverage bar
+  y += px(34);
+  const barW = W - padX*2, barH = px(14);
+  ctx.fillStyle = '#21262d'; roundRect(padX, y, barW, barH, px(7)); ctx.fill();
+  if(n > 0){ ctx.fillStyle = t.color; roundRect(padX, y, Math.max(barH, barW*(n/N)), barH, px(7)); ctx.fill(); }
+
+  // protection rows
+  y += px(46);
+  ctx.font = '500 ' + px(18) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  const rowH = px(30);
+  PROTECTIONS.forEach((p,i) => {
+    const on = state[i];
+    ctx.fillStyle = on ? '#3fb950' : '#6e7681';
+    ctx.font = '700 ' + px(18) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillText(on ? '✓' : '✕', padX, y);
+    ctx.font = '500 ' + px(18) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillStyle = on ? '#c9d1d9' : '#6e7681';
+    ctx.fillText(p.card, padX + px(28), y);
+    y += rowH;
+  });
+
+  // footer
+  y = H - px(56);
+  ctx.strokeStyle = '#21262d'; ctx.lineWidth = px(1);
+  ctx.beginPath(); ctx.moveTo(padX, y - px(22)); ctx.lineTo(W - padX, y - px(22)); ctx.stroke();
+  ctx.font = '700 ' + px(20) + 'px ui-monospace,Menlo,monospace';
+  ctx.fillStyle = '#58a6ff'; ctx.fillText('npx cc-safe-setup', padX, y);
+  ctx.font = '400 ' + px(15) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#6e7681';
+  const foot = 'MIT · free · github.com/yurukusa/cc-safe-setup';
+  const fw = ctx.measureText(foot).width;
+  ctx.fillText(foot, W - padX - fw, y);
+
+  // update share affordances
+  const url = writeURL();
+  const exposed = PROTECTIONS.filter((_,i)=>!state[i]).map(p=>p.name);
+  let msg = 'My Claude Code safety: ' + n + '/' + N + ' core protections';
+  if(n < N && exposed.length) msg += '. Still exposed to: ' + exposed.slice(0,2).join(', ') + (exposed.length>2?' +'+(exposed.length-2)+' more':'');
+  msg += '. Free hooks: npx cc-safe-setup';
+  const xurl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '&url=' + encodeURIComponent(url);
+  document.getElementById('xshare').href = xurl;
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+// ---- actions ----
+function toast(t){
+  const el = document.getElementById('toast');
+  el.textContent = t; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1800);
+}
+function downloadPNG(){
+  const n = state.filter(Boolean).length;
+  const a = document.createElement('a');
+  a.download = 'cc-safety-scorecard-' + n + 'of' + N + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  toast('Scorecard downloaded');
+}
+async function copyImage(){
+  try{
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+    toast('Image copied to clipboard');
+  }catch(e){ toast('Copy not supported — use Download PNG'); }
+}
+async function copyLink(){
+  try{
+    await navigator.clipboard.writeText(writeURL());
+    toast('Share link copied');
+  }catch(e){ toast('Copy failed — link is in your address bar'); }
+}
+
+// ---- init ----
+readURL();
+renderList();
+render();
+</script>
+</body>
+</html>
