@@ -565,12 +565,47 @@ test_deploy() {
     fi
 }
 
+# deploy-guard.sh only blocks deploy commands when the CWD git repo has uncommitted
+# changes (#37314/#34674). Running the hook against this repo's own working tree made the
+# result flip with the ambient clean/dirty state — the same commands were asserted both 0
+# (clean, below) and 2 (dirty, in the example-hooks section), so they could never both pass.
+# This helper runs deploy-guard in a controlled temp git repo so the assertion is deterministic.
+test_deploy_in_repo() {
+    local cmd="$1" git_state="$2" expected_exit="$3" desc="$4"
+    # Resolve the hook to an absolute path: DEPLOY_GUARD is relative to $0, so it would
+    # not resolve after we cd into the temp repo below.
+    local guard_abs; guard_abs="$(cd "$(dirname "$DEPLOY_GUARD")" && pwd)/$(basename "$DEPLOY_GUARD")"
+    local tmp; tmp=$(mktemp -d)
+    # Build the repo state in a subshell. set -euo pipefail is active, so swallow the
+    # subshell's exit with `|| true` (a trailing false test would otherwise abort the suite).
+    (
+        cd "$tmp" || exit 1
+        git init -q
+        git config user.email t@example.com
+        git config user.name test
+        echo seed > seed
+        git add seed
+        git commit -qm init
+        if [ "$git_state" = "dirty" ]; then echo change > uncommitted; fi
+    ) > /dev/null 2>&1 || true
+    local actual_exit=0
+    printf '{"tool_input":{"command":"%s"}}' "$cmd" | ( cd "$tmp" && bash "$guard_abs" ) > /dev/null 2>/dev/null || actual_exit=$?
+    rm -rf "$tmp"
+    if [ "$actual_exit" -eq "$expected_exit" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected exit $expected_exit, got $actual_exit)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
 # Non-deploy commands pass through
 test_deploy '{"tool_input":{"command":"npm start"}}' 0 "allows non-deploy command"
 test_deploy '{"tool_input":{"command":"git push origin feature"}}' 0 "allows git push to feature"
-# Deploy commands in a git repo (will check for dirty files)
-test_deploy '{"tool_input":{"command":"firebase deploy"}}' 0 "firebase deploy passes in clean repo"
-test_deploy '{"tool_input":{"command":"vercel --prod"}}' 0 "vercel passes in clean repo"
+# Deploy commands in a CLEAN git repo pass (nothing uncommitted to lose)
+test_deploy_in_repo "firebase deploy" clean 0 "firebase deploy passes in clean repo"
+test_deploy_in_repo "vercel --prod" clean 0 "vercel passes in clean repo"
 echo ""
 
 # ========== network-guard (example) ==========
@@ -1049,7 +1084,7 @@ EI_FAIL=0
 for f in "$EXAMPLES_DIR"/*.sh; do
     # Skip hooks that depend on session state (call counters, etc.)
     case "$(basename "$f")" in
-        response-budget-guard.sh|session-budget-alert.sh|usage-warn.sh|compact-blocker.sh) continue ;;
+        response-budget-guard.sh|session-budget-alert.sh|usage-warn.sh|compact-blocker.sh|compact-circuit-breaker.sh) continue ;;
     esac
     EXIT=0
     echo '{}' | bash "$f" > /dev/null 2>/dev/null || EXIT=$?
@@ -2072,10 +2107,11 @@ echo ""
 echo "deploy-guard.sh:"
 test_ex deploy-guard.sh '{"tool_input":{"command":"npm run build"}}' 0 "non-deploy passes"
 test_ex deploy-guard.sh '{"tool_input":{"command":"echo hello"}}' 0 "echo passes"
-test_ex deploy-guard.sh '{"tool_input":{"command":"firebase deploy"}}' 2 "firebase deploy blocked"
-test_ex deploy-guard.sh '{"tool_input":{"command":"vercel --prod"}}' 2 "vercel blocked"
-test_ex deploy-guard.sh '{"tool_input":{"command":"kubectl apply -f deploy.yaml"}}' 2 "kubectl apply blocked"
-test_ex deploy-guard.sh '{"tool_input":{"command":"terraform apply"}}' 2 "terraform apply blocked"
+# deploy-guard blocks only when uncommitted changes exist; run in a controlled dirty repo
+test_deploy_in_repo "firebase deploy" dirty 2 "firebase deploy blocked (uncommitted changes)"
+test_deploy_in_repo "vercel --prod" dirty 2 "vercel blocked (uncommitted changes)"
+test_deploy_in_repo "kubectl apply -f deploy.yaml" dirty 2 "kubectl apply blocked (uncommitted changes)"
+test_deploy_in_repo "terraform apply" dirty 2 "terraform apply blocked (uncommitted changes)"
 test_ex deploy-guard.sh '{}' 0 "empty passes"
 echo ""
 
@@ -6547,7 +6583,7 @@ test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"s
 test_ex write-secret-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"src/app.js","new_string":"const token = \"ghp_1234567890abcdefghij1234567890abcdef\""}}' 2 "write-secret-guard: GitHub token in Edit blocked"
 test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/api.py","content":"api_key = \"sk-abcdefghijklmnopqrstuvwx\""}}' 2 "write-secret-guard: OpenAI key blocked"
 test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/claude.py","content":"key = \"sk-ant-api03-abcdefghijklmnopqrstuvwx\""}}' 2 "write-secret-guard: Anthropic key blocked"
-test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/slack.py","content":"token = \"xoxb-12345678901-12345678901234-abcdefghijklmnop\""}}' 2 "write-secret-guard: Slack token blocked"
+test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/slack.py","content":"token = \"xoxb-EXAMPLE-FAKE-SLACK-TOKEN-FOR-HOOK-TEST-ONLY\""}}' 2 "write-secret-guard: Slack token blocked"
 test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/pay.py","content":"stripe = \"sk_live_abcdefghijklmnopqrstuvwxyz\""}}' 2 "write-secret-guard: Stripe key blocked"
 test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/google.py","content":"key = \"AIzaSyA1234567890abcdefghijklmnopqrstuv\""}}' 2 "write-secret-guard: Google API key blocked"
 test_ex write-secret-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/key.pem","content":"-----BEGIN RSA PRIVATE KEY-----\nMIIE..."}}' 2 "write-secret-guard: PEM private key blocked"
