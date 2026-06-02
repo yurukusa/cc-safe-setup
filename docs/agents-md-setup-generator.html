@@ -103,10 +103,12 @@ const TOOLS = [
   {id:"claude",  nm:"Claude Code", rd:{en:"reads CLAUDE.md",          ja:"CLAUDE.md を読む"},        kind:"claude"},
   {id:"codex",   nm:"Codex",       rd:{en:"reads AGENTS.md natively", ja:"AGENTS.md を直接読む"},     kind:"native"},
   {id:"amp",     nm:"Amp",         rd:{en:"reads AGENTS.md natively", ja:"AGENTS.md を直接読む"},     kind:"native"},
+  {id:"copilot", nm:"GitHub Copilot",rd:{en:"reads AGENTS.md (agent)",ja:"AGENTS.md を読む(agent)"}, kind:"native"},
   {id:"cursor",  nm:"Cursor",      rd:{en:"reads .cursorrules",       ja:".cursorrules を読む"},      kind:"file", file:".cursorrules"},
   {id:"windsurf",nm:"Windsurf",    rd:{en:"reads .windsurfrules",     ja:".windsurfrules を読む"},    kind:"file", file:".windsurfrules"},
   {id:"cline",   nm:"Cline",       rd:{en:"reads .clinerules",        ja:".clinerules を読む"},       kind:"file", file:".clinerules"},
-  {id:"aider",   nm:"Aider",       rd:{en:"reads AGENTS.md via config",ja:"設定で AGENTS.md を読む"}, kind:"config", file:".aider.conf.yml"},
+  {id:"aider",   nm:"Aider",       rd:{en:"reads AGENTS.md via config",ja:"設定で AGENTS.md を読む"}, kind:"config", file:".aider.conf.yml", cfgBody:"read: AGENTS.md", cfgAlt:true},
+  {id:"gemini",  nm:"Gemini CLI",  rd:{en:"reads AGENTS.md via config",ja:"設定で AGENTS.md を読む"}, kind:"config", file:".gemini/settings.json", cfgBody:'{ "context": { "fileName": "AGENTS.md" } }'},
 ];
 
 const T = {
@@ -133,9 +135,9 @@ const T = {
     symN2:'Verify it resolved as a link (some clones bring symlinks through as plain text): <code>ls -l CLAUDE.md</code> should show <code>CLAUDE.md -&gt; AGENTS.md</code>.',
     nativePill:"no setup",
     nativeN:(names)=>`${names} read <code>AGENTS.md</code> directly. Nothing to do — they already share the source of truth.`,
-    cfgPill:"config", cfgRoot:"repo root",
-    cfgN:"Aider does <em>not</em> read <code>AGENTS.md</code> on its own — point it there once in <code>.aider.conf.yml</code> at the repo root. It then loads <code>AGENTS.md</code> read-only on every run, so it stays in sync with the one source of truth.",
-    cfgN2:'Prefer a per-run flag instead? <code>aider --read AGENTS.md</code> does the same thing; the config file just saves you from remembering it.',
+    cfgPill:"config",
+    cfgN:(nm,file)=>`${nm} does <em>not</em> read <code>AGENTS.md</code> by default — point it there once in <code>${file}</code> (repo root) and it will load <code>AGENTS.md</code> on every run, staying in sync with the one source of truth.`,
+    cfgN2:'Aider also takes a per-run flag — <code>aider --read AGENTS.md</code> — but the config file saves you from remembering it.',
     filePill:"symlink to AGENTS.md",
     fileN:"These read their own filename. Point each at <code>AGENTS.md</code> with a symlink so there's still one real file.",
     fileWin:"On Windows, symlinks need Admin or Developer Mode. If that's a problem, keep these as real copies and add the drift check in the next step.",
@@ -172,9 +174,9 @@ const T = {
     symN2:'リンクとして解決できたか確認してください(clone の経路によっては実体のコピーになることがあります): <code>ls -l CLAUDE.md</code> で <code>CLAUDE.md -&gt; AGENTS.md</code> と出るはずです。',
     nativePill:"設定不要",
     nativeN:(names)=>`${names} は <code>AGENTS.md</code> を直接読みます。何もする必要はありません——すでに正本を共有しています。`,
-    cfgPill:"設定", cfgRoot:"リポジトリ最上位",
-    cfgN:"Aider は <code>AGENTS.md</code> を自分からは<em>読みません</em>。リポジトリ最上位の <code>.aider.conf.yml</code> で一度だけ向き先を指定します。以降は毎回 <code>AGENTS.md</code> を読み取り専用で読み込むので、唯一の正本と揃ったままになります。",
-    cfgN2:'1回ごとにフラグで渡すこともできます: <code>aider --read AGENTS.md</code>。設定ファイルにしておけば、毎回フラグを覚えずに済みます。',
+    cfgPill:"設定",
+    cfgN:(nm,file)=>`${nm} は <code>AGENTS.md</code> を既定では<em>読みません</em>。リポジトリ最上位の <code>${file}</code> で一度だけ向き先を指定すれば、以降は毎回 <code>AGENTS.md</code> を読み込み、唯一の正本と揃ったままになります。`,
+    cfgN2:'Aider は1回ごとのフラグ <code>aider --read AGENTS.md</code> でも渡せますが、設定ファイルにしておけば毎回覚えずに済みます。',
     filePill:"AGENTS.md への symlink",
     fileN:"これらは自分のファイル名を読みます。symlink で <code>AGENTS.md</code> に向けて、実体を1つに保ちます。",
     fileWin:"Windows では symlink に管理者権限か開発者モードが要ります。難しい場合は実体のコピーのままにして、次の段の乖離の検出を入れてください。",
@@ -285,9 +287,9 @@ function render(){
   if(configTools.length){
     configTools.forEach(x=>{
       html+=`<div class="step"><h3>${n++}. ${x.nm} <span class="pill">${t.cfgPill}</span></h3>
-        <p class="note">${t.cfgN}</p>
-        ${block("# "+x.file+"  ("+t.cfgRoot+")\nread: AGENTS.md")}
-        <p class="note">${t.cfgN2}</p></div>`;
+        <p class="note">${t.cfgN(x.nm, x.file)}</p>
+        ${block(x.cfgBody)}
+        ${x.cfgAlt?`<p class="note">${t.cfgN2}</p>`:""}</div>`;
     });
   }
 
