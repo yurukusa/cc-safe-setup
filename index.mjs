@@ -6016,6 +6016,7 @@ async function main() {
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (7 open clusters, ~11,500 user reactions across 60+ issues)');
+  console.log('  ' + c.dim + 'AGENTS.md:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html  (pick your tools → exact CLAUDE.md/AGENTS.md setup; the #6235 gap, EN/日本語)');
   console.log();
   const daysLeft2 = daysUntilJune15();
   const daySuffix2 = daysLeft2 === 1 ? 'day' : 'days';
