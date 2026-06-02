@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code's June 15, 2026 billing change — who's affected and what to do</title>
+<meta name="description" content="On 2026-06-15 Anthropic moves programmatic Claude usage (Agent SDK, claude -p, Claude Code GitHub Actions, third-party agents) to a separate monthly credit pool billed at API rates. Interactive Claude Code is unchanged. Who's affected, the credit amounts, and the two actions to take.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-june-15-billing-change.html">
+<meta property="og:title" content="Claude Code's June 15, 2026 billing change — who's affected and what to do">
+<meta property="og:description" content="Programmatic usage (Agent SDK, claude -p, GitHub Actions, third-party agents) splits to a separate credit pool at API rates. Interactive terminal use is unchanged. The two actions to take before June 15.">
+<meta property="og:type" content="article">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  h1{font-size:1.8rem;line-height:1.22;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.02rem;margin:1.1em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#3a341f;color:var(--warn);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0;border-radius:10px;overflow:hidden}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1a2233;font-weight:600}
+  .ok{color:var(--ok)}.warn{color:var(--warn)}
+  .note{color:var(--mut);font-size:.92rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6em 0 0;color:#cdd6e6}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:16px 0}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  ol li,ul li{margin:.3em 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Announced 2026-05-14 · effective 2026-06-15 · verify against Anthropic's own email/docs</span>
+  <h1>Claude Code's June 15, 2026 billing change</h1>
+  <p class="sub">Anthropic is moving <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. Here's who's affected and what to do before June 15.</p>
+
+  <div class="card">
+    <strong>The one-sentence version:</strong> if you run Claude through the <strong>Agent SDK</strong>, <code>claude -p</code>, <strong>Claude Code GitHub Actions</strong>, or a <strong>third-party agent</strong>, that usage leaves your normal subscription limit on 2026-06-15 and starts drawing from a fixed monthly credit billed at <strong>full API rates, with no rollover</strong>. If you only use Claude Code interactively in your terminal (and claude.ai / Cowork), nothing changes.
+  </div>
+
+  <h2>The two pools</h2>
+  <table>
+    <thead><tr><th>Pool</th><th>What it covers</th><th>How it's billed</th></tr></thead>
+    <tbody>
+      <tr><td class="ok">Interactive (unchanged)</td><td>claude.ai web/desktop/mobile, <strong>Claude Code used interactively in the terminal</strong>, Claude Cowork</td><td>Your normal subscription limits, exactly as before</td></tr>
+      <tr><td class="warn">Agent SDK credit (new)</td><td>Agent SDK, <code>claude -p</code>, Claude Code <strong>GitHub Actions</strong>, third-party agent apps</td><td>A fixed monthly dollar credit at <strong>full API list prices</strong>, no rollover</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Monthly credit by plan</h2>
+  <table>
+    <thead><tr><th>Plan</th><th>New Agent SDK credit / month</th></tr></thead>
+    <tbody>
+      <tr><td>Pro ($20)</td><td>$20</td></tr>
+      <tr><td>Max 5×</td><td>$100</td></tr>
+      <tr><td>Max 20×</td><td>$200</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Metered at full API list prices with no rollover. Because it's billed at API rates rather than the subscription's effective rate, heavy programmatic users can see the same workload cost noticeably more once it draws from this pool — which is why estimating your programmatic usage before June 15 matters.</p>
+
+  <h2>Are you affected?</h2>
+  <div class="two">
+    <div class="card"><h3 class="warn">Yes, if you…</h3><ul style="margin:0;padding-left:18px"><li>run <code>claude -p "…"</code> in scripts or cron</li><li>use the Claude <strong>Agent SDK</strong></li><li>run <strong>Claude Code in GitHub Actions</strong> / CI</li><li>use a third-party app built on Claude agents</li></ul></div>
+    <div class="card"><h3 class="ok">No change, if you…</h3><ul style="margin:0;padding-left:18px"><li>only use Claude Code <strong>interactively</strong> in the terminal</li><li>chat on claude.ai (web/desktop/mobile)</li><li>use Claude Cowork</li></ul></div>
+  </div>
+
+  <h2>What to do before June 15</h2>
+  <ol>
+    <li><strong>Claim your credit.</strong> Anthropic sends a claim email before June 15; claim the Agent SDK credit once through your Claude account. Watch for it and don't miss the window.</li>
+    <li><strong>Decide on overflow.</strong> Choose whether to enable "usage credits" so that programmatic usage past the monthly credit <em>bills at API rates</em> instead of being rejected. Rejection is safer for budget; overflow is safer for uptime. Pick deliberately.</li>
+    <li><strong>Estimate your programmatic usage now</strong> so the new credit isn't a surprise. If your <code>claude -p</code> / CI / Agent SDK workload already costs more than your plan's credit at API rates, plan to reduce it or budget the overflow.</li>
+  </ol>
+
+  <div class="cta">
+    <strong>Free tools to get ready (no signup):</strong>
+    <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/yurukusa/cc-safe-setup/main/docs/tools/june15-readiness-audit.html">June 15 Readiness Audit</a> (10-question assessment) ·
+    <a href="https://yurukusa.github.io/cc-safe-setup/cost-calculator.html">Cost calculator</a> ·
+    <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (MIT hooks incl. quota/cost-spike warnings).
+  </div>
+
+  <h2>Reducing programmatic token cost</h2>
+  <p>If you're affected, the lever is spending fewer tokens per programmatic run so the new credit lasts. The biggest wins are usually prompt-cache hygiene, model selection per task, trimming context that's re-sent every turn, and catching cost-spike patterns (large tool outputs, hook stderr re-injection, duplicated context). A field reference of <a href="https://gist.github.com/yurukusa/ccd2bd793c71521d81eb4cfcd3900755" target="_blank" rel="noopener">13 Claude Code cost-spike patterns</a> (free) covers the common ones with a defense for each.</p>
+
+  <h2>FAQ</h2>
+  <details><summary>Does June 15 affect interactive Claude Code in the terminal?</summary><p>No. Interactive terminal use keeps drawing from your normal subscription limits. Only programmatic usage (Agent SDK, <code>claude -p</code>, GitHub Actions, third-party agents) moves to the new credit pool.</p></details>
+  <details><summary>How much will my agents cost after June 15?</summary><p>They draw from a fixed monthly credit ($20 Pro / $100 Max 5× / $200 Max 20×) metered at full API list prices, no rollover. Estimate your current programmatic token spend at API rates to see whether you'll exceed it. If you do, you either reduce usage or enable usage-credit overflow (billed at API rates).</p></details>
+  <details><summary>What happens if I run out of the credit?</summary><p>By default, programmatic requests past the credit are rejected. If you enable "usage credits," they instead bill at API rates so your automation keeps running. Choose based on whether budget or uptime matters more for that workload.</p></details>
+  <details><summary>Do I need to do anything if I only chat / use the terminal interactively?</summary><p>No action required for interactive use. It's worth claiming the credit anyway in case you start using agents later.</p></details>
+  <details><summary>Is this the same as a price increase?</summary><p>Not for interactive use. For programmatic use it can effectively raise cost, because that usage now bills at full API list prices from a capped credit rather than drawing from the subscription's effective rate. Heavy automation users feel it most.</p></details>
+
+  <p class="foot">
+    Independent summary by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT hooks). Announced by Anthropic on 2026-05-14, effective 2026-06-15 — always confirm the exact terms against Anthropic's own claim email and docs, since plans can change. For a deep, field-tested guide to cutting Claude Code token cost (the lever for surviving the new credit pool), see the <a href="https://yurukusa.gumroad.com/l/azrdt" target="_blank" rel="noopener">Token Book (Claude Code Token Optimization Guide, English)</a>. Not affiliated with Anthropic.
+  </p>
+</div>
+</body>
+</html>
