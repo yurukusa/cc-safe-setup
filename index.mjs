@@ -40,7 +40,10 @@ function daysUntilJune15() {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(2026, 5, 15);
   const diff = Math.round((target - today) / 86400000);
-  return Math.max(0, diff);
+  // Return the raw signed difference so callers can distinguish "still upcoming"
+  // (positive) from "already happened" (zero or negative). Clamping to 0 here
+  // made the post-install banner say "in 0 days" forever after June 15, 2026.
+  return diff;
 }
 
 const SCRIPTS = JSON.parse(readFileSync(join(__dirname, 'scripts.json'), 'utf-8'));
@@ -337,8 +340,10 @@ function status() {
   console.log();
 
   const daysLeft1 = daysUntilJune15();
-  const daySuffix1 = daysLeft1 === 1 ? 'day' : 'days';
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' Anthropic splits programmatic billing in ' + daysLeft1 + ' ' + daySuffix1 + '.' + c.reset);
+  const june15msg1 = daysLeft1 > 0
+    ? 'Anthropic splits programmatic billing in ' + daysLeft1 + (daysLeft1 === 1 ? ' day' : ' days') + '.'
+    : 'Anthropic\'s programmatic billing split is in effect (since June 15, 2026).';
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + c.dim + ' ' + june15msg1 + c.reset);
   console.log('  ' + c.dim + '  Diagnose any unexpected charge: https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log();
   // Exit code for CI: 0 = all installed, 1 = missing hooks
@@ -6019,8 +6024,10 @@ async function main() {
   console.log('  ' + c.dim + 'AGENTS.md:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html  (pick your tools → exact CLAUDE.md/AGENTS.md setup; the #6235 gap, EN/日本語)');
   console.log();
   const daysLeft2 = daysUntilJune15();
-  const daySuffix2 = daysLeft2 === 1 ? 'day' : 'days';
-  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' Anthropic splits programmatic billing in ' + daysLeft2 + ' ' + daySuffix2 + '. claude -p invocations route to a separate credit bucket.');
+  const june15msg2 = daysLeft2 > 0
+    ? 'Anthropic splits programmatic billing in ' + daysLeft2 + (daysLeft2 === 1 ? ' day' : ' days') + '. claude -p invocations route to a separate credit bucket.'
+    : 'Anthropic split programmatic billing on June 15, 2026; claude -p invocations route to a separate credit bucket.';
+  console.log('  ' + c.yellow + '⚠ June 15:' + c.reset + ' ' + june15msg2);
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
@@ -6035,7 +6042,7 @@ async function main() {
   console.log();
   console.log('  ' + c.blue + 'Recurring track:' + c.reset + ' CC Safety Lab Founder (¥500/mo, Ko-fi, grandfathered)');
   console.log('  ' + c.dim + '  Monthly digest of new failure clusters + cc-safe-setup hooks shipped that month.' + c.reset);
-  console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,196 reactions).' + c.reset);
+  console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,270 reactions).' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Sister handbooks:' + c.reset + ' Claim-Verify Handbook live ($19); Sub-Agent Observability Handbook preview (full PDF pending)');
