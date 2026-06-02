@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code billing surprises — why your subscription or credits drain unexpectedly</title>
+<meta name="description" content="The common reasons Claude Code consumes your API credits or quota unexpectedly — auth precedence, the June 15 Agent SDK credit split, cache inflation, parallel agents, trial-and-error loops — and how to check and fix each.">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+h1 { font-size: 1.7rem; margin-bottom: 0.4rem; line-height: 1.3; }
+.subtitle { color: #666; font-size: 1.02rem; margin-bottom: 1.5rem; }
+.intro { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.8rem; font-size: 0.97rem; }
+.case { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.4rem 1.6rem; margin: 1.1rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.case h2 { font-size: 1.15rem; color: #1f2937; margin-bottom: 0.3rem; }
+.case .tag { display: inline-block; font-size: 0.75rem; font-weight: bold; padding: 0.15rem 0.6rem; border-radius: 999px; margin-bottom: 0.7rem; }
+.tag.most { background: #16a34a; color: white; }
+.tag.timely { background: #dc2626; color: white; }
+.tag.common { background: #f59e0b; color: white; }
+.case h3 { font-size: 0.92rem; color: #475569; margin: 0.8rem 0 0.3rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.case p { margin: 0.4rem 0; font-size: 0.96rem; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.88em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 0.9rem 1.1rem; border-radius: 8px; overflow-x: auto; margin: 0.6rem 0; font-size: 0.85rem; line-height: 1.5; }
+pre code { background: none; padding: 0; color: inherit; }
+a { color: #2563eb; }
+.deeper { background: #eff6ff; border-left: 4px solid #2563eb; padding: 1.1rem 1.4rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.95rem; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code billing surprises: why your subscription or credits drain unexpectedly</h1>
+<p class="subtitle">Five common reasons Claude Code consumes your credits or quota in a way you didn't expect — each with how to check it and the fix. All checks are read-only and run on your own machine.</p>
+
+<div class="intro">
+If your Claude Code usage is being billed somewhere you didn't expect — purchased/API credits draining while your subscription sits idle, quota vanishing faster than your work explains, or a sudden change after an update — it is almost always one of the five causes below. Work down the list; the first two cover the large majority of reports.
+</div>
+
+<div class="case">
+<h2>1. An API key in your environment overrides your subscription</h2>
+<span class="tag most">most common</span>
+<p>Claude Code's documented credential precedence puts <code>ANTHROPIC_AUTH_TOKEN</code> and <code>ANTHROPIC_API_KEY</code> <strong>above</strong> your Pro/Max subscription. If either is set anywhere in your environment, Claude Code authenticates as a pay-per-token API request and bills your purchased/Console credits — even when your subscription quota is at 0% used. This is the single most common cause of "subscription available, but it's draining my paid tokens."</p>
+<h3>How to check</h3>
+<pre><code>echo $ANTHROPIC_API_KEY
+echo $ANTHROPIC_AUTH_TOKEN</code></pre>
+<p>If either prints anything, that's the cause. Inside Claude Code, <code>/status</code> shows which auth method is active (subscription vs API key).</p>
+<h3>Fix</h3>
+<p>Unset both variables and relaunch. Check the places that re-export them on every new shell: your shell profile (<code>.zshrc</code> / <code>.bashrc</code> / <code>.profile</code>) and any <code>.env</code> or direnv <code>.envrc</code>. In <code>/config</code>, the "Use custom API key" toggle remembers a previous approval — switch it off too. Then confirm with <code>/status</code>.</p>
+</div>
+
+<div class="case">
+<h2>2. From June 15, 2026: Agent SDK and <code>claude -p</code> draw from a separate credit pool</h2>
+<span class="tag timely">timely — June 15</span>
+<p>Per the official docs: "Starting June 15, 2026, Agent SDK and <code>claude -p</code> usage on subscription plans will draw from a new monthly Agent SDK credit, separate from your interactive usage limits." If you run headless/scripted Claude Code (cron jobs, CI, <code>claude -p</code> pipelines, Agent SDK apps), that usage moves to a different pool on that date. A job that "just worked" against your interactive limit may start hitting a separate credit ceiling — or, if you've wired in an API key for automation, bill API credits instead.</p>
+<h3>How to check</h3>
+<p>Inventory where you call <code>claude -p</code> or the Agent SDK (cron, CI, scripts). For each, confirm which credential it uses — subscription OAuth token (<code>CLAUDE_CODE_OAUTH_TOKEN</code> from <code>claude setup-token</code>) vs an API key. Mixed setups are where the surprise lands.</p>
+<h3>Fix</h3>
+<p>Decide per workload before June 15 whether it should draw the new SDK credit (subscription auth) or API credits, and set the credential explicitly so the routing isn't accidental.</p>
+</div>
+
+<div class="case">
+<h2>3. Cache creation inflated on a single large request</h2>
+<span class="tag common">common</span>
+<p>A single turn that reads a very large file, a huge diff, or a long tool output can balloon <code>cache_creation</code> tokens far beyond what the visible work suggests. Because cache-creation tokens are billed, one oversized request can spike a session's cost with no obvious cause in the transcript.</p>
+<h3>How to check</h3>
+<p>Watch <code>/cost</code> across turns and note which turn jumps. The <a href="https://yurukusa.github.io/cc-safe-setup/cache-health.html">cache health tool</a> and <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html">token checkup</a> help localize it.</p>
+<h3>Fix</h3>
+<p>Avoid pulling whole large files/outputs into context in one turn; read targeted ranges. cc-safe-setup ships a <code>cache-creation-drift-detector</code> hook that warns when a single request's cache creation jumps above a trailing average.</p>
+</div>
+
+<div class="case">
+<h2>4. Parallel sub-agents or multi-tool workers re-create the cache per lane</h2>
+<span class="tag common">common</span>
+<p>When several sub-agents (or several vendors' workers) run in parallel against the same repo, each has its own context window and can re-create the prompt cache independently. The combined token cost is super-linear: a fan-out of N workers does not cost 1× — observed multipliers run 3–5×, and one reported run hit ~887K tokens/min.</p>
+<h3>How to check</h3>
+<p>Watch whether cost scales with the number of parallel lanes, not the amount of work. If a 5-way fan-out costs far more than 5× a single run, the cache is being re-created per lane.</p>
+<h3>Fix</h3>
+<p>Cap parallel fan-out, give workers disjoint scopes, and prefer one lead lane for edits. If you run multiple AI CLIs at once, see the <a href="https://yurukusa.github.io/cc-safe-setup/multi-vendor-fan-out-diagnostic.html">multi-vendor fleet diagnostic</a>.</p>
+</div>
+
+<div class="case">
+<h2>5. Trial-and-error loops burn quota without converging</h2>
+<span class="tag common">common</span>
+<p>Sometimes the model keeps editing-running-reverting on a problem it could have reasoned out first, consuming quota each cycle without resolving the issue. This isn't a billing bug — it's a workflow one — but it shows up as "my quota vanished and the bug is still there."</p>
+<h3>How to check</h3>
+<p>If you see repeated edit/run cycles on the same symptom with no stated diagnosis, that's the pattern.</p>
+<h3>Fix</h3>
+<p>Force the reasoning before the edit: use <strong>plan mode</strong> (Shift+Tab) and ask for the root-cause diagnosis and the exact change <em>before</em> any code is written; approve, then let it edit. For open-ended exploration, a cheaper model is fine — switch to the stronger one once the approach is locked.</p>
+</div>
+
+<div class="deeper">
+<strong>Going deeper.</strong> These are the fast checks. For the full treatment of where Claude Code tokens actually go — cache tiers, the cost math, and the staged optimization playbook — see the <a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Savings Guide (¥2,500)</a> (intro + chapter 1 free on Zenn). For the June 15 billing/quota cliff specifically, see the <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">failure-cluster tracker</a>. All the defensive hooks referenced above are free in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> (MIT).
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-02 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · Read-only checks; nothing here transmits your data.
+</footer>
+
+</div>
+</body>
+</html>
