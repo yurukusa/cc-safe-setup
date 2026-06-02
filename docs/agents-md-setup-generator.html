@@ -106,7 +106,7 @@ const TOOLS = [
   {id:"cursor",  nm:"Cursor",      rd:{en:"reads .cursorrules",       ja:".cursorrules を読む"},      kind:"file", file:".cursorrules"},
   {id:"windsurf",nm:"Windsurf",    rd:{en:"reads .windsurfrules",     ja:".windsurfrules を読む"},    kind:"file", file:".windsurfrules"},
   {id:"cline",   nm:"Cline",       rd:{en:"reads .clinerules",        ja:".clinerules を読む"},       kind:"file", file:".clinerules"},
-  {id:"aider",   nm:"Aider",       rd:{en:"AGENTS.md-aware",          ja:"AGENTS.md に対応"},         kind:"native"},
+  {id:"aider",   nm:"Aider",       rd:{en:"reads AGENTS.md via config",ja:"設定で AGENTS.md を読む"}, kind:"config", file:".aider.conf.yml"},
 ];
 
 const T = {
@@ -133,6 +133,9 @@ const T = {
     symN2:'Verify it resolved as a link (some clones bring symlinks through as plain text): <code>ls -l CLAUDE.md</code> should show <code>CLAUDE.md -&gt; AGENTS.md</code>.',
     nativePill:"no setup",
     nativeN:(names)=>`${names} read <code>AGENTS.md</code> directly. Nothing to do — they already share the source of truth.`,
+    cfgPill:"config", cfgRoot:"repo root",
+    cfgN:"Aider does <em>not</em> read <code>AGENTS.md</code> on its own — point it there once in <code>.aider.conf.yml</code> at the repo root. It then loads <code>AGENTS.md</code> read-only on every run, so it stays in sync with the one source of truth.",
+    cfgN2:'Prefer a per-run flag instead? <code>aider --read AGENTS.md</code> does the same thing; the config file just saves you from remembering it.',
     filePill:"symlink to AGENTS.md",
     fileN:"These read their own filename. Point each at <code>AGENTS.md</code> with a symlink so there's still one real file.",
     fileWin:"On Windows, symlinks need Admin or Developer Mode. If that's a problem, keep these as real copies and add the drift check in the next step.",
@@ -169,6 +172,9 @@ const T = {
     symN2:'リンクとして解決できたか確認してください(clone の経路によっては実体のコピーになることがあります): <code>ls -l CLAUDE.md</code> で <code>CLAUDE.md -&gt; AGENTS.md</code> と出るはずです。',
     nativePill:"設定不要",
     nativeN:(names)=>`${names} は <code>AGENTS.md</code> を直接読みます。何もする必要はありません——すでに正本を共有しています。`,
+    cfgPill:"設定", cfgRoot:"リポジトリ最上位",
+    cfgN:"Aider は <code>AGENTS.md</code> を自分からは<em>読みません</em>。リポジトリ最上位の <code>.aider.conf.yml</code> で一度だけ向き先を指定します。以降は毎回 <code>AGENTS.md</code> を読み取り専用で読み込むので、唯一の正本と揃ったままになります。",
+    cfgN2:'1回ごとにフラグで渡すこともできます: <code>aider --read AGENTS.md</code>。設定ファイルにしておけば、毎回フラグを覚えずに済みます。',
     filePill:"AGENTS.md への symlink",
     fileN:"これらは自分のファイル名を読みます。symlink で <code>AGENTS.md</code> に向けて、実体を1つに保ちます。",
     fileWin:"Windows では symlink に管理者権限か開発者モードが要ります。難しい場合は実体のコピーのままにして、次の段の乖離の検出を入れてください。",
@@ -248,6 +254,7 @@ function render(){
   const useClaude=state.tools.has("claude");
   const fileTools=sel.filter(x=>x.kind==="file");
   const nativeTools=sel.filter(x=>x.kind==="native");
+  const configTools=sel.filter(x=>x.kind==="config");
   const importMethod = useClaude && (state.extras==="yes" || state.os==="win");
   let html="";
   let n=1;
@@ -273,6 +280,15 @@ function render(){
     const names=nativeTools.map(x=>x.nm).join(", ");
     html+=`<div class="step"><h3>${n++}. ${names} <span class="pill native">${t.nativePill}</span></h3>
       <p class="note">${t.nativeN(names)}</p></div>`;
+  }
+
+  if(configTools.length){
+    configTools.forEach(x=>{
+      html+=`<div class="step"><h3>${n++}. ${x.nm} <span class="pill">${t.cfgPill}</span></h3>
+        <p class="note">${t.cfgN}</p>
+        ${block("# "+x.file+"  ("+t.cfgRoot+")\nread: AGENTS.md")}
+        <p class="note">${t.cfgN2}</p></div>`;
+    });
   }
 
   if(fileTools.length){
