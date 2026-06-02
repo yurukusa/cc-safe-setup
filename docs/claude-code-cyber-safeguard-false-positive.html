@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code blocked your legitimate work as a "cyber" policy violation? (2026)</title>
+<meta name="description" content="Claude Code's cyber/usage-policy classifier false-positives on legitimate engineering — firmware flashing, sysadmin audits, security review — then poisons the whole session and bills you for the restart. Here's why one block kills the session, how to keep working today, and the refund framing that lands.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-cyber-safeguard-false-positive.html">
+<meta property="og:title" content="Claude Code blocked your legitimate work as a 'cyber' violation?">
+<meta property="og:description" content="The usage-policy classifier false-positive cluster: why one block kills the session, the operator-side mitigations that keep you working, and the refund argument for the tokens it burned.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-cyber-safeguard-false-positive.html">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.02rem;margin:1.2em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#23304a;color:var(--acc);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .two .card h3{margin-top:0}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,Menlo,monospace;color:#d7dce6}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0;overflow:hidden;border-radius:10px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#1a2233;color:var(--ink);font-weight:600}
+  .note{color:var(--mut);font-size:.92rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6em 0 0;color:#cdd6e6}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Updated 2026-06-03 · independent · not affiliated with Anthropic</span>
+  <h1>Claude Code blocked your legitimate work as a "cyber" policy violation?</h1>
+  <p class="sub">If <em>"This request triggered cyber-related safeguards"</em> or <em>"appears to violate our Usage Policy"</em> stopped you mid-task on your own legitimate engineering — and then every message after it was blocked too — you're hitting a documented false-positive cluster. Here's why one block kills the whole session, how to keep working today, and how to argue back the tokens it burned.</p>
+
+  <p>The usage-policy / "cyber" classifier over-triggers on ordinary, vendor-documented engineering: embedded firmware flashing and eFuse provisioning (<a href="https://github.com/anthropics/claude-code/issues/64405" target="_blank" rel="noopener">#64405</a>), routine sysadmin audit commands (<a href="https://github.com/anthropics/claude-code/issues/61185" target="_blank" rel="noopener">#61185</a>), hardening your own software (<a href="https://github.com/anthropics/claude-code/issues/63751" target="_blank" rel="noopener">#63751</a>), and the session getting stuck in a blocked state afterward (<a href="https://github.com/anthropics/claude-code/issues/62071" target="_blank" rel="noopener">#62071</a>). It's well past anecdote: <em>The Register</em> tracked the escalation from ~2–3 reports/month in mid-2025 to 30+ in April 2026 alone. Reaction and comment counts move over time; the linked issues are the source of truth.</p>
+
+  <div class="card">
+    <p style="margin:0"><strong>The short version.</strong> The classifier doesn't just judge your latest message — sensitivity rises with the <em>accumulated</em> security-adjacent context in the session. A firmware or security session naturally piles up that vocabulary, so eventually a completely benign sentence ("flash the remaining boards", "continue") trips it. Once it does, every later turn re-reads the now-"poisoned" context and re-blocks. <code>/clear</code> or a fresh session is the only escape — which kills any in-flight work and re-bills you to rebuild context. You can't fix the classifier, but you <a href="#keep-working">can stop feeding it</a> and <a href="#billing">argue the billing back</a>.</p>
+  </div>
+
+  <h2>Why one block kills the whole session</h2>
+  <div class="card">
+    <p>The failure is not "one bad message." It's <strong>context accumulation</strong>: as a session collects security-shaped tokens (<code>eFuse</code>, <code>secure-boot</code>, <code>iptables</code>, <code>/etc/shadow</code>, exploit/audit terminology — even when entirely legitimate), the running context looks more and more like the thing the classifier is trained to stop. A single large security-shaped tool output can do it in one shot (<a href="https://github.com/anthropics/claude-code/issues/61185" target="_blank" rel="noopener">#61185</a>: a 17,000-line blocklist <code>cat</code>). After the first trip, the poisoned context is re-sent every turn, so even <code>"ok"</code> gets blocked (<a href="https://github.com/anthropics/claude-code/issues/62071" target="_blank" rel="noopener">#62071</a>, <a href="https://github.com/anthropics/claude-code/issues/63751" target="_blank" rel="noopener">#63751</a>). That's why the session, not the message, is what dies.</p>
+  </div>
+
+  <h2 id="keep-working">How to keep working today</h2>
+  <div class="two">
+    <div class="card">
+      <h3>Pin Sonnet for the security-adjacent work</h3>
+      <p class="note">The over-trigger signature is Opus-family-wide; operators report the same workflows pass far more often on a Sonnet variant. Switch with <code>/model</code> before the firmware/audit/security session. If Sonnet passes the exact message Opus blocked, that's both an immediate unblock and clean evidence for your report.</p>
+    </div>
+    <div class="card">
+      <h3>Don't let the context accumulate</h3>
+      <p class="note">Keep heavy secure-boot / eFuse / exploit-analysis <em>discussion</em> in a separate session from the <em>execution</em> turns, and keep execution terse ("flash board 3"). Read large security files with <code>head -200</code> / <code>grep -c</code> instead of dumping the whole thing into context. Less accumulated security shape = fewer trips.</p>
+    </div>
+  </div>
+  <p>If you run hooks, the free MIT <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> repo ships four advisory-only hooks built for exactly this cluster — none of them block, they just warn or break the bleed:</p>
+  <pre>npx cc-safe-setup</pre>
+  <table>
+    <tr><th>Hook</th><th>What it does</th></tr>
+    <tr><td><code>aup-large-tool-output-warner</code></td><td>PreToolUse: warns before a <code>cat</code>/<code>find</code> on a security-shaped path dumps a large output that can flip the classifier — suggests a size-capped variant</td></tr>
+    <tr><td><code>aup-retry-loop-guard</code></td><td>PostToolUse: detects 3+ blocks in a short window on the same tool and tells you to swap/restart <em>before</em> you re-ingest context on retries — stops the double-billing loop</td></tr>
+    <tr><td><code>aup-block-pattern-logger</code></td><td>Logs each block (timestamp / model / pattern) so you can show the classifier-shift over time when you report</td></tr>
+    <tr><td><code>aup-false-positive-helper</code></td><td>SessionStart advisory naming the cluster and the swap/refund paths</td></tr>
+  </table>
+
+  <h2 id="billing">The billing harm — and the refund framing that lands</h2>
+  <p>A blocked request that still consumes tokens, then forces a full-context-rebuild restart, charges you twice: the work doesn't happen <em>and</em> you pay to rebuild the context the kill-switch threw away. That is a defensible refund case — but the framing matters. Don't ask for a generic refund; frame it as:</p>
+  <div class="card">
+    <p style="margin:0"><em>"Tokens consumed by a classifier false-positive and the forced session rebuild it caused — not by requested output,"</em> with the <strong>request IDs</strong> from the blocked turns attached.</p>
+  </div>
+  <p>Capture the request ID shown with each block (the <code>req_…</code> string) at the time it happens — it's the single most actionable thing you can give support, and the vendor-defect-cost framing is the one that tends to land versus "the filter is too aggressive."</p>
+
+  <div class="cta">
+    <p style="margin:0 0 .4em"><strong>This classifier keeps changing.</strong> The trigger surface, the version boundaries, and the workarounds shift release to release — what passes on one build blocks on the next. The free hooks and field guide above are the operator playbook; if you want the evolving picture (new trigger patterns, version boundaries, and defenses as they're found) tracked monthly instead of re-searching GitHub each time, that's what the <a href="safety-lab.html">Claude Code Safety Lab</a> digest (¥500/mo) is for. Start free: the <a href="https://gist.github.com/yurukusa/4fa4751044be45bd83345601ee79c2db" target="_blank" rel="noopener">Cluster 9 field guide</a> and the <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/ddd7b7487fb114543b33479cacaa36b6/raw/cluster-9-aup-diagnostic.html" target="_blank" rel="noopener">4-question diagnostic</a> that routes you to the highest-leverage path for your model and frequency.</p>
+  </div>
+
+  <h2>How to report it so it actually helps</h2>
+  <p>The product-native paths are inconsistent (<code>/feedback</code> and <code>/bug</code> are unavailable in some surfaces) and the Cyber Verification Program appeal often auto-declines individual developers, so a clean public repro plus a private form submission is currently the best combination. Add your case to the matching open issue rather than filing a new duplicate — <a href="https://github.com/anthropics/claude-code/issues/64405" target="_blank" rel="noopener">#64405</a> (embedded/firmware), <a href="https://github.com/anthropics/claude-code/issues/61185" target="_blank" rel="noopener">#61185</a> (sysadmin), <a href="https://github.com/anthropics/claude-code/issues/63751" target="_blank" rel="noopener">#63751</a> (own-software hardening) — and 👍 the request for a <a href="https://github.com/anthropics/claude-code/issues/64287" target="_blank" rel="noopener">first-class private false-positive report path (#64287)</a>. A clean repro with the exact two messages (one that passes, one that blocks) and the request IDs is far more actionable than "the filter is too cautious." Check the <a href="https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html">failure-mode cluster tracker</a> to see if your variant is already documented.</p>
+
+  <h2>FAQ</h2>
+  <details><summary>Why does it block "ok" or "continue" after the first false positive?</summary><p>Because the block isn't about that message — it's the accumulated context being re-sent each turn. Once the session holds enough security-shaped content to trip the classifier, every subsequent turn re-reads it and re-blocks. The fix is a fresh session (or <code>/clear</code>), which is also why it costs you a context rebuild.</p></details>
+  <details><summary>Will switching to Sonnet really get me unblocked?</summary><p>Often, yes — the over-trigger signature is Opus-family-wide and the same workflows pass more often on Sonnet. It's a mitigation, not a guarantee; treat a Sonnet pass/Opus block on the identical message as both an unblock and a data point for your report.</p></details>
+  <details><summary>Can I get the tokens refunded?</summary><p>It's a defensible case when the tokens were consumed by the false-positive and the forced restart rather than by output you asked for. Frame it exactly that way, attach the <code>req_…</code> IDs from the blocked turns, and submit through support / the Cyber Verification Program false-positive form. The vendor-defect-cost framing lands better than a generic refund request.</p></details>
+  <details><summary>Is this me doing something wrong?</summary><p>No. Flashing your own boards, auditing your own systems, hardening your own software, and reviewing security are first-class, documented engineering. The classifier cannot reliably tell legitimate work from abuse yet — that's the defect (<a href="https://github.com/anthropics/claude-code/issues/64405" target="_blank" rel="noopener">#64405</a>). Keep a clean repro; you're not the outlier.</p></details>
+
+  <p class="foot">
+    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety hooks). Issue numbers and reaction counts are as of 2026-06-03 and move over time; the linked issues are the source of truth. Not affiliated with Anthropic. This page describes user reports and operator-side mitigations — it is not legal or account advice; for Usage Policy questions, confirm against Anthropic's own documentation and support.
+  </p>
+</div>
+</body>
+</html>
