@@ -4177,6 +4177,7 @@ function scorecard() {
   rule('└', '┘');
   console.log();
   console.log('  ' + c.dim + 'Screenshot it · share your score · github.com/yurukusa/cc-safe-setup' + c.reset);
+  console.log('  ' + c.dim + 'Prefer a clickable card? ' + c.reset + c.blue + 'yurukusa.github.io/cc-safe-setup/safety-scorecard.html' + c.reset);
   console.log();
 }
 
