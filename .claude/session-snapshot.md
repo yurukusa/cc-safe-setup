@@ -1,25 +1,25 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-03T14:57:37+09:00
+Updated: 2026-06-02T10:38:47+09:00
 
 ## Git
-- Branch: `docs/cheaper-wins-positive-2026-06-03`
+- Branch: `feat/multi-vendor-concurrent-warner-2026-06-02`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 003dbaa6 recovery: pre-compact checkpoint (1 files, 20260603-055737)
+- Last commit: 9f8dc860 recovery: pre-compact checkpoint (1 files, 20260602-013847)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-06-03.md
 ./.claude/pre-compact-checkpoint.md
-./test.sh
-./tests/test-subscription-api-billing-warner.sh
-./examples/agents-md-sync-checker.sh
-./examples/multi-vendor-concurrent-warner.sh
-./examples/subscription-api-billing-warner.sh
 ./.claude/session-logs/2026-06-02.md
+./test.sh
 ./README.md
+./examples/multi-vendor-concurrent-warner.sh
+./examples/agents-md-sync-checker.sh
+./scripts/agents-md-sync-setup.sh
+./docs/june-15-cliff-14-day-plan.md
+./examples/cowork-model-picker-advisor.sh
 ```
 
