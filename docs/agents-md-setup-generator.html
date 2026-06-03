@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AGENTS.md ↔ CLAUDE.md Setup Generator — one source of truth across your AI tools</title>
-<meta name="description" content="Pick the AI coding tools you use and get the exact, copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one instruction file. Free, MIT, no telemetry. English / 日本語.">
+<title>Make all your AI tools read the same instructions — AGENTS.md / CLAUDE.md setup generator</title>
+<meta name="description" content="One file, every tool. Pick the AI coding tools you use and get the exact copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one AGENTS.md — edit once, every tool stays in step. Free, MIT, no telemetry. English / 日本語.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html">
+<meta property="og:title" content="Make all your AI tools read the same instructions">
+<meta property="og:description" content="One file, every tool. Generate the exact copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one AGENTS.md. Free, MIT, browser-only.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html">
 <style>
   :root{
     --bg:#0f1115; --card:#171a21; --card2:#1d212a; --ink:#e6e9ef; --mut:#9aa3b2;
@@ -47,6 +52,8 @@
   .foot{color:var(--mut);font-size:.86rem;border-top:1px solid var(--line);padding-top:16px;margin-top:26px}
   .foot a{color:var(--acc)}
   .empty{color:var(--mut);font-style:italic}
+  .win-banner{background:#11271c;border:1px solid #2ea043;border-radius:10px;padding:12px 14px;margin:0 0 16px;color:#7ee0c0;font-size:.98rem;line-height:1.5}
+  .win-banner strong{color:#aef0cf}
   code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.85em}
 </style>
 </head>
@@ -113,8 +120,9 @@ const TOOLS = [
 
 const T = {
   en:{
-    title:"AGENTS.md ↔ CLAUDE.md Setup Generator",
-    sub:'One source of truth across your AI coding tools. Pick what you use — get the exact, copy-paste setup. Built for the <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a> pain (5,200+ reactions: "Claude Code reads CLAUDE.md, my other tools read AGENTS.md"). Free, MIT, runs entirely in your browser — no upload, no telemetry.',
+    title:"Make all your AI tools read the same instructions",
+    sub:'One file, every tool. Pick the AI coding tools you use and get the exact copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one <code>AGENTS.md</code> — edit once, and every tool stays in step. This is the setup behind the <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a> request (5,200+ reactions). Free, MIT, runs entirely in your browser — no upload, no telemetry.',
+    win:(c,names)=>`✓ Nice — with this, your <strong>${c}</strong> tool${c>1?"s":""} (${names}) all read one <code>AGENTS.md</code>. Edit one file, and every tool stays in step.`,
     q1:"1 · Which AI coding tools do you use in this repo?",
     q1h:"AGENTS.md is the shared standard. Tools that read it natively need no setup; the others get a one-line link to it.",
     q2:"2 · A couple of details",
@@ -152,8 +160,9 @@ const T = {
     foot:'Method picked for you follows the official Claude Code memory docs (the <code>@AGENTS.md</code> import is the documented default; symlink is the lighter option when you need no Claude-only additions). Want the why, the edge cases, and the four other patterns (pre-commit, SessionStart hook, direnv, CI drift check)? → <a href="https://gist.github.com/yurukusa/d36197848911f025add142abefcde685" target="_blank" rel="noopener">AGENTS.md interop field guide (English, MIT)</a> · <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT hooks incl. an AGENTS.md/CLAUDE.md drift checker). Want it all in one place — this 9-tool matrix, all six paths, copy-paste templates, and a rollback-safe migration runbook? The <a href="https://yurukusa.gumroad.com/l/swpeu" target="_blank" rel="noopener">AGENTS.md &times; Claude Code Interop Handbook (English, $12)</a> collects them; a longer <a href="https://zenn.dev/yurukusa/books/agents-md-interop" target="_blank" rel="noopener">Japanese edition</a> is on Zenn.<br><br>Independent operator tool, MIT-licensed. Conventions verified 2026-06-02 against each tool\'s docs; recheck before relying on it, since tool conventions change.',
   },
   ja:{
-    title:"AGENTS.md ↔ CLAUDE.md セットアップ生成ツール",
-    sub:'複数の AI コーディングの道具で、指示書を1つの正本にまとめます。使っている道具を選ぶと、貼るだけの正確なセットアップが出ます。<a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a>(5,200 を超える反応:「Claude Code は CLAUDE.md を読むが、他の道具は AGENTS.md を読む」)の痛みのために作りました。無料、MIT、すべてブラウザ内で動作——送信もテレメトリもありません。',
+    title:"全部の AI の道具に同じ指示を読ませる",
+    sub:'1つのファイルで、全部の道具へ。使っている AI コーディングの道具を選ぶと、Claude Code・Codex・Cursor・Windsurf・Cline・Amp が同じ <code>AGENTS.md</code> を読むための、貼るだけの正確なセットアップが出ます。1か所を直すだけで、全部の道具がそろいます。<a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a>(5,200 を超える反応)で多くの人が望んだ形です。無料、MIT、すべてブラウザ内で動作——送信もテレメトリもありません。',
+    win:(c,names)=>`✓ これで、選んだ <strong>${c}</strong> 個の道具(${names})が同じ <code>AGENTS.md</code> を読みます。1つのファイルを直すだけで、全部の道具がそろいます。`,
     q1:"1 · このリポジトリで使っている AI コーディングの道具は？",
     q1h:"AGENTS.md が共通の標準です。これを直接読む道具は設定が不要、それ以外には1行のリンクを張ります。",
     q2:"2 · いくつかの条件",
@@ -261,6 +270,7 @@ function render(){
   let html="";
   let n=1;
 
+  html+=`<div class="win-banner">${t.win(sel.length, sel.map(x=>x.nm).join(", "))}</div>`;
   html+=`<div class="step"><h3>${n++}. ${t.s1h}</h3><p class="note">${t.s1n}</p></div>`;
 
   if(useClaude){
