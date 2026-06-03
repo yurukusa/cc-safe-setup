@@ -192,9 +192,9 @@ const TOTAL = 5;
 
 // Hook database — each hook has conditions for when it's recommended
 const hooks = [
-  {name:'banned-command-guard',cat:'Safety',why:'Blocks rm -rf, git reset --hard, and other destructive commands — even in auto/bypass mode',when:{concern:['files'],mode:['interactive','semi','auto']}},
+  {name:'rm-safety-net',cat:'Safety',why:'Blocks destructive recursive deletes (rm -rf on sensitive or absolute paths) before they run — even in auto/bypass mode',when:{concern:['files'],mode:['interactive','semi','auto']}},
   {name:'main-branch-warn',cat:'Safety',why:'Warns before a direct push to main/master branch',when:{concern:['files','quality'],mode:['interactive','semi','auto']}},
-  {name:'credential-exfil-guard',cat:'Security',why:'Detects .env, API keys, tokens leaving in file writes or output',when:{concern:['secrets'],mode:['interactive','semi','auto']}},
+  {name:'credential-exfil-guard',cat:'Security',why:'Blocks commands that exfiltrate credentials — reading .env or piping API keys/tokens into curl, uploads, or external output',when:{concern:['secrets'],mode:['interactive','semi','auto']}},
   {name:'large-read-guard',cat:'Token',why:'Warns when reading files over 100KB — prevents token waste',when:{concern:['tokens'],mode:['semi','auto']}},
   {name:'token-budget-guard',cat:'Token',why:'Tracks estimated token usage and blocks when budget exceeded',when:{concern:['tokens'],mode:['semi','auto']}},
   {name:'subagent-budget-guard',cat:'Token',why:'Limits subagent spawning to prevent token explosions',when:{concern:['tokens'],agents:['subagents','both']}},
