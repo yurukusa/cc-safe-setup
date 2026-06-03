@@ -80,9 +80,9 @@
       <tr><td>Codex</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
       <tr><td>Amp</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
       <tr><td>GitHub Copilot</td><td class="n">AGENTS.md (agent/chat)</td><td><span class="pill n">nothing</span></td></tr>
-      <tr><td>Cursor</td><td><code>.cursorrules</code></td><td><span class="pill f">symlink</span></td></tr>
-      <tr><td>Windsurf</td><td><code>.windsurfrules</code></td><td><span class="pill f">symlink</span></td></tr>
-      <tr><td>Cline</td><td><code>.clinerules</code></td><td><span class="pill f">symlink</span></td></tr>
+      <tr><td>Cursor</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
+      <tr><td>Windsurf</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
+      <tr><td>Cline</td><td class="n">AGENTS.md</td><td><span class="pill n">nothing</span></td></tr>
       <tr><td>Aider</td><td class="c">— (must be told)</td><td><span class="pill c">config: <code>read: AGENTS.md</code></span></td></tr>
       <tr><td>Gemini CLI</td><td><code>GEMINI.md</code></td><td><span class="pill c">config: <code>context.fileName</code></span></td></tr>
     </tbody>
@@ -113,7 +113,7 @@ ls -l CLAUDE.md      # confirm:  CLAUDE.md -&gt; AGENTS.md</pre>
   <details><summary>Does Claude Code read AGENTS.md?</summary><p>Not on its own, as of mid-2026 (issue #6235 is still open). You bridge it with a one-line <code>@AGENTS.md</code> import in <code>CLAUDE.md</code>, or a symlink. Some blogs claim Claude Code reads <code>AGENTS.md</code> "as a fallback" — that is not accurate; the import is the supported bridge.</p></details>
   <details><summary>Which should I name my file — AGENTS.md or CLAUDE.md?</summary><p>Make <code>AGENTS.md</code> the real file (it's the cross-tool standard) and point <code>CLAUDE.md</code> at it. That way every other tool works with zero extra config and Claude Code reads it via the import/symlink.</p></details>
   <details><summary>Can I use both with no duplication?</summary><p>Yes. The <code>@AGENTS.md</code> import keeps one real file. A symlink does too. Only avoid keeping two real copies edited by hand — that's what drifts.</p></details>
-  <details><summary>What about Cursor's <code>.cursor/rules/</code> or Windsurf's <code>.windsurf/rules/</code>?</summary><p>Those newer directory formats can't be symlinked from one file. Use them only for genuinely tool-specific rules; keep shared rules in <code>AGENTS.md</code> and symlink the legacy single-file name (<code>.cursorrules</code>, <code>.windsurfrules</code>) to it.</p></details>
+  <details><summary>What about Cursor's <code>.cursor/rules/</code> or Windsurf's <code>.windsurf/rules/</code>?</summary><p>Cursor, Windsurf, and Cline now read a project-root <code>AGENTS.md</code> directly — their own docs list it as the cross-tool rules file — so you don't need to symlink anything for them. Their newer per-tool directory formats (<code>.cursor/rules/</code>, <code>.windsurf/rules/</code>, <code>.clinerules/</code>) are for genuinely tool-specific rules; keep everything shared in <code>AGENTS.md</code>.</p></details>
   <details><summary>How do I keep AGENTS.md and CLAUDE.md in sync on a team?</summary><p>Prefer the import or symlink (one real file). Where real copies are unavoidable, add a pre-commit hook (and a CI step) that fails when any copy diverges from <code>AGENTS.md</code>. The <a href="https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html">generator</a> emits both.</p></details>
 
   <p class="foot">
