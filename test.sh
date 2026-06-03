@@ -5938,6 +5938,15 @@ test_hook "memory-write" '{"tool_input":{}}' 0 "allows empty file_path"
 test_hook "memory-write" '{}' 0 "handles empty JSON"
 test_hook "memory-write" '{"tool_name":"Bash","tool_input":{"command":"npm run build"}}' 0 "npm build passes"
 test_hook "memory-write" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/main.ts","old_string":"a","new_string":"b"}}' 0 "edit passes"
+# CC_MEMORY_WRITE_APPROVAL modes (opt-in approval/block) — issue #65064
+EXIT=0; OUT=$(echo '{"tool_input":{"file_path":"/home/user/.claude/projects/p/memory/MEMORY.md"}}' | CC_MEMORY_WRITE_APPROVAL=ask bash /tmp/test-memory-write.sh 2>/dev/null) || EXIT=$?
+if [ "$EXIT" -eq 0 ] && echo "$OUT" | jq -e '.hookSpecificOutput.permissionDecision=="ask"' >/dev/null 2>&1; then echo "  PASS: memory-write ask mode emits permissionDecision ask"; PASS=$((PASS+1)); else echo "  FAIL: memory-write ask mode"; FAIL=$((FAIL+1)); fi
+EXIT=0; echo '{"tool_input":{"file_path":"./CLAUDE.md"}}' | CC_MEMORY_WRITE_APPROVAL=block bash /tmp/test-memory-write.sh >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 2 ] && { echo "  PASS: memory-write block mode refuses CLAUDE.md (exit 2)"; PASS=$((PASS+1)); } || { echo "  FAIL: memory-write block mode (got exit $EXIT)"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_input":{"file_path":"/tmp/normal.js"}}' | CC_MEMORY_WRITE_APPROVAL=block bash /tmp/test-memory-write.sh >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 0 ] && { echo "  PASS: memory-write block mode ignores non-memory file"; PASS=$((PASS+1)); } || { echo "  FAIL: memory-write block mode non-memory (got exit $EXIT)"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_input":{"file_path":"./CLAUDE.md"}}' | bash /tmp/test-memory-write.sh >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 0 ] && { echo "  PASS: memory-write default off allows CLAUDE.md (exit 0)"; PASS=$((PASS+1)); } || { echo "  FAIL: memory-write default off CLAUDE.md (got exit $EXIT)"; FAIL=$((FAIL+1)); }
 echo ""
 echo ""
 echo "no-curl-upload.sh:"
