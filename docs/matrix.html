@@ -80,7 +80,7 @@ const H=[
 {n:'uncommitted-work-guard',c:'safety',t:'Pre',a:'block',d:'Block destructive git when dirty',i:'--install-example uncommitted-work-guard'},
 {n:'test-deletion-guard',c:'quality',t:'Pre',a:'warn',d:'Warn when removing test assertions',i:'--install-example test-deletion-guard'},
 {n:'overwrite-guard',c:'safety',t:'Pre',a:'warn',d:'Warn before overwriting files',i:'--install-example overwrite-guard'},
-{n:'memory-write-guard',c:'safety',t:'Pre',a:'warn',d:'Log writes to ~/.claude/',i:'--install-example memory-write-guard'},
+{n:'memory-write-guard',c:'safety',t:'Pre',a:'warn',d:'Log (or opt-in approve/block) memory writes: CLAUDE.md + ~/.claude/',i:'--install-example memory-write-guard'},
 {n:'fact-check-gate',c:'quality',t:'Post',a:'warn',d:'Docs reference unread source files',i:'--install-example fact-check-gate'},
 {n:'token-budget-guard',c:'monitor',t:'Post',a:'block',d:'Block when cost exceeds budget',i:'--install-example token-budget-guard'},
 {n:'conflict-marker-guard',c:'quality',t:'Pre',a:'block',d:'Block commits with conflict markers',i:'--install-example conflict-marker-guard'},
