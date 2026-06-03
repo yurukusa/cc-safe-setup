@@ -1,5 +1,26 @@
 [
   {
+    "url": "agents-md-interop-scorecard.html",
+    "title": "AGENTS.md ↔ CLAUDE.md Interop Scorecard — score your one-source-of-truth setup",
+    "description": "Check whether your AGENTS.md is actually wired into every AI coding tool you use. Get an honest X/6 interop score you can screenshot and share. Based on the #6235 pain. Runs entirely in your browser — no npm, no upload.",
+    "keywords": "",
+    "snippet": "You wrote one AGENTS.md — but does every tool actually read it? Check what's wired, get an honest X / 6 interop score you can screenshot and share.Built for the #6235 pain (5,200+ reactions). Nothing leaves your browser."
+  },
+  {
+    "url": "agents-md-setup-generator.html",
+    "title": "AGENTS.md ↔ CLAUDE.md Setup Generator — one source of truth across your AI tools",
+    "description": "Pick the AI coding tools you use and get the exact, copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one instruction file. Free, MIT, no telemetry. English / 日本語.",
+    "keywords": "",
+    "snippet": "Copy${esc(code)}`;} function render(){ const t=T[LANG]; const out=document.getElementById(\"out\"); const sel=TOOLS.filter(x=>state.tools.has(x.id)); if(!sel.length){ out.innerHTML=`${t.empty}"
+  },
+  {
+    "url": "agents-md-vs-claude-md.html",
+    "title": "AGENTS.md vs CLAUDE.md — what's the difference, and do you need both? (2026)",
+    "description": "AGENTS.md vs CLAUDE.md explained: Claude Code reads CLAUDE.md, every other tool reads AGENTS.md. A verified 9-tool matrix, whether you need both, and how to make them share one file. Updated 2026-06-02.",
+    "keywords": "",
+    "snippet": "Claude Code reads CLAUDE.md. Almost every other AI coding tool reads AGENTS.md. Here's the difference, whether you need both, and the one-line way to make them share a single file."
+  },
+  {
     "url": "ai-coding-safety-report-2026.html",
     "title": "AI Coding Safety Report 2026 — Incidents Across All Major Tools",
     "description": "Cross-tool safety report covering real incidents from Claude Code, Cursor, GitHub Copilot, and Windsurf. Data loss, credential leaks, production failures, and token drain — documented with sources.",
@@ -40,6 +61,20 @@
     "description": "Claude Code can run curl/wget to any domain. Block unauthorized HTTP requests with a PreToolUse hook that enforces a domain allowlist on Bash commands.",
     "keywords": "claude code curl block, claude code domain allowlist, claude code network security, data exfiltration prevention, sandbox bypass, cc-safe-setup",
     "snippet": "Claude Code can run curl, wget, and other HTTP tools to any domain. Even with sandbox allowedDomains configured, plain HTTP requests may bypass filtering. A hook-level domain allowlist provides defense-in-depth."
+  },
+  {
+    "url": "billing-incident-detection.html",
+    "title": "Claude Code の課金の事故の早期の検出の5つの確認 — 未承認の Gift Max 課金の集積",
+    "description": "2026年4月から5月にかけて anthropics/claude-code の起票で6件以上の独立した課金の事故の集積を確認。 Pro Annual が「Gift Max 20X」 に勝手に変更、 €199.97 / $87.92 の未承認の請求、 support の10日以上の沈黙の経路など。 利用者の側で早期に検出する5つの確認の手順の整理。",
+    "keywords": "Claude Code, 課金, 未承認の課金, Gift Max, billing fraud, Pro Annual, 検出",
+    "snippet": "2026年4月から5月にかけて、 anthropics/claude-code の起票で6件以上の独立した課金の事故の集積を確認しています。 「Pro Annual が Gift Max 20X に勝手に変更」「€199.97 の未承認の請求」「Max が Free に勝手に降格」 などの様式。 道具の経路では予防できない上流の課金の整備の合図ですが、 利用者の側で早期に検出する5つの確認の経路を整理しました。 整備の経路は2026年5月30日。"
+  },
+  {
+    "url": "billing-surprises-guide.html",
+    "title": "Claude Code billing surprises — why your subscription or credits drain unexpectedly",
+    "description": "The common reasons Claude Code consumes your API credits or quota unexpectedly — auth precedence, the June 15 Agent SDK credit split, cache inflation, parallel agents, trial-and-error loops — and how to check and fix each.",
+    "keywords": "",
+    "snippet": "Five common reasons Claude Code consumes your credits or quota in a way you didn't expect — each with how to check it and the fix. All checks are read-only and run on your own machine."
   },
   {
     "url": "blog-5-essential-hooks.html",
@@ -149,16 +184,37 @@
   {
     "url": "claude-code-autonomous-safety.html",
     "title": "Claude Code Autonomous Mode Safety — Complete Hook Setup — cc-safe-setup",
-    "description": "Running Claude Code unattended? 727 hooks to prevent rm -rf, force-push, secret leaks, and session drift.",
+    "description": "Running Claude Code unattended? 734 hooks to prevent rm -rf, force-push, secret leaks, and session drift.",
     "keywords": "claude code autonomous, unattended safety, auto mode hooks, claude code headless, pretooluse hook, cc-safe-setup",
     "snippet": "Running Claude Code unattended — overnight builds, CI pipelines, headless mode — means no human is watching when it decides to rm -rf node_modules, force-push to main, or commit your .env file. Hooks are the only safety layer that works without human oversight."
   },
   {
+    "url": "claude-code-cyber-safeguard-false-positive.html",
+    "title": "Claude Code blocked your legitimate work as a \"cyber\" policy violation? (2026)",
+    "description": "Claude Code's cyber/usage-policy classifier false-positives on legitimate engineering — firmware flashing, sysadmin audits, security review — then poisons the whole session and bills you for the restart. Here's why one block kills the session, how to keep working today, and the refund framing that l",
+    "keywords": "",
+    "snippet": "If \"This request triggered cyber-related safeguards\" or \"appears to violate our Usage Policy\" stopped you mid-task on your own legitimate engineering — and then every message after it was blocked too — you're hitting a documented false-positive cluster. Here's why one block kills the whole session, "
+  },
+  {
     "url": "claude-code-hooks-testing-guide.html",
     "title": "How to Test Claude Code Hooks — Validation Guide — cc-safe-setup",
-    "description": "9,200+ tests for 727 hooks. How to validate your hooks work correctly before trusting them in production.",
+    "description": "9,200+ tests for 734 hooks. How to validate your hooks work correctly before trusting them in production.",
     "keywords": "claude code hook testing, validate hooks, cc-safe-setup verify, pretooluse hook test, hook validation, cc-safe-setup",
     "snippet": "A hook that doesn't work is worse than no hook at all. It gives you false confidence that you're protected while dangerous commands slip through. Here's how to validate your hooks actually block what they should."
+  },
+  {
+    "url": "claude-code-june-15-billing-change.html",
+    "title": "Claude Code's June 15, 2026 billing change — who's affected and what to do",
+    "description": "On 2026-06-15 Anthropic moves programmatic Claude usage (Agent SDK, claude -p, Claude Code GitHub Actions, third-party agents) to a separate monthly credit pool billed at API rates. Interactive Claude Code is unchanged. Who's affected, the credit amounts, and the two actions to take.",
+    "keywords": "",
+    "snippet": "Anthropic is moving programmatic Claude usage off your subscription pool onto a separate, dollar-metered credit pool. Interactive use is unchanged. Here's who's affected and what to do before June 15."
+  },
+  {
+    "url": "claude-code-max-usage-limits.html",
+    "title": "Why is Claude Code hitting usage limits so fast on Max? (2026)",
+    "description": "Claude Code Max users keep hitting usage limits faster than expected — sometimes at 16% usage, or 70 minutes after a reset. Here's the documented issue cluster, why you can't see your real quota, how to measure your own consumption, the false 'Usage credits required for 1M context' gate and how to c",
+    "keywords": "",
+    "snippet": "If your Max subscription says you're at 16% — and then refuses the next prompt with a rate-limit error — you are not imagining it, and you are not alone. Here's the documented pattern, why you can't see your real quota from inside Claude Code, and what you can actually measure today."
   },
   {
     "url": "claude-code-pipe-mode-safety.html",
@@ -201,6 +257,48 @@
     "description": "Optimize your CLAUDE.md to reduce Claude Code token consumption by 40%. Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.",
     "keywords": "",
     "snippet": "3 rules that cut token costs by 40%. Based on 800+ hours of Claude Code operation."
+  },
+  {
+    "url": "cluster-12-tool-call-parsing-diagnostic.html",
+    "title": "Cluster 12 Tool Call Parsing Diagnostic — Which Sub-Pattern Are You Hitting?",
+    "description": "4-question diagnostic to identify which of the four Opus 4.7 tool call parsing failure sub-patterns (12A/12B/12C/12D) is hitting your session. Each sub-pattern has a different recovery — misapplied /clear burns context. Browser-only, no signup, no telemetry. CC0.",
+    "keywords": "",
+    "snippet": "Source: #62344. Errors accumulate as the session grows. Past malformed-recovery attempts pollute the recent-tool-call context, biasing subsequent tool calls toward the same malformed shape. Recovery: /clear. Defense hook: long-session-malformed-tool-call-detector.sh (PR #406, 40 tests)."
+  },
+  {
+    "url": "cluster-13-extended-thinking-wedge-diagnostic.html",
+    "title": "Cluster 13 Extended-Thinking Wedge Diagnostic — Which Sub-Pattern Are You Hitting? Plus the /loop Trap",
+    "description": "5-question diagnostic for the Cluster 13 extended-thinking session wedge (400 thinking blocks cannot be modified). Identifies sub-pattern 13A/B/C/D, plus the new /loop autonomous-run amplification vector reported 2026-05-29. Recovery + prevention path per situation. Browser-only, no signup, no telem",
+    "keywords": "",
+    "snippet": "Your session runs under autonomous resume. The wedge becomes an unrecoverable infinite loop — every loop iteration re-fires the 400. Stop the loop now before it burns API tokens / Pool 2 quota / Max-plan rate-limit budget on requests that cannot succeed."
+  },
+  {
+    "url": "cluster-22-23-opus48-dual-diagnostic-jp.html",
+    "title": "Opus 4.8の双子の事例の利用者の影響の5問の診断 (集積22 + 集積23)",
+    "description": "5問でOpus 4.8の双子の事例 (集積22 correctness + 集積23 cost) の利用者の影響を判定する診断道具。 11件の独立な起票 (5/30-5/31)。 ブラウザのみで動作、 登録なし、 計測なし。 CC0。",
+    "keywords": "",
+    "snippet": "cluster tracker: cluster-tracker.html · 英語の field guide: 集積22 · 集積23"
+  },
+  {
+    "url": "cluster-22-23-opus48-dual-diagnostic.html",
+    "title": "Opus 4.8 Dual Cluster Exposure — 5-Question Diagnostic (Cluster 22 + Cluster 23 candidates)",
+    "description": "5-question browser-only diagnostic. Estimates whether you're exposed to the Opus 4.8 dual cluster (Cluster 22 correctness + Cluster 23 cost). 11 independent filings 2026-05-30 to 2026-05-31. No signup, no telemetry. CC0.",
+    "keywords": "",
+    "snippet": "The diagnostic produces a 0-90 score across five factors. The bands reflect both the probability you're hitting the cluster and the dollar magnitude of the impact:"
+  },
+  {
+    "url": "cluster-exposure-diagnostic.html",
+    "title": "Cluster Exposure Diagnostic — Which of the 12 Claude Code failure clusters are hitting you?",
+    "description": "7 questions, 3 minutes. Identify which of the 16 tracked plus 7 candidate Claude Code failure clusters you are most exposed to, with concrete hook and resource recommendations.",
+    "keywords": "",
+    "snippet": "Which of the 16 tracked plus 7 candidate Claude Code failure clusters are most likely hitting you right now?"
+  },
+  {
+    "url": "cluster-tracker.html",
+    "title": "Claude Code Failure-Mode Cluster Tracker — CC Safety Lab",
+    "description": "Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata, v2.1.150 server-side prompt injection, AUP false-positive on Opus. Issue counts, reactions, defense hooks shippe",
+    "keywords": "",
+    "snippet": "Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status. Updated as clusters evolve."
   },
   {
     "url": "common-mistakes.html",
@@ -338,7 +436,7 @@
   {
     "url": "hub.html",
     "title": "cc-safe-setup: Claude Code Safety Hub",
-    "description": "727 example hooks, 56 commands, 28 browser tools, 30K+ total installs. Make Claude Code safe for autonomous operation. Prevents rm -rf, database destruction, force-push, secret leaks, and more.",
+    "description": "734 example hooks, 56 commands, 28 browser tools, 30K+ total installs. Make Claude Code safe for autonomous operation. Prevents rm -rf, database destruction, force-push, secret leaks, and more.",
     "keywords": "claude code, hooks, safety, autonomous, pretooluse, rm rf, git push, secrets, cc-safe-setup, database protection, production safety",
     "snippet": ""
   },
@@ -364,6 +462,20 @@
     "snippet": "Audit your setup and generate safety hooks — 100% in your browser. No npm required."
   },
   {
+    "url": "june-15-billing-cliff-exposure.html",
+    "title": "June 15 Claude Code billing cliff — are you exposed? (shareable check)",
+    "description": "On 2026-06-15 Anthropic moves programmatic Claude usage (Agent SDK, claude -p, GitHub Actions, third-party agents) off your subscription onto a separate dollar-metered credit at full API rates. Check in 20 seconds whether you're exposed, see your plan's new credit cap, and get a shareable exposure c",
+    "keywords": "",
+    "snippet": "On 2026-06-15 Anthropic moves programmatic Claude usage off your subscription onto a separate dollar-metered credit at full API list prices (no rollover). Interactive terminal use is unchanged. Check your exposure and share the card. Nothing leaves your browser."
+  },
+  {
+    "url": "june-15-cliff-checklist.html",
+    "title": "6月15日の Claude Code 課金分離の前の16日間の確認の手引き (5月30日始まり)",
+    "description": "2026年6月15日の Anthropic の Claude Code の課金分離 (Pool 1 と Pool 2 の経路) の前16日間の利用者の側の準備の確認の手引き。 5月30日から6月14日まで日次の整備の経路の整理。 道具の経路、 移行の判定、 監視の整備、 緊急の対応の整理。",
+    "keywords": "Claude Code, June 15, 課金分離, Pool 1, Pool 2, Migration, checklist, 確認",
+    "snippet": "2026年6月15日の Anthropic の Claude Code の課金の分離 (Pool 1 と Pool 2 の2軸の経路の分離) まで残り16日 (5月30日の段)。 業界の解析の合図で、 軽い作業の負荷で12倍、 重い Sonnet の自動の作業で150倍以上の費用の倍率の合図が観察されています。 利用者の側の16日間の日次の整備の経路の整理を本頁で公開します。"
+  },
+  {
     "url": "matchers.html",
     "title": "Hook Matchers — Which Tools Does Your Hook Apply To?",
     "description": "Complete matcher reference for Claude Code hooks. Bash, Edit, Write, Read, Agent — how to target specific tools.",
@@ -373,9 +485,16 @@
   {
     "url": "matrix.html",
     "title": "Claude Code Hooks Matrix — 605 Hooks Collection",
-    "description": "Interactive matrix of Claude Code hooks. Filter by trigger, category, and action type. 727 hooks available.",
+    "description": "Interactive matrix of Claude Code hooks. Filter by trigger, category, and action type. 734 hooks available.",
     "keywords": "",
-    "snippet": "727 hooks total — showing 67 curated hooks below. Browse all 605 →"
+    "snippet": "734 hooks total — showing 67 curated hooks below. Browse all 605 →"
+  },
+  {
+    "url": "max-usage-burn-checker.html",
+    "title": "Claude Code hitting Max limits too fast — is it you or the platform? (shareable check)",
+    "description": "#16157 'Instantly hitting usage limits with Max' has 720+ reactions. Your Pro/Max quota is shared across Claude and Claude Code. In 20 seconds, check how much of your fast burn is self-explainable (shared surfaces, Opus, big context) versus a possible platform anomaly worth reporting — and get a sha",
+    "keywords": "",
+    "snippet": "#16157 \"Instantly hitting usage limits with Max\" has 720+ reactions. Before you conclude it's a bug, the first thing most people miss: your Pro/Max quota is shared across Claude and Claude&nbsp;Code. This check sorts how much of your fast burn is self-explainable from a possible anomaly worth report"
   },
   {
     "url": "migration-guide.html",
@@ -392,6 +511,20 @@
     "snippet": "Claude Codeは1つのセッションで1つのタスクしか扱えない。コードを書きながらテストを走らせ、ドキュメントも更新する——これを1セッションでやるとコンテキストが膨らみ、トークン効率が悪化する。"
   },
   {
+    "url": "multi-vendor-fan-out-diagnostic-jp.html",
+    "title": "複数社の並列運用の自己診断 — あなたは4社のfleetを動かしているか",
+    "description": "",
+    "keywords": "",
+    "snippet": "5つの質問で、あなたが複数社のAIの道具を並列で動かす運用に当てはまるか、当てはまるならどの費用の形が一番重いかを見分けます。詳しくは複数社の並列運用の手引き（日本語の要点）へ。"
+  },
+  {
+    "url": "multi-vendor-fan-out-diagnostic.html",
+    "title": "Multi-Vendor Fan-Out Diagnostic — Are you running a fleet?",
+    "description": "",
+    "keywords": "",
+    "snippet": "Five questions → are you running a multi-vendor agentic fleet, and if so, which cost shape is hitting you hardest? Maps to the Multi-Vendor Fan-Out Field Guide."
+  },
+  {
     "url": "opus-47-data-loss-crisis.html",
     "title": "Opus 4.7 Data Loss Crisis — 47+ Bugs, 50GB Lost, and How to Protect Yourself",
     "description": "Opus 4.7 caused 20+ data loss incidents in 3 days. Auto mode classifier failure, 4x token burn, prompt cache destruction. Here are the hooks that stop it.",
@@ -404,6 +537,13 @@
     "description": "Opus 4.7 has critical bugs: 4x token consumption, data loss (50GB+), classifier failures. Here are the hooks and fixes that protect your work right now.",
     "keywords": "Claude Code Opus 4.7, token consumption, data loss, rm -rf, classifier bug, safety hooks, PreToolUse, auto mode",
     "snippet": "Known issues, immediate fixes, and safety hooks. Last updated: April 18, 2026."
+  },
+  {
+    "url": "opus-48-fabricated-tool-results.html",
+    "title": "Why does Claude Code's Opus 4.8 fabricate tool results? (2026)",
+    "description": "Opus 4.8 in Claude Code sometimes reports tool output that never ran — fabricated results, a hallucinated 'task complete', or made-up command output, often after a parallel tool batch is partially cancelled. Here's the documented pattern, how to tell a fabricated result from a real one, and what you",
+    "keywords": "",
+    "snippet": "When Opus 4.8 tells you a command succeeded, a file was written, or a test passed — but the tool never actually ran, or ran and was cancelled — you're seeing a documented failure pattern, not a one-off glitch. Here's what's happening, how to tell a fabricated result from a real one, and what you can"
   },
   {
     "url": "opus47-cost-estimator.html",
@@ -616,6 +756,13 @@
     "snippet": "Real problems. Copy-paste solutions. Each recipe is a working hook you can install in 10 seconds."
   },
   {
+    "url": "rewind-data-loss-recovery.html",
+    "title": "Claude Code /rewind deleted my code — how to recover and prevent it",
+    "description": "Pressing Esc twice (or running /rewind) and choosing the default 'Restore code and conversation' reverts your files with no preview of what's lost (#64615). Here is exactly what /rewind can and cannot touch, how to recover work right now, and the free hook that makes any accidental rewind recoverabl",
+    "keywords": "",
+    "snippet": "You pressed Esc twice (or ran /rewind), the first highlighted option was Restore code and conversation, you hit Enter — and edits you wanted are gone, with no preview of what was lost. This page explains exactly what /rewind can and cannot touch, how to get your work back right now, and the one free"
+  },
+  {
     "url": "risk-assessment.html",
     "title": "Claude Code Risk Assessment — How Exposed Are You?",
     "description": "5-question risk assessment based on 90 real Claude Code incidents. Find out your risk level and get personalized safety recommendations.",
@@ -630,11 +777,67 @@
     "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
   },
   {
+    "url": "safety-lab-august-preview.html",
+    "title": "Pro Max の利用枠が想定より早く枯渇する経路の3つの自己診断 — CC Safety Lab 試し読み",
+    "description": "Claude Code の Pro / Max 5x / Max 20x の購読の枠が想定より早く尽きる事案が10件の起票 (累計2,200反応) で表面化しています。 サーバ側のキャッシュの膨張、 副の作業者の並行、 セッション初期の文脈の読み込み の3つの独立な経路の自己診断の手順を全文公開 (約6,500字、 読了7分)。",
+    "keywords": "Claude Code, Pro Max, クォータ, トークン, cache_creation, ccusage, 月額, 月次便, Safety Lab, Ko-fi",
+    "snippet": "Claude Code の Pro / Max 5x / Max 20x の購読の枠が想定より早く尽きる事案が10件の起票 (累計2,200反応) で5ヶ月の継続の合図で表面化しています。 同じ作業の量でも、 サーバ側のキャッシュの膨張、 副の作業者の並行、 セッション初期の文脈の読み込み の3つの独立な経路の累積で、 枠の消費の率が大きく変わります。 本頁は CC Safety Lab の8月号の冒頭の章 (約6,500字、 読了7分) の全文公開です。"
+  },
+  {
+    "url": "safety-lab-december-preview.html",
+    "title": "利用方針の判別器の誤発火と利用者の側の4つの選択肢、 5件の防衛のhookの全件の出荷の整理 — CC Safety Lab 試し読み",
+    "description": "2026年5月18日以降、 Opus 系列で政策に違反しない通常のやり取りが利用方針の判別器に阻まれる事象が25件以上の独立な起票で報告。 4軸の合図の articulate と利用者の側の4つの選択肢、 5件の防衛のhookの全件の出荷の状態を全文公開 (約6,500字、 読了8分)。",
+    "keywords": "Claude Code, AUP, usage-policy, false positive, Opus, Sonnet, multilingual, cyber-safeguards, Safety Lab, Ko-fi, June 15",
+    "snippet": "2026年5月18日以降、 Claude Code で Opus 系列のモデル (4.7、 4.6、 1Mの異本) を選んだ状態で、 政策に違反しない通常のやり取りがサーバー側の利用方針の判別器に阻まれて、 応答が返らない事象が25件以上の独立な起票で広範に報告されている。 本頁は CC Safety Lab の12月号の冒頭の章 (約6,500字、 読了8分) の全文公開です。"
+  },
+  {
+    "url": "safety-lab-fit-diagnostic.html",
+    "title": "Should I Subscribe to CC Safety Lab? — 5-Question Fit Diagnostic",
+    "description": "5-question diagnostic to decide whether the ¥500/month CC Safety Lab Founder Membership matches your Claude Code operator setup. Browser-only, no signup, no telemetry. CC0.",
+    "keywords": "",
+    "snippet": "The diagnostic produces a 0–85 score across five factors. The bands are calibrated to the cost-of-one-avoided-incident vs ¥500/month subscription cost:"
+  },
+  {
+    "url": "safety-lab-july-preview.html",
+    "title": "過剰な設計は単発の事案では見えない: 16ヶ月の62件の記録の累積の数値からの発見の経路 — CC Safety Lab 試し読み",
+    "description": "Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークン、 2,109件の計画、 19% の実装の率 という累積の数値として表面化します。 thecatfix さんの起票61101 の手書きの分析の文書を中核に、 利用者の側の3つの自己点検の手順を全文公開 (約6,500字、 読了7分)。",
+    "keywords": "Claude Code, 過剰な設計, 複雑性の中毒, thecatfix, 月額, 月次便, Safety Lab, Ko-fi",
+    "snippet": "Claude Code の過剰な設計の様式は、 1件1件の事案では正しく見える複雑性の追加でも、 16ヶ月の窓で 968M トークン、 2,109件の計画、 19% の実装の率 という累積の数値として表面化します。 thecatfix さん (起票61101) の2026年5月24日の手書きの分析の文書を中核に、 利用者の側の3つの自己点検の手順を整理しました。 本頁は CC Safety Lab の7月号の冒頭の章 (約6,500字、 読了7分) の全文公開です。"
+  },
+  {
+    "url": "safety-lab-june-preview.html",
+    "title": "6月15日の課金分離の発火まで15日: 自動の経路の22日の準備の手引き — CC Safety Lab 試し読み",
+    "description": "2026年6月15日に Anthropic は claude -p や GitHub の自動の経路の利用を購読の枠から別の月次の枠に分離します。 自前の自動の経路を持つ方の発火の前22日の準備の7つの手順 (受領の便りの到来の準備、 自動の経路の棚卸し、 現在の使用量の取得、 事前飛行の検査、 上限の自動の停止の整備、 公式の鍵への切替の判定、 発火の前後の差分の取得) と3つの警告の予兆を全文公開 (約6,500字、 読了7分)。",
+    "keywords": "Claude Code, 6月15日, 課金分離, Pool 1, Pool 2, Anthropic, 月額, 月次便, Safety Lab, Ko-fi",
+    "snippet": "2026年6月15日に Anthropic は claude -p や GitHub の自動の経路など、 対話なしの利用を購読の枠から別の月次の枠に分離します。 自前の経路で月の予算を超過する見込みがある場合、 発火の前の準備の有無で6月の請求の金額が大きく変わります。 本頁は CC Safety Lab の6月号の冒頭の章 (約6,500字、 読了7分) の全文公開です。"
+  },
+  {
+    "url": "safety-lab-may-preview.html",
+    "title": "2026年5月の Claude Code の9件の事故事例の整理 — CC Safety Lab 試し読み",
+    "description": "2026年5月の Claude Code の運用で発生した9件の事故事例 (cache_control の API 400、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落とし、 Worktree、 Skill、 UI、 Cmd+F、 子の作業者の身分の漏れ、 2.1.126 の沈黙の退行) の整理を全文公開。 月額の Safety Lab の中身の質と書き方の深さの目安 (約6,000字、 読了5分)。",
+    "keywords": "Claude Code, 事故事例, 月額, 月次便, cache_control, Cowork, Worktree, Skills, Safety Lab, Ko-fi",
+    "snippet": "2026年5月の Claude Code の運用で、 cache_control の API 400 の集積から、 利用量の表示のずれ、 仕事の共有の予定の沈黙の見落としまで、 9件の事故事例の経路が表面化しました。 本頁は CC Safety Lab の5月号の冒頭の章 (約6,000字、 読了5分) の全文公開です。"
+  },
+  {
+    "url": "safety-lab-september-preview.html",
+    "title": "設定の権限の照合が動作しない7つの失敗の様式と利用者の側の3つの選択肢 — CC Safety Lab 試し読み",
+    "description": "settings.json の allow / deny / ask のルールが期待通りに照合しない事案が30件以上の起票 (累計約804反応、 area:permissions の上位25件の合計) で9ヶ月以上の継続の合図。 7軸の失敗の様式の articulate と、 利用者の側の3つの選択肢 (すべて欠陥) と、 4件の防衛のhookのうち2件の出荷状態を全文公開 (約6,800字、 読了8分)。",
+    "keywords": "Claude Code, permissions, settings.json, dangerously-skip-permissions, allow rule, deny rule, Always Allow, Safety Lab, Ko-fi",
+    "snippet": "~/.claude/settings.json と settings.local.json の allow と deny と ask のルールを配置したのに、 Claude Code が期待通りに照合しない事案が、 30件以上の起票 (累計約804反応、 area:permissions の上位25件の合計) で2025年8月から9ヶ月以上の継続の合図。 本頁は CC Safety Lab の9月号の冒頭の章 (約6,800字、 読了8分) の全文公開です。"
+  },
+  {
     "url": "safety-lab.html",
     "title": "CC Safety Lab: Claude Code の事故レポートと安全運用パックを毎月届ける（¥500/月）",
     "description": "Claude Code の事故事例、再発防止 hook、トークン節約手法を、毎月 1 本のレポートとして届ける。¥500/月 Founder 価格（grandfathered）。無料の試し読みあり。",
     "keywords": "Claude Code, safety, monthly report, incident, hook, token saving, Ko-fi, membership",
-    "snippet": "GitHub Issue から拾った事故事例、再発防止 hook、トークン節約手法を月 1 本のレポートに。Ko-fi メンバーシップ。"
+    "snippet": "Claude Code の GitHub Issue は月数百件で、 全部読む時間は取れない。 けれど、 起きている事故と版の変更と利用枠の異常は知っておきたい。 800 時間以上 Claude Code を自律で動かしてきた非エンジニアの著者が、 毎月の事故と対処と再発予防の hook を 1 本のレポートに整理してお届けします。 月額 ¥500 の Ko-fi メンバーシップ。"
+  },
+  {
+    "url": "safety-scorecard.html",
+    "title": "Claude Code Safety Scorecard — score your setup, share the card",
+    "description": "Check off the protections you have, get an honest X/8 coverage scorecard you can screenshot and share. Based on 8 real Claude Code incidents. No npm, runs entirely in your browser.",
+    "keywords": "",
+    "snippet": "Check the protections your setup has. Get an honest X / 8 coverage card you can screenshot and share.Each line is a real, documented incident. Nothing leaves your browser."
   },
   {
     "url": "security-checkup.html",
@@ -670,6 +873,13 @@
     "description": "Paste your Claude Code settings.json to detect common hook mistakes. Free validator from cc-safe-setup (700+ hooks).",
     "keywords": "",
     "snippet": "Paste your Claude Code settings.json to detect common hook configuration mistakes"
+  },
+  {
+    "url": "skills-audit-tool.html",
+    "title": "Claude Code Skills Audit — Find Which Installed Skills Never Fire",
+    "description": "Drop your Claude Code session log (~/.claude/projects/*.jsonl) and find out which of your installed Skills actually fire in practice. Half of installed skills don't activate; each unused skill burns ~200-500 context tokens per session. Browser-only, no upload, no telemetry.",
+    "keywords": "",
+    "snippet": "Drop your Claude Code session log and find out which of your installed Skills actually fire in practice. Half of installed skills don't activate per session — each unused one burns hundreds to thousands of context tokens."
   },
   {
     "url": "token-audit.html",
