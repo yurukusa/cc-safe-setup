@@ -122,7 +122,7 @@ const T = {
   en:{
     title:"Make all your AI tools read the same instructions",
     sub:'One file, every tool. Pick the AI coding tools you use and get the exact copy-paste setup so Claude Code, Codex, Cursor, Windsurf, Cline and Amp all read one <code>AGENTS.md</code> — edit once, and every tool stays in step. This is the setup behind the <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a> request (5,200+ reactions). Free, MIT, runs entirely in your browser — no upload, no telemetry.',
-    win:(c,names)=>`✓ Nice — with this, your <strong>${c}</strong> tool${c>1?"s":""} (${names}) all read one <code>AGENTS.md</code>. Edit one file, and every tool stays in step.`,
+    win:(c,names)=>`✓ Nice — with this, your <strong>${c}</strong> tool${c>1?"s":""} (${names}) ${c>1?"all read":"reads"} one <code>AGENTS.md</code>. Edit one file, and every tool stays in step.`,
     q1:"1 · Which AI coding tools do you use in this repo?",
     q1h:"AGENTS.md is the shared standard. Tools that read it natively need no setup; the others get a one-line link to it.",
     q2:"2 · A couple of details",
