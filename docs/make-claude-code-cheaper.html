@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How I made Claude Code cheaper: the 5 changes that worked (800-hour field notes)</title>
+<meta name="description" content="The few habits that reliably brought my Claude Code costs down and kept sessions calm and predictable, learned over an 800-hour autonomous run: fresh sessions per task, Sonnet for routine work, compacting on purpose, watching the numbers, and keeping context lean. Each one is a win you can copy today — free.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/make-claude-code-cheaper.html">
+<meta property="og:title" content="How I made Claude Code cheaper: the 5 changes that worked">
+<meta property="og:description" content="Five habits that reliably brought my Claude Code costs down and kept sessions calm — copy them today, free.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/make-claude-code-cheaper.html">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 18px 90px}
+  .back{display:inline-block;margin-bottom:1rem;color:var(--acc);font-size:.85rem}
+  h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em}
+  h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:1.05rem;margin:1.2em 0 .3em;color:#cdd6e6}
+  .sub{color:var(--mut);font-size:1.05rem;margin:0 0 8px}
+  .tag{display:inline-block;background:#1f3a31;color:var(--ok);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;margin:0 0 18px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .win{border-left:3px solid var(--ok)}
+  .win h3{color:var(--ok);margin-top:0}
+  code{background:#0b0d12;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em;color:#cfe0ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow:auto;font:13.5px/1.5 "SFMono-Regular",Consolas,Menlo,monospace;color:#d7dce6}
+  .result{color:var(--ok);font-weight:600}
+  .note{color:var(--mut);font-size:.92rem}
+  .cta{background:#16243b;border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin:22px 0}
+  .foot{color:var(--mut);font-size:.9rem;border-top:1px solid var(--line);padding-top:16px;margin-top:30px}
+  .foot a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; cc-safe-setup</a>
+  <span class="tag">Field notes · 800-hour autonomous run · independent</span>
+  <h1>How I made Claude Code cheaper — the 5 changes that worked</h1>
+  <p class="sub">Over an 800-hour autonomous run I tried a lot of things to bring the token bill down. Most of the gains came from just five small habits. Here they are — each one is a win you can copy today, and every one is free.</p>
+
+  <div class="card">
+    <p style="margin:0">The good news up front: you don't need a complicated setup to spend a lot less. The five changes below are the ones that kept paying off, turn after turn — leaner sessions, calmer bills, and faster replies as a bonus. Start with the first one; it did the most.</p>
+  </div>
+
+  <h2>The five wins</h2>
+
+  <div class="card win">
+    <h3>1. A fresh session per task — the single best change</h3>
+    <p>Starting a new session (<code>/clear</code>) whenever I switched topics turned out to be the biggest lever by far. A long session keeps re-sending its whole history every turn, so the per-turn cost quietly climbs as it grows. Clearing between unrelated tasks keeps every session short and the prompt small.</p>
+    <p class="result">Result: each turn stays cheap instead of getting ~10× pricier by turn 200, and replies come back faster because the model re-reads less.</p>
+    <p class="note">Habit: one task, one session. When you move to something unrelated, <code>/clear</code> and begin fresh.</p>
+  </div>
+
+  <div class="card win">
+    <h3>2. Sonnet for the everyday work — the biggest line-item drop</h3>
+    <p>Opus is wonderful for hard reasoning, but most routine work — edits, refactors, file shuffling, running commands — lands just as well on Sonnet, which is several times cheaper per token. Setting Sonnet as the default for ordinary turns and reaching for Opus only when a problem actually needs it was the change that moved the monthly number the most.</p>
+    <pre>/model sonnet     # everyday work
+/model opus       # bring it back for the genuinely hard problems</pre>
+    <p class="result">Result: the bulk of my turns ran on the cheaper model, and I honestly couldn't tell the difference on routine work.</p>
+  </div>
+
+  <div class="card win">
+    <h3>3. Compacting on purpose kept long sessions smooth</h3>
+    <p>When a session does need to run long, calling <code>/compact</code> yourself at a natural breakpoint (after finishing a sub-task) keeps it tidy and predictable. Doing it on purpose, rather than waiting for the automatic trigger to fire deep in a huge context, kept the summaries small and the flow uninterrupted.</p>
+    <p class="result">Result: long sessions stayed lean and steady, with no surprise pauses to re-summarize a giant transcript.</p>
+  </div>
+
+  <div class="card win">
+    <h3>4. Watching where the tokens go made costs calm and predictable</h3>
+    <p>Once I could actually see the numbers, the whole thing stopped feeling mysterious. The free, open-source <a href="https://github.com/ryoppippi/ccusage" target="_blank" rel="noopener">ccusage</a> reads your local session logs and shows a per-session breakdown, so you learn your own normal range and spot anything unusual early — no bill-day surprises.</p>
+    <p class="result">Result: spending became something I could plan around instead of guess at, which made every other habit on this list easy to keep.</p>
+    <p class="note">Tip: a one-line check after a heavy session is enough to keep your sense of "normal" current.</p>
+  </div>
+
+  <div class="card win">
+    <h3>5. Keeping context lean made every turn faster and cheaper</h3>
+    <p>Loading only what a task actually needs — trimming the files, tools, and MCP servers that get re-sent every single turn — pays off continuously, because anything in the context is paid for on every turn it survives. A tidy context is cheaper <em>and</em> snappier.</p>
+    <p class="result">Result: lighter prompts, quicker replies, and a smaller bill, all from the same habit.</p>
+  </div>
+
+  <h2>The shortlist</h2>
+  <div class="card">
+    <p style="margin:0 0 .4em">If you do just these, you'll feel it on the next bill:</p>
+    <ul style="margin:.2em 0 0">
+      <li><code>/clear</code> when you switch tasks — keep sessions short</li>
+      <li>Default to Sonnet; reach for Opus only when it's truly needed</li>
+      <li><code>/compact</code> on purpose at natural breakpoints</li>
+      <li>Glance at <code>ccusage</code> so you know your normal</li>
+      <li>Load only what the task needs</li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    Want the longer version? The free <a href="https://gist.github.com/yurukusa/ccd2bd793c71521d81eb4cfcd3900755" target="_blank" rel="noopener">field reference of cost patterns</a> lists every common cause with the fix for each, and the cc-safe-setup hooks watch your own usage for free so good habits are easy to keep. If you want the full worked-through playbook — per-task model routing, cache hygiene, and a token-reduction checklist with the math — the <a href="https://yurukusa.gumroad.com/l/azrdt" target="_blank" rel="noopener">Token &amp; Cost Survival Guide ($19)</a> collects everything that worked in one place.
+  </div>
+
+  <div class="foot">
+    <a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · Field notes from an independent 800-hour autonomous run; your mileage will vary with your workload. Model and pricing details change — confirm current rates against Anthropic's site.
+  </div>
+</div>
+</body>
+</html>
