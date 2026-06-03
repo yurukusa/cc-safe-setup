@@ -18379,6 +18379,33 @@ test_ex compact-alert-notification.sh '{"message":""}' 0 "compact-alert-notifica
 test_ex compact-alert-notification.sh '{"message":"Context compaction complete"}' 0 "compact-alert-notification: compaction complete exits 0"
 test_ex compact-alert-notification.sh '{"message":"COMPACT: reducing context from 900K to 200K"}' 0 "compact-alert-notification: uppercase COMPACT exits 0"
 
+# --- subagent-blast-radius-guard tests (#65152 / #63356 / #45108) ---
+# Main-thread writes (no agent_id) are never touched, in any mode.
+test_ex subagent-blast-radius-guard.sh '{"tool_input":{"file_path":"db/migrations/001.sql"}}' 0 "blast-radius: main-thread sensitive write ignored (no agent_id)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{}}' 0 "blast-radius: subagent missing file_path exits 0"
+test_ex subagent-blast-radius-guard.sh 'not json' 0 "blast-radius: malformed input fails open"
+# Default warn mode: advisory only, always exit 0.
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","agent_type":"general-purpose","tool_input":{"file_path":"src/app.js"}}' 0 "blast-radius: subagent ordinary write warn-mode exit 0"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","agent_type":"general-purpose","tool_input":{"file_path":"db/migrations/001_create.sql"}}' 0 "blast-radius: subagent sensitive write warns (exit 0)"
+# off mode disables entirely.
+export CC_SUBAGENT_WRITE_GUARD=off
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":".env"}}' 0 "blast-radius: off mode exits 0"
+unset CC_SUBAGENT_WRITE_GUARD
+# block mode: exit 2 on sensitive sub-agent writes, ordinary writes pass.
+export CC_SUBAGENT_WRITE_GUARD=block
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","agent_type":"general-purpose","tool_input":{"file_path":"prisma/migrations/x.sql"}}' 2 "blast-radius: block mode blocks subagent migration write (exit 2)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":".env.production"}}' 2 "blast-radius: block mode blocks subagent .env write (exit 2)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"infra/main.tf"}}' 2 "blast-radius: block mode blocks subagent terraform write (exit 2)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"yarn.lock"}}' 2 "blast-radius: block mode blocks subagent lockfile write (exit 2)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"src/util.js"}}' 0 "blast-radius: block mode allows subagent ordinary write (exit 0)"
+test_ex subagent-blast-radius-guard.sh '{"tool_input":{"file_path":"db/migrations/001.sql"}}' 0 "blast-radius: block mode still ignores main-thread write (exit 0)"
+unset CC_SUBAGENT_WRITE_GUARD
+# allowlist: out-of-scope sub-agent writes are flagged.
+export CC_SUBAGENT_WRITE_GUARD=block CC_SUBAGENT_WRITE_ALLOW="src/featureX/"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"src/other/util.js"}}' 2 "blast-radius: block mode blocks out-of-allowlist subagent write (exit 2)"
+test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"src/featureX/util.js"}}' 0 "blast-radius: block mode allows in-allowlist subagent write (exit 0)"
+unset CC_SUBAGENT_WRITE_GUARD CC_SUBAGENT_WRITE_ALLOW
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
