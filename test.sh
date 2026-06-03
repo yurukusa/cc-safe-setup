@@ -2678,6 +2678,12 @@ if [ -f "$EXDIR/terraform-guard.sh" ]; then
 
     EXIT=0; echo '{"tool_input":{"command":"terraform init"}}' | bash "$EXDIR/terraform-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
     [ "$EXIT" -eq 0 ] && echo "  PASS: terraform-guard allows terraform init" && PASS=$((PASS+1)) || { echo "  FAIL: terraform-guard should allow init (got $EXIT)"; FAIL=$((FAIL+1)); }
+
+    EXIT=0; echo '{"tool_input":{"command":"terraform apply -destroy"}}' | bash "$EXDIR/terraform-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && echo "  PASS: terraform-guard blocks apply -destroy" && PASS=$((PASS+1)) || { echo "  FAIL: terraform-guard should block apply -destroy (got $EXIT)"; FAIL=$((FAIL+1)); }
+
+    EXIT=0; echo '{"tool_input":{"command":"tofu destroy"}}' | bash "$EXDIR/terraform-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+    [ "$EXIT" -eq 2 ] && echo "  PASS: terraform-guard blocks tofu destroy (OpenTofu)" && PASS=$((PASS+1)) || { echo "  FAIL: terraform-guard should block tofu destroy (got $EXIT)"; FAIL=$((FAIL+1)); }
 fi
 
 # --- 9. test-coverage-guard (warning-only, always exit 0) ---
@@ -6544,7 +6550,7 @@ test_ex terraform-guard.sh '{"tool_input":{"command":"terraform apply"}}' 0 "ter
 test_ex terraform-guard.sh '{"tool_input":{"command":""}}' 0 "terraform-guard: empty command passes"
 test_ex terraform-guard.sh '{"tool_input":{"command":"echo terraform destroy"}}' 2 "terraform-guard: echo terraform destroy still matches grep"
 test_ex terraform-guard.sh '{"tool_input":{"command":"terraform state list"}}' 0 "terraform-guard: terraform state list allowed"
-test_ex terraform-guard.sh '{"tool_input":{"command":"tofu destroy"}}' 0 "terraform-guard: opentofu destroy not matched (terraform only)"
+test_ex terraform-guard.sh '{"tool_input":{"command":"tofu destroy"}}' 2 "terraform-guard: opentofu (tofu) destroy now blocked too"
 test_ex tmp-cleanup.sh '{"stop_reason":"user"}' 0 "tmp-cleanup: user stop reason"
 test_ex tmp-cleanup.sh '{"stop_reason":"compact"}' 0 "tmp-cleanup: compact stop reason"
 test_ex uncommitted-work-guard.sh '{"tool_input":{"command":"git checkout -b new-feature"}}' 0 "uncommitted-work-guard: git checkout -b (create branch) passes"
@@ -11377,6 +11383,10 @@ test_ex prisma-migrate-guard.sh '{}' 0 "prisma-migrate-guard: empty input"
 test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit drop"}}' 2 "drizzle-migrate-guard: drop blocked"
 test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit generate"}}' 0 "drizzle-migrate-guard: generate passes"
 test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit migrate"}}' 0 "drizzle-migrate-guard: migrate passes"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit push --force"}}' 2 "drizzle-migrate-guard: push --force blocked (#27063)"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit push --force-reset"}}' 2 "drizzle-migrate-guard: push --force-reset blocked"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"drizzle-kit push:pg --force"}}' 2 "drizzle-migrate-guard: legacy push:pg --force blocked"
+test_ex drizzle-migrate-guard.sh '{"tool_input":{"command":"npx drizzle-kit push --force"}}' 2 "drizzle-migrate-guard: npx push --force blocked"
 test_ex drizzle-migrate-guard.sh '{"tool_input":{}}' 0 "drizzle-migrate-guard: empty command"
 test_ex drizzle-migrate-guard.sh '{}' 0 "drizzle-migrate-guard: empty input"
 test_ex turbo-cache-guard.sh '{"tool_input":{"command":"turbo clean"}}' 0 "turbo-cache-guard: clean warns (exit 0)"

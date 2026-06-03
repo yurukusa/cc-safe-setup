@@ -31,4 +31,17 @@ if echo "$COMMAND" | grep -qE 'drizzle-kit\s+drop'; then
     exit 2
 fi
 
+# Block 'drizzle-kit push --force'. Plain 'push' prompts before any data-loss
+# change; --force (and the legacy push:pg/push:mysql/push:sqlite variants)
+# skips that prompt and applies the change directly — the exact way autonomous
+# agents have wiped production databases (anthropics/claude-code#27063, and the
+# sibling prisma case #36183). The header has always advertised this block; it
+# was never implemented, so a user relying on this hook was unprotected.
+if echo "$COMMAND" | grep -qE 'drizzle-kit\s+push(:[a-z]+)?\b' && echo "$COMMAND" | grep -qE '\-\-force(-reset)?\b'; then
+    echo "BLOCKED: 'drizzle-kit push --force' applies schema changes without the data-loss prompt and can wipe table data." >&2
+    echo "Command: $COMMAND" >&2
+    echo "Use 'drizzle-kit generate' + 'drizzle-kit migrate' for a reviewable migration, or drop --force to keep the interactive guard." >&2
+    exit 2
+fi
+
 exit 0
