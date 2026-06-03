@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-03T14:56:49+09:00
+Updated: 2026-06-03T14:57:04+09:00
 
 ## Git
 - Branch: `docs/cheaper-wins-positive-2026-06-03`
@@ -7,13 +7,13 @@ Updated: 2026-06-03T14:56:49+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 6dc4fbf1 recovery: pre-compact checkpoint (1 files, 20260603-055649)
+- Last commit: f06c6c97 recovery: pre-compact checkpoint (1 files, 20260603-055704)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-06-03.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./tests/test-subscription-api-billing-warner.sh
 ./examples/agents-md-sync-checker.sh
