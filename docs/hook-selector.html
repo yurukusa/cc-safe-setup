@@ -192,14 +192,14 @@ const TOTAL = 5;
 
 // Hook database — each hook has conditions for when it's recommended
 const hooks = [
-  {name:'destructive-guard',cat:'Safety',why:'Blocks rm -rf, git reset --hard, and other destructive commands',when:{concern:['files'],mode:['interactive','semi','auto']}},
-  {name:'main-branch-guard',cat:'Safety',why:'Prevents direct push to main/master branch',when:{concern:['files','quality'],mode:['interactive','semi','auto']}},
-  {name:'secret-scan-guard',cat:'Security',why:'Detects .env, API keys, tokens in file writes',when:{concern:['secrets'],mode:['interactive','semi','auto']}},
+  {name:'banned-command-guard',cat:'Safety',why:'Blocks rm -rf, git reset --hard, and other destructive commands — even in auto/bypass mode',when:{concern:['files'],mode:['interactive','semi','auto']}},
+  {name:'main-branch-warn',cat:'Safety',why:'Warns before a direct push to main/master branch',when:{concern:['files','quality'],mode:['interactive','semi','auto']}},
+  {name:'credential-exfil-guard',cat:'Security',why:'Detects .env, API keys, tokens leaving in file writes or output',when:{concern:['secrets'],mode:['interactive','semi','auto']}},
   {name:'large-read-guard',cat:'Token',why:'Warns when reading files over 100KB — prevents token waste',when:{concern:['tokens'],mode:['semi','auto']}},
   {name:'token-budget-guard',cat:'Token',why:'Tracks estimated token usage and blocks when budget exceeded',when:{concern:['tokens'],mode:['semi','auto']}},
   {name:'subagent-budget-guard',cat:'Token',why:'Limits subagent spawning to prevent token explosions',when:{concern:['tokens'],agents:['subagents','both']}},
-  {name:'duplicate-read-detector',cat:'Token',why:'Warns when the same file is read multiple times',when:{concern:['tokens'],mode:['semi','auto']}},
-  {name:'syntax-check-after-edit',cat:'Quality',why:'Runs syntax validation after every file edit',when:{concern:['quality'],mode:['interactive','semi','auto']}},
+  {name:'output-token-spike-detector',cat:'Token',why:'Flags a single turn burning far more output tokens than usual (the Opus 4.8 regression)',when:{concern:['tokens'],mode:['semi','auto']}},
+  {name:'json-syntax-check',cat:'Quality',why:'Validates JSON after edits (language-specific variants exist too: go-vet-after-edit, java-compile-on-edit)',when:{concern:['quality'],mode:['interactive','semi','auto']}},
   {name:'scope-guard',cat:'Safety',why:'Prevents operations outside the project directory',when:{concern:['files'],mode:['semi','auto']}},
   {name:'pre-compact-checkpoint',cat:'Safety',why:'Auto-saves work before context compaction',when:{mode:['semi','auto'],incident:['minor','major']}},
   {name:'token-spike-alert',cat:'Token',why:'Alerts on rapid tool calls that suggest runaway behavior',when:{concern:['tokens'],mode:['auto']}},
@@ -210,8 +210,12 @@ const hooks = [
   {name:'auto-approve-readonly',cat:'Workflow',why:'Auto-approves read-only operations (Glob, Grep, Read)',when:{mode:['auto'],level:['intermediate','advanced']}},
   {name:'block-database-wipe',cat:'Safety',why:'Blocks DROP DATABASE, migrate:fresh, db:drop, TRUNCATE — prevents production DB destruction',when:{concern:['files'],mode:['semi','auto'],incident:['major']}},
   {name:'db-connect-guard',cat:'Security',why:'Blocks connections to production databases (checks for production hostnames)',when:{concern:['secrets','files'],mode:['auto'],incident:['major']}},
-  {name:'fabrication-detection',cat:'Verification',why:'Detects fake test results, fabricated context warnings, and exit code mismatches',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
-  {name:'exit-code-verifier',cat:'Verification',why:'Flags when command exits non-zero but output claims success',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
+  {name:'deployment-verify-guard',cat:'Verification',why:'Requires real verification before treating a deploy/action as done — defends against Opus 4.8 claiming work it did not do',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
+  {name:'closure-word-verify-gate',cat:'Verification',why:'Catches "done / fixed / passed" claims that are not backed by the actual command result',when:{concern:['fabrication','quality'],mode:['semi','auto']}},
+  {name:'auto-checkpoint',cat:'Safety',why:'Commits a throwaway branch before risky operations — your ground truth to compare any "I fixed it" claim against the real working tree',when:{concern:['files','fabrication'],mode:['semi','auto'],incident:['minor','major']}},
+  {name:'subscription-api-billing-warner',cat:'Token',why:'Warns when an ANTHROPIC_API_KEY/AUTH_TOKEN would route your subscription work onto paid credits — the #1 way Max users pay twice after the June 15 billing split',when:{concern:['tokens'],mode:['interactive','semi','auto']}},
+  {name:'cowork-model-picker-advisor',cat:'Token',why:'Flags when a 1M-context or higher-cost model is selected for routine work, before it bills you',when:{concern:['tokens']}},
+  {name:'multi-vendor-concurrent-warner',cat:'Safety',why:'Warns when another AI CLI (Codex/Cursor/Gemini/Aider) is running in the same repo — conflicting edits and invisible combined cost',when:{concern:['files','tokens'],agents:['subagents','both']}},
 ];
 
 function answer(step, value) {
