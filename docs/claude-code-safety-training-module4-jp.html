@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モジュール 4: サブエージェントと auto モードを制御する（Claude Code 安全運用 研修）— cc-safe-setup</title>
+<meta name="description" content="Claude Code 安全運用 研修のモジュール 4 の公開版。委譲したサブエージェントの暴走と、auto（自動承認）での分類器の見落としと巻き添えを、実行の層で止める方法を、実際に報告された事故と、手を動かす演習で学びます。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="モジュール 4: サブエージェントと auto モードを制御する（Claude Code 安全運用 研修）">
+<meta property="og:description" content="サブエージェントの暴走とauto モードの巻き添えを、実行の層のhookで止める。手を動かす演習つきの公開モジュール。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-module4-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; --red:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.55rem; line-height:1.4; margin-bottom:0.5rem; }
+h2 { font-size:1.22rem; margin:2.2rem 0 0.9rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.3rem 0 0.4rem; font-size:1.05rem; }
+.crumb { color:var(--gray); font-size:0.9rem; margin-bottom:1rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.4rem; }
+.obj { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.case { background:var(--light); border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; border-left:4px solid var(--red); }
+.case h3 { margin-top:0; }
+.case dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.step { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; }
+.note { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:0.9rem 1rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; margin:0.6rem 0; }
+code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.88em; }
+pre code { background:none; color:inherit; padding:0; }
+.check { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid var(--green); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+ul,ol { padding-left:1.5rem; } li { margin-bottom:0.45rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.8rem 1.5rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="crumb"><a href="claude-code-safety-training-jp.html">Claude Code 安全運用 研修</a> ／ モジュール 4（公開版）</p>
+<h1>モジュール 4: サブエージェントと auto モードを制御する</h1>
+<p class="subtitle">委譲の暴走と、自動承認の巻き添えを、実行の層で止める。実際の事故と、手を動かす演習で学びます。</p>
+
+<div class="obj">
+<strong>このモジュールの到達目標。</strong> 委譲したサブエージェントの想定外の書き換えと、auto（自動承認）モードでの破壊的な操作の巻き添えを、自動承認とは<strong>別の層</strong>で止める hook を設定し、実機で検証できる。委譲と自動化の安全の境界を設計できる。
+</div>
+
+<p>これは研修の公開のモジュールです。そのまま読んで手を動かせます。<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>・<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a>・<a href="claude-code-safety-training-module3-jp.html">モジュール 3</a>に続く4本目で、残りのモジュール（組織の baseline、事故対応）の構成は<a href="claude-code-safety-training-jp.html">カリキュラム</a>をご覧ください。</p>
+
+<h2>1. なぜ委譲と自動化が危険なのか</h2>
+<p>作業をサブエージェントに委譲したり、auto（自動承認）モードで人の確認を省いたりすると、速度は上がりますが、<strong>人の目が届かないところで操作が実行されます</strong>。サブエージェントは、頼んだ範囲を超えて広く書き換えることがあり、auto モードは、安全の分類器が見落とした破壊的な操作を自動で承認してしまうことがあります。</p>
+<p>ここで効くのは、自動承認とは<strong>別の層</strong>の防御です。Claude Code の hook は、サブエージェント由来のツール呼び出しでも発火し、その入力には <code>agent_id</code> と <code>agent_type</code> が付きます（メインの会話の呼び出しには付きません）。だから、サブエージェントの書き込みだけを識別して、危険な対象なら止められます。auto モードの破壊的なコマンドも、分類器とは別に、実行の手前の hook で止められます。</p>
+
+<h2>2. 実際の事故を読む</h2>
+<p>抽象論ではなく、番号で辿れる実際の報告で学びます。</p>
+
+<div class="case">
+<h3>「2つコマンドを実行して」が、15個の無断の書き換えになった（<a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>Haiku のサブエージェントに2つのコマンドの実行を頼んだら、頼んでいない15個のファイルの書き換えが実行された。</dd>
+<dt>なぜ起きたか</dt><dd>委譲したサブエージェントの書き込みの範囲を、実行の層で制限する仕組みが無かった。</dd>
+<dt>何が止めたはずか</dt><dd>サブエージェント由来の書き込みを <code>agent_id</code> で識別して、高リスクの対象を止める hook（<code>subagent-blast-radius-guard</code>）。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>「外科的な編集だけ」と指示しても、設定ファイルを過剰に書き換えた（<a href="https://github.com/anthropics/claude-code/issues/63356">#63356</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>「surgical edits only（最小限の編集だけ）」と明示したのに、サブエージェントが構造化された設定ファイルを広く書き換えた。</dd>
+<dt>なぜ起きたか</dt><dd>文章の指示は素通りされうる。委譲の書き込みの範囲は、指示でなく実行の層で守る必要がある。</dd>
+<dt>何が止めたはずか</dt><dd>マイグレーション・設定・スキーマなどの高リスクのパスへのサブエージェントの書き込みを止める hook。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>auto モードが、頼んでいないワイルドカードの削除でユーザーのファイルを消した（<a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>auto モードで、要求していないワイルドカードの <code>rm</code> が実行され、確認なしでユーザーのファイルが消えた。</dd>
+<dt>なぜ起きたか</dt><dd>自動承認の安全の分類器が破壊的な操作を見落とし、巻き添えを止める層が無かった。</dd>
+<dt>何が止めたはずか</dt><dd>auto モードでも実行の手前で破壊的なコマンドを止める hook（<code>auto-mode-safety-enforcer</code>）。hook は自動承認とは別の層で効きます。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>worktree の分離が、サブエージェントの書き込みを分離しなかった（<a href="https://github.com/anthropics/claude-code/issues/56137">#56137</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd><code>isolation: "worktree"</code> を指定しても、サブエージェントのファイルの書き込みが実際には分離されなかった。</dd>
+<dt>何が止めたはずか</dt><dd>分離の設定に頼らず、サブエージェントの書き込みそのものを実行の層で識別・制限する hook。</dd>
+</dl>
+</div>
+
+<h2>3. 演習: 委譲と自動化の境界を入れる</h2>
+<p>実際に hook を入れて、サブエージェントの書き込みと auto モードの破壊的な操作が止まることを確認します。所要およそ10分。</p>
+
+<div class="step">
+<h3>手順 1. hook の一式を入れる</h3>
+<p>cc-safe-setup（無料・MIT）が、委譲と自動化の防御の hook を1コマンドで入れます。</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>これで <code>subagent-blast-radius-guard</code>（<code>Edit|Write</code>）と <code>auto-mode-safety-enforcer</code>（<code>Bash</code>）を含む hook が登録されます。サブエージェントの防御は既定が「警告」で、止めるのは opt-in です（途中で止めると委譲が壊れることがあるため）。止める運用にするには環境変数を設定します。</p>
+<pre><code>export CC_SUBAGENT_WRITE_GUARD=block</code></pre>
+</div>
+
+<div class="step">
+<h3>手順 2. サブエージェントの高リスクの書き込みが止まることを確認する</h3>
+<p>hook は、入力に <code>agent_id</code> があればサブエージェント由来と判定します。高リスクのパス（マイグレーションなど）への書き込みが止まり、通常のファイルは通り、メインの会話の書き込みは止まらないことを確かめます。</p>
+<pre><code># サブエージェントがマイグレーションを書こうとすると止まる（終了コード 2）
+echo '{"agent_id":"a1","agent_type":"general","tool_name":"Write","tool_input":{"file_path":"db/migrations/0001_init.sql"}}' \
+  | ~/.claude/hooks/subagent-blast-radius-guard.sh ; echo "exit=$?"
+
+# サブエージェントの通常のソースの書き込みは通過（終了コード 0）
+echo '{"agent_id":"a1","agent_type":"general","tool_name":"Write","tool_input":{"file_path":"src/util.js"}}' \
+  | ~/.claude/hooks/subagent-blast-radius-guard.sh ; echo "exit=$?"
+
+# メインの会話（agent_id 無し）の書き込みは止めない（終了コード 0）
+echo '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/0001_init.sql"}}' \
+  | ~/.claude/hooks/subagent-blast-radius-guard.sh ; echo "exit=$?"</code></pre>
+<p>最初だけ <code>BLOCKED: sub-agent ...</code> とともに <code>exit=2</code>、残りは <code>exit=0</code> になれば、委譲の境界が効いています（環境変数は <code>CC_SUBAGENT_WRITE_GUARD=block</code>）。</p>
+</div>
+
+<div class="step">
+<h3>手順 3. auto モードの破壊的な操作が止まることを確認する</h3>
+<p><code>auto-mode-safety-enforcer</code> は、どのモデルや権限のモードでも、破壊的なコマンドを実行の手前で止めます（分類器が見落としても効く層）。</p>
+<pre><code># ホームの配下への再帰的な削除は止まる（#64559 の型、終了コード 2）
+echo '{"tool_input":{"command":"rm -rf /home/me/project"}}' \
+  | ~/.claude/hooks/auto-mode-safety-enforcer.sh ; echo "exit=$?"
+
+# 安全な削除（依存の一式）は通過（終了コード 0）
+echo '{"tool_input":{"command":"rm -rf node_modules"}}' \
+  | ~/.claude/hooks/auto-mode-safety-enforcer.sh ; echo "exit=$?"</code></pre>
+<p>最初が <code>exit=2</code>、安全な削除が <code>exit=0</code> になれば、auto モードでも別の層の防御が効いています。</p>
+</div>
+
+<div class="check">
+<strong>確認（このモジュールの修了の判定）。</strong> 次のすべてに「はい」と答えられれば修了です。
+<ul>
+<li>サブエージェントの高リスクのパスへの書き込みが <code>exit=2</code> で止まり、通常のパスとメインの会話の書き込みは <code>exit=0</code> で通ることを確認した。</li>
+<li>auto モードの破壊的な削除が <code>exit=2</code> で止まり、安全な削除は <code>exit=0</code> で通ることを確認した。</li>
+<li>hook が自動承認とは「別の層」で効く理由（<code>agent_id</code> による識別と、分類器に依らない実行の手前の遮断）を、自分の言葉で説明できる。</li>
+<li>サブエージェントの既定が「警告」で、止めるのが opt-in である理由を説明できる。</li>
+</ul>
+</div>
+
+<h2>4. 自社への適用</h2>
+<ul>
+<li>委譲を多用するチームは、まず既定の「警告」で全サブエージェントの書き込みの範囲を可視化し、対象を絞ってから <code>block</code> にする。</li>
+<li>マイグレーション・IaC・本番の設定・スキーマ・CI のワークフローを、高リスクのパスとして守る（<code>CC_SUBAGENT_WRITE_ALLOW</code> で許可するパスを絞れる）。</li>
+<li><code>auto-mode-safety-enforcer</code> を全員の環境に入れ、auto モードでも破壊的な操作が分類器に依らず止まる状態にする。</li>
+<li>分離の設定（<code>isolation: "worktree"</code>）だけに安全を頼らない（<a href="https://github.com/anthropics/claude-code/issues/56137">#56137</a> のように分離されないことがある）。実行の層の hook で二重に守る。</li>
+</ul>
+
+<h2>次のモジュールと、研修の全体</h2>
+<p>このモジュールは「委譲と自動化の境界の層」です。研修の全体（約12時間・7モジュール）では、削除とデータ破壊（<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>）、機密と認証情報（<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a>）、費用と利用枠（<a href="claude-code-safety-training-module3-jp.html">モジュール 3</a>）に続き、組織の baseline と CI のゲート、事故対応と復旧までを、同じように手を動かして学びます。</p>
+
+<p>
+<a class="cta" href="claude-code-safety-training-jp.html">研修のカリキュラム全体を見る</a>
+<a class="cta sub" href="services-jp.html">法人での実施・費用の相談</a>
+</p>
+<p class="honest">本モジュールは公開版です。引用した事故はすべて番号で辿れる実際の報告で、演習で使う hook はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）に実在します。演習のコマンドは作者が実機で検証しています。個人での利用は無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のモジュール 4（公開版） ·
+<a href="claude-code-safety-training-jp.html">研修カリキュラム</a> ·
+<a href="claude-code-safety-training-module3-jp.html">モジュール 3</a> ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
