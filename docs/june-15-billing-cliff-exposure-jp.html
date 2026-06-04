@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6月15日の課金の崖、あなたは影響を受ける？（共有できる30秒診断）</title>
+<meta name="description" content="2026年6月15日、Anthropicは「プログラム経由」のClaude利用（Agent SDK・claude -p・GitHub Actions・第三者のエージェント）を購読の枠から外し、別建ての月額クレジット（API料金、繰り越しなし）に移します。30秒で自分が影響を受けるか、自分のプランの新しいクレジット枠、共有できる結果カードを確認できます。">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/june-15-billing-cliff-exposure-jp.html">
+<meta property="og:title" content="6月15日の課金の崖、あなたは影響を受ける？">
+<meta property="og:description" content="プログラム経由のClaude利用は6月15日に購読の枠を離れます。自分の影響とプランの新しいクレジット枠を30秒で確認し、結果カードを共有できます。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/june-15-billing-cliff-exposure-jp.html">
+<meta property="og:image" content="https://yurukusa.github.io/cc-safe-setup/june-15-billing-cliff-exposure-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://yurukusa.github.io/cc-safe-setup/june-15-billing-cliff-exposure-og.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem}
+.container{max-width:680px;width:100%}
+.back{display:block;margin-bottom:1rem;color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.4rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:1.5rem;line-height:1.7}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:1.25rem}
+.q{font-weight:600;color:#f0f6fc;font-size:.95rem;margin:.9rem 0 .5rem}
+.q:first-child{margin-top:0}
+.opts{display:flex;gap:.5rem;flex-wrap:wrap}
+.opt{background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:.45rem .85rem;cursor:pointer;font-size:.85rem;color:#c9d1d9;transition:all .15s}
+.opt:hover{border-color:#58a6ff}
+.opt.on{border-color:#1f6feb;background:#15233f;color:#cfe0ff}
+.surfaces .opt.on{border-color:#d29922;background:#2b2410;color:#ffd479}
+.note{color:#8b949e;font-size:.82rem;margin-top:.35rem;line-height:1.6}
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.1rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;text-decoration:none}
+.btn-primary{background:#238636;color:#fff}.btn-primary:hover{background:#2ea043}
+.btn-x{background:#1da1f2;color:#fff}
+.btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.cta{margin-top:1.75rem;background:#16243b;border:1px solid #1f6feb;border-radius:10px;padding:1rem 1.2rem;font-size:.9rem;line-height:1.7}
+.cta a{color:#79c0ff;font-weight:600;text-decoration:none}
+.footer{margin-top:2rem;font-size:.75rem;color:#484f58;text-align:center;line-height:1.8}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; cc-safe-setup</a>
+<h1>6月15日の課金の崖、あなたは影響を受ける？</h1>
+<p class="subtitle"><strong>2026年6月15日</strong>、Anthropicは<em>プログラム経由</em>のClaude利用を購読の枠から外し、別建ての月額クレジット（API料金、繰り越しなし）に移します。端末での対話的な利用は変わりません。自分が影響を受けるかを確認し、結果カードを共有できます。入力は一切ブラウザの外に出ません。</p>
+
+<div class="panel">
+  <div class="q">あなたのプラン</div>
+  <div class="opts" id="plan"></div>
+  <div class="q">Claudeを<em>プログラム経由</em>で動かしていますか？（使っているものを全部選ぶ）</div>
+  <div class="opts surfaces" id="surfaces"></div>
+  <div class="note">Agent SDK、<code>claude -p</code>（ヘッドレス）、Claude Code の GitHub Actions、第三者のエージェントのアプリは、すべて新しいクレジットの枠に移ります。端末での素の対話的な利用、claude.ai、Cowork は<strong>移りません</strong>。</div>
+  <div class="q">そのプログラム経由の利用は、だいたいどのくらい重いですか？</div>
+  <div class="opts" id="intensity"></div>
+</div>
+
+<div class="cardwrap">
+<canvas id="card" width="1320" height="1100"></canvas>
+<div class="actions">
+<button class="btn btn-primary" onclick="downloadPNG()">⬇ カードを保存</button>
+<button class="btn btn-ghost" onclick="copyImage()">⧉ 画像をコピー</button>
+<button class="btn btn-ghost" onclick="copyLink()">🔗 共有リンクをコピー</button>
+<a class="btn btn-x" id="xshare" target="_blank" rel="noopener">Xで共有</a>
+</div>
+</div>
+
+<div class="cta">
+このカードが教えるのは「影響を受けるか」と「自分のプランの新しいクレジット枠」です。実際の請求額は、自分のトークンの内訳とAPI料金で決まるため、あえて推測しません。実際の金額を出して<strong>残る／移る／併用する</strong>を判断したい場合は、費用を構造的に下げる手引き <a href="https://zenn.dev/yurukusa/books/token-savings-guide" target="_blank" rel="noopener">Token Book（¥2,500、第1章無料）</a>が、新しいクレジットを長持ちさせる手順をまとめています。まず無料で読むなら、<a href="https://qiita.com/yurukusa/items/6dc849eea5a9b3fd926c" target="_blank" rel="noopener">6月15日の課金分離の解説（Qiita）</a>からどうぞ。
+</div>
+
+<div class="footer">
+<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · Anthropicの告知 2026-05-13、施行 2026-06-15 — 正確な条件はAnthropicの公式の案内で確認してください。<br>
+これは影響の自己診断であり、請求額の見積もりや財務の助言ではありません。
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 6月15日の崖は Claude Code の利用者にとって最も時限性の高い費用の出来事。
+// このニッチで効く到達は「共有したくなる小さな成果物」。英語版の暴露診断の日本語版で、
+// 影響の有無＋プランごとのクレジット枠＋残り日数を URL に埋め、共有リンクが同じ結果を再現する。
+// 誠実さを保つ: 誰が影響を受けるか・公開されたプランごとの枠だけを示し、推測のドル請求は出さない。
+var PLANS = [
+  {id:'pro', label:'Pro（$20）', credit:'$20'},
+  {id:'max5', label:'Max 5×（$100）', credit:'$100'},
+  {id:'max20', label:'Max 20×（$200）', credit:'$200'},
+];
+var SURFACES = [
+  {id:'sdk', label:'Agent SDK'},
+  {id:'headless', label:'claude -p / ヘッドレス'},
+  {id:'gha', label:'GitHub Actions'},
+  {id:'thirdparty', label:'第三者のエージェント'},
+];
+var INTENSITY = [
+  {id:'none', label:'使っていない / 不明'},
+  {id:'light', label:'軽い'},
+  {id:'heavy', label:'重い / 毎日'},
+];
+
+var state = { plan:'max5', surfaces:{}, intensity:'light' };
+
+function readURL(){
+  var p = new URLSearchParams(location.search);
+  if(PLANS.some(function(x){return x.id===p.get('p')})) state.plan = p.get('p');
+  if(['none','light','heavy'].indexOf(p.get('i'))>=0) state.intensity = p.get('i');
+  var s = p.get('s')||'';
+  SURFACES.forEach(function(x){ state.surfaces[x.id] = s.indexOf(x.id)>=0; });
+}
+function writeURL(){
+  var s = SURFACES.filter(function(x){return state.surfaces[x.id]}).map(function(x){return x.id}).join('.');
+  var url = location.origin + location.pathname + '?p='+state.plan+'&i='+state.intensity+(s?'&s='+s:'');
+  history.replaceState(null,'',url);
+  return url;
+}
+
+function renderControls(){
+  var pe=document.getElementById('plan'); pe.innerHTML='';
+  PLANS.forEach(function(x){ var d=document.createElement('div'); d.className='opt'+(state.plan===x.id?' on':''); d.textContent=x.label; d.onclick=function(){state.plan=x.id;renderControls();render();}; pe.appendChild(d); });
+  var se=document.getElementById('surfaces'); se.innerHTML='';
+  SURFACES.forEach(function(x){ var d=document.createElement('div'); d.className='opt'+(state.surfaces[x.id]?' on':''); d.textContent=x.label; d.onclick=function(){state.surfaces[x.id]=!state.surfaces[x.id];renderControls();render();}; se.appendChild(d); });
+  var ie=document.getElementById('intensity'); ie.innerHTML='';
+  INTENSITY.forEach(function(x){ var d=document.createElement('div'); d.className='opt'+(state.intensity===x.id?' on':''); d.textContent=x.label; d.onclick=function(){state.intensity=x.id;renderControls();render();}; ie.appendChild(d); });
+}
+
+function daysToCliff(){
+  var cliff = new Date('2026-06-15T00:00:00Z').getTime();
+  var now = new Date().getTime();
+  return Math.ceil((cliff-now)/(1000*60*60*24));
+}
+function planObj(){ return PLANS.filter(function(x){return x.id===state.plan})[0]; }
+function affected(){ return SURFACES.some(function(x){return state.surfaces[x.id]}) && state.intensity!=='none'; }
+
+var canvas=document.getElementById('card'), ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height, S=2;
+function px(v){return v*S;}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function render(){
+  var aff=affected(), plan=planObj(), days=daysToCliff();
+  var accent = aff ? '#f0883e' : '#3fb950';
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=px(1.5); roundRect(px(8),px(8),W-px(16),H-px(16),px(16)); ctx.stroke();
+  var padX=px(40); var y=px(58);
+  ctx.textBaseline='alphabetic';
+  ctx.font='700 '+px(26)+'px sans-serif'; ctx.fillStyle='#f0883e'; ctx.fillText('6月15日 課金の崖',padX,y);
+  var w1=ctx.measureText('6月15日 課金の崖').width;
+  ctx.fillStyle='#8b949e'; ctx.fillText('  ·  影響の診断',padX+w1,y);
+  // 判定
+  y+=px(64);
+  ctx.font='700 '+px(44)+'px sans-serif'; ctx.fillStyle=accent;
+  ctx.fillText(aff?'影響あり':'影響なし', padX, y);
+  y+=px(40);
+  ctx.font='400 '+px(20)+'px sans-serif'; ctx.fillStyle='#c9d1d9';
+  var line2 = aff
+    ? 'プログラム経由の利用が新しいクレジットの枠に移ります。'
+    : '対話だけの利用は、この崖では変わりません。';
+  ctx.fillText(line2, padX, y);
+  // 残り日数
+  y+=px(54);
+  ctx.font='700 '+px(22)+'px sans-serif'; ctx.fillStyle='#f0f6fc';
+  ctx.fillText(days>0 ? ('6月15日まで残り '+days+' 日') : '6月15日は過ぎました', padX, y);
+  // クレジット枠のボックス
+  y+=px(40);
+  ctx.fillStyle='#161b22'; roundRect(padX,y,W-padX*2,px(86),px(10)); ctx.fill();
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=px(1); roundRect(padX,y,W-padX*2,px(86),px(10)); ctx.stroke();
+  ctx.font='400 '+px(17)+'px sans-serif'; ctx.fillStyle='#8b949e';
+  ctx.fillText('あなたのプラン（'+plan.label+'）の新しいプログラム用クレジット:', padX+px(18), y+px(34));
+  ctx.font='700 '+px(30)+'px sans-serif'; ctx.fillStyle='#f0f6fc';
+  ctx.fillText(plan.credit+' / 月', padX+px(18), y+px(68));
+  ctx.font='400 '+px(15)+'px sans-serif'; ctx.fillStyle='#6e7681';
+  var capNote='API料金 · 繰り越しなし';
+  ctx.fillText(capNote, W-padX-px(18)-ctx.measureText(capNote).width, y+px(68));
+  // やること
+  y+=px(104);
+  ctx.font='700 '+px(18)+'px sans-serif'; ctx.fillStyle='#c9d1d9';
+  ctx.fillText(aff?'6月15日までにやること:':'念のためやっておくこと:', padX, y);
+  y+=px(34);
+  var acts = aff
+    ? ['プログラム経由のトークン消費を、今のうちにAPI料金で見積もる',
+       '1回あたりのトークンを減らす（キャッシュ・モデル選択・文脈の削減）',
+       '枠超過を拒否（予算優先）かAPI料金で続行（稼働優先）かを決める']
+    : ['自分の作業にヘッドレス / Agent SDK / CI が無いことを確認',
+       '6月15日までに変わったら、影響を再診断する',
+       'いずれにせよ対話のセッションは軽く保つ'];
+  ctx.font='400 '+px(17)+'px sans-serif';
+  acts.forEach(function(a){ ctx.fillStyle=accent; ctx.fillText('•',padX,y); ctx.fillStyle='#c9d1d9'; ctx.fillText(a,padX+px(22),y); y+=px(34); });
+  // フッター
+  y=H-px(50);
+  ctx.strokeStyle='#21262d'; ctx.lineWidth=px(1); ctx.beginPath(); ctx.moveTo(padX,y-px(22)); ctx.lineTo(W-padX,y-px(22)); ctx.stroke();
+  ctx.font='700 '+px(17)+'px sans-serif'; ctx.fillStyle='#58a6ff';
+  ctx.fillText('cc-safe-setup.github.io · 6月15日 影響の診断', padX, y);
+  ctx.font='400 '+px(14)+'px sans-serif'; ctx.fillStyle='#6e7681';
+  var f='Anthropic, 施行 2026-06-15';
+  ctx.fillText(f, W-padX-ctx.measureText(f).width, y);
+
+  var url=writeURL();
+  var msg = aff
+    ? '6月15日: 自分のプログラム経由のClaude利用（'+plan.label+'）が '+plan.credit+'/月 のAPI料金クレジットに移る。'+(days>0?'残り'+days+'日。':'')+' 影響を診断した:'
+    : '6月15日のClaude Codeの課金の崖の影響を診断した: 対話のみで影響なし。';
+  document.getElementById('xshare').href = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(msg)+'&url='+encodeURIComponent(url);
+}
+
+function toast(t){var el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},1800);}
+function downloadPNG(){var a=document.createElement('a');a.download='june-15-cliff-exposure-jp.png';a.href=canvas.toDataURL('image/png');a.click();toast('カードを保存しました');}
+function copyImage(){canvas.toBlob(function(b){try{navigator.clipboard.write([new ClipboardItem({'image/png':b})]).then(function(){toast('画像をコピーしました')},function(){toast('「カードを保存」を使ってください')});}catch(e){toast('「カードを保存」を使ってください');}},'image/png');}
+function copyLink(){try{navigator.clipboard.writeText(writeURL()).then(function(){toast('共有リンクをコピーしました')});}catch(e){toast('リンクはアドレス欄にあります');}}
+
+readURL(); renderControls(); render();
+</script>
+</body>
+</html>
