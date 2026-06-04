@@ -1,6 +1,6 @@
 # Changelog
 
-## [30.0.1] - 2026-05-28 → 2026-06-04
+## [30.0.1] - 2026-05-28 → 2026-06-05
 Post-launch safety-hook expansion. The example-hook catalog grew from 707 to
 824+, driven by a sustained "issue → tested hook" workflow against the highest-
 reaction GitHub Issues and newly observed incident clusters.
@@ -31,6 +31,15 @@ reaction GitHub Issues and newly observed incident clusters.
 - **Credential / sub-agent safety**: `dotenv-read-guard` (blocks Read of `.env`,
   inherited by sub-agents that do not inherit CLAUDE.md), sub-agent blast-radius
   guards keyed on `agent_id`.
+- **2026-06-05 security hardening** (verified against live incidents):
+  - `rm-safety-net`: also blocks deletion of `.env` files in nested paths
+    (`backend/.env`, `src/.env`) — the start-anchored pattern previously missed
+    them (#65034). +10 tests.
+  - `credential-exfil-guard`: now blocks macOS keychain extraction of secret
+    tokens (`security find-generic-password -s ANTHROPIC_AUTH_TOKEN -w`, the
+    technique a malicious plugin used in #65350) and secret env vars piped to a
+    network client, while leaving `Authorization: Bearer $TOKEN` headers and
+    non-secret keychain lookups untouched. +inline + standalone tests (17/17).
 
 ## [30.0.0] - 2026-04-21
 - **Milestone (Product Hunt launch)**: Incident Tracker expanded from 36 to 88
