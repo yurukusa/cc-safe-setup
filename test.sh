@@ -18422,6 +18422,23 @@ test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":
 test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V14__add.sql","content":"ALTER TABLE users ADD COLUMN nickname text;"}}' 0 "mig-write: block mode allows additive migration (exit 0)"
 unset CC_MIGRATION_WRITE_GUARD
 
+# --- destructive-db-script-write-guard tests (#64056) ---
+echo "destructive-db-script-write-guard.sh:"
+test_ex destructive-db-script-write-guard.sh '{"agent_id":"abc12345","tool_name":"Write","tool_input":{"file_path":"debug-check2.js","content":"const url=process.env.DATABASE_URL;\ndb.query(\"DELETE FROM clinics;\")"}}' 0 "db-script: #64056 subagent DELETE FROM in .js warns (exit 0)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"svc.js","content":"db.query(\"DELETE FROM sessions WHERE id = $1\", [id])"}}' 0 "db-script: qualified DELETE (has WHERE) is silent (exit 0)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"repo.ts","content":"await userRepo.delete({ id })"}}' 0 "db-script: ORM .delete() is silent (exit 0)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/x.sql","content":"DELETE FROM users;"}}' 0 "db-script: .sql deferred to migration guard (exit 0)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"seed.py","content":"cur.execute(\"TRUNCATE TABLE orders\")"}}' 0 "db-script: TRUNCATE in python warns (exit 0)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"app.js","content":"console.log(1)"}}' 0 "db-script: plain script no DB op is silent (exit 0)"
+test_ex destructive-db-script-write-guard.sh 'not json' 0 "db-script: malformed input fails open (exit 0)"
+export CC_DB_SCRIPT_WRITE_GUARD=off
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"reset.js","content":"db.query(\"DELETE FROM users;\")"}}' 0 "db-script: off mode exits 0"
+unset CC_DB_SCRIPT_WRITE_GUARD
+export CC_DB_SCRIPT_WRITE_GUARD=block
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"reset.js","content":"db.query(\"DELETE FROM users;\")"}}' 2 "db-script: block mode blocks destructive script write (exit 2)"
+test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"app.js","content":"console.log(1)"}}' 0 "db-script: block mode allows ordinary script (exit 0)"
+unset CC_DB_SCRIPT_WRITE_GUARD
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
