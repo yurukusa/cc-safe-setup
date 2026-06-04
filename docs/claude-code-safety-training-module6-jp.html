@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モジュール 6: 事故対応と復旧（Claude Code 安全運用 研修）— cc-safe-setup</title>
+<meta name="description" content="Claude Code 安全運用 研修のモジュール 6 の公開版。事故が起きた時の報告と復旧、checkpoint、worktree の復旧、データベースの時点の復旧（PITR）と、復旧が不能になる条件を、実際の事故と手を動かす演習で学びます。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="モジュール 6: 事故対応と復旧（Claude Code 安全運用 研修）">
+<meta property="og:description" content="事故の報告と復旧の手順、checkpoint、PITR、復旧が不能になる条件を学ぶ公開モジュール。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-module6-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; --red:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.55rem; line-height:1.4; margin-bottom:0.5rem; }
+h2 { font-size:1.22rem; margin:2.2rem 0 0.9rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.3rem 0 0.4rem; font-size:1.05rem; }
+.crumb { color:var(--gray); font-size:0.9rem; margin-bottom:1rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.4rem; }
+.obj { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.case { background:var(--light); border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; border-left:4px solid var(--red); }
+.case h3 { margin-top:0; }
+.case dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.step { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; }
+.note { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:0.9rem 1rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; margin:0.6rem 0; }
+code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.88em; }
+pre code { background:none; color:inherit; padding:0; }
+.check { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid var(--green); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+ul,ol { padding-left:1.5rem; } li { margin-bottom:0.45rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.8rem 1.5rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="crumb"><a href="claude-code-safety-training-jp.html">Claude Code 安全運用 研修</a> ／ モジュール 6（公開版）</p>
+<h1>モジュール 6: 事故対応と復旧</h1>
+<p class="subtitle">事故は起きる前提で備える。報告と復旧の手順、checkpoint、PITR、そして復旧が不能になる条件を学びます。</p>
+
+<div class="obj">
+<strong>このモジュールの到達目標。</strong> 事故が起きた時に、誰に・どう報告し・どう戻すかの手順を自社の運用に組み込める。checkpoint と file backup で復旧の備えを作り、復旧が不能になる条件を理解して、事前に塞げる。
+</div>
+
+<p>これは研修の公開のモジュールです。そのまま読んで手を動かせます。<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>〜<a href="claude-code-safety-training-module5-jp.html">モジュール 5</a>に続く、研修の最後の実技のモジュールです（全体の構成は<a href="claude-code-safety-training-jp.html">カリキュラム</a>）。</p>
+
+<h2>1. 予防と復旧は別の備え</h2>
+<p>モジュール 1〜5 は<strong>予防</strong>（事故を起こさない層）でした。このモジュールは<strong>復旧</strong>（事故が起きた後の損失を最小化する層）です。予防の層をすり抜けた操作や、予防の対象外の事故は必ず起こりえます。だから、起きる前提で復旧の備えを作ります。</p>
+<p>復旧で大事なのは2つです。第一に、<strong>事前の備え</strong>（checkpoint や backup が無ければ戻せません）。第二に、<strong>復旧が不能になる条件を知ること</strong>（バックアップの無いデータベースは、消えたら戻りません）。</p>
+
+<h2>2. 実際の事故を読む</h2>
+<p>抽象論ではなく、番号で辿れる実際の報告で学びます。</p>
+
+<div class="case">
+<h3>worktree の自動の片付けが、10日分の未コミットの作業を消した（<a href="https://github.com/anthropics/claude-code/issues/46444">#46444</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>worktree の自動の片付けが、警告なしで10日分の未コミットの作業を永久に削除した。</dd>
+<dt>なぜ起きたか</dt><dd>未コミットの作業は git の履歴に無いため、片付けで消えると戻せない。</dd>
+<dt>何が止めた／戻せたはずか</dt><dd>編集ごとの自動の checkpoint（<code>auto-checkpoint</code>）と、編集の前の backup（<code>file-edit-backup</code>）。こまめに履歴に残っていれば復旧できる。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>文脈の圧縮で、git 管理下のファイルの編集が黙って巻き戻った（<a href="https://github.com/anthropics/claude-code/issues/34674">#34674</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>context の compaction の際に、git 管理下のファイルの編集が黙って巻き戻った。</dd>
+<dt>何が戻せたはずか</dt><dd>編集ごとに checkpoint の commit を作る <code>auto-checkpoint</code>。<code>git log</code> と <code>git cherry-pick</code> で戻せる。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>本番のデータベースが消え、バックアップが無く戻せなかった（<a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>破壊的なコマンドで本番のデータベースが消え、バックアップが無かったため復旧が不能だった。</dd>
+<dt>なぜ戻せなかったか</dt><dd>データベースには git のような履歴が無い。バックアップと時点の復旧（PITR）が事前に無ければ、消えたデータは戻らない。</dd>
+</dl>
+</div>
+
+<h2>3. 演習: 復旧の備えを作り、戻し方を確認する</h2>
+<p>実際に復旧の備えを入れ、戻せることを確認します。所要およそ15分。</p>
+
+<div class="step">
+<h3>手順 1. 復旧の備えの hook を入れる</h3>
+<p>cc-safe-setup（無料・MIT）が、編集の前の backup と編集ごとの checkpoint の hook を入れます。</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>これで <code>file-edit-backup</code>（編集の前にファイルを <code>~/.claude/file-backups/</code> へ退避）と <code>auto-checkpoint</code>（編集ごとに軽量の checkpoint の commit）を含む hook が入ります。</p>
+</div>
+
+<div class="step">
+<h3>手順 2. 編集の前に backup が作られることを実機で確認する</h3>
+<p><code>file-edit-backup</code> は、ファイルが上書きされる前に、時刻つきの backup を退避します。次のように確かめます。</p>
+<pre><code># 重要なファイルへの編集の直前に backup が作られる
+echo '{"tool_name":"Write","tool_input":{"file_path":"'"$HOME"'/important.txt"}}' \
+  | ~/.claude/hooks/file-edit-backup.sh
+
+# 退避された backup を確認する（時刻つきで残る）
+ls ~/.claude/file-backups/</code></pre>
+<p>退避された backup（元のファイル名に時刻が付いたもの）が一覧に出れば、編集の前の備えが効いています。上書きで失っても、ここから前の版を戻せます。</p>
+</div>
+
+<div class="step">
+<h3>手順 3. 戻し方を確認する</h3>
+<p>事故の種類ごとに、戻し方が違います。</p>
+<ul>
+<li><strong>ファイルの上書き</strong>: <code>~/.claude/file-backups/</code> の時刻つきの backup から戻す。</li>
+<li><strong>編集の巻き戻りや消失</strong>: <code>git reflog</code> で直前の状態を探し、<code>git checkout</code> や <code>git cherry-pick</code> で戻す（<code>auto-checkpoint</code> の commit が残っていれば確実）。</li>
+<li><strong>worktree の作業の消失</strong>: <code>git reflog</code> と <code>git fsck --lost-found</code> で、片付けで失った commit を探す（コミット済みなら多くは戻せる、未コミットは戻せないことがある）。</li>
+<li><strong>データベースの破壊</strong>: バックアップと時点の復旧（PITR）から戻す。<strong>バックアップが無ければ戻りません</strong>（<a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>）。</li>
+</ul>
+</div>
+
+<div class="note">
+<strong>正直な限界。</strong> 復旧は、事前の備えがあって初めて可能です。未コミットの作業、バックアップの無いデータベース、退避の前に消えたファイルは、戻せないことがあります。だから、最良の事故対応は予防（モジュール 1〜5）であり、復旧はその次の防衛線です。
+</div>
+
+<h2>4. 連絡と運用への組み込み</h2>
+<ul>
+<li><strong>誰に・どう報告するか</strong>を事前に決める（事故の連絡の経路、影響範囲の確認、止血の担当）。事故の時に手順を探さない。</li>
+<li>本番のデータベースに、バックアップと時点の復旧（PITR）があるかを<strong>事前に</strong>確認する（無いと <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> のように戻せない）。</li>
+<li><code>auto-checkpoint</code> と <code>file-edit-backup</code> を全員の baseline に入れる（モジュール 5 の配布の仕組みで強制する）。</li>
+<li>事故が起きたら、原因を <code>tasks/lessons.md</code> のような記録に残し、検知可能なルール（hook）に変換する。「気をつける」は対策にならない。</li>
+</ul>
+
+<h2>研修の全体のまとめ</h2>
+<p>これで実技の6モジュールが揃いました。削除とデータ破壊（<a href="claude-code-safety-training-module1-jp.html">1</a>）、機密と認証情報（<a href="claude-code-safety-training-module2-jp.html">2</a>）、費用と利用枠（<a href="claude-code-safety-training-module3-jp.html">3</a>）、サブエージェントと auto モード（<a href="claude-code-safety-training-module4-jp.html">4</a>）、組織の baseline と CI（<a href="claude-code-safety-training-module5-jp.html">5</a>）、事故対応と復旧（本モジュール）。研修の全体（約12時間）では、これらを自社の技術スタックと運用に合わせて、手を動かしながら学びます。</p>
+
+<p>
+<a class="cta" href="claude-code-safety-training-jp.html">研修のカリキュラム全体を見る</a>
+<a class="cta sub" href="services-jp.html">法人での実施・費用の相談</a>
+</p>
+<p class="honest">本モジュールは公開版です。引用した事故はすべて番号で辿れる実際の報告で、演習で使う hook はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）に実在します。<code>file-edit-backup</code> が編集の前に backup を作ることは作者が実機で検証しています。復旧が常に可能だとは書いていません。個人での利用は無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のモジュール 6（公開版） ·
+<a href="claude-code-safety-training-jp.html">研修カリキュラム</a> ·
+<a href="claude-code-safety-training-module5-jp.html">モジュール 5</a> ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
