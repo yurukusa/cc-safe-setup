@@ -1344,17 +1344,45 @@ async function audit() {
     });
   }
 
-  // 11. Check for hook permission fixer (SessionStart)
+  // 11. Check for hook permission fixer (SessionStart).
+  // Execute-bit loss is cross-platform, not Windows-only: plugin installs and
+  // archive extraction strip +x from .sh hooks on Unix too, and Claude Code then
+  // fails every affected hook with "Permission denied".
+  // See anthropics/claude-code #39378 / #38901 / #39777 / #39798.
   const sessionHooks = settings.hooks?.SessionStart || [];
   const hasPermFixer = sessionHooks.some(e =>
     (e.hooks || []).some(h => (h.command || '').includes('permission'))
   );
-  if (!hasPermFixer && process.platform === 'win32') {
-    risks.push({
-      severity: 'LOW',
-      issue: 'No SessionStart permission fixer — plugin updates may break hook permissions on Windows',
-      fix: 'npx cc-safe-setup --install-example hook-permission-fixer'
-    });
+  if (!hasPermFixer) {
+    // Only flag when there is real evidence it is needed, to avoid noise:
+    // a hook script that actually lacks the execute bit, or a plugins dir that
+    // can introduce non-executable hooks on the next update.
+    let nonExecCount = 0;
+    let pluginsPresent = false;
+    try {
+      const { readdirSync, statSync } = await import('fs');
+      if (existsSync(HOOKS_DIR)) {
+        for (const f of readdirSync(HOOKS_DIR)) {
+          if (!f.endsWith('.sh')) continue;
+          try { if (!(statSync(join(HOOKS_DIR, f)).mode & 0o111)) nonExecCount++; } catch {}
+        }
+      }
+      const pluginsDir = join(CLAUDE_BASE, '.claude', 'plugins');
+      pluginsPresent = existsSync(pluginsDir);
+    } catch {}
+    if (nonExecCount > 0) {
+      risks.push({
+        severity: 'HIGH',
+        issue: `${nonExecCount} hook script(s) in ~/.claude/hooks lack the execute bit — Claude Code will fail them with "Permission denied" (anthropics/claude-code #39378)`,
+        fix: 'npx cc-safe-setup --validate   (one-shot fix) or --install-example hook-permission-fixer (persistent)'
+      });
+    } else if (pluginsPresent || process.platform === 'win32') {
+      risks.push({
+        severity: 'LOW',
+        issue: 'No SessionStart permission fixer — plugin installs/updates can strip hook execute bits, causing "Permission denied"',
+        fix: 'npx cc-safe-setup --install-example hook-permission-fixer'
+      });
+    }
   }
 
   // Display results
