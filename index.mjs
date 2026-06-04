@@ -1461,6 +1461,18 @@ async function audit() {
     console.log(JSON.stringify(output, null, 2));
   }
 
+  // Highest-intent moment: the user just saw their score. Point to genuinely
+  // useful free next steps (skip when --json so machine consumers stay clean).
+  // A low score → the incident-prevention guide fits; everyone gets the cost guide.
+  if (!JSON_OUTPUT) {
+    console.log();
+    console.log(c.bold + '  Go deeper (all free to start):' + c.reset);
+    if (score < 80) {
+      console.log(c.dim + '  • Incident-prevention guide (Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+    }
+    console.log(c.dim + '  • Cut token cost (Ch.1 free):  https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
+  }
+
   console.log();
   process.exit(score < (parseInt(process.env.CC_AUDIT_THRESHOLD) || 0) ? 1 : 0);
 }
