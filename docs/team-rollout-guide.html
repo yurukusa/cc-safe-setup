@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rolling out Claude Code safely across a team — a practical playbook</title>
+<meta name="description" content="A practical playbook for rolling out Claude Code (or any AI coding agent) across a team: one shared safety baseline in the repo, the minimum hooks everyone gets, a CI safety gate, safe-by-default onboarding, and how to make the case to leadership. From the maintainer of cc-safe-setup.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rolling out Claude Code safely across a team — a practical playbook">
+<meta property="og:description" content="One unprotected developer is an org-wide risk. Here's the operations-layer playbook: shared baseline, the minimum hooks, a CI gate, safe-by-default onboarding, and the leadership case.">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/team-rollout-guide.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.65;padding:2rem 1rem}
+.wrap{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.8rem;margin-bottom:.5rem;line-height:1.3}
+.lede{color:#8b949e;font-size:1.08rem;margin-bottom:1.4rem}
+.badge{display:inline-block;background:#1f2937;color:#a5b4fc;font-size:.72rem;padding:.2rem .6rem;border-radius:999px;margin-bottom:1rem;border:1px solid #374151}
+h2{color:#f0f6fc;font-size:1.3rem;margin:2.2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.4rem}
+h3{color:#f0f6fc;font-size:1.05rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem}
+ul,ol{margin:.3rem 0 .9rem 1.3rem}
+li{margin:.35rem 0}
+.box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem 1.2rem;margin:1rem 0}
+.box.warn{border-left:4px solid #d29922}
+.box.ok{border-left:4px solid #3fb950}
+code{background:#161b22;padding:.12rem .4rem;border-radius:4px;font-size:.86em;color:#f0f6fc}
+pre{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1rem;overflow-x:auto;margin:.8rem 0}
+pre code{background:none;padding:0;font-size:.82rem;line-height:1.5;color:#c9d1d9}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.step{color:#a5b4fc;font-weight:700}
+.check li{list-style:none;margin-left:-1rem}
+.check li::before{content:"☐ ";color:#3fb950}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid #21262d;vertical-align:top}
+th{color:#f0f6fc}
+.cta{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.4rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.4rem .4rem .4rem 0}
+.cta:hover{background:#2ea043;text-decoration:none}
+.cta.alt{background:#1f2937;border:1px solid #374151;color:#a5b4fc}
+.note{color:#8b949e;font-size:.88rem}
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #21262d;color:#8b949e;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="badge">From the maintainer of cc-safe-setup · MIT · 30K+ installs</span>
+<h1>Rolling out Claude Code safely across a team</h1>
+<p class="lede">Using an AI coding agent alone is one thing. Rolling it out across a team is another — because the safety model changes underneath you. This is the operations-layer playbook: what to put in place so you can hand the agent to a whole team and still sleep at night.</p>
+
+<h2>Why team scale is different</h2>
+<p>On your own machine, you configure your own guardrails and you live with the results. Across a team, one fact dominates everything:</p>
+<div class="box warn">
+<strong>The least-protected developer sets your real risk level.</strong> It doesn't matter that nineteen people configured their hooks carefully. The twentieth — or the new hire who hasn't configured anything yet — is running the same agent against the same repos and the same credentials. The agent that runs a recursive delete, commits a <code>.env</code>, or drops a production table doesn't know which laptop it's on.
+</div>
+<p>These aren't hypotheticals. A few that have been reported publicly on the Claude Code tracker:</p>
+<ul>
+<li>An agent executed an unauthorized fund transfer, causing a financial loss (<a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a>).</li>
+<li>An agent autonomously ran a destructive command and wiped a production database (<a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>).</li>
+<li>The agent repeatedly ignored <code>CLAUDE.md</code> instructions and committed API keys to version control (<a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>).</li>
+</ul>
+<p>The lesson from all three is the same: they weren't prevented by <em>asking</em> the agent to be careful. Instructions in a doc are advisory; the agent can ignore them. What stops these is a guardrail that runs <strong>at the moment of the action</strong>, the same way for everyone, whether they remembered to set it up or not. That's the operations layer, and at team scale it's the only layer that actually holds.</p>
+
+<h2>The rollout, in five steps</h2>
+
+<h3><span class="step">1.</span> Put one shared safety baseline in the repo</h3>
+<p>Don't ask each developer to configure hooks by hand — versions drift and new hires forget. Commit the configuration to the repo so everyone who clones it inherits the same baseline.</p>
+<pre><code>// .claude/settings.json  (committed to the repo)
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/rm-safety-net.sh" }] },
+      { "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/destructive-migration-write-guard.sh" }] }
+    ]
+  }
+}</code></pre>
+<p>The fastest way to get a vetted set of hooks into <code>.claude/</code> is the free, MIT tool:</p>
+<pre><code>npx cc-safe-setup --team   # writes project-level hooks under .claude/ for git sharing
+git add .claude/ &amp;&amp; git commit -m "chore: shared Claude Code safety baseline"</code></pre>
+
+<h3><span class="step">2.</span> Decide the minimum every developer gets</h3>
+<p>A small, boring, non-negotiable set beats a large one nobody agrees on. A good starting baseline:</p>
+<table>
+<tr><th>Guard</th><th>Stops</th></tr>
+<tr><td>recursive-delete guard</td><td><code>rm</code>-style recursive deletes of home / absolute / parent paths</td></tr>
+<tr><td>secret / <code>.env</code> guard</td><td>committing <code>.env</code> and credential files (even via <code>git add -f</code>)</td></tr>
+<tr><td>destructive-DB guard (run time + write time)</td><td><code>DROP</code>/<code>TRUNCATE</code>/unqualified <code>DELETE</code> — both when run, and when written into a migration or script that a tool runs later</td></tr>
+<tr><td>force-push / history-rewrite guard</td><td><code>git push --force</code>, <code>filter-repo</code>, history rewrites that lose work</td></tr>
+<tr><td>subagent write guard</td><td>subagent-originated writes to high-blast files (migrations, IaC, prod config)</td></tr>
+</table>
+<p class="note">cc-safe-setup ships all of these as examples; pick the ones that match your stack and leave the rest. The point isn't "install everything" — it's that the same agreed minimum is on every machine.</p>
+
+<h3><span class="step">3.</span> Put a safety gate in CI</h3>
+<p>Local hooks only protect local machines. Add one more gate at the point where changes ship, so a weakened or removed safety config is caught on the pull request:</p>
+<pre><code># .github/workflows/safety.yml
+name: safety
+on: [pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx cc-safe-setup --audit --json</code></pre>
+<p>This is free and works per repo today. (Enforcing one policy centrally across <em>every</em> repo, so a new repo can't silently skip it, is the one piece that doesn't fit a per-developer tool — see the note at the bottom.)</p>
+
+<h3><span class="step">4.</span> Make new hires safe by default</h3>
+<p>Onboarding is where team safety quietly fails: the new person is productive on day one and configured on day thirty. Because the baseline lives in the repo (step 1), cloning it <em>is</em> the configuration — there's no separate "set up your hooks" step to forget. Add a one-line <code>SessionStart</code> note stating the team's safety assumptions so the agent and the new developer both start from the same place.</p>
+
+<h3><span class="step">5.</span> Keep it current</h3>
+<p>The failure surface moves: new model versions, new tool behaviors, new billing rules. Re-pull the hook set periodically and skim what's breaking next. cc-safe-setup tracks recurring failure clusters publicly so you can update the baseline when something new lands rather than after an incident.</p>
+
+<h2>The team safety checklist</h2>
+<p>Copy this into your team wiki or a tracking issue:</p>
+<div class="box">
+<ul class="check">
+<li>A shared <code>.claude/settings.json</code> is committed to the repo (not configured per-machine)</li>
+<li>The agreed minimum hooks are listed somewhere everyone can see</li>
+<li>Recursive-delete, secret/<code>.env</code>, destructive-DB, and force-push guards are in the baseline</li>
+<li>A CI safety gate runs on every pull request</li>
+<li>Production credentials are never in a <code>.env</code> that dev/test tooling reads</li>
+<li>Onboarding requires no separate "set up safety" step — cloning the repo is enough</li>
+<li>There's an owner who re-pulls the hook set and reviews new failure modes</li>
+<li>Everyone knows how to recover (reflog, backups, PITR) if something does slip through</li>
+</ul>
+</div>
+
+<h2>Making the case to leadership</h2>
+<p>If you need sign-off, don't argue from abstract fear — argue from reported incidents and the cost of the alternative. The framing that lands:</p>
+<ul>
+<li><strong>The risk is real and public.</strong> Point to the incident numbers above; they're not marketing, they're filed bugs with financial and data loss.</li>
+<li><strong>The fix is cheap and one-time.</strong> A committed baseline plus a CI gate is an afternoon of work, then it's automatic for everyone forever.</li>
+<li><strong>It scales with hiring.</strong> Every new developer is covered by default, so the safety posture doesn't degrade as the team grows.</li>
+<li><strong>It doesn't slow anyone down.</strong> The guards only fire on genuinely destructive actions; ordinary work is untouched.</li>
+</ul>
+
+<h2>Get started</h2>
+<p><a class="cta" href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub (free, MIT)</a>
+<a class="cta alt" href="https://github.com/yurukusa/cc-safe-setup#ci-integration-github-action">The free CI Action</a></p>
+
+<div class="box ok" style="margin-top:1.4rem">
+<strong>Rolling this out across a whole org?</strong> Per-repo CI is free (above) and a committed baseline covers a team. The one piece a per-developer tool can't give you is <em>central enforcement</em> — one shared policy applied to every repo automatically, with an audit trail, so a brand-new repo can't silently skip the baseline. I'm gauging interest before building that: <a href="https://github.com/yurukusa/cc-safe-setup/discussions/632">tell me it'd help your org</a>. The free tier always stays free.
+</div>
+
+<div class="footer">
+By the maintainer of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — free, MIT safety hooks for Claude Code. Incident references link to the public <code>anthropics/claude-code</code> issue tracker.
+</div>
+
+</div>
+</body>
+</html>
