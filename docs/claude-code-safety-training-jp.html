@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 安全運用 チーム研修 カリキュラム（法人向け）— cc-safe-setup</title>
+<meta name="description" content="Claude Code を組織で安全に使うためのチーム研修のカリキュラム。約12時間・7モジュール、実際に報告された事故に基づく到達目標つき。録画とライブのオンラインに対応。カリキュラム・受講記録・修了証明は人材開発支援助成金の申請の書類として提供します。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Claude Code 安全運用 チーム研修 カリキュラム（法人向け）">
+<meta property="og:description" content="約12時間・7モジュール、実際の事故に基づく到達目標つきの安全研修。助成金の申請書類の提供に対応。cc-safe-setup の作者が設計。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.65rem; line-height:1.4; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); white-space:nowrap; }
+.mod { background:var(--light); border-radius:8px; padding:1.1rem 1.2rem; margin-bottom:1rem; border-left:4px solid var(--blue); }
+.mod h3 { font-size:1.06rem; margin-bottom:0.3rem; }
+.mod .hours { color:var(--green); font-weight:bold; font-size:0.9rem; }
+.mod dl { margin:0.5rem 0 0; }
+.mod dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.mod dd { margin:0.1rem 0 0; }
+.mod code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.86em; }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.16rem 0.55rem; border-radius:4px; font-size:0.8rem; margin:0.16rem 0.16rem 0 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0.4rem 0.6rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.grant { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.grant strong { color:var(--amber); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:0.7rem; padding-top:0.6rem; }
+ul { padding-left:1.4rem; } li { margin-bottom:0.4rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code 安全運用 チーム研修 — カリキュラム</h1>
+<p class="subtitle">組織で Claude Code を安全に使うための、実際の事故に基づく研修の構成です。</p>
+
+<div class="lead">
+個人で使うのと、チームや組織で使うのは、安全の前提が違います。1人の無防備な設定が組織全体のリスクになります。この研修は、人間の注意力に頼るのではなく、危険な操作を実行の手前で機械的に止める運用層の作り方を、実際に報告された事故と、それを止める <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）の hook を使って、手を動かしながら学びます。
+</div>
+
+<h2>研修の概要</h2>
+<table>
+<tr><th>対象</th><td>Claude Code を業務で使う、または導入を検討している技術リードと開発者</td></tr>
+<tr><th>合計の時間</th><td>約 12 時間（7 モジュール + 演習と評価）。半日 × 3 回などに分割が可能</td></tr>
+<tr><th>形式</th><td>オンラインの同時双方向（ライブ）／録画のいずれも対応。自社の運用に合わせて調整します</td></tr>
+<tr><th>前提</th><td>git と端末の基本の操作。特別な前提の知識は不要</td></tr>
+<tr><th>持ち帰るもの</th><td>自社に配布できる安全 baseline の設定、CI の安全のゲート、運用のチェックリスト</td></tr>
+<tr><th>修了</th><td>全モジュールの受講と最終の演習で修了。修了証明を発行</td></tr>
+</table>
+
+<h2>到達目標</h2>
+<p>研修の修了時に、受講者は次ができる状態を目指します。</p>
+<ul>
+<li>組織で AI コーディングを使う際の、リスクの構造を説明できる</li>
+<li>取り返しのつかない操作（再帰的な削除、本番データベースの破壊、機密の漏洩）を、実行の手前で止める hook を設定し、実機で検証できる</li>
+<li>組織で共有する安全 baseline を設計し、全員と全リポジトリへ配布・強制できる</li>
+<li>CI に安全のゲートを置き、危険な変更を出荷の手前で止められる</li>
+<li>事故が起きた時の、連絡と復旧の手順を運用に組み込める</li>
+</ul>
+
+<h2>カリキュラム（7 モジュール）</h2>
+
+<div class="mod">
+<h3>モジュール 0｜なぜチームの安全は違うのか</h3>
+<span class="hours">約 0.5 時間</span>
+<dl>
+<dt>内容</dt><dd>個人の利用と組織の利用の、リスクの前提の違い。Claude Code の失敗の全体像（削除、機密、課金、暴走、巻き添え）。本研修の地図。</dd>
+<dt>到達目標</dt><dd>組織での AI コーディングのリスクの構造を、自分の言葉で説明できる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 1｜取り返しのつかない操作（削除とデータ破壊）</h3>
+<span class="hours">約 2 時間</span>
+<dl>
+<dt>内容</dt><dd>再帰的なファイルの削除、<code>git reset --hard</code>、force&#8209;push、本番データベースの破壊的なマイグレーション。実際に報告された事故で学ぶ（強制のマイグレーションで約60テーブルが消えた <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>、データ消失を伴う <code>db push</code> の <a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a>、auto モードのワイルドカードの削除 <a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a>）。</dd>
+<dt>演習</dt><dd><code>rm-safety-net</code> / <code>prisma-migrate-guard</code> / <code>git-history-rewrite-guard</code> を設定し、危険なコマンドが実際に止まることを実機で確認する。</dd>
+<dt>到達目標</dt><dd>破壊的な操作を実行の手前で止める hook を設定・検証できる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 2｜機密と認証情報の保護</h3>
+<span class="hours">約 1.5 時間</span>
+<dl>
+<dt>内容</dt><dd><code>.env</code> の git への取り込み、機密の漏洩、認証情報の持ち出し、想定外の送金。指示は素通りされうるため機械的な防御が要る（<code>CLAUDE.md</code> の指示を素通りした漏洩 <a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>、無断の送金 <a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a>）。</dd>
+<dt>演習</dt><dd><code>dotenv-commit-guard</code> / <code>credential-exfil-guard</code> を設定する。</dd>
+<dt>到達目標</dt><dd>機密の漏洩の経路を塞ぐ設定ができる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 3｜費用と利用枠の管理</h3>
+<span class="hours">約 1.5 時間</span>
+<dl>
+<dt>内容</dt><dd>想定外のトークンの消費、1M context への自動の昇格による課金、2026年6月15日の課金の分離（<code>claude -p</code> や Agent SDK や GitHub Actions が別建ての枠へ移る）。利用枠の暴露の測り方。</dd>
+<dt>演習</dt><dd>1M context の自動の昇格を止める（<code>CLAUDE_CODE_DISABLE_1M_CONTEXT</code>）、利用枠の暴露を確認する。</dd>
+<dt>到達目標</dt><dd>想定外の課金を防ぎ、利用枠を管理できる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 4｜サブエージェントと auto モードの制御</h3>
+<span class="hours">約 1.5 時間</span>
+<dl>
+<dt>内容</dt><dd>委譲したサブエージェントの暴走（本番設定やマイグレーションを含む広範な書き換え）、auto（自動承認）での分類器の見落としと巻き添え。実行の層での制御。</dd>
+<dt>演習</dt><dd><code>subagent-blast-radius-guard</code> / <code>auto-mode-safety-enforcer</code> を設定し、自動承認とは別の層で hook が効くことを確認する。</dd>
+<dt>到達目標</dt><dd>委譲と自動化の、安全の境界を設計できる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 5｜組織の baseline と CI のゲート、監査</h3>
+<span class="hours">約 2.5 時間</span>
+<dl>
+<dt>内容</dt><dd>全員に必須の hook の統一、CI での安全の検査、監査と、新しいメンバーのオンボーディングへの組み込み。手作業の配布で起こる「設定のズレ」「付け忘れ」をなくす。</dd>
+<dt>演習</dt><dd><code>cc-safe-setup --team</code> で hook をリポジトリで共有し、無料の GitHub Action（<code>--audit</code>）で安全のスコアが閾値を下回ったら CI を落とす設定を作る。</dd>
+<dt>到達目標</dt><dd>組織の安全 baseline を設計・配布・強制できる。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>モジュール 6｜事故対応と復旧</h3>
+<span class="hours">約 1.5 時間</span>
+<dl>
+<dt>内容</dt><dd>事故が起きた時の、誰に・どう報告し・どう戻すか。checkpoint、worktree の復旧、データベースの時点の復旧（PITR）と、復旧が不能になる条件（バックアップが無い場合に <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> が戻せなかった理由）。</dd>
+<dt>到達目標</dt><dd>事故の連絡と復旧の手順を、自社の運用に組み込める。</dd>
+</dl>
+</div>
+
+<div class="mod">
+<h3>評価と、自社への適用</h3>
+<span class="hours">約 0.5 時間</span>
+<dl>
+<dt>内容</dt><dd>理解の確認と、自社の運用への適用の計画づくり。修了の要件は、全モジュールの受講と最終の演習。</dd>
+</dl>
+</div>
+
+<h2>形式と費用</h2>
+<p>ライブのオンライン（同時双方向）と、録画のいずれにも対応します。費用の目安は<a href="services-jp.html">法人向けサービスのページ</a>に記載しています（チーム研修は目安 1人 ¥50,000〜、人数と形式により変動）。カリキュラムは自社の技術スタックと運用に合わせて調整します。</p>
+
+<div class="grant">
+<strong>人材開発支援助成金について。</strong>
+本研修は、約12時間の体系化された構成、到達目標、受講の記録、修了の証明を備えており、カリキュラム、受講の時間、受講の記録、修了の証明、講師の経歴など、<strong>人材開発支援助成金（厚生労働省）の申請に必要となる書類を整えてご提供します</strong>。
+<div class="honest">
+ただし、助成金の申請をするのは受講する企業で、助成金は企業へ支給されます。対象のコース、助成の率、支給の可否は、貴社の訓練の計画と所轄の労働局の審査で決まり、当方が支給を保証するものではありません。研修の開始の前に、労働局への計画の届け出（訓練の開始の原則1か月前まで）が必要です。なお、録画のみの受講と、同時双方向のライブの受講とで、助成の扱いが異なる場合があります。制度の内容と率は年度で変わるため、検討される場合は早めに所轄の労働局または社会保険労務士にご確認ください。
+</div>
+</div>
+
+<p style="margin-top:1rem">
+<a class="cta" href="services-jp.html">費用と問い合わせ（法人向けサービス）</a>
+<a class="cta sub" href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html">まず無料のチェックリストを見る</a>
+</p>
+
+<p class="honest">本ページは研修の構成の見本です。実際の研修は、貴社の運用と技術スタックに合わせて調整します。引用した事故は番号で辿れる実際の報告で、推奨する hook はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に実在します。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のカリキュラム ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
