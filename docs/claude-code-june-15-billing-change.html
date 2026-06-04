@@ -39,7 +39,7 @@
 </head>
 <body>
 <div class="wrap">
-  <span class="tag">Announced 2026-05-14 · effective 2026-06-15 · verify against Anthropic's own email/docs</span>
+  <span class="tag">Announced 2026-05-13 · effective 2026-06-15 · verify against Anthropic's own email/docs</span>
   <h1>Claude Code's June 15, 2026 billing change</h1>
   <p class="sub">Anthropic is moving <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. Here's who's affected and what to do before June 15.</p>
 
@@ -60,18 +60,31 @@
   <table>
     <thead><tr><th>Plan</th><th>New Agent SDK credit / month</th></tr></thead>
     <tbody>
-      <tr><td>Pro ($20)</td><td>$20</td></tr>
+      <tr><td>Pro</td><td>$20</td></tr>
       <tr><td>Max 5×</td><td>$100</td></tr>
       <tr><td>Max 20×</td><td>$200</td></tr>
+      <tr><td>Team — Standard seat</td><td>$20</td></tr>
+      <tr><td>Team — Premium seat</td><td>$100</td></tr>
+      <tr><td>Enterprise — usage-based</td><td>$20</td></tr>
+      <tr><td>Enterprise — Premium seat</td><td>$200</td></tr>
     </tbody>
   </table>
-  <p class="note">Metered at full API list prices with no rollover. Because it's billed at API rates rather than the subscription's effective rate, heavy programmatic users can see the same workload cost noticeably more once it draws from this pool — which is why estimating your programmatic usage before June 15 matters.</p>
+  <p class="note">Metered at full API list prices with no rollover. Because it's billed at API rates rather than the subscription's effective rate, heavy programmatic users can see the same workload cost noticeably more once it draws from this pool — which is why estimating your programmatic usage before June 15 matters. <span class="warn">Note:</span> on seat-based Enterprise plans, <strong>Standard seats can't claim the Agent SDK credit</strong>; only Premium seats can.</p>
 
   <h2>Are you affected?</h2>
   <div class="two">
     <div class="card"><h3 class="warn">Yes, if you…</h3><ul style="margin:0;padding-left:18px"><li>run <code>claude -p "…"</code> in scripts or cron</li><li>use the Claude <strong>Agent SDK</strong></li><li>run <strong>Claude Code in GitHub Actions</strong> / CI</li><li>use a third-party app built on Claude agents</li></ul></div>
     <div class="card"><h3 class="ok">No change, if you…</h3><ul style="margin:0;padding-left:18px"><li>only use Claude Code <strong>interactively</strong> in the terminal</li><li>chat on claude.ai (web/desktop/mobile)</li><li>use Claude Cowork</li></ul></div>
   </div>
+
+  <h2>How to measure your exposure</h2>
+  <p>The honest question is <em>how much of your usage actually crosses to the new pool</em>. Two reliable ways, in order of certainty:</p>
+  <ol>
+    <li><strong>By definition — find your programmatic invocations.</strong> Anything launched as <code>claude -p</code> / <code>claude --print</code>, the Agent SDK, or GitHub Actions is programmatic by definition, so this is the most certain check. Grep your scripts, cron, and CI:
+      <br><code>grep -rn "claude -p\|claude --print" ~ 2>/dev/null</code> and check your GitHub workflows for <code>anthropics/claude-code-action</code>. Every hit is Pool-2 usage after June 15.</li>
+    <li><strong>By measurement — the official entrypoint attribute.</strong> Claude Code's built-in OpenTelemetry can label each session's entrypoint. Enable it with <code>CLAUDE_CODE_ENABLE_TELEMETRY=1</code> and <code>OTEL_METRICS_INCLUDE_ENTRYPOINT=true</code>, then group your token/cost metrics by the <code>app.entrypoint</code> attribute — the programmatic entrypoints are your Pool-2 volume. This is the method Anthropic documents (<a href="https://code.claude.com/docs/en/monitoring-usage" target="_blank" rel="noopener">monitoring docs</a>); teams can also use the Claude Code Analytics API.</li>
+  </ol>
+  <p class="note">Tip: once you know your monthly programmatic token volume, price it at the <strong>full API list rates</strong> (Opus 4.5–4.8 input $5 / output $25 / cached read $0.50 per million; Sonnet 4.6 $3 / $15; Haiku 4.5 $1 / $5) to see whether it fits inside your plan's credit. Source: <a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener">Anthropic pricing</a>.</p>
 
   <h2>What to do before June 15</h2>
   <ol>
@@ -96,9 +109,10 @@
   <details><summary>What happens if I run out of the credit?</summary><p>By default, programmatic requests past the credit are rejected. If you enable "usage credits," they instead bill at API rates so your automation keeps running. Choose based on whether budget or uptime matters more for that workload.</p></details>
   <details><summary>Do I need to do anything if I only chat / use the terminal interactively?</summary><p>No action required for interactive use. It's worth claiming the credit anyway in case you start using agents later.</p></details>
   <details><summary>Is this the same as a price increase?</summary><p>Not for interactive use. For programmatic use it can effectively raise cost, because that usage now bills at full API list prices from a capped credit rather than drawing from the subscription's effective rate. Heavy automation users feel it most.</p></details>
+  <details><summary>What about remote-control, MCP servers, or sub-agents — which pool?</summary><p>Anthropic's official classification names only four programmatic paths (Agent SDK, <code>claude -p</code>, GitHub Actions, third-party SDK apps). It does <strong>not</strong> explicitly classify <code>claude remote-control</code>, MCP servers, or in-session sub-agents, so treat any confident claim about them with caution. The structural reading is that they follow the <em>entrypoint that launched them</em>: an MCP call or sub-agent inside an interactive terminal session stays interactive (Pool 1), while the same inside a <code>claude -p</code> / SDK run is programmatic (Pool 2). <code>remote-control</code> is reported to invoke <code>claude --print</code> internally, which would put it on the programmatic side — but Anthropic hasn't confirmed this. Don't guess: measure with the <code>app.entrypoint</code> attribute above on your own usage.</p></details>
 
   <p class="foot">
-    Independent summary by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT hooks). Announced by Anthropic on 2026-05-14, effective 2026-06-15 — always confirm the exact terms against Anthropic's own claim email and docs, since plans can change. For a deep, field-tested guide to cutting Claude Code token cost (the lever for surviving the new credit pool), see the <a href="https://yurukusa.gumroad.com/l/azrdt" target="_blank" rel="noopener">Token Book (Claude Code Token Optimization Guide, English)</a>. Not affiliated with Anthropic.
+    Independent summary by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT hooks). Announced by Anthropic on 2026-05-13, effective 2026-06-15 — always confirm the exact terms against Anthropic's own claim email and docs, since plans can change. For a deep, field-tested guide to cutting Claude Code token cost (the lever for surviving the new credit pool), see the <a href="https://yurukusa.gumroad.com/l/azrdt" target="_blank" rel="noopener">Token Book (Claude Code Token Optimization Guide, English)</a>. Not affiliated with Anthropic.
   </p>
 </div>
 </body>
