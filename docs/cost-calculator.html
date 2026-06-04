@@ -192,14 +192,14 @@ function calculate() {
   const apiDetail = document.getElementById('api-detail');
 
   if (plan === 'api') {
-    // Opus: $15/M input, $75/M output. Assume 70% input, 30% output
+    // Opus: $5/M input, $25/M output (Opus 4.5-4.8 current). Assume 70% input, 30% output
     const inputTokens = monthlyTokens * 0.7;
     const outputTokens = monthlyTokens * 0.3;
     // With caching (typical 60% cache hit)
     const cachedInput = inputTokens * 0.6;
     const uncachedInput = inputTokens * 0.4;
-    const inputCost = (uncachedInput / 1e6 * 15) + (cachedInput / 1e6 * 1.5);
-    const outputCost = outputTokens / 1e6 * 75;
+    const inputCost = (uncachedInput / 1e6 * 5) + (cachedInput / 1e6 * 0.5);
+    const outputCost = outputTokens / 1e6 * 25;
     monthlyCost = inputCost + outputCost;
     costDisplay = '$' + monthlyCost.toFixed(0);
     apiDetail.style.display = 'block';
@@ -281,7 +281,7 @@ function calculate() {
   const tips = [];
 
   if (claudemd > 60) {
-    const savings = Math.round((claudemd - 35) * 30 * 0.25 * turnsPerSession * sessions * days / 1e6 * 15 * 0.4);
+    const savings = Math.round((claudemd - 35) * 30 * 0.25 * turnsPerSession * sessions * days / 1e6 * 5 * 0.4);
     tips.push({
       level: 'crit',
       text: `Your CLAUDE.md (${claudemd} lines) is costing ~${claudemdTokensPerTurn} tokens per turn. ` +
