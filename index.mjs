@@ -340,6 +340,9 @@ function status() {
   console.log();
   console.log(c.dim + '  Tip: --validate to check health · --scorecard for a shareable safety card · --shield for max safety' + c.reset);
   console.log();
+  console.log('  ' + c.dim + 'On a team? Roll one shared safety baseline out across every repo (free playbook):' + c.reset);
+  console.log('  ' + c.dim + '  https://yurukusa.github.io/cc-safe-setup/team-rollout-guide.html' + c.reset);
+  console.log();
 
   const daysLeft1 = daysUntilJune15();
   const june15msg1 = daysLeft1 > 0
