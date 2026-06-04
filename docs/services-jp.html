@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code をチームに安全に導入する｜法人向けの研修・導入・保守 — cc-safe-setup</title>
+<meta name="description" content="Claude Code をチーム・組織に安全に導入するための法人向けサービス。安全監査、チーム研修（人材開発支援助成金の対象になりうる）、導入の初期設定、月額の運用保守。790+ の安全 hook を作る cc-safe-setup の作者が、実際に報告された事故に基づいて支援します。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Claude Code をチームに安全に導入する｜法人向けサービス">
+<meta property="og:description" content="安全監査・チーム研修・導入支援・月額保守。1人の無防備が組織のリスクになる前に。cc-safe-setup の作者が支援します。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/services-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.7rem; line-height:1.4; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin-bottom:0.4rem; font-size:1.08rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.service { background:var(--light); border-radius:8px; padding:1.3rem 1.3rem; margin-bottom:1rem; border-left:4px solid var(--blue); }
+.service .price { color:var(--green); font-weight:bold; font-size:1.05rem; display:block; margin-top:0.5rem; }
+.service .note { color:var(--gray); font-size:0.86rem; }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.18rem 0.6rem; border-radius:4px; font-size:0.82rem; margin:0.18rem 0.18rem 0.18rem 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul { padding-left:1.4rem; } li { margin-bottom:0.45rem; }
+.grant { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1rem 0; font-size:0.95rem; }
+.grant strong { color:var(--amber); }
+.honest { color:var(--gray); font-size:0.88rem; border-top:1px dashed #cbd5e1; margin-top:0.7rem; padding-top:0.6rem; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Claude Code を、チームに安全に導入する</h1>
+<p class="subtitle">法人・チーム向けの研修・導入・保守サービス｜cc-safe-setup の作者が支援します</p>
+<div class="lead">
+個人で Claude Code を使うのと、チームや組織で使うのは、安全の前提がまったく違います。
+組織では、<strong>たった1人の無防備な設定が、組織全体のリスク</strong>になります。
+1人の開発者の手元で動いた AI が、再帰的にファイルを削除する、<code>.env</code> を git に取り込む、本番のデータベースを壊す、想定外の課金を発生させる——
+こうした事故は、ほかの19人がどれだけ慎重でも起こります。
+このページは、組織として「統一・強制・監査」をどう作るかを、実務の型と一緒にご案内します。
+</div>
+<h2>こんな課題に</h2>
+<ul>
+<li>開発者ごとに設定がバラバラで、誰がどこまで安全対策をしているか分からない</li>
+<li>新しく入った人が、安全の設定をしないまま AI を本番のリポジトリで動かしてしまう</li>
+<li>「やってはいけない操作」を、組織として強制する仕組みがない</li>
+<li>CI に安全のゲートがなく、危険な変更が出荷の手前で止まらない</li>
+<li>チームに Claude Code を導入したいが、安全と費用の両面で何から始めるべきか分からない</li>
+</ul>
+<h2>サービスと費用の目安</h2>
+<p>下記はいずれも<strong>目安</strong>です。チームの規模・対象のリポジトリ数・既存の運用によって変わるため、まずはご相談ください。
+実際の作業の範囲と費用は、お見積もりでご提示します。</p>
+<div class="service">
+<h3>1. 導入の安全監査（スポット）</h3>
+<p>組織の <code>settings.json</code>・<code>CLAUDE.md</code>・hook の設定を点検し、事故につながる穴（権限の抜け、機密の漏洩経路、削除や課金のリスク）を洗い出します。是正のための設定一式と、配布できる安全 baseline をお渡しします。</p>
+<span class="price">目安 ¥150,000〜（スポット）</span>
+<span class="tag">成果物: 脆弱性レポート + 推奨 hook + 配布用テンプレート</span>
+</div>
+<div class="service">
+<h3>2. チーム研修（オンライン／録画）</h3>
+<p>技術リードと開発者向けに、Claude Code の安全な運用を実例で学ぶ研修です。実際に報告された事故と、その防ぎ方を、自社の運用に落とし込みます。録画での提供も可能です。</p>
+<span class="price">目安 1人 ¥50,000〜（人数・形式により変動）</span>
+<span class="tag">人材開発支援助成金の対象になりうる（下記の注記）</span>
+</div>
+<div class="service">
+<h3>3. 導入・初期設定（組織 baseline の設計と配布）</h3>
+<p>組織で共有する安全ポリシーを設計し、全リポジトリと全開発者へ配布する仕組み、CI の安全ゲート、必須 baseline の強制までを構築します。手作業の配布で起こる「設定のズレ」「付け忘れ」をなくします。</p>
+<span class="price">目安 ¥300,000〜（スポットのプロジェクト）</span>
+<span class="tag">成果物: 共有ポリシー + CI ワークフロー + 配布手順</span>
+</div>
+<div class="service">
+<h3>4. 月額の運用保守・相談対応</h3>
+<p>hook の更新、新しく報告された事故への対応、設定レビュー、運用の相談を継続して支援します。Claude Code は更新が速く、安全の前提も変わるため、入れて終わりにしない運用を支えます。</p>
+<span class="price">目安 月額 ¥100,000〜（規模により変動）</span>
+<span class="tag">継続的な安全の更新 + 相談 + レビュー</span>
+</div>
+<div class="service">
+<h3>5. スポットのコンサル（設計レビュー・事故の原因調査）</h3>
+<p>AI コーディングの導入方針の策定、安全設計のレビュー、起きてしまった事故の原因調査と再発防止まで、単発でご相談に応じます。</p>
+<span class="price">目安 1日 ¥300,000〜</span>
+<span class="tag">方針策定 / 設計レビュー / 原因調査</span>
+</div>
+<div class="service">
+<h3>6. cc-safe-setup for Teams（open-core・準備中）</h3>
+<p>中核の hook は <strong>これからもずっと無料（MIT）</strong>です。そのうえで、組織で共有ポリシーを配布・強制し、CI で実行し、監査ログを残す上位の機能を、開発者あたりの月額で提供することを検討しています。
+作る前に需要を確認しています——必要そうであれば、👍 か一言で教えてください。</p>
+<span class="price">目安 約 $12 / 開発者 / 月（需要を確認中）</span>
+<p class="note"><a href="https://github.com/yurukusa/cc-safe-setup/discussions/632">需要の確認のスレッド（GitHub Discussion #632）→</a></p>
+</div>
+<h2>競合の費用感（参考）</h2>
+<p>日本国内では、Claude Code・AI コーディングの法人向け支援はすでに事業として成立しています。費用感の目安として、公開されている範囲では研修が1人あたり数万〜十数万円、月額の保守支援が十数万〜数十万円、コンサルが1日あたり数十万円という水準です。当方の費用は、この市場の水準に沿って設定しています。</p>
+<div class="grant">
+<strong>人材開発支援助成金について。</strong>
+従業員の IT・AI のスキルの研修には、国の<strong>人材開発支援助成金</strong>が使える場合があります（<a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html">厚生労働省の公式の案内</a>）。
+対象・助成の率・申請の要件は、制度と年度で変わります。必ず公式の案内と、自社の所在地の労働局でご確認ください。本ページは助成の可否を保証するものではありません。
+</div>
+<h2>無料で、今すぐ始められること</h2>
+<p>ご相談の前に、まず無料の資料で現状を確認できます。いずれもそのまま社内で使えます。</p>
+<table>
+<tr><th>資料</th><th>内容</th></tr>
+<tr><td><a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html">チーム導入の安全チェックリスト</a></td><td>技術リードがそのまま使える7セクションのチェックリストと、コピーできるチームの安全ポリシーの雛形、CI の安全ゲート</td></tr>
+<tr><td><a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d8a81c46aeb8852f9b3a77ff9b7ee50a/raw/jiko-sonae-shindan-jp.html">事故への備え 自己診断</a></td><td>5問・30秒で、設定が事故にどれだけ備えているかを判定し、無料の対策を提案</td></tr>
+<tr><td><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（無料・MIT）</a></td><td>1コマンドで入る安全 hook 一式。個人向けは無料のままです</td></tr>
+</table>
+<h2>お問い合わせ</h2>
+<p>導入のご相談・お見積りは、GitHub の issue からお願いします。詳細・機密にかかわるご相談は、最初のご連絡のあと、非公開のやりとりに切り替えて対応します。</p>
+<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/issues/new?title=%5B%E6%B3%95%E4%BA%BA%5D%20%E5%B0%8E%E5%85%A5%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87&labels=service">GitHub から相談する</a>
+<a class="cta sub" href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html">まず無料のチェックリストを見る</a>
+<h2>担当について</h2>
+<p>
+<span class="tag">cc-safe-setup の作者（790+ の安全 hook・MIT）</span>
+<span class="tag">npm 累計 約3万 取り込み</span>
+<span class="tag">GitHub 41★</span>
+<span class="tag">Claude Code の安全と運用について Qiita 累計閲覧 8万超</span>
+<span class="tag">実際に報告された事故（GitHub の起票）に基づく設計</span>
+</p>
+<p class="honest">数値は公開時点の実測です。サービスの実施の範囲・日程は個別のご相談で決めます。誇張した約束はしません。</p>
+<footer>
+<p>
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ｜
+<a href="https://yurukusa.github.io/cc-safe-setup/services.html">English (individual services)</a> ｜
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本（¥800・3章無料）</a> ｜
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide">Token Book</a>
+</p>
+</footer>
+</div>
+</body>
+</html>
