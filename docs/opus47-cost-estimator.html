@@ -144,7 +144,7 @@ function calc(){
   daily47+=daily47*0.14; // 14% startup bloat per #49593
 
   var increase=daily47-daily46;
-  var monthlyExtra=(increase*22/1000000)*15; // $15/MTok input price, 22 working days
+  var monthlyExtra=(increase*22/1000000)*5; // $5/MTok input price (Opus 4.5-4.8 current), 22 working days
 
   document.getElementById('tokens46').textContent=fmt(daily46)+' tokens';
   document.getElementById('tokens47').textContent=fmt(daily47)+' tokens';

@@ -241,8 +241,8 @@ function audit(text) {
 
   // Summary text
   const wastePct = ((wastedTokens / totalTokens) * 100).toFixed(0);
-  // Cost estimate at Opus 4.7 input rate (~$15 / 1M tokens)
-  const dailyCost = (wastedTokens * 10 * 0.000015).toFixed(2); // 10 sessions/day
+  // Cost estimate at Opus 4.7 input rate (~$5 / 1M tokens, current)
+  const dailyCost = (wastedTokens * 10 * 0.000005).toFixed(2); // 10 sessions/day
   const monthlyCost = (dailyCost * 30).toFixed(0);
   document.getElementById('summaryText').innerHTML = `
     Of <strong>${skillList.length}</strong> installed skills, <strong>${unusedSkills.length}</strong>

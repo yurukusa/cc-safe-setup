@@ -105,9 +105,9 @@ function calc() {
     savingsText = `${savedPercent}% fewer tokens used`;
     detailText = `Pro plan has stricter limits. Reducing effort level extends your daily allowance by ~${savedPercent}%.`;
   } else {
-    const savedDollars = Math.round(savedTokens / 1000000 * 15);
+    const savedDollars = Math.round(savedTokens / 1000000 * 5);
     savingsText = `~$${savedDollars}/month saved`;
-    detailText = `${(savedTokens/1000000).toFixed(1)}M tokens/month saved at ~$15/MTok output. With Opus 4.7's +35% tokenizer overhead, this compounds.`;
+    detailText = `${(savedTokens/1000000).toFixed(1)}M tokens/month saved at ~$5/MTok (Opus 4.7 input rate, conservative). With Opus 4.7's +35% tokenizer overhead, this compounds.`;
   }
 
   document.getElementById('rec-level').textContent = bestLevel;

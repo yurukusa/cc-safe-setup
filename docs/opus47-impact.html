@@ -126,7 +126,7 @@ function calculate() {
   var costPerToken = 0; // for display
   var monthlySavings = 0;
   if (plan === 'api') {
-    costPerToken = 0.000015; // Opus input
+    costPerToken = 0.000005; // Opus input ($5/MTok, Opus 4.5-4.8 current)
     monthlySavings = Math.round(totalOverhead * costPerToken * 100) / 100;
   } else if (plan === 'max') {
     monthlySavings = Math.round(200 * overheadPct / 100);
