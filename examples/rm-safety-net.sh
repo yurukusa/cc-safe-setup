@@ -82,7 +82,10 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     fi
 
     # Block rm on critical paths (/Users = macOS home, parity with /home on Linux)
-    CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|^\.env"
+    # .env is matched at the start OR after any path segment, so a nested path
+    # like backend/.env or src/.env is caught too (#65034 — Claude deleted a
+    # .env living in a subdirectory, which the start-anchored pattern missed).
+    CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|(^|/)\.env"
     if echo "$TARGET" | grep -qE "$CRITICAL"; then
         echo "BLOCKED: rm targeting critical path: $TARGET" >&2
         exit 2
