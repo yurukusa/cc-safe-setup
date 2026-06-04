@@ -494,12 +494,31 @@ Analyzes 9 safety dimensions and gives you a score (0-100) with one-command fixe
 
 ### CI Integration (GitHub Action)
 
+Gate every PR on a safety score — the agent that runs `rm -rf` or commits a `.env` in one repo doesn't care how careful the rest of the team was. Drop in this workflow:
+
 ```yaml
 # .github/workflows/safety.yml
-- uses: yurukusa/cc-safe-setup@main
-  with:
-    threshold: 70  # CI fails if score drops below this
+name: Claude Code Safety
+on: [push, pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: yurukusa/cc-safe-setup@main
+        with:
+          threshold: 70   # CI fails if the safety score drops below this
 ```
+
+It exposes `score`, `grade`, and `risks` outputs for later steps. Free, MIT, no token, no signup.
+
+**Show your score** — paste a badge into your README (`npx cc-safe-setup --audit --badge` prints one for your current score):
+
+```markdown
+![Claude Code Safety](https://img.shields.io/badge/Claude_Code_Safety-90%2F100-brightgreen)
+```
+
+> **Rolling this out across a whole org?** Per-repo CI is free (above). If you'd want one shared policy enforced across *every* repo centrally — with an audit trail and no per-repo opt-in for a new repo to silently forget — I'm gauging interest before building it: [tell me it'd help](https://github.com/yurukusa/cc-safe-setup/discussions/632). The free tier stays free.
 
 ### Project Scanner
 
