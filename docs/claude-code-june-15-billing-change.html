@@ -100,6 +100,27 @@
     <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (MIT hooks incl. quota/cost-spike warnings).
   </div>
 
+  <h2>Two more things break on June 15 — and they're not about billing</h2>
+  <p>The billing split isn't the only thing landing on 2026-06-15. Two API-level breaking changes share the same date, and they hit <em>code</em>, not your plan. If you have model IDs pinned in scripts, CI, or config, your calls can start <strong>failing</strong> that day.</p>
+
+  <h3 class="warn">1. Two model IDs retire (requests start failing)</h3>
+  <p>Anthropic deprecated these on 2026-04-14 with a 2026-06-15 retirement date. After June 15, requests to a retired model ID return an error.</p>
+  <table>
+    <thead><tr><th>Retiring ID (stops working)</th><th>Replacement</th></tr></thead>
+    <tbody>
+      <tr><td><code>claude-opus-4-20250514</code></td><td><code>claude-opus-4-8</code></td></tr>
+      <tr><td><code>claude-sonnet-4-20250514</code></td><td><code>claude-sonnet-4-6</code></td></tr>
+    </tbody>
+  </table>
+  <p>Find pinned IDs before they break:</p>
+  <pre><code>grep -rn "claude-opus-4-20250514\|claude-sonnet-4-20250514" . \
+  --include=*.{js,ts,py,json,yml,yaml,toml,sh,env}</code></pre>
+  <p>Also export your API usage by model from the <a href="https://platform.claude.com/usage" target="_blank" rel="noopener">Claude Console Usage page</a> (Export → CSV) to catch IDs your code sets dynamically.</p>
+
+  <h3 class="warn">2. <code>temperature</code> / <code>top_p</code> / <code>top_k</code> now 400 on Opus 4.7+</h3>
+  <p>If your "fix" for the retirement is to bump the model to Opus 4.7 or 4.8, note that setting any of <code>temperature</code>, <code>top_p</code>, or <code>top_k</code> to a non-default value returns a <strong>400 error</strong> on Opus 4.7 and later. Remove those parameters and steer behavior through the prompt instead.</p>
+  <p class="sub">Sources: Anthropic <a href="https://platform.claude.com/docs/en/docs/about-claude/model-deprecations" target="_blank" rel="noopener">model deprecations</a> page (verify against your own claim email and the live docs, since dates can change).</p>
+
   <h2>Reducing programmatic token cost</h2>
   <p>If you're affected, the lever is spending fewer tokens per programmatic run so the new credit lasts. The biggest wins are usually prompt-cache hygiene, model selection per task, trimming context that's re-sent every turn, and catching cost-spike patterns (large tool outputs, hook stderr re-injection, duplicated context). A field reference of <a href="https://gist.github.com/yurukusa/ccd2bd793c71521d81eb4cfcd3900755" target="_blank" rel="noopener">13 Claude Code cost-spike patterns</a> (free) covers the common ones with a defense for each.</p>
 
