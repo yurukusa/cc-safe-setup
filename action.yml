@@ -39,10 +39,15 @@ runs:
           GRADE=$(python3 -c "import json; print(json.load(open('/tmp/audit-json.txt'))['grade'])" 2>/dev/null || echo "?")
           RISK_COUNT=$(python3 -c "import json; print(len(json.load(open('/tmp/audit-json.txt'))['risks']))" 2>/dev/null || echo "0")
         else
-          SCORE=$(grep -oP 'Safety Score: \K\d+' /tmp/audit-output.txt || echo "0")
+          # Fallback: strip ANSI colour codes first, otherwise the escape
+          # sequence between "Safety Score: " and the number defeats the match.
+          SCORE=$(sed 's/\x1b\[[0-9;]*m//g' /tmp/audit-output.txt | grep -oP 'Safety Score: \K\d+' | head -1)
           GRADE="?"
           RISK_COUNT="?"
         fi
+
+        # Guard against an empty parse so the threshold comparison stays numeric.
+        [ -z "$SCORE" ] && SCORE="0"
 
         THRESHOLD="${{ inputs.threshold }}"
 

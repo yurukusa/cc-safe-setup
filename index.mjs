@@ -1217,6 +1217,13 @@ async function installExample(name) {
 }
 
 async function audit() {
+  // When --json is set, machine consumers (the GitHub Action, CI) parse stdout
+  // as pure JSON. Route the human-readable report to stderr so stdout carries
+  // only the JSON object emitted below. Without this, the colored report
+  // printed ahead of the JSON made stdout unparseable, the Action scored it 0,
+  // and every CI run failed (default threshold 70).
+  const _stdoutLog = console.log;
+  if (JSON_OUTPUT) console.log = (...a) => console.error(...a);
   console.log();
   console.log(c.bold + '  cc-safe-setup --audit' + c.reset);
   console.log(c.dim + '  Analyzing your Claude Code safety setup...' + c.reset);
@@ -1458,6 +1465,7 @@ async function audit() {
       passing: good,
       timestamp: new Date().toISOString(),
     };
+    console.log = _stdoutLog; // restore: the JSON object must reach stdout
     console.log(JSON.stringify(output, null, 2));
   }
 
