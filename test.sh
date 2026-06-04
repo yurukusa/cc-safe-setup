@@ -18406,6 +18406,22 @@ test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_pat
 test_ex subagent-blast-radius-guard.sh '{"agent_id":"a1","tool_input":{"file_path":"src/featureX/util.js"}}' 0 "blast-radius: block mode allows in-allowlist subagent write (exit 0)"
 unset CC_SUBAGENT_WRITE_GUARD CC_SUBAGENT_WRITE_ALLOW
 
+# --- destructive-migration-write-guard tests (#63763) ---
+echo "destructive-migration-write-guard.sh:"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V12__rel.sql","content":"ALTER TABLE assignments DROP COLUMN officer_id;"}}' 0 "mig-write: #63763 DROP COLUMN in Flyway file warns (exit 0)"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V14__add.sql","content":"ALTER TABLE users ADD COLUMN nickname text;"}}' 0 "mig-write: additive migration is silent (exit 0)"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"src/sqlBuilder.js","content":"// builds DROP COLUMN statements"}}' 0 "mig-write: non-migration file ignored (exit 0)"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Edit","tool_input":{"file_path":"alembic/versions/x.py","new_string":"op.execute(\"DROP TABLE legacy\")"}}' 0 "mig-write: Edit new_string DROP TABLE warns (exit 0)"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"MultiEdit","tool_input":{"file_path":"db/migrate/7.sql","edits":[{"new_string":"TRUNCATE TABLE sessions;"}]}}' 0 "mig-write: MultiEdit TRUNCATE warns (exit 0)"
+test_ex destructive-migration-write-guard.sh 'not json' 0 "mig-write: malformed input fails open (exit 0)"
+export CC_MIGRATION_WRITE_GUARD=off
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V12__rel.sql","content":"DROP TABLE users;"}}' 0 "mig-write: off mode exits 0"
+unset CC_MIGRATION_WRITE_GUARD
+export CC_MIGRATION_WRITE_GUARD=block
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V12__rel.sql","content":"ALTER TABLE assignments DROP COLUMN officer_id;"}}' 2 "mig-write: block mode blocks destructive migration write (exit 2)"
+test_ex destructive-migration-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"db/migrations/V14__add.sql","content":"ALTER TABLE users ADD COLUMN nickname text;"}}' 0 "mig-write: block mode allows additive migration (exit 0)"
+unset CC_MIGRATION_WRITE_GUARD
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
