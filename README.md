@@ -713,7 +713,10 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 
 ### Professional Services
 
-Need help configuring Claude Code safely? [**Safety Setup Service**](https://yurukusa.github.io/cc-safe-setup/services.html), audit, token optimization, and custom hooks by the cc-safe-setup team.
+The hooks above stay free (MIT) forever. If you'd rather have a person help, there are two paid tracks:
+
+- **Individuals** — [Safety Setup Service](https://yurukusa.github.io/cc-safe-setup/services.html): a one-off audit of your Claude Code config, token optimization, and custom hooks by the cc-safe-setup team.
+- **Teams & organizations (日本語)** — [法人・チーム向けの安全導入・研修・保守](https://yurukusa.github.io/cc-safe-setup/services-jp.html): for rolling Claude Code out across a company. A security audit of your `settings.json` / `CLAUDE.md`, an org-wide enforced safety baseline, CI safety gates, team training (potentially eligible for Japan's 人材開発支援助成金), and ongoing operations-layer support. This is the layer *after* training — stopping the incidents that happen even to careful, trained developers, because one unprotected developer is an org-wide risk.
 
 ## FAQ
 
