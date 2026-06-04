@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 安全監査レポート（サンプル）— cc-safe-setup</title>
+<meta name="description" content="法人向けの導入の安全監査で、実際にお渡しする脆弱性レポートのサンプルです。架空の企業を対象に、検出する所見の様式、重大度、関連する実際の事故、推奨 hook、是正の手順を例示します。cc-safe-setup の作者による法人向けサービスの成果物の見本。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Claude Code 安全監査レポート（サンプル）">
+<meta property="og:description" content="法人向けの安全監査でお渡しする脆弱性レポートの見本。所見の様式・重大度・関連する実際の事故・推奨 hook・是正の手順を架空の企業で例示します。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/services-jp-sample-audit.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.7rem; line-height:1.4; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin-bottom:0.4rem; font-size:1.08rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.sample-banner { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.sample-banner strong { color:var(--amber); }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.18rem 0.6rem; border-radius:4px; font-size:0.82rem; margin:0.18rem 0.18rem 0.18rem 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0.4rem 0.6rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul { padding-left:1.4rem; } li { margin-bottom:0.45rem; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+.meta-table th { width:32%; white-space:nowrap; }
+.sev { display:inline-block; padding:0.1rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:bold; color:#fff; }
+.sev-crit { background:#dc2626; } .sev-high { background:#ea580c; } .sev-med { background:#ca8a04; } .sev-low { background:#16a34a; }
+.finding { border:1px solid #e2e8f0; border-left:4px solid var(--gray); border-radius:8px; padding:1.1rem 1.2rem; margin-bottom:1.1rem; }
+.finding.crit { border-left-color:#dc2626; } .finding.high { border-left-color:#ea580c; } .finding.med { border-left-color:#ca8a04; }
+.finding h3 { margin-bottom:0.5rem; }
+.finding dl { margin:0.4rem 0 0; }
+.finding dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.finding dd { margin:0.1rem 0 0; }
+.finding code { background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:3px; font-size:0.88em; }
+.honest { color:var(--gray); font-size:0.88rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code 安全監査レポート（サンプル）</h1>
+<p class="subtitle">法人向けの「導入の安全監査」でお渡しする脆弱性レポートの見本です。</p>
+
+<div class="sample-banner">
+<strong>これは架空の企業を対象にしたサンプルです。</strong> 実際の監査は、貴社の <code>settings.json</code>・<code>CLAUDE.md</code>・CI 設定・運用に基づいて作成します。下記の所見・件数・評価は、レポートの様式と内容の水準をお見せするための例示です。実在の企業の情報は含みません。
+</div>
+
+<h2>1. 監査の概要</h2>
+<table class="meta-table">
+<tr><th>対象（架空）</th><td>株式会社サンプル 開発部</td></tr>
+<tr><th>規模</th><td>開発者 20 名 / 対象リポジトリ 35 件</td></tr>
+<tr><th>監査の範囲</th><td>各開発者の <code>~/.claude/settings.json</code>、プロジェクトの <code>CLAUDE.md</code>、CI の安全ゲートの有無、組織で共有された安全ポリシーの有無</td></tr>
+<tr><th>手法</th><td>設定の静的点検 → 実際に報告された Claude Code の事故との突き合わせ → 推奨する防御 hook の実機での動作確認</td></tr>
+<tr><th>総合評価</th><td><span class="sev sev-crit">高リスク</span> 重大 2 件・高 2 件・中 2 件。組織として危険な操作を機械的に止める仕組みが未整備です。</td></tr>
+</table>
+
+<div class="lead">
+<strong>要旨。</strong> 各開発者が手元で個別に設定しており、組織として統一・強制された安全の baseline がありません。1 人の無防備な設定が組織全体のリスクになる状態で、再帰的なファイル削除・本番データベースの破壊・<code>.env</code> の漏洩・想定外の課金を、実行の手前で止める防御がいずれも未設定でした。いずれも、すでに報告されている実際の事故と同じ型です。是正は、無料の hook の配布で即日に着手できます。
+</div>
+
+<h2>2. 重大度の集計</h2>
+<table>
+<tr><th>重大度</th><th>件数</th><th>概要</th></tr>
+<tr><td><span class="sev sev-crit">重大</span></td><td>2</td><td>取り返しのつかないデータ消失（ファイル / データベース）の未保護</td></tr>
+<tr><td><span class="sev sev-high">高</span></td><td>2</td><td>機密の漏洩・想定外の課金につながる経路の未保護</td></tr>
+<tr><td><span class="sev sev-med">中</span></td><td>2</td><td>サブエージェントと auto モードの巻き添えの未保護</td></tr>
+<tr><td><span class="sev sev-low">低</span></td><td>0</td><td>—</td></tr>
+</table>
+
+<h2>3. 検出した所見</h2>
+
+<div class="finding crit">
+<h3><span class="sev sev-crit">重大</span> 再帰的なファイル削除を止める仕組みがない</h3>
+<dl>
+<dt>観測</dt><dd>全開発者の <code>settings.json</code> で Bash の実行が許可される一方、<code>rm -rf</code> などの再帰削除を実行の手前で遮断する <code>PreToolUse</code> hook が未設定でした。</dd>
+<dt>関連する実際の事故</dt><dd>Claude Code がワイルドカードの削除でユーザーのファイルを巻き添えにする事故が複数報告されています（<a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a>）。</dd>
+<dt>推奨</dt><dd><code>rm-safety-net.sh</code> を全開発者の <code>~/.claude</code> に導入し、危険な再帰削除を停止します。</dd>
+<dt>是正の容易さ</dt><dd>容易（1 コマンドで配布可能）。</dd>
+</dl>
+</div>
+
+<div class="finding crit">
+<h3><span class="sev sev-crit">重大</span> 本番データベースの破壊的な操作が素通りする</h3>
+<dl>
+<dt>観測</dt><dd>マイグレーションのコマンド（<code>prisma db push --accept-data-loss</code>、<code>drizzle push --force</code> など）を止める防御がなく、AI が本番のスキーマへ破壊的な変更を実行できる状態でした。</dd>
+<dt>関連する実際の事故</dt><dd>強制的なマイグレーションで約 60 のテーブルが消失した事故（<a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>）、データ消失を伴う <code>db push</code> の事故（<a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a>）。</dd>
+<dt>推奨</dt><dd><code>prisma-migrate-guard.sh</code> を導入し、データ消失を伴うマイグレーションを実行の手前で停止します。</dd>
+<dt>是正の容易さ</dt><dd>容易。<code>db push --accept-data-loss</code> の遮断を実機で確認済みです。</dd>
+</dl>
+</div>
+
+<div class="finding high">
+<h3><span class="sev sev-high">高</span> <code>.env</code> が git に取り込まれる経路が開いている</h3>
+<dl>
+<dt>観測</dt><dd><code>CLAUDE.md</code> に「機密を commit しない」旨の記述はあるものの、指示は素通りされうるため、<code>.env</code> の取り込みを止める機械的な防御が必要です。実際に <code>CLAUDE.md</code> の指示を素通りした機密の漏洩が報告されています（<a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>）。</dd>
+<dt>推奨</dt><dd><code>dotenv-commit-guard.sh</code> で <code>.env</code> の <code>git add</code> / commit を遮断します。</dd>
+<dt>是正の容易さ</dt><dd>容易。</dd>
+</dl>
+</div>
+
+<div class="finding high">
+<h3><span class="sev sev-high">高</span> 認証情報の持ち出し・想定外の課金を止める層がない</h3>
+<dl>
+<dt>観測</dt><dd>認証情報を外部へ送出する経路や、想定外の支払い・送金につながる操作を止める防御が未設定でした。</dd>
+<dt>関連する実際の事故</dt><dd>無断の送金が発生した事故（<a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a>、$1,446）。</dd>
+<dt>推奨</dt><dd><code>credential-exfil-guard.sh</code> で認証情報の持ち出しの経路を遮断します。高額な操作には承認のゲートを設けます。</dd>
+<dt>是正の容易さ</dt><dd>中（対象の経路の棚卸しを伴います）。</dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3><span class="sev sev-med">中</span> サブエージェントの書き込みが無制限</h3>
+<dl>
+<dt>観測</dt><dd>サブエージェントによるファイルの書き換えに、影響範囲の制限がありませんでした。委譲したタスクの裏で、本番設定やマイグレーションを含む広範な書き換えが起こりうる状態です。</dd>
+<dt>推奨</dt><dd><code>subagent-blast-radius-guard.sh</code> で、サブエージェント由来の書き込みを <code>agent_id</code> 単位で可視化・制限します（高リスクのパスのみ対象、メインの作業は妨げません）。</dd>
+<dt>是正の容易さ</dt><dd>容易（既定は警告のみ、強制は任意で有効化）。</dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3><span class="sev sev-med">中</span> auto モードでの巻き添えが止まらない</h3>
+<dl>
+<dt>観測</dt><dd>auto（自動承認）での運用時に、分類器が見落とす操作が実行されうる状態でした。掃除やワイルドカードの削除で、対象外のファイルが巻き添えになる経路です。</dd>
+<dt>推奨</dt><dd><code>auto-mode-safety-enforcer.sh</code> を導入します。hook は自動承認とは別の層で効くため、auto モードでも危険な操作を停止できます（実機で確認済み）。</dd>
+<dt>是正の容易さ</dt><dd>容易。</dd>
+</dl>
+</div>
+
+<h2>4. 推奨する組織の安全 baseline</h2>
+<p>下記を、全開発者と全リポジトリに統一して配布・強制することを推奨します。手作業の配布で起こる「設定のズレ」「付け忘れ」をなくすのが目的です。</p>
+<ul>
+<li>必須の防御 hook（上記の所見に対応）: <code>rm-safety-net</code> / <code>prisma-migrate-guard</code> / <code>dotenv-commit-guard</code> / <code>credential-exfil-guard</code> / <code>subagent-blast-radius-guard</code> / <code>auto-mode-safety-enforcer</code>、加えて履歴の改変を止める <code>git-history-rewrite-guard</code>、メモリの無断の書き換えを止める <code>memory-write-guard</code>。</li>
+<li>必須 baseline の強制: 安全 hook が欠けている場合に止める（新しいリポジトリが付け忘れても素通りしない）。</li>
+<li>CI の安全ゲート: ローカルだけでなく CI でも安全の検査を実行し、危険な変更を出荷の手前で止める。</li>
+<li>監査ログ: 誰がいつポリシーを変えたかを残す。</li>
+</ul>
+
+<h2>5. 是正のロードマップ</h2>
+<table>
+<tr><th>段階</th><th>内容</th><th>目安</th></tr>
+<tr><td>フェーズ 0</td><td>重大 2 件に対応する hook を全開発者へ即日配布</td><td>即日</td></tr>
+<tr><td>フェーズ 1</td><td>高 2 件への対応 + 組織の共有ポリシーの設計と配布</td><td>1 週間以内</td></tr>
+<tr><td>フェーズ 2</td><td>CI の安全ゲート + 必須 baseline の強制 + 監査ログ</td><td>2〜3 週間</td></tr>
+<tr><td>継続</td><td>新しく報告される事故への対応・hook の更新・設定レビュー（月額の運用保守）</td><td>継続</td></tr>
+</table>
+
+<h2>6. このサンプルについて</h2>
+<p>本レポートは、法人向けの「導入の安全監査（目安 ¥150,000〜）」でお渡しする成果物の見本です。実際の監査では、貴社の実際の設定を点検し、検出した所見・推奨 hook・配布できる安全 baseline のテンプレートをお渡しします。所見はすべて、番号で辿れる実際の事故と、それを止める hook の実機での検証に基づいて作成します。一般論や誇張した約束はしません。</p>
+
+<p style="margin-top:1.2rem">
+<a class="cta" href="services-jp.html">法人向けサービスの詳細を見る</a>
+<a class="cta sub" href="https://github.com/yurukusa/cc-safe-setup/issues/new?title=%5B%E6%B3%95%E4%BA%BA%5D%20%E5%B0%8E%E5%85%A5%E3%81%AE%E5%AE%89%E5%85%A8%E7%9B%A3%E6%9F%BB%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87&labels=service">監査について相談する</a>
+</p>
+<p style="margin-top:0.4rem">まず自社で確認したい場合は、無料の <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html">チーム導入の安全チェックリスト</a> をそのままお使いください。</p>
+
+<p class="honest">所見の様式と件数はサンプルです。実際のリスクと件数は、貴社の設定によって変わります。推奨する hook はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）に実在し、個人向けは無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けサービスの成果物の見本 ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a> ·
+引用した事故: <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> ·
+<a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a> ·
+<a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a> ·
+<a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> ·
+<a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a>
+</footer>
+
+</div>
+</body>
+</html>
