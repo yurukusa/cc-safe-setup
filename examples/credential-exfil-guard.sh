@@ -84,4 +84,33 @@ if echo "$COMMAND" | grep -qiP 'cat\s+[^\s]*(\.env|\.pem|\.key|credentials|\.ssh
     exit 2
 fi
 
+# Pattern 10: macOS keychain extraction of a known secret token (#65350 —
+# a plugin shipped `security find-generic-password -s ANTHROPIC_AUTH_TOKEN -w`
+# in skill files to silently exfiltrate the user's Anthropic token). Require
+# the -w flag (prints the raw secret) AND a high-signal secret service name,
+# so reading a non-secret keychain item (e.g. a wifi password) is not blocked.
+if echo "$COMMAND" | grep -qiE 'security\s+find-(generic|internet)-password' \
+   && echo "$COMMAND" | grep -qE '(^|[[:space:]])-w([[:space:]]|$)' \
+   && echo "$COMMAND" | grep -qiE 'ANTHROPIC|OPENAI|AUTH[_-]?TOKEN|API[_-]?KEY|ACCESS[_-]?TOKEN|[_-]SECRET|OAUTH|GITHUB[_-]?TOKEN|(^|[^a-z])secret([^a-z]|$)'; then
+    echo "BLOCKED: macOS keychain extraction of a secret token (security find-generic-password -w of a credential)" >&2
+    exit 2
+fi
+
+# Pattern 11: keychain secret piped straight into a network client.
+if echo "$COMMAND" | grep -qiE 'security\s+find-(generic|internet)-password' \
+   && echo "$COMMAND" | grep -qiE '\|[[:space:]]*(curl|wget|nc|ncat|telnet)([[:space:]]|$)'; then
+    echo "BLOCKED: keychain secret piped to a network client (possible exfiltration)" >&2
+    exit 2
+fi
+
+# Pattern 12: a secret-named env var piped into a network client as data.
+# Legit auth uses a header (-H "Authorization: Bearer $TOKEN") where the pipe,
+# if any, goes to a parser like jq — not to the network client — so this only
+# fires when the secret value itself is piped straight to curl/wget/nc.
+if echo "$COMMAND" | grep -qE '\$\{?[A-Za-z_]*(TOKEN|SECRET|API[_-]?KEY|PASSWORD|CREDENTIAL|AUTH)[A-Za-z_]*' \
+   && echo "$COMMAND" | grep -qiE '\|[[:space:]]*(curl|wget|nc|ncat|telnet)([[:space:]]|$)'; then
+    echo "BLOCKED: secret environment variable piped to a network client (possible exfiltration)" >&2
+    exit 2
+fi
+
 exit 0
