@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-05T07:09:24+09:00
+Updated: 2026-06-05T07:10:20+09:00
 
 ## Git
 - Branch: `fix/credential-exfil-keychain-65350`
@@ -7,13 +7,13 @@ Updated: 2026-06-05T07:09:24+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 7af69f8f checkpoint: auto-save 07:09:22
+- Last commit: 0a2b413d checkpoint: auto-save 07:09:36
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-06-05.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-06-05.md
 ./tests/test-credential-exfil-guard.sh
 ./examples/credential-exfil-guard.sh
 ./tests/test-spurious-malformed-notice-detector.sh
