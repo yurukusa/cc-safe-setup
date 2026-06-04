@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モジュール 5: 組織の baseline と CI のゲート（Claude Code 安全運用 研修）— cc-safe-setup</title>
+<meta name="description" content="Claude Code 安全運用 研修のモジュール 5 の公開版。全員に必須の hook の統一、CI での安全の検査、監査を、手作業の配布で起こる設定のズレをなくす方法として、手を動かす演習で学びます。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="モジュール 5: 組織の baseline と CI のゲート（Claude Code 安全運用 研修）">
+<meta property="og:description" content="全員に安全baselineを配布・強制し、CIで安全スコアが閾値を下回ったら止める。手を動かす演習つきの公開モジュール。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-module5-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; --red:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.55rem; line-height:1.4; margin-bottom:0.5rem; }
+h2 { font-size:1.22rem; margin:2.2rem 0 0.9rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.3rem 0 0.4rem; font-size:1.05rem; }
+.crumb { color:var(--gray); font-size:0.9rem; margin-bottom:1rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.4rem; }
+.obj { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.case { background:var(--light); border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; border-left:4px solid var(--red); }
+.case h3 { margin-top:0; }
+.case dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.step { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; }
+.note { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:0.9rem 1rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; margin:0.6rem 0; }
+code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.88em; }
+pre code { background:none; color:inherit; padding:0; }
+.check { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid var(--green); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+ul,ol { padding-left:1.5rem; } li { margin-bottom:0.45rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.8rem 1.5rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="crumb"><a href="claude-code-safety-training-jp.html">Claude Code 安全運用 研修</a> ／ モジュール 5（公開版）</p>
+<h1>モジュール 5: 組織の baseline と CI のゲート</h1>
+<p class="subtitle">全員に安全 baseline を配布・強制し、CI で安全のスコアが閾値を下回ったら止める。手を動かす演習で学びます。</p>
+
+<div class="obj">
+<strong>このモジュールの到達目標。</strong> 組織で共有する安全 baseline を設計し、全員と全リポジトリへ配布・強制でき、CI に安全のゲートを置いて、危険な設定を出荷の手前で止められる。
+</div>
+
+<p>これは研修の公開のモジュールです。そのまま読んで手を動かせます。<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>〜<a href="claude-code-safety-training-module4-jp.html">モジュール 4</a>に続く5本目で、残りのモジュール（事故対応と復旧）の構成は<a href="claude-code-safety-training-jp.html">カリキュラム</a>をご覧ください。</p>
+
+<h2>1. なぜ手作業の配布では守れないのか</h2>
+<p>モジュール 1〜4 で学んだ防御（削除・機密・費用・委譲の hook）は、<strong>入れた人だけ</strong>を守ります。組織では、これが最大の弱点になります。1人が hook を入れ忘れていれば、その1人の環境で <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> のデータベースの破壊や <a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> のサブエージェントの暴走が起こりえます。<strong>組織の安全は、最も無防備な1人の水準で決まります。</strong></p>
+<p>手作業で「各自入れてください」と配ると、必ず<strong>設定のズレ</strong>（人によって入っている hook が違う）と<strong>付け忘れ</strong>（新しいメンバー、新しいリポジトリ）が起きます。だから、安全 baseline は、口頭の依頼ではなく、<strong>git で配布し、CI で強制</strong>します。</p>
+
+<h2>2. baseline・配布・強制の3つの層</h2>
+<p>組織の安全は、3つの層で考えます。</p>
+<div class="case" style="border-left-color:var(--blue)">
+<h3>(1) baseline を決める</h3>
+<dl><dt>何を</dt><dd>全員に必須の hook の一式（削除・機密・費用・委譲の防御）を、組織の baseline として固定する。</dd></dl>
+</div>
+<div class="case" style="border-left-color:var(--blue)">
+<h3>(2) git で配布する</h3>
+<dl><dt>何を</dt><dd>baseline をリポジトリの <code>.claude/hooks/</code> に入れて git で配る。各自の手作業に頼らず、リポジトリを clone すれば baseline が付いてくる状態にする。</dd></dl>
+</div>
+<div class="case" style="border-left-color:var(--blue)">
+<h3>(3) CI で強制する</h3>
+<dl><dt>何を</dt><dd>CI で安全のスコアを測り、閾値を下回ったら出荷を止める。設定のズレや付け忘れを、PR の段階で機械的に検出する。</dd></dl>
+</div>
+
+<h2>3. 演習: baseline を配り、CI で強制する</h2>
+<p>実際に baseline をリポジトリで共有し、CI のゲートを置きます。所要およそ15分。</p>
+
+<div class="step">
+<h3>手順 1. baseline をリポジトリで共有する</h3>
+<p>プロジェクトの単位で hook を共有するには <code>--team</code> を使います。</p>
+<pre><code>npx cc-safe-setup --team</code></pre>
+<p>これで hook がリポジトリの <code>.claude/hooks/</code> に入ります。これを git にコミットすれば、リポジトリを clone した全員に baseline が配布され、各自の手作業の付け忘れがなくなります。</p>
+</div>
+
+<div class="step">
+<h3>手順 2. 自分の設定の安全のスコアを測る</h3>
+<p>監査は、設定の安全のスコア（0〜100）と、足りない防御の一覧を出します。</p>
+<pre><code>npx cc-safe-setup --audit</code></pre>
+<p>スコア、評価（A/B/C/F）、検出した risk の数が表示されます。<code>--audit --fix</code> で自動で直せるものは直せます。スコアは設定の状態で変わるため、<strong>「何点以上を組織の必須にするか」を baseline として決めます</strong>（既定の CI の閾値は70点）。</p>
+</div>
+
+<div class="step">
+<h3>手順 3. CI のゲートを置く（閾値を下回ったら止める）</h3>
+<p>監査を CI に組み込み、スコアが閾値を下回ったら CI を落とします。次のワークフローを <code>.github/workflows/</code> に置きます（<code>npx cc-safe-setup --generate-ci</code> でも生成できます）。</p>
+<pre><code>name: Claude Code Safety
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+jobs:
+  safety-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run safety audit
+        run: |
+          npx cc-safe-setup --audit --json > /tmp/audit.json 2>&1 || true
+          SCORE=$(jq -r '.score // 0' /tmp/audit.json)
+          echo "Safety score: $SCORE/100"
+          if [ "$SCORE" -lt 70 ]; then
+            echo "::error::Safety score $SCORE is below threshold (70)"
+            exit 1
+          fi</code></pre>
+<p>これで、安全のスコアが70点を下回る PR は、CI で止まります。閾値は組織の baseline に合わせて調整します（GitHub Marketplace の Action 版では <code>threshold</code> の入力で指定できます）。</p>
+</div>
+
+<div class="note">
+<strong>無料です。</strong> <code>--team</code>・<code>--audit</code>・CI のゲートは、すべて cc-safe-setup（無料・MIT）の機能です。組織への配布と強制に、追加の費用はかかりません。
+</div>
+
+<div class="check">
+<strong>確認（このモジュールの修了の判定）。</strong> 次のすべてに「はい」と答えられれば修了です。
+<ul>
+<li><code>--team</code> で baseline をリポジトリの <code>.claude/hooks/</code> に入れ、git で配布できることを確認した。</li>
+<li><code>--audit</code> で自分の設定の安全のスコアを測った。</li>
+<li>CI のワークフローを置き、安全のスコアが閾値を下回ると CI が止まる仕組みを理解した。</li>
+<li>なぜ手作業の配布（口頭の依頼）でなく、git の配布と CI の強制が要るのかを、自分の言葉で説明できる。</li>
+</ul>
+</div>
+
+<h2>4. 自社への適用</h2>
+<ul>
+<li>組織の baseline（必須の hook の一式）と、CI の合格の閾値（例: 70点）を、文書として固定する。</li>
+<li>新しいリポジトリのテンプレートに、baseline の <code>.claude/hooks/</code> と CI のワークフローを最初から含める（付け忘れをなくす）。</li>
+<li>新しいメンバーのオンボーディングに、baseline の導入と <code>--audit</code> の確認を組み込む。</li>
+<li>定期的に <code>--audit</code> を走らせ、設定のズレ（drift）を検出する。</li>
+</ul>
+
+<h2>次のモジュールと、研修の全体</h2>
+<p>このモジュールは「組織で守る層」です。研修の全体（約12時間・7モジュール）では、削除とデータ破壊（<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>）、機密と認証情報（<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a>）、費用と利用枠（<a href="claude-code-safety-training-module3-jp.html">モジュール 3</a>）、サブエージェントと auto モード（<a href="claude-code-safety-training-module4-jp.html">モジュール 4</a>）に続き、最後に事故対応と復旧を、同じように手を動かして学びます。</p>
+
+<p>
+<a class="cta" href="claude-code-safety-training-jp.html">研修のカリキュラム全体を見る</a>
+<a class="cta sub" href="services-jp.html">法人での実施・費用の相談</a>
+</p>
+<p class="honest">本モジュールは公開版です。引用した事故はすべて番号で辿れる実際の報告で、演習で使う機能（<code>--team</code>・<code>--audit</code>・CI のゲート）はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）に実在します。安全のスコアは設定の状態で変わるため、特定の点数は記載していません。個人での利用は無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のモジュール 5（公開版） ·
+<a href="claude-code-safety-training-jp.html">研修カリキュラム</a> ·
+<a href="claude-code-safety-training-module4-jp.html">モジュール 4</a> ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
