@@ -9,13 +9,16 @@
 #   This hook blocks: ALL rm commands on important paths, even non-recursive
 #
 # What it blocks:
-#   rm (any flags) on: /, ~, .., /home, /etc, /usr, /var, .git, .env
+#   rm (any flags) on: /, ~, .., /home, /Users, /etc, /usr, /var, .git, .env
+#   wildcard/glob rm reaching into a user/home/absolute path, e.g.
+#     rm -f ~/Downloads/*copy*.md  (unpredictable match set — see #64559)
 #   find -delete (any path)
 #   shred (any file)
 #   unlink on critical paths
 #
 # What it allows:
 #   rm on safe targets: node_modules, dist, build, __pycache__, .cache, /tmp
+#   bare relative globs in the working dir: rm *.pyc, rm dist/*.js
 #
 # Usage: Add to settings.json as a PreToolUse hook
 #
@@ -62,8 +65,24 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
         exit 0
     fi
 
-    # Block rm on critical paths
-    CRITICAL="^/\$|^/home|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|^\.env"
+    # Block wildcard/glob rm on absolute or home paths (#64559).
+    # A glob's match set can't be enumerated in advance, so a delete intended only
+    # for the model's own temp files (e.g. rm -f ~/Downloads/*copy*.md) can silently
+    # collateral-delete pre-existing user files whose names merely share the substring.
+    # Auto mode runs this with no confirmation. Bare relative globs (e.g. rm *.pyc in a
+    # project dir) are left alone; only globs reaching into a user/home/absolute path
+    # outside the safe-target list are gated, where the blast radius is unpredictable.
+    if echo "$TARGET" | grep -qE '[*?[]'; then
+        if echo "$TARGET" | grep -qE "^(/|~)"; then
+            echo "BLOCKED: wildcard rm on a user/absolute path — unpredictable match set: $TARGET" >&2
+            echo "A glob can delete pre-existing files you never named. List the matches first:" >&2
+            echo "  ls -d $TARGET   # confirm exactly what matches, then rm those names explicitly" >&2
+            exit 2
+        fi
+    fi
+
+    # Block rm on critical paths (/Users = macOS home, parity with /home on Linux)
+    CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|^\.env"
     if echo "$TARGET" | grep -qE "$CRITICAL"; then
         echo "BLOCKED: rm targeting critical path: $TARGET" >&2
         exit 2
