@@ -1,5 +1,49 @@
 # Changelog
 
+## [30.0.1] - 2026-05-28 → 2026-06-04
+Post-launch safety-hook expansion. The example-hook catalog grew from 707 to
+824+, driven by a sustained "issue → tested hook" workflow against the highest-
+reaction GitHub Issues and newly observed incident clusters.
+- **CLI**: aligned the post-install banner / sister-handbook claims with the
+  actual preview state (no "coming soon" wording for shipped items).
+- **New incident-cluster defenses** (advisory + blocking hooks, each with tests):
+  - Extended-thinking session wedging (Cluster 13): `extended-thinking-loop-guard`,
+    `extended-thinking-resume-warning`, `opus48-thinking-wedge-advisor`
+  - Auth drift / silent invalidation (Cluster 19): `oauth-refresh-monitor`,
+    `auth-status-checker`, `auth-macos-sleep-detector`, CLI pin advisory
+  - Parallel-batch cancellation corruption (Cluster 20): `parallel-cascade-detector`,
+    `parallel-batch-size-limiter`, `tool-result-correlation-checker`
+  - Opus 4.8 fabrication / effort-budget regressions (Clusters 22/23):
+    `pre-execution-claim-detector`, `thinking-budget-effort-mismatch-detector`,
+    `output-token-spike-detector`, `opus48-routine-task-warning`
+  - AUP false-positive / large-output (Cluster 9): `aup-retry-loop-guard`,
+    `aup-large-tool-output-warner`, `aup-block-pattern-logger`, `model-swap-suggester`
+  - Permission boundary integrity (Cluster 6): `compound-bash-permission-resolver`,
+    `deny-rule-integrity-verifier`
+  - Misc: `nested-spawn-inflight-guard`, `stop-hook-sigterm-wrapper`,
+    `plugin-hooks-json-bloat-detector`, `cache-ttl-eviction-detector`,
+    `non-english-quality-warner`, `pre-bash-sed-line-ending-windows` (#63715)
+- **Data-loss prevention**: hardened the destructive-command and ORM guards to
+  actually block `drizzle push --force`, `tofu/terraform apply -destroy`, and
+  `prisma db push --accept-data-loss` (real incidents #27063 / #14411).
+- **June 15 billing change**: `cliff-countdown-advisor` (SessionStart advisory on
+  days-to-2026-06-15 and credit-pool minimization), plus prep-plan docs.
+- **Credential / sub-agent safety**: `dotenv-read-guard` (blocks Read of `.env`,
+  inherited by sub-agents that do not inherit CLAUDE.md), sub-agent blast-radius
+  guards keyed on `agent_id`.
+
+## [30.0.0] - 2026-04-21
+- **Milestone (Product Hunt launch)**: Incident Tracker expanded from 36 to 88
+  entries, all sourced from the 65-section Survival Guide.
+- **Stats**: 707 hooks, 88 incidents, 65 Survival Guide sections.
+
+## [29.9.0] - 2026-04-21
+- **UX**: improved post-install experience (clearer install summary / next steps).
+
+## [29.8.0] - 2026-04-20
+- **New hook**: `thinking-stall-detector` — detect stalled extended-thinking turns.
+- This is the version currently published to npm.
+
 ## [29.6.38] - 2026-04-01
 - **New hooks (8)**:
   - session-index-repair — rebuild sessions-index.json on exit ([#25032](https://github.com/anthropics/claude-code/issues/25032))
