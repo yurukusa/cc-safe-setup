@@ -34,6 +34,18 @@ run_test "rm -rf /home blocks"              2 '"rm -rf /home"'
 run_test "rm -rf .git blocks"               2 '"rm -rf .git"'
 run_test "rm -rf .env blocks"               2 '"rm -rf .env"'
 run_test "rm .env (non-recursive) blocks"   2 '"rm .env"'
+run_test "rm .env.local blocks"             2 '"rm .env.local"'
+
+# --- BLOCK: nested .env paths (#65034 — Claude deleted a .env in a subdir) ---
+run_test "rm src/.env blocks"               2 '"rm src/.env"'
+run_test "rm backend/.env blocks"           2 '"rm backend/.env"'
+run_test "rm config/.env.local blocks"      2 '"rm config/.env.local"'
+run_test "rm ./app/.env blocks"             2 '"rm ./app/.env"'
+
+# --- ALLOW: lookalikes that are NOT .env files (no false positives) ---
+run_test "rm myenv allows"                  0 '"rm myenv"'
+run_test "rm environment.ts allows"         0 '"rm environment.ts"'
+run_test "rm dist/bundle.env.js allows"     0 '"rm dist/bundle.env.js"'
 
 # --- BLOCK: path traversal ---
 run_test "rm -rf ../ blocks (path traversal)"      2 '"rm -rf ../"'
