@@ -2727,6 +2727,14 @@ async function team() {
   console.log(c.dim + `  ${installed} hooks installed, ${allHooks.length} total configured.` + c.reset);
   console.log(c.dim + '  Hooks use relative paths (.claude/hooks/) — portable across machines.' + c.reset);
   console.log();
+  // Highest-intent moment: the user just engaged. Offer genuinely useful FREE next
+  // steps first (value-first, not a sales pitch). The deeper paid guides have free
+  // chapters, so they read as "go deeper if this helped" rather than an upsell.
+  console.log(c.bold + '  Go deeper (all free to start):' + c.reset);
+  console.log(c.dim + '  • Check what your tokens cost:  npx cc-safe-setup --validate' + c.reset);
+  console.log(c.dim + '  • Token cost field guide (Ch.1 free):  https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
+  console.log(c.dim + '  • Incident-prevention guide (Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log();
 }
 
 async function profile(level) {
