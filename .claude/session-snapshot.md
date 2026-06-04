@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-05T07:12:06+09:00
+Updated: 2026-06-05T07:12:21+09:00
 
 ## Git
 - Branch: `fix/credential-exfil-keychain-65350`
@@ -7,7 +7,7 @@ Updated: 2026-06-05T07:12:06+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: a70c1a39 recovery: pre-compact checkpoint (1 files, 20260604-221206)
+- Last commit: 33c5ed53 checkpoint: auto-save 07:12:20
 
 ## Recent Files
 ```
