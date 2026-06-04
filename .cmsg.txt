@@ -1,0 +1,26 @@
+fix(credential-exfil-guard): block macOS keychain token extraction + env-var exfil (#65350)
+
+The guard caught credential-FILE exfiltration but missed two real vectors,
+both verified to pass (exit 0) before this change:
+
+  1. macOS keychain extraction of the Anthropic token via
+     `security find-generic-password ... -w` — the exact technique #65350
+     reports a plugin shipping in skill files to harvest the auth token.
+  2. a secret-named env var or keychain output piped into a network client.
+
+Adds three scoped patterns:
+  - Pattern 10: keychain extraction, only when `-w` (prints the raw secret)
+    is combined with a high-signal secret name (ANTHROPIC/OPENAI/*_TOKEN/
+    *API_KEY*/*_SECRET/oauth/github-token/secret). A non-secret keychain
+    item (e.g. a wifi password) is NOT blocked.
+  - Pattern 11: keychain output piped to a network client.
+  - Pattern 12: a secret-named env var piped to a network client. The legit
+    `-H "Authorization: Bearer $TOKEN"` header pattern is unaffected (the
+    secret is in a header; any pipe goes to a parser, not to the client).
+
+Verified: standalone tests/test-credential-exfil-guard.sh 17/17 (7 attacks
+blocked, 7 benign pass incl. the bearer header, a non-secret keychain lookup,
+and a keychain lookup without -w). Added the same cases inline to test.sh;
+full suite green, no regression to the existing 9 patterns.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
