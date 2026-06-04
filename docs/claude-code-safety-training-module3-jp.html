@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モジュール 3: 費用と利用枠を管理する（Claude Code 安全運用 研修）— cc-safe-setup</title>
+<meta name="description" content="Claude Code 安全運用 研修のモジュール 3 の公開版。想定外のトークンの消費、1M context への自動の昇格による課金、2026年6月15日の課金の分離を、公式の一次情報と、自分の暴露を測る演習で学びます。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="モジュール 3: 費用と利用枠を管理する（Claude Code 安全運用 研修）">
+<meta property="og:description" content="6月15日の課金の分離と1M contextの自動昇格を、公式情報と暴露を測る演習で学ぶ公開モジュール。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-module3-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; --red:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.55rem; line-height:1.4; margin-bottom:0.5rem; }
+h2 { font-size:1.22rem; margin:2.2rem 0 0.9rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.3rem 0 0.4rem; font-size:1.05rem; }
+.crumb { color:var(--gray); font-size:0.9rem; margin-bottom:1rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.4rem; }
+.obj { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.case { background:var(--light); border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; border-left:4px solid var(--red); }
+.case h3 { margin-top:0; }
+.case dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.step { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; }
+.note { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.9rem; }
+th,td { border:1px solid #e2e8f0; padding:0.45rem 0.6rem; text-align:left; }
+th { background:var(--light); }
+pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:0.9rem 1rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; margin:0.6rem 0; }
+code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.88em; }
+pre code { background:none; color:inherit; padding:0; }
+.check { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid var(--green); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+ul,ol { padding-left:1.5rem; } li { margin-bottom:0.45rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.8rem 1.5rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="crumb"><a href="claude-code-safety-training-jp.html">Claude Code 安全運用 研修</a> ／ モジュール 3（公開版）</p>
+<h1>モジュール 3: 費用と利用枠を管理する</h1>
+<p class="subtitle">想定外の課金を防ぎ、2026年6月15日の課金の分離に備える。公式の一次情報と、自分の暴露を測る演習で学びます。</p>
+
+<div class="obj">
+<strong>このモジュールの到達目標。</strong> 1M context への自動の昇格による課金を止め、6月15日の課金の分離で自分のどの使い方が別の枠へ移るかを、公式の事実に基づいて判別し、自分の暴露を実機で測れる。
+</div>
+
+<p>これは研修の公開のモジュールです。そのまま読んで手を動かせます。<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>・<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a>に続く3本目で、残りのモジュール（サブエージェントの制御、組織の baseline、事故対応）の構成は<a href="claude-code-safety-training-jp.html">カリキュラム</a>をご覧ください。</p>
+
+<h2>1. なぜ想定外の課金が起きるのか</h2>
+<p>費用の事故は、削除や漏洩と違って「気づいた時には請求済み」という形で起きます。主な原因は2つです。</p>
+<h3>(1) 1M context への自動の昇格</h3>
+<p>長い文脈を扱うと、モデルが 1M context の枠へ自動で昇格し、課金の区分が引き上がることがあります。これは会話の中身ではなく基盤の側で選ばれるため、<code>CLAUDE.md</code> に「1M を使わないで」と書いても効きません。利用者の側で止める手段は環境変数です（演習で扱います）。</p>
+<h3>(2) 2026年6月15日の課金の分離</h3>
+<p>2026年6月15日から、<strong>一部の使い方が、従来の購読の枠とは別建ての月額のクレジットの枠へ移ります</strong>（公式の告知は2026年5月13日）。どの使い方が移るかは、公式が次のとおり明確に分けています。</p>
+<table>
+<tr><th>別建ての枠へ移る（programmatic）</th><th>従来の購読の枠に残る（interactive）</th></tr>
+<tr><td>Agent SDK（Python / TypeScript）</td><td>対話的な Claude Code（ターミナルでも IDE でも）</td></tr>
+<tr><td><code>claude -p</code>（非対話 / headless）</td><td>claude.ai の web / desktop / mobile のチャット</td></tr>
+<tr><td>Claude Code の GitHub Actions</td><td>Claude Cowork</td></tr>
+<tr><td>SDK で購読を認証する第三者のアプリ</td><td></td></tr>
+</table>
+<p>別建ての枠の月額のクレジットは、Pro が $20、Max 5x が $100、Max 20x が $200 です（Team と Enterprise は席の種類で異なります）。使い切った後は、従量の課金を有効にしていればその料率で続き、無効なら黙って止まります。<strong>繰り越しはありません</strong>。だからクレジットは6月15日より前に把握しておきます。</p>
+<div class="note">
+<strong>公式が分類していない使い方（断定しない）。</strong> <code>claude remote-control</code>（<a href="https://github.com/anthropics/claude-code/issues/59823">#59823</a>）、対話の中で動くサブエージェント、MCP サーバー経由、IDE からのプログラム的な起動は、公式が明示的に分類していません。構造的には「どの入口から起動したか」に従うと読めますが、公式の明文ではないため、自分の利用で計測して確認します（演習の手順 3）。
+</div>
+
+<h2>2. 実際の事故を読む</h2>
+<p>抽象論ではなく、番号で辿れる実際の報告で学びます。</p>
+
+<div class="case">
+<h3><code>claude -p</code> の課金がモデルに誤って説明され、想定外の課金が出た（<a href="https://github.com/anthropics/claude-code/issues/61704">#61704</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>headless（<code>claude -p</code>）の課金についてモデルが繰り返し誤った確認を返し、€80 以上の想定外の課金につながった。</dd>
+<dt>なぜ起きたか</dt><dd>課金の仕組みを「モデルに聞いて確かめた」が、その回答が事実でなかった。課金は、推測でなく公式の一次情報で確認する必要がある。</dd>
+<dt>何が止めたはずか</dt><dd>公式の分類（上の表）に基づく事前の把握と、自分の暴露の計測（演習）。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>1M context のクレジットを要求されて操作が止まった（<a href="https://github.com/anthropics/claude-code/issues/65283">#65283</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>「Usage credits required for 1M context」と表示され、<code>/clear</code> をしても、利用枠が残っていても解消しなかった。</dd>
+<dt>なぜ起きたか</dt><dd>1M context への昇格が会話の側でなく基盤の側で選ばれるため、会話の操作では戻せない。</dd>
+<dt>何が止めたはずか</dt><dd>1M context の自動の昇格を環境変数で止める設定（<code>CLAUDE_CODE_DISABLE_1M_CONTEXT</code>、演習の手順 1）。</dd>
+</dl>
+</div>
+
+<h2>3. 演習: 課金を止める層と、暴露を測る</h2>
+<p>実際に設定を入れ、自分の6月15日の暴露を測ります。所要およそ10分。削除や漏洩のモジュールと違い、ここでの主役はコマンドを止める hook ではなく、<strong>環境変数の設定</strong>と、<strong>自分の利用の計測</strong>です。</p>
+
+<div class="step">
+<h3>手順 1. 1M context の自動の昇格を止める</h3>
+<p>1M context への昇格は環境変数で止められます。シェルの設定（<code>~/.bashrc</code> や <code>~/.zshrc</code>）に次を加えます。</p>
+<pre><code>export CLAUDE_CODE_DISABLE_1M_CONTEXT=1</code></pre>
+<p>これで、長い文脈による 1M context への自動の昇格と、それに伴う課金の区分の引き上げを止めます（<a href="https://github.com/anthropics/claude-code/issues/65283">#65283</a> の型の事故の予防）。</p>
+</div>
+
+<div class="step">
+<h3>手順 2. 6月15日の暴露を測る（最も確実な方法）</h3>
+<p>別建ての枠へ移るのは、上の表の4つの programmatic な使い方です。<strong>定義の上で確実</strong>なのは、自分のスクリプト・cron・CI を検索して、これらの使い方の箇所を洗い出すことです。</p>
+<pre><code># 自分のスクリプトや CI に programmatic な起動があるかを洗い出す
+grep -rEn 'claude[[:space:]]+-p|claude[[:space:]]+--print|claude-code-action|claude_agent_sdk|claude-agent-sdk' \
+  ~/ . 2>/dev/null</code></pre>
+<p>出てきた箇所が、6月15日から別建ての枠で課金される候補です。0 件なら、あなたの使い方は対話的（従来の購読の枠）に収まっている可能性が高いです。cron・CI・バックグラウンドの自動の起動を特に確認します。</p>
+</div>
+
+<div class="step">
+<h3>手順 3. 継続して計測する（公式の計測）</h3>
+<p>一度の検索だけでなく、入口（entrypoint）の別に費用を継続して測れます。公式の OpenTelemetry の計測を有効にします。</p>
+<pre><code>export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_INCLUDE_ENTRYPOINT=true</code></pre>
+<p>これで <code>app.entrypoint</code> の属性ごとにトークンと費用を集計でき、どの入口が別建ての枠に当たるかを実データで確認できます。崖までの日数と準備の行動を毎セッション知らせる補助の hook（<code>cliff-countdown-advisor</code>、止めない助言・<code>CC_CLIFF_QUIET=1</code> で抑制）も cc-safe-setup に含まれます。</p>
+</div>
+
+<div class="check">
+<strong>確認（このモジュールの修了の判定）。</strong> 次のすべてに「はい」と答えられれば修了です。
+<ul>
+<li>1M context の自動の昇格を止める環境変数（<code>CLAUDE_CODE_DISABLE_1M_CONTEXT</code>）を設定した。</li>
+<li>自分のスクリプト・cron・CI を検索して、6月15日から別建ての枠へ移る使い方の有無を確認した。</li>
+<li>6月15日に別建ての枠へ移る4つの使い方と、従来の枠に残る使い方を、自分の言葉で説明できる。</li>
+<li>課金の仕組みは、モデルに聞くのでなく公式の一次情報で確認すべき理由を説明できる（<a href="https://github.com/anthropics/claude-code/issues/61704">#61704</a>）。</li>
+</ul>
+</div>
+
+<h2>4. 自社への適用</h2>
+<ul>
+<li>Anthropic の Console で<strong>月額の上限（Spend Limit）</strong>を設定・確認する（無効だと従量で止まらない）。</li>
+<li>6月15日より前に、Pool 1（購読の枠）と Pool 2（別建ての枠）の比率の baseline を取る（手順 2・3）。</li>
+<li>cron・CI で動く <code>claude -p</code> や Agent SDK の起動を棚卸しし、並列の起動を見直す。</li>
+<li>課金の事実は推測で広めず、公式の一次情報で確認した内容だけをチームに共有する（<a href="https://github.com/anthropics/claude-code/issues/61704">#61704</a> の型の混乱を防ぐ）。</li>
+</ul>
+
+<h2>次のモジュールと、研修の全体</h2>
+<p>このモジュールは「費用を管理する層」です。研修の全体（約12時間・7モジュール）では、削除とデータ破壊（<a href="claude-code-safety-training-module1-jp.html">モジュール 1</a>）、機密と認証情報（<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a>）に続き、サブエージェントと auto モードの制御、組織の baseline と CI のゲート、事故対応と復旧までを、同じように手を動かして学びます。</p>
+
+<p>
+<a class="cta" href="claude-code-safety-training-jp.html">研修のカリキュラム全体を見る</a>
+<a class="cta sub" href="services-jp.html">法人での実施・費用の相談</a>
+</p>
+<p class="honest">本モジュールは公開版です。引用した事故はすべて番号で辿れる実際の報告で、課金の事実はすべて公式の一次情報（support.claude.com / platform.claude.com / code.claude.com）で確認しています。公式が分類していない使い方は、断定せず計測で確認するよう明記しています。個人での利用は無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のモジュール 3（公開版） ·
+<a href="claude-code-safety-training-jp.html">研修カリキュラム</a> ·
+<a href="claude-code-safety-training-module2-jp.html">モジュール 2</a> ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
