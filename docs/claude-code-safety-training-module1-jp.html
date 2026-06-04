@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モジュール 1: 取り返しのつかない操作を止める（Claude Code 安全運用 研修）— cc-safe-setup</title>
+<meta name="description" content="Claude Code 安全運用 研修のモジュール 1 の公開版。再帰的な削除、本番データベースの破壊、履歴の改変など、取り返しのつかない操作を実行の手前で止める方法を、実際に報告された事故と、手を動かす演習で学びます。cc-safe-setup の作者が設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="モジュール 1: 取り返しのつかない操作を止める（Claude Code 安全運用 研修）">
+<meta property="og:description" content="実際の事故で学ぶ、削除・データ破壊の防御。手を動かす演習つきの公開モジュール。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-training-module1-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; --red:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.55rem; line-height:1.4; margin-bottom:0.5rem; }
+h2 { font-size:1.22rem; margin:2.2rem 0 0.9rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.3rem 0 0.4rem; font-size:1.05rem; }
+.crumb { color:var(--gray); font-size:0.9rem; margin-bottom:1rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.4rem; }
+.obj { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.case { background:var(--light); border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; border-left:4px solid var(--red); }
+.case h3 { margin-top:0; }
+.case dt { color:var(--gray); font-size:0.82rem; margin-top:0.5rem; }
+.step { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:1rem 1.2rem; margin:0.9rem 0; }
+pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:0.9rem 1rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; margin:0.6rem 0; }
+code { background:#eef2ff; color:var(--blue); padding:0.08rem 0.34rem; border-radius:3px; font-size:0.88em; }
+pre code { background:none; color:inherit; padding:0; }
+.check { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid var(--green); border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+ul,ol { padding-left:1.5rem; } li { margin-bottom:0.45rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.8rem 1.5rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+.honest { color:var(--gray); font-size:0.86rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="crumb"><a href="claude-code-safety-training-jp.html">Claude Code 安全運用 研修</a> ／ モジュール 1（公開版）</p>
+<h1>モジュール 1: 取り返しのつかない操作を止める</h1>
+<p class="subtitle">削除とデータ破壊を、実行の手前で機械的に止める。実際の事故と、手を動かす演習で学びます。</p>
+
+<div class="obj">
+<strong>このモジュールの到達目標。</strong> 再帰的な削除、本番データベースの破壊、履歴の改変を、実行の手前で止める hook を、自分で設定し、危険なコマンドが実際に止まることを実機で確認できる。
+</div>
+
+<p>これは研修の公開のモジュールです。そのまま読んで手を動かせます。残りのモジュール（機密の保護、費用の管理、サブエージェントの制御、組織の baseline、事故対応）の構成は<a href="claude-code-safety-training-jp.html">カリキュラム</a>をご覧ください。</p>
+
+<h2>1. なぜ AI エージェントは破壊的な操作を実行するのか</h2>
+<p>Claude Code のようなエージェントは、人の確認を待たずにコマンドを実行できます。「危険な操作はしないで」と <code>CLAUDE.md</code> に書いても、その指示は<strong>文章であり、文脈の圧で素通りされることがあります</strong>。実際に、<code>CLAUDE.md</code> の指示を素通りして機密が漏れた事故が報告されています（<a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>）。</p>
+<p>だから、取り返しのつかない操作は、人の注意力や文章の指示ではなく、<strong>実行の手前で機械的に止める層（hook）</strong>で守ります。hook は、コマンドが実行される直前にその中身を検査し、危険なら終了コード 2 で止めます。これは自動承認（auto）モードでも効きます。</p>
+
+<h2>2. 実際の事故を読む</h2>
+<p>抽象論ではなく、番号で辿れる実際の事故で学びます。各事故について「何が起きたか」「なぜ起きたか」「何が止めたはずか」を見ます。</p>
+
+<div class="case">
+<h3>本番データベースの約60テーブルが消えた（<a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>強制的なマイグレーション（<code>drizzle push --force</code> 系）で、本番のスキーマの約60のテーブルが消失。</dd>
+<dt>なぜ起きたか</dt><dd>破壊的なマイグレーションのコマンドを止める層がなく、バックアップも無かったため、戻せませんでした。</dd>
+<dt>何が止めたはずか</dt><dd>データ消失を伴うマイグレーションを実行の手前で止める hook（<code>prisma-migrate-guard</code> など）。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>データ消失を伴う <code>db push</code>（<a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd><code>prisma db push --accept-data-loss</code> が実行され、データが失われた。</dd>
+<dt>何が止めたはずか</dt><dd><code>--accept-data-loss</code> を含むマイグレーションを遮断する hook。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>auto モードのワイルドカードの削除（<a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>自動承認のモードで、ワイルドカードの削除が対象外のファイルを巻き添えにした。</dd>
+<dt>何が止めたはずか</dt><dd>再帰的な削除と、ホームや絶対パスへのワイルドカードの削除を止める hook（<code>rm-safety-net</code>）。hook は自動承認とは別の層で効きます。</dd>
+</dl>
+</div>
+
+<div class="case">
+<h3>下層の <code>.env</code> の削除（<a href="https://github.com/anthropics/claude-code/issues/65034">#65034</a>）</h3>
+<dl>
+<dt>何が起きたか</dt><dd>コードベースの中の <code>.env</code> が削除された。秘密と設定の喪失。</dd>
+<dt>何が止めたはずか</dt><dd>下層のパス（<code>backend/.env</code> など）を含めて <code>.env</code> の削除を止める hook（<code>rm-safety-net</code>）。</dd>
+</dl>
+</div>
+
+<h2>3. 演習: 止める層を入れる</h2>
+<p>実際に hook を入れて、危険なコマンドが止まることを確認します。所要およそ10分。</p>
+
+<div class="step">
+<h3>手順 1. hook の一式を入れる</h3>
+<p>cc-safe-setup（無料・MIT）が、削除・データ破壊・機密の防御の hook を1コマンドで入れます。</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>これで <code>rm-safety-net</code> / <code>prisma-migrate-guard</code> / <code>git-history-rewrite-guard</code> を含む hook が <code>~/.claude/settings.json</code> に登録されます。仕組みを理解するために、登録の形だけ示します（<code>PreToolUse</code> の Bash の hook）。</p>
+<pre><code>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/rm-safety-net.sh" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+</div>
+
+<div class="step">
+<h3>手順 2. 止まることを実機で確認する</h3>
+<p>hook は、コマンドを JSON で受け取り、危険なら終了コード 2 を返します。次のように、危険なコマンドが実際に止まることを確かめます（実際には消さずに、hook の判定だけを見ます）。</p>
+<pre><code># 再帰的な削除が止まる（終了コード 2 = 遮断）
+echo '{"tool_input":{"command":"rm -rf /home/me/project"}}' \
+  | ~/.claude/hooks/rm-safety-net.sh ; echo "exit=$?"
+
+# 下層の .env の削除も止まる（#65034 の対策）
+echo '{"tool_input":{"command":"rm backend/.env"}}' \
+  | ~/.claude/hooks/rm-safety-net.sh ; echo "exit=$?"
+
+# データ消失を伴うマイグレーションが止まる
+echo '{"tool_input":{"command":"prisma db push --accept-data-loss"}}' \
+  | ~/.claude/hooks/prisma-migrate-guard.sh ; echo "exit=$?"</code></pre>
+<p>いずれも <code>BLOCKED: ...</code> の表示とともに <code>exit=2</code> になれば、止める層が効いています。</p>
+</div>
+
+<div class="step">
+<h3>手順 3. 通常の作業が妨げられないことを確認する</h3>
+<p>防御は、普段の作業を止めてはいけません。安全な対象は通過します。</p>
+<pre><code># 安全な削除は通過（終了コード 0）
+echo '{"tool_input":{"command":"rm -rf node_modules"}}' \
+  | ~/.claude/hooks/rm-safety-net.sh ; echo "exit=$?"</code></pre>
+<p><code>exit=0</code> になれば、通常の削除は妨げられていません。</p>
+</div>
+
+<div class="check">
+<strong>確認（このモジュールの修了の判定）。</strong> 次のすべてに「はい」と答えられれば修了です。
+<ul>
+<li>hook を入れて、再帰的な削除と下層の <code>.env</code> の削除が <code>exit=2</code> で止まることを確認した。</li>
+<li>データ消失を伴うマイグレーションが止まることを確認した。</li>
+<li>安全な削除（<code>node_modules</code> など）は <code>exit=0</code> で通過することを確認した。</li>
+<li>なぜ文章の指示（<code>CLAUDE.md</code>）でなく実行の層の hook が要るのかを、自分の言葉で説明できる。</li>
+</ul>
+</div>
+
+<h2>4. 自社への適用</h2>
+<ul>
+<li>上の hook を、<strong>全員</strong>の環境に入れる（1人の無防備が組織のリスクになる）。</li>
+<li>プロジェクトで共有する場合は <code>npx cc-safe-setup --team</code> で <code>.claude/hooks/</code> に入れて git で配布する。</li>
+<li>本番のデータベースに、バックアップと時点の復旧（PITR）があるかを確認する（無いと <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> のように戻せない）。これはモジュール 6（事故対応と復旧）で扱います。</li>
+</ul>
+
+<h2>次のモジュールと、研修の全体</h2>
+<p>このモジュールは「止める層」の入口です。研修の全体（約12時間・7モジュール）では、機密と認証情報の保護、費用と利用枠の管理、サブエージェントと auto モードの制御、組織の baseline と CI のゲート、事故対応と復旧までを、同じように手を動かして学びます。</p>
+
+<p>
+<a class="cta" href="claude-code-safety-training-jp.html">研修のカリキュラム全体を見る</a>
+<a class="cta sub" href="services-jp.html">法人での実施・費用の相談</a>
+</p>
+<p class="honest">本モジュールは公開版です。引用した事故はすべて番号で辿れる実際の報告で、演習で使う hook はすべて <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料・MIT）に実在します。個人での利用は無料のままです。</p>
+
+<footer>
+cc-safe-setup の作者による法人向けのチーム研修のモジュール 1（公開版） ·
+<a href="claude-code-safety-training-jp.html">研修カリキュラム</a> ·
+<a href="services-jp.html">法人向けサービス</a> ·
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a>
+</footer>
+
+</div>
+</body>
+</html>
