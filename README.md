@@ -206,6 +206,20 @@ Each hook exists because a real incident happened without it.
 | **[Three layers of operator-side control in Claude Code: prose, permissions, hooks](https://gist.github.com/yurukusa/a6dfd6244c287534ee5524c2bc7d0261)** | English long-form (~2,500 words). Reference for which surface fits which failure shape: Layer 1 (`CLAUDE.md` prose — drifts under context pressure), Layer 2 (`settings.json` permissions — reliable but tool-class granularity), Layer 3 (hooks — out-of-band, can inspect tool args or transcript). Anchored in [#61929](https://github.com/anthropics/claude-code/issues/61929) (inverted-judgment cluster: field-catalog example + AUQ case-3) and the `authorized-reconfirmation-detector.sh` Stop hook (PR #374) as a worked example. Includes a posture matrix and a `PreToolUse` sketch for the field-catalog failure shape. CC0. |
 | **[When Claude Code's API breaks your session: 7 failure shapes and the limits of operator-side recovery](https://gist.github.com/yurukusa/81d849c34e4edad34333d3b031db041d)** | English long-form (~2,200 words). 30-day model-API + guardrail-rejection cluster in `anthropics/claude-code`: [#62123](https://github.com/anthropics/claude-code/issues/62123) tool-call parse, [#60366](https://github.com/anthropics/claude-code/issues/60366) `"hi"` triggers Usage Policy, [#62190](https://github.com/anthropics/claude-code/issues/62190) guardrail over-firing, [#61412](https://github.com/anthropics/claude-code/issues/61412) System role 400, [#60133](https://github.com/anthropics/claude-code/issues/60133) socket close, [#59520](https://github.com/anthropics/claude-code/issues/59520) 429 cascade (the only non-recoverable shape), [#55254](https://github.com/anthropics/claude-code/issues/55254) opaque termination. 9 issues / 103 reactions / no overlap with the named operator-side clusters. Stop-hook sketch that classifies failure shape, writes structured audit log, advises retry-vs-restart per signature. Names the limit clearly: operator-side surface is *post-hoc* here, the durable fix is upstream. CC0. |
 
+### Where cc-safe-setup fits in the Claude Code safety stack
+
+cc-safe-setup is the runtime-prevention layer of a five-layer safety stack. Each layer catches a different failure mode, they pair well in combination. None of these tools are affiliated with cc-safe-setup, they are third-party projects with their own maintainers and licenses.
+
+| Layer | What it catches | When it acts | Representative tool |
+|---|---|---|---|
+| 0. Configuration audit | Vulnerabilities and misconfigurations in your Claude Code setup itself | Before any agent run | [ecc-agentshield](https://github.com/affaan-m/agentshield) (102 rules, 1282 tests) |
+| 1. Runtime prevention | Dangerous tool calls about to execute | At each tool call | **cc-safe-setup (this repo)** |
+| 2. Output verification | Subtle bugs and regressions in code Claude wrote | After code generation | [adamsreview](https://github.com/adamjgmiller/adamsreview) (multi-lens review pipeline) |
+| 3. Session governance | Runaway retry loops, budget overruns, missing audit trails | Across an entire agent run | [Martin-Loop](https://github.com/Keesan12/Martin-Loop) (governed runtime, 11-class failure taxonomy) |
+| 4. Cost measurement | Token consumption visibility | Continuous | Various trackers |
+
+See the [5-layer ecosystem map](https://gist.github.com/yurukusa/66e2cb1e066f5a4a5117378be4c576ff) for the failure mode each layer addresses and a progression of which layer to add at which stage of Claude Code adoption.
+
 ### Companion log-analysis tools (third-party)
 
 These are unaffiliated projects that pair well with the cc-safe-setup hooks, they read your `~/.claude/projects/` JSONL logs from a *post-hoc analysis* angle, where the hooks here intervene at *pre-execution* time. Use them together if you want both prevention (hooks) and observation (viewers).
