@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月次の安全コンプライアンス報告書（サンプル）— cc-safe-setup for Teams</title>
+<meta name="description" content="cc-safe-setup for Teams（Org Guard）の上位機能でお渡しする「月次の安全コンプライアンス報告書」のサンプルです。全リポジトリの安全スコアの集計、リポジトリ別の評価、今月配信した事故ルールフィード、baseline からの逸脱と hook の回避の監査ログを、架空の企業を対象に例示します。SOC2・顧客・経営への提出に使える成果物の見本。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="月次の安全コンプライアンス報告書（サンプル）— Org Guard">
+<meta property="og:description" content="全リポの安全スコアの集計、事故ルールフィード、hook 回避の監査ログを月次でまとめ、SOC2・顧客・経営に提出できる形で出す成果物の見本。架空の企業で例示。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/org-guard-monthly-report-sample.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.7rem; line-height:1.4; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin-bottom:0.4rem; font-size:1.08rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.sample-banner { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.sample-banner strong { color:var(--amber); }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.18rem 0.6rem; border-radius:4px; font-size:0.82rem; margin:0.18rem 0.18rem 0.18rem 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0.4rem 0.6rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul { padding-left:1.4rem; } li { margin-bottom:0.45rem; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+.meta-table th { width:32%; white-space:nowrap; }
+.sev { display:inline-block; padding:0.1rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:bold; color:#fff; }
+.sev-crit { background:#dc2626; } .sev-high { background:#ea580c; } .sev-med { background:#ca8a04; } .sev-low { background:#16a34a; }
+.honest { color:var(--gray); font-size:0.88rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+/* この報告書に固有の様式 */
+.scorecard { display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
+.scorecard .box { flex:1; min-width:150px; background:var(--light); border:1px solid #e2e8f0; border-radius:10px; padding:1rem 1.1rem; text-align:center; }
+.scorecard .num { font-size:2.1rem; font-weight:bold; line-height:1.1; }
+.scorecard .lbl { color:var(--gray); font-size:0.82rem; margin-top:0.2rem; }
+.grade { display:inline-block; min-width:1.6rem; padding:0.05rem 0.45rem; border-radius:5px; font-weight:bold; color:#fff; text-align:center; }
+.g-a { background:#16a34a; } .g-b { background:#65a30d; } .g-c { background:#ca8a04; } .g-f { background:#dc2626; }
+.up { color:var(--green); font-weight:bold; } .down { color:#dc2626; font-weight:bold; } .flat { color:var(--gray); }
+.feed { border:1px solid #e2e8f0; border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.1rem; margin-bottom:0.9rem; }
+.feed h3 { margin-bottom:0.35rem; font-size:1.02rem; }
+.feed code { background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:3px; font-size:0.88em; }
+.feed .src { color:var(--gray); font-size:0.84rem; }
+.attest { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:1.1rem 1.2rem; margin:1rem 0; font-size:0.94rem; }
+@media print { .cta, footer .noprint { display:none; } body { line-height:1.6; } .container { max-width:none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>月次の安全コンプライアンス報告書（サンプル）</h1>
+<p class="subtitle">cc-safe-setup for Teams（Org Guard）の上位機能で、毎月お渡しする成果物の見本です。</p>
+
+<div class="sample-banner">
+<strong>これは架空の企業を対象にしたサンプルです。</strong> 実際の報告書は、貴社の全リポジトリの <code>settings.json</code>・<code>CLAUDE.md</code>・CI 設定・hook の実行ログから自動で集計して作成します。下記のリポジトリ名・スコア・件数・回避の記録はすべて、報告書の様式と内容の水準をお見せするための例示で、実在の企業の情報は含みません。
+</div>
+
+<h2>1. 報告の概要</h2>
+<table class="meta-table">
+<tr><th>対象（架空）</th><td>株式会社サンプル プロダクト本部</td></tr>
+<tr><th>報告の期間</th><td>2026年5月1日 〜 2026年5月31日</td></tr>
+<tr><th>対象のリポジトリ</th><td>8 リポジトリ（GitHub Organization 全体）</td></tr>
+<tr><th>対象の開発者</th><td>23 名（過去30日に Claude Code を実行した人数）</td></tr>
+<tr><th>提出の想定先</th><td>セキュリティ責任者 / SOC2 の証跡 / 顧客のセキュリティ調査票への回答</td></tr>
+<tr><th>集計の方法</th><td><code>npx cc-safe-setup --audit --json</code> を各リポで実行した結果の集計と、hook の実行ログの解析（手作業の入力なし）</td></tr>
+</table>
+
+<h2>2. 組織全体の安全スコア</h2>
+<p>全リポジトリの安全スコア（0〜100）を集計した、組織としての今月の安全態勢です。「設定したつもり」ではなく、リポジトリごとに実際に効いている hook を機械的に確認した結果に基づきます。</p>
+<div class="scorecard">
+<div class="box"><div class="num" style="color:var(--amber)">78<span style="font-size:1.1rem">/100</span></div><div class="lbl">組織の加重平均スコア</div></div>
+<div class="box"><div class="num up">+6</div><div class="lbl">前月（72）からの変化</div></div>
+<div class="box"><div class="num" style="color:#dc2626">2</div><div class="lbl">baseline 未達のリポジトリ</div></div>
+<div class="box"><div class="num">23</div><div class="lbl">保護下の開発者</div></div>
+</div>
+<p style="font-size:0.92rem;color:var(--gray)">組織の最弱点は、最も保護の弱いリポジトリで決まります（最も設定していない1つが、組織全体の実効リスクを決めます）。今月は <code>legacy-billing</code> と <code>data-pipeline</code> の2つが baseline 未達で、是正のロードマップは第6節に記載しています。</p>
+
+<h2>3. リポジトリ別のスコア一覧</h2>
+<table>
+<tr><th>リポジトリ</th><th>スコア</th><th>評価</th><th>重大</th><th>高</th><th>前月比</th></tr>
+<tr><td><code>web-frontend</code></td><td>95</td><td><span class="grade g-a">A</span></td><td>0</td><td>0</td><td class="up">▲ +3</td></tr>
+<tr><td><code>api-core</code></td><td>92</td><td><span class="grade g-a">A</span></td><td>0</td><td>1</td><td class="up">▲ +8</td></tr>
+<tr><td><code>auth-service</code></td><td>88</td><td><span class="grade g-b">B</span></td><td>0</td><td>1</td><td class="flat">― 0</td></tr>
+<tr><td><code>mobile-app</code></td><td>83</td><td><span class="grade g-b">B</span></td><td>0</td><td>2</td><td class="up">▲ +5</td></tr>
+<tr><td><code>internal-tools</code></td><td>80</td><td><span class="grade g-b">B</span></td><td>0</td><td>2</td><td class="up">▲ +12</td></tr>
+<tr><td><code>infra-terraform</code></td><td>74</td><td><span class="grade g-c">C</span></td><td>0</td><td>3</td><td class="flat">― 0</td></tr>
+<tr><td><code>data-pipeline</code></td><td>52</td><td><span class="grade g-c">C</span></td><td>1</td><td>3</td><td class="down">▼ −4</td></tr>
+<tr><td><code>legacy-billing</code></td><td>38</td><td><span class="grade g-f">F</span></td><td>2</td><td>2</td><td class="down">▼ −6</td></tr>
+</table>
+<p style="font-size:0.92rem;color:var(--gray)">評価は A（80以上）／B（60以上）／C（40以上）／F（40未満）。重大・高は、その重大度の未対応の所見の件数です。</p>
+
+<h2>4. 今月配信した事故ルールフィード</h2>
+<p>新しく報告された破壊の事故から作った、署名付きのルールパックを毎月配信します。番号で辿れる実際の事故に基づき、その月のうちに全リポジトリの baseline へ反映します（一般論のチェックリストではなく、起きた事故への即応です）。これは時間とともに積み上がる、当方にしか作れない価値です。</p>
+
+<div class="feed">
+<h3>RULE-2605-01：サブエージェントの無制限の書き込みの遮断</h3>
+<p>「2つコマンドを実行して」と頼んだ補助のエージェントが、本番のマイグレーションを含む15ファイルを勝手に書き換えた事故への対応。実行層で <code>agent_id</code> を見て、高影響のパス（マイグレーション・IaC・<code>.env</code>・本番設定）への補助エージェント由来の書き込みだけを止めます。</p>
+<p class="src">出典の事故: <a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> ／ 適用先: 全8リポジトリ ／ 重大度: 中</p>
+</div>
+
+<div class="feed">
+<h3>RULE-2605-02：auto モードでのワイルドカード削除の巻き添えの遮断</h3>
+<p>auto モードで <code>*copy*</code> のようなワイルドカードの削除が、利用者の意図しないファイルまで巻き添えで消す事故への対応。絶対パスとホーム配下のワイルドカードの削除を止め、相対パスの限定的な削除は通します。</p>
+<p class="src">出典の事故: <a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a> ／ 適用先: 全8リポジトリ ／ 重大度: 高</p>
+</div>
+
+<div class="feed">
+<h3>RULE-2605-03：<code>prisma db push --accept-data-loss</code> の遮断</h3>
+<p>マイグレーションの破棄のフラグが本番のデータを消す事故への対応。<code>--force-reset</code> と <code>--accept-data-loss</code> を、スキーマ指定の後にあっても確実に止めるよう強化しました。</p>
+<p class="src">出典の事故: <a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a> ／ 適用先: <code>data-pipeline</code> ／ 重大度: 重大</p>
+</div>
+
+<h2>5. baseline からの逸脱と hook の回避の監査</h2>
+<p>「効いているはず」を、ログで確認します。組織の baseline からの設定のズレと、開発者が安全の確認をどれだけ回避したか（<code>--no-verify</code> でのコミットなど）を、リポジトリ別に記録します。</p>
+<table>
+<tr><th>事象</th><th>リポジトリ</th><th>回数</th><th>備考</th></tr>
+<tr><td><code>git commit --no-verify</code>（CI の安全ゲートの回避）</td><td><code>legacy-billing</code></td><td>7</td><td>同一の開発者。ヒアリングを推奨</td></tr>
+<tr><td>baseline の hook の欠落（destructive-guard 未設定）</td><td><code>legacy-billing</code></td><td>—</td><td>クローン時に baseline 未適用</td></tr>
+<tr><td>baseline の hook の欠落（secret-guard 未設定）</td><td><code>data-pipeline</code></td><td>—</td><td>設定のズレ。第6節で是正</td></tr>
+<tr><td>hook がブロックした破壊的な操作（正常に機能）</td><td>全リポジトリ</td><td>14</td><td>内訳: 再帰削除6・force push5・<code>.env</code> 取り込み3</td></tr>
+</table>
+<p style="font-size:0.92rem;color:var(--gray)">最終行は「事故ではなく、防いだ件数」です。安全の投資が実際に働いたことの証跡として、経営や顧客への報告に使えます。</p>
+
+<h2>6. 是正のロードマップ（来月までの推奨）</h2>
+<table>
+<tr><th>優先</th><th>対象</th><th>推奨する対応</th></tr>
+<tr><td><span class="sev sev-crit">重大</span></td><td><code>legacy-billing</code></td><td>baseline を再適用（<code>npx cc-safe-setup --team</code>）。本番の課金のコードであり、destructive-guard の欠落は最優先で塞ぐ</td></tr>
+<tr><td><span class="sev sev-high">高</span></td><td><code>data-pipeline</code></td><td>secret-guard を適用し、<code>--accept-data-loss</code> の遮断（RULE-2605-03）を反映</td></tr>
+<tr><td><span class="sev sev-med">中</span></td><td><code>legacy-billing</code> の <code>--no-verify</code> 7回</td><td>CI ゲートの回避の運用を確認。回避が必要なら例外の手順を明文化</td></tr>
+<tr><td><span class="sev sev-low">低</span></td><td><code>infra-terraform</code></td><td>terraform の <code>destroy</code> の保護を baseline に追加（現状は警告のみ）</td></tr>
+</table>
+
+<h2>7. 経営・監査向けの要約</h2>
+<div class="attest">
+<p>2026年5月の期間において、株式会社サンプル プロダクト本部の8リポジトリ・23名の開発者に対し、Claude Code の運用層の安全管理が継続して適用されていることを確認しました。組織の加重平均スコアは前月の72から78へ改善し、当月は破壊的な操作を14件、自動で遮断しました。2つのリポジトリが baseline 未達であり、第6節の是正により来月の改善を見込みます。</p>
+<p style="margin-top:0.6rem;font-size:0.88rem;color:var(--gray)">この要約は、SOC2 の証跡、顧客のセキュリティ調査票への回答、四半期の経営報告に、そのまま添付できる形でお渡しします。</p>
+</div>
+
+<h2>8. このサンプルについて</h2>
+<p>これは <strong>cc-safe-setup for Teams（Org Guard）</strong> の上位機能の成果物の見本です。中核の hook は<strong>これからもずっと無料（MIT）</strong>で、個人での <code>--audit</code> のスコアも無料のままです。上位機能が足すのは、「1人では要らないが、組織として遵守を証明するために要る」部分だけです——全リポの集計、月次の事故ルールフィード、回避の監査、提出できる報告書。</p>
+<p>引用した事故（<a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> ／ <a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a> ／ <a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a>）は、いずれも実際に GitHub で報告された事故です。各ルールに対応する hook は、cc-safe-setup の公開リポジトリで実機で検証しています。スコア・件数・リポジトリ名は架空です。</p>
+
+<div class="honest">
+正直にお伝えします。この上位機能は現在、需要を確認している段階です（中核の hook は今すぐ無料で使えます）。チームでの導入に関心があれば、下記の Discussion で 👍 か一言いただけると、実装の優先度を判断できます。月額の目安は約 $12 / 開発者 / 月で、5名以下の小さなチームは無料を想定しています。
+</div>
+
+<p style="margin-top:1.4rem">
+<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/discussions/632">需要の確認のスレッド（Discussion #632）→</a>
+<a class="cta sub" href="services-jp.html">法人向けサービスの一覧 →</a>
+</p>
+
+<footer>
+<p class="noprint">この報告書のサンプルは <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（790+ の安全 hook・MIT）の作者が作成しています。中核の hook は無料です。実際に報告された事故に基づいて設計しています。</p>
+<p style="margin-top:0.5rem">関連: <a href="services-jp-sample-audit.html">単発の安全監査レポートのサンプル</a> ｜ <a href="team-rollout-guide.html">チームへの安全な導入の手引き</a></p>
+</footer>
+
+</div>
+</body>
+</html>
