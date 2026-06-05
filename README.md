@@ -171,6 +171,7 @@ Each hook exists because a real incident happened without it.
 
 | Tool | What it does |
 |------|-------------|
+| **NEW [June 15 deprecated-model scan](scripts/june-15-deprecated-model-scan.sh)** (2026-06-05) | Read-only `bash scripts/june-15-deprecated-model-scan.sh` — finds hardcoded model IDs that **return a hard 404 on 2026-06-15** (`claude-opus-4-20250514` → `claude-opus-4-8`, `claude-sonnet-4-20250514` → `claude-sonnet-4-6`) plus already-retired IDs, printing the exact replacement + `file:line`. The 2026-06-15 change is usually explained as *billing* (programmatic usage moves to a separate credit pool) — but the same date also retires two model IDs, so hardcoded strings break with a 404 regardless of billing. CI-friendly (non-zero exit on a hit). No edits, no network. |
 | **[Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html)** | 5 questions → find where your tokens are going (30 seconds) |
 | **[Security Checkup](https://yurukusa.github.io/cc-safe-setup/security-checkup.html)** | 6 questions based on real incidents ($1,800+ in losses) |
 | **[Version Check](https://yurukusa.github.io/cc-safe-setup/version-check.html)** | Is your CC version affected by cache inflation? |
