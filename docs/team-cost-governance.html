@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code team cost governance — the gaps the official controls don't cover</title>
+<meta name="description" content="What Anthropic's official spend limits and usage reporting cover for a team running Claude Code — and three gaps they don't: subscription seats run on an included quota with no dollar cap, Bedrock/Vertex usage is invisible to the Console, and every control is post-hoc. How to close the gaps with operator-side prevention. From the maintainer of cc-safe-setup.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Code team cost governance — the gaps the official controls don't cover">
+<meta property="og:description" content="One developer's runaway burns the shared quota for the whole team. The official controls are real but post-hoc and don't cover subscription seats or Bedrock/Vertex. Here's how to prevent the burn before it happens.">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/team-cost-governance.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.65;padding:2rem 1rem}
+.wrap{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.8rem;margin-bottom:.5rem;line-height:1.3}
+.lede{color:#8b949e;font-size:1.08rem;margin-bottom:1.4rem}
+.badge{display:inline-block;background:#1f2937;color:#a5b4fc;font-size:.72rem;padding:.2rem .6rem;border-radius:999px;margin-bottom:1rem;border:1px solid #374151}
+h2{color:#f0f6fc;font-size:1.3rem;margin:2.2rem 0 .8rem;border-bottom:1px solid #21262d;padding-bottom:.4rem}
+h3{color:#f0f6fc;font-size:1.05rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem}
+ul,ol{margin:.3rem 0 .9rem 1.3rem}
+li{margin:.35rem 0}
+.box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem 1.2rem;margin:1rem 0}
+.box.warn{border-left:4px solid #d29922}
+.box.ok{border-left:4px solid #3fb950}
+code{background:#161b22;padding:.12rem .4rem;border-radius:4px;font-size:.86em;color:#f0f6fc}
+pre{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1rem;overflow-x:auto;margin:.8rem 0}
+pre code{background:none;padding:0;font-size:.82rem;line-height:1.5;color:#c9d1d9}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid #21262d;vertical-align:top}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{color:#f0f6fc}
+.cta{display:inline-block;background:#238636;color:#fff;padding:.7rem 1.4rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.4rem .4rem .4rem 0}
+.cta:hover{background:#2ea043;text-decoration:none}
+.cta.alt{background:#1f2937;border:1px solid #374151;color:#a5b4fc}
+.footer{color:#6e7681;font-size:.85rem;margin-top:2.5rem;border-top:1px solid #21262d;padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="badge">cc-safe-setup · team cost governance</div>
+<h1>Claude Code team cost governance: the gaps the official controls don't cover</h1>
+<p class="lede">The official spend limits and usage reporting are real and worth turning on. But on a team, three gaps let one developer's runaway quietly burn the shared quota — and none of the official controls prevent it. Here's what they cover, what they don't, and how to close the difference.</p>
+
+<h2>The failure mode at team scale</h2>
+<p>One mis-configured developer or repo doesn't just hurt that one person — it burns the <em>shared</em> quota or budget for the whole team. The public issue tracker has a steady stream of exactly this, and it's expensive:</p>
+<ul>
+<li>A Max 20x subscriber's weekly limit gone in 2–2.5 days, forcing a cancellation (<a href="https://github.com/anthropics/claude-code/issues/65678">#65678</a>).</li>
+<li>A plugin silently spending ~$93 on a developer's API key over four days (<a href="https://github.com/anthropics/claude-code/issues/65543">#65543</a>).</li>
+<li>A 1M-context model accidentally pinned in settings, draining the limit on every session and surviving <code>/clear</code> (<a href="https://github.com/anthropics/claude-code/issues/65283">#65283</a>).</li>
+<li>A single run burning millions of tokens before anyone noticed.</li>
+</ul>
+<p>At one developer this is an annoyance. Across twenty, it's a recurring budget line and a support burden.</p>
+
+<h2>What the official controls <em>do</em> cover</h2>
+<p>Credit where due — turn these on first; they're the baseline:</p>
+<ul>
+<li><strong>Org &amp; per-member spend limits</strong> on usage credits (Team and seat-based Enterprise), plus a monthly usage-credit limit on Pro/Max via <code>/usage-credits</code>. The system checks you're within the limit before each request.</li>
+<li><strong>Month-to-date usage visibility</strong> per member, and <code>/usage</code> in the CLI with a breakdown across skills, subagents, plugins, and MCP servers.</li>
+<li><strong>Workspace spend limits</strong> on the auto-created "Claude Code" workspace for API/Console usage.</li>
+</ul>
+<p>If you run on the API and pay in dollars, that covers a lot. The gaps below are where it stops.</p>
+
+<h2>The three gaps they don't cover</h2>
+
+<h3>1. Subscription seats run on an included quota with no dollar cap</h3>
+<p>Pro, Max, and Team seats run on an <em>included</em> weekly / 5-hour usage allowance, not API dollars. The spend caps that exist govern <em>usage-credit overage</em> — the consumption <em>after</em> the included allowance — not the included quota itself. Per Anthropic's own docs, these limits are "not caps on base subscription seat costs." So when a runaway burns through the included weekly quota, no dollar limit stops it; the developer simply gets hard-blocked and their work stops for the rest of the week. Nothing prevents or refunds the wasted burn.</p>
+
+<h3>2. Bedrock / Vertex / Foundry usage is invisible to the Console</h3>
+<p>Straight from the Claude Code cost docs: <em>"On Bedrock, Vertex, and Foundry, Claude Code does not send metrics from your cloud."</em> The official recommendation is to bolt on a third-party gateway (LiteLLM) to track spend by key. If your org runs Claude Code through a cloud provider — which many enterprises do for data-residency reasons — the native org-level spend management can't see that usage at all.</p>
+
+<h3>3. Every control is post-hoc</h3>
+<p>The native limits and the excellent free tools like <code>ccusage</code> all act <em>after</em> the tokens are spent: they report what was consumed, or hard-stop once a budget is hit. None of them <em>prevent</em> the specific runaway from consuming the quota in the first place. The 1M pin keeps reprocessing a huge context every turn; the retry loop keeps firing; the plugin keeps billing — and you only find out when the limit is gone.</p>
+
+<div class="box warn">
+<strong>The net:</strong> if your team is on subscription seats or on Bedrock/Vertex, the dollar-based controls don't bound the quota that actually gets burned — and even where they do, they stop you <em>after</em> the waste, not before. The only lever left is preventing the burn locally, before it consumes the quota.</div>
+
+<h2>Closing the gaps: operator-side prevention</h2>
+<p>A small set of <code>PreToolUse</code> / <code>SessionStart</code> hooks can catch the common runaways <em>before</em> they consume the quota. These are free and MIT-licensed in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>; the relevant ones for cost:</p>
+<table>
+<tr><th>Runaway</th><th>What prevents it</th></tr>
+<tr><td>A <code>[1m]</code> model pinned in settings, draining the limit across <code>/clear</code> (<a href="https://github.com/anthropics/claude-code/issues/65283">#65283</a>)</td><td><code><a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/persisted-1m-model-advisor.sh">persisted-1m-model-advisor.sh</a></code> — flags the pin at session start and names where it's set</td></tr>
+<tr><td>A tool loop firing indefinitely (e.g. a research agent fetching URL after URL, <a href="https://github.com/anthropics/claude-code/issues/65684">#65684</a>)</td><td><code><a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/webfetch-runaway-guard.sh">webfetch-runaway-guard.sh</a></code> — caps a runaway fetch loop and tells the agent to summarize</td></tr>
+<tr><td>A plugin/automation silently billing an API key (<a href="https://github.com/anthropics/claude-code/issues/65543">#65543</a>)</td><td><code>subscription-api-billing-warner.sh</code> — warns when usage is routing to API billing instead of the plan</td></tr>
+<tr><td>A session quietly burning tokens far above your normal rate</td><td><code>session-cost-alert.sh</code> / <code>quota-anomaly-detector.sh</code> — alert on abnormal burn before the limit is gone</td></tr>
+</table>
+<p>Wiring one up is a few lines in <code>settings.json</code>:</p>
+<pre><code>{ "hooks": { "SessionStart": [
+  { "matcher": "", "hooks": [
+    { "type": "command", "command": "~/.claude/hooks/persisted-1m-model-advisor.sh" } ] } ] } }</code></pre>
+<p>They're advisory or scoped blocks, fail open, and don't touch ordinary work — they only fire on the specific runaway. They don't replace the official limits; they cover the window the official limits leave open.</p>
+
+<h2>The team problem: enforcement</h2>
+<p>Per-developer hooks solve this for one machine. The team problem is making sure <em>every</em> developer and repo actually has them — one person who forgets, or a brand-new repo, reopens the gap for the whole org. A committed <code>.claude/settings.json</code> baseline plus the <a href="https://github.com/yurukusa/cc-safe-setup#ci-integration-github-action">free CI gate</a> covers a repo; central, audited enforcement across every repo is the piece a per-developer tool can't give you.</p>
+
+<div class="box ok">
+<strong>Is org-wide enforcement of cost-prevention hooks worth building?</strong> I'm gauging interest before I build it — a 👍 or a one-line note on the discussion directly shapes what comes first: <a href="https://github.com/yurukusa/cc-safe-setup/discussions/632">Would a 'cc-safe-setup for Teams' tier be useful?</a> The individual hooks stay free, forever.</div>
+
+<h2>Start here</h2>
+<p><a class="cta" href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup on GitHub (free, MIT)</a>
+<a class="cta alt" href="team-rollout-guide.html">Team rollout playbook</a></p>
+<p>If you'd rather have the baseline designed, enforced, and audited for you, see the <a href="services-en.html">cc-safe-setup team services</a> (<a href="services-jp.html">法人向け・日本語</a>).</p>
+
+<div class="footer">
+By the maintainer of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — free, MIT safety hooks for Claude Code. Official behavior cited from Anthropic's <a href="https://code.claude.com/docs/en/costs">Claude Code cost docs</a> and <a href="https://support.claude.com/en/articles/12005970">spend-limit help</a>; incident references link to the public <code>anthropics/claude-code</code> issue tracker.
+</div>
+
+</div>
+</body>
+</html>
