@@ -2555,6 +2555,20 @@ EXIT=0; echo '{"tool_name":"mcp__evil__hack","tool_input":{}}' | CC_MCP_BLOCKED_
 EXIT=0; echo '{"tool_name":"mcp__server__read","tool_input":{}}' | CC_MCP_BLOCKED_TOOLS="evil" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
 [ "$EXIT" -eq 0 ] && echo "  PASS: mcp-tool-guard allows non-blocked MCP tool" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should allow (got $EXIT)"; FAIL=$((FAIL+1)); }
 test_ex mcp-tool-guard.sh '{"tool_input":{"command":"pwd"}}' 0 "mcp-tool-guard: pwd passes"
+# CC_MCP_PROD_HOSTS: deny MCP calls that reach a production host (#65563)
+OUT=$(echo '{"tool_name":"mcp__playwright__browser_navigate","permission_mode":"default","tool_input":{"url":"https://prod.example.com/dashboard/orders"}}' | CC_MCP_PROD_HOSTS="prod.example.com" bash "$EXDIR/mcp-tool-guard.sh" 2>/dev/null)
+echo "$OUT" | grep -q '"permissionDecision":"deny"' && echo "  PASS: mcp-tool-guard denies prod-host navigate" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should deny prod host"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_name":"mcp__playwright__browser_navigate","permission_mode":"default","tool_input":{"url":"https://localhost:3000/x"}}' | CC_MCP_PROD_HOSTS="prod.example.com" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 0 ] && echo "  PASS: mcp-tool-guard: non-prod navigate passes" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard non-prod navigate (got $EXIT)"; FAIL=$((FAIL+1)); }
+# CC_MCP_AUTOMATION_GUARD: auto-approve mode + automation tool (#65563 root cause)
+OUT=$(echo '{"tool_name":"mcp__playwright__browser_click","permission_mode":"acceptEdits","tool_input":{"ref":"e7"}}' | CC_MCP_AUTOMATION_GUARD="ask" bash "$EXDIR/mcp-tool-guard.sh" 2>/dev/null)
+echo "$OUT" | grep -q '"permissionDecision":"ask"' && echo "  PASS: mcp-tool-guard asks for click under acceptEdits" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should ask under acceptEdits"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_name":"mcp__playwright__browser_click","permission_mode":"acceptEdits","tool_input":{"ref":"e7"}}' | CC_MCP_AUTOMATION_GUARD="block" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 2 ] && echo "  PASS: mcp-tool-guard blocks click under acceptEdits (block mode)" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard should block click (got $EXIT)"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_name":"mcp__playwright__browser_click","permission_mode":"default","tool_input":{"ref":"e7"}}' | CC_MCP_AUTOMATION_GUARD="block" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 0 ] && echo "  PASS: mcp-tool-guard: click in default mode is not escalated" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard default-mode click (got $EXIT)"; FAIL=$((FAIL+1)); }
+EXIT=0; echo '{"tool_name":"mcp__db__read_rows","permission_mode":"acceptEdits","tool_input":{}}' | CC_MCP_AUTOMATION_GUARD="block" bash "$EXDIR/mcp-tool-guard.sh" >/dev/null 2>/dev/null || EXIT=$?
+[ "$EXIT" -eq 0 ] && echo "  PASS: mcp-tool-guard: non-automation tool passes under acceptEdits" && PASS=$((PASS+1)) || { echo "  FAIL: mcp-tool-guard non-automation under acceptEdits (got $EXIT)"; FAIL=$((FAIL+1)); }
 echo ""
 
 
