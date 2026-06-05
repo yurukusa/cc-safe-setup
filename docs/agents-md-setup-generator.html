@@ -312,10 +312,14 @@ function render(){
       <p class="note">${t.fileN2}</p></div>`;
   }
 
-  const hasCopies = fileTools.length>0 || (useClaude && !importMethod) || state.os==="win";
-  if(state.team==="team" && hasCopies){
-    const links = (useClaude?["CLAUDE.md"]:[]).concat(fileTools.map(x=>x.file));
-    const loopList = links.length?links.join(" "):"CLAUDE.md";
+  // Only files that are meant to be byte-identical copies of AGENTS.md can drift.
+  // CLAUDE.md qualifies ONLY when Claude uses the symlink method — with the @AGENTS.md
+  // import (the default on Windows, where symlinks need Admin/Developer Mode) CLAUDE.md
+  // is a one-line stub, not a copy, so diffing it against AGENTS.md would always fail and
+  // block every commit. If nothing can drift, show no guard at all.
+  const driftFiles = (useClaude && !importMethod ? ["CLAUDE.md"] : []).concat(fileTools.map(x=>x.file));
+  if(state.team==="team" && driftFiles.length){
+    const loopList = driftFiles.join(" ");
     const hook =
 `#!/bin/sh
 ${t.hookCmt1}
