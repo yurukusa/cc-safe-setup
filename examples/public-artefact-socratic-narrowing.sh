@@ -90,6 +90,11 @@ set -uo pipefail
 
 [ "${CC_SOCRATIC_DISABLE:-0}" = "1" ] && exit 0
 
+# OPT-IN: this gate blocks every public-artefact emission (commits, PRs, docs
+# edits) on first pass, which is high friction as a default. It is therefore
+# off unless explicitly enabled. Set CC_SOCRATIC_ENABLE=1 to turn it on.
+[ "${CC_SOCRATIC_ENABLE:-0}" = "1" ] || exit 0
+
 INPUT=$(cat 2>/dev/null || true)
 [ -z "$INPUT" ] && exit 0
 
