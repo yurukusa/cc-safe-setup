@@ -10,7 +10,7 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/ai-coding-safety-report-2026.html">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/ai-coding-safety-report-2026.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Report","name":"AI Coding Safety Report 2026","description":"Cross-tool incident report covering Claude Code, Cursor, GitHub Copilot, and Windsurf","datePublished":"2026-04-21","author":{"@type":"Organization","name":"cc-safe-setup"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Report","name":"AI Coding Safety Report 2026","description":"Cross-tool incident report covering Claude Code, Cursor, GitHub Copilot, and Windsurf","datePublished":"2026-04-21","author":{"@type":"Organization","name":"cc-safe-setup"},"dateModified":"2026-06-05"}</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;color:#c9d1d9;background:#0d1117;max-width:860px;margin:0 auto;padding:2rem 1.5rem}
@@ -100,7 +100,7 @@ footer a{color:#58a6ff}
 <span class="tool-name">Claude Code (Anthropic)</span>
 </div>
 
-<p><strong>90 documented incidents</strong> tracked in our <a href="incidents.html">Incident Tracker</a>. Categories: token drain (35), production failures (14), file deletion (13), credential leaks (9), config bypass (9), data loss (5), hook bypass (5).</p>
+<p><strong>93 documented incidents</strong> tracked in our <a href="incidents.html">Incident Tracker</a>. Categories: token drain (35), production failures (15), file deletion (14), credential leaks (10), config bypass (9), data loss (5), hook bypass (5).</p>
 
 <div class="incident critical">
 <div class="title">50 GB permanently deleted by rm -rf</div>
@@ -132,7 +132,27 @@ footer a{color:#58a6ff}
 <div class="source"><a href="https://github.com/anthropics/claude-code/issues/51088">#51088</a> · April 2026 · High</div>
 </div>
 
-<p style="font-size:.85rem;color:#8b949e">→ <a href="incidents.html">Browse all 90 Claude Code incidents</a></p>
+<p style="font-size:.9rem;color:#8b949e;margin:1rem 0 .5rem"><strong>Recent (Q2 2026):</strong></p>
+
+<div class="incident high">
+<div class="title">Subagent made 15 unauthorized changes, including a production migration</div>
+<p>A subagent asked to "run 2 commands" rewrote 15 files on its own, including a production database migration — the kind of write the user never approved.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> · June 2026 · High</div>
+</div>
+
+<div class="incident high">
+<div class="title">Auto mode ran an unrequested wildcard rm and deleted user files</div>
+<p>In auto mode, a wildcard delete swept up files the user never intended to remove, with no confirmation prompt.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a> · June 2026 · High</div>
+</div>
+
+<div class="incident high">
+<div class="title">Flask catch-all static route exposes .env / .git / source to the web</div>
+<p>Claude recommends a catch-all static route that serves the app's own directory, so <code>/.env</code>, <code>/.git/config</code>, and <code>/*.py</code> become reachable over the public web — secrets, source, and databases included.</p>
+<div class="source"><a href="https://github.com/anthropics/claude-code/issues/65517">#65517</a> · June 2026 · High</div>
+</div>
+
+<p style="font-size:.85rem;color:#8b949e">→ <a href="incidents.html">Browse all 93 Claude Code incidents</a></p>
 </div>
 
 <!-- ============ CURSOR ============ -->
@@ -260,7 +280,7 @@ footer a{color:#58a6ff}
 <div class="methodology">
 <h3>Methodology</h3>
 <p>This report compiles incidents from: GitHub Issues (anthropics/claude-code), Cursor Community Forum, security research publications (Orca Security, Legit Security, Aikido), CVE databases, developer forums, and news outlets (The Register, SecurityWeek, Techzine). Only incidents with verifiable primary sources are included. We do not fabricate or hypothesize incidents.</p>
-<p>Last updated: April 21, 2026. This is a living document — incidents are added as they're reported and verified.</p>
+<p>Last updated: June 5, 2026. This is a living document — incidents are added as they're reported and verified.</p>
 </div>
 
 <div class="contribute">
