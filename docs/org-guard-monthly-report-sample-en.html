@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monthly Safety Compliance Report (sample) — cc-safe-setup for Teams</title>
+<meta name="description" content="A sample of the monthly safety compliance report delivered by the cc-safe-setup for Teams (Org Guard) tier: org-wide safety scores aggregated across every repo, per-repo grades, the incident rule feed shipped this month, and an audit log of baseline drift and hook bypasses. Fictional company, for illustration. The kind of deliverable you can attach to a SOC2 evidence package or hand to leadership.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Monthly Safety Compliance Report (sample) — Org Guard">
+<meta property="og:description" content="Org-wide safety scores, a monthly incident rule feed, and a hook-bypass audit log — aggregated monthly into a document you can hand to SOC2, customers, or leadership. Fictional company, for illustration.">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/org-guard-monthly-report-sample-en.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.75; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.7rem; line-height:1.35; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin-bottom:0.4rem; font-size:1.06rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.sample-banner { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.sample-banner strong { color:var(--amber); }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.18rem 0.6rem; border-radius:4px; font-size:0.82rem; margin:0.18rem 0.18rem 0.18rem 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0.4rem 0.6rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul { padding-left:1.4rem; } li { margin-bottom:0.45rem; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+.meta-table th { width:34%; white-space:nowrap; }
+.sev { display:inline-block; padding:0.1rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:bold; color:#fff; }
+.sev-crit { background:#dc2626; } .sev-high { background:#ea580c; } .sev-med { background:#ca8a04; } .sev-low { background:#16a34a; }
+.honest { color:var(--gray); font-size:0.88rem; border-top:1px dashed #cbd5e1; margin-top:1.2rem; padding-top:0.7rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+.scorecard { display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
+.scorecard .box { flex:1; min-width:150px; background:var(--light); border:1px solid #e2e8f0; border-radius:10px; padding:1rem 1.1rem; text-align:center; }
+.scorecard .num { font-size:2.1rem; font-weight:bold; line-height:1.1; }
+.scorecard .lbl { color:var(--gray); font-size:0.82rem; margin-top:0.2rem; }
+.grade { display:inline-block; min-width:1.6rem; padding:0.05rem 0.45rem; border-radius:5px; font-weight:bold; color:#fff; text-align:center; }
+.g-a { background:#16a34a; } .g-b { background:#65a30d; } .g-c { background:#ca8a04; } .g-f { background:#dc2626; }
+.up { color:var(--green); font-weight:bold; } .down { color:#dc2626; font-weight:bold; } .flat { color:var(--gray); }
+.feed { border:1px solid #e2e8f0; border-left:4px solid var(--blue); border-radius:8px; padding:1rem 1.1rem; margin-bottom:0.9rem; }
+.feed h3 { margin-bottom:0.35rem; font-size:1.0rem; }
+.feed code { background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:3px; font-size:0.88em; }
+.feed .src { color:var(--gray); font-size:0.84rem; }
+.attest { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:1.1rem 1.2rem; margin:1rem 0; font-size:0.94rem; }
+@media print { .cta, footer .noprint { display:none; } body { line-height:1.55; } .container { max-width:none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Monthly Safety Compliance Report <span style="font-weight:400;color:var(--gray)">(sample)</span></h1>
+<p class="subtitle">An example of the deliverable shipped every month on the cc-safe-setup for Teams (Org Guard) tier.</p>
+
+<div class="sample-banner">
+<strong>This is a sample for a fictional company.</strong> A real report is generated automatically from every repository's <code>settings.json</code>, <code>CLAUDE.md</code>, CI config, and hook execution logs. The repo names, scores, counts, and bypass records below are illustrative — they show the format and the level of detail, not a real organization.
+</div>
+
+<h2>1. Report overview</h2>
+<table class="meta-table">
+<tr><th>Organization (fictional)</th><td>Acme Corp — Product Engineering</td></tr>
+<tr><th>Reporting period</th><td>1–31 May 2026</td></tr>
+<tr><th>Repositories covered</th><td>8 repos (entire GitHub organization)</td></tr>
+<tr><th>Developers covered</th><td>23 (ran Claude Code in the last 30 days)</td></tr>
+<tr><th>Intended for</th><td>Security owner / SOC2 evidence / customer security questionnaires</td></tr>
+<tr><th>Method</th><td>Aggregated from <code>npx cc-safe-setup --audit --json</code> per repo plus hook-log analysis (no manual entry)</td></tr>
+</table>
+
+<h2>2. Org-wide safety score</h2>
+<p>The organization's posture this month, aggregated from every repository's safety score (0–100). It's based on the hooks that are actually in effect per repo, checked mechanically — not on "we think we configured it".</p>
+<div class="scorecard">
+<div class="box"><div class="num" style="color:var(--amber)">78<span style="font-size:1.1rem">/100</span></div><div class="lbl">Org weighted-average score</div></div>
+<div class="box"><div class="num up">+6</div><div class="lbl">vs last month (72)</div></div>
+<div class="box"><div class="num" style="color:#dc2626">2</div><div class="lbl">repos below baseline</div></div>
+<div class="box"><div class="num">23</div><div class="lbl">developers protected</div></div>
+</div>
+<p style="font-size:0.92rem;color:var(--gray)">Your real risk is set by the least-protected repo (the one nobody configured decides the org's effective exposure). This month <code>legacy-billing</code> and <code>data-pipeline</code> are below baseline; the remediation roadmap is in section 6.</p>
+
+<h2>3. Per-repository scores</h2>
+<table>
+<tr><th>Repository</th><th>Score</th><th>Grade</th><th>Crit</th><th>High</th><th>vs last mo.</th></tr>
+<tr><td><code>web-frontend</code></td><td>95</td><td><span class="grade g-a">A</span></td><td>0</td><td>0</td><td class="up">▲ +3</td></tr>
+<tr><td><code>api-core</code></td><td>92</td><td><span class="grade g-a">A</span></td><td>0</td><td>1</td><td class="up">▲ +8</td></tr>
+<tr><td><code>auth-service</code></td><td>88</td><td><span class="grade g-b">B</span></td><td>0</td><td>1</td><td class="flat">― 0</td></tr>
+<tr><td><code>mobile-app</code></td><td>83</td><td><span class="grade g-b">B</span></td><td>0</td><td>2</td><td class="up">▲ +5</td></tr>
+<tr><td><code>internal-tools</code></td><td>80</td><td><span class="grade g-b">B</span></td><td>0</td><td>2</td><td class="up">▲ +12</td></tr>
+<tr><td><code>infra-terraform</code></td><td>74</td><td><span class="grade g-c">C</span></td><td>0</td><td>3</td><td class="flat">― 0</td></tr>
+<tr><td><code>data-pipeline</code></td><td>52</td><td><span class="grade g-c">C</span></td><td>1</td><td>3</td><td class="down">▼ −4</td></tr>
+<tr><td><code>legacy-billing</code></td><td>38</td><td><span class="grade g-f">F</span></td><td>2</td><td>2</td><td class="down">▼ −6</td></tr>
+</table>
+<p style="font-size:0.92rem;color:var(--gray)">Grades: A (80+) / B (60+) / C (40+) / F (below 40). Crit and High are counts of open findings at that severity.</p>
+
+<h2>4. Incident rule feed shipped this month</h2>
+<p>Every month we ship a signed rule pack built from newly reported destructive incidents. Each rule is tied to a real, numbered incident and rolled into every repo's baseline within the month — not a generic checklist, but a fast response to what actually happened. This is the value that compounds over time, and it's built from a corpus only we maintain.</p>
+
+<div class="feed">
+<h3>RULE-2605-01 — block unrestricted subagent writes</h3>
+<p>Response to: a helper (subagent) asked to "run 2 commands" rewrote 15 files on its own, including a production migration. At the execution layer this reads <code>agent_id</code> and blocks only subagent-originated writes to high-blast paths (migrations, IaC, <code>.env</code>, production config).</p>
+<p class="src">Source incident: <a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> · Applied to: all 8 repos · Severity: Medium</p>
+</div>
+
+<div class="feed">
+<h3>RULE-2605-02 — block collateral wildcard deletes in auto mode</h3>
+<p>Response to: in auto mode a wildcard delete like <code>*copy*</code> swept up files the user never intended. Blocks absolute-path and home-directory wildcard deletes; lets bounded relative-path deletes through.</p>
+<p class="src">Source incident: <a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a> · Applied to: all 8 repos · Severity: High</p>
+</div>
+
+<div class="feed">
+<h3>RULE-2605-03 — block <code>prisma db push --accept-data-loss</code></h3>
+<p>Response to: a migration-discard flag wiped production data. Hardened to catch <code>--force-reset</code> and <code>--accept-data-loss</code> reliably, even when they appear after a <code>--schema</code> argument.</p>
+<p class="src">Source incident: <a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a> · Applied to: <code>data-pipeline</code> · Severity: Critical</p>
+</div>
+
+<h2>5. Baseline drift &amp; hook-bypass audit</h2>
+<p>We turn "it should be working" into "here's the log". This records drift from the org baseline and how often developers bypassed the safety checks (e.g. committing with <code>--no-verify</code>), per repository.</p>
+<table>
+<tr><th>Event</th><th>Repository</th><th>Count</th><th>Note</th></tr>
+<tr><td><code>git commit --no-verify</code> (skipped the CI safety gate)</td><td><code>legacy-billing</code></td><td>7</td><td>Same developer. Worth a conversation.</td></tr>
+<tr><td>Missing baseline hook (destructive-guard not configured)</td><td><code>legacy-billing</code></td><td>—</td><td>Baseline never applied on clone</td></tr>
+<tr><td>Missing baseline hook (secret-guard not configured)</td><td><code>data-pipeline</code></td><td>—</td><td>Config drift. Fixed in section 6.</td></tr>
+<tr><td>Destructive operations blocked by a hook (working as intended)</td><td>all repos</td><td>14</td><td>Of which: recursive deletes 6 · force pushes 5 · <code>.env</code> commits 3</td></tr>
+</table>
+<p style="font-size:0.92rem;color:var(--gray)">The last row is "prevented", not "incidents" — evidence for leadership and customers that the safety investment actually fired.</p>
+
+<h2>6. Remediation roadmap (recommended by next month)</h2>
+<table>
+<tr><th>Priority</th><th>Target</th><th>Recommended action</th></tr>
+<tr><td><span class="sev sev-crit">Critical</span></td><td><code>legacy-billing</code></td><td>Re-apply the baseline (<code>npx cc-safe-setup --team</code>). This is production billing code; a missing destructive-guard is the top thing to close.</td></tr>
+<tr><td><span class="sev sev-high">High</span></td><td><code>data-pipeline</code></td><td>Apply secret-guard and roll in the <code>--accept-data-loss</code> block (RULE-2605-03).</td></tr>
+<tr><td><span class="sev sev-med">Medium</span></td><td><code>legacy-billing</code> · 7× <code>--no-verify</code></td><td>Review the practice of skipping the CI gate. If a bypass is ever needed, document an exception process.</td></tr>
+<tr><td><span class="sev sev-low">Low</span></td><td><code>infra-terraform</code></td><td>Add terraform <code>destroy</code> protection to the baseline (currently warn-only).</td></tr>
+</table>
+
+<h2>7. Executive &amp; audit summary</h2>
+<div class="attest">
+<p>For the period of May 2026, operations-layer safety controls for Claude Code were continuously applied across Acme Corp Product Engineering's 8 repositories and 23 developers. The org weighted-average score improved from 72 to 78, and 14 destructive operations were automatically blocked during the period. Two repositories are below baseline; the section 6 remediation is expected to improve them next month.</p>
+<p style="margin-top:0.6rem;font-size:0.88rem;color:var(--gray)">This summary is delivered in a form you can attach directly to a SOC2 evidence package, a customer security questionnaire, or a quarterly leadership report.</p>
+</div>
+
+<h2>8. About this sample</h2>
+<p>This is an example deliverable from the <strong>cc-safe-setup for Teams (Org Guard)</strong> tier. The core hooks stay <strong>free forever (MIT)</strong>, and the individual <code>--audit</code> score stays free too. The tier only adds what a single developer doesn't need but an organization does: the cross-repo rollup, the monthly incident rule feed, the bypass audit, and a report you can hand over.</p>
+<p>The cited incidents (<a href="https://github.com/anthropics/claude-code/issues/65152">#65152</a> · <a href="https://github.com/anthropics/claude-code/issues/64559">#64559</a> · <a href="https://github.com/anthropics/claude-code/issues/14411">#14411</a>) are all real, reported GitHub issues. The hook behind each rule is verified live in the cc-safe-setup repository. The scores, counts, and repo names are fictional.</p>
+
+<div class="honest">
+Honestly: this tier isn't built yet — we're gauging demand first (the core hooks are free to use right now). If a shared, enforceable, CI-integrated safety policy would help your team, a 👍 or a one-line comment on the discussion below directly decides what we build first. Indicative price is ~$12 / developer / month, with small teams (≤5) free.
+</div>
+
+<p style="margin-top:1.4rem">
+<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/discussions/632">Tell us it'd help — Discussion #632 →</a>
+<a class="cta sub" href="team-rollout-guide.html">Team rollout playbook →</a>
+</p>
+
+<footer>
+<p class="noprint">This sample is by the author of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> (790+ safety hooks, MIT). The core hooks are free. Everything here is designed from real, reported incidents.</p>
+</footer>
+
+</div>
+</body>
+</html>
