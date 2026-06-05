@@ -18375,6 +18375,13 @@ test_ex image-file-validator.sh '{"tool_input":{"file_path":"README.md"}}' 0 "im
 test_ex image-file-validator.sh '{"tool_input":{"file_path":"src/main.ts"}}' 0 "image-file-validator: code file passes"
 test_ex image-file-validator.sh '{"tool_input":{}}' 0 "image-file-validator: no file_path passes"
 
+# --- image-dimension-guard tests ---
+test_ex image-dimension-guard.sh '{}' 0 "image-dimension-guard: empty input passes"
+test_ex image-dimension-guard.sh '{"tool_input":{}}' 0 "image-dimension-guard: no file_path passes"
+test_ex image-dimension-guard.sh '{"tool_input":{"file_path":"/nonexistent/file.png"}}' 0 "image-dimension-guard: nonexistent file passes"
+test_ex image-dimension-guard.sh '{"tool_input":{"file_path":"README.md"}}' 0 "image-dimension-guard: non-image extension passes"
+CC_IMAGE_DIM_GUARD=off test_ex image-dimension-guard.sh '{"tool_input":{"file_path":"/nonexistent/big.png"}}' 0 "image-dimension-guard: off mode passes"
+
 # --- pre-compact-transcript-backup tests ---
 test_ex pre-compact-transcript-backup.sh '{}' 0 "pre-compact-transcript-backup: empty input exits 0"
 test_ex pre-compact-transcript-backup.sh '{"transcript_path":"/nonexistent/file.jsonl"}' 0 "pre-compact-transcript-backup: missing file exits 0"
