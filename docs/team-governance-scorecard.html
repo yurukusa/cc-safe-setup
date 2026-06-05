@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Team Governance Scorecard — score your org's AI-coding controls</title>
+<meta name="description" content="Is your team's Claude Code setup governed, or does one unprotected developer put the whole org at risk? Score 8 org-level controls (shared baseline, CI gate, audit trail, production guards) and get an honest X/8 card you can screenshot and share. Runs entirely in your browser — no upload. English / 日本語.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/team-governance-scorecard.html">
+<meta property="og:title" content="Claude Code Team Governance Scorecard">
+<meta property="og:description" content="One unprotected developer can put the whole org at risk. Score your team's AI-coding controls — shared baseline, CI gate, production guards, audit trail. Honest X/8, a card you'll want to share. Runs in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/team-governance-scorecard.html">
+<meta property="og:image" content="https://yurukusa.github.io/cc-safe-setup/team-governance-scorecard-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://yurukusa.github.io/cc-safe-setup/team-governance-scorecard-og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Team Governance Scorecard","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Self-assessment scorecard for whether a team's Claude Code / AI coding agent usage is governed at the org level: shared baseline, enforced guards, CI gate, audit trail, onboarding and periodic review.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 3rem}
+.container{max-width:680px;width:100%}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.back{color:#58a6ff;text-decoration:none;font-size:.85rem}
+.langbar{display:flex;gap:6px}
+.langbar button{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:8px;padding:5px 12px;font:inherit;font-size:.82rem;cursor:pointer}
+.langbar button.on{background:#1f6feb;color:#fff;font-weight:600;border-color:#1f6feb}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem;text-align:center}
+.subtitle{color:#8b949e;font-size:.9rem;text-align:center;margin-bottom:1.75rem;line-height:1.55}
+.subtitle a{color:#58a6ff;text-decoration:none}
+.checklist{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:.5rem;margin-bottom:1.5rem}
+.item{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem .9rem;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.item:hover{background:#0d1117}
+.item.on{background:#0d1117;border-color:#1f6feb}
+.box{flex:0 0 22px;width:22px;height:22px;border:2px solid #484f58;border-radius:6px;margin-top:.1rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;transition:all .15s}
+.item.on .box{background:#1f6feb;border-color:#1f6feb}
+.item.on .box::after{content:"✓"}
+.txt .name{color:#f0f6fc;font-weight:600;font-size:.95rem}
+.txt .why{color:#8b949e;font-size:.8rem;margin-top:.2rem;line-height:1.45}
+.txt .why code{background:#161b22;border:1px solid #30363d;border-radius:4px;padding:0 .25rem;font-size:.92em;color:#c9d1d9}
+.controls{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.75rem}
+.mini{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .9rem;border-radius:6px;font-size:.8rem;cursor:pointer}
+.mini:hover{border-color:#58a6ff;color:#58a6ff}
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;text-decoration:none}
+.btn-primary{background:#1f6feb;color:#fff}.btn-primary:hover{background:#388bfd}
+.btn-x{background:#1da1f2;color:#fff}.btn-x:hover{filter:brightness(1.1)}
+.btn-ghost{background:#21262d;color:#c9d1d9;border:1px solid #30363d}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:#1f6feb;color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.next{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.3rem;margin-top:2rem}
+.next h2{color:#f0f6fc;font-size:1.02rem;margin-bottom:.5rem}
+.next p{color:#8b949e;font-size:.86rem;line-height:1.65;margin-bottom:.5rem}
+.next p:last-child{margin-bottom:0}
+.next a{color:#58a6ff;text-decoration:none}
+.next code{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:.05rem .3rem;color:#f0f6fc}
+.footer{margin-top:2.5rem;font-size:.75rem;color:#484f58;text-align:center;line-height:1.7}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="topbar">
+<a class="back" href="index.html">&larr; cc-safe-setup</a>
+<div class="langbar">
+<button data-lang="en" class="on">English</button>
+<button data-lang="ja">日本語</button>
+</div>
+</div>
+<h1 id="t-title"></h1>
+<p class="subtitle" id="t-sub"></p>
+
+<div class="checklist" id="checklist"></div>
+
+<div class="controls">
+<button class="mini" id="t-all" onclick="setAll(true)"></button>
+<button class="mini" id="t-clear" onclick="setAll(false)"></button>
+</div>
+
+<div class="cardwrap">
+<canvas id="card" width="1320" height="1120"></canvas>
+<div class="actions">
+<button class="btn btn-primary" id="t-dl" onclick="downloadPNG()"></button>
+<button class="btn btn-ghost" id="t-copy" onclick="copyImage()"></button>
+<button class="btn btn-ghost" id="t-link" onclick="copyLink()"></button>
+<a class="btn btn-x" id="xshare" target="_blank" rel="noopener">Share on X</a>
+</div>
+</div>
+
+<div class="next">
+<h2 id="t-next-h"></h2>
+<p id="t-next-free"></p>
+<p id="t-next-service"></p>
+</div>
+
+<div class="footer" id="t-foot"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// The reach mechanic that works in this niche is a compact artifact people *want*
+// to share (the ccusage cost scorecard, Karpathy's CLAUDE.md), not launch posts.
+// This is the org-level twin of the per-developer Safety Scorecard: it targets the
+// B2B adoption pain ("one unprotected developer puts the whole org at risk") that an
+// individual ¥800 book can't reach, and funnels to the corporate services page —
+// the highest-revenue pillar that previously had no top-of-funnel reach asset.
+// Each check is a real org-level control; the score reflects what you checked, not a
+// scan, so it stays honest when screenshotted. Score in the URL → a shared link
+// reproduces the exact card. JA routes to services-jp.html, EN to services.html.
+const CHECKS = [
+  {id:'baseline',
+   name:{en:'Shared baseline in git', ja:'共有 baseline が git にある'},
+   why:{en:'One committed safety baseline (<code>settings.json</code> + hooks) every clone inherits — not each developer configuring ad-hoc. Ad-hoc setups drift the moment someone clones fresh.', ja:'安全の baseline(<code>settings.json</code> とフック)が1つ、リポジトリに commit されていて、clone した全員が継承する状態。各自が手で設定する運用は、誰かが新しく clone した瞬間に崩れる。'},
+   card:{en:'Shared safety baseline committed to git', ja:'共有の安全 baseline が git に commit 済み'}},
+  {id:'destructive',
+   name:{en:'Destructive ops blocked for everyone', ja:'破壊的操作が全員で遮断'},
+   why:{en:'<code>rm -rf</code>, force-push, <code>git reset --hard</code>, destructive DB migrations blocked org-wide via PreToolUse hooks — enforced, not opt-in per developer.', ja:'<code>rm -rf</code>、force-push、<code>git reset --hard</code>、破壊的な DB マイグレーションを、PreToolUse のフックで組織全体で遮断。各自の任意でなく、強制されている。'},
+   card:{en:'Destructive ops blocked org-wide (not opt-in)', ja:'破壊的操作を組織全体で遮断(任意でない)'}},
+  {id:'secrets',
+   name:{en:'Secret & .env protection', ja:'機密と .env の保護'},
+   why:{en:'<code>git add .env</code>, committed API keys and credential exfiltration blocked team-wide. One developer leaking keys to a public repo is an org-level incident, not a personal one.', ja:'<code>git add .env</code>、API キーの commit、認証情報の流出をチーム全体で遮断。1人が公開リポジトリに鍵を漏らす事故は、個人でなく組織の事故になる。'},
+   card:{en:'Secrets / .env / credential leaks blocked', ja:'機密・.env・認証情報の流出を遮断'}},
+  {id:'production',
+   name:{en:'Production & agent-write guards', ja:'本番とエージェント書き込みの防御'},
+   why:{en:'Auto-mode, browser-MCP clicks and sub-agent writes can hit production with no human in the loop (a recent incident deleted a production DB record from a UI click). Guard production hosts and high-risk paths regardless of who or what issued the action.', ja:'自動承認モード、ブラウザ MCP のクリック、サブエージェントの書き込みは、人の確認なしに本番へ届く(最近、UI クリックで本番 DB のレコードが消えた事故がある)。誰が・何が出した操作かに関わらず、本番ホストと高リスクのパスを守る。'},
+   card:{en:'Production / auto-mode / agent-write guards', ja:'本番・自動承認・エージェント書き込みの防御'}},
+  {id:'cigate',
+   name:{en:'CI gate on the baseline', ja:'CI で baseline をゲート'},
+   why:{en:'CI fails the build when the safety baseline is removed, weakened or drifts from the committed copy — so a single developer cannot silently disable the controls for everyone.', ja:'安全の baseline が外された・弱められた・commit 済みの版とずれた時に、CI がビルドを落とす。1人が全員の防御を黙って無効化できない状態にする。'},
+   card:{en:'CI fails when the baseline drifts/removed', ja:'baseline の逸脱・削除で CI が失敗'}},
+  {id:'audit',
+   name:{en:'Audit trail of agent actions', ja:'エージェント操作の監査ログ'},
+   why:{en:'Blocked actions and high-risk operations are logged so an incident can be reviewed and a compliance reviewer (e.g. SOC 2) can see what was prevented and by whom.', ja:'遮断した操作と高リスクの操作が記録され、事故を後から検証でき、監査(例: SOC 2)で「何を、誰の操作で防いだか」を示せる。'},
+   card:{en:'Audit trail of blocked / high-risk actions', ja:'遮断・高リスク操作の監査ログ'}},
+  {id:'onboarding',
+   name:{en:'Onboarding installs it automatically', ja:'オンボーディングで自動導入'},
+   why:{en:'New team members get the full baseline from one command (or it is already in the repo), not a wiki page they are trusted to follow. Manual onboarding is the most common way controls silently lapse.', ja:'新しいメンバーが、1つのコマンド(あるいは元からリポジトリにある形)で baseline を丸ごと得る。守ってくれる前提の wiki ページでない。手動のオンボーディングは、防御が黙って抜ける最大の原因。'},
+   card:{en:'Onboarding installs the baseline automatically', ja:'オンボーディングで baseline を自動導入'}},
+  {id:'review',
+   name:{en:'Periodic re-review', ja:'定期的な見直し'},
+   why:{en:'The baseline is reviewed on a cadence as Claude Code ships new features and new failure classes appear (new ones surface most months). A baseline set once and never revisited goes stale.', ja:'Claude Code の新機能と新しい失敗のクラス(ほぼ毎月のように新種が出る)に合わせて、baseline を定期的に見直す。一度決めて放置した baseline は陳腐化する。'},
+   card:{en:'Baseline re-reviewed on a cadence', ja:'baseline を定期的に見直し'}},
+];
+const N = CHECKS.length;
+let state = new Array(N).fill(false);
+let LANG = 'en';
+
+const T = {
+  en:{
+    title:"Claude Code Team Governance Scorecard",
+    sub:'Your team adopted Claude Code — but is it <em>governed</em>, or does one unprotected developer put the whole org at risk? Score 8 org-level controls and get an honest <strong>X / 8</strong> card you can screenshot and share.<br>Built for the team-adoption pain behind <a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a>. Nothing leaves your browser.',
+    all:"Check all", clear:"Clear all",
+    dl:"⬇ Download PNG", copy:"⧉ Copy image", link:"🔗 Copy share link",
+    nextH:"How does your team score?",
+    nextFree:'The core enforcement hooks are free and MIT: <code>npx cc-safe-setup</code> installs destructive-op, secret, production and agent-write guards in about ten seconds, with zero npm dependencies. Start there — the <a href="safety-scorecard.html">per-developer Safety Scorecard</a> covers the individual layer.',
+    nextService:'Designing an org-wide baseline, wiring the CI gate, standing up the audit trail and re-reviewing it as Claude Code changes is hands-on work. That is exactly what the <a href="services.html">cc-safe-setup services</a> (safety audit, baseline rollout, training, ongoing review) deliver — see a <a href="services-jp-sample-audit.html">sample audit report</a> for the shape of the deliverable.',
+    footL:"This is a self-assessment: the score reflects what you checked, not a scan of your systems. The controls are real.",
+    cardSub:"core controls", scoreWord:"interop",
+    tierFull:"Fully governed", tierMost:"Mostly governed", tierPart:"Partially exposed", tierNone:"Ungoverned",
+    shareMsg:(n)=>'Our team\'s Claude Code governance: '+n+'/'+N+' org-level controls',
+    shareStill:"Still exposed on: ", shareMore:(k)=>' +'+k+' more', shareTail:". Score yours:",
+  },
+  ja:{
+    title:"Claude Code チーム統制 スコアカード",
+    sub:'チームで Claude Code を使い始めた——でもそれは<em>統制</em>されているか、それとも無防備な1人が組織全体を危険にさらしているか？ 組織レベルの8つの統制を採点し、共有できる正直な <strong>X / 8</strong> のカードを得られます。<br><a href="https://github.com/anthropics/claude-code/issues/6235" target="_blank" rel="noopener">#6235</a> の背後にあるチーム導入の痛みのために作りました。情報はブラウザの外に出ません。',
+    all:"全部チェック", clear:"全部外す",
+    dl:"⬇ PNG を保存", copy:"⧉ 画像をコピー", link:"🔗 共有リンクをコピー",
+    nextH:"あなたのチームは何点？",
+    nextFree:'中核の強制フックは無料で MIT です。<code>npx cc-safe-setup</code> が、破壊的操作・機密・本番・エージェント書き込みの防御を約10秒で導入します(npm の依存はゼロ)。まずここから。個人の層は<a href="safety-scorecard.html">開発者向けの安全スコアカード</a>が見ます。',
+    nextService:'組織全体の baseline の設計、CI ゲートの配線、監査ログの整備、Claude Code の変化に合わせた見直しは、手を動かす作業です。それを行うのが<a href="services-jp.html">cc-safe-setup の法人向けサービス</a>(安全監査・baseline 導入・研修・継続の見直し)です。成果物の形は<a href="services-jp-sample-audit.html">監査レポートのサンプル</a>で見られます。',
+    footL:"これは自己診断です。点数はチェックした内容を映すもので、システムを走査した結果ではありません。統制の項目は実在のものです。",
+    cardSub:"組織の統制", scoreWord:"",
+    tierFull:"完全に統制", tierMost:"おおむね統制", tierPart:"一部が無防備", tierNone:"未統制",
+    shareMsg:(n)=>'うちのチームの Claude Code 統制: '+n+'/'+N+' の組織レベルの統制',
+    shareStill:"まだ無防備: ", shareMore:(k)=>' 他'+k+'件', shareTail:"。あなたの点数は:",
+  }
+};
+
+// ---- URL state (?s=11010110) so a shared link reproduces the exact card ----
+function readURL(){
+  const u = new URLSearchParams(location.search);
+  const p = u.get('s');
+  if(p && p.length === N && /^[01]+$/.test(p)){ state = p.split('').map(c => c === '1'); }
+  if(u.get('lang') === 'ja') LANG = 'ja';
+}
+function writeURL(){
+  const s = state.map(b => b?'1':'0').join('');
+  const url = location.origin + location.pathname + '?s=' + s + (LANG==='ja'?'&lang=ja':'');
+  history.replaceState(null,'',url);
+  return url;
+}
+
+// ---- static text ----
+function setText(){
+  const t = T[LANG];
+  document.documentElement.lang = LANG;
+  document.getElementById('t-title').textContent = t.title;
+  document.getElementById('t-sub').innerHTML = t.sub;
+  document.getElementById('t-all').textContent = t.all;
+  document.getElementById('t-clear').textContent = t.clear;
+  document.getElementById('t-dl').textContent = t.dl;
+  document.getElementById('t-copy').textContent = t.copy;
+  document.getElementById('t-link').textContent = t.link;
+  document.getElementById('t-next-h').textContent = t.nextH;
+  document.getElementById('t-next-free').innerHTML = t.nextFree;
+  document.getElementById('t-next-service').innerHTML = t.nextService;
+  document.getElementById('t-foot').innerHTML =
+    '<a href="index.html">cc-safe-setup</a> · <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · 800+ example hooks · MIT<br>' + t.footL;
+}
+
+// ---- checklist UI ----
+const checklist = document.getElementById('checklist');
+function renderList(){
+  checklist.innerHTML = '';
+  CHECKS.forEach((p,i) => {
+    const el = document.createElement('div');
+    el.className = 'item' + (state[i]?' on':'');
+    el.onclick = () => { state[i] = !state[i]; renderList(); render(); };
+    el.innerHTML = '<div class="box"></div><div class="txt"><div class="name">'+p.name[LANG]+'</div><div class="why">'+p.why[LANG]+'</div></div>';
+    checklist.appendChild(el);
+  });
+}
+function setAll(v){ state = new Array(N).fill(!!v); renderList(); render(); }
+
+// ---- honest score tiers ----
+function tier(n){
+  const t = T[LANG];
+  if(n === N) return {label:t.tierFull, color:'#3fb950'};
+  if(n >= 5)  return {label:t.tierMost, color:'#3fb950'};
+  if(n >= 1)  return {label:t.tierPart, color:'#d29922'};
+  return {label:t.tierNone, color:'#f85149'};
+}
+
+// ---- canvas card (the shareable artifact) ----
+const canvas = document.getElementById('card');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, S = 2;
+function px(v){ return v * S; }
+function render(){
+  const t = T[LANG];
+  const n = state.filter(Boolean).length;
+  const ti = tier(n);
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = px(1.5);
+  roundRect(px(8),px(8),W-px(16),H-px(16),px(16)); ctx.stroke();
+
+  const padX = px(40);
+  let y = px(58);
+
+  // header
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '700 ' + px(26) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#58a6ff'; ctx.fillText('cc-safe-setup', padX, y);
+  const w1 = ctx.measureText('cc-safe-setup').width;
+  ctx.fillStyle = '#8b949e';
+  ctx.fillText('  ·  ' + (LANG==='ja'?'チーム統制 スコアカード':'Team Governance Scorecard'), padX + w1, y);
+
+  // score line
+  y += px(56);
+  ctx.font = '700 ' + px(54) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = ti.color;
+  ctx.fillText(n + '/' + N, padX, y);
+  const ws = ctx.measureText(n + '/' + N).width;
+  ctx.font = '600 ' + px(20) + 'px -apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif';
+  ctx.fillStyle = '#c9d1d9';
+  ctx.fillText(t.cardSub, padX + ws + px(14), y - px(20));
+  ctx.fillStyle = ti.color;
+  ctx.fillText(ti.label, padX + ws + px(14), y + px(6));
+
+  // coverage bar
+  y += px(34);
+  const barW = W - padX*2, barH = px(14);
+  ctx.fillStyle = '#21262d'; roundRect(padX, y, barW, barH, px(7)); ctx.fill();
+  if(n > 0){ ctx.fillStyle = ti.color; roundRect(padX, y, Math.max(barH, barW*(n/N)), barH, px(7)); ctx.fill(); }
+
+  // check rows
+  y += px(46);
+  const rowH = px(36);
+  CHECKS.forEach((p,i) => {
+    const on = state[i];
+    ctx.fillStyle = on ? '#3fb950' : '#6e7681';
+    ctx.font = '700 ' + px(19) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillText(on ? '✓' : '✕', padX, y);
+    ctx.font = '500 ' + px(18) + 'px -apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif';
+    ctx.fillStyle = on ? '#c9d1d9' : '#6e7681';
+    ctx.fillText(p.card[LANG], padX + px(30), y);
+    y += rowH;
+  });
+
+  // footer
+  y = H - px(56);
+  ctx.strokeStyle = '#21262d'; ctx.lineWidth = px(1);
+  ctx.beginPath(); ctx.moveTo(padX, y - px(22)); ctx.lineTo(W - padX, y - px(22)); ctx.stroke();
+  ctx.font = '700 ' + px(19) + 'px ui-monospace,Menlo,monospace';
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillText(LANG==='ja' ? '無防備な1人 = 組織のリスク' : 'one unprotected dev = org risk', padX, y);
+  ctx.font = '400 ' + px(15) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.fillStyle = '#6e7681';
+  const foot = 'free · github.com/yurukusa/cc-safe-setup';
+  const fw = ctx.measureText(foot).width;
+  ctx.fillText(foot, W - padX - fw, y);
+
+  // share affordances
+  const url = writeURL();
+  const exposed = CHECKS.filter((_,i)=>!state[i]).map(p=>p.name[LANG]);
+  let msg = t.shareMsg(n);
+  if(n < N && exposed.length) msg += '. ' + t.shareStill + exposed.slice(0,2).join(', ') + (exposed.length>2?t.shareMore(exposed.length-2):'');
+  msg += t.shareTail;
+  const xurl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '&url=' + encodeURIComponent(url);
+  document.getElementById('xshare').href = xurl;
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+// ---- actions ----
+function toast(s){
+  const el = document.getElementById('toast');
+  el.textContent = s; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1800);
+}
+function downloadPNG(){
+  const n = state.filter(Boolean).length;
+  const a = document.createElement('a');
+  a.download = 'cc-team-governance-scorecard-' + n + 'of' + N + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  toast(LANG==='ja'?'スコアカードを保存しました':'Scorecard downloaded');
+}
+async function copyImage(){
+  try{
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+    toast(LANG==='ja'?'画像をコピーしました':'Image copied to clipboard');
+  }catch(e){ toast(LANG==='ja'?'コピー不可 — PNG 保存を使ってください':'Copy not supported — use Download PNG'); }
+}
+async function copyLink(){
+  try{
+    await navigator.clipboard.writeText(writeURL());
+    toast(LANG==='ja'?'共有リンクをコピーしました':'Share link copied');
+  }catch(e){ toast(LANG==='ja'?'コピー失敗 — リンクはアドレス欄にあります':'Copy failed — link is in your address bar'); }
+}
+
+// ---- lang switch ----
+document.querySelectorAll('.langbar button').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  document.querySelectorAll('.langbar button').forEach(x => x.classList.toggle('on', x===b));
+  setText(); renderList(); render();
+}));
+
+// ---- init ----
+readURL();
+document.querySelectorAll('.langbar button').forEach(x => x.classList.toggle('on', x.dataset.lang===LANG));
+setText();
+renderList();
+render();
+</script>
+</body>
+</html>
