@@ -73,6 +73,12 @@ set -uo pipefail
 
 [ "${CC_PLAN_GATE_DISABLE:-0}" = "1" ] && exit 0
 
+# OPT-IN: this gate BLOCKS the 3rd+ file Write/Edit in a session when no plan
+# file exists. Ordinary multi-file work (refactors, features touching 3+ files)
+# would be arrested by default, so it is off unless explicitly enabled.
+# Set CC_PLAN_GATE_ENABLE=1 to turn it on.
+[ "${CC_PLAN_GATE_ENABLE:-0}" = "1" ] || exit 0
+
 INPUT=$(cat 2>/dev/null || true)
 [ -z "$INPUT" ] && exit 0
 
