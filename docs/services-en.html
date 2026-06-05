@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roll out Claude Code safely across your team — audit, training, baseline & ongoing review｜cc-safe-setup</title>
+<meta name="description" content="Org-level safety services for teams adopting Claude Code: a one-off safety audit, recorded team training, org baseline rollout with a CI gate, and ongoing review. Built by the author of cc-safe-setup (800+ safety hooks), based on real documented incidents. Async / remote-friendly.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Roll out Claude Code safely across your team — org safety services">
+<meta property="og:description" content="One unprotected developer can put the whole org at risk. Safety audit, team training, org baseline + CI gate, and ongoing review by the author of cc-safe-setup.">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/services-en.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--dark); line-height:1.8; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.7rem; line-height:1.35; margin-bottom:0.6rem; }
+h2 { font-size:1.25rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin-bottom:0.4rem; font-size:1.08rem; }
+.subtitle { color:var(--gray); font-size:1.02rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.service { background:var(--light); border-radius:8px; padding:1.3rem 1.3rem; margin-bottom:1rem; border-left:4px solid var(--blue); }
+.service .price { color:var(--green); font-weight:bold; font-size:1.05rem; display:block; margin-top:0.5rem; }
+.service .note { color:var(--gray); font-size:0.86rem; }
+.tag { display:inline-block; background:#e0e7ff; color:var(--blue); padding:0.18rem 0.6rem; border-radius:4px; font-size:0.82rem; margin:0.18rem 0.18rem 0.18rem 0; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.6rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul { padding-left:1.4rem; } li { margin-bottom:0.45rem; }
+.honest { color:var(--gray); font-size:0.88rem; border-top:1px dashed #cbd5e1; margin-top:0.7rem; padding-top:0.6rem; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a { color:var(--blue); }
+a { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Roll out Claude Code safely across your team</h1>
+<p class="subtitle">Org-level safety services — audit, training, baseline rollout and ongoing review, by the author of cc-safe-setup.</p>
+<div class="lead">
+Using Claude Code as an individual and using it across a team are not the same safety problem.
+In an organization, <strong>one developer's unprotected setup is the whole org's risk</strong>.
+An AI that runs fine on one machine can recursively delete files, stage <code>.env</code> into git, drop a production database, or trigger unexpected billing —
+and that happens no matter how careful the other nineteen people are.
+This page lays out how to make safety <strong>uniform, enforced and audited</strong> across the org, with the practical patterns to get there.
+</div>
+<h2>Sound familiar?</h2>
+<ul>
+<li>Every developer is configured differently, and no one knows who is actually protected.</li>
+<li>A new hire runs the agent on a production repo before setting up any safety config.</li>
+<li>There is no mechanism to <em>enforce</em> "operations you must never allow" across the org.</li>
+<li>CI has no safety gate, so a dangerous change isn't stopped before it ships.</li>
+<li>You want to adopt Claude Code team-wide but don't know where to start on safety or cost.</li>
+</ul>
+
+<h2>Training and a hardened environment don't stop the accidents</h2>
+<div class="lead">
+Most corporate Claude Code support is either <strong>training</strong> (teaching people how to use it) or <strong>environment hardening</strong> (no-training data settings, SSO, isolated environments).
+Both matter as an entry point. But the real accidents happen on the machine of someone who was trained, inside a hardened environment.
+<br><br>
+What this service adds is the layer after that: <strong>operational guardrails</strong>.
+Instead of relying on human attention, dangerous operations are <strong>stopped mechanically, before they run</strong> —
+recursive file deletion, production-database destruction, <code>.env</code> staging, force&#8209;push, runaway sub-agents, unexpected billing.
+These are blocked with hooks, the same baseline is enforced across every repo in the org, and CI plus an audit trail keep confirming it still works.
+</div>
+<table>
+<tr><th></th><th>Typical training / hardening</th><th>This service (operational accident prevention)</th></tr>
+<tr><td>Focus</td><td>Learning to use it / securing the environment</td><td>Stopping dangerous operations before they run</td></tr>
+<tr><td>Depends on</td><td>Trainee attention / following rules</td><td>Mechanical enforcement (hooks, CI, audit)</td></tr>
+<tr><td>Pricing shape</td><td>Mainly per-seat training fees</td><td>Audit + monthly review (not per-seat)</td></tr>
+<tr><td>Position</td><td>The on-ramp</td><td>The downstream layer for the "accidents still happen in the field" problem that always remains</td></tr>
+</table>
+<p>It composes with training rather than competing with it: the same <code>diff</code>-style enforcement that catches a weakened baseline in CI is what training alone can't give you.</p>
+<p>The basis is real, documented incidents and on-machine verification of the hooks that stop them — for example an unauthorized transfer <a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> ($1,446), mass deletion of database tables <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>, and a secret leak that walked straight past CLAUDE.md instructions <a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>. Not generalities — incidents you can trace by number, with the matching hook.</p>
+
+<h2>Services & indicative pricing</h2>
+<p>The figures below are <strong>estimates</strong>. They move with team size, number of repos and your existing setup, so start with a conversation — the actual scope and price come back in a quote. These engagements are <strong>async / remote-friendly</strong> (the audit and baseline work are delivered as artifacts and reports; training is available recorded).</p>
+<div class="service">
+<h3>1. Safety audit (one-off)</h3>
+<p>Review the org's <code>settings.json</code>, <code>CLAUDE.md</code> and hook setup, and surface the gaps that lead to accidents (permission holes, secret-leak paths, deletion and billing risk). You get the remediation config and a distributable safety baseline. Delivered as a written report — no live session required.</p>
+<span class="price">from ~$1,000 (one-off)</span>
+<span class="tag">Deliverable: vulnerability report + recommended hooks + distributable template</span>
+<p style="margin-top:0.6rem;font-size:0.92rem"><a href="services-jp-sample-audit.html">See a sample vulnerability report →</a> (fictional company, for illustration)</p>
+</div>
+<div class="service">
+<h3>2. Team training (online / recorded)</h3>
+<p>For tech leads and developers: how to operate Claude Code safely, taught through real incidents and how to prevent them, mapped onto your own workflow. Available recorded so it scales across time zones.</p>
+<span class="price">from ~$350 / person (varies by size & format)</span>
+<span class="tag">Recorded option · 7-module curriculum</span>
+<p style="margin-top:0.6rem;font-size:0.92rem"><a href="claude-code-safety-training-jp.html">See the curriculum (7 modules) →</a></p>
+</div>
+<div class="service">
+<h3>3. Rollout & setup (org baseline design + distribution)</h3>
+<p>Design the shared safety policy, the mechanism to distribute it to every repo and developer, the CI safety gate, and enforcement of the required baseline. Eliminates the drift and "forgot to add it" failures of manual distribution.</p>
+<span class="price">from ~$2,000 (one-off project)</span>
+<span class="tag">Deliverable: shared policy + CI workflow + rollout runbook</span>
+</div>
+<div class="service">
+<h3>4. Monthly review & support<span class="tag" style="background:#dcfce7;color:#059669;">core</span></h3>
+<p>The core service. Ongoing hook updates, responses to newly reported incident classes, config review, and operational Q&amp;A. Claude Code ships fast and the safety assumptions shift; training and initial setup are one-time, but the risk stays for as long as you keep using it. Priced per org's operation, not per seat.</p>
+<span class="price">from ~$700 / month (varies by scale)</span>
+<span class="tag">Continuous safety updates + review + audit</span>
+</div>
+<div class="service">
+<h3>5. Spot consulting (design review / incident post-mortem)</h3>
+<p>One-off: AI-coding adoption strategy, safety-design review, or root-cause analysis and prevention after an incident has already happened.</p>
+<span class="price">from ~$2,000 / day</span>
+<span class="tag">Strategy / design review / post-mortem</span>
+</div>
+<div class="service">
+<h3>6. cc-safe-setup for Teams (open-core · gauging interest)</h3>
+<p>The core hooks stay <strong>free and MIT, always</strong>. On top of that, a per-developer monthly tier that distributes and enforces a shared policy across the org, runs it in CI, and keeps an audit trail. I'm confirming demand before building it — if it'd help your org, a 👍 or a line is enough.</p>
+<span class="price">~$12 / developer / month (gauging interest)</span>
+<span class="tag">Deliverable: monthly compliance report + incident-rule feed + bypass audit</span>
+<p style="margin-top:0.6rem;font-size:0.92rem"><a href="org-guard-monthly-report-sample-en.html">See a sample monthly compliance report →</a> (fictional company, for illustration)</p>
+<p class="note"><a href="https://github.com/yurukusa/cc-safe-setup/discussions/632">Demand thread (GitHub Discussion #632) →</a></p>
+</div>
+
+<h2>Free, start right now</h2>
+<p>Before any conversation, check where you stand with the free tools — all usable in-house as-is.</p>
+<table>
+<tr><th>Tool</th><th>What it does</th></tr>
+<tr><td><a href="team-governance-scorecard.html">Team Governance Scorecard</a></td><td>Score 8 org-level controls in 30 seconds; get a shareable card and a clear "what to fix next" list</td></tr>
+<tr><td><a href="safety-scorecard.html">Safety Scorecard (per developer)</a></td><td>Check the individual layer: 8 documented incidents, X/8 coverage you can screenshot</td></tr>
+<tr><td><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup (free · MIT)</a></td><td>One command installs the core safety hooks. The individual tier stays free.</td></tr>
+</table>
+
+<h2>Get in touch</h2>
+<p>For an inquiry or a quote, use the GitHub issue form — a short form where you pick the type and size of engagement. Don't include your company name or anything confidential; after the first contact we move to a private channel.</p>
+<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/issues/new?template=service_inquiry.yml">Inquire via the GitHub form</a>
+<a class="cta sub" href="team-governance-scorecard.html">First, score your team</a>
+
+<h2>About</h2>
+<p>
+<span class="tag">Author of cc-safe-setup (800+ safety hooks · MIT)</span>
+<span class="tag">~30k npm installs (cumulative)</span>
+<span class="tag">~1,900 de-duplicated GitHub clones in the last 14 days (measured, includes automated traffic such as CI)</span>
+<span class="tag">GitHub 42★</span>
+<span class="tag">80k+ cumulative Qiita views on Claude Code safety &amp; operations</span>
+<span class="tag">Designed from real, documented incidents (GitHub issues)</span>
+</p>
+<p class="honest">Figures are measured as of publication. Scope and schedule are agreed per engagement. No exaggerated promises.</p>
+<footer>
+<p>
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ｜
+<a href="services-jp.html">日本語（法人向け）</a> ｜
+<a href="services.html">Individual services</a> ｜
+<a href="token-book.html#en">Token Book</a>
+</p>
+</footer>
+</div>
+</body>
+</html>
