@@ -13,6 +13,7 @@ assert_fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 STATE_DIR=$(mktemp -d -t cc-aislop-test-XXXXXX)
 trap 'rm -rf "$STATE_DIR"' EXIT
 export CC_AI_SLOP_STATE_DIR="$STATE_DIR"
+export CC_AI_SLOP_ENABLE=1   # gate is opt-in; enable it for the block-mode tests
 
 echo "=== ai-slop-punctuation-arrest.sh tests ==="
 
@@ -263,7 +264,17 @@ if [ "$rc" -eq 2 ]; then
 else
     assert_fail "expected custom file pattern to gate .html, got rc=$rc"
 fi
-
+INPUT=$(jq -nc --arg c "This sentence has an em-dash — yes it does." '{
+    tool_name: "Write",
+    tool_input: {file_path: "/repo/README.md", content: $c}
+}')
+output=$(printf '%s' "$INPUT" | env -u CC_AI_SLOP_ENABLE bash "$HOOK" 2>&1)
+rc=$?
+if [ "$rc" -eq 0 ] && [ -z "$output" ]; then
+    assert_pass "gate is off by default (CC_AI_SLOP_ENABLE unset → silent pass-through)"
+else
+    assert_fail "expected silent no-op without CC_AI_SLOP_ENABLE, got rc=$rc output=$output"
+fi
 echo
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ]
