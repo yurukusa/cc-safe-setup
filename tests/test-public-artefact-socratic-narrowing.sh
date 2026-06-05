@@ -26,6 +26,7 @@ assert_fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 STATE_DIR=$(mktemp -d -t cc-socratic-test-XXXXXX)
 trap 'rm -rf "$STATE_DIR"' EXIT
 export CC_SOCRATIC_STATE_DIR="$STATE_DIR"
+export CC_SOCRATIC_ENABLE=1   # gate is opt-in; enable it for the block-mode tests
 
 # Helper to build a long body so the length-threshold doesn't filter it
 LONG_BODY=$(printf 'This is a non-trivial PR body with multiple claims. %.0s' {1..10})
@@ -325,6 +326,19 @@ if [ "$rc" -eq 2 ]; then
     assert_pass "git tag -a with long message blocks"
 else
     assert_fail "expected git tag to be gated (rc=$rc)"
+fi
+
+# --- Test: opt-in default — without CC_SOCRATIC_ENABLE the gate is a no-op ---
+INPUT=$(jq -nc --arg cmd "gh pr create --title 'Fix' --body '$LONG_BODY'" '{
+    tool_name: "Bash",
+    tool_input: {command: $cmd}
+}')
+output=$(printf '%s' "$INPUT" | env -u CC_SOCRATIC_ENABLE bash "$HOOK" 2>&1)
+rc=$?
+if [ "$rc" -eq 0 ] && [ -z "$output" ]; then
+    assert_pass "gate is off by default (CC_SOCRATIC_ENABLE unset → silent pass-through)"
+else
+    assert_fail "expected silent no-op without CC_SOCRATIC_ENABLE, got rc=$rc output=$output"
 fi
 
 echo
