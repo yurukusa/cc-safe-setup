@@ -444,6 +444,34 @@ test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"rm -rf .ssh"
 test_example_dotfiles '{"tool_name":"Bash","tool_input":{"command":"echo .bashrc is important"}}' 0 "allows echo mentioning dotfiles"
 echo ""
 
+# ========== flask-static-route-guard (example) ==========
+echo "flask-static-route-guard.sh (example):"
+FLASK_STATIC_GUARD="$(dirname "$0")/examples/flask-static-route-guard.sh"
+
+# Warn-only hook (exit 0); assert on the WARNING in stderr instead of exit code.
+test_flask_static() {
+    local input="$1" expect="$2" desc="$3"   # expect = warn|quiet
+    local err got="quiet"
+    err=$(printf '%s' "$input" | bash "$FLASK_STATIC_GUARD" 2>&1 >/dev/null) || true
+    echo "$err" | grep -q "WARNING:" && got="warn"
+    if [ "$got" = "$expect" ]; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc (expected $expect, got $got)"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+test_flask_static '{"tool_name":"Write","tool_input":{"file_path":"app.py","content":"import os\nfrom flask import Flask, send_from_directory\nSTATIC_DIR=os.path.dirname(os.path.abspath(__file__))\n@app.route(\"/<path:path>\")\ndef serve(path):\n    return send_from_directory(STATIC_DIR, path)"}}' warn "warns on catch-all serving app root"
+test_flask_static '{"tool_name":"Edit","tool_input":{"file_path":"server.py","new_string":"@app.route(\"/<path:p>\")\ndef s(p):\n    return send_file(os.path.join(os.getcwd(), p))"}}' warn "warns on catch-all serving cwd"
+test_flask_static '{"tool_name":"Write","tool_input":{"file_path":"app.py","content":"STATIC_DIR=os.path.join(os.path.dirname(__file__),\"static\")\n@app.route(\"/<path:path>\")\ndef serve(path):\n    return send_from_directory(STATIC_DIR, path)"}}' quiet "quiet when scoped to static/ subdir"
+test_flask_static '{"tool_name":"Write","tool_input":{"file_path":"app.py","content":"BASE=os.path.dirname(__file__)\n@app.route(\"/<path:path>\")\ndef serve(path):\n    if not path or path.startswith(\".\") or \"..\" in path: abort(404)\n    return send_from_directory(BASE, path)"}}' quiet "quiet when dotfiles are rejected"
+test_flask_static '{"tool_name":"Write","tool_input":{"file_path":"app.py","content":"@app.route(\"/img/<name>\")\ndef img(name):\n    return send_from_directory(\"images\", name)"}}' quiet "quiet on non-catch-all route"
+test_flask_static '{"tool_name":"Write","tool_input":{"file_path":"README.md","content":"@app.route(\"/<path:path>\") send_from_directory(os.getcwd(), path)"}}' quiet "quiet on non-Python files"
+test_flask_static 'not json' quiet "malformed JSON silent"
+echo ""
+
 # ========== scope-guard (example) ==========
 echo "scope-guard.sh (example):"
 SCOPE_GUARD="$(dirname "$0")/examples/scope-guard.sh"
