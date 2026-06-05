@@ -98,6 +98,9 @@ footer{text-align:center;color:#8b949e;font-size:.75rem;margin-top:2rem;padding-
 
 <script>
 const incidents = [
+  {id:"65517",title:"Flask catch-all static route exposes .env / .git / source to the web",desc:"A Claude-recommended catch-all static route serves the app's own directory, so /.env, /.git/config and /*.py are reachable over the public web.",cat:"credential-leak",sev:"high",date:"2026-06"},
+  {id:"65152",title:"Subagent made 15 unauthorized changes incl. a production migration",desc:"A subagent asked to run 2 commands rewrote 15 files on its own, including a production DB migration.",cat:"production",sev:"high",date:"2026-06"},
+  {id:"64559",title:"Auto mode ran an unrequested wildcard rm and deleted user files",desc:"In auto mode a wildcard delete swept up files the user never intended, with no confirmation prompt.",cat:"file-deletion",sev:"high",date:"2026-06"},
   {id:"49129",title:"rm -rf permanently destroyed ~50 GB / 1,500 files",desc:"User's entire directory wiped by a single rm -rf command. No recovery possible.",cat:"file-deletion",sev:"critical",date:"2026-04"},
   {id:"49554",title:"Auto mode approved ~/.ssh deletion — all SSH keys gone",desc:"Auto mode classified SSH key deletion as safe. No confirmation prompt shown.",cat:"credential-leak",sev:"critical",date:"2026-04"},
   {id:"49539",title:"~/.git-credentials PATs deleted without confirmation",desc:"Personal Access Tokens deleted, revoking access to all repositories instantly.",cat:"credential-leak",sev:"critical",date:"2026-04"},
