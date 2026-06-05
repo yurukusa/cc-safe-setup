@@ -49,6 +49,26 @@ TOOL=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
 [[ -z "$FILE" ]] && exit 0
 
+# Helper: append a divergence record to the receipt log.
+# Defined before first use — the missing-after-write path below calls it.
+_record_divergence() {
+    local file="$1"
+    local tool="$2"
+    local kind="$3"
+    local msg="$4"
+    local dir="${CC_POST_EDIT_VERIFY_RECEIPT_DIR:-$HOME/.claude/receipts}"
+    mkdir -p "$dir" 2>/dev/null || return 0
+    local ts
+    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    # The missing-after-write path calls this for a file that does not exist,
+    # so guard the redirection to avoid a leaked "No such file" shell error.
+    local file_size=0
+    [ -f "$file" ] && file_size=$(wc -c < "$file" 2>/dev/null || echo 0)
+    printf '{"ts":"%s","tool":"%s","file":"%s","kind":"%s","file_size":%s}\n' \
+        "$ts" "$tool" "$file" "$kind" "$file_size" \
+        >> "$dir/post-edit-divergence.jsonl" 2>/dev/null || true
+}
+
 # File must exist (Write may have created it; Edit always operates on existing).
 [[ ! -e "$FILE" ]] && {
     # If the tool reported success on a Write to a path that doesn't exist
@@ -66,23 +86,6 @@ FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path /
 
 # Regular file only (skip symlinks, sockets, devices).
 [[ ! -f "$FILE" ]] && exit 0
-
-# Helper: append a divergence record to the receipt log.
-_record_divergence() {
-    local file="$1"
-    local tool="$2"
-    local kind="$3"
-    local msg="$4"
-    local dir="${CC_POST_EDIT_VERIFY_RECEIPT_DIR:-$HOME/.claude/receipts}"
-    mkdir -p "$dir" 2>/dev/null || return 0
-    local ts
-    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-    local file_size
-    file_size=$(wc -c < "$file" 2>/dev/null || echo 0)
-    printf '{"ts":"%s","tool":"%s","file":"%s","kind":"%s","file_size":%s}\n' \
-        "$ts" "$tool" "$file" "$kind" "$file_size" \
-        >> "$dir/post-edit-divergence.jsonl" 2>/dev/null || true
-}
 
 # --- Check 1: Write with claimed content vs actual on-disk size ---
 # If a Write claimed N bytes but disk shows much less, that is the
