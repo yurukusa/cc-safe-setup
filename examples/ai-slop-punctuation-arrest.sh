@@ -80,6 +80,12 @@ set -uo pipefail
 
 [ "${CC_AI_SLOP_DISABLE:-0}" = "1" ] && exit 0
 
+# OPT-IN: this gate BLOCKS Write/Edit to markdown containing em-dash or "--",
+# which are legitimate punctuation in normal prose (English and Japanese), so a
+# default-on block would arrest ordinary documentation writing. Off unless
+# explicitly enabled. Set CC_AI_SLOP_ENABLE=1 to turn it on.
+[ "${CC_AI_SLOP_ENABLE:-0}" = "1" ] || exit 0
+
 INPUT=$(cat 2>/dev/null || true)
 [ -z "$INPUT" ] && exit 0
 
