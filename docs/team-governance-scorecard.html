@@ -109,7 +109,7 @@ canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(
 // the highest-revenue pillar that previously had no top-of-funnel reach asset.
 // Each check is a real org-level control; the score reflects what you checked, not a
 // scan, so it stays honest when screenshotted. Score in the URL → a shared link
-// reproduces the exact card. JA routes to services-jp.html, EN to services.html.
+// reproduces the exact card. JA routes to services-jp.html, EN to services-en.html.
 const CHECKS = [
   {id:'baseline',
    name:{en:'Shared baseline in git', ja:'共有 baseline が git にある'},
@@ -156,7 +156,7 @@ const T = {
     dl:"⬇ Download PNG", copy:"⧉ Copy image", link:"🔗 Copy share link",
     nextH:"How does your team score?",
     nextFree:'The core enforcement hooks are free and MIT: <code>npx cc-safe-setup</code> installs destructive-op, secret, production and agent-write guards in about ten seconds, with zero npm dependencies. Start there — the <a href="safety-scorecard.html">per-developer Safety Scorecard</a> covers the individual layer.',
-    nextService:'Designing an org-wide baseline, wiring the CI gate, standing up the audit trail and re-reviewing it as Claude Code changes is hands-on work. That is exactly what the <a href="services.html">cc-safe-setup services</a> (safety audit, baseline rollout, training, ongoing review) deliver — see a <a href="services-jp-sample-audit.html">sample audit report</a> for the shape of the deliverable.',
+    nextService:'Designing an org-wide baseline, wiring the CI gate, standing up the audit trail and re-reviewing it as Claude Code changes is hands-on work. That is exactly what the <a href="services-en.html">cc-safe-setup team services</a> (safety audit, baseline rollout, recorded training, ongoing review — async / remote-friendly) deliver — see a <a href="services-jp-sample-audit.html">sample audit report</a> for the shape of the deliverable.',
     footL:"This is a self-assessment: the score reflects what you checked, not a scan of your systems. The controls are real.",
     cardSub:"core controls", scoreWord:"interop",
     tierFull:"Fully governed", tierMost:"Mostly governed", tierPart:"Partially exposed", tierNone:"Ungoverned",
