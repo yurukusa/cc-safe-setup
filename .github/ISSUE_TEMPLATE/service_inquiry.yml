@@ -1,0 +1,70 @@
+name: 法人向けサービスのご相談
+description: 安全監査・チーム研修・導入支援・月額の保守・コンサルのご相談。費用と内容は法人向けサービスのページをご覧ください。
+title: "[法人] 導入のご相談: "
+labels: ["service"]
+assignees:
+  - yurukusa
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Claude Code の運用の安全について、法人・チーム向けのご相談を承ります。
+
+        **このフォームは公開の issue として作成されます。** 社名や機密にかかわる詳細は、ここには書かず、最初のやりとりのあとに非公開のチャネルへ切り替えてご相談ください。下のフォームは、こちらで適切にご案内するための、最小限の項目だけを伺うものです。
+
+        サービスの内容と費用の目安は、[法人向けサービスのページ](https://yurukusa.github.io/cc-safe-setup/services-jp.html)に記載しています。
+  - type: dropdown
+    id: service_type
+    attributes:
+      label: ご相談の種類
+      description: 複数にまたがる場合は、最も近いものを選び、詳細は本文にお書きください。
+      options:
+        - 安全監査（CLAUDE.md・設定・hook の点検）
+        - チーム研修（安全運用の研修コース）
+        - 導入の初期設定（hook・権限・運用ルールの構築）
+        - 月額の保守（事故ルールの継続配信・点検）
+        - コンサル（運用方針・体制の相談）
+        - open-core の Team 機能について
+        - まだ決めていない／全体の相談
+    validations:
+      required: true
+  - type: dropdown
+    id: team_size
+    attributes:
+      label: 対象の人数の規模
+      description: おおよそで結構です。
+      options:
+        - 1〜5 名
+        - 6〜20 名
+        - 21〜50 名
+        - 51〜200 名
+        - 200 名以上
+    validations:
+      required: false
+  - type: input
+    id: timeline
+    attributes:
+      label: 検討の時期
+      placeholder: 例）今四半期中、来月から、未定 など
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: 状況・お困りごと
+      description: どんな運用で、何を心配されているか。事故の経験や、社内の体制づくりの段階など、差し支えない範囲で。機密は書かないでください。
+      placeholder: 例）チームで Claude Code を使い始めたが、誤って本番のファイルやデータを壊さないか不安。組織で共通の安全のルールを配りたい。
+    validations:
+      required: false
+  - type: checkboxes
+    id: subsidy
+    attributes:
+      label: 人材開発支援助成金
+      description: チーム研修は、助成金の申請に必要な書類（カリキュラム・受講の記録・修了の証明など）を整えてご提供できます。支給の可否は貴社の計画と所轄の労働局の審査で決まります。
+      options:
+        - label: 助成金の活用に関心がある
+          required: false
+  - type: markdown
+    attributes:
+      value: |
+        ご記入ありがとうございます。内容を拝見し、こちらから返信します。詳細・お見積り・機密にかかわるご相談は、最初の返信のあとに非公開のやりとりへ切り替えて対応します。
