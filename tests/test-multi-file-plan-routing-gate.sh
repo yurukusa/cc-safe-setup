@@ -23,6 +23,7 @@ assert_fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 
 # Use unique state dir per test run to avoid cross-contamination
 TEST_STATE_DIR=$(mktemp -d)
+export CC_PLAN_GATE_ENABLE=1   # gate is opt-in; enable it for the block-mode tests
 TEST_PLAN_DIR=$(mktemp -d)
 SESSION="test-session-$$"
 
@@ -259,6 +260,17 @@ else
     assert_fail "malformed input crashed, got: $out"
 fi
 
+rm -rf "$TEST_STATE_DIR"/* 2>/dev/null
+for f in /tmp/x1.md /tmp/x2.md /tmp/x3.md; do
+    INPUT=$(mk_input "$SESSION-optin" "$f")
+    out=$(env -u CC_PLAN_GATE_ENABLE CC_PLAN_GATE_STATE_DIR="$TEST_STATE_DIR" CC_PLAN_GATE_PLAN_DIR="$TEST_PLAN_DIR" bash "$HOOK" <<< "$INPUT" 2>&1)
+    rc=$?
+done
+if [ "$rc" -eq 0 ] && [ -z "$out" ]; then
+    assert_pass "gate is off by default (CC_PLAN_GATE_ENABLE unset → 3rd file silent)"
+else
+    assert_fail "expected silent no-op without CC_PLAN_GATE_ENABLE, got rc=$rc out=$out"
+fi
 echo ""
 echo "=== Results: PASS=$PASS FAIL=$FAIL ==="
 [ "$FAIL" -gt 0 ] && exit 1
