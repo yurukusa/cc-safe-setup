@@ -224,6 +224,9 @@ if (HELP) {
   Token Checkup: https://yurukusa.github.io/cc-safe-setup/token-checkup.html
   Token Book:    https://yurukusa.github.io/cc-safe-setup/token-book.html
   Safety Guide:  https://zenn.dev/yurukusa/books/6076c23b1cb18b
+
+  Hitting nested sub-agent dispatch (Task tool absent from sub-agent contexts)?
+  See: https://gist.github.com/yurukusa/cf477f03f03d9f93c184f1fb7d894f96
 `);
   process.exit(0);
 }
