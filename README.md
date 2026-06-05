@@ -283,6 +283,7 @@ Guards against issues that corrupt sessions or waste tokens silently.
 | `session-backup-on-start` | Backs up session JSONL files on start (protects against silent deletion) | [#41874](https://github.com/anthropics/claude-code/issues/41874) |
 | `working-directory-fence` | Blocks Read/Edit/Write outside CWD (prevents operating on wrong project copy) | [#41850](https://github.com/anthropics/claude-code/issues/41850) |
 | `mcp-warmup-wait` | Waits for MCP servers to initialize on session start (fixes first-turn tool errors) | [#41778](https://github.com/anthropics/claude-code/issues/41778) |
+| `mcp-tool-guard` | Guards destructive MCP tool calls — incl. browser automation clicking a delete button under auto-approve (`CC_MCP_AUTOMATION_GUARD=ask\|block`, `CC_MCP_PROD_HOSTS` blocks reaching production) | [#65563](https://github.com/anthropics/claude-code/issues/65563) |
 | `pre-compact-transcript-backup` | Full JSONL backup before compaction (protects against rate-limit data loss) | [#40352](https://github.com/anthropics/claude-code/issues/40352) |
 | `conversation-history-guard` | Blocks access to session JSONL files (prevents 20x cache poisoning) | [#40524](https://github.com/anthropics/claude-code/issues/40524) |
 | `read-before-edit` | Warns when Edit targets a file not recently Read (Read:Edit ratio dropped 70%, [#42796](https://github.com/anthropics/claude-code/issues/42796)) | [#42796](https://github.com/anthropics/claude-code/issues/42796) |
