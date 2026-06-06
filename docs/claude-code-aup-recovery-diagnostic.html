@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code "Usage Policy violation" won't stop — can you recover, or must you escalate?</title>
+<meta name="description" content="The June 2026 Claude Code usage-policy false-positive poisons whole sessions. 3 questions route you to the one isolation test that says whether you can recover in place (local replay) or must escalate (server-side), with the exact commands for each.">
+<meta property="og:title" content="Claude Code AUP false-positive: recover or escalate? — diagnostic">
+<meta property="og:description" content="3 questions + one clean-config test → are you in the recoverable local-replay case or the escalate-only server-side case? Exact recovery commands and the request_id escalation path.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-aup-recovery-diagnostic.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.6; }
+.c { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 1.5rem; line-height: 1.25; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.3rem; font-size: .98rem; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+.q { font-weight:600; color:#f0f6fc; margin-bottom:.8rem; font-size:1.08rem; }
+.opt { display:block; width:100%; text-align:left; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:9px; padding:.75rem .9rem; margin:.5rem 0; cursor:pointer; font-size:.96rem; transition:.12s; }
+.opt:hover { border-color:#58a6ff; background:#1c2330; }
+.opt b { color:#f0f6fc; }
+.muted { color:#8b949e; font-size:.9rem; }
+pre { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:.8rem .9rem; overflow:auto; font:13px/1.5 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; margin:.6rem 0; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.result { border-width:2px; }
+.ok { border-color:#3fb950; }
+.warn { border-color:#d29922; }
+.result h2 { font-size:1.2rem; margin-bottom:.5rem; }
+.ok h2 { color:#3fb950; } .warn h2 { color:#e3b341; }
+.step { margin:.5rem 0 .5rem 0; padding-left:1.1rem; position:relative; }
+.step::before { content:"→"; position:absolute; left:0; color:#58a6ff; }
+.back { background:none; border:none; color:#58a6ff; cursor:pointer; font-size:.9rem; padding:.4rem 0; margin-top:.6rem; }
+.links { border-top:1px solid #30363d; margin-top:1.4rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.8rem 0; font-size:.92rem; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">independent · not affiliated with Anthropic · nothing leaves your browser</span>
+  <h1>Claude Code keeps blocking you with a "Usage Policy violation" — can you recover, or do you have to escalate?</h1>
+  <p class="sub">In the June 2026 wave (≈ <code>2.1.161</code>–<code>2.1.167</code>) this false-positive poisons the whole session: once it fires, even <code>"hi"</code> gets blocked. The single thing that decides whether you can fix it yourself is <em>where the state lives</em>. Three questions and one test sort that out.</p>
+
+  <div class="note" id="vocab-note">
+    First, the trap to avoid: this is <strong>not</strong> driven by your vocabulary. In the June wave it fires on ordinary CRUD edits, a bare <code>git&nbsp;worktree&nbsp;status</code>, even <code>"hi"</code> — turns with zero security content. So rephrasing or sanitizing your prompts will not help, and "what did I say wrong" is the wrong question. The right question is the one below.
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="links">
+    Full field guide: <a href="claude-code-cyber-safeguard-false-positive.html">Claude Code blocked as a "cyber"/Usage-Policy violation</a> ·
+    Free MIT advisory hooks for this cluster: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (<code>npx cc-safe-setup</code>)
+  </div>
+  <p class="foot">This page describes user reports and operator-side steps; it is not account or legal advice. For Usage Policy questions, confirm against Anthropic's own documentation and support. Reproductions referenced: anthropics/claude-code #65866, #65846, #65867, #65873.</p>
+</div>
+
+<script>
+// Decision tree for the AUP false-positive "session poisoning" recovery path.
+// Two terminal states: A = local-replay (recoverable in place), B = server/account-side (escalate only).
+const Q = {
+  start: {
+    q: "Have you tried a genuinely fresh session — a brand-new session, NOT <code>--continue</code> / <code>--resume</code> and NOT reopening the transcript — in the same project?",
+    opts: [
+      ["No — I've only retried, or resumed/continued the same session", "needfresh"],
+      ["Yes, and a fresh session is clean (no block)", "A"],
+      ["Yes, and even a fresh session still blocks", "cleancfg"]
+    ]
+  },
+  needfresh: {
+    q: "Start a truly fresh session first — that one test splits most cases.",
+    info: true,
+    body: `<p class="muted">A "new session" that <code>--resume</code>s or continues the poisoned one replays the flagged turn from its transcript, so it re-poisons itself. Open a genuinely new session (no resume, no transcript reopen) in the same project and send one benign turn.</p>
+      <pre>cd your-project
+# start Claude Code fresh — do NOT pass --continue / --resume
+# send one harmless message, e.g. "say ok"</pre>`,
+    opts: [
+      ["The fresh session is clean", "A"],
+      ["The fresh session still blocks", "cleancfg"]
+    ]
+  },
+  cleancfg: {
+    q: "Run the clean-config test — it isolates disk state from account state.",
+    info: true,
+    body: `<p class="muted">A fresh session still reuses the same <code>~/.claude.json</code> and the same account. Move both aside (back up, don't delete) so nothing local is replayed, re-auth, and send one benign turn:</p>
+      <pre>mv ~/.claude.json ~/.claude.json.bak
+mv ~/.claude ~/.claude.bak      # has projects/history — back it up
+# re-auth, reopen the project, run one benign command</pre>
+      <p class="muted">Restore afterwards with the reverse <code>mv</code>.</p>`,
+    opts: [
+      ["With config moved aside, it WORKS", "A"],
+      ["With config moved aside, it STILL blocks", "B"]
+    ]
+  },
+  A: {
+    result: "ok",
+    title: "Case A — local replay. You can recover in place.",
+    body: `<p>The block is coming from state on <strong>your disk</strong> (a session transcript / local config that gets re-sent), not from your account. That means you do not have to wait for Anthropic.</p>
+      <div class="step">Don't <code>--resume</code> the poisoned session. A genuinely fresh session is clean — use it.</div>
+      <div class="step">Want to keep the context? Copy the session transcript at <code>~/.claude/projects/&lt;encoded-project-path&gt;/&lt;session&gt;.jsonl</code>, truncate it to just <em>before</em> the first blocked turn, and resume that copy. You keep almost everything up to the poison.</div>
+      <div class="step">If only one project re-poisons, clear just that project's entry in <code>~/.claude.json</code> rather than wiping everything, then restore the rest of your backup.</div>
+      <div class="note">Because it's local, a teammate on the same machine/account is unaffected in their own fresh sessions. And again: it is not your wording — don't burn time sanitizing prompts.</div>`
+  },
+  B: {
+    result: "warn",
+    title: "Case B — server/account-side. Escalation only, but you hold the key evidence.",
+    body: `<p>A clean config on the same account still blocked, so no client-side action clears it. What makes your report actionable is the <strong>request id</strong>.</p>
+      <div class="step">Capture the <code>req_…</code> id from a blocked turn (it's surfaced in debug/verbose logs). Grab two or three, on turns that are obviously benign.</div>
+      <div class="step">Add them to an existing issue rather than filing a duplicate — e.g. <a href="https://github.com/anthropics/claude-code/issues/65866" target="_blank" rel="noopener">#65866</a> or <a href="https://github.com/anthropics/claude-code/issues/65846" target="_blank" rel="noopener">#65846</a> — with: "fresh config + fresh account session, a <code>git status</code>-class command still blocked," and the request ids.</div>
+      <div class="step">That phrasing is the tightest possible repro: it lets the classifier decision be audited independent of the (benign) content, which is exactly what the maintainers need.</div>
+      <div class="note">A different git worktree won't help here — it changes <code>cwd</code> but keeps the same account, so it stays blocked (reported in #65866). The request ids are the lever, not more local tinkering.</div>`
+  }
+};
+
+const quiz = document.getElementById('quiz');
+const vnote = document.getElementById('vocab-note');
+const stack = [];
+
+function render(key){
+  const n = Q[key];
+  if(n.result){ renderResult(key); return; }
+  vnote.style.display = '';
+  let html = `<div class="card"><div class="q">${n.q}</div>`;
+  if(n.body) html += n.body;
+  n.opts.forEach((o,i)=> html += `<button class="opt" data-go="${o[1]}"><b>${o[0]}</b></button>`);
+  if(stack.length) html += `<button class="back" data-back="1">← back</button>`;
+  html += `</div>`;
+  quiz.innerHTML = html;
+  quiz.querySelectorAll('[data-go]').forEach(b=> b.onclick=()=>{ stack.push(key); go(b.dataset.go); });
+  const bk = quiz.querySelector('[data-back]'); if(bk) bk.onclick=()=>{ go(stack.pop()); };
+}
+function renderResult(key){
+  const n = Q[key];
+  vnote.style.display = 'none';
+  quiz.innerHTML = `<div class="card result ${n.result}"><h2>${n.title}</h2>${n.body}
+    <button class="back" data-back="1">← back to the questions</button></div>`;
+  quiz.querySelector('[data-back]').onclick=()=>{ history.replaceState(null,'',location.pathname); go(stack.length?stack.pop():'start'); };
+  history.replaceState(null,'','#'+key);
+}
+function go(key){ render(key); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// Shared links reproduce the result card.
+const h = location.hash.replace('#','');
+go((h==='A'||h==='B') ? h : 'start');
+</script>
+</body>
+</html>

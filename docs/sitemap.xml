@@ -118,4 +118,7 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/team-cost-governance.html</loc><lastmod>2026-06-06</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/team-cost-governance-jp.html</loc><lastmod>2026-06-06</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-safety-talk-jp.html</loc><lastmod>2026-06-06</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url>
+    <loc>https://yurukusa.github.io/cc-safe-setup/claude-code-aup-recovery-diagnostic.html</loc>
+  </url>
 </urlset>
