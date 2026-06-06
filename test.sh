@@ -18494,6 +18494,22 @@ test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":
 test_ex destructive-db-script-write-guard.sh '{"tool_name":"Write","tool_input":{"file_path":"app.js","content":"console.log(1)"}}' 0 "db-script: block mode allows ordinary script (exit 0)"
 unset CC_DB_SCRIPT_WRITE_GUARD
 
+# --- unbounded-output-guard tests ---
+test_ex unbounded-output-guard.sh '{}' 0 "unbounded-output-guard: empty input passes"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "unbounded-output-guard: ordinary command passes"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"yes"}}' 2 "unbounded-output-guard: bare yes blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"yes > /tmp/big.txt"}}' 2 "unbounded-output-guard: yes redirected to file blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"cat /dev/zero"}}' 2 "unbounded-output-guard: cat /dev/zero blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"cat /dev/urandom"}}' 2 "unbounded-output-guard: cat /dev/urandom blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"base64 /dev/urandom"}}' 2 "unbounded-output-guard: base64 /dev/urandom blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"tr -dc a-z < /dev/urandom"}}' 2 "unbounded-output-guard: tr reading /dev/urandom blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"make build && yes"}}' 2 "unbounded-output-guard: yes after && blocked"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"yes | head -n 5"}}' 0 "unbounded-output-guard: yes piped to head allowed"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"timeout 1 yes"}}' 0 "unbounded-output-guard: timeout-wrapped yes allowed"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"head -c 32 /dev/urandom"}}' 0 "unbounded-output-guard: head -c on /dev/urandom allowed"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"tr -dc a-z < /dev/urandom | head -c 8"}}' 0 "unbounded-output-guard: bounded tr+head allowed"
+test_ex unbounded-output-guard.sh '{"tool_input":{"command":"echo yes"}}' 0 "unbounded-output-guard: yes as argument allowed"
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
