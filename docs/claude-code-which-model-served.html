@@ -94,6 +94,36 @@ for m,n in c.most_common(): print(f"{n:7d}  {m}")
   </div>
   <p class="muted">Output is one row per served model, most-served first — for example a column of turn counts beside <code>claude-opus-4-8</code>, <code>claude-sonnet-4-6</code>, and so on.</p>
 
+  <h2>3 · Recent-window breakdown (catch a stale "favorite model")</h2>
+  <p>An all-time tally can be the <em>opposite</em> of what you're getting right now — which is also why a stats "favorite model" that ignores recency misleads (cf. anthropics/claude-code #65899). On one real machine the two windows fully inverted:</p>
+  <table>
+    <tr><th>Window</th><th>Top served model</th><th>Share</th></tr>
+    <tr><td>Last 30 days</td><td><code>claude-opus-4-7</code></td><td>80%</td></tr>
+    <tr><td>Last 7 days</td><td><code>claude-opus-4-8</code></td><td>73%</td></tr>
+  </table>
+  <p>So tally only the recent window. Change <code>DAYS</code> to taste:</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd3">copy</button>
+    <pre id="cmd3">python3 - &lt;&lt;'PY'
+import json, glob, os, collections, datetime
+DAYS = 7
+cut = (datetime.date.today() - datetime.timedelta(days=DAYS)).isoformat()
+c = collections.Counter()
+for f in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
+    for line in open(f):
+        try: d = json.loads(line)
+        except: continue
+        if d.get("type") == "assistant":
+            m = d.get("message", {}).get("model"); t = d.get("timestamp", "")
+            if m and m != "&lt;synthetic&gt;" and t[:10] &gt;= cut:
+                c[m] += 1
+tot = sum(c.values()) or 1
+for m, n in c.most_common():
+    print(f"{n*100//tot:3d}%  {n:6d}  {m}")
+PY</pre>
+  </div>
+  <p class="muted">Each row is the recent-window share per model — e.g. <code>73%&nbsp;&nbsp;24773&nbsp;&nbsp;claude-opus-4-8</code> — so a drifted "favorite" stands out at a glance.</p>
+
   <h2>Reading the model IDs</h2>
   <p>The IDs are explicit, so you can see when a turn crossed into a different tier. Real current examples:</p>
   <table>
@@ -124,7 +154,7 @@ for m,n in c.most_common(): print(f"{n:7d}  {m}")
     Related, same project · <a href="claude-code-max-usage-limits.html">Claude Code Max usage limits</a> · <a href="prevent-cost-explosion.html">Prevent a cost explosion</a><br>
     Free MIT advisory hooks &amp; local checks for Claude Code: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (<code>npx cc-safe-setup</code>)
   </div>
-  <p class="foot">This page describes a local verification method against your own session logs; it is not account or legal advice and makes no claim about Anthropic's routing intent. For model and Usage Policy questions, confirm against Anthropic's own documentation and support. Issue referenced for context: anthropics/claude-code #65889.</p>
+  <p class="foot">This page describes a local verification method against your own session logs; it is not account or legal advice and makes no claim about Anthropic's routing intent. For model and Usage Policy questions, confirm against Anthropic's own documentation and support. Issues referenced for context: anthropics/claude-code #65889 (silent routing under a pinned model), #65899 (stats "favorite model" ignores recency).</p>
 </div>
 
 <script>
