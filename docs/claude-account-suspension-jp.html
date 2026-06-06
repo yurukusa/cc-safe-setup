@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude / Claude Code のアカウントが突然停止・凍結された時の原因と対処 — cc-safe-setup</title>
+<meta name="description" content="課金しているのに Claude のアカウントが突然停止・凍結された。公式の3つの停止理由、申し立てフォーム、報告されている原因(支払い・地域・共有)、予防策を、公式の出典つきで誠実に整理。">
+<meta name="keywords" content="Claude アカウント 停止, Claude 凍結 解除, Claude BAN 原因, Claude Code 急に使えない, Claude 申し立て, アカウント 復旧, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-account-suspension-jp.html">
+<meta property="og:title" content="Claude のアカウントが突然停止・凍結された時の原因と対処">
+<meta property="og:description" content="公式の停止理由・申し立てフォーム・報告されている原因・予防を、出典つきで誠実に整理。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+.lab-official{color:#3fb950;font-weight:600}
+.lab-report{color:#d29922;font-weight:600}
+.lab-weak{color:#8b949e;font-weight:600}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a></nav>
+
+<h1>Claude / Claude Code のアカウントが突然停止・凍結された時の原因と対処</h1>
+<p>課金しているのに、ある日 Claude にログインできない。「アカウントが無効になりました」と表示される。これは最も重い事態です——作業の履歴も、契約も、アクセスごと失われかねない。このページは、公式に確認できる事実だけを土台に、原因と対処と予防を整理します。憶測は「報告レベル」「確証が弱い」と明示します。</p>
+
+<p><strong>これは <a href="claude-code-aup-recovery-diagnostic-jp.html">AUP の誤検知でセッションが止まる話</a>(別ページ)とは別です。</strong> ここでは「アカウント自体の停止・凍結」を扱います。</p>
+
+<h2>公式が挙げている停止の理由は3つだけ</h2>
+<p>Anthropic の公式サポート(<a href="https://support.claude.com/en/articles/8241253-safeguards-warnings-and-appeals">Safeguards warnings and appeals</a>)が、アカウントが停止される理由として挙げているのは次の3つです。</p>
+<ol style="margin:.8rem 0 .8rem 1.5rem">
+<li><strong>Usage Policy(利用方針)の繰り返しの違反</strong>(<a href="https://www.anthropic.com/legal/aup">AUP</a>)</li>
+<li><strong>サポート対象外の地域からのアカウント作成</strong>(<a href="https://www.anthropic.com/supported-countries">対応地域の一覧</a>)</li>
+<li><strong>利用規約(Terms of Service)の違反</strong>(<a href="https://www.anthropic.com/legal/consumer-terms">Consumer Terms</a>)</li>
+</ol>
+<p>規約上、Anthropic は「規約違反の疑い、または法令順守のために、<strong>予告なくいつでも</strong>停止・終了できる」と明記しています(Consumer Terms)。だから通知が来ない、または来てから気づくこともあります。</p>
+
+<h2>報告されている原因(確証のラベルつき)</h2>
+<p>公式の3理由に加え、利用者から報告されている引き金を、確証の強さを明示して並べます。<span class="lab-official">公式記載</span> / <span class="lab-report">報告レベル</span> / <span class="lab-weak">確証が弱い</span>。</p>
+<table>
+<tr><th>原因</th><th>確証</th></tr>
+<tr><td>認証情報・API キー・アカウントを他人と共有する/他人に使わせる</td><td><span class="lab-official">公式記載(規約で明確に禁止)</span></td></tr>
+<tr><td>API キー以外の自動化(ボット/スクリプト)でのアクセス</td><td><span class="lab-official">公式記載(規約で禁止)</span></td></tr>
+<tr><td>複数アカウントの作成/アカウントを他人に開放する</td><td><span class="lab-official">公式記載</span></td></tr>
+<tr><td>18歳未満(年齢の要件)</td><td><span class="lab-official">公式記載</span></td></tr>
+<tr><td>支払いの自動フラグ(別地域・別カード・プリペイド/バーチャルカード等)</td><td><span class="lab-report">報告レベル(当人の推測。公式が「支払いが原因」と認めた記載は無い)</span></td></tr>
+<tr><td>第三者ツール経由・規約外の API 利用</td><td><span class="lab-report">規約上のリスクは公式記載 / 個別の停止は報告レベル</span></td></tr>
+<tr><td>VPN / プロキシの使用そのもの</td><td><span class="lab-weak">確証が弱い(公式の明文は確認できず、二次情報のみ)</span></td></tr>
+</table>
+<p>停止の通知の文面は、報告例ではいつも「アカウントに関連する疑わしいシグナルの内部調査が Usage Policy の違反を示した」という汎用の表現で、具体的な原因が書かれないことが多いです。だから自分で切り分ける必要があります。</p>
+
+<h2>止められた時にすること</h2>
+<div class="fix">
+<ol style="margin:.5rem 0 .5rem 1.2rem">
+<li><strong>メールの通知を確認する</strong>。停止時は Safeguards Team から自動のメールが届きます。</li>
+<li><strong>ログインと請求の状態を確認する</strong>。チェックアウトで「この組織は無効です」「banned organization のため購読を開始できません」等が出るかで、課金のトラブルか組織の停止かを切り分けられます。</li>
+<li><strong>申し立てのフォームを出す</strong>。公式の申し立ての窓口は <a href="https://claude.ai/restricted"><code>https://claude.ai/restricted</code></a> です。アカウントのメール、利用の目的の詳しい説明、状況の文脈を添えます。</li>
+<li><strong>BAN の前の「警告」の段階なら</strong>、公式サポートのページに異議の連絡先が明記されています。連絡先は必ず<a href="https://support.claude.com/en/articles/8241253-safeguards-warnings-and-appeals">公式ページ</a>で最新の表記を確認してください(誤った窓口に送らないため、本ページでは特定のアドレスを断定しません)。</li>
+</ol>
+</div>
+<p><strong>応答の時間について正直に</strong>: 公式は「現在、応答は通常より遅い」とだけ述べ、確定した日数は公開していません。利用者の報告では数日から数週間とばらつきます(確証は弱い)。そして<strong>復旧の保証はありません</strong>。</p>
+
+<h2>申し立てがどれくらい覆るか(公式の数字)</h2>
+<p>Anthropic の公式の <a href="https://www.anthropic.com/transparency/system-trust-reporting">Transparency Hub</a>(2025年7〜12月)によると、BAN されたアカウント約145万件に対し、申し立ては約52,000件、そのうち覆った(復旧した)のは約1,700件でした。<strong>申し立てが覆る率は約3.3%</strong>です。</p>
+<p>ただしこれは Claude 全体の統計(その大半は AUP 違反での BAN)であり、「あなたの誤検知の復旧率が3.3%」という意味ではありません。全体として申し立てが覆る割合の目安として読んでください。正当な誤検知なら、詳しい説明を添えて申し立てる価値はあります。</p>
+
+<h2>予防(規約から導ける具体策)</h2>
+<div class="fix">
+<ul style="margin:.5rem 0 .5rem 1.2rem">
+<li>認証情報・API キー・アカウントを<strong>他人と共有しない</strong>。チームで使うなら正規の Team / 組織の機能を使う。</li>
+<li><strong>複数アカウントを作らない</strong>。1人で複数を使い分けたり、他人に使わせたりしない。</li>
+<li><strong>自動化は正規の API キー経由に限る</strong>。ボットやスクリプトで対話の画面を自動操作しない。</li>
+<li><strong>サポート対象の地域から、実在の手段で利用する</strong>。対象外の地域での作成は明示的な停止の理由。</li>
+<li>支払いの手段を安定させる(これは確証が弱い目安。別地域・別カード・プリペイドが自動フラグの引き金になったという報告がある)。</li>
+</ul>
+</div>
+
+<h2>関連: 規約に沿った安全な運用</h2>
+<p>アカウントの停止そのものは、コマンドを止める hook では防げません(原因は支払いや地域や規約で、端末の操作ではないため)。ただし、規約に沿った安全な運用と、AUP の誤検知への備えは、リスクを下げる方向に働きます。</p>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="claude-code-aup-recovery-diagnostic-jp.html">AUP の誤検知でセッションが止まった時の回復</a></li>
+<li><a href="prevent-credential-leak-jp.html">認証情報の漏洩を防ぐ(共有や流出はアカウントのリスクにも繋がる)</a></li>
+<li><a href="prevent-rm-rf-jp.html">破壊的な操作を防ぐ無料の hook</a></li>
+</ul>
+
+<div class="cta">
+<h2>Claude Code の事故を予防する</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">破壊的な操作・秘密の漏洩・費用の暴走を、実行の前に止める無料の hook。アカウントの停止は防げませんが、規約に沿った安全な運用を支えます。</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">本ページは公開された公式の文書と、出典の確認できる報告に基づきます。停止・申し立ての手順は変わりうるので、実際の手続きの前に必ず<a href="https://support.claude.com/en/articles/8241253-safeguards-warnings-and-appeals">公式のページ</a>で最新を確認してください。cc-safe-setup は Anthropic とは無関係の独立したオープンソースです。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
