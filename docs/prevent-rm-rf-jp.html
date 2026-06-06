@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の rm -rf 事故を防ぐ——ファイルが消える前に — cc-safe-setup</title>
+<meta name="description" content="Claude Code は端末をフルに操作でき、rm -rf でファイルシステムごと消すことが実際に起きています。GitHub の実際の事故と、それを止める1コマンド npx cc-safe-setup。">
+<meta name="keywords" content="Claude Code ファイル 消えた, Claude Code 削除 事故, Claude Code rm -rf, Claude Code 安全, 破壊的コマンド 防止, PreToolUse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf-jp.html">
+<meta property="og:title" content="Claude Code の rm -rf 事故を防ぐ">
+<meta property="og:description" content="Claude Code がファイルシステムを消した実際の事故と、それを止める1コマンド。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の rm -rf 事故を防ぐ","description":"安全 hook を入れて Claude Code の破壊的な rm -rf を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup を実行し、破壊的コマンドを止める hook を含む安全 hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a> <a href="prevent-rm-rf.html">English</a></nav>
+
+<h1>Claude Code の rm -rf 事故を防ぐ</h1>
+<p>Claude Code は端末をフルに操作できます。<code>rm -rf /</code> を走らせてファイルシステムごと消すことが、実際に起きています。これは仮の risk ではありません。GitHub に報告された実際の事故です。</p>
+
+<h2>実際の事故</h2>
+
+<div class="incident">
+<p class="incident-title">🆕 1,500ファイル・50GBが永久に消えた(2026年4月)</p>
+<p>Claude がファイルをサブディレクトリへ移動し、その後で親ディレクトリを <code>rm -rf</code> した——移動したばかりのファイルごと破壊した。移動先が移動元の子だったという、計画の論理の失敗。</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a> — 48時間で3件目のデータ消失</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">C:\Users ディレクトリ全体が NTFS ジャンクション経由で消えた</p>
+<p><code>rm -rf</code> が NTFS のジャンクションを辿り、ユーザープロファイルのディレクトリ全体を消した。文書も設定もインストール済みのプログラムも、すべて消失。</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36339">#36339</a> — 40件以上の反応</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Remove-Item -Recurse -Force で全ソースコードが破壊された</p>
+<p>Claude がリポジトリのルートで <code>Remove-Item -Recurse -Force *</code> を実行し、未 push のソースコードをすべて破壊した。</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/37331">#37331</a></p>
+</div>
+
+<div class="incident">
+<p class="incident-title">「掃除」の作業中に Mac のファイルシステム全体が消えた</p>
+<p>「掃除」のタスクの最中に、Claude が macOS の重要なシステムディレクトリを消した。</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36233">#36233</a></p>
+</div>
+
+<div class="incident">
+<p class="incident-title">午前3時に force-push が共有ブランチの履歴を書き換えた</p>
+<p>自律で動いていた Claude Code のセッションが、開発者が眠っている間に main へ force push し、共有ブランチの履歴を書き換えた。</p>
+<p><a href="https://github.com/anthropics/claude-code/issues/36640">#36640</a></p>
+</div>
+
+<div class="incident">
+<p class="incident-title">🆕 Opus 4.7: 安全の分類器が壊れ、3日で23件以上のデータ消失(2026年4月)</p>
+<p>auto モードの安全の分類器が <a href="https://github.com/anthropics/claude-code/issues/49618">Opus 4.6 に固定</a>されていた。既定のモデルが Opus 4.7 になると分類器が機能せず、auto モードの利用者は安全の関門なしで走っていた。結果: <a href="https://github.com/anthropics/claude-code/issues/49554">~/.ssh が消えた</a>、<a href="https://github.com/anthropics/claude-code/issues/49539">git-credentials が消えた</a>、<a href="https://github.com/anthropics/claude-code/issues/49615">bash_profile と zshrc が0バイトに切り詰められた</a>。</p>
+<p><strong>hook はモデルに依存しません。どの Opus の版で走っていても効きます。</strong></p>
+</div>
+
+<h2>なぜ CLAUDE.md では防げないか</h2>
+<p>CLAUDE.md のルールはプロンプトの文脈の一部です。文脈が一杯になると、ルールは押し出されます。Claude はそれを無視できますし、実際に無視します。「rm -rf を決して走らせるな」というルールは<em>お願い</em>であって、強制ではありません。</p>
+
+<h2>解決: PreToolUse の hook</h2>
+<p>Claude Code の <a href="https://code.claude.com/docs/en/hooks">Hooks</a> はプロセスの層で、モデルの制御の外で動きます。終了コード2で終わる PreToolUse の hook は、その道具の呼び出しを止めます。モデルはこれを迂回できません。</p>
+
+<div class="fix">
+<p><strong>destructive-guard.sh</strong> — rm -rf を止める hook:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Block rm -rf with dangerous targets
+if echo "$COMMAND" | grep -qE 'rm\s+.*-[rRf]*[rR][rRf]*\s+(/|~|\$HOME|\.\.)'; then
+  echo "BLOCKED: Destructive rm command targeting root/home" >&2
+  exit 2
+fi
+
+exit 0</code></pre>
+</div>
+
+<div class="cta">
+<h2>8つの安全 hook を10秒で入れる</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">rm -rf を止め、main への force push を防ぎ、秘密の漏洩を捕まえ、編集のたびに構文を検証します。<span class="badge">9,200以上のテスト</span> <span class="badge">734の hook</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
+</div>
+
+<h2>設定を検証する</h2>
+<pre><code>npx cc-safe-setup --verify</code></pre>
+<p>各 hook にテストの入力を送り、正しく止まることを確認します:</p>
+<pre><code>destructive-guard:
+  &#10004; rm -rf / → BLOCKED
+  &#10004; rm -rf node_modules → ALLOWED
+8/8 hooks verified</code></pre>
+
+<h2>安全のスコアを測る</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>無料の20点の診断。80点を下回るなら、Claude Code の設定に隙間があります。</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup はオープンソースで、依存はなく、グローバルには何も入れません。すべての hook はローカルで動きます。<a href="https://github.com/yurukusa/cc-safe-setup">GitHub でソースを見る</a>。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="prevent-rm-rf.html" style="color:#58a6ff">English version</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
