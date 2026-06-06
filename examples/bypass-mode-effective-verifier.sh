@@ -83,19 +83,55 @@ if [ "$INPUT_MODE" = "bypassPermissions" ]; then
     BYPASS_SIGNAL="hook input permission_mode=bypassPermissions"
 fi
 
-# Nothing to warn about if bypass isn't active.
-[ "$BYPASS_ACTIVE" = "0" ] && exit 0
+# Signal 4: settings.json. Env vars and hook input miss the case where bypass is
+# set as the *saved default* (#65848): accepting the warning prompt silently writes
+# `defaultMode: bypassPermissions` and `skipDangerousModePermissionPrompt: true` to
+# settings.json permanently, and the upstream prompt never reappears — so the operator
+# loses the per-session awareness that they are in dangerous mode at all. Read the
+# settings file directly so a silently-persisted default is still surfaced each session.
+# CC_BYPASS_VERIFIER_SETTINGS overrides the path (used by tests).
+SETTINGS_FILE="${CC_BYPASS_VERIFIER_SETTINGS:-$HOME/.claude/settings.json}"
+SKIP_PROMPT_PERSISTED=0
+if [ -f "$SETTINGS_FILE" ]; then
+    SETTINGS_MODE=$(jq -r '.permissions.defaultMode // empty' "$SETTINGS_FILE" 2>/dev/null)
+    if [ "$SETTINGS_MODE" = "bypassPermissions" ]; then
+        BYPASS_ACTIVE=1
+        [ -z "$BYPASS_SIGNAL" ] && BYPASS_SIGNAL="settings.json permissions.defaultMode=bypassPermissions"
+    fi
+    SKIP_PROMPT=$(jq -r '.skipDangerousModePermissionPrompt // empty' "$SETTINGS_FILE" 2>/dev/null)
+    case "$SKIP_PROMPT" in 1|true|TRUE|True|yes|YES) SKIP_PROMPT_PERSISTED=1 ;; esac
+fi
+
+# Nothing to warn about if bypass isn't active AND the dangerous-mode prompt
+# has not been silently suppressed.
+[ "$BYPASS_ACTIVE" = "0" ] && [ "$SKIP_PROMPT_PERSISTED" = "0" ] && exit 0
+
+# The standing note about the silently-persisted dangerous-mode prompt (#65848).
+# Accepting the bypass warning writes `skipDangerousModePermissionPrompt: true` to
+# settings.json permanently with no disclosure, so Claude Code never re-warns. The
+# hook re-surfaces that suppressed awareness each session.
+SKIP_NOTE=""
+if [ "$SKIP_PROMPT_PERSISTED" = "1" ]; then
+    SKIP_NOTE="
+- skipDangerousModePermissionPrompt=true is set in settings.json: the upstream dangerous-mode warning is silently suppressed on this machine (#65848). Claude Code will not re-warn you when entering bypass mode. Remove that key to restore the prompt, or keep this hook as the standing warning."
+fi
 
 # Build the warning message. Kept compact to minimize cache_creation
 # token growth at session start.
-MSG="bypass mode ACTIVE ($BYPASS_SIGNAL). --dangerously-skip-permissions does NOT cover every permission gate. Known exceptions in cc-safe-setup Cluster 6 Axis 7 tracking:
+if [ "$BYPASS_ACTIVE" = "1" ]; then
+    MSG="bypass mode ACTIVE ($BYPASS_SIGNAL). --dangerously-skip-permissions does NOT cover every permission gate. Known exceptions in cc-safe-setup Cluster 6 Axis 7 tracking:
 
 - Edit tool still prompts (#36192)
 - Cowork scheduled tasks re-prompt every run (#47180)
 - Mobile Remote Control shows prompts (#29214)
-- Bypass flag itself broken after v2.1.77 (#36168, regression open)
+- Bypass flag itself broken after v2.1.77 (#36168, regression open)${SKIP_NOTE}
 
 If you depend on bypass for unattended runs (cron, watchdog, automation), test the specific tool surfaces you use BEFORE the run, not during. Tracking meta-issue: #39523 (12+ duplicates over 9 months)."
+else
+    # Bypass is not currently the active mode, but the dangerous-mode warning has been
+    # permanently suppressed — surface that disabled guardrail on its own (#65848).
+    MSG="dangerous-mode warning SUPPRESSED.${SKIP_NOTE}"
+fi
 
 # Always echo to stderr for operator visibility.
 echo "[bypass-mode-effective-verifier] $MSG" >&2

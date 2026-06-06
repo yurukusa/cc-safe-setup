@@ -9,9 +9,13 @@ PASS=0 FAIL=0
 run_hook() {
     # $1 = JSON payload, optional extra env vars trail as $2..$n
     local payload="$1"; shift
-    # Always clear bypass env vars so each test starts clean.
+    # Always clear bypass env vars so each test starts clean. Point the settings read
+    # at /dev/null by default so the runner's real ~/.claude/settings.json can't leak
+    # into the env/hook-input signal tests; tests that exercise Signal 4 pass their own
+    # CC_BYPASS_VERIFIER_SETTINGS=<fixture> in "$@", which overrides this default.
     env -u CLAUDE_PERMISSION_MODE -u CLAUDE_DANGEROUSLY_SKIP_PERMISSIONS \
         -u CC_BYPASS_VERIFIER_DISABLE -u CC_BYPASS_VERIFIER_SILENT \
+        CC_BYPASS_VERIFIER_SETTINGS=/dev/null \
         "$@" bash "$HOOK" <<< "$payload" 2>&1
 }
 
@@ -122,6 +126,53 @@ assert_contains "warning names Cowork" "$OUT" "Cowork"
 assert_contains "warning names Remote Control" "$OUT" "Remote Control"
 assert_contains "warning names v2.1.77 regression" "$OUT" "v2.1.77"
 assert_contains "warning references meta-issue #39523" "$OUT" "#39523"
+
+# --- Signal 4: settings.json detection (#65848) ---
+FIX_DIR=$(mktemp -d)
+trap 'rm -rf "$FIX_DIR"' EXIT
+
+# Test 17: settings.json defaultMode=bypassPermissions detected (no env/hook signal)
+printf '%s' '{"permissions":{"defaultMode":"bypassPermissions"}}' > "$FIX_DIR/bypass.json"
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/bypass.json")
+RC=$?
+assert_exit "settings defaultMode exit 0" "$RC" "0"
+assert_contains "settings defaultMode warns" "$OUT" "bypass mode ACTIVE"
+assert_contains "settings defaultMode names signal" "$OUT" "settings.json permissions.defaultMode=bypassPermissions"
+
+# Test 18: skipDangerousModePermissionPrompt=true surfaced even when not currently bypass
+printf '%s' '{"skipDangerousModePermissionPrompt":true}' > "$FIX_DIR/skip.json"
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/skip.json")
+RC=$?
+assert_exit "skip-only exit 0" "$RC" "0"
+assert_contains "skip-only warns suppressed" "$OUT" "dangerous-mode warning SUPPRESSED"
+assert_contains "skip-only references #65848" "$OUT" "#65848"
+assert_not_contains "skip-only not labelled active" "$OUT" "bypass mode ACTIVE"
+
+# Test 19: the #65848 repro — both keys set — names active bypass AND the suppressed prompt
+printf '%s' '{"permissions":{"defaultMode":"bypassPermissions"},"skipDangerousModePermissionPrompt":true}' > "$FIX_DIR/both.json"
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/both.json")
+assert_contains "both warns active" "$OUT" "bypass mode ACTIVE"
+assert_contains "both surfaces suppression" "$OUT" "skipDangerousModePermissionPrompt=true"
+assert_contains "both references #65848" "$OUT" "#65848"
+
+# Test 20: benign settings.json (default mode, no skip) stays silent
+printf '%s' '{"permissions":{"defaultMode":"default"}}' > "$FIX_DIR/benign.json"
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/benign.json")
+RC=$?
+assert_exit "benign settings exit 0" "$RC" "0"
+assert_not_contains "benign settings silent" "$OUT" "bypass mode ACTIVE"
+assert_not_contains "benign settings no suppression note" "$OUT" "SUPPRESSED"
+
+# Test 21: missing settings file is fail-open (no crash, silent on no other signal)
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/does-not-exist.json")
+RC=$?
+assert_exit "missing settings exit 0" "$RC" "0"
+assert_not_contains "missing settings silent" "$OUT" "bypass mode ACTIVE"
+
+# Test 22: DISABLE still silences the settings.json path
+OUT=$(run_hook '{}' CC_BYPASS_VERIFIER_SETTINGS="$FIX_DIR/both.json" CC_BYPASS_VERIFIER_DISABLE=1)
+assert_not_contains "disable silences settings path" "$OUT" "bypass mode ACTIVE"
+assert_not_contains "disable silences suppression note" "$OUT" "SUPPRESSED"
 
 echo ""
 echo "Tests: $((PASS+FAIL)) | Passed: $PASS | Failed: $FAIL"
