@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の課金の暴走を防ぐ——利用枠を数分で使い切る前に — cc-safe-setup</title>
+<meta name="description" content="Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。">
+<meta name="keywords" content="Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 数分で枠, claude code cost explosion, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-cost-explosion-jp.html">
+<meta property="og:title" content="Claude Code の課金の暴走を防ぐ">
+<meta property="og:description" content="暴走するループが利用枠を焼き尽くすのを止める。頻度の制限とエラーの検知の hook。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の課金の暴走を防ぐ","description":"安全 hook を入れて Claude Code の暴走するループによる利用枠の浪費を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup を実行し、呼び出しの頻度の制限・連続エラーの遮断・使用量の追跡の hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #30363d;font-size:.85rem;color:#8b949e}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← cc-safe-setup</a> · <a href="hub.html">全ツール</a> · <a href="prevent-cost-explosion.html">English</a></nav>
+
+<h1>Claude Code の課金の暴走を防ぐ</h1>
+<p>Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。</p>
+
+<h2>問題: 暴走するループ</h2>
+
+<div class="incident">
+<p class="incident-title">実際の事故: 数分で利用枠の80%を消費</p>
+<p>GitHub の起票 <a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>(80以上の反応): Max プランのセッションの上限が異常に速く尽きるという報告。セッションの開始から数分で80%が消費されることもあった。</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">実際の事故: 使用量の爆発</p>
+<p>GitHub の起票 <a href="https://github.com/anthropics/claude-code/issues/37917">#37917</a>: 単純なタスクがセッションの予算を丸ごと消費する、極端なトークンの消費。</p>
+</div>
+
+<p>よくある原因:</p>
+<ul style="margin:1rem 0;padding-left:1.5rem">
+<li>失敗するコマンドを Claude が再試行し続ける</li>
+<li>収束しないビルド/テストのループ</li>
+<li>サブエージェントの生成が連鎖する</li>
+<li>文脈の圧縮の繰り返し</li>
+</ul>
+
+<h2>解決1: 呼び出しの頻度の制限</h2>
+
+<div class="fix">
+<p><code>tool-call-rate-limiter</code> の hook は、呼び出しの頻度が閾値(既定: 60秒に30回)を超えると、道具の呼び出しを止めます。</p>
+</div>
+
+<pre><code>#!/bin/bash
+# tool-call-rate-limiter.sh — PreToolUse hook
+RATE_FILE="${HOME}/.claude/rate-limiter.log"
+MAX_CALLS="${CC_RATE_LIMIT_MAX:-30}"
+WINDOW="${CC_RATE_LIMIT_WINDOW:-60}"
+
+mkdir -p "$(dirname "$RATE_FILE")"
+NOW=$(date +%s)
+CUTOFF=$((NOW - WINDOW))
+
+echo "$NOW" >> "$RATE_FILE"
+RECENT=$(awk -v cutoff="$CUTOFF" '$1 >= cutoff' "$RATE_FILE" | wc -l)
+
+awk -v cutoff="$CUTOFF" '$1 >= cutoff' "$RATE_FILE" > "${RATE_FILE}.tmp"
+mv "${RATE_FILE}.tmp" "$RATE_FILE"
+
+if [ "$RECENT" -gt "$MAX_CALLS" ]; then
+    echo "BLOCKED: $RECENT calls in ${WINDOW}s (max: $MAX_CALLS)" >&2
+    exit 2
+fi
+exit 0</code></pre>
+
+<h2>解決2: 連続エラーの遮断</h2>
+
+<div class="fix">
+<p><code>consecutive-error-breaker</code> の hook は、N回(既定: 5回)連続で非ゼロの終了コードが続いたら警告し、行き詰まった再試行のループを検知します。</p>
+</div>
+
+<pre><code>#!/bin/bash
+# consecutive-error-breaker.sh — PostToolUse hook
+EXIT_CODE=$(echo "$(cat)" | jq -r '.tool_result.exit_code // "0"')
+STATE_FILE="/tmp/cc-error-streak"
+MAX="${CC_ERROR_STREAK_MAX:-5}"
+
+if [ "$EXIT_CODE" = "0" ]; then
+    echo "0" > "$STATE_FILE"; exit 0
+fi
+
+CURRENT=$(cat "$STATE_FILE" 2>/dev/null || echo "0")
+echo $((CURRENT + 1)) > "$STATE_FILE"
+
+if [ $((CURRENT + 1)) -ge "$MAX" ]; then
+    echo "⚠ $((CURRENT + 1)) consecutive errors. Try a different approach." >&2
+fi
+exit 0</code></pre>
+
+<h2>解決3: 1日の使用量の追跡</h2>
+
+<div class="fix">
+<p><code>daily-usage-tracker</code> の hook は、すべての道具の呼び出しを記録し、節目(1日あたり100/250/500/1000回)で警告します。</p>
+</div>
+
+<h2>3つとも入れる</h2>
+
+<div class="cta">
+<p>1コマンドで、費用の保護の hook を含む734の例の hook が入ります:</p>
+<p><code>npx cc-safe-setup --install-example tool-call-rate-limiter</code></p>
+<p><code>npx cc-safe-setup --install-example consecutive-error-breaker</code></p>
+<p><code>npx cc-safe-setup --install-example daily-usage-tracker</code></p>
+<p style="margin-top:1rem">あるいは全部入れる: <code>npx cc-safe-setup --shield</code></p>
+</div>
+
+<h2>関連する hook</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><code>loop-detector</code> — 同一のコマンドの繰り返しを検知</li>
+<li><code>token-budget-guard</code> — トークンの消費の上限</li>
+<li><code>session-quota-tracker</code> — セッションの利用枠の使用を追跡</li>
+<li><code>subagent-budget-guard</code> — 同時のサブエージェントの数を制限</li>
+<li><code>error-memory-guard</code> — エラーを記憶して繰り返しを避ける</li>
+</ul>
+
+<h2>関連するページ</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="prevent-rm-rf-jp.html">rm -rf の事故を防ぐ</a></li>
+<li><a href="prevent-git-reset-hard-jp.html">git reset --hard の事故を防ぐ</a></li>
+<li><a href="prevent-force-push.html">force push の事故を防ぐ(English)</a></li>
+<li><a href="june-15-billing-cliff-exposure-jp.html">6月15日の課金の崖</a></li>
+</ul>
+
+<footer>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の一部 — 734の例の hook · 9,200以上のテスト · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</footer>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="prevent-cost-explosion.html" style="color:#58a6ff">English version</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
