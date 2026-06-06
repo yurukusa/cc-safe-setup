@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeが実際にどのモデルで動いたかを自分で確認する方法 — ログから検証する</title>
+<meta name="description" content="モデルを固定したのに、勝手に安いモデルに切り替わっている気がする。上位プランなのに品質が落ちた。UIで推測する必要はありません。各ターンで実際に応答したモデルは、あなた自身のセッションのログ(~/.claude/projects の .jsonl)に記録されています。ターンごとの一覧、モデル別の集計、直近N日の集計をコピペで取れます。何もマシンの外に出ません。">
+<meta property="og:title" content="Claude Codeが実際にどのモデルで動いたかを自分で確認する方法">
+<meta property="og:description" content="セッションの .jsonl の message.model が、そのターンで実際に提供されたモデルの正本です。ターンごとの時刻つき一覧・モデル別の集計・直近N日の集計の3つのコマンド。固定したのに勝手に変わる疑いや、全期間で誤解を招く統計の確認に。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-which-model-served-jp.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.75; }
+.c { max-width: 760px; margin: 0 auto; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
+h1 { font-size: 1.45rem; line-height: 1.35; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.3rem; font-size: .98rem; }
+h2 { font-size: 1.12rem; color:#f0f6fc; margin:1.6rem 0 .4rem; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+p { margin:.5rem 0; }
+.muted { color:#8b949e; font-size:.9rem; }
+pre { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:.8rem .9rem; overflow:auto; font:13px/1.5 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; margin:.6rem 0; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.cmd { position:relative; }
+.copy { position:absolute; top:.7rem; right:.7rem; background:#21262d; border:1px solid #30363d; color:#58a6ff; border-radius:6px; padding:.25rem .6rem; font-size:.78rem; cursor:pointer; }
+.copy:hover { border-color:#58a6ff; } .copy.done { color:#3fb950; border-color:#3fb950; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.8rem 0; font-size:.92rem; }
+table { border-collapse:collapse; width:100%; margin:.6rem 0; font-size:.9rem; }
+th,td { border:1px solid #30363d; padding:.4rem .6rem; text-align:left; }
+th { background:#161b22; color:#f0f6fc; }
+ul { margin:.4rem 0 .4rem 1.2rem; } li { margin:.3rem 0; }
+.links { border-top:1px solid #30363d; margin-top:1.4rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">独立した非公式の情報 · Anthropicとは無関係 · 何もブラウザの外に出ません</span>
+  <h1>Claude Codeが実際にどのモデルで動いたかを、自分で確認する</h1>
+  <p class="sub">モデルを固定したのに、品質が揺れて、勝手に安いモデルに切り替わっている気がする。あるいは統計の画面の「よく使うモデル」が実感と合わない。UIから推測する必要はありません。Claude Codeが書き出すターンごとのログには、APIが<em>実際に応答したモデル</em>がそのまま記録されています。その読み方を説明します。</p>
+
+  <div class="note">
+    <strong>正本になるフィールド。</strong> セッションは1行1件のJSONとして <code>~/.claude/projects/&lt;project&gt;/&lt;session-id&gt;.jsonl</code> に記録されます。<code>"type":"assistant"</code> の各行の <code>message.model</code> が、そのターンで<em>実際に提供されたモデル</em>(APIが応答したモデル)で、同じ行に <code>timestamp</code> が入っています。これが地に足のついた事実で、どんなUIの要約よりも信頼できます。
+  </div>
+
+  <h2>1 · ターンごとに、提供されたモデルを時刻つきで一覧する</h2>
+  <p>「昨夜はなんだかSonnetっぽかった」という感覚を、報告にそのまま貼れる日付つきの記録に変えます。全セッションを通して、各 assistant のターンの提供モデルを時刻の順に並べます。そのまま貼り付けてください。</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd1">コピー</button>
+    <pre id="cmd1">for f in ~/.claude/projects/*/*.jsonl; do
+  python3 - "$f" &lt;&lt;'PY'
+import sys, json
+for line in open(sys.argv[1]):
+    try: d = json.loads(line)
+    except: continue
+    if d.get("type") == "assistant":
+        m = d.get("message", {}).get("model")
+        if m and m != "&lt;synthetic&gt;":
+            print(d.get("timestamp",""), m)
+PY
+done | sort</pre>
+  </div>
+  <p class="muted">1行が1つの提供ターンです(例: <code>2026-06-07T01:23:45.678Z&nbsp;&nbsp;claude-opus-4-8</code>)。固定したものより下位のモデルが続く区間があれば、それが証拠です。正確なUTCの時刻があるので、自分の作業と突き合わせられます。</p>
+
+  <h2>2 · モデル別にターン数を集計する(報告で効く数字)</h2>
+  <p>上の一覧を、モデルごとのターン数に畳み込みます。報告を具体的にする一番効く数字です。</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd2">コピー</button>
+    <pre id="cmd2">cat ~/.claude/projects/*/*.jsonl | python3 -c '
+import sys, json, collections
+c = collections.Counter()
+for line in sys.stdin:
+    try: d = json.loads(line)
+    except: continue
+    if d.get("type")=="assistant":
+        m=d.get("message",{}).get("model")
+        if m and m!="&lt;synthetic&gt;": c[m]+=1
+for m,n in c.most_common(): print(f"{n:7d}  {m}")
+'</pre>
+  </div>
+  <p class="muted">提供の多い順に、モデルごとのターン数が1行ずつ出ます。<code>claude-opus-4-8</code> や <code>claude-sonnet-4-6</code> の横に件数が並びます。</p>
+
+  <h2>3 · 直近N日だけの集計(古い「よく使うモデル」を見抜く)</h2>
+  <p>全期間の集計は、<em>今</em>提供されているものと正反対になりえます。最近を無視した統計の「よく使うモデル」が誤解を招くのも同じ理由です。実際のあるマシンでは、2つの窓が完全に逆転していました。</p>
+  <table>
+    <tr><th>期間</th><th>最も多い提供モデル</th><th>割合</th></tr>
+    <tr><td>直近30日</td><td><code>claude-opus-4-7</code></td><td>80%</td></tr>
+    <tr><td>直近7日</td><td><code>claude-opus-4-8</code></td><td>73%</td></tr>
+  </table>
+  <p>そこで、最近の窓だけで集計します。<code>DAYS</code> は好みで変えてください。</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd3">コピー</button>
+    <pre id="cmd3">python3 - &lt;&lt;'PY'
+import json, glob, os, collections, datetime
+DAYS = 7
+cut = (datetime.date.today() - datetime.timedelta(days=DAYS)).isoformat()
+c = collections.Counter()
+for f in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
+    for line in open(f):
+        try: d = json.loads(line)
+        except: continue
+        if d.get("type") == "assistant":
+            m = d.get("message", {}).get("model"); t = d.get("timestamp", "")
+            if m and m != "&lt;synthetic&gt;" and t[:10] &gt;= cut:
+                c[m] += 1
+tot = sum(c.values()) or 1
+for m, n in c.most_common():
+    print(f"{n*100//tot:3d}%  {n:6d}  {m}")
+PY</pre>
+  </div>
+  <p class="muted">各行が最近の窓でのモデル別の割合です(例: <code>73%&nbsp;&nbsp;24773&nbsp;&nbsp;claude-opus-4-8</code>)。傾向が変わった「よく使うモデル」が一目で分かります。</p>
+
+  <h2>モデルIDの読み方</h2>
+  <p>IDは明示されているので、別の段に移った瞬間が分かります。実在する現行の例です。</p>
+  <table>
+    <tr><th><code>message.model</code> のID</th><th>意味</th></tr>
+    <tr><td><code>claude-opus-4-8</code></td><td>Opus 4.8(最上位)</td></tr>
+    <tr><td><code>claude-opus-4-7</code></td><td>Opus 4.7(最上位)</td></tr>
+    <tr><td><code>claude-sonnet-4-6</code></td><td>Sonnet 4.6(中位)</td></tr>
+    <tr><td><code>claude-haiku-4-5-20251001</code></td><td>Haiku 4.5(高速・下位)</td></tr>
+  </table>
+
+  <h2>本当に報告する価値があるのはどれか</h2>
+  <p>すべての差が同じ重みではありません。見つけたものを、影響の大きさで仕分けてください。</p>
+  <ul>
+    <li><strong>Opus同士(例: <code>4-7</code> と <code>4-8</code>)の入れ替わりは弱い手がかり。</strong> どちらも最上位で、出力の質に効くほどの差は出にくく、通常の理由でも起こりえます。</li>
+    <li><strong>Opusを固定したのに非Opusの段(例: <code>claude-sonnet-4-6</code>)へ静かに落ちたなら、それが鋭い証拠です。</strong> 段をまたぐ降格こそ、体感できる質の差を生みます。報告する価値があるのはこちらです。</li>
+  </ul>
+  <p>そして、逸話でなく再現できる形にします。</p>
+  <ul>
+    <li>問題の窓について、コマンド1の<strong>時刻つきの表</strong>を添える。「昨日の午後」ではなく、正確なUTCの時刻で。</li>
+    <li>該当ターンの<strong>Feedback ID</strong>があれば添える。時刻つきの提供モデルの表とFeedback IDがあれば、保守する人が実際に動ける報告になります。</li>
+  </ul>
+
+  <div class="note">
+    ログが何を証明するかについては誠実でいましょう。<code>message.model</code> は<em>どのモデルがそのターンを提供したか</em>を教えてくれます。それ自体は、意図や「わざと下げた」ことまでは証明しません。観測した事実(ターンごとの提供モデルと時刻)を報告し、原因の判断はルーティングを監査できる人に委ねてください。
+  </div>
+
+  <div class="links">
+    同じプロジェクトの関連ページ · <a href="claude-code-max-usage-limits.html">Claude Code の利用上限の解説</a> · <a href="team-cost-governance-jp.html">チームのトークン費用のガバナンス</a><br>
+    Claude Code 向けの無料(MIT)の安全フックとローカル点検: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a>(<code>npx cc-safe-setup</code>) · <a href="claude-code-which-model-served.html">English version</a>
+  </div>
+  <p class="foot">本ページは、自分のセッションのログに対するローカルな検証方法の説明であり、アカウントや法務の助言ではなく、Anthropicのルーティングの意図についての主張もしません。モデルやUsage Policyの疑問は、Anthropic自身の文書とサポートで確認してください。文脈として参照した報告: anthropics/claude-code #65889(固定したモデルの静かなルーティング)、#65899(統計の「よく使うモデル」が最近を反映しない)。</p>
+</div>
+
+<script>
+// コピーのボタン: 表示用にHTMLエンティティへ変換した文字を元に戻し、コマンドの原文を渡す。
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var el = document.getElementById(btn.dataset.target);
+    var text = el.textContent;
+    navigator.clipboard.writeText(text).then(function(){
+      btn.textContent = 'コピー済み'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = 'コピー'; btn.classList.remove('done'); }, 1500);
+    }).catch(function(){
+      var r = document.createRange(); r.selectNode(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand('copy'); btn.textContent='コピー済み'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='コピー'; btn.classList.remove('done'); }, 1500);
+      } catch(e){}
+      s.removeAllRanges();
+    });
+  });
+});
+</script>
+</body>
+</html>
