@@ -142,8 +142,7 @@ Anthropic Console の Usage の再取得で、 6/16 と6/29 の差分の合図�
 - [14日の準備の計画 (英語)](https://gist.github.com/yurukusa/2d4ac9eb49635a4d2a348dee62856aa1): 英語版の long-form Gist
 - [cluster-tracker.html](https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html): 累計の集積の整理
 - [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (800円): 800時間の自律運用の事故予防の全手順
-- [Token Book](https://zenn.dev/yurukusa/books/token-savings-guide) (2,500円): Claude Code のトークン削減の手引き、 22章
-- [6月15日 cliff-survival 本](https://zenn.dev/yurukusa/books/june-15-cliff-survival) (800円): 6月15日の発火の前の15日の準備の手引き
+- [Token Book](https://zenn.dev/yurukusa/books/token-savings-guide) (2,500円): Claude Code のトークン削減の手引き、 6月15日の課金分離に備える費用章つき
 
 ## 著者の正直な合図
 

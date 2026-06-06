@@ -54,7 +54,6 @@ Today's measurement priority:
 
 Reference (free, MIT):
 - 14-day plan: docs/june-15-cliff-14-day-plan.md (post-cliff diff section)
-- cliff-survival book free preview: https://zenn.dev/yurukusa/books/june-15-cliff-survival
 
 Set CC_CLIFF_QUIET=1 to suppress this advisory.
 EOF
@@ -74,7 +73,6 @@ Operator-side actions to consider:
 
 Reference (free, MIT):
 - 14-day plan: docs/june-15-cliff-14-day-plan.md
-- cliff-survival book (¥800): https://zenn.dev/yurukusa/books/june-15-cliff-survival
 
 Set CC_CLIFF_QUIET=1 to suppress this advisory.
 EOF
