@@ -30,6 +30,7 @@ OUT=$(printf '{"session_id":"%s","transcript_path":"%s"}' "$SESS" "$TRANS" | bas
 assert_contains "over threshold warns" "$OUT" "context-length-budget"
 assert_contains "warning shows cumulative" "$OUT" "251000"
 assert_contains "warning references MRCR" "$OUT" "MRCR"
+assert_contains "warning references billing tier" "$OUT" "200k-1M"
 
 # Test 3: Second turn over threshold → no duplicate warning (sentinel)
 OUT2=$(printf '{"session_id":"%s","transcript_path":"%s"}' "$SESS" "$TRANS" | bash "$HOOK" 2>&1)

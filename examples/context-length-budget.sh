@@ -4,7 +4,10 @@
 #      tokens of context (MRCR -46pt, 256k-8-needle -32.7pt). This hook
 #      tracks cumulative input-token usage across a session and emits an
 #      advisory when the budget threshold is crossed, so you can split the
-#      workflow before results start degrading.
+#      workflow before results start degrading. The same 200K line is also a
+#      billing-tier boundary on 1M-context models (the 200k-1M tier bills at a
+#      higher rate, #65870), so the advisory doubles as a cost warning when
+#      auto-compaction fails to fire and a session silently grows past it.
 # Event: PreToolUse  MATCHER: "*"
 # Action: Read the latest usage total from the transcript, append to the
 #         session's context-budget log, and warn once per session when the
@@ -59,6 +62,7 @@ SENTINEL="${LOG_DIR}/context-budget-${SESSION_ID}.warned"
 if [ "$CUMULATIVE" -gt "$THRESHOLD" ] && [ ! -f "$SENTINEL" ]; then
   echo "⚠ context-length-budget: $CUMULATIVE tokens in session context (threshold ${THRESHOLD})" >&2
   echo "  Opus 4.7 shows retrieval accuracy drops above 200K (MRCR -46pt). Consider splitting the workflow or running /compact." >&2
+  echo "  Cost: on 1M-context models, crossing 200K also moves requests into the higher-priced 200k-1M billing tier (#65870), so a long session can silently bill at the premium rate when auto-compaction does not fire." >&2
   touch "$SENTINEL"
 fi
 
