@@ -48,6 +48,8 @@ nav a{margin-right:1rem}
 <li><strong>git add .env</strong> — Committed API keys to a public repository</li>
 <li><strong>Infinite loop</strong> — Repeated the same failing command 50+ times, burning tokens</li>
 <li><strong>Session drift</strong> — Started working on unrelated files after context compaction</li>
+<li><strong>Output runaway</strong> — In a long session as context grew toward the window ceiling, the model began repeating a fixed string thousands of times and burned the entire 64k output budget in a single turn (<a href="https://github.com/anthropics/claude-code/issues/65823">#65823</a>)</li>
+<li><strong>Silent bypass-mode persistence</strong> — Accepting the dangerous-mode prompt once permanently wrote <code>skipDangerousModePermissionPrompt: true</code> to settings.json, so every later autonomous session ran in bypass mode with no warning (<a href="https://github.com/anthropics/claude-code/issues/65848">#65848</a>)</li>
 </ul>
 </div>
 
@@ -94,6 +96,13 @@ npx cc-safe-setup --audit
 
 # Full health check
 npx cc-health-check</code></pre>
+
+<h2>Running with <code>--dangerously-skip-permissions</code>? One more layer</h2>
+<p>Most autonomous setups (cron, CI, watchdogs) run in bypass mode so nothing pauses for approval. Two things bite operators here. First, accepting the dangerous-mode prompt once silently writes <code>skipDangerousModePermissionPrompt: true</code> to settings.json <em>permanently</em>, so you stop being warned that you are even in bypass mode (<a href="https://github.com/anthropics/claude-code/issues/65848">#65848</a>). Second, the flag does not actually bypass every gate — Edit prompts and some surfaces still fire, and the flag itself has regressed across versions.</p>
+<p>The <code>bypass-mode-effective-verifier</code> hook re-surfaces both at every session start: it reads settings.json for a persisted bypass default or the suppressed-warning flag and prints a standing reminder, and it names the gates the flag does not cover. It is advisory only (it never blocks), so it is safe to leave on in unattended runs.</p>
+<pre><code># Re-prints the bypass warning each session, even after the
+# upstream prompt has been silently suppressed (#65848)
+npx cc-safe-setup   # installs bypass-mode-effective-verifier</code></pre>
 
 <div class="cta">
 <h2>Make Autonomous Mode Safe</h2>
