@@ -41,7 +41,7 @@
 </head>
 <body>
 <div class="wrap">
-  <span class="tag">Updated 2026-06-03 · independent · not affiliated with Anthropic</span>
+  <span class="tag">Updated 2026-06-06 · independent · not affiliated with Anthropic</span>
   <h1>Claude Code blocked your legitimate work as a "cyber" policy violation?</h1>
   <p class="sub">If <em>"This request triggered cyber-related safeguards"</em> or <em>"appears to violate our Usage Policy"</em> stopped you mid-task on your own legitimate engineering — and then every message after it was blocked too — you're hitting a documented false-positive cluster. Here's why one block kills the whole session, how to keep working today, and how to argue back the tokens it burned.</p>
 
@@ -49,6 +49,11 @@
 
   <div class="card">
     <p style="margin:0"><strong>The short version.</strong> The classifier doesn't just judge your latest message — sensitivity rises with the <em>accumulated</em> security-adjacent context in the session. A firmware or security session naturally piles up that vocabulary, so eventually a completely benign sentence ("flash the remaining boards", "continue") trips it. Once it does, every later turn re-reads the now-"poisoned" context and re-blocks. <code>/clear</code> or a fresh session is the only escape — which kills any in-flight work and re-bills you to rebuild context. You can't fix the classifier, but you <a href="#keep-working">can stop feeding it</a> and <a href="#billing">argue the billing back</a>.</p>
+  </div>
+
+  <div class="card" style="border-color:var(--warn)">
+    <p style="margin:0 0 .5em"><strong>June 2026 update — the cluster widened past "cyber".</strong> Through Claude Code <code>2.1.165</code>–<code>2.1.167</code>, users report the same false-positive firing on work with <em>no</em> security or sensitive vocabulary at all: ordinary CRUD bug-fixing on your own Node/Mongoose API (<a href="https://github.com/anthropics/claude-code/issues/65867" target="_blank" rel="noopener">#65867</a>), fintech/trading-app development against a testnet (<a href="https://github.com/anthropics/claude-code/issues/65873" target="_blank" rel="noopener">#65873</a>), and pharmacometrics/PK SaaS (<a href="https://github.com/anthropics/claude-code/issues/65846" target="_blank" rel="noopener">#65846</a>, <a href="https://github.com/anthropics/claude-code/issues/65866" target="_blank" rel="noopener">#65866</a>) — in at least one report it tripped on a bare <code>git worktree status</code> turn carrying zero domain content. Reporters place the regression at <code>2.1.165</code> (still reproducing on <code>2.1.167</code>) across Windows, macOS and Linux, which points to a server/model-side change rather than anything OS- or vocabulary-specific.</p>
+    <p style="margin:0" class="note">Practical consequence: when it fires on plain, non-security turns, the "stop feeding it security vocabulary" mitigations below have nothing to reduce. Run the <a href="#isolate">which-failure-mode test</a> first to learn whether you can self-recover or have to escalate.</p>
   </div>
 
   <h2>Why one block kills the whole session</h2>
@@ -67,6 +72,19 @@
       <p class="note">Keep heavy secure-boot / eFuse / exploit-analysis <em>discussion</em> in a separate session from the <em>execution</em> turns, and keep execution terse ("flash board 3"). Read large security files with <code>head -200</code> / <code>grep -c</code> instead of dumping the whole thing into context. Less accumulated security shape = fewer trips.</p>
     </div>
   </div>
+  <h3 id="isolate">First, find out which failure mode you're in</h3>
+  <p class="note">A plain "new session" can't tell you, because it reuses the same <code>~/.claude.json</code> and the same account. There are two very different causes and the recovery differs:</p>
+  <table>
+    <tr><th>Cause</th><th>Sign</th><th>Recovery</th></tr>
+    <tr><td><strong>Replayed local state</strong></td><td>The block only returns when you <code>--continue</code>/<code>--resume</code> the poisoned session — the flagged turn is in that session's transcript</td><td>Start a genuinely fresh session, or resume from a copy of the transcript truncated to before the flagged turn — recoverable in place</td></tr>
+    <tr><td><strong>Account / server-side</strong></td><td>Even a fresh session, and a fresh git worktree, stay blocked (<a href="https://github.com/anthropics/claude-code/issues/65866" target="_blank" rel="noopener">#65866</a>)</td><td>No client-side action clears it; escalate with the <code>req_…</code> IDs</td></tr>
+  </table>
+  <p class="note">The one test that separates them — because it resets the two things a "new session" keeps — is to start fresh with config moved aside (back up, don't delete):</p>
+  <pre>mv ~/.claude.json ~/.claude.json.bak
+mv ~/.claude ~/.claude.bak     # has projects/history — back it up
+# re-auth, reopen the project, run one benign turn</pre>
+  <p class="note">Works in the clean slate → you were replaying local state; recover by clearing just the offending session's transcript, then restore your backup selectively. Still blocked → it's account/server-side, and the <code>req_…</code> IDs from the blocked turns are what let Anthropic trace it independent of the (benign) content.</p>
+
   <p>If you run hooks, the free MIT <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> repo ships four advisory-only hooks built for exactly this cluster — none of them block, they just warn or break the bleed:</p>
   <pre>npx cc-safe-setup</pre>
   <table>
@@ -98,7 +116,7 @@
   <details><summary>Is this me doing something wrong?</summary><p>No. Flashing your own boards, auditing your own systems, hardening your own software, and reviewing security are first-class, documented engineering. The classifier cannot reliably tell legitimate work from abuse yet — that's the defect (<a href="https://github.com/anthropics/claude-code/issues/64405" target="_blank" rel="noopener">#64405</a>). Keep a clean repro; you're not the outlier.</p></details>
 
   <p class="foot">
-    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety hooks). Issue numbers and reaction counts are as of 2026-06-03 and move over time; the linked issues are the source of truth. Not affiliated with Anthropic. This page describes user reports and operator-side mitigations — it is not legal or account advice; for Usage Policy questions, confirm against Anthropic's own documentation and support.
+    Independent reference by an operator running Claude Code 800+ hours, maintainer of <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (free MIT safety hooks). Issue numbers and reaction counts are as of 2026-06-06 and move over time; the linked issues are the source of truth. Not affiliated with Anthropic. This page describes user reports and operator-side mitigations — it is not legal or account advice; for Usage Policy questions, confirm against Anthropic's own documentation and support.
   </p>
 </div>
 </body>
