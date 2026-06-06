@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の安全運用と事故防止の総まとめ（日本語）— cc-safe-setup</title>
+<meta name="description" content="Claude Code で実際に起きた事故(データ消失・費用爆発・アカウント停止・モデルの無言の劣化)を、症状ごとに防ぐ・直す日本語の手引きの索引。無料の hook と事故防止の本への導線つき。">
+<meta name="keywords" content="Claude Code 安全, Claude Code 事故 対策, Claude Code 危険, Claude Code 安全 設定, Claude Code 事故防止, Claude Code トラブル, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-safety-jp.html">
+<meta property="og:title" content="Claude Code の安全運用と事故防止の総まとめ（日本語）">
+<meta property="og:description" content="実際に起きた事故を症状ごとに防ぐ・直す日本語の手引きの索引。">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:840px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.25rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.cat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.2rem;margin:1rem 0}
+.cat h2{margin-top:0;border:none;padding:0;color:#f85149;font-size:1.1rem}
+.cat ul{margin:.5rem 0 0 1.2rem}
+.cat li{margin:.45rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="hub.html">All Tools (English)</a> <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></nav>
+
+<h1>Claude Code の安全運用と事故防止の総まとめ（日本語）</h1>
+<p>Claude Code は端末をフルに操作でき、自律で長時間動かすほど事故の確率が上がります。ファイルが消え、トークンの費用が膨らみ、アカウントが止まり、モデルが無言で劣化する——これらは仮の話ではなく、GitHub に報告された実際の事故です。このページは、症状ごとに「自分で防ぐ・直す」日本語の手引きをまとめた索引です。</p>
+
+<div class="incident">
+実際に起きた事故の例: <code>rm -rf</code> が約50GB・1,500ファイルを永久に破壊（<a href="https://github.com/anthropics/claude-code/issues/49129">#49129</a>）／ auto モードが <code>~/.ssh</code> の削除を承認し SSH 鍵が全消失（<a href="https://github.com/anthropics/claude-code/issues/49554">#49554</a>）／ 本番のデータベースに破壊的な DDL を実行（<a href="https://github.com/anthropics/claude-code/issues/46684">#46684</a>）。
+</div>
+
+<p><strong>まず無料の安全装置を入れる</strong>なら、1コマンドで終わります:</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>破壊的なコマンド・force push・秘密の漏洩を実行の前に止める hook を10秒で導入します（<span class="badge">885の hook</span> <span class="badge">依存なし</span>）。以下は、症状ごとの詳しい手引きです。</p>
+
+<div class="cat">
+<h2>破壊的操作・データの消失</h2>
+<ul>
+<li><a href="prevent-rm-rf-jp.html">rm -rf の事故を防ぐ</a> — ファイルシステムごと消える前に止める</li>
+<li><a href="prevent-git-reset-hard-jp.html">git reset --hard の事故を防ぐ</a> — 未コミットの作業が一瞬で消える</li>
+<li><a href="prevent-database-wipe-jp.html">本番データベースの全消しを防ぐ</a> — DROP DATABASE / migrate reset を止める</li>
+<li><a href="prevent-credential-leak-jp.html">認証情報の漏洩を防ぐ</a> — 鍵やトークンの読み取り・流出・乗っ取り</li>
+</ul>
+</div>
+
+<div class="cat">
+<h2>費用・利用枠の暴走</h2>
+<ul>
+<li><a href="prevent-cost-explosion-jp.html">費用の暴走を防ぐ</a> — 暴走ループで利用枠を数分で使い切る</li>
+<li><a href="june-15-billing-cliff-exposure-jp.html">6月15日の課金の分離への備え</a> — 自動の経路が別の月次の枠に分離される</li>
+<li><a href="team-cost-governance-jp.html">チームの費用のガバナンス</a> — 公式の上限が届かない領域の予防</li>
+</ul>
+</div>
+
+<div class="cat">
+<h2>モデルの透明性・品質の劣化</h2>
+<ul>
+<li><a href="claude-code-which-model-served-jp.html">どのモデルが実際に提供されているかの監査</a> — 固定したのに静かに別のモデルへ／上位プランなのに品質が落ちた</li>
+<li><a href="cluster-22-23-opus48-dual-diagnostic-jp.html">Opus 4.8 の捏造と effort の劣化の診断</a> — 道具の結果の偽造・思考の予算の回帰</li>
+</ul>
+</div>
+
+<div class="cat">
+<h2>セキュリティ・アカウント</h2>
+<ul>
+<li><a href="claude-account-suspension-jp.html">アカウントが突然停止・凍結された時の原因と対処</a> — 公式の停止理由・申し立て・予防</li>
+<li><a href="claude-code-aup-recovery-diagnostic-jp.html">AUP の誤検知でセッションが止まった時の回復</a> — 正当な作業が「違反」で止まる</li>
+</ul>
+</div>
+
+<div class="cat">
+<h2>運用・パフォーマンス</h2>
+<ul>
+<li><a href="claude-code-slow-crash-jp.html">急に遅い・固まる・落ちる原因と直し方</a> — 一時ファイルとログの蓄積</li>
+<li><a href="multi-vendor-fan-out-diagnostic-jp.html">多ベンダの fan-out の診断</a> — 複数のモデルへの並列の経路の問題</li>
+</ul>
+</div>
+
+<div class="cat">
+<h2>チームでの安全な導入・学習</h2>
+<ul>
+<li><a href="claude-code-safety-training-jp.html">Claude Code 安全運用のトレーニング（全6章）</a> — 体系的に学ぶ無料の教材</li>
+<li><a href="services-jp.html">チームへの導入支援・監査のサービス</a> — 組織での安全な展開</li>
+</ul>
+</div>
+
+<div class="cta">
+<h2>まず無料の安全装置を10秒で</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">破壊的な操作・force push・秘密の漏洩・費用の暴走を、実行の前に止めます。オープンソース・依存なし・ローカルで動作。</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
+</div>
+
+<h2>さらに深く: 事故防止の本</h2>
+<p>無料の hook と手引きで足りないとき、800時間以上の自律運用で実際に起きた事故と、その予防の全手順を整理した本があります。</p>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=safety-hub-jp&utm_medium=hub">事故防止の実践ガイド（¥800・第3章まで無料）</a> — データ消失・不可逆操作・沈黙の失敗の予防</li>
+<li><a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=safety-hub-jp&utm_medium=hub">Claude Code のトークン消費を半分にする本（¥2,500・第1章まで無料）</a> — 費用の暴走の予防</li>
+</ul>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup は Anthropic とは無関係の独立したオープンソースです。すべての hook はローカルで動き、グローバルには何も入れません。<a href="https://github.com/yurukusa/cc-safe-setup">GitHub でソースを見る</a>。</p>
+</body>
+</html>
