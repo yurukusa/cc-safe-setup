@@ -73,7 +73,7 @@
     </div>
   </div>
   <h3 id="isolate">First, find out which failure mode you're in</h3>
-  <p class="note">A plain "new session" can't tell you, because it reuses the same <code>~/.claude.json</code> and the same account. There are two very different causes and the recovery differs:</p>
+  <p class="note">A plain "new session" can't tell you, because it reuses the same <code>~/.claude.json</code> and the same account. There are two very different causes and the recovery differs. <a href="claude-code-aup-recovery-diagnostic.html"><strong>Interactive version: 3 questions → recover-in-place vs escalate-only</strong></a>, with the exact commands for your case.</p>
   <table>
     <tr><th>Cause</th><th>Sign</th><th>Recovery</th></tr>
     <tr><td><strong>Replayed local state</strong></td><td>The block only returns when you <code>--continue</code>/<code>--resume</code> the poisoned session — the flagged turn is in that session's transcript</td><td>Start a genuinely fresh session, or resume from a copy of the transcript truncated to before the flagged turn — recoverable in place</td></tr>
