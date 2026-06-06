@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeが「Usage Policy違反」で止まり続ける——回復できるか、報告するしかないかを切り分ける</title>
+<meta name="description" content="2026年6月のClaude Codeの利用ポリシーの誤検知はセッション全体を汚染する。自分で直せるかどうかは『状態がどこにあるか』で決まる。3つの質問と1つのテストで、その場で回復できる(ローカルの再生)か、報告するしかない(サーバー側)かを判定し、各々の正確なコマンドを示す。">
+<meta property="og:title" content="Claude Code AUP誤検知: 回復するか報告するか — 診断ツール">
+<meta property="og:description" content="3つの質問+1つのclean-configテストで、その場で回復できるローカルの再生のケースか、報告するしかないサーバー側のケースかを判定。回復の正確なコマンドとrequest_idの報告経路つき。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-aup-recovery-diagnostic-jp.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.7; }
+.c { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 1.4rem; line-height: 1.3; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.3rem; font-size: .96rem; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+.q { font-weight:600; color:#f0f6fc; margin-bottom:.8rem; font-size:1.06rem; }
+.opt { display:block; width:100%; text-align:left; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:9px; padding:.75rem .9rem; margin:.5rem 0; cursor:pointer; font-size:.95rem; transition:.12s; }
+.opt:hover { border-color:#58a6ff; background:#1c2330; }
+.opt b { color:#f0f6fc; }
+.muted { color:#8b949e; font-size:.9rem; }
+pre { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:.8rem .9rem; overflow:auto; font:13px/1.5 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; margin:.6rem 0; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.result { border-width:2px; }
+.ok { border-color:#3fb950; } .warn { border-color:#d29922; }
+.result h2 { font-size:1.15rem; margin-bottom:.5rem; }
+.ok h2 { color:#3fb950; } .warn h2 { color:#e3b341; }
+.step { margin:.55rem 0; padding-left:1.2rem; position:relative; }
+.step::before { content:"→"; position:absolute; left:0; color:#58a6ff; }
+.back { background:none; border:none; color:#58a6ff; cursor:pointer; font-size:.9rem; padding:.4rem 0; margin-top:.6rem; }
+.links { border-top:1px solid #30363d; margin-top:1.4rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.8rem 0; font-size:.92rem; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">独立した解説 · Anthropic非公式 · 入力はブラウザの外に出ません</span>
+  <h1>Claude Codeが「Usage Policy違反」で止まり続ける——自分で回復できるか、報告するしかないか</h1>
+  <p class="sub">2026年6月の波(おおよそ <code>2.1.161</code>〜<code>2.1.167</code>)では、この誤検知はセッション全体を汚染する。一度出ると、その後は <code>"hi"</code> でもブロックされる。自分で直せるかどうかを決めるのは、ただ一点、<em>状態がどこにあるか</em>。3つの質問と1つのテストでそれが分かる。</p>
+
+  <div class="note" id="vocab-note">
+    最初に、はまりやすい罠を一つ。これは<strong>あなたの言葉づかいが原因ではない</strong>。6月の波では、ごく普通のCRUDの編集や、ただの <code>git&nbsp;worktree&nbsp;status</code>、果ては <code>"hi"</code> でも発火する。セキュリティ的な中身がゼロのターンでも止まる。だから言い換えやサニタイズをしても抜けられないし、「何を言ったのが悪かったのか」は問いの立て方が間違っている。正しい問いは下にある。
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="links">
+    詳しい解説(英語): <a href="claude-code-cyber-safeguard-false-positive.html">Claude Code blocked as a "cyber"/Usage-Policy violation</a> ·
+    このクラスタ向けの無料のMITの助言フック: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a>(<code>npx cc-safe-setup</code>)
+  </div>
+  <p class="foot">このページは利用者の報告と運用者側の手順をまとめたもので、アカウントや法務の助言ではない。利用ポリシーの判断はAnthropicの公式の文書とサポートで確認すること。参照した起票: anthropics/claude-code #65866, #65846, #65867, #65873。</p>
+</div>
+
+<script>
+// AUP誤検知のセッション汚染の回復経路の決定木。
+// 終端は2つ。A = ローカルの再生(その場で回復可)、B = サーバー/アカウント側(報告のみ)。
+const Q = {
+  start: {
+    q: "本当に新しいセッション——<code>--continue</code> / <code>--resume</code> でも、記録の再表示でもない、まっさらな新規のセッション——を同じプロジェクトで試したか？",
+    opts: [
+      ["いいえ。再試行だけ、または同じセッションを resume / continue しただけ", "needfresh"],
+      ["はい。新規のセッションは綺麗だった(ブロックされない)", "A"],
+      ["はい。新規のセッションでもブロックされる", "cleancfg"]
+    ]
+  },
+  needfresh: {
+    q: "まず本当に新しいセッションを試す。これでほとんどのケースが切り分けられる。",
+    info: true,
+    body: `<p class="muted">汚染されたセッションを <code>--resume</code> / continue する「新しいセッション」は、問題のターンを記録から再生するので、自分で再び汚染される。resume も記録の再表示もしない、本当に新規のセッションを同じプロジェクトで開き、無害なターンを1回送る。</p>
+      <pre>cd your-project
+# Claude Code をまっさらに起動する。--continue / --resume は付けない
+# 無害なメッセージを1回送る(例: 「ok と言って」)</pre>`,
+    opts: [
+      ["新規のセッションは綺麗だった", "A"],
+      ["新規のセッションでもブロックされる", "cleancfg"]
+    ]
+  },
+  cleancfg: {
+    q: "clean-config テストを実行する。ディスクの状態とアカウントの状態を分離する。",
+    info: true,
+    body: `<p class="muted">新規のセッションも、同じ <code>~/.claude.json</code> と同じアカウントを使い回す。両方を退避して(消さずにバックアップ)ローカルの再生を断ち、再認証して無害なターンを1回送る。</p>
+      <pre>mv ~/.claude.json ~/.claude.json.bak
+mv ~/.claude ~/.claude.bak      # projects/history を含む。消さずに退避
+# 再認証し、プロジェクトを開き、無害なコマンドを1回実行</pre>
+      <p class="muted">終わったら逆向きの <code>mv</code> で戻す。</p>`,
+    opts: [
+      ["設定を退避したら、通った", "A"],
+      ["設定を退避しても、まだブロックされる", "B"]
+    ]
+  },
+  A: {
+    result: "ok",
+    title: "ケースA — ローカルの再生。その場で回復できる。",
+    body: `<p>ブロックは<strong>あなたのディスク上の状態</strong>(再送される記録やローカルの設定)から来ていて、アカウントからではない。つまりAnthropicの修正を待つ必要はない。</p>
+      <div class="step">汚染されたセッションを <code>--resume</code> しない。本当に新規のセッションは綺麗なので、それを使う。</div>
+      <div class="step">文脈を残したいなら、<code>~/.claude/projects/&lt;エンコードされたパス&gt;/&lt;session&gt;.jsonl</code> の記録を複製し、最初のブロックのターンの<em>手前</em>で切ってから resume する。汚染の手前までほぼ全部を保てる。</div>
+      <div class="step">特定の1プロジェクトだけが再汚染するなら、全部を消さず <code>~/.claude.json</code> のそのプロジェクトの項目だけを片付け、残りはバックアップから戻す。</div>
+      <div class="note">ローカルなので、同じマシン/アカウントの別の人は、自分の新規のセッションでは影響を受けない。そして繰り返すが、原因は言葉づかいではない——プロンプトのサニタイズに時間を使わないこと。</div>`
+  },
+  B: {
+    result: "warn",
+    title: "ケースB — サーバー/アカウント側。報告のみ。ただし決め手の証拠はあなたが持っている。",
+    body: `<p>同じアカウントで設定を退避しても止まったので、端末側の操作では直らない。報告を有効にするのは <strong>request id</strong> だ。</p>
+      <div class="step">ブロックされたターンの <code>req_…</code> の id を取得する(デバッグ/詳細のログに出る)。明らかに無害なターンのものを2〜3件集める。</div>
+      <div class="step">重複の起票を立てず、既存の起票に足す——例: <a href="https://github.com/anthropics/claude-code/issues/65866" target="_blank" rel="noopener">#65866</a> や <a href="https://github.com/anthropics/claude-code/issues/65846" target="_blank" rel="noopener">#65846</a>。「まっさらな設定+新規のアカウントのセッションで、<code>git status</code> 級のコマンドがブロックされた」と request id を添える。</div>
+      <div class="step">この書き方が最もきつい再現になる。分類器の判定を(無害な)中身と独立に監査できる形で、maintainer が必要とするのはまさにこれ。</div>
+      <div class="note">別の git worktree は効かない。<code>cwd</code> は変わるが同じアカウントなので止まったまま(#65866 で報告)。梃子はローカルの細工でなく request id。</div>`
+  }
+};
+
+const quiz = document.getElementById('quiz');
+const vnote = document.getElementById('vocab-note');
+const stack = [];
+
+function render(key){
+  const n = Q[key];
+  if(n.result){ renderResult(key); return; }
+  vnote.style.display = '';
+  let html = `<div class="card"><div class="q">${n.q}</div>`;
+  if(n.body) html += n.body;
+  n.opts.forEach((o)=> html += `<button class="opt" data-go="${o[1]}"><b>${o[0]}</b></button>`);
+  if(stack.length) html += `<button class="back" data-back="1">← 戻る</button>`;
+  html += `</div>`;
+  quiz.innerHTML = html;
+  quiz.querySelectorAll('[data-go]').forEach(b=> b.onclick=()=>{ stack.push(key); go(b.dataset.go); });
+  const bk = quiz.querySelector('[data-back]'); if(bk) bk.onclick=()=>{ go(stack.pop()); };
+}
+function renderResult(key){
+  const n = Q[key];
+  vnote.style.display = 'none';
+  quiz.innerHTML = `<div class="card result ${n.result}"><h2>${n.title}</h2>${n.body}
+    <button class="back" data-back="1">← 質問に戻る</button></div>`;
+  quiz.querySelector('[data-back]').onclick=()=>{ history.replaceState(null,'',location.pathname); go(stack.length?stack.pop():'start'); };
+  history.replaceState(null,'','#'+key);
+}
+function go(key){ render(key); window.scrollTo({top:0,behavior:'smooth'}); }
+
+const h = location.hash.replace('#','');
+go((h==='A'||h==='B') ? h : 'start');
+</script>
+</body>
+</html>
