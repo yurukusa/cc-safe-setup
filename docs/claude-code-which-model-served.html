@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Claude model did Claude Code actually serve you? — verify it from your own logs</title>
+<meta name="description" content="Suspect your pinned model isn't the one being served? Don't guess from the UI. Each assistant turn's real served model is recorded in your own session logs. Two copy-paste commands list the served model per turn (with timestamps) and tally turns per model — straight from ~/.claude/projects/*.jsonl.">
+<meta property="og:title" content="Which Claude model did Claude Code actually serve you? — verify from your logs">
+<meta property="og:description" content="message.model in your session .jsonl is the ground truth for what model each turn was served. Two commands: per-turn timeline with timestamps, and a per-model turn tally. Nothing leaves your machine.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-which-model-served.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.6; }
+.c { max-width: 760px; margin: 0 auto; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
+h1 { font-size: 1.5rem; line-height: 1.25; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.3rem; font-size: .98rem; }
+h2 { font-size: 1.18rem; color:#f0f6fc; margin:1.6rem 0 .6rem; }
+h3 { font-size: 1.02rem; color:#f0f6fc; margin:1.1rem 0 .4rem; }
+p { margin:.6rem 0; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+.muted { color:#8b949e; font-size:.92rem; }
+pre { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:.8rem .9rem; overflow:auto; font:13px/1.5 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; margin:.6rem 0; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.cmd { position:relative; }
+.copy { position:absolute; top:8px; right:8px; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:6px; padding:3px 10px; font-size:.78rem; cursor:pointer; transition:.12s; }
+.copy:hover { border-color:#58a6ff; color:#f0f6fc; }
+.copy.done { border-color:#3fb950; color:#3fb950; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.8rem 0; font-size:.92rem; }
+ul { margin:.5rem 0 .5rem 1.2rem; } li { margin:.3rem 0; }
+table { border-collapse:collapse; width:100%; margin:.6rem 0; font-size:.9rem; }
+th, td { border:1px solid #30363d; padding:.4rem .6rem; text-align:left; }
+th { background:#161b22; color:#f0f6fc; }
+.links { border-top:1px solid #30363d; margin-top:1.4rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">independent · not affiliated with Anthropic · nothing leaves your machine</span>
+  <h1>Which Claude model did Claude Code actually serve you?</h1>
+  <p class="sub">You pinned a model, but you suspect a different (cheaper) tier is quietly being served. Stop guessing from the UI — your own session logs record, per turn, the exact model ID that was served. Two copy-paste commands turn that into a timestamped timeline and a per-model tally. Everything runs locally against files already on your disk.</p>
+
+  <div class="note">
+    This is a recurring worry — e.g. <a href="https://github.com/anthropics/claude-code/issues/65889" target="_blank" rel="noopener">anthropics/claude-code #65889</a>, and the routing/quality issues Anthropic itself acknowledged in April 2026. The point of this page is <strong>not</strong> to assert a cause. It's to replace "I think it felt different" with "here is the served model ID on each turn, with timestamps, from my logs."
+  </div>
+
+  <h2>Where the ground truth lives</h2>
+  <p>Claude Code writes one JSON object per line into a session log:</p>
+  <pre>~/.claude/projects/&lt;project&gt;/&lt;session-id&gt;.jsonl</pre>
+  <p>For every assistant turn, the line has <code>type":"assistant"</code>, and inside it <code>message.model</code> is the model ID that was <em>actually served</em> for that turn. The same line carries a top-level <code>timestamp</code> (UTC, ISO 8601). So <code>message.model</code> — not the UI, not the status line — is the canonical record of what you got.</p>
+
+  <div class="note">
+    <strong>Exclude <code>&lt;synthetic&gt;</code>.</strong> Some lines have <code>message.model</code> equal to <code>&lt;synthetic&gt;</code>. Those are injected/synthetic turns (e.g. interface-generated messages), <em>not</em> a model that served you. Counting them would pollute the tally, so both commands below drop them.
+  </div>
+
+  <h2>1 · Per-turn timeline of the served model (with timestamps)</h2>
+  <p>Across every session, list each assistant turn's served model next to its timestamp, sorted in time order. Paste as-is:</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd1">copy</button>
+    <pre id="cmd1">for f in ~/.claude/projects/*/*.jsonl; do
+  python3 - "$f" &lt;&lt;'PY'
+import sys, json
+for line in open(sys.argv[1]):
+    try: d = json.loads(line)
+    except: continue
+    if d.get("type") == "assistant":
+        m = d.get("message", {}).get("model")
+        if m and m != "&lt;synthetic&gt;":
+            print(d.get("timestamp",""), m)
+PY
+done | sort</pre>
+  </div>
+  <p class="muted">Each line is one served turn: <code>2026-06-07T01:23:45.678Z&nbsp;&nbsp;claude-opus-4-8</code>. If a stretch of turns shows a different (lower) tier than the one you pinned, that's your evidence — with the exact UTC time you can correlate against your activity.</p>
+
+  <h2>2 · Per-model turn tally (the strong number for a report)</h2>
+  <p>Collapse all of that into a count of turns served by each model — the single figure that makes a report concrete:</p>
+  <div class="card cmd">
+    <button class="copy" data-target="cmd2">copy</button>
+    <pre id="cmd2">cat ~/.claude/projects/*/*.jsonl | python3 -c '
+import sys, json, collections
+c = collections.Counter()
+for line in sys.stdin:
+    try: d = json.loads(line)
+    except: continue
+    if d.get("type")=="assistant":
+        m=d.get("message",{}).get("model")
+        if m and m!="&lt;synthetic&gt;": c[m]+=1
+for m,n in c.most_common(): print(f"{n:7d}  {m}")
+'</pre>
+  </div>
+  <p class="muted">Output is one row per served model, most-served first — for example a column of turn counts beside <code>claude-opus-4-8</code>, <code>claude-sonnet-4-6</code>, and so on.</p>
+
+  <h2>Reading the model IDs</h2>
+  <p>The IDs are explicit, so you can see when a turn crossed into a different tier. Real current examples:</p>
+  <table>
+    <tr><th>Model ID in <code>message.model</code></th><th>What it is</th></tr>
+    <tr><td><code>claude-opus-4-8</code></td><td>Opus 4.8 (top tier)</td></tr>
+    <tr><td><code>claude-opus-4-7</code></td><td>Opus 4.7 (top tier)</td></tr>
+    <tr><td><code>claude-sonnet-4-6</code></td><td>Sonnet 4.6 (mid tier)</td></tr>
+    <tr><td><code>claude-haiku-4-5-20251001</code></td><td>Haiku 4.5 (fast/low tier)</td></tr>
+  </table>
+
+  <h2>What's actually worth reporting</h2>
+  <p>Not every difference is equal. Sort what you find by how much it matters:</p>
+  <ul>
+    <li><strong>Opus-to-Opus (e.g. <code>4-7</code> ↔ <code>4-8</code>) is a weak signal.</strong> Both are top tier; a swap between them rarely changes output quality enough to matter, and can happen for ordinary reasons.</li>
+    <li><strong>A silent drop to a non-Opus tier (e.g. <code>claude-sonnet-4-6</code>) while you pinned Opus is the sharp evidence.</strong> A cross-tier downgrade is what produces a felt quality difference, so that's the case worth raising.</li>
+  </ul>
+  <p>And turn it into something reproducible rather than an anecdote:</p>
+  <ul>
+    <li>Include the <strong>timestamped table</strong> from command 1 for the window in question — exact UTC times, not "yesterday afternoon."</li>
+    <li>If you have a <strong>Feedback ID</strong> for the affected turn, attach it. A timestamped served-model table plus a Feedback ID is a report a maintainer can actually act on.</li>
+  </ul>
+
+  <div class="note">
+    Stay honest about what the logs prove. <code>message.model</code> tells you <em>which model served a turn</em>. It does not, by itself, prove intent or that anyone "downgraded you on purpose." Report the observed fact (served model per turn, with times); leave the cause to the people who can audit the routing.
+  </div>
+
+  <div class="links">
+    Related, same project · <a href="claude-code-max-usage-limits.html">Claude Code Max usage limits</a> · <a href="prevent-cost-explosion.html">Prevent a cost explosion</a><br>
+    Free MIT advisory hooks &amp; local checks for Claude Code: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (<code>npx cc-safe-setup</code>)
+  </div>
+  <p class="foot">This page describes a local verification method against your own session logs; it is not account or legal advice and makes no claim about Anthropic's routing intent. For model and Usage Policy questions, confirm against Anthropic's own documentation and support. Issue referenced for context: anthropics/claude-code #65889.</p>
+</div>
+
+<script>
+// Copy buttons: copy the original command text verbatim (decode the HTML entities
+// that the <pre> displays, so the clipboard gets real <synthetic> and <<'PY' text).
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var el = document.getElementById(btn.dataset.target);
+    var text = el.textContent; // textContent already decodes &lt; &gt; &amp; back to < > &
+    navigator.clipboard.writeText(text).then(function(){
+      btn.textContent = 'copied'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('done'); }, 1500);
+    }).catch(function(){
+      var r = document.createRange(); r.selectNode(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand('copy'); btn.textContent='copied'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='copy'; btn.classList.remove('done'); }, 1500);
+      } catch(e){}
+      s.removeAllRanges();
+    });
+  });
+});
+</script>
+</body>
+</html>
