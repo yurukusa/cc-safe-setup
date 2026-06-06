@@ -6,8 +6,11 @@
 #         Also prevents wholesale C: drive deletion via PowerShell (#41708).
 #
 # How it works: Intercepts Bash commands containing PowerShell Remove-Item patterns.
-#   Blocks when -Recurse targets system directories, user profiles, or paths
-#   that could traverse NTFS junctions (node_modules, .pnpm).
+#   Hard-blocks when -Recurse targets system directories, user profiles, or paths
+#   that could traverse NTFS junctions (node_modules, .pnpm). For -Recurse -Force on
+#   any other absolute drive/UNC path it asks for confirmation instead of blocking —
+#   the case that destroyed ~34 client video files in #64310 (D:\Clientes\...) where
+#   -Force bypassed the Recycle Bin and no confirmation was requested.
 #
 # TRIGGER: PreToolUse
 # MATCHER: "Bash"
@@ -34,5 +37,18 @@ fi
 # Block if targeting home directory patterns
 if echo "$COMMAND" | grep -qiE 'Remove-Item.*-Recurse.*(\$HOME|\$env:USERPROFILE|~\/|~\\)'; then
   echo '{"decision":"DENY","reason":"Blocked: Remove-Item -Recurse targeting home directory. Risk of irreversible data loss (#41708)."}'
+  exit 0
+fi
+
+# Confirm before -Recurse -Force on any other absolute drive/UNC path.
+# The hard blocks above only cover system, junction, and home targets. The case
+# that destroyed ~34 client video files in #64310 was Remove-Item -Recurse -Force on
+# an ordinary data path (D:\Clientes\...) — none of the above matched, -Force bypassed
+# the Recycle Bin, and no confirmation was requested (SSD/TRIM made it unrecoverable).
+# Use "ask" rather than a hard block so routine build/dependency cleanup just gets one
+# confirmation instead of being denied; relative paths (./build) don't trigger at all.
+if echo "$COMMAND" | grep -qiE '\-Force' \
+   && echo "$COMMAND" | grep -qiE '[A-Za-z]:[\\/]|\\\\[A-Za-z0-9]'; then
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Confirm: Remove-Item -Recurse -Force on an absolute path. -Force bypasses the Recycle Bin and is unrecoverable on SSD/TRIM. Verify the target path is correct (and that any move/copy finished) before deleting (#64310)."}}'
   exit 0
 fi

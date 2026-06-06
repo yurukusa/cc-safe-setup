@@ -19,12 +19,20 @@ test_hook() {
             echo "  FAIL: $desc (expected DENY, got: $output)"
             FAIL=$((FAIL + 1))
         fi
-    else
-        if [ -z "$output" ] || ! echo "$output" | grep -q '"decision":"DENY"'; then
+    elif [ "$expected" = "ASK" ]; then
+        if echo "$output" | grep -q '"permissionDecision":"ask"'; then
             echo "  PASS: $desc"
             PASS=$((PASS + 1))
         else
-            echo "  FAIL: $desc (expected ALLOW, got DENY)"
+            echo "  FAIL: $desc (expected ASK, got: $output)"
+            FAIL=$((FAIL + 1))
+        fi
+    else
+        if [ -z "$output" ] || ! echo "$output" | grep -qE '"decision":"DENY"|"permissionDecision":"ask"'; then
+            echo "  PASS: $desc"
+            PASS=$((PASS + 1))
+        else
+            echo "  FAIL: $desc (expected ALLOW, got: $output)"
             FAIL=$((FAIL + 1))
         fi
     fi
@@ -48,11 +56,18 @@ test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force $HOME/Documents
 test_hook '{"tool_input":{"command":"Remove-Item -Recurse $env:USERPROFILE"}}' DENY "Block Remove-Item on USERPROFILE"
 test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force ~/projects"}}' DENY "Block Remove-Item on ~/"
 
+# --- Should ASK: -Recurse -Force on an ordinary absolute data path (#64310) ---
+test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force D:\\Clientes\\Yandy\\ENTREGABLES"}}' ASK "Confirm Remove-Item -Force on D:\\ client data (#64310)"
+test_hook '{"tool_input":{"command":"Remove-Item -Force -Recurse E:\\work\\deliverables"}}' ASK "Confirm regardless of flag order on E:\\"
+test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force \\\\nas\\share\\projects"}}' ASK "Confirm on UNC path"
+
 # --- Should ALLOW: safe commands ---
 test_hook '{"tool_input":{"command":"Remove-Item ./temp.txt"}}' ALLOW "Allow single file deletion"
 test_hook '{"tool_input":{"command":"ls -la"}}' ALLOW "Allow non-Remove-Item command"
 test_hook '{"tool_input":{"command":"rm -rf ./build"}}' ALLOW "Allow bash rm (different hook)"
 test_hook '{"tool_input":{"command":"Get-ChildItem -Recurse"}}' ALLOW "Allow Get-ChildItem (read-only)"
+test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force ./dist"}}' ALLOW "Allow relative force-delete (no absolute path)"
+test_hook '{"tool_input":{"command":"Remove-Item -Recurse -Force .\\build\\out"}}' ALLOW "Allow relative Windows force-delete"
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
