@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code が急に遅い・固まる・落ちる原因と直し方——一時ファイルとログの蓄積 — cc-safe-setup</title>
+<meta name="description" content="Claude Code が作業の途中で急に重くなる・フリーズする・落ちるのは、セッションのログや一時ファイルの蓄積が原因のことが多いです。進行中の作業を失う前に、自分で切り分けて直す手順と予防の hook。">
+<meta name="keywords" content="Claude Code 急に遅い, Claude Code フリーズ 対処, Claude Code 落ちる 原因, Claude Code クラッシュ, Claude Code 重い, ENOSPC disk full 誤報, 一時ファイル 肥大, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-slow-crash-jp.html">
+<meta property="og:title" content="Claude Code が急に遅い・固まる・落ちる原因と直し方">
+<meta property="og:description" content="一時ファイルとログの蓄積で Claude Code が重くなる・落ちる。進行中の作業を失う前に直す手順。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code が急に遅い・固まる・落ちる原因と直し方","description":"一時ファイルとログの蓄積による Claude Code の遅さ・クラッシュを自分で切り分けて直す。","step":[{"@type":"HowToStep","name":"切り分けて直す","text":"--resume で復帰し、出力をファイルへ逃がし、一時ファイルを掃除する。予防に npx cc-safe-setup の hook を入れる。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a> <a href="troubleshooting.html">Troubleshooting (English)</a></nav>
+
+<h1>Claude Code が急に遅い・固まる・落ちる原因と直し方</h1>
+<p>作業の途中で Claude Code が急に重くなり、固まり、落ちる。進行中の作業がそのまま飛ぶ。再起動すると直るのに、しばらくするとまた遅くなる——これは利用者から繰り返し報告されている問題です。原因の多くは、セッションのログや一時ファイルの蓄積です。</p>
+
+<h2>2つの別々の現象を切り分ける</h2>
+
+<div class="incident">
+<p class="incident-title">現象1: 一時ファイル・ログの蓄積で本当に遅くなる/落ちる</p>
+<p>長いセッションでは、会話のログ(JSONL)や一時ファイルが積み上がります。これがディスクや一時領域を圧迫すると、動作が重くなり、最終的に落ちます。<strong>再起動で直る</strong>のは、溜まった状態が一度リセットされるからで、これは蓄積が原因である証拠です。<code>git</code> の対象範囲が広すぎる(巨大なディレクトリを抱えている)と、これがさらに悪化します。</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">現象2: ディスクは空いているのに「容量がない」と誤報される</p>
+<p>ディスクに十分な空きがあるのに、<code>Bash</code> が <code>temp filesystem ... is full (0MB free)</code> / <code>ENOSPC</code> で止まる事例があります(<a href="https://github.com/anthropics/claude-code/issues/65915">#65915</a>)。報告では実際には100GB以上の空きがあり、これは本当の容量不足ではなく、一時的な書き込みの失敗が「容量ゼロ」と誤って表示されたものです。これは Anthropic 側の問題で、利用者の側では回避策で凌ぎます。</p>
+</div>
+
+<h2>今すぐ直す(切り分けの手順)</h2>
+<div class="fix">
+<p>順に試してください。どれもデータを壊さない安全な操作です。</p>
+<ul style="margin:.5rem 0;padding-left:1.5rem">
+<li><strong>復帰する</strong>: 落ちた直後は <code>claude --resume</code> で直前のセッションに戻れます(会話の続きから再開)。</li>
+<li><strong>出力をファイルへ逃がす</strong>: 容量の誤報(現象2)は、コマンドの出力を <code>&gt; ~/out.txt</code> でファイルに書き出してから読むと、ほぼ確実に回避できます(#65915 の報告で確認された回避策)。</li>
+<li><strong>一時ファイルを掃除する</strong>: 溜まった一時ファイルを消すと軽くなります。<code>CLAUDE_CODE_TMPDIR</code> を空きの多いディスク上のディレクトリに向けるのも有効です。</li>
+<li><strong>git の範囲を狭める</strong>: 巨大なビルド成果物やデータのディレクトリを <code>.gitignore</code> に入れ、Claude が抱える範囲を小さくします。</li>
+<li><strong>診断する</strong>: <code>claude doctor</code> で環境の問題を点検します。</li>
+</ul>
+</div>
+
+<h2>予防する: 蓄積を hook で止める</h2>
+<p>原因の多くは「気づかないうちに溜まる」ことなので、予防が効きます。cc-safe-setup には、まさにこの種の蓄積と誤報に対応する hook が含まれています。</p>
+<div class="fix">
+<ul style="margin:.5rem 0;padding-left:1.5rem">
+<li><code>temp-file-cleanup</code> — セッションの一時ファイルを掃除する</li>
+<li><code>tmp-output-size-guard</code> — 一時領域に書き出す出力の大きさを見張る</li>
+<li><code>false-disk-full-guard</code> — 実際の空きを確かめ、容量の誤報(現象2)と本当の不足を区別する</li>
+<li><code>session-health-monitor</code> — セッションの健康状態を監視し、肥大を早く知らせる</li>
+<li><code>unbounded-output-guard</code> — 無限に出力するコマンドが一時領域を枯らす前に止める</li>
+</ul>
+</div>
+
+<div class="cta">
+<h2>予防の hook をまとめて入れる</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">一時ファイルとログの肥大を見張り、破壊的なコマンドや秘密の漏洩も止めます。<span class="badge">885の hook</span> <span class="badge">9,200以上のテスト</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
+</div>
+
+<h2>正直な限界</h2>
+<p>現象1(蓄積)は、掃除と予防の hook で十分に防げます。現象2(容量の誤報)は Anthropic 側のバグで、上の回避策(出力をファイルへ逃がす・再起動)で実用上は凌げますが、根本の修正は Anthropic 側の対応を待つ必要があります。確実に直せる部分と、回避でしのぐ部分を分けて扱ってください。</p>
+
+<h2>関連するページ</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="prevent-cost-explosion-jp.html">費用の暴走を防ぐ(出力の暴走と同じ予防)</a></li>
+<li><a href="prevent-rm-rf-jp.html">rm -rf の事故を防ぐ</a></li>
+<li><a href="disable-auto-compaction.html">自動の圧縮を無効にする(English)</a></li>
+</ul>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup はオープンソースで、依存はなく、グローバルには何も入れません。すべての hook はローカルで動きます。<a href="https://github.com/yurukusa/cc-safe-setup">GitHub でソースを見る</a>。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
