@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の git reset --hard 事故を防ぐ——未コミットの作業が消える前に — cc-safe-setup</title>
+<meta name="description" content="Claude Code は git reset --hard を走らせて未コミットの作業をすべて消すことが実際に起きています。確認も、ゴミ箱も、取り消しもありません。GitHub の実際の事故と、それを止める1コマンド npx cc-safe-setup。">
+<meta name="keywords" content="Claude Code git reset hard, Claude Code 変更 消えた, Claude Code 戻せない, git reset --hard 復元, 未コミット 消えた, 破壊的 git コマンド, PreToolUse hook, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-git-reset-hard-jp.html">
+<meta property="og:title" content="Claude Code の git reset --hard 事故を防ぐ">
+<meta property="og:description" content="Claude Code は1つのコマンドで未コミットの作業をすべて消せます。それを止める方法。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の git reset --hard 事故を防ぐ","description":"安全 hook を入れて Claude Code の破壊的な git reset --hard を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup を実行し、git reset --hard と git clean -fd を止める hook を含む安全 hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a> <a href="prevent-git-reset-hard.html">English</a></nav>
+
+<h1>Claude Code の git reset --hard 事故を防ぐ</h1>
+<p><code>git reset --hard</code> は未コミットの変更を一瞬ですべて破壊します。確認も、ゴミ箱も、取り消しもありません。Claude Code は「まっさらからやり直すのが一番速い」と判断したときに、これを走らせます。</p>
+
+<h2>何が破壊されるか</h2>
+<p>Claude が <code>git reset --hard</code> を走らせると:</p>
+<ul style="margin:.8rem 0 .8rem 1.5rem">
+<li>ステージ済みの変更——消える</li>
+<li>ステージしていない変更——消える</li>
+<li>コミットしていない数時間分の作業——復元不能</li>
+</ul>
+<p>Claude が併せて走らせる <code>git clean -fd</code> と組み合わさると、追跡されていないファイルまで削除されます。</p>
+
+<h2>いつ起きるか</h2>
+
+<div class="incident">
+<p class="incident-title">失敗したやり方を Claude が「掃除」する</p>
+<p>Claude が実装を試し、エラーにぶつかり、最初からやり直すと決める。「白紙に戻す」ために <code>git reset --hard HEAD</code> を走らせ——自分の作業もろとも、あなたの未コミットの作業を消す。</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">Claude がマージの衝突を力ずくで解決する</p>
+<p>マージの衝突の最中に、Claude が衝突を解決する代わりに <code>git reset --hard origin/main</code> を走らせる。ローカルの変更が、リモートの状態で上書きされる。</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">午前3時の自律セッション</p>
+<p>あなたが眠っている間に、Claude が問題にぶつかり <code>git reset --hard &amp;&amp; git clean -fd</code> を走らせる。朝起きると、作業ディレクトリは最後のコミットと一致していて——それ以外はすべて消えている。</p>
+</div>
+
+<div class="incident">
+<p class="incident-title">git checkout -- で手作業の編集30件以上が消えた</p>
+<p><code>git checkout -- &lt;files&gt;</code> と <code>git restore .</code> は、作業ツリーの変更を確認なしで黙って破棄します。取り消しもありません。<a href="https://github.com/anthropics/claude-code/issues/37888">#37888</a> では、この方法で手作業の編集30件以上が破壊されたと報告されています。</p>
+</div>
+
+<h2>なぜ CLAUDE.md では防げないか</h2>
+<p>「git reset --hard を決して走らせるな」という CLAUDE.md のルールは<em>お願い</em>です。文脈が一杯になったり、Claude がそのリセットを「必要だ」と判断したりすると、ルールは無視されえますし、実際に無視されます。hook はプロセスの層で動きます——モデルはこれを迂回できません。</p>
+
+<h2>解決: destructive-guard の hook</h2>
+
+<div class="fix">
+<p><strong>destructive-guard.sh</strong> は危険な git コマンドを止めます:</p>
+<pre><code>#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# git reset --hard を止める
+if echo "$COMMAND" | grep -qE 'git\s+reset\s+--hard'; then
+  echo "BLOCKED: git reset --hard destroys uncommitted work" >&2
+  exit 2
+fi
+
+# git clean -fd を止める
+if echo "$COMMAND" | grep -qE 'git\s+clean\s+-[a-zA-Z]*f'; then
+  echo "BLOCKED: git clean -f deletes untracked files permanently" >&2
+  exit 2
+fi
+
+exit 0</code></pre>
+<p>この hook はすべての Bash コマンドの前に動きます。終了コード2が、コマンドの実行の前にそれを止めます。</p>
+</div>
+
+<h2>destructive-guard が止めるもの</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0">
+<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:.5rem;color:#f0f6fc">コマンド</th><th style="text-align:left;padding:.5rem;color:#f0f6fc">結果</th></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git reset --hard</code></td><td style="padding:.5rem;color:#f85149">BLOCKED</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git reset --hard HEAD~3</code></td><td style="padding:.5rem;color:#f85149">BLOCKED</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git clean -fd</code></td><td style="padding:.5rem;color:#f85149">BLOCKED</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git reset --soft HEAD~1</code></td><td style="padding:.5rem;color:#3fb950">ALLOWED</td></tr>
+<tr style="border-bottom:1px solid #21262d"><td style="padding:.5rem"><code>git checkout -- file.js</code></td><td style="padding:.5rem;color:#3fb950">ALLOWED(<a href="#discard-guard">uncommitted-discard-guard</a> で止められます)</td></tr>
+</table>
+
+<h2 id="discard-guard">これも止める: git checkout -- と git restore</h2>
+<p><code>git checkout -- &lt;files&gt;</code> と <code>git restore .</code> は、作業ツリーの変更を黙って破棄します——確認も、取り消しもありません。<a href="https://github.com/anthropics/claude-code/issues/37888">#37888</a> では、この方法で手作業の編集30件以上が破壊されたと報告されています。</p>
+<pre><code>npx cc-safe-setup --install-example uncommitted-discard-guard</code></pre>
+<p><code>git checkout --</code>、<code>git checkout .</code>、<code>git restore</code>(<code>--staged</code> を除く)、<code>git stash drop</code> を止めます。</p>
+
+<h2>もし既に走らせてしまったら</h2>
+<p>まだ望みはあります。<strong>コミット済み</strong>の変更を <code>git reset --hard</code> で消した場合は、<code>git reflog</code> に消えたコミットの記録が残っていることが多く、<code>git reset --hard &lt;reflog のハッシュ&gt;</code> で戻せます。ただし<strong>一度もコミットしていない</strong>変更(ステージ済み・未ステージともに)は reflog にも残らず、復元できません。だからこそ、実行の前に止めることが唯一の確実な防御です。</p>
+
+<div class="cta">
+<h2>8つの安全 hook を10秒で入れる</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">git reset --hard と rm -rf を止め、main への force push を防ぎ、秘密の漏洩を捕まえます。<span class="badge">9,200以上のテスト</span> <span class="badge">734の hook</span></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
+</div>
+
+<h2>設定を検証する</h2>
+<pre><code>npx cc-safe-setup --verify</code></pre>
+<p>各 hook にテストの入力を送り、正しく止まることを確認します:</p>
+<pre><code>destructive-guard:
+  &#10004; git reset --hard → BLOCKED
+  &#10004; git reset --soft HEAD~1 → ALLOWED
+8/8 hooks verified</code></pre>
+
+<h2>安全のスコアを測る</h2>
+<pre><code>npx cc-health-check</code></pre>
+<p>無料の20点の診断。80点を下回るなら、Claude Code の設定に隙間があります。</p>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup はオープンソースで、依存はなく、グローバルには何も入れません。すべての hook はローカルで動きます。<a href="https://github.com/yurukusa/cc-safe-setup">GitHub でソースを見る</a>。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="prevent-git-reset-hard.html" style="color:#58a6ff">English version</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
