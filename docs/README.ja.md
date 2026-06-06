@@ -10,6 +10,38 @@ npx cc-safe-setup
 
 > **フック（hook）とは？** Claude Codeがコマンドを実行する前に、内容をチェックして危険なら止める仕組み。空港のセキュリティゲートのようなもの — 搭乗口（コマンド実行）の前にチェック（hook）があり、危険物（rm -rf等）を持っていたら止められる。
 
+## 実際に起きた事故を防ぐ
+
+```
+  cc-safe-setup
+  Claude Code を自律運用で安全にする
+
+  実際に起きた事故を防ぐ（GitHub Issue より）:
+  ✗ rm -rf が約50GB / 1,500ファイルを永久に破壊 (#49129) ← 2026年4月
+  ✗ auto モードが ~/.ssh の削除を承認、SSH 鍵が全消失 (#49554)
+  ✗ ~/.git-credentials の PAT が確認なしで削除 (#49539)
+  ✗ rm -rf が NTFS ジャンクション経由でユーザーディレクトリ全体を削除 (#36339)
+  ✗ Remove-Item -Recurse -Force が未 push のソースを破壊 (#37331)
+  ✗ 本番データベースに破壊的な DDL を実行 (#46684)
+  ✗ 副の作業者が「完了」と返すが道具の呼び出しの記録は 0 件
+  ✗ 文脈の圧縮の後に CLAUDE.md のルールが黙って無視される (#6354)
+```
+
+**今日、どの問題を解決したいですか？** — 実際に本を買った方の経路をもとに、まず無料で解決し、必要なら深掘りの本へ。
+
+| あなたの状況 | まず無料で | さらに深く |
+|---|---|---|
+| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| トークンの費用が暴走する (`/cost` ショック) | [費用爆発を防ぐ](prevent-cost-explosion-jp.html) | [Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=readme-ja&utm_medium=routing-table) |
+| 急に遅い・固まる・落ちる | [遅い/クラッシュの原因と直し方](claude-code-slow-crash-jp.html) | 無料の道具で対処 |
+| どのモデルが実際に動いているか分からない | [提供モデルの監査](claude-code-which-model-served-jp.html) | 無料の道具で確認 |
+| サブエージェントが嘘の「完了」を返す | [集積の露出診断](cluster-exposure-diagnostic.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
+| 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab (¥500/月)](safety-lab.html) |
+
 ## 何ができるか
 
 | コマンド | 機能 |
