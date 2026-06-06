@@ -176,7 +176,7 @@ if (HELP) {
     --safe-mode                    Emergency: disable all hooks
 
   Install & Configure:
-    --install-example <name>       Install from 707 example hooks
+    --install-example <name>       Install from 800+ example hooks
     --examples                     Browse examples by category
     --from-claudemd                Convert CLAUDE.md rules into hooks
     --rules [file]                 Compile YAML rules into hooks
