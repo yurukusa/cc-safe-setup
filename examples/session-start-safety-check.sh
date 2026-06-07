@@ -57,11 +57,26 @@ if [ "$STASHES" -gt 0 ]; then
     # The teardown template is "auto-stash: agent <role> (<id>) crashed at <ts>",
     # so matching "auto-stash" is a high-confidence signal with no false positives
     # against the default "WIP on <branch>" messages of manual stashes.
-    AUTO_STASHES=$(git stash list 2>/dev/null | grep -c 'auto-stash' || true)
+    AUTO_STASHES=$(git stash list 2>/dev/null | grep -cE 'auto-stash|pre-switch' || true)
     if [ "$AUTO_STASHES" -gt 0 ]; then
-        echo "⚠ WARNING: $AUTO_STASHES of $STASHES stashes are crash/teleport auto-stashes." >&2
-        echo "  Uncommitted work is hidden here; a clean working tree is NOT proof it was lost (#66060)." >&2
-        echo "  Inspect:  git stash list | grep auto-stash" >&2
+        echo "⚠ WARNING: $AUTO_STASHES of $STASHES stashes are harness auto-stashes (crash/teleport or branch-switch)." >&2
+        # A stash made with --include-untracked has a third parent (the untracked
+        UNTRACKED_STASHES=0
+        N=$(git stash list 2>/dev/null | wc -l)
+        i=0
+        while [ "$i" -lt "$N" ]; do
+            if git rev-parse --verify --quiet "stash@{$i}^3" >/dev/null 2>&1; then
+                UNTRACKED_STASHES=$((UNTRACKED_STASHES + 1))
+            fi
+            i=$((i + 1))
+        done
+        if [ "$UNTRACKED_STASHES" -gt 0 ]; then
+            echo "  ‼ $UNTRACKED_STASHES of these also stashed UNTRACKED files (--include-untracked):" >&2
+            echo "    those local files vanished from the folder; a sync client may have propagated the deletion." >&2
+            echo "    List them:  git stash show --include-untracked 'stash@{N}'" >&2
+        fi
+        echo "  Uncommitted work is hidden here; a clean working tree is NOT proof it was lost (#66060, #66092)." >&2
+        echo "  Inspect:  git stash list   (harness stashes say 'auto-stash' or 'pre-switch')" >&2
         echo "            git stash show -p 'stash@{N}'" >&2
         echo "  Recover:  checkout the branch in the stash's 'On <branch>:' label, then" >&2
         echo "            git stash apply 'stash@{N}'   (apply, not pop — keeps a safety copy)" >&2
