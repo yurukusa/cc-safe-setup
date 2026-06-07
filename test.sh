@@ -18510,6 +18510,27 @@ test_ex unbounded-output-guard.sh '{"tool_input":{"command":"head -c 32 /dev/ura
 test_ex unbounded-output-guard.sh '{"tool_input":{"command":"tr -dc a-z < /dev/urandom | head -c 8"}}' 0 "unbounded-output-guard: bounded tr+head allowed"
 test_ex unbounded-output-guard.sh '{"tool_input":{"command":"echo yes"}}' 0 "unbounded-output-guard: yes as argument allowed"
 
+# --- api-busyloop-guard tests (#65985) ---
+# block (default): the unambiguous busy-wait shapes
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until gh run view 123 2>&1 | grep -q completed; do true; done"}}' 2 "api-busyloop: until gh + do true; done blocked"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"while ! gh run view 123 | grep -q completed; do :; done"}}' 2 "api-busyloop: while gh + do :; done blocked"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"for ((;;)); do gh api /rate_limit; done"}}' 2 "api-busyloop: for ((;;)) + gh blocked"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"while true; do curl -s http://localhost/health; done"}}' 2 "api-busyloop: while true + curl blocked"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until curl -sf http://localhost/health; do sleep 0; done"}}' 2 "api-busyloop: do sleep 0 (busy) blocked"
+# warn (broad shape, possibly bounded): never blocks, exits 0
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"n=0; while [ $n -lt 5 ]; do gh api x; n=$((n+1)); done"}}' 0 "api-busyloop: counter-bounded loop warns, not blocked"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until curl -s localhost; do echo retry; done"}}' 0 "api-busyloop: condition loop non-noop warns, not blocked"
+# allow: bounded or already-correct forms pass silently
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"gh pr create --fill"}}' 0 "api-busyloop: no loop allowed"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"gh run watch 123 --exit-status"}}' 0 "api-busyloop: gh run watch allowed"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until curl -sf http://localhost/health; do sleep 2; done"}}' 0 "api-busyloop: poll with sleep allowed"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"while read -r f; do curl -O \"$f\"; done < urls.txt"}}' 0 "api-busyloop: while read (bounded) allowed"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"for f in *.json; do curl -O \"$f\"; done"}}' 0 "api-busyloop: for-in list (bounded) allowed"
+test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"while true; do echo hi; done"}}' 0 "api-busyloop: infinite loop without net CLI allowed"
+# off / malformed fail open
+test_ex api-busyloop-guard.sh '{}' 0 "api-busyloop: empty input passes"
+CC_API_BUSYLOOP_GUARD=off test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until gh run view 1; do true; done"}}' 0 "api-busyloop: off mode passes"
+
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
