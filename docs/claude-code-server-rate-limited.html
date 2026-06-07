@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code: "Server is temporarily limiting requests (not your usage limit)" — what it means and what to do — cc-safe-setup</title>
+<meta name="description" content="Claude Code throws 'Server is temporarily limiting requests (not your usage limit) · Rate limited' even though your usage meters show headroom. This is a server-side 529 overload, not your plan limit. How to confirm it, tell it apart from a real usage limit and 429 acceleration limits, and what you can (and can't) do.">
+<meta name="keywords" content="Claude Code Server is temporarily limiting requests, not your usage limit, Claude 529 overloaded, Claude Code rate limited not usage limit, Claude API 529 overloaded_error, Claude Code capacity, you've hit your usage limit banner wrong, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-server-rate-limited.html">
+<meta property="og:title" content="Claude Code: 'Server is temporarily limiting requests (not your usage limit)' explained">
+<meta property="og:description" content="It's a server-side 529 overload, not your plan limit. How to confirm it, tell it apart from a real usage limit / 429 acceleration limits, and what you can do.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.6rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Get Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>"Server is temporarily limiting requests (not your usage limit) · Rate limited" — what it actually means</h1>
+<p>You're mid-task in Claude Code and every request starts failing with <strong>"API Error: Server is temporarily limiting requests (not your usage limit) · Rate limited"</strong> — even though your usage meters show plenty of headroom (Session 40%, Weekly 20%). Sometimes you also see a <em>"You've hit your usage limit"</em> banner that contradicts those same meters. Here's what's happening, how to confirm it, and the (small) set of things actually in your control.</p>
+
+<h2>Short version: it's a server-side overload, not your plan</h2>
+<p>The message says it outright — <strong>"not your usage limit."</strong> On the public API this surfaces as HTTP <strong>529 <code>overloaded_error</code></strong> ("The API is temporarily overloaded"), which the <a href="https://platform.claude.com/docs/en/api/errors">official errors docs</a> describe as happening <em>"when APIs experience high traffic across all users."</em> It's a capacity condition on Anthropic's side, shared across everyone — nothing in your config, your account, or your usage caused it, and your 40%/20% meters confirm you're not actually limited.</p>
+
+<h2>Confirm it in 10 seconds</h2>
+<div class="fix">
+<ul style="margin:.5rem 0 .5rem 1.2rem">
+<li>Run <code>/usage</code>. If your session/weekly meters show headroom, the failure is <strong>not</strong> a real usage limit — it's the server-side overload.</li>
+<li>Read the error text itself: if it contains <em>"not your usage limit"</em> or <em>"temporarily"</em>/<em>"overloaded,"</em> that's the 529 capacity path.</li>
+</ul>
+</div>
+
+<h2>Tell the three lookalikes apart</h2>
+<p>Three different conditions show up with similar-looking "rate limited / usage" wording. They have different causes and different fixes:</p>
+<table>
+<tr><th>What you see</th><th>What it is</th><th>What you can do</th></tr>
+<tr><td>"Server is temporarily limiting requests (<strong>not your usage limit</strong>)"</td><td><strong>529 overload</strong> — server capacity, all users</td><td>Back off and retry; it clears when capacity frees up. Not fixable client-side.</td></tr>
+<tr><td>"You've hit your usage limit" <em>and your meters really are near 100%</em></td><td><strong>Real plan limit</strong> — your session/weekly quota</td><td>Wait for the window to reset, or reduce consumption. See <a href="claude-code-max-usage-limits.html">usage limits guide</a>.</td></tr>
+<tr><td>Failures cluster right when you fire <strong>heavy parallel / sub-agent</strong> work</td><td><strong>429 acceleration limit</strong> — a sharp spike in <em>your</em> traffic</td><td>The docs' fix: ramp up gradually, keep a steady pattern. Throttle parallel fan-out.</td></tr>
+</table>
+<p>The one true trap is the middle row's <em>banner</em> appearing while your meters show headroom — that's a display mislabel of a 529, not a real limit. Your meters (via <code>/usage</code>) are the authoritative source; believe them over the banner.</p>
+
+<h2>What you can and can't do</h2>
+<div class="incident">
+<p class="incident-title">A 529 is not fixable from your side</p>
+<p>It's Anthropic's capacity, shared across all users. No setting, retry-config, or plan change makes the overload go away. The honest answer is: <strong>back off and retry with a short delay</strong>, and it resolves on its own as load drops. These incidents are typically transient (minutes), not a state your account is stuck in.</p>
+</div>
+<div class="fix">
+<p><strong>The parts that <em>are</em> in your control:</strong></p>
+<ul style="margin:.5rem 0 .5rem 1.2rem">
+<li><strong>Rule out the 429 acceleration path.</strong> If your failures correlate with bursty parallel/sub-agent fan-out rather than steady single-threaded work, you may be tripping acceleration limits — ramp gradually instead of bursting.</li>
+<li><strong>Don't let retries quietly burn your week.</strong> During an overload, aggressive auto-retry re-sends large contexts; that's reprocessing tokens, which advances your weekly meter even though the original requests failed. If you're worried about your quota, slow the retry cadence and trim context. (Reducing tokens-per-task is the lever covered in the <a href="claude-code-usage-limit-fast-jp.html">usage-stretching guide</a>.)</li>
+<li><strong>For a specific failing request, capture the <code>request-id</code></strong> by running with <code>--debug</code> (it's printed to stderr). That's the single most useful thing to give Anthropic support if you want a particular failure traced.</li>
+</ul>
+</div>
+
+<h2>"Does a failed/rate-limited request still consume my quota?"</h2>
+<p>This is the common follow-up, and the honest answer is: don't take anyone's word for it — measure it. Note <code>/usage</code>, trigger the error, check <code>/usage</code> again. A 529 that fails <em>before</em> any tokens are generated shouldn't bill tokens; but auto-<em>retries</em> that re-send context do reprocess tokens. If your meter advances across a window of pure errors with no successful output, that's a concrete bug worth reporting with a <code>request-id</code> attached.</p>
+
+<h2>The "an image could not be processed and was removed" error</h2>
+<p>If you also see this, it's unrelated to the rate limiting — it's image handling (an oversized or unsupported image in context; very large images can also hit the 32&nbsp;MB request cap as a 413). Treat it as a separate issue.</p>
+
+<h2>Related</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="claude-code-max-usage-limits.html">When it really is your usage limit (Max/Pro limits explained)</a></li>
+<li><a href="claude-code-usage-limit-fast-jp.html">Make your paid plan last longer before the cap (verified levers)</a></li>
+<li><a href="make-claude-code-cheaper.html">Reduce Claude Code token consumption</a></li>
+</ul>
+
+<div class="cta">
+<h2>Prevent the costly Claude Code failures you <em>can</em> control</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">Free hooks that stop destructive operations, secret leaks, and runaway cost loops before they run. They can't fix a server-side overload, but they catch the failures that are actually on your side.</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Based on Anthropic's public <a href="https://platform.claude.com/docs/en/api/errors">errors documentation</a>. Behavior can change between versions; check the official docs for the latest. cc-safe-setup is an independent open-source project, not affiliated with Anthropic.</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem"><a href="hub.html" style="color:#58a6ff">All Tools</a></p>
+</body>
+</html>
