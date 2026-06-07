@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code: "Usage credits required for 1M context" — how to recover (2026)</title>
+<meta name="description" content="Claude Code suddenly blocked by 'Usage credits required for 1M context' on a Pro or Max plan? Here is what actually works to recover, which workarounds are broken, and the credit-drain trap to avoid.">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-1m-context-usage-credits-recovery.html">
+<meta property="og:title" content="Claude Code: 'Usage credits required for 1M context' — how to recover">
+<meta property="og:description" content="A Pro/Max plan blocked with no warning. The confirmed recovery, the workarounds that are currently broken, and the credit-drain trap.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Recover Claude Code from the '1M context usage credits' block",
+  "description": "Recover a Claude Code session blocked by 'Usage credits required for 1M context' without buying credits.",
+  "step": [
+    {"@type": "HowToStep", "name": "Switch to a smaller model", "text": "Resume the session with --model claude-haiku-4-5-20251001 (or Opus)."},
+    {"@type": "HowToStep", "name": "Compact the context", "text": "Run /compact in the smaller model, which can compact where Sonnet was blocked."},
+    {"@type": "HowToStep", "name": "Switch back", "text": "Resume with --model claude-sonnet-4-6; the smaller context now fits under 200K."}
+  ]
+}
+</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.7rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin: 2rem 0 0.8rem; }
+h3 { font-size: 1.02rem; margin: 1.3rem 0 0.5rem; }
+.alert { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+.warn { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+.ok { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; margin: 1rem 0; }
+code { font-family: 'JetBrains Mono', monospace; background:#f1f1f4; padding:0.05rem 0.3rem; border-radius:3px; font-size:0.9em; }
+pre code { background:none; padding:0; }
+.cta { text-align: center; margin: 2.5rem 0; padding: 1.5rem; background: #eff6ff; border-radius: 8px; }
+.cta a { color: #2563eb; font-weight: bold; text-decoration: none; }
+.cta a:hover { text-decoration: underline; }
+ul { margin: 0.5rem 0 0.5rem 1.4rem; }
+li { margin: 0.3rem 0; }
+footer { text-align: center; color: #888; font-size: 0.82rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
+footer a { color: #2563eb; text-decoration: none; }
+.lang { text-align:right; font-size:0.85rem; margin-bottom:0.5rem; }
+.lang a { color:#2563eb; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="lang"><a href="claude-code-1m-context-usage-credits-recovery-jp.html">日本語</a></div>
+
+<h1>Claude Code: "Usage credits required for 1M context"</h1>
+<p style="color:#666;">Blocked on a Pro or Max plan with no warning? Here is what actually recovers it — and what doesn't.</p>
+
+<div class="alert">
+<strong>The error:</strong> <code>API Error: Usage credits required for 1M context · turn on usage credits at claude.ai/settings/usage, or use --model to switch to standard context</code> (newer builds say <code>run /usage-credits ... or /model to switch to standard context</code>). It hits paid <strong>Pro and Max</strong> users, on the CLI, the VS Code extension, the desktop app, and Cowork. As of this writing there is no official fix and no "fixed in version X" — so treat the steps below as recovery, not a permanent cure.
+</div>
+
+<h2>First: which situation are you in?</h2>
+<p>There are two different problems behind the same message. The fix is different for each, so check this first:</p>
+<ul>
+<li><strong>It started <em>mid-session</em></strong>, or right after a <code>/compact</code>, or after the context meter climbed high (130%, 185%, 369K…). → This is the common, <strong>recoverable</strong> case. Go to Section A.</li>
+<li><strong>It fires on a <em>fresh</em> session</strong>, immediately, before you type anything, while your usage dashboard shows you are nowhere near the limit. → This looks account/server-side. Go to Section B.</li>
+</ul>
+
+<h2>A. It started mid-session (the recoverable case)</h2>
+<p>What is happening: your session context grew past 200K tokens (often because auto-compaction didn't fire, or large tool outputs — e.g. MCP screenshots — piled up in the session). The next request silently escalates to the 1M-context tier, which is gated, so it gets blocked. The trick is that a <em>smaller</em> model can still compact the session even when Sonnet is blocked.</p>
+
+<div class="ok">
+<strong>Confirmed recovery</strong> (reported working by multiple unaffiliated users):
+</div>
+
+<h3>1. Switch to a smaller model, compact, switch back</h3>
+<pre><code># resume the SAME session in a small model
+claude --continue --model claude-haiku-4-5-20251001
+# inside it:
+/compact
+# then resume in Sonnet again — the compacted context now fits
+claude --continue --model claude-sonnet-4-6</code></pre>
+<p>Opus works too as the "compact in a different model" step. The point is that <code>/compact</code> succeeds in the smaller model where it was blocked in Sonnet.</p>
+
+<h3>2. If compact still won't run: prune large items from the session file</h3>
+<p>If huge images/screenshots are what pushed you over 200K, the compact itself can be too big to run. Trim the biggest items out of the session JSONL and resume. Find your session file under <code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code>, make a backup, and replace the large <code>type: image</code> blocks in <code>tool_result</code> entries with small placeholders, then <code>claude --resume &lt;session&gt;</code>. (Always copy the <code>.jsonl</code> to <code>.jsonl.bak</code> first.)</p>
+
+<h3>3. Last resort: <code>/clear</code></h3>
+<p><code>/clear</code> reliably unblocks you, but it <strong>discards the session context</strong>. Use it only when the steps above fail and you can afford to lose the conversation.</p>
+
+<h2>Workarounds that do NOT work (save your time)</h2>
+<div class="warn">
+<ul>
+<li><strong><code>--model</code> flag alone</strong> — ignored when the session is already over 200K, because the request is already built from the oversized context. It only helps <em>combined with</em> a <code>/compact</code> in the smaller model (Section A).</li>
+<li><strong><code>CLAUDE_CODE_DISABLE_1M_CONTEXT=1</code></strong> — currently ignored. This is a confirmed regression that broke in <strong>2.1.156</strong> (it worked in 2.1.155). Setting it in the shell or in <code>settings.json</code> has no effect on affected builds. Dispatch/background sub-agents ignore it too.</li>
+<li><strong>Enabling "usage credits" to make the error go away</strong> — ⚠ this does not <em>fix</em> the block, it <em>pays through</em> it. Multiple users report their prepaid balance instantly dropped into the negative, and that blocked/errored requests still consumed credits. If you turn credits on to unblock, watch the balance.</li>
+<li>Downgrading Claude Code, full config reset, and logout/login were all reported as <em>not</em> fixing it.</li>
+</ul>
+</div>
+
+<h2>B. It fires on a fresh session at low usage (account/server-side)</h2>
+<p>If the error appears immediately on a brand-new session while your dashboard shows plenty of headroom, no confirmed local fix exists — the strongest signal in the issue threads is that this variant is tied to the account/server side, not your machine. Honest options:</p>
+<ul>
+<li>Opening a new thread can clear it temporarily, but it tends to return after a few hours.</li>
+<li>Check whether a <code>[1m]</code> model id got pinned as your default — grep <code>~/.claude/settings.json</code>, the project <code>.claude/settings.json</code>, and <code>~/.claude.json</code> for <code>1m</code>, and in the VS Code extension's model picker. If you find one, set a standard id (e.g. <code>claude-sonnet-4-6</code>) instead. This is worth ruling out, but it is <em>not</em> a confirmed fix for the fresh-session variant.</li>
+<li>If everything local is a standard model and it still fires, it is server-side — report it to support, and note that the error's own suggestion ("switch to standard context") implies a client-side lever that, in this case, isn't working.</li>
+</ul>
+
+<h2>Why Max users get hit too</h2>
+<p>It is easy to assume a Max plan is immune. It isn't: <strong>Sonnet's 1M context is not auto-included even on Max</strong> (Opus 1M is included; Sonnet 1M requires usage credits on every plan). So when a long Sonnet session escalates to 1M, Max plans hit the same gate as Pro.</p>
+
+<h2>Prevent it from recurring</h2>
+<ul>
+<li><strong>Compact before you hit the wall</strong>, not after — once the session is over the limit you're already in recovery mode. A pre-compact checkpoint hook also saves your work before any compaction runs.</li>
+<li>Keep large artifacts out of the chat context — put reference files in the workspace, use <code>.claudeignore</code>, and avoid letting screenshot-heavy MCP tools accumulate images in one long session.</li>
+<li>Start a fresh session per large task instead of growing one session indefinitely.</li>
+</ul>
+
+<div class="cta">
+A free, MIT-licensed set of guardrails for exactly this class of problem — pre-compact checkpoints, context-bloat guards, and cost-spike protection — lives in<br>
+<a href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/README.ja.md">cc-safe-setup</a>. One command: <code>npx cc-safe-setup</code>.
+</div>
+
+<footer>
+Based on the open GitHub issue cluster #62063 · #63060 · #63479 · #63634 · #64057 · #64398 · #65205 · #66067 (anthropics/claude-code), as of June 2026. All were open with no official fix at the time of writing; steps reflect what unaffiliated users confirmed worked. From <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — safety guardrails from 800+ hours of autonomous Claude Code operation.
+</footer>
+
+</div>
+</body>
+</html>
