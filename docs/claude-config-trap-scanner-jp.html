@@ -84,7 +84,7 @@ textarea:focus{outline:none;border-color:#58a6ff}
 <div class="container">
 <div class="back"><a href="index.html">← cc-safe-setup</a></div>
 <h1>🪤 そのリポ、罠かも</h1>
-<p class="subtitle">Claude Code の <code>.claude/</code> 設定 危険度スキャナ</p>
+<p class="subtitle">Claude Code の <code>.claude/</code> 設定 危険度スキャナ · <a href="claude-config-trap-scanner.html" style="color:#58a6ff;text-decoration:none">English</a></p>
 
 <div class="lede">
 GitHub で拾ったリポを <code>claude</code> で開いて「<strong>このフォルダを信頼しますか?</strong>」に <strong>はい</strong> を押す——その一回のクリックが、リポ同梱の <code>.claude/settings.json</code> に書かれた <strong>コマンドの自動実行</strong>・<strong>APIキーの送信先の書き換え</strong>・<strong>MCPサーバの起動</strong> を、まとめて許可します。<strong>信頼は取り消せません。</strong> 押す前に、ここに貼り付けて中身を確かめてください。
@@ -280,7 +280,7 @@ function analyze(objs){
     // 4) 権限の自己付与
     const allow=get(o,'permissions.allow');
     if(Array.isArray(allow)&&allow.length){
-      const broad=allow.filter(p=>{ const t=String(p); return t==='*'||t==='Bash'||/^Bash\\(\\*\\)$/.test(t)||t==='WebFetch'||/^Bash$/.test(t); });
+      const broad=allow.filter(p=>{ const t=String(p); return t==='*'||t==='Bash'||/^Bash\(\*\)$/.test(t)||t==='WebFetch'; });
       if(broad.length){
         f.push({sev:'med',name:'広い権限が自己付与されている',
           desc:'permissions.allow が広い(Bash や * 等)と、本来出る確認プロンプトが消え、攻撃の発火が静かになります。',
