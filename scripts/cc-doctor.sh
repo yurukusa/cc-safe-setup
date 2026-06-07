@@ -143,6 +143,28 @@ if [ -d "$SESSIONS_DIR" ]; then
 fi
 note ""
 
+# --- Section 7: Background Claude processes (quota-burn suspect) ---
+# Detached or orphaned Claude Code processes keep drawing on your session quota
+# after you move on — the "a background loop drove my quota to 100%" shape in
+# #65998, and the orphaned-process drain in #5545. This check is read-only: it
+# reports what is running and how to inspect it, and never kills anything.
+note "${BOLD}Background processes${NC}"
+if command -v pgrep >/dev/null 2>&1; then
+    PROCS=$(pgrep -af '[c]laude' 2>/dev/null | grep -viE 'cc-doctor|pgrep|[ /]grep ' || true)
+    PCOUNT=$(printf '%s' "$PROCS" | grep -c . | tr -d ' ')
+    PCOUNT=${PCOUNT:-0}
+    if [ "$PCOUNT" -ge 5 ]; then
+        warn "$PCOUNT 'claude' processes are running. If only one session is active, the extras are likely orphaned and can keep burning session quota (#65998, #5545). List them with 'pgrep -af claude' and end the ones you did not start."
+    elif [ "$PCOUNT" -gt 0 ]; then
+        ok "$PCOUNT 'claude' process(es) running (normal for an active session). If you get locked out with no session active, run 'pgrep -af claude' and end any stray ones (#65998, #5545)."
+    else
+        ok "no lingering 'claude' processes detected"
+    fi
+else
+    note "  ${DIM}pgrep unavailable; list stray Claude processes via your OS task manager and end ones with no active session (#65998, #5545)${NC}"
+fi
+note ""
+
 # --- Summary ---
 note "${BOLD}Summary${NC}"
 if [ ${#CONCERNS[@]} -eq 0 ]; then
