@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-07T14:47:30+09:00
+Updated: 2026-06-07T14:48:11+09:00
 
 ## Git
 - Branch: `seo/sitemap-add-missing-docs-2026-06-07`
@@ -7,13 +7,13 @@ Updated: 2026-06-07T14:47:30+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ca3230a4 checkpoint: pre-compact auto-save (1 files, 20260607-054721)
+- Last commit: 691058fc checkpoint: pre-compact auto-save (1 files, 20260607-054738)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-06-07.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/api-busyloop-guard.sh
 ./tests/test-completion-claim-without-verification-detector.sh
