@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Drain Analyzer — Is It a Bug or Your Context? (Claude Code)</title>
+<meta name="description" content="Analyze your real Claude Code session logs in your browser (nothing is uploaded). See the cache_read breakdown that drives 99% of token consumption, and tell a real bug apart from expected context-driven drain.">
+<meta property="og:title" content="Token Drain Analyzer — Bug or Context? (Claude Code)">
+<meta property="og:description" content="Your Max/Pro weekly limit dies in a day? Analyze your own session logs in-browser and see whether it's a bug or context re-reads — and what actually fixes it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/token-drain-analyzer.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-drain-analyzer.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Token Drain Analyzer for Claude Code","description":"In-browser analysis of Claude Code session logs to attribute token consumption and distinguish a bug from context-driven drain.","url":"https://yurukusa.github.io/cc-safe-setup/token-drain-analyzer.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.5}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.2rem 0 .6rem}
+.priv{background:#0c2a17;border:1px solid #1c5132;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:#7ee2a8;margin-bottom:1rem}
+.drop{background:#161b22;border:2px dashed #30363d;border-radius:10px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:all .15s}
+.drop:hover,.drop.over{border-color:#f97316;background:#1c2128}
+.drop p{color:#8b949e;font-size:.85rem;margin-top:.4rem}
+.btn{background:#f97316;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600}
+.btn:hover{background:#ea580c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#f97316;color:#f97316}
+.hide{display:none}
+.score{font-size:2.6rem;font-weight:700;text-align:center;margin:.3rem 0}
+.score.red{color:#f87171}.score.yellow{color:#fbbf24}.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.82rem;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.6rem 0}
+th,td{text-align:right;padding:.35rem .5rem;border-bottom:1px solid #21262d}
+th{color:#8b949e;font-weight:600}td:first-child,th:first-child{text-align:left;color:#e6edf3}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem;margin:1rem 0}
+.verdict{border-left:4px solid #f97316;padding-left:.9rem;margin:.8rem 0}
+.verdict.ok{border-color:#4ade80}
+.verdict.warn{border-color:#fbbf24}
+.lever{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0;font-size:.83rem}
+.lever b{color:#f97316}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.74rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;margin:.6rem 0}
+.note{color:#8b949e;font-size:.78rem;margin:.6rem 0}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.82rem;margin-bottom:.4rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+.err{color:#f87171;font-size:.82rem;margin:.5rem 0}
+.big{color:#f0f6fc;font-weight:700}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Token Drain Analyzer</h1>
+<p class="sub">Your Max/Pro weekly limit dies in a day on "light" work? This reads your <b>real</b> Claude Code session logs and shows where the tokens actually go — then tells a genuine bug apart from expected context-driven drain. Companion to the <a href="token-checkup.html">5-question Token Checkup</a>; this one uses your actual data.</p>
+
+<div class="priv">🔒 100% in your browser. Your logs are parsed locally with JavaScript and <b>never uploaded</b> — there is no server. You can disconnect from the network and it still works.</div>
+
+<h2>1. Pick your session logs</h2>
+<p class="note">They live in <code>~/.claude/projects/</code> (each project is a folder of <code>.jsonl</code> files). Select that folder, or drag in any <code>.jsonl</code> files.</p>
+<div class="drop" id="drop">
+  <button class="btn" id="pickFolder" type="button">Select ~/.claude/projects folder</button>
+  <button class="btn btn-outline" id="pickFiles" type="button">…or pick .jsonl files</button>
+  <p>or drag &amp; drop .jsonl files here</p>
+  <input id="fFolder" type="file" webkitdirectory directory multiple class="hide">
+  <input id="fFiles" type="file" accept=".jsonl" multiple class="hide">
+</div>
+<div id="status" class="note"></div>
+<div id="err" class="err"></div>
+
+<div id="results" class="hide">
+  <h2>2. Where your tokens went</h2>
+  <div class="card">
+    <div id="cacheScore" class="score"></div>
+    <div class="score-label">of your raw token volume is <b>cache_read</b> — context re-read on every turn</div>
+    <table id="dayTbl"><thead><tr><th>UTC day</th><th>input</th><th>cache_write</th><th>cache_read</th><th>output</th></tr></thead><tbody></tbody></table>
+    <h3 style="color:#f0f6fc;font-size:.92rem;margin:.8rem 0 .3rem">Heaviest sessions (which one ate the quota)</h3>
+    <table id="sessTbl"><thead><tr><th>session</th><th>messages</th><th>cache_read</th><th>output</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <h2>3. Bug, or your context?</h2>
+  <div id="verdict"></div>
+
+  <h2>4. What actually moves it</h2>
+  <div class="lever"><b>/clear between tasks.</b> The single biggest lever. It drops the accumulated context that gets re-sent every turn. One marathon session is what melts the quota fastest.</div>
+  <div class="lever"><b>Scope the working dir.</b> Open Claude Code on the subdirectory you're touching, not a giant monorepo root, so less gets pulled into context.</div>
+  <div class="lever"><b>Watch a big early file.</b> A large file (or generated artifact) read in early gets re-read every later turn. Keep it out unless needed.</div>
+
+  <div class="note"><b>Honest caveat:</b> the raw <code>cache_read</code> count is <em>volume</em>, not your dollar/quota cost — cached reads are weighted far cheaper per token than output. Don't read "1.2 billion" as a bill. The value here is the <b>attribution</b> (which sessions, and whether they match your usage), not the absolute number.</div>
+
+  <div class="actions">
+    <button class="btn" id="copyCard" type="button">Copy shareable summary</button>
+    <button class="btn btn-outline" id="again" type="button">Analyze again</button>
+  </div>
+</div>
+
+<div class="cta">
+  <h3>Stop the next cost surprise before it happens</h3>
+  <p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> is a free set of Claude Code safety hooks — one command installs guards against runaway cost, destructive ops, and secret leaks. <code>npx cc-safe-setup</code></p>
+  <p>More on why Max plans hit limits fast: <a href="claude-code-max-usage-limits.html">the #16157 cluster, explained</a>.</p>
+</div>
+
+<p class="footer">Runs entirely client-side. No data leaves your machine. Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>.</p>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let lastSummary="";
+function fmt(n){return n.toLocaleString();}
+function aggregate(texts){
+  const day={},sess={},msgs={};
+  let lines=0,used=0;
+  for(const t of texts){
+    const fileSid=(t.name||"").replace(/\.jsonl$/,"").slice(0,8)||"session";
+    for(const line of t.body.split("\n")){
+      if(!line.trim())continue; lines++;
+      let o; try{o=JSON.parse(line);}catch(e){continue;}
+      const m=o.message||{}; const u=m.usage; if(!u)continue;
+      const sid=(o.sessionId||fileSid).slice(0,8);
+      const d=(o.timestamp||"").slice(0,10)||"?";
+      const rec=k=>({in:u.input_tokens||0,cw:u.cache_creation_input_tokens||0,cr:u.cache_read_input_tokens||0,out:u.output_tokens||0});
+      const r=rec();
+      day[d]=day[d]||{in:0,cw:0,cr:0,out:0}; sess[sid]=sess[sid]||{in:0,cw:0,cr:0,out:0};
+      for(const k of["in","cw","cr","out"]){day[d][k]+=r[k];sess[sid][k]+=r[k];}
+      msgs[sid]=(msgs[sid]||0)+1; used++;
+    }
+  }
+  return {day,sess,msgs,lines,used};
+}
+function tot(c){return c.in+c.cw+c.cr+c.out;}
+function render(a){
+  if(a.used===0){$("#err").textContent="No token-usage records found in those files. Pick the .jsonl files inside ~/.claude/projects/ (assistant messages carry the usage data).";return;}
+  $("#err").textContent="";
+  let gTot=0,gCr=0,gOut=0;
+  Object.values(a.day).forEach(c=>{gTot+=tot(c);gCr+=c.cr;gOut+=c.out;});
+  const pct=gTot?Math.round(gCr/gTot*1000)/10:0;
+  const el=$("#cacheScore"); el.textContent=pct+"%";
+  el.className="score "+(pct>=90?"green":pct>=70?"yellow":"red");
+  // day table (last 14)
+  const days=Object.keys(a.day).sort().slice(-14);
+  $("#dayTbl tbody").innerHTML=days.map(d=>{const c=a.day[d];return `<tr><td>${d}</td><td>${fmt(c.in)}</td><td>${fmt(c.cw)}</td><td>${fmt(c.cr)}</td><td>${fmt(c.out)}</td></tr>`;}).join("");
+  // sessions top 10 by total
+  const top=Object.keys(a.sess).sort((x,y)=>tot(a.sess[y])-tot(a.sess[x])).slice(0,10);
+  $("#sessTbl tbody").innerHTML=top.map(s=>{const c=a.sess[s];return `<tr><td>${s}</td><td>${fmt(a.msgs[s]||0)}</td><td>${fmt(c.cr)}</td><td>${fmt(c.out)}</td></tr>`;}).join("");
+  // verdict
+  const heavy=top[0]?a.sess[top[0]]:null;
+  let v="";
+  if(pct>=90){
+    v=`<div class="verdict ok"><p><span class="big">Looks context-driven, not a leak in the model.</span> ${pct}% of your token volume is <code>cache_read</code> — the accumulated context (system prompt + files + history) re-sent on <em>every</em> turn. Consumption tracks <b>context size × number of turns</b>, not lines of code. "Light work, limit gone" is consistent with a long session over a big workspace.</p>
+    <p style="margin-top:.5rem">Now the one check only you can do: <b>do the heaviest sessions/days above line up with when you were actually working?</b></p>
+    <div class="lever">✅ <b>They match your usage</b> → expected. Use the levers below to make the weekly quota last.</div>
+    <div class="lever">🚩 <b>There's heavy usage when you weren't using it</b> → that's a real anomaly. Screenshot the per-day table and escalate to support — concrete numbers are far harder to wave off than "it feels wrong."</div></div>`;
+  } else {
+    v=`<div class="verdict warn"><p><span class="big">Mixed profile.</span> Only ${pct}% of your volume is <code>cache_read</code>; output and cache writes are a larger share than usual. If <code>output</code> is unexpectedly large relative to what you asked for, look at long auto-generated responses or runaway loops. Still compare the heaviest sessions to your actual usage — anything heavy when you weren't working is worth escalating with the table as evidence.</p></div>`;
+  }
+  $("#verdict").innerHTML=v;
+  lastSummary=`Claude Code token drain — my last ${days.length} days:\n`+
+    `cache_read = ${pct}% of token volume (context re-reads, not code).\n`+
+    (heavy?`heaviest session: ${fmt(a.msgs[top[0]]||0)} msgs, ${fmt(heavy.cr)} cache_read tokens.\n`:"")+
+    `Consumption = context size × turns. Diagnosed in-browser: https://yurukusa.github.io/cc-safe-setup/token-drain-analyzer.html`;
+  $("#results").classList.remove("hide");
+  $("#status").textContent=`Parsed ${fmt(a.used)} usage records from ${fmt(a.lines)} log lines — all in your browser.`;
+}
+async function handle(fileList){
+  const files=[...fileList].filter(f=>f.name.endsWith(".jsonl"));
+  if(!files.length){$("#err").textContent="No .jsonl files found. Pick the folder ~/.claude/projects/ or its .jsonl files.";return;}
+  $("#status").textContent=`Reading ${files.length} file(s)…`;
+  const texts=[];
+  for(const f of files){try{texts.push({name:f.name,body:await f.text()});}catch(e){}}
+  render(aggregate(texts));
+}
+$("#pickFolder").onclick=()=>$("#fFolder").click();
+$("#pickFiles").onclick=()=>$("#fFiles").click();
+$("#fFolder").onchange=e=>handle(e.target.files);
+$("#fFiles").onchange=e=>handle(e.target.files);
+const drop=$("#drop");
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files)handle(e.dataTransfer.files);});
+$("#again").onclick=()=>{$("#results").classList.add("hide");$("#status").textContent="";$("#fFolder").value="";$("#fFiles").value="";};
+$("#copyCard").onclick=()=>{navigator.clipboard.writeText(lastSummary).then(()=>{$("#copyCard").textContent="Copied!";setTimeout(()=>$("#copyCard").textContent="Copy shareable summary",1500);});};
+</script>
+</body>
+</html>
