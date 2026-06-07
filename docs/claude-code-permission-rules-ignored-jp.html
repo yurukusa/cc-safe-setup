@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code が allow / deny の権限ルールを無視して毎回確認を出す時の原因と直し方 — cc-safe-setup</title>
+<meta name="description" content="settings.json に allow や deny のルールを書いたのに Claude Code が毎回確認を出す、bypassPermissions が効かない時の原因と直し方。Windows のパスの正規化(backslash と UNC は一致しない)、設定の優先順位、ルールの書式、UI のモードが defaultMode を上書きする問題、skipDangerousModePermissionPrompt の誤解を、/permissions で実際のルールを見ながら一つずつ確認します。">
+<meta name="keywords" content="Claude Code 権限 効かない, allow list 無視, deny 効かない, Claude Code 毎回確認, bypassPermissions 効かない, settings.json 権限 反映されない, 権限 ルール 一致しない, /permissions, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-permission-rules-ignored-jp.html">
+<meta property="og:title" content="Claude Code が権限ルールを無視して毎回確認を出す時の原因と直し方">
+<meta property="og:description" content="設定したのに効かない権限ルールは、ルールが無いより危険です。守られているつもりで守られていないからです。Windows のパスの正規化・優先順位・モードの上書きの原因と、/permissions での確認の仕方。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.9;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.5rem;line-height:1.4}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.15rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a></nav>
+
+<h1>Claude Code が allow / deny の権限ルールを無視して毎回確認を出す時の原因と直し方</h1>
+<p>確認を出さないように <code>allow</code> のルールを足したのに、毎回確認が出る。<code>deny</code> を書いた、あるいは <code>bypassPermissions</code> を設定したのに、挙動が変わらない。困るのは、<strong>こっそり一致していない権限のルールは、ルールが無いより危険</strong>な点です。守られているつもりで作業を続けてしまうからです。これが実際に起きる原因を、確認すべき順に並べました。</p>
+
+<h2>まず /permissions で「実際の」ルールを見る</h2>
+<p>何かを変える前に、Claude Code で <code>/permissions</code> を実行してください。統合された後の有効なルールと、Claude が実際に照合している形が表示されます。「ルールが無視される」のほとんどは、<strong>書いた内容と <code>/permissions</code> に出る内容のずれ</strong>です。期待するルールがそこに在るか、別の形になっていないかを照合してください。これが手元での正本です。</p>
+
+<h2>原因1: Windows のパスの正規化(backslash と UNC は一致しない)</h2>
+<p>Windows では、ルールを照合する<strong>前に</strong>パスが POSIX 風の形に正規化されます。<code>C:\Users\alice\project</code> は <code>/c/Users/alice/project</code> として照合されます。そのため、backslash で書いたルールや <code>\\server\share</code> のような UNC のパスは、正規化後の形と永久に一致せず、毎回確認に落ちます。</p>
+<div class="fix">
+<strong>直し方:</strong> パスのルールは forward-slash の POSIX の形で書き、正確な正規化後の文字列は推測せず <code>/permissions</code> で確認してください。ドライブや UNC の正規化後の形は自明でないことがあるので、<code>/permissions</code> からコピーしてルールを組み立てます。
+</div>
+
+<h2>原因2: どの設定ファイルがそのルールを持つか(優先順位)</h2>
+<p>ルールは複数のファイルから統合され、上位の層が今編集した内容を上書きします。おおよそ、上位から下位の順に:</p>
+<table>
+<tr><th>層</th><th>場所</th></tr>
+<tr><td>組織・管理の方針</td><td>システムが管理する設定</td></tr>
+<tr><td>コマンドラインの引数</td><td><code>claude</code> の起動に渡す引数</td></tr>
+<tr><td>プロジェクト(ローカル・追跡外)</td><td><code>.claude/settings.local.json</code></td></tr>
+<tr><td>プロジェクト(共有)</td><td><code>.claude/settings.json</code></td></tr>
+<tr><td>ユーザー</td><td><code>~/.claude/settings.json</code></td></tr>
+</table>
+<p>上位の層の <code>deny</code> は、下位で足した <code>allow</code> に勝ちます。また <code>.claude/settings.local.json</code> に書いたのを忘れたルールが、プロジェクトのファイルを静かに覆い隠すこともあります。<code>/permissions</code> は統合後の結果を出すので、自分のルールが勝っていないなら、どのファイルが衝突する記述を持っているかを探します。</p>
+
+<h2>原因3: ルールのツール名や書式が一致していない</h2>
+<p>ルールは、ツール名とパターンの両方が、Claude がこれから行う内容に一致した時だけ発火します。</p>
+<ul>
+<li>パターンは厳密です。<code>Bash(npm run test:*)</code> は <code>npm run test:unit</code> に一致しますが、素の <code>npm test</code> には一致しません。細かすぎるパターンは何にも一致しません。</li>
+<li>引数の無い素のツール名(例: <code>Edit</code>)は、そのツールの<strong>全ての</strong>使用に一致します。素のルールが「何もしない」なら、パターンが違うのではなく、効いているモードが思っているものと違う合図です(原因4)。</li>
+<li>Claude が実際に使うツールに合わせます。PowerShell やシェルのコマンドは、プログラム名のツールではなくシェルのツール(多くは <code>Bash</code>)で動きます。ツール名は <code>/permissions</code> か確認のプロンプト自体で確かめます。</li>
+</ul>
+
+<h2>原因4: 効いているモードが settings.json の defaultMode を上書きする</h2>
+<p><code>defaultMode</code>(例: <code>acceptEdits</code> や <code>bypassPermissions</code>)を settings.json に設定したのに確認が出るなら、使っている画面の側が上書きしている可能性があります。VS Code の拡張では、UI で選んだモード(例えば <code>acceptEdits</code> にあたる「自動で編集」)が settings.json の既定より優先されます。さらに <code>bypassPermissions</code> は拡張の独自のトグル(<code>claudeCode.allowDangerouslySkipPermissions</code>)でゲートされ、そのトグルを有効にするまで settings.json の bypass は効きません。</p>
+<div class="fix">
+<strong>直し方:</strong> モードは settings.json だけでなく、実際に動かしている画面(拡張の UI のモードの選択、またはコマンドライン)で設定します。VS Code で bypass を使うなら、先に拡張のトグルを有効にします。
+</div>
+<div class="incident">
+<span class="incident-title">bypass の安全の注意</span>
+<p>確認を止めるために一括の bypass を有効にすると、本当に取り返しのつかない操作を止めている分も含めて、全てのガードが一度に外れます。「日常の編集は <code>acceptEdits</code>、取り返しのつかない数件の操作は <code>deny</code> のリスト」という狭い設定の方が、確認が雑音になる所では止め、効くべき所では残せます。</p>
+</div>
+
+<h2>原因5: skipDangerousModePermissionPrompt は「警告」を消すだけ</h2>
+<p>確認そのものを止めるつもりで <code>skipDangerousModePermissionPrompt</code> を設定したなら、それは違う梃子です。これは危険なモードに入る時に出る<strong>警告</strong>を消すだけで、操作ごとの確認は消しません。しかも一度設定すると「ガード無しで動いている」という警告が二度と出なくなり、欲しかった挙動は得られないまま、安全の合図だけが消えます。</p>
+
+<h2>原因6: セッションの途中で設定を編集した</h2>
+<p>Claude Code が動いている間に settings.json(や hook)を編集しても、セッションを再起動するまで反映されないことがあります。ルールを直したのに変わらないなら、Claude Code を再起動して <code>/permissions</code> で再確認します。</p>
+
+<h2>直したら、実際に発火するか確認する</h2>
+<p><code>/permissions</code> に出るようになったルールは照合されています。ただし最も確実な確認は挙動の確認です。その操作を一度だけ実際に起こして、意図どおりに許可・拒否・確認されるかを見ます。権限のルールの目的は「肝心な時に効くこと」で、効くと分かる唯一の方法は一度動かしてみることです。</p>
+
+<div class="cta">
+<p>プロンプトのモードの混乱に依らず、ツールの段で守りたいなら</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">破壊的・取り返しのつかない操作を実行の前に止める無料の hook。どの UI のモードが効いていても、ツールの段で守ります。</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">本ページは公開された Anthropic の権限と設定のドキュメントと、再現された報告に基づきます。権限の挙動は版や画面(コマンドラインか VS Code の拡張か)で変わりうるので、手元では <code>/permissions</code> が正本です。最新は公式のドキュメントで確認してください。cc-safe-setup は Anthropic とは無関係の独立したオープンソースです。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
