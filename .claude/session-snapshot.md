@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-07T14:47:09+09:00
+Updated: 2026-06-07T14:47:17+09:00
 
 ## Git
 - Branch: `seo/sitemap-add-missing-docs-2026-06-07`
@@ -7,7 +7,7 @@ Updated: 2026-06-07T14:47:09+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 8407e7f0 recovery: pre-compact checkpoint (1 files, 20260607-054709)
+- Last commit: 209c2bfe checkpoint: auto-save 14:47:15
 
 ## Recent Files
 ```
