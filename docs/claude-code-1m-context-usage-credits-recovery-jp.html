@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeが「Usage credits required for 1M context」で止まった時の復旧（2026）</title>
+<meta name="description" content="Pro / Max プランで突然「Usage credits required for 1M context」と出て Claude Code が止まった。実際に効く復旧手順、いま壊れている回避策、残高を黙って溶かす罠を、起票の実例からまとめます。">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-1m-context-usage-credits-recovery-jp.html">
+<meta property="og:title" content="Claude Codeが「1M context の usage credits」で止まった時の復旧">
+<meta property="og:description" content="課金プランが警告なく止まる。確定した復旧手順、いま効かない回避策、残高を溶かす罠。">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; line-height: 1.8; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.55rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.18rem; margin: 2rem 0 0.8rem; }
+h3 { font-size: 1.02rem; margin: 1.3rem 0 0.5rem; }
+.alert { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+.warn { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+.ok { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 1rem 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; }
+pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; margin: 1rem 0; }
+code { font-family: 'JetBrains Mono', monospace; background:#f1f1f4; padding:0.05rem 0.3rem; border-radius:3px; font-size:0.9em; }
+pre code { background:none; padding:0; }
+.cta { text-align: center; margin: 2.5rem 0; padding: 1.5rem; background: #eff6ff; border-radius: 8px; }
+.cta a { color: #2563eb; font-weight: bold; text-decoration: none; }
+.cta a:hover { text-decoration: underline; }
+ul { margin: 0.5rem 0 0.5rem 1.4rem; }
+li { margin: 0.4rem 0; }
+footer { text-align: center; color: #888; font-size: 0.82rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
+footer a { color: #2563eb; text-decoration: none; }
+.lang { text-align:right; font-size:0.85rem; margin-bottom:0.5rem; }
+.lang a { color:#2563eb; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="lang"><a href="claude-code-1m-context-usage-credits-recovery.html">English</a></div>
+
+<h1>Claude Codeが「Usage credits required for 1M context」で止まった時の復旧</h1>
+<p style="color:#666;">Pro / Max プランなのに、警告なく止まった。実際に効く手順と、効かない手順を分けて書きます。</p>
+
+<div class="alert">
+<strong>出るエラー：</strong> <code>API Error: Usage credits required for 1M context · turn on usage credits at claude.ai/settings/usage, or use --model to switch to standard context</code>（新しい版は <code>run /usage-credits ... or /model to switch to standard context</code>）。課金している <strong>Pro と Max の両方</strong>で起き、CLI・VS Code 拡張・デスクトップ・Cowork のどれでも報告されています。執筆時点で公式の修正も「version X で直った」の告知もありません。だから以下は「完全な解決」ではなく「復旧の手順」として読んでください。
+</div>
+
+<h2>まず、自分がどちらの状況か確かめる</h2>
+<p>同じメッセージの裏に、別々の2つの原因があります。直し方が違うので、先にここを見分けます。</p>
+<ul>
+<li><strong>セッションの<em>途中</em>で出た</strong>、または <code>/compact</code> の直後、あるいは文脈のメーターが高く（130%、185%、369K…）なってから出た。→ こちらが多く、<strong>復旧できる</strong>側です。Aへ。</li>
+<li><strong>新規のセッションで</strong>、何も入力する前に即座に出る。しかも使用量のダッシュボードは上限に程遠い。→ アカウント／サーバ側の様子です。Bへ。</li>
+</ul>
+
+<h2>A. セッションの途中で出た（復旧できる側）</h2>
+<p>起きていること：セッションの文脈が20万トークンを超えて育ち（自動の圧縮が走らなかった、あるいはMCPのスクリーンショットなど大きな道具の出力がたまった、など）、次のリクエストが黙って1M contextの段へ上がり、そこが課金の壁でブロックされます。鍵は、<em>小さいモデル</em>ならSonnetが止まった所でも圧縮できることです。</p>
+
+<div class="ok">
+<strong>確定した復旧</strong>（無関係の複数の利用者が「効いた」と報告）：
+</div>
+
+<h3>1. 小さいモデルへ切替→圧縮→戻す</h3>
+<pre><code># 同じセッションを小さいモデルで再開
+claude --continue --model claude-haiku-4-5-20251001
+# その中で:
+/compact
+# 圧縮できたらSonnetで再開。縮んだ文脈は20万に収まる
+claude --continue --model claude-sonnet-4-6</code></pre>
+<p>「別のモデルで圧縮する」段はOpusでも構いません。要点は、Sonnetで止まった <code>/compact</code> が小さいモデルでは通ることです。</p>
+
+<h3>2. それでも圧縮が走らない時：セッションの大きな項目を間引く</h3>
+<p>巨大な画像やスクリーンショットが20万超えの原因なら、圧縮そのものが大きすぎて走らないことがあります。セッションのJSONLから一番大きい項目を抜いて再開します。<code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code> のセッションファイルを見つけ、<strong>先に必ずバックアップ</strong>（<code>.jsonl.bak</code> にコピー）してから、<code>tool_result</code> の中の大きな <code>type: image</code> のブロックを小さな目印に置き換え、<code>claude --resume &lt;session&gt;</code> で再開します。</p>
+
+<h3>3. 最終手段：<code>/clear</code></h3>
+<p><code>/clear</code> は確実に解除できますが、<strong>セッションの文脈を捨てます</strong>。上の手順がどれも効かず、会話を失っても良い時だけ使ってください。</p>
+
+<h2>効かない回避策（時間を使わないために）</h2>
+<div class="warn">
+<ul>
+<li><strong><code>--model</code> のフラグだけ</strong>：セッションが既に20万超えだと無視されます。リクエストが既に大きい文脈で組まれているからです。Aのように <code>/compact</code> と<em>組み合わせた</em>時だけ効きます。</li>
+<li><strong><code>CLAUDE_CODE_DISABLE_1M_CONTEXT=1</code></strong>：いま無視されます。これは <strong>2.1.156</strong> で壊れた既知の不具合です（2.1.155では効いていた）。シェルでも <code>settings.json</code> でも、該当の版では効きません。Dispatchや背景のサブエージェントも無視します。</li>
+<li><strong>エラーを消すために「usage credits」を有効化する</strong>：⚠ これは壁を<em>直す</em>のでなく<em>払って通す</em>だけです。前払いの残高が一気にマイナスへ落ちた、ブロックされたリクエストでも残高が減った、という報告が複数あります。解除のために有効化するなら、残高を見張ってください。</li>
+<li>Claude Codeの版下げ、設定の全消し、logout/loginは、どれも「直らなかった」と報告されています。</li>
+</ul>
+</div>
+
+<h2>B. 新規セッションで、使用量が低いのに即出る（アカウント／サーバ側）</h2>
+<p>まっさらなセッションで、ダッシュボードに余裕があるのに即座に出る場合、確定した手元の修正はありません。起票の議論で一番強い手がかりは、この型がアカウント／サーバ側に紐づくこと（手元の設定ではない）です。正直な選択肢：</p>
+<ul>
+<li>新しいスレッドを開くと一時的に消えることがありますが、数時間で戻りがちです。</li>
+<li><code>[1m]</code> のモデルIDが既定に固定されていないか確認する：<code>~/.claude/settings.json</code>、プロジェクトの <code>.claude/settings.json</code>、<code>~/.claude.json</code> を <code>1m</code> で検索し、VS Code拡張のモデルの選択も見ます。見つかれば標準のID（例 <code>claude-sonnet-4-6</code>）に直します。確認の価値はありますが、新規セッションの型に対する確定の修正<em>ではありません</em>。</li>
+<li>手元が全部標準のモデルなのにまだ出るなら、サーバ側です。supportへ報告を。エラー自身の案内（「standard contextへ切替えよ」）は手元の梃子があるはずだと示唆していて、それが効かない時点で不具合です。</li>
+</ul>
+
+<h2>なぜMaxでも止まるのか</h2>
+<p>Maxなら無縁だと思いがちですが、そうではありません。<strong>Sonnetの1M contextはMaxでも自動では含まれません</strong>（Opusの1Mは含まれる、Sonnetの1Mはどのプランでもusage creditsが要る）。だからSonnetの長いセッションが1Mへ上がると、MaxもProと同じ壁に当たります。</p>
+
+<h2>再発を防ぐ</h2>
+<ul>
+<li><strong>壁に当たる前に圧縮する</strong>。当たった後では既に復旧モードです。圧縮の前に作業を保存するフックも、消失の予防になります。</li>
+<li>大きな成果物を会話の文脈に入れない。参照ファイルは作業領域に置き、<code>.claudeignore</code> を使い、スクリーンショットの多いMCPの道具が一つの長いセッションに画像をためないようにします。</li>
+<li>一つのセッションを無限に育てず、大きな仕事ごとに新しいセッションを始めます。</li>
+</ul>
+
+<div class="cta">
+この種の問題のための、無料・MITの安全装置（圧縮前のチェックポイント、文脈の肥大の防止、費用の急増の保護）が<br>
+<a href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/README.ja.md">cc-safe-setup</a> にあります。ワンコマンド：<code>npx cc-safe-setup</code>。
+</div>
+
+<footer>
+公開中のGitHubの起票のクラスタ #62063・#63060・#63479・#63634・#64057・#64398・#65205・#66067（anthropics/claude-code）に基づく、2026年6月時点のまとめです。執筆時点で全て未解決・公式の修正なし。手順は無関係の利用者が「効いた」と報告したものです。<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 800時間超の自律運用から生まれた安全装置。
+</footer>
+
+</div>
+</body>
+</html>
