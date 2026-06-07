@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cluster 12 Tool Call Parsing Diagnostic — Which Sub-Pattern Are You Hitting?</title>
+<title>Claude Code: "Tool call could not be parsed" / tool call corrupted — diagnose which parsing failure you're hitting — cc-safe-setup</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="4-question diagnostic to identify which of the four Opus 4.7 tool call parsing failure sub-patterns (12A/12B/12C/12D) is hitting your session. Each sub-pattern has a different recovery — misapplied /clear burns context. Browser-only, no signup, no telemetry. CC0.">
+<meta name="description" content="Claude Code shows 'Tool call could not be parsed' / 'unable to parse model response' / a corrupted tool call mid-turn? A 4-question diagnostic identifies which of the four parsing-failure sub-patterns (12A/12B/12C/12D) is hitting you — each has a different recovery, and a misapplied /clear burns context. Browser-only, no signup, no telemetry. CC0.">
+<meta name="keywords" content="Claude Code tool call could not be parsed, tool call corrupted, unable to parse model response, Claude Code parsing failed, tool_use parse error, Claude Code tool call error, model response could not be parsed, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/cluster-12-tool-call-parsing-diagnostic.html">
 <style>
 :root {
   --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
@@ -51,8 +53,12 @@ code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-siz
 </head>
 <body>
 
-<h1>Cluster 12 Tool Call Parsing Diagnostic</h1>
+<h1>Claude Code: "Tool call could not be parsed" — parsing-failure diagnostic</h1>
 <div class="meta">4 questions · ~2 minutes · browser-only, no signup, no telemetry · CC0 · v1.0 (2026-05-29)</div>
+
+<div class="intro">
+<strong>Seeing <code>Tool call could not be parsed</code>, <code>unable to parse model response</code>, or a tool call that arrives corrupted mid-turn?</strong> You're in the right place. These are not one bug — there are four distinct sub-patterns, and each has a <em>different</em> recovery, so applying the wrong one (e.g. a reflexive <code>/clear</code>) can waste your context. This page identifies which one you're hitting.
+</div>
 
 <div class="intro">
 <strong>The cluster:</strong> Five filings (<a href="https://github.com/anthropics/claude-code/issues/62123" target="_blank">#62123</a>, <a href="https://github.com/anthropics/claude-code/issues/62344" target="_blank">#62344</a>, <a href="https://github.com/anthropics/claude-code/issues/62467" target="_blank">#62467</a>, <a href="https://github.com/anthropics/claude-code/issues/62700" target="_blank">#62700</a>, <a href="https://github.com/anthropics/claude-code/issues/49747" target="_blank">#49747</a>) document four distinct sub-patterns where Opus 4.7 produces tool calls the harness cannot parse. Each sub-pattern has a different recovery — misapplied <code>/clear</code> burns context on the wrong ones. This diagnostic asks four questions to identify which sub-pattern is most likely hitting your session.
