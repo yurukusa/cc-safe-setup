@@ -93,8 +93,13 @@ New Release — April 2026
 <div style="margin-bottom:1.5rem;">
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary" style="margin-right:8px;">Buy Now — $17</a>
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=token-book-lp&utm_medium=tool&utm_campaign=token-book" class="btn-primary" style="background:#2563eb;">Zennで購入 — ¥2,500</a>
-<p style="margin-top:8px;font-size:0.85em;color:#22c55e;font-weight:600">Max plan ($200/月) の10%節約で月$20回収 → 1ヶ月で元が取れる</p>
+<p style="margin-top:8px;font-size:0.85em;color:#dc2626;font-weight:600">同じ$200を払っても、トークンを減らせば枠が枯れて締め出されるまでに進められる仕事が増える</p>
 <p style="margin-top:4px;font-size:0.85em;color:#666">PDF全10章・44,000字 ｜ <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" style="color:#666;text-decoration:none;">まずは無料診断 →</a> ｜ <a href="token-book-chapter1.html" style="color:#22c55e;text-decoration:underline;">はじめに＋第1章 無料で読む →</a></p>
+</div>
+
+<div class="pain-point">
+<p style="margin:0 0 0.5rem;"><strong>「$200を払っているのに、すぐ使用枠に達する」</strong></p>
+<p style="margin:0;font-size:0.95rem;color:#444;">Max/Proの利用枠が想定よりはるかに速く枯れる問題は、GitHub Issueで今も続いている——<a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a>（722件の反応「Instantly hitting usage limits with Max subscription」）、<a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>（529件「3月以降セッション枠が異常に速く消費される」）。痛いのは「節約できない」ことではなく、<strong>定額を払っているのに作業の途中で締め出されること</strong>だ。容量の問題そのものはAnthropic側にしか直せない。だが同じ作業をより少ないトークンで終わらせれば、<strong>枠が枯れて締め出されるまでの猶予は自分で伸ばせる</strong>。この本はその実践テクニックを800時間の運用データから体系化した。</p>
 </div>
 
 <div class="data-point" style="background:#f0f9ff;border-left:3px solid #2563eb;padding-left:1.5rem;">
@@ -112,7 +117,7 @@ New Release — April 2026
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=token-book-lp&utm_medium=tool&utm_campaign=token-book" class="btn-primary">Zennで購入 — ¥2,500 (~$17)</a>
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary" style="background:#f97316;margin-left:8px;">Buy on Ko-fi — $17</a>
 <p style="margin-top:8px;font-size:0.85em;color:#666">PDF全10章・44,000字・設定テンプレート収録 ｜ <a href="token-book-chapter1.html" style="color:#22c55e;">第1章を無料で読む →</a></p>
-<p style="margin-top:4px;font-size:0.85em;color:#22c55e;font-weight:600">Max plan ($200/月) の10%削減で月$20節約 → 1ヶ月で元が取れる</p>
+<p style="margin-top:4px;font-size:0.85em;color:#dc2626;font-weight:600">定額制では、トークンを減らしても返金はない。戻るのは「枠が枯れる前に進められる仕事の量」だ</p>
 </div>
 
 <h2>このBookで手に入るもの</h2>
@@ -204,12 +209,12 @@ New Release — April 2026
 </details>
 </div>
 
-<h2>¥2,500で元が取れるか</h2>
-<div class="data-point">
-<strong>Max plan $200/月 ≈ ¥30,000/月</strong>。トークン消費を10%減らせば月¥3,000の節約。<strong>1ヶ月目で回収</strong>。実測では40%減の事例もあり、その場合は月¥12,000の効果。
+<h2>¥2,500の価値はどこにあるか</h2>
+<div class="data-point" style="background:#fef2f2;border-left:3px solid #ef4444;">
+<strong>定額のMax / Pro を使っている場合</strong>。トークンを減らしても請求額は同じ（定額だから返金はない）。価値は別のところにある——<strong>枠が枯れて締め出されるまでに進められる仕事が増える</strong>。$200を払って作業の途中で止められる、その損失を減らすのがこの本の効きどころだ。「30日中12日しか使えない」状態を、同じ料金のまま広げる。
 </div>
 <div class="data-point" style="background:#eff6ff;">
-<strong>Pro plan $20/月でも効果あり</strong>。トークン効率が上がれば、枠を使い切るまでの作業量が増える。「30日中12日しか使えない」状態を解消できれば、Max($100/月)へのアップグレードが不要になる可能性も。
+<strong>従量課金（API / Bedrock / Vertex）を使っている場合</strong>。トークン削減はそのまま請求額に効く。CLAUDE.mdを100行→35行に凝縮した実測で消費が体感40%減、compaction頻度も下がった。削減した分はそのまま支払いの減少になる。
 </div>
 <p>無料のTips記事を10本読んで試行錯誤する時間コスト vs. 体系化された10章を1冊で学ぶ時間コスト。どちらが安いか。</p>
 
@@ -220,7 +225,7 @@ New Release — April 2026
 <a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=token-book-lp&utm_medium=tool&utm_campaign=token-book" class="btn-primary">Zennで購入 — ¥2,500 (~$17)</a>
 <a href="https://ko-fi.com/s/fd44ef09a7" class="btn-primary" style="background:#f97316;margin-left:8px;">Buy on Ko-fi — $17</a>
 <p style="margin-top:8px;font-size:0.9em;color:#666">PDF全10章・44,000字・設定テンプレート収録</p>
-<p style="margin-top:12px;font-size:0.85em;color:#555;background:#f0fdf4;display:inline-block;padding:0.4rem 1rem;border-radius:6px;">Max plan $200/月のトークン消費を10%減らせば<strong>1ヶ月で回収</strong></p>
+<p style="margin-top:12px;font-size:0.85em;color:#555;background:#fef2f2;display:inline-block;padding:0.4rem 1rem;border-radius:6px;">定額$200を払って作業の途中で締め出される——その猶予を、同じ料金のまま伸ばす</p>
 <br>
 <a href="token-checkup.html" class="btn-secondary">まず無料でトークン消費を診断する →</a>
 <a href="cache-health.html" class="btn-secondary" style="margin-top:4px">/costの出力でキャッシュ健全性を確認 →</a>
@@ -277,7 +282,7 @@ New Release — April 2026
 <div style="margin-bottom:1.5rem;">
 <a href="https://ko-fi.com/s/fd44ef09a7?utm_source=token-book-lp&utm_medium=tool&utm_campaign=token-book" class="btn-primary" style="background:#f97316;">Buy Now — $17</a>
 <a href="https://yurukusa.gumroad.com/l/azrdt?utm_source=token-book-lp" class="btn-primary" style="background:#22c55e;margin-left:8px;">Get on Gumroad — ¥1,800</a>
-<p style="margin-top:8px;font-size:0.85em;color:#22c55e;font-weight:600">Max plan ($200/mo): save 10% = $20/mo → pays for itself in month one</p>
+<p style="margin-top:8px;font-size:0.85em;color:#dc2626;font-weight:600">On a flat Max plan, cutting tokens won't lower your bill — it buys you more work before the cap locks you out mid-task</p>
 <p style="margin-top:4px;font-size:0.85em;color:#666">10 chapters · 44,000 words · config templates ｜ <span style="color:#22c55e;">Intro + Ch.1 free</span> ｜ <a href="https://yurukusa.github.io/cc-safe-setup/token-checkup.html" style="color:#666;text-decoration:none;">Free diagnostic →</a></p>
 <p style="margin-top:8px;font-size:0.85em;background:#f0fdf4;border-left:3px solid #22c55e;padding:0.5rem 0.8rem;color:#166534;">💡 <strong>Bundle deal</strong>: <a href="https://yurukusa.gumroad.com/l/poqhoo?utm_source=token-book-lp" style="color:#166534;font-weight:600;">Token Book + Safety Mastery — ¥3,900 (~38% off)</a>. Both books = complete Claude Code safety + efficiency.</p>
 </div>
@@ -319,12 +324,12 @@ New Release — April 2026
 <tr><td style="padding:0.5rem;border-bottom:1px solid #f0f0f0;">Troubleshooting</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;">Search GitHub Issues yourself</td><td style="padding:0.5rem;text-align:center;border-bottom:1px solid #f0f0f0;background:#f0fdf4;"><strong>54-symptom diagnostic flowchart</strong></td></tr>
 </table>
 
-<h2>ROI</h2>
-<div class="data-point">
-<strong>Max plan = $200/month</strong>. Reduce token usage by just 10% = $20/month saved. <strong>Pays for itself in month one</strong>. Measured cases show 40% reduction = $80/month saved.
+<h2>What It's Worth</h2>
+<div class="data-point" style="background:#fef2f2;border-left:3px solid #ef4444;">
+<strong>On a flat Max / Pro plan</strong>: cutting tokens doesn't lower your bill — you still pay the same fixed price. The payoff is different: <strong>you get more done before the cap throttles you and locks you out mid-task</strong>. Paying $200 and getting cut off ("out of 30 days I get to use Claude 12") is the loss this book reduces — same fee, more usable runway.
 </div>
 <div class="data-point" style="background:#eff6ff;">
-<strong>Pro plan ($20/month) users too</strong>. Better token efficiency means more work per session. "Out of 30 days I get to use Claude 12" — if optimization fixes that, you may not need to upgrade to Max at all.
+<strong>On usage-based billing (API / Bedrock / Vertex)</strong>: token reduction maps straight to dollars. A measured CLAUDE.md restructure (100→35 lines) cut consumption ~40% and lowered compaction frequency — that reduction comes off your bill directly.
 </div>
 
 <h2>FAQ</h2>
@@ -335,7 +340,7 @@ New Release — April 2026
 </details>
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">Is ¥2,500 ($17) worth it?</summary>
-<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">Max plan costs $200/month. A 10% reduction saves $20/month — the book pays for itself in month one. Measured cases show 40% reduction ($80/month saved). Even Pro plan ($20/month) users benefit: better efficiency means more work per session without upgrading.</p>
+<p style="margin-top:0.5rem;font-size:0.9rem;color:#555;">Depends on how you're billed. On a flat Max/Pro plan, the value isn't dollars saved (your fee is fixed) — it's reaching the cap less often and getting more done before you're locked out mid-task. On usage-based billing (API/Bedrock/Vertex), token reduction comes straight off your bill; a measured CLAUDE.md restructure cut consumption ~40%.</p>
 </details>
 <details style="margin-bottom:0.8rem;border:1px solid #e5e7eb;border-radius:8px;padding:0.8rem 1rem;">
 <summary style="cursor:pointer;font-weight:600;color:#1e293b;">I'm not an engineer. Will I understand it?</summary>
@@ -356,7 +361,7 @@ New Release — April 2026
 <div style="margin-top:12px;padding:0.8rem 1rem;background:#f0fdf4;border:1px solid #22c55e;border-radius:8px;text-align:left;">
 <p style="margin:0;font-size:0.9rem;color:#166534;"><strong>💡 Save with the Bundle:</strong> <a href="https://yurukusa.gumroad.com/l/poqhoo?utm_source=token-book-lp" style="color:#166534;font-weight:600;">Token Book + Safety Mastery — ¥3,900 (~38% off)</a>. Complete Claude Code safety + efficiency in one purchase. Prevents rm -rf, credential leaks, CVE-2026-21852 — plus all the token-saving content.</p>
 </div>
-<p style="margin-top:8px;font-size:0.85em;color:#22c55e;font-weight:600">Save just 10% on Max plan ($200/mo) = $20/mo saved. Pays for itself in month one.</p>
+<p style="margin-top:8px;font-size:0.85em;color:#dc2626;font-weight:600">Flat Max/Pro plan: same fee, more usable runway before the cap locks you out. Usage-based billing: token cuts come straight off your bill.</p>
 <br>
 <a href="token-checkup.html" class="btn-secondary">Free Token Checkup → Diagnose your usage first</a>
 <a href="cache-health.html" class="btn-secondary" style="margin-top:4px">Cache Health → Paste /cost output for instant diagnosis</a>
