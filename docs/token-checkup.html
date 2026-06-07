@@ -181,7 +181,7 @@ const answers = [];
 const TOTAL = 5;
 
 const tips = [
-  {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Save 20-40% tokens ($40-80/mo on Max)',chapter:'Ch.2 — CLAUDE.md Optimization',when:{claudemd:['long']}},
+  {id:'claudemd',title:'Optimize your CLAUDE.md',desc:'A bloated CLAUDE.md is re-read on every turn. Each 1KB = ~250 tokens × every message. Move details to linked files.',impact:'Cut 20-40% token use (≈$40-80/mo metered, or that much runway back on flat plans)',chapter:'Ch.2 — CLAUDE.md Optimization',when:{claudemd:['long']}},
   {id:'cache',title:'Monitor cache read ratio',desc:'Run /cost and check cache_read vs cache_creation. Below 50% means you\'re paying full price for repeated context. Two root causes: git status changes break cache on every edit (#47107), and new sessions always miss cache for ~6,500 tokens (#47098). See <a href="https://gist.github.com/yurukusa/fe6ba0a6aee14207f27ecc84419878b4">Cache Breakage Fix</a> for details.',impact:'Prevent 10-20x spikes',chapter:'Ch.8 — Troubleshooting',when:{cache:['dunno','yes']}},
   {id:'subagent',title:'Set subagent budget limits',desc:'Each subagent gets its own context window. 5 parallel agents = 5x token cost. Use token-budget-guard and subagent-budget-guard hooks.',impact:'Save 30-60% on agent workflows ($60-120/mo)',chapter:'Ch.5 — Subagent Strategy',when:{agents:['heavy','sometimes']}},
   {id:'session',title:'Split sessions strategically',desc:'After context compaction, cache efficiency drops. Starting a fresh session with a clear task description is often cheaper than continuing.',impact:'Save 15-25% per session ($30-50/mo)',chapter:'Ch.6 — Workflow Design',when:{session:['single','auto']}},
@@ -244,7 +244,7 @@ function showResults() {
 
   const scoreClass = score >= 70 ? 'green' : score >= 40 ? 'yellow' : 'red';
   const typeName = score >= 80 ? 'The Optimizer' : score >= 60 ? 'The Conscious Coder' : score >= 40 ? 'The Silent Burner' : score >= 20 ? 'The Token Bleeder' : 'The Quota Destroyer';
-  const typeDesc = score >= 80 ? 'Your setup is solid. You already know where tokens go.' : score >= 60 ? 'You\'re aware of the problem but haven\'t plugged all the leaks yet.' : score >= 40 ? 'Tokens are draining in places you can\'t see. Most developers are here.' : score >= 20 ? 'Your monthly bill is 2-3x what it should be. Quick wins available.' : 'Emergency: your setup has critical token drains. Fix today.';
+  const typeDesc = score >= 80 ? 'Your setup is solid. You already know where tokens go.' : score >= 60 ? 'You\'re aware of the problem but haven\'t plugged all the leaks yet.' : score >= 40 ? 'Tokens are draining in places you can\'t see. Most developers are here.' : score >= 20 ? 'You hit your cap 2-3x sooner than you should — or pay 2-3x on usage-based billing. Quick wins available.' : 'Emergency: your setup has critical token drains. Fix today.';
   const label = `${typeName} — ${typeDesc}`;
   const wastePercent = Math.round((100 - score) * 0.6);
   const monthlySavings = burn === 'fast' ? Math.round(wastePercent * 2) : burn === 'moderate' ? Math.round(wastePercent * 1.2) : Math.round(wastePercent * 0.5);
@@ -257,11 +257,12 @@ function showResults() {
       <div class="score ${scoreClass}">${score}/100</div>
       <p style="font-size:1.1rem;font-weight:700;color:#f0f6fc;margin:.5rem 0 .3rem">${typeName}</p>
       <p class="score-label">${typeDesc}</p>
-      ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Estimated ~${wastePercent}% token waste → <strong style="color:#f97316">~$${monthlySavings}/month</strong> in potential savings on your $${planCost}/month plan.</p>` : ''}
+      ${score < 70 ? `<p style="margin-top:.5rem;font-size:.85rem;color:#8b949e">Estimated ~${wastePercent}% token waste. On a flat $${planCost}/month plan that means hitting your cap ~<strong style="color:#f97316">${wastePercent}% sooner</strong> than necessary — capacity you already paid for, burned early. On usage-based billing it's ≈$${monthlySavings}/month in direct cost.</p>` : ''}
     </div>
 
     <div class="result">
       <h2>Recommended Optimizations</h2>
+      <p style="font-size:.78rem;color:#8b949e;margin:-.3rem 0 .6rem">Dollar figures below are usage-based-billing equivalents. On a flat Max/Pro plan you don't pay less — these cuts push your cap back so you get locked out later.</p>
       ${matched.map(t => `
         <div class="tip">
           <div class="tip-title">${t.title}</div>
@@ -273,8 +274,8 @@ function showResults() {
     </div>
 
     <div class="cta">
-      <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to stop it' : score < 70 ? 'Save $' + monthlySavings + '/month with these fixes' : 'Fine-tune your setup further'}</h3>
-      <p>${score < 40 ? `At ~${wastePercent}% waste, you're losing <strong style="color:#f97316">~$${monthlySavings}/month</strong>. The Token Book has copy-paste CLAUDE.md templates, hook configs, and the exact workflow changes that cut our cost by 50%. $17 (¥2,500) — pays for itself in ${monthlySavings > 34 ? '2 days' : monthlySavings > 17 ? 'the first week' : 'the first month'}.` : score < 70 ? `The ${matched.length} optimizations above come from the Token Book — 10 chapters of real data from 800+ hours. At ~$${monthlySavings}/month in savings, the $17 (¥2,500) pays back ${monthlySavings > 17 ? 'within days' : 'in the first month'}. Every template is copy-paste ready.` : 'CLAUDE.md structure and cache management alone can squeeze out 10-20% more. The Token Book covers advanced techniques with copy-paste templates from 800+ hours of operation.'}</p>
+      <h3>${score < 40 ? 'Your tokens are bleeding — here\'s how to stop it' : score < 70 ? 'Reclaim ~' + wastePercent + '% of the plan you already pay for' : 'Fine-tune your setup further'}</h3>
+      <p>${score < 40 ? `At ~${wastePercent}% waste, you're hitting your cap well before you need to — on a flat plan that's capacity you already paid for, gone early (≈$${monthlySavings}/month if you're on usage-based billing). The Token Book has copy-paste CLAUDE.md templates, hook configs, and the workflow changes that cut our own token use by ~50% — so you reach the cap later, and pay less if you're metered. $17 (¥2,500).` : score < 70 ? `The ${matched.length} optimizations above come from the Token Book — 10 chapters of real data from 800+ hours. On a flat plan they buy you more runway before the cap; on usage-based billing they cut roughly $${monthlySavings}/month directly. $17 (¥2,500), every template copy-paste ready.` : 'CLAUDE.md structure and cache management alone can squeeze out 10-20% more. The Token Book covers advanced techniques with copy-paste templates from 800+ hours of operation.'}</p>
       <a href="https://ko-fi.com/s/fd44ef09a7?utm_source=token-checkup&utm_medium=tool&utm_campaign=token-book" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem;font-size:1rem;padding:.8rem 2rem">Get Token Book — $17 (¥2,500)</a>
       <a href="token-book.html#en" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Details + 2 Free Chapters →</a>
       <a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=token-checkup&utm_medium=tool&utm_campaign=token-book" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem;font-size:.85rem">日本語版 (Zenn)</a>
