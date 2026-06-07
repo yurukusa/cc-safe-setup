@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code ignores my permission rules (allow / deny) and prompts anyway — why, and how to fix it — cc-safe-setup</title>
+<meta name="description" content="You added an allow or deny rule in settings.json, or set bypassPermissions, but Claude Code still prompts every time — or blocks the wrong thing. The usual causes: Windows path normalization (backslashes/UNC never match), settings precedence, rule format, the UI mode overriding defaultMode, and skipDangerousModePermissionPrompt suppressing only the warning. How to see your real rules with /permissions and fix each.">
+<meta name="keywords" content="Claude Code permission rules not working, allow list ignored, deny rule not working, Claude Code prompts every time, bypassPermissions not working, settings.json permissions ignored, Claude Code permission allow not matching, claudeCode.allowDangerouslySkipPermissions, skipDangerousModePermissionPrompt, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-permission-rules-ignored.html">
+<meta property="og:title" content="Claude Code ignores my permission rules and prompts anyway — why, and how to fix it">
+<meta property="og:description" content="An allow/deny rule that silently doesn't match is worse than no rule — you operate thinking you're guarded. The real causes (Windows path normalization, precedence, mode override) and how to verify your rules with /permissions.">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.6rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">Home</a> <a href="getting-started.html">Get Started</a> <a href="hub.html">All Tools</a></nav>
+
+<h1>Claude Code ignores my permission rules and prompts anyway — why, and how to fix it</h1>
+<p>You added an <code>allow</code> rule so a command would stop asking — but it still prompts every time. Or you added a <code>deny</code> rule, or set <code>bypassPermissions</code>, and the behavior didn't change. The frustrating part is that a permission rule that <em>silently doesn't match</em> is worse than no rule at all: you keep working believing you are guarded, when you are not. Here are the causes that actually produce this, in the order worth checking, and how to confirm each.</p>
+
+<h2>Step 0: see your <em>real</em> rules with /permissions</h2>
+<p>Before changing anything, run <code>/permissions</code> in Claude Code. It shows the effective, merged rules and the exact form Claude is matching against. Almost every "my rule is ignored" case is a mismatch between what you wrote and what <code>/permissions</code> actually shows — so this is your ground truth. Match the rule you expect against the list there; if it's absent or in a different form, one of the causes below explains it.</p>
+
+<h2>Cause 1: Windows path normalization (backslashes and UNC never match)</h2>
+<p>On Windows, Claude Code normalizes paths to a POSIX-style form <em>before</em> matching a rule. A path like <code>C:\Users\alice\project</code> is matched as <code>/c/Users/alice/project</code>. So a rule you wrote with backslashes, or a UNC path like <code>\\server\share</code>, will never match the normalized form — and the action falls through to a prompt every time.</p>
+<div class="fix">
+<strong>Fix:</strong> write path-based rules in forward-slash POSIX form, and confirm the exact normalized string with <code>/permissions</code> rather than guessing. The normalized form for a given drive/UNC path isn't always obvious, so copy it from <code>/permissions</code> and build your rule from that.
+</div>
+
+<h2>Cause 2: which settings file actually holds the rule (precedence)</h2>
+<p>Rules are merged from several files, and a higher-precedence layer can override what you just edited. Roughly, from highest to lowest precedence:</p>
+<table>
+<tr><th>Layer</th><th>Where</th></tr>
+<tr><td>Enterprise / managed policy</td><td>system-managed settings</td></tr>
+<tr><td>Command-line flags</td><td>flags passed to the <code>claude</code> invocation</td></tr>
+<tr><td>Project (local, untracked)</td><td><code>.claude/settings.local.json</code></td></tr>
+<tr><td>Project (shared)</td><td><code>.claude/settings.json</code></td></tr>
+<tr><td>User</td><td><code>~/.claude/settings.json</code></td></tr>
+</table>
+<p>A <code>deny</code> in a higher layer beats an <code>allow</code> you added lower down, and a forgotten rule in <code>.claude/settings.local.json</code> can quietly shadow your project file. <code>/permissions</code> shows the merged result; if your rule isn't winning, find which file actually contributes the conflicting entry.</p>
+
+<h2>Cause 3: the rule's tool name or pattern doesn't match</h2>
+<p>A rule only fires when both the tool name and the pattern match what Claude is about to do.</p>
+<ul>
+<li>Patterns are specific: <code>Bash(npm run test:*)</code> matches <code>npm run test:unit</code> but not a bare <code>npm test</code>. Too-specific patterns match nothing.</li>
+<li>A bare tool name with no arguments — e.g. <code>Edit</code> — matches <em>all</em> uses of that tool. If a bare rule "does nothing," that's a sign the active mode isn't the one you think (see Cause 4), not that the pattern is wrong.</li>
+<li>Match the tool Claude actually uses. A PowerShell or shell command runs under the shell tool (often <code>Bash</code>), not a tool named after the program — check the tool name in <code>/permissions</code> or in the permission prompt itself.</li>
+</ul>
+
+<h2>Cause 4: the active mode overrides settings.json <code>defaultMode</code></h2>
+<p>If you set <code>defaultMode</code> (e.g. <code>acceptEdits</code> or <code>bypassPermissions</code>) in settings.json but still get prompts, the surface you're using may be overriding it. In the VS Code extension, the mode selected in the UI (for example "Edit automatically", which is <code>acceptEdits</code>) takes precedence over the settings.json default, and <code>bypassPermissions</code> is additionally gated behind the extension's own toggle (<code>claudeCode.allowDangerouslySkipPermissions</code>) — until that toggle is on, a settings.json bypass won't take effect.</p>
+<div class="fix">
+<strong>Fix:</strong> set the mode in the surface you're actually running (the UI mode selector in the extension, or the CLI), not only in settings.json. For bypass in VS Code, enable the extension toggle first.
+</div>
+<div class="incident">
+<span class="incident-title">A safety note on bypass</span>
+<p>Turning on a blanket bypass to stop prompts removes every guard at once, including the ones catching genuinely destructive actions. A narrower setup — <code>acceptEdits</code> for routine edits plus a <code>deny</code> list for the handful of irreversible operations — keeps the prompts off where they're noise and on where they matter.</p>
+</div>
+
+<h2>Cause 5: <code>skipDangerousModePermissionPrompt</code> only hides the warning</h2>
+<p>If you set <code>skipDangerousModePermissionPrompt</code> expecting it to stop per-action confirmations, that's the wrong lever: it suppresses the <em>warning</em> shown when you enter dangerous mode, not the action confirmations themselves. Worse, once it's set, the warning that you're running without guards stops appearing — so it removes a safety reminder without giving you the behavior you wanted.</p>
+
+<h2>Cause 6: you edited settings mid-session</h2>
+<p>Changes to settings.json (and to hooks) made while Claude Code is already running may not take effect until you restart the session. If you edited a rule and nothing changed, restart Claude Code and re-check with <code>/permissions</code>.</p>
+
+<h2>After you fix it: confirm the rule actually fires</h2>
+<p>A rule that now appears in <code>/permissions</code> is matching; but the most reliable check is behavioral — trigger the exact action once and confirm it is allowed/denied/prompted as you intended. The whole point of a permission rule is that it does something when it matters, and the only way to know is to see it act once.</p>
+
+<div class="cta">
+<p>Want guards that enforce at the tool layer regardless of prompt-mode confusion?</p>
+<pre><code>npx cc-safe-setup</code></pre>
+<p>Free, MIT hooks that block destructive and irreversible actions before they run — independent of which UI mode is active.</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">Based on Anthropic's public permissions and settings documentation and reproduced reports. Permission behavior can vary by version and surface (CLI vs VS Code extension); <code>/permissions</code> is the ground truth on your machine — check the official docs for the latest. cc-safe-setup is an independent open-source project, not affiliated with Anthropic.</p>
+</body>
+</html>

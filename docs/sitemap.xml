@@ -137,5 +137,39 @@
   <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-usage-limit-fast-jp.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-mcp-not-working-jp.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-server-rate-limited.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-permission-rules-ignored.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-12-tool-call-parsing-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/agents-md-setup-generator.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/agents-md-vs-claude-md.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/billing-incident-detection.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/billing-surprises-guide.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-june-15-billing-change.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/june-15-cliff-checklist.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/safety-lab.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/safety-lab-fit-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/attack-simulator.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-code-2-1-133-context-bloat-fix.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claude-update-fix.html</loc><lastmod>2026-06-07</lastmod><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-13-extended-thinking-wedge-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-22-23-opus48-dual-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-22-23-opus48-dual-diagnostic-jp.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-exposure-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/multi-vendor-fan-out-diagnostic.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/multi-vendor-fan-out-diagnostic-jp.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/opus47-cost-estimator.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/opus47-downgrade.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/opus47-scanner.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/claudemd-guide.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/security-checkup.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/skills-audit-tool.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/token-audit.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/token-saving-hooks.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/effort-calculator.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/ai-coding-safety-report-2026.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/blog-official-security-review-plus-hooks.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/blog-subagent-permissions.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/blog-token-cost-volatility.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/token-book-chapter1.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://yurukusa.github.io/cc-safe-setup/tools/june15-readiness-audit.html</loc><lastmod>2026-06-07</lastmod><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>
