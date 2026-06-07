@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code で MCP を設定したのに動かない・無視される(エラーも出ない)時の原因と直し方 — cc-safe-setup</title>
+<meta name="description" content="MCP サーバーを .mcp.json に設定したのに、ツールが出てこない・エラーも出ずに無視される。最大の原因はプロジェクトのサーバーの承認待ち。/mcp で実際の状態を見て、スコープ・承認・環境変数・PATH・タイムアウトを順に切り分ける手順を公式の出典つきで整理。">
+<meta name="keywords" content="Claude Code MCP 動かない, MCP 設定 反映されない, mcp.json 認識しない, MCP ツール 出てこない, claude mcp list pending, MCP 沈黙 失敗, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-mcp-not-working-jp.html">
+<meta property="og:title" content="Claude Code で MCP を設定したのに動かない・無視される時の原因と直し方">
+<meta property="og:description" content="最大の原因は『プロジェクトのサーバーの承認待ち』。/mcp で状態を見て順に切り分ける手順を、公式の出典つきで。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+.sig-silent{color:#f85149;font-weight:600}
+.sig-loud{color:#3fb950;font-weight:600}
+.sig-visible{color:#d29922;font-weight:600}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a></nav>
+
+<h1>MCP を設定したのに動かない・無視される(エラーも出ない)時の原因と直し方</h1>
+<p><code>.mcp.json</code> にサーバーを書いた。<code>claude mcp add</code> もした。なのに、そのツールが会話に出てこない。Claude も使ってくれない。そして<strong>エラーも出ない</strong>——一番もやもやする詰まり方です。このページは、何が起きているかを <code>/mcp</code> で確かめてから、原因を起こりやすい順に切り分ける手順を、<a href="https://code.claude.com/docs/en/mcp">公式の MCP ドキュメント</a>を出典に整理します。</p>
+
+<h2>まず <code>/mcp</code> を見る(「沈黙」の大半はここで声が出ている)</h2>
+<p>「エラーも出ない」と感じても、状態は <code>/mcp</code> パネル(または端末で <code>claude mcp list</code>)に出ていることがほとんどです。会話を始める前に、まずここを見てください。各サーバーの横に状態が出ます。</p>
+<table>
+<tr><th>表示</th><th>意味</th></tr>
+<tr><td>名前 + ツール数</td><td>接続済み。ツール数が出ていれば使える状態。</td></tr>
+<tr><td><code>⏸ Pending approval</code>(承認待ち)</td><td>プロジェクトの <code>.mcp.json</code> のサーバーが、まだ承認されていない。<strong>これが「設定したのに無視される」の最大の原因。</strong></td></tr>
+<tr><td><code>⏸ Pending auth</code>(認証待ち)</td><td>HTTP のサーバーで OAuth のログインがまだ。<code>/mcp</code> から認証する。</td></tr>
+<tr><td><code>✗ Rejected</code>(拒否)</td><td>以前あなたが承認を拒否した。あとで戻せる(後述)。</td></tr>
+<tr><td><code>failed</code>(失敗)</td><td>起動・接続に失敗。多くは PATH やコマンドの問題(後述)。</td></tr>
+</table>
+<p><strong>正直な限界</strong>: 公式ドキュメントの範囲では、<code>/mcp</code> は <code>failed</code> とは出しても「なぜ失敗したか」(コマンドが見つからない/タイムアウト/401 など)の詳細までは出しません。ここは切り分けで埋めます。</p>
+
+<h2>最大の原因: プロジェクトのサーバーは「承認」しないと黙って動かない</h2>
+<div class="incident">
+<p class="incident-title">設定は正しいのに、何も起きない</p>
+<p>公式は明記しています——<em>「セキュリティ上の理由から、Claude Code は <code>.mcp.json</code> のプロジェクトのサーバーを使う前に承認を求める」</em>。つまり、チームの誰かが <code>.mcp.json</code> をコミットし、あなたが <code>git pull</code> しても、<strong>あなたが承認するまでそのサーバーは不活性のまま</strong>です。承認の前は <code>claude mcp list</code> で <code>⏸ Pending approval</code> と出るだけで、赤いエラーは出ません。これが「設定したのに無視される」の正体であることが非常に多いです。</p>
+</div>
+<div class="fix">
+<p><strong>直し方</strong></p>
+<ul style="margin:.5rem 0 .5rem 1.2rem">
+<li><code>claude</code> を対話で起動すると、承認のプロンプトが出ます。承認すると有効になります。</li>
+<li>間違って拒否してしまった(<code>✗ Rejected</code>)場合は、承認の選択をやり直せます:<pre><code>claude mcp reset-project-choices</code></pre></li>
+</ul>
+</div>
+
+<h2>次に多い: スコープの取り違え(別の場所に登録されている)</h2>
+<p>MCP サーバーには3つのスコープがあり、<strong>どこに書いたかで「どのプロジェクトで読まれるか」が変わります</strong>。期待した場所に出ていないなら、スコープが原因のことがあります。</p>
+<table>
+<tr><th>スコープ</th><th>保存先</th><th>読まれる範囲</th></tr>
+<tr><td>Local(ローカル)</td><td><code>~/.claude.json</code> のそのプロジェクトの項目</td><td>今のプロジェクトだけ・自分だけ</td></tr>
+<tr><td>Project(プロジェクト)</td><td>プロジェクト直下の <code>.mcp.json</code>(git で共有)</td><td>今のプロジェクト・チーム共有(要承認)</td></tr>
+<tr><td>User(ユーザー)</td><td><code>~/.claude.json</code> の全体の項目</td><td>全プロジェクト・自分だけ</td></tr>
+</table>
+<p>優先順位は <strong>Local &gt; Project &gt; User</strong>(さらにプラグイン提供のもの、最後に claude.ai のコネクタ)。同じ名前のサーバーを別スコープに書いていると、優先順位の高い方の定義だけが効きます。<code>claude mcp get &lt;名前&gt;</code> でどの定義が効いているかを確認できます。</p>
+
+<h2>「失敗」の中身: 静かに落ちる/はっきり落ちるの切り分け</h2>
+<p>失敗の出方は原因で違います。どれが静かに(<span class="sig-silent">沈黙</span>)落ち、どれが声を出す(<span class="sig-loud">明示</span>/<span class="sig-visible">状態表示</span>)かを知っておくと早いです。</p>
+<table>
+<tr><th>原因</th><th>出方</th></tr>
+<tr><td>stdio のコマンドが PATH に無い/起動できない</td><td><span class="sig-silent">静か</span>:接続が pending のあと <code>failed</code> に。stdio は自動で再接続しません。</td></tr>
+<tr><td>サーバーは起動するがツールを1つも公開しない</td><td><span class="sig-visible">/mcp に出る</span>:「tools の能力はあるが公開ゼロ」と表示。</td></tr>
+<tr><td>HTTP のサーバーで認証(401/403)が未完</td><td><span class="sig-visible">状態表示</span>:<code>⏸ Pending auth</code>。OAuth を促される。</td></tr>
+<tr><td><code>.mcp.json</code> の JSON の文法エラー</td><td><span class="sig-loud">はっきり失敗</span>:設定の読み込みでエラー。</td></tr>
+<tr><td>必須の環境変数が未設定で既定値も無い</td><td><span class="sig-loud">はっきり失敗</span>:公式いわく「設定の解析に失敗する」。</td></tr>
+<tr><td>起動に時間がかかりタイムアウト</td><td><span class="sig-silent">静か</span>に <code>failed</code>:<code>MCP_TIMEOUT</code> で延ばせる(下記)。</td></tr>
+</table>
+<p>HTTP/SSE のサーバーは指数バックオフで最大5回まで自動再接続し、超えると <code>failed</code> になります。認証エラーは再試行されません(設定の修正が必要)。</p>
+
+<h2>stdio が <code>failed</code> の時: まず単体で動くか確かめる</h2>
+<div class="fix">
+<ul style="margin:.5rem 0 .5rem 1.2rem">
+<li><code>.mcp.json</code> の <code>command</code> を、<strong>同じ環境の素の端末でそのまま実行</strong>してみる。<code>command not found</code> なら PATH の問題です。<code>npx</code> や <code>uvx</code> やフルパスで起動するか確認します。</li>
+<li>Claude Code が起動するサーバーの作業ディレクトリやログインシェルは、あなたの端末と違うことがあります。<strong>絶対パス</strong>や、確実に解決できるコマンド名を使うと安定します。</li>
+<li>起動が遅いサーバーは、既定のタイムアウトで切られている可能性があります。延ばして試す:<pre><code>MCP_TIMEOUT=15000 claude</code></pre></li>
+</ul>
+</div>
+
+<h2>環境変数の展開でつまずく時</h2>
+<p><code>.mcp.json</code> では <code>${VAR}</code> と <code>${VAR:-既定値}</code> が使えます(<code>command</code> / <code>args</code> / <code>env</code> / <code>url</code> / <code>headers</code> の中で展開)。注意点:</p>
+<ul style="margin:.5rem 0 .5rem 1.5rem">
+<li><strong>必須の変数が未設定で既定値も無いと、設定全体の解析に失敗します</strong>(静かではなく、はっきり失敗)。鍵などは <code>${API_KEY}</code> でなく、未設定時の挙動を意識して書く。</li>
+<li>プロジェクト/ローカルのスコープで <code>${CLAUDE_PROJECT_DIR}</code> を使うときは、既定値つきの <code>${CLAUDE_PROJECT_DIR:-.}</code> の形が要ります。</li>
+</ul>
+
+<h2>切り分けの順番(まとめ)</h2>
+<div class="fix">
+<ol style="margin:.5rem 0 .5rem 1.4rem">
+<li><code>/mcp</code> または <code>claude mcp list</code> で状態を見る。</li>
+<li><code>⏸ Pending approval</code> なら承認する(最頻の原因)。<code>✗ Rejected</code> なら <code>claude mcp reset-project-choices</code>。</li>
+<li><code>claude mcp get &lt;名前&gt;</code> で、効いている定義とスコープを確認する。期待と違えば書く場所を直す。</li>
+<li><code>failed</code> なら、<code>command</code> を素の端末で実行して PATH を確認。必要なら <code>MCP_TIMEOUT</code> を延ばす。</li>
+<li><code>⏸ Pending auth</code> なら <code>/mcp</code> から OAuth を完了する。</li>
+<li>「ツール公開ゼロ」と出るなら、サーバー側の問題。サーバーのバージョンや起動引数を見る。</li>
+<li>JSON の文法と、必須の環境変数(既定値の有無)を確認する。</li>
+</ol>
+</div>
+<p><strong>正直な限界(公式ドキュメントの範囲)</strong>: 専用の MCP デバッグのフラグや、ログの保存先は公式には明記されていません。上の「素の端末で <code>command</code> を実行」「<code>MCP_TIMEOUT</code> を延ばす」「<code>/mcp</code> の状態表示」が、現状で確実な切り分けの手立てです。詳細なエラー理由が <code>/mcp</code> に出ないのは改善の余地のある点です。</p>
+
+<h2>関連: 設定とは別に、運用の事故を防ぐ</h2>
+<p>MCP が動かないのは設定の問題で、コマンドを止める hook では直りません。ただし MCP は外部のサーバーに権限を渡す仕組みでもあるので、安全な運用は別途大切です。</p>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="prevent-credential-leak-jp.html">認証情報の漏洩を防ぐ(MCP に鍵を渡す設計でも効く)</a></li>
+<li><a href="prevent-rm-rf-jp.html">破壊的な操作を実行の前に止める無料の hook</a></li>
+<li><a href="claude-code-which-model-served-jp.html">実際にどのモデルで動いたかを確認する</a></li>
+</ul>
+
+<div class="cta">
+<h2>Claude Code の事故を予防する</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">破壊的な操作・秘密の漏洩・費用の暴走を、実行の前に止める無料の hook。MCP の設定の問題そのものは直しませんが、外部のサーバーに権限を渡す運用の安全を支えます。</p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">本ページは公開された<a href="https://code.claude.com/docs/en/mcp">公式の MCP ドキュメント</a>に基づきます。挙動は版で変わりうるので、実際の設定の前に最新を確認してください。cc-safe-setup は Anthropic とは無関係の独立したオープンソースです。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
