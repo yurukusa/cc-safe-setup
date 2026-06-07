@@ -1,25 +1,27 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-02T10:38:47+09:00
+Updated: 2026-06-07T14:45:01+09:00
 
 ## Git
-- Branch: `feat/multi-vendor-concurrent-warner-2026-06-02`
+- Branch: `seo/sitemap-add-missing-docs-2026-06-07`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 9f8dc860 recovery: pre-compact checkpoint (1 files, 20260602-013847)
+- Last commit: 0dba8402 checkpoint: auto-save 14:44:40
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-06-02.md
 ./test.sh
-./README.md
-./examples/multi-vendor-concurrent-warner.sh
-./examples/agents-md-sync-checker.sh
-./scripts/agents-md-sync-setup.sh
-./docs/june-15-cliff-14-day-plan.md
-./examples/cowork-model-picker-advisor.sh
+./examples/api-busyloop-guard.sh
+./tests/test-completion-claim-without-verification-detector.sh
+./tests/test-context-length-budget.sh
+./tests/test-cost-incident-self-audit.sh
+./tests/test-credential-exfil-guard.sh
+./tests/test-cron-create-receipt.sh
+./tests/test-cross-product-mcp-spawn-detector.sh
+./tests/test-deployment-readback-gate.sh
 ```
+
+## Active TODOs: 1 file(s)
 
