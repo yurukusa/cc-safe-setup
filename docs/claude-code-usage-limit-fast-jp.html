@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の Max / Pro の利用枠がすぐ尽きるとき——何が枠を食っているか調べて長持ちさせる検証済みの方法 — cc-safe-setup</title>
+<meta name="description" content="Max / Pro を払っているのに Claude Code の利用枠が数日で尽きて作業できない。まず /usage で何が枠を食っているか特定し、公式に裏づけのある方法(/clear・モデル選択・1M文脈の無効化・CLAUDE.md の軽量化)で消費を減らして枠を長持ちさせる手順。">
+<meta name="keywords" content="Claude Code 利用枠 すぐ 尽きる, Claude Code 上限 早い, Claude Code Max 枠 持たない, Claude Code 使用量 減らす, Claude Code 週次 上限, CLAUDE_CODE_DISABLE_1M_CONTEXT, opusplan, /usage, /clear, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-usage-limit-fast-jp.html">
+<meta property="og:title" content="Claude Code の Max / Pro の利用枠がすぐ尽きるとき">
+<meta property="og:description" content="まず何が枠を食っているか /usage で特定し、公式に裏づけのある方法で消費を減らして枠を長持ちさせる。">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の利用枠がすぐ尽きるときに枠を長持ちさせる方法","description":"/usage で消費の内訳を特定し、/clear・モデル選択・1M文脈の無効化・CLAUDE.md の軽量化で消費を減らす。","step":[{"@type":"HowToStep","name":"何が枠を食っているか特定する","text":"/usage を開き d または w で直近24時間/7日の内訳を見て、skill・subagent・plugin・MCP のどれが枠を食っているか特定する。"},{"@type":"HowToStep","name":"消費を減らす","text":"タスクの切れ目で /clear、用途に合うモデル(Sonnet 中心・必要時のみ Opus)、CLAUDE_CODE_DISABLE_1M_CONTEXT=1 で 1M 文脈を無効化、CLAUDE.md を 200 行未満に保つ。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.7rem;line-height:1.35}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+h3{color:#f0f6fc;margin:1.4rem 0 .4rem;font-size:1.1rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+.badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+.src{color:#8b949e;font-size:.8rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a> <a href="troubleshooting.html">Troubleshooting (English)</a></nav>
+
+<h1>Claude Code の Max / Pro の利用枠がすぐ尽きるとき</h1>
+<p>Max や Pro を払っているのに、Claude Code の利用枠が週の半ばどころか数日で尽きて、残りの日は作業できない。前と同じ使い方なのに急に早く上限に当たるようになった——これは多くの利用者が報告している痛みです(例: <a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a>、<a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>)。あなたの感覚は正しく、気のせいではありません。</p>
+<p>このページは、まず<strong>何があなたの枠を食っているのかを特定</strong>し、次に<strong>公式に裏づけのある方法で消費を減らして枠を長持ちさせる</strong>手順です。すべて Anthropic の公式ドキュメントに基づきます(末尾に出典)。あわせて、消費が増える要因のうち利用者側で変えられないもの(プラットフォーム側)も正直に分けて示します。</p>
+
+<h2>まず: 何が枠を食っているか特定する</h2>
+<div class="fix">
+<p>原因を当てる前に、実測で内訳を見ます。これが最初の一手です。</p>
+<ul style="margin:.5rem 0;padding-left:1.5rem">
+<li><code>/usage</code> を開くと、Pro / Max / Team / Enterprise では<strong>枠に対する消費の内訳</strong>が出ます。<code>d</code> で直近24時間、<code>w</code> で直近7日に切り替えられ、skill・subagent・plugin・個別の MCP サーバーのそれぞれが全体の何%かを表示します。どれが枠を食っているかがここで分かります。</li>
+<li><code>/context</code> で、いま文脈に何が載っているか(MCP のツール定義や CLAUDE.md など)を確認できます。</li>
+</ul>
+<p class="src">数値はこの端末のローカルの履歴から概算されるため、別の端末や claude.ai の利用は含まれません。</p>
+</div>
+
+<h2>消費を減らして枠を長持ちさせる(公式の方法)</h2>
+
+<h3>1. タスクの切れ目で <code>/clear</code>(最も効くレバー)</h3>
+<p>毎回のメッセージには、それまでの会話のすべてが含まれます。会話が長くなるほど、1回ごとの消費が増えます。別の作業に移るときは <code>/clear</code> で会話を流すと、CLAUDE.md やプロジェクトのファイルは残したまま、履歴だけが消えます。公式は、これを<strong>品質と費用の両方で最も効果的なレバー</strong>と説明しています。後で戻りたいときは <code>/clear</code> の前に <code>/rename</code>、戻るときは <code>/resume</code>。</p>
+
+<h3>2. 用途に合うモデルを選ぶ(Opus は数倍重い)</h3>
+<p>Opus は1ターンあたり Sonnet の数倍の枠を使います。常用せず、難しい設計判断や込み入った推論のときだけにします。<code>/model</code> で随時切り替え、<code>/config</code> で既定を設定。<code>opusplan</code> を使うと、計画は Opus・実装は Sonnet に自動で切り替わります(後述の 1M の自動昇格は <code>opus</code> 設定には及びますが <code>opusplan</code> には及びません)。subagent には <code>model: haiku</code> も指定できます。</p>
+
+<h3>3. 1M 文脈を無効化する(既定で重い場合)</h3>
+<p>Opus 4.7 では 1M 文脈が既定で、これは消費が大きくなります。多くのタスクは 200K で足ります。次で 200K に戻せます。</p>
+<pre><code>CLAUDE_CODE_DISABLE_1M_CONTEXT=1</code></pre>
+<p>これを <code>settings.json</code> または環境変数に設定すると、モデルの選択肢から 1M 版が外れます。1M の文脈は毎回その大きな文脈を再処理するため、週次の枠の消費を速める要因になります。</p>
+
+<h3>4. 毎回載るものを軽くする</h3>
+<ul style="margin:.5rem 0;padding-left:1.5rem">
+<li><strong>CLAUDE.md は 200 行未満</strong>に保つ。CLAUDE.md はセッションの開始時に文脈へ読み込まれ、無関係な作業のときも常に消費します。詳しい手順は skill に移すと、必要なときだけ読み込まれます。</li>
+<li><strong>使わない MCP サーバーを切る</strong>。<code>/mcp</code> で一覧を見て、使っていないものを無効化。MCP のツール定義は既定では遅延読み込みですが、CLI で済むもの(<code>gh</code>・<code>aws</code>・<code>gcloud</code> など)は MCP より文脈効率が良いです。</li>
+<li><strong>具体的に頼む</strong>。「このコードベースを改善して」のような曖昧な依頼は広い走査を招きます。「auth.ts のログイン関数に入力検証を足して」のように具体的だと、最小限のファイル読みで済みます。</li>
+</ul>
+
+<h3>5. 拡張思考(extended thinking)を調整する</h3>
+<p>拡張思考は既定で有効で、思考トークンは出力として課金されます。深い推論が要らない簡単なタスクでは、<code>/effort</code> で努力レベルを下げる、<code>/config</code> で無効化する、<code>MAX_THINKING_TOKENS=8000</code> で予算を下げる、で消費を減らせます。</p>
+
+<h3>6. 重い処理は subagent に逃がす / agent team は控えめに</h3>
+<p>テストの実行・ドキュメントの取得・ログの処理などの冗長な出力は subagent に委ねると、その出力は subagent の文脈に留まり、本体には要約だけが返ります。なお agent team は、各メンバーが自分の文脈を持つため、plan モードで標準のセッションの約7倍のトークンを使います。使うときは小さく保ち、終わったら片付けます。</p>
+
+<h3>7. 上限のガードを置く</h3>
+<p>Pro / Max では <code>/usage-credits</code> で使用クレジットの月次の上限を設定できます(変更には課金のアクセス権が必要)。あわせて、消費の暴走を実行の手前で自動で止める hook を入れておくと、気づかないうちの枠の枯渇を防げます(下記)。</p>
+
+<div class="cta">
+<h2>消費の暴走を自動で止める hook を入れる</h2>
+<pre><code>npx cc-safe-setup</code></pre>
+<p style="margin-top:.8rem">暴走した取得ループ・無限出力・巨大画像の再試行など、枠と費用を一気に食う操作を実行の手前で止めます。<span class="badge">885の hook</span> <span class="badge">9,200以上のテスト</span></p>
+<p style="margin-top:1rem">いま自分がどの費用事故に無防備かを調べる: <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/cost-incident-self-audit.sh">cost-incident-self-audit</a> &middot; <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a></p>
+</div>
+
+<h2>正直な限界: 利用者側で変えられない要因もある</h2>
+<p>上の方法は<strong>あなたの</strong>消費を減らして枠を長持ちさせます。一方で、消費が増える要因のうちプラットフォーム側のものは、利用者側では直せません。報告レベルでは、特定の版での挙動の変化(モデルの自動の振り分けや既定の変化)で、同じ使い方でも消費が増えたという声があります(<a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a>、<a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>)。これらは Anthropic 側の対応を待つ部分です。回避策として版を戻すと消費が戻ったという報告もあります(<code>claude --version</code> で現在の版を確認できます)。<strong>使い方を一切変えていないのに急に枠の減りが速くなった場合は、上の節約で凌ぎつつ、公式のサポートに報告する</strong>のが筋です。確実に自分で減らせる部分と、待つ/報告する部分を分けて扱ってください。</p>
+
+<h2>関連するページ</h2>
+<ul style="padding-left:1.5rem;margin:1rem 0">
+<li><a href="prevent-cost-explosion-jp.html">費用の暴走を防ぐ(出力・取得の暴走の予防)</a></li>
+<li><a href="claude-code-slow-crash-jp.html">急に遅い・固まる・落ちる原因と直し方</a></li>
+<li><a href="token-book.html">トークン消費を抑えて枠を長持ちさせる実践テクニック(800時間の運用データ)</a></li>
+</ul>
+
+<p style="margin-top:2rem;color:#8b949e;font-size:.85rem">cc-safe-setup はオープンソースで、依存はなく、グローバルには何も入れません。すべての hook はローカルで動きます。<a href="https://github.com/yurukusa/cc-safe-setup">GitHub でソースを見る</a>。</p>
+<p class="src" style="margin-top:1.5rem">出典(すべて公式): <a href="https://code.claude.com/docs/en/costs">Manage costs effectively</a> · <a href="https://code.claude.com/docs/en/model-config">Model configuration</a> · <a href="https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code">Models, usage, and limits in Claude Code</a>。</p>
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="token-book.html" style="color:#58a6ff">トークン消費を抑える実践ガイド</a> · <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
