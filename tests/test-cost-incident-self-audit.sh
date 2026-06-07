@@ -28,6 +28,9 @@ JSON
 EMPTY="$WORK/empty-settings.json"
 echo '{}' > "$EMPTY"
 
+# Convention: like every example hook, this always exits 0 (it is a report,
+# not a gate). The count is asserted via output/JSON, never the exit code.
+
 # Test 1: fully-guarded setup + 1M off + no workflows -> 0 exposures, exit 0
 OUT=$(CC_COST_AUDIT_SETTINGS="$FULL" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>&1)
 RC=$?
@@ -35,27 +38,26 @@ assert_contains "fully guarded reports none" "$OUT" "No exposures found"
 assert_eq "fully guarded exit 0" "$RC" "0"
 
 # Test 2: empty settings + 1M off + no workflows -> exposed to runaway/image/output/spend (4)
-OUT=$(CC_COST_AUDIT_SETTINGS="$EMPTY" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>/dev/null)
+OUT=$(CC_COST_AUDIT_SETTINGS="$EMPTY" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>&1)
 RC=$?
-assert_eq "empty settings -> 4 exposures (no CI, 1M off)" "$RC" "4"
+assert_eq "report always exits 0" "$RC" "0"
+assert_contains "empty settings -> 4 exposures (no CI, 1M off)" "$OUT" "Exposed to 4 of"
 assert_contains "mentions webfetch issue" "$OUT" "65684"
 assert_contains "mentions image issue" "$OUT" "65636"
 assert_contains "mentions output issue" "$OUT" "65789"
 assert_not_contains "no CI -> no push-blast finding" "$OUT" "65944"
 
 # Test 3: 1M context left ON adds the quota exposure (5)
-OUT=$(CC_COST_AUDIT_SETTINGS="$EMPTY" bash "$HOOK" 2>/dev/null)
-RC=$?
-assert_eq "1M on -> 5 exposures" "$RC" "5"
+OUT=$(CC_COST_AUDIT_SETTINGS="$EMPTY" bash "$HOOK" 2>&1)
+assert_contains "1M on -> 5 exposures" "$OUT" "Exposed to 5 of"
 assert_contains "mentions 1M quota issue" "$OUT" "64445"
 
 # Test 4: CI workflows present + no push guard -> push-blast finding appears
 mkdir -p "$WORK/.github/workflows"
 echo 'on: [push]' > "$WORK/.github/workflows/ci.yml"
-OUT=$(cd "$WORK" && CC_COST_AUDIT_SETTINGS="$EMPTY" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>/dev/null)
-RC=$?
+OUT=$(cd "$WORK" && CC_COST_AUDIT_SETTINGS="$EMPTY" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>&1)
 assert_contains "CI present -> push-blast finding" "$OUT" "65944"
-assert_eq "CI present -> 5 exposures" "$RC" "5"
+assert_contains "CI present -> 5 exposures" "$OUT" "Exposed to 5 of"
 
 # Test 5: CI present but guard wired in -> no push-blast finding
 OUT=$(cd "$WORK" && CC_COST_AUDIT_SETTINGS="$FULL" CLAUDE_CODE_DISABLE_1M_CONTEXT=1 bash "$HOOK" 2>/dev/null)

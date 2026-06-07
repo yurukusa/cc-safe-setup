@@ -21,9 +21,9 @@
 # something it stays quiet rather than guessing. Every finding cites the real
 # issue it comes from so you can read the incident yourself.
 #
-# Exit code: number of exposures found (0 = none), capped at 125. Use --json for
-# machine-readable output. CC_COST_AUDIT_SETTINGS overrides the settings glob
-# (mainly for testing).
+# Always exits 0 (it is a report, not a gate). The exposure count is in the
+# output and, with --json, in the "exposures" field. CC_COST_AUDIT_SETTINGS
+# overrides the settings glob (mainly for testing).
 
 set -u
 
@@ -124,8 +124,7 @@ EOF
         printf '{"issue":"%s","title":"%s","fix":"%s"}' "$issue" "$et" "$ef"
     done
     printf ']}\n'
-    [ "$COUNT" -gt 125 ] && exit 125
-    exit "$COUNT"
+    exit 0
 fi
 
 echo ""
@@ -160,5 +159,4 @@ echo "  Worked examples of these exact incidents (free chapter):"
 echo "    https://yurukusa.github.io/cc-safe-setup/token-book.html"
 echo ""
 
-[ "$COUNT" -gt 125 ] && exit 125
-exit "$COUNT"
+exit 0
