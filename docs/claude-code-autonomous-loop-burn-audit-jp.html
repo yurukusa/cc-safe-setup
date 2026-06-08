@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自律 /loop・wakeup の暴走と無人の消費を、自分のセッションログから見つける（Claude Code・日本語・ブラウザ内処理）</title>
+<meta name="description" content="Claude Code を /loop やスケジュールされた wakeup で自律運用すると、道具が自分で自分に偽の指示を注入し、人がいない間に同じ作業を繰り返して枠を溶かすことがあります。セッションの .jsonl を貼ると、繰り返し注入された自動の促しの run と、その間に無人で消費されたターン数を、ブラウザの中だけで洗い出します。送信しません。">
+<meta property="og:title" content="自律 /loop・wakeup の暴走と無人の消費を、自分のログから見つける（Claude Code）">
+<meta property="og:description" content="自律運用で道具が偽の指示を繰り返し注入し、無人で枠を溶かす。自分の .jsonl で、自動の促しの繰り返しと無人の消費ターンを洗い出す。ブラウザ内処理・送信なし。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-autonomous-loop-burn-audit-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"自律loop・wakeupの暴走と無人の消費の監査（Claude Code・日本語）","applicationCategory":"DeveloperApplication","operatingSystem":"Any","inLanguage":"ja","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"Claude Code のセッションログから、自律 /loop・wakeup の繰り返し注入と無人の消費を洗い出す無料の診断ツール。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:780px;margin:0 auto}
+.back{margin-bottom:1.2rem;font-size:.85rem}
+.back a{color:#58a6ff;text-decoration:none}
+h1{color:#f0f6fc;font-size:1.5rem;line-height:1.5;margin-bottom:.8rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:2rem 0 .8rem}
+.lede{color:#adbac7;font-size:.92rem;margin-bottom:1.6rem}
+.lede strong{color:#f0f6fc}
+.story{background:#161b22;border-left:3px solid #f85149;border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1.6rem;font-size:.9rem;color:#d6dbe1}
+.drop{border:2px dashed #30363d;border-radius:12px;padding:2.2rem 1.4rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#0f141b}
+.drop:hover,.drop.over{border-color:#1f6feb;background:#0f1b2d}
+.drop .big{color:#f0f6fc;font-size:1.05rem;margin-bottom:.4rem}
+.drop .sm{color:#8b949e;font-size:.82rem}
+.drop input{display:none}
+.hint{color:#6e7681;font-size:.78rem;margin:.7rem 0 0;text-align:center}
+.hint code{background:#161b22;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.76rem}
+#out{margin-top:1.6rem;display:none}
+.summary{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.stat{flex:1;min-width:150px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:700;line-height:1.1}
+.stat .l{font-size:.78rem;color:#8b949e;margin-top:.2rem}
+.stat.red{border-color:#f85149}.stat.red .n{color:#f85149}
+.stat.green{border-color:#3fb950}.stat.green .n{color:#3fb950}
+.verdict{border-radius:10px;padding:1.1rem 1.3rem;margin-bottom:1.2rem;font-size:.92rem}
+.verdict.clean{background:#0d2417;border:1px solid #238636;color:#aff5b4}
+.verdict.hit{background:#2d1416;border:1px solid #f85149;color:#ffc1bd}
+.event{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.7rem}
+.event .h{color:#f0f6fc;font-weight:600;font-size:.9rem;margin-bottom:.4rem}
+.event .d{font-size:.84rem;color:#adbac7}
+.event code{background:#0d1117;padding:.1rem .4rem;border-radius:4px;color:#e3b341;font-family:'Fira Code',ui-monospace,monospace;font-size:.78rem}
+.note{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.3rem;font-size:.86rem;color:#adbac7;margin:1.2rem 0}
+.note strong{color:#f0f6fc}
+.note code{background:#0d1117;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.8rem}
+.honest{border:1px solid #9e6a03;background:#1c1404}
+.honest strong{color:#e3b341}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:2rem 0 1rem;font-size:.9rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681;text-align:center}
+.footer a{color:#58a6ff}
+a{color:#58a6ff}
+ul.steps{margin:.4rem 0 0 1.2rem;font-size:.86rem;color:#adbac7}
+ul.steps li{margin:.35rem 0}
+ul.steps code{background:#0d1117;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.8rem;font-family:'Fira Code',ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="back"><a href="index.html">← 他の Claude Code 安全ツール</a></div>
+
+<h1>自律 <code style="font-size:.85em">/loop</code>・wakeup の暴走と<br>「無人の消費」を、自分のログから見つける</h1>
+
+<p class="lede">Claude Code を <code>/loop</code> やスケジュールされた wakeup で自律運用すると、道具が<strong>自分で自分に促しを注入</strong>する。そして注入された促しは、人間が打った指示と<strong>区別がつかない形で</strong>記録される（<a href="https://github.com/anthropics/claude-code/issues/65753" target="_blank" rel="noopener">#65753</a>）。だから人がいない間に、モデルは同じ促しを繰り返し受け取り、同じところを回り続け、枠だけを溶かす。このツールは、あなたのログから<strong>繰り返し注入された自動の促しの run</strong>と、その間に<strong>無人で消費されたターン数</strong>を洗い出す。</p>
+
+<div class="story">
+「<code>/loop</code> を仕掛けたまま家を出た。数時間後に戻ったら、モデルは1週間前の古い計画ファイルを漁り、うろ覚えで一致したものを実装し始めていた。この数日かけて取り除いたばかりのリグレッションを、全部実装し直していた。そこに到達するまでに、週次の枠の30%が溶けていた。」（<a href="https://github.com/anthropics/claude-code/issues/65753" target="_blank" rel="noopener">#65753</a> の報告より）
+</div>
+
+<label class="drop" id="drop">
+  <div class="big">セッションの <code>.jsonl</code> をここにドラッグ、またはクリックして選択</div>
+  <div class="sm">処理はすべてこのページの中だけ。ファイルは送信されません。</div>
+  <input type="file" id="file" accept=".jsonl,.json,.txt">
+</label>
+<p class="hint">場所: <code>~/.claude/projects/&lt;プロジェクト&gt;/&lt;セッションID&gt;.jsonl</code></p>
+
+<div id="out"></div>
+
+<h2>このツールが「健全に」できること・できないこと</h2>
+<div class="note honest">
+<strong>正直な範囲:</strong><br>
+・<strong>できる</strong>: 連続する <strong>ほぼ同一の</strong> user 促し（日付や数字を除いて中身が同じもの）の run を見つける。自律の <code>/loop</code> や wakeup は同じ促しを繰り返し注入するので、これがその足跡になる。run の中で消費された assistant のターン数も数える＝<strong>人がいない間にどれだけ回ったか</strong>の目安。<br>
+・<strong>できない①</strong>: run が「健全な定期実行」なのか「暴走のスパイラル」なのかは、ツールには判定できない。回った末に有益な仕事をしたかは、あなたが中身を見て判断する。ここで出すのは<strong>消費の事実</strong>であって、善し悪しの判定ではない。<br>
+・<strong>できない②</strong>: 注入された促しは <code>promptSource: "typed"</code> で人間の入力と同じラベルで保存される（#65753 で検証）。だから「ラベル」では区別できず、このツールは<strong>文面がほぼ同一かどうか</strong>で近似している。人が偶然ほぼ同じ指示を繰り返した場合も拾う。<br>
+・全てクライアント側の処理。ファイルは送信しない。
+</div>
+
+<h2>暴走を防ぐ・早く気づく</h2>
+<div class="note">
+<ul class="steps">
+<li><strong>自律の <code>/loop</code> を、人がいないところで放置しない。</strong> いちばん大きな事故は無人の長時間で起きる。</li>
+<li><strong>自分でスケジュールする wakeup の文を、命令形で書かない。</strong>「今すぐXをやれ」は <code>typed</code> のラベルと相まって過剰に重く受け取られる。「これは自動の合図で、状況はこうだ」という文脈の形で。</li>
+<li><strong>長時間の自律運用の後は、このツールか <code>grep</code> でログを見る。</strong> 同じ文面の user 促しが何度も並んでいたら、その間に何が消費されたかを確認する。</li>
+<li><strong><code>/compact</code> が無人で挟まっていたら要注意。</strong> 捏造された「あなたの指示」が要約に畳み込まれると巻き戻せない（<a href="https://github.com/anthropics/claude-code/issues/63192" target="_blank" rel="noopener">#63192</a> 系の不可逆化）。</li>
+</ul>
+</div>
+
+<div class="cta">
+こうした「気づけない静かな事故」を、<strong>実行の手前で止める</strong>無料のフック集が <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> です（<code>rm -rf</code>、強制 push、秘密の漏れ、暴走するコマンドを止める例を多数収録。<code>npx cc-safe-setup</code> ひとつで導入）。<br><br>
+この自律運用の暴走の仕組みを、体験と防御の手順でまとめた読み物が <a href="https://yurukusa-dev.hatenablog.com/entry/2026/06/09/031433">自律で動かしている Claude Code が偽の指示で暴走する話</a>。「道具が成功と報告したのに、実際には別のことをしていた」型の事故を一冊にしたのが <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック</a>（¥800・第2章まで無料）です。
+</div>
+
+<div class="footer">
+ブラウザの中だけで処理し、ファイルは送信しません。 ・ <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="claude-code-cascade-cancel-audit-jp.html">並列キャンセル＆捏造の監査</a> ・ <a href="claude-code-thinking-session-rescue-jp.html">拡張思考セッションの救出</a> ・ <a href="index.html">診断ツール集</a>
+</div>
+
+</div>
+
+<script>
+function norm(s){
+  s = s.replace(/\d{1,4}[-/:]\d{1,2}([-/:]\d{1,2})?/g,'');
+  s = s.replace(/\d+/g,'#');
+  s = s.replace(/\s+/g,' ').trim();
+  return s.slice(0,400);
+}
+function sim(a,b){
+  if (a===b) return 1.0;
+  if (!a || !b) return 0.0;
+  const sa=new Set(a.split(' ')), sb=new Set(b.split(' '));
+  let inter=0; for (const w of sa) if (sb.has(w)) inter++;
+  const uni=new Set([...sa,...sb]).size;
+  return uni? inter/uni : 0;
+}
+function textOf(content){
+  if (typeof content==='string') return content;
+  if (Array.isArray(content)) return content.map(b=>(b&&typeof b==='object'&&typeof b.text==='string')?b.text:(typeof b==='string'?b:'')).join('\n');
+  if (content&&typeof content==='object'&&typeof content.text==='string') return content.text;
+  return content==null?'':JSON.stringify(content);
+}
+function audit(text){
+  const prompts=[]; let assistSince=0, compactSeen=false;
+  for (const line of text.split('\n')){
+    if (!line.trim()) continue;
+    let o; try{o=JSON.parse(line);}catch(e){continue;}
+    const m=o&&o.message; const ty=o&&o.type;
+    if (ty==='assistant') assistSince++;
+    if (ty==='user' && m && typeof m==='object'){
+      const c=m.content;
+      if (typeof c==='string'){
+        const tx=textOf(c);
+        if (/^\s*\/(compact|clear)/m.test(tx)) compactSeen=true;
+        prompts.push({n:norm(tx), preview:tx.slice(0,70).replace(/\n/g,' '), assistBefore:assistSince});
+        assistSince=0;
+      }
+    }
+    if (o&&o.isCompactSummary) compactSeen=true;
+  }
+  const runs=[]; let run=[];
+  for (const p of prompts){
+    if (run.length && sim(run[run.length-1].n, p.n)>0.8) run.push(p);
+    else { if (run.length>=3) runs.push(run); run=[p]; }
+  }
+  if (run.length>=3) runs.push(run);
+  const out = runs.map(r=>({
+    injections: r.length,
+    assistTurns: r.slice(1).reduce((a,x)=>a+x.assistBefore,0),
+    preview: r[0].preview
+  }));
+  return { totalPrompts: prompts.length, runs: out, compactSeen };
+}
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function render(r){
+  const out=document.getElementById('out'); out.style.display='block';
+  const nRuns=r.runs.length;
+  const totalBurn=r.runs.reduce((a,x)=>a+x.assistTurns,0);
+  let html='<div class="summary">';
+  html+=`<div class="stat ${nRuns?'red':'green'}"><div class="n">${nRuns}</div><div class="l">繰り返し注入の run（自動loopの足跡）</div></div>`;
+  html+=`<div class="stat ${totalBurn?'red':'green'}"><div class="n">${totalBurn}</div><div class="l">run 内で無人で消費した assistant ターン</div></div>`;
+  html+='</div>';
+  if (!nRuns){
+    html+='<div class="verdict clean">ほぼ同一の user 促しが3回以上連続する run は見つかりませんでした。少なくともこのログには、自動loopが同じところを繰り返し回った明らかな足跡はありません。</div>';
+  } else {
+    html+=`<div class="verdict hit">ほぼ同一の自動の促しが繰り返された run が <strong>${nRuns}</strong> 件。その間に <strong>${totalBurn}</strong> の assistant ターンが消費されています。健全な定期実行か暴走かは中身次第ですが、無人で回っていたなら、何が消費されたかを確認してください。</div>`;
+    for (const x of r.runs){
+      html+=`<div class="event"><div class="h">注入 ${x.injections} 回 ・ 間に assistant ${x.assistTurns} ターン</div><div class="d">最初の促し: <code>${esc(x.preview)}…</code></div></div>`;
+    }
+  }
+  if (r.compactSeen){
+    html+='<div class="note" style="border-color:#9e6a03"><strong style="color:#e3b341">⚠ このログには <code>/compact</code> または圧縮の要約が含まれます。</strong> 無人の run の中で圧縮が走ると、捏造された「あなたの指示」が要約に固着して巻き戻せなくなります（#63192 系）。圧縮の前後の文脈を確認してください。</div>';
+  }
+  out.innerHTML=html;
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function handle(file){
+  const reader=new FileReader();
+  reader.onload=e=>{ try{ render(audit(e.target.result)); }catch(err){ const o=document.getElementById('out'); o.style.display='block'; o.innerHTML='<div class="verdict hit">読み込みに失敗しました: '+esc(err.message)+'</div>'; } };
+  reader.readAsText(file);
+}
+const drop=document.getElementById('drop'), file=document.getElementById('file');
+file.addEventListener('change',e=>{ if(e.target.files[0]) handle(e.target.files[0]); });
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) handle(f); });
+</script>
+</body>
+</html>
