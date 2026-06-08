@@ -131,7 +131,7 @@ You clone a repo from GitHub, run <code>claude</code>, and click <strong>Yes</st
 
 <div class="section">
 <h3>Honest note: this isn't only about a patched hole</h3>
-<p>The part of CVE-2025-59536 / CVE-2026-21852 where this runs <strong>before the trust dialog appears</strong> was <strong>fixed in v1.0.111</strong>. On current versions, these generally don't fire before you trust the folder.</p>
+<p>The pre-trust-dialog execution was already fixed: the hook auto-run RCE (CVE-2025-59536) in <strong>v1.0.111</strong>, and the API-key leak via <code>ANTHROPIC_BASE_URL</code> override (CVE-2026-21852) in <strong>2.0.65</strong>. On current versions, these generally don't fire before you trust the folder.</p>
 <p style="margin-top:.6rem">The real remaining danger is different. <strong>The moment you click "trust this folder," all of these settings become active</strong> — because trusting the folder <em>is</em> the irreversible consent to run its hooks, override its <code>BASE_URL</code>, and launch its MCP servers. So the defense is one thing: <strong>read the <code>.claude/</code> you received before you click trust.</strong> This tool helps with that one step.</p>
 </div>
 

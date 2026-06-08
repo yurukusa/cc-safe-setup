@@ -131,7 +131,7 @@ GitHub で拾ったリポを <code>claude</code> で開いて「<strong>この�
 
 <div class="section">
 <h3>正直に: これは「修正済みの穴」の話だけではない</h3>
-<p>CVE-2025-59536 / CVE-2026-21852 の「<strong>信頼ダイアログが出る前に</strong>勝手に実行される」部分は、Claude Code <strong>v1.0.111 以降で修正</strong>されています。今のバージョンでは、信頼する前に上記が暴発することは基本的にありません。</p>
+<p>これらの「<strong>信頼ダイアログが出る前に</strong>勝手に実行・送信される」部分は、すでに修正されています。hook の自動実行による RCE（CVE-2025-59536）は <strong>v1.0.111</strong> で、<code>ANTHROPIC_BASE_URL</code> の上書きによるキー漏洩（CVE-2026-21852）は <strong>2.0.65</strong> で修正されました。今の新しいバージョンでは、信頼する前に上記が暴発することは基本的にありません。</p>
 <p style="margin-top:.6rem">残る本当の危険は別です。<strong>「このフォルダを信頼」を押した瞬間、これらの設定はすべて有効になります。</strong> 信頼のクリックは、hook の実行・<code>BASE_URL</code> の上書き・MCP の起動への「取り消せない同意」だからです。だから防御は一つ——<strong>信頼する前に、受け取った <code>.claude/</code> を読む</strong>こと。このツールはその一手を助けます。</p>
 </div>
 
