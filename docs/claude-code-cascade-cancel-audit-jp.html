@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>並列ツールコールの巻き添えキャンセルと「捏造」を、自分のセッションログから見つける（Claude Code・日本語・ブラウザ内処理）</title>
+<meta name="description" content="Claude Code で並列ツールコールの1つが失敗すると、残りの無関係なコール（pwd や echo まで）が静かにキャンセルされ、さらにモデルが受け取っていない結果を捏造することがあります。セッションの .jsonl を貼ると、巻き添えキャンセルの件数と、その『結果』を語ったら捏造になるコールを、ブラウザの中だけで洗い出します。送信しません。">
+<meta property="og:title" content="並列ツールコールの巻き添えキャンセルと『捏造』を、自分のログから見つける（Claude Code）">
+<meta property="og:description" content="1つのコマンド失敗が無関係な並列コールを静かにキャンセルし、モデルが受け取っていない結果を捏造する。自分の .jsonl で巻き添えの規模と捏造の候補を洗い出す。ブラウザ内処理・送信なし。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-cascade-cancel-audit-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"並列ツールコールの巻き添えキャンセル監査（Claude Code・日本語）","applicationCategory":"DeveloperApplication","operatingSystem":"Any","inLanguage":"ja","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"Claude Code のセッションログから、並列ツールコールの巻き添えキャンセルと、モデルが捏造しうる結果を洗い出す無料の診断ツール。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:780px;margin:0 auto}
+.back{margin-bottom:1.2rem;font-size:.85rem}
+.back a{color:#58a6ff;text-decoration:none}
+h1{color:#f0f6fc;font-size:1.5rem;line-height:1.5;margin-bottom:.8rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:2rem 0 .8rem}
+.lede{color:#adbac7;font-size:.92rem;margin-bottom:1.6rem}
+.lede strong{color:#f0f6fc}
+.story{background:#161b22;border-left:3px solid #f85149;border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1.6rem;font-size:.9rem;color:#d6dbe1}
+.drop{border:2px dashed #30363d;border-radius:12px;padding:2.2rem 1.4rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#0f141b}
+.drop:hover,.drop.over{border-color:#1f6feb;background:#0f1b2d}
+.drop .big{color:#f0f6fc;font-size:1.05rem;margin-bottom:.4rem}
+.drop .sm{color:#8b949e;font-size:.82rem}
+.drop input{display:none}
+.hint{color:#6e7681;font-size:.78rem;margin:.7rem 0 0;text-align:center}
+.hint code{background:#161b22;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.76rem}
+#out{margin-top:1.6rem;display:none}
+.summary{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.stat{flex:1;min-width:150px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:700;line-height:1.1}
+.stat .l{font-size:.78rem;color:#8b949e;margin-top:.2rem}
+.stat.red{border-color:#f85149}.stat.red .n{color:#f85149}
+.stat.green{border-color:#3fb950}.stat.green .n{color:#3fb950}
+.stat.gray .n{color:#8b949e}
+.verdict{border-radius:10px;padding:1.1rem 1.3rem;margin-bottom:1.2rem;font-size:.92rem}
+.verdict.clean{background:#0d2417;border:1px solid #238636;color:#aff5b4}
+.verdict.hit{background:#2d1416;border:1px solid #f85149;color:#ffc1bd}
+.event{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.7rem}
+.event .h{color:#f0f6fc;font-weight:600;font-size:.88rem;margin-bottom:.5rem}
+.event ul{list-style:none;margin:0}
+.event li{font-size:.82rem;color:#adbac7;padding:.2rem 0;border-top:1px solid #21262d}
+.event li:first-child{border-top:none}
+.event li code{background:#0d1117;padding:.1rem .4rem;border-radius:4px;color:#e3b341;font-family:'Fira Code',ui-monospace,monospace;font-size:.78rem}
+.note{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.3rem;font-size:.86rem;color:#adbac7;margin:1.2rem 0}
+.note strong{color:#f0f6fc}
+.note code{background:#0d1117;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.8rem}
+.honest{border:1px solid #9e6a03;background:#1c1404}
+.honest strong{color:#e3b341}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:2rem 0 1rem;font-size:.9rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681;text-align:center}
+.footer a{color:#58a6ff}
+a{color:#58a6ff}
+ul.steps{margin:.4rem 0 0 1.2rem;font-size:.86rem;color:#adbac7}
+ul.steps li{margin:.35rem 0}
+ul.steps code{background:#0d1117;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.8rem;font-family:'Fira Code',ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="back"><a href="index.html">← 他の Claude Code 安全ツール</a></div>
+
+<h1>並列ツールコールの「巻き添えキャンセル」と<br>それに続く「捏造」を、自分のログから見つける</h1>
+
+<p class="lede">Claude Code が1ターンで複数のツールを並列に呼ぶとき、<strong>そのうち1つが失敗すると、残りの無関係なコールまで一斉にキャンセル</strong>されることがあります（<a href="https://github.com/anthropics/claude-code/issues/22264" target="_blank" rel="noopener">#22264</a>）。さらに厄介なのは、空に見えた結果をモデルが「受け取った」と思い込み、<strong>受け取っていない出力を作文し、ときに言ってもいない指示まであなたの発言として書き込む</strong>ことです（<a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538</a>）。このツールは、あなたのセッションログから巻き添えの規模と、その「結果」を語ったら捏造になるコールを洗い出します。</p>
+
+<div class="story">
+「<code>grep</code> が単に何も見つけずに終了（正常な exit 1）しただけだった。なのにそれが、同じバッチの <code>pwd</code> や <code>echo hello</code> ——失敗のしようがないコマンドまで——を巻き添えにキャンセルした。モデルは環境が壊れたと判断し、確かめてもいない結果を語り始めた。」（<a href="https://github.com/anthropics/claude-code/issues/64346" target="_blank" rel="noopener">#64346</a> の事例より）
+</div>
+
+<label class="drop" id="drop">
+  <div class="big">セッションの <code>.jsonl</code> をここにドラッグ、またはクリックして選択</div>
+  <div class="sm">処理はすべてこのページの中だけ。ファイルは送信されません。</div>
+  <input type="file" id="file" accept=".jsonl,.json,.txt">
+</label>
+<p class="hint">場所: <code>~/.claude/projects/&lt;プロジェクト&gt;/&lt;セッションID&gt;.jsonl</code>（一番大きい・新しいファイルが直近のセッション）</p>
+
+<div id="out"></div>
+
+<h2>このツールが「健全に」できること・できないこと</h2>
+<div class="note honest">
+<strong>正直な範囲（信用は誇張しないことの上に立つので明記します）:</strong><br>
+・<strong>できる</strong>: ハーネスが書き残す逐語のマーカー <code>Cancelled: parallel tool call … errored</code> が、ツール結果の<strong>本体</strong>になっているコールだけを数えます。ログの本文にその文字列が偶然含まれる場合（このページの説明文を実行結果に貼った等）は<strong>数えません</strong>。<br>
+・<strong>できない①</strong>: キャンセルされたコールが「本当は成功したはずか」までは分かりません。マーカー自体にその情報が無いからです。<br>
+・<strong>できない②（捏造の確定）</strong>: 巻き添えになったコールは挙げられますが、モデルがその結果を<strong>実際に作文したか</strong>は、後続の文章を人が読んで判断するしかありません。自然言語の真偽はツールには判定できないので、ここでは「捏造の<strong>候補</strong>」までを出します。<br>
+・<strong>できない③（永久ロックの判定）</strong>: 拡張思考のセッションが <code>400 thinking blocks cannot be modified</code> で二度と開けなくなる変種（<a href="https://github.com/anthropics/claude-code/issues/63192" target="_blank" rel="noopener">#63192</a> / <a href="https://github.com/anthropics/claude-code/issues/63147" target="_blank" rel="noopener">#63147</a>）は、署名の検証がブラウザの中ではできないため、このツールでは判定しません。その症状が出たセッションの<strong>救出</strong>は <a href="claude-code-thinking-session-rescue-jp.html">拡張思考セッションの救出ツール</a> を使ってください。<br>
+・<strong>作者の注</strong>: 検出ロジックは #22264 / #63192 / #64346 の逐語のトランスクリプトの形式から作り、文字列形とリスト形の両方の結果で検証しました。ただし作者自身はこのバグを再現していないため、普遍の助言よりも<strong>あなた自身のログ</strong>を信じてください。
+</div>
+
+<h2>巻き添えキャンセルを減らす当面の手立て</h2>
+<div class="note">
+根本の修正（並列バッチの1件の失敗で全部を巻き添えにしない）は <a href="https://github.com/anthropics/claude-code/issues/22264" target="_blank" rel="noopener">#22264</a> で5か月以上 OPEN のままです。利用者の側でできる緩和は、起票群で報告されている範囲では次のとおりです（断定でなく、報告されている回避策）:
+<ul class="steps">
+<li><strong>失敗しやすいコマンドを単独で出す</strong>: スクリーンショットやブラウザ操作など <code>exit 1</code> を返しやすいコマンドを、重要な並列バッチと同じターンに混ぜない。</li>
+<li><strong>正常終了を強制する</strong>: 何も見つからない可能性のある <code>grep</code> 等は <code>|| true</code> を末尾に付け、正常な「no-match」が兄弟を巻き添えにしないようにする。</li>
+<li><strong>キャンセルの跡を見たら結果を信じない</strong>: <code>Cancelled: parallel tool call</code> が出たターンの後でモデルが「実行結果」を語っていたら、その語りは受け取った結果ではない可能性がある。該当のコールだけを名指しでもう一度実行させる。</li>
+<li><strong>長い拡張思考のセッションで多発するなら</strong>: 一度 <code>/clear</code> して文脈を切り、壊れたメッセージを履歴から外す（永久ロックの予防にもなる）。</li>
+</ul>
+</div>
+
+<div class="cta">
+こうした「気づけない静かな事故」を、<strong>実行の手前で止める</strong>無料のフック集が <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> です（<code>rm -rf</code>、強制 push、秘密の漏れ、壊れたデプロイを止める例を多数収録。<code>npx cc-safe-setup</code> ひとつで導入）。<br><br>
+「道具が成功と報告したのに、実際には失敗していた／結果が捏造されていた」型の事故を、実際の体験と防御の手順でまとめた読み物が <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック</a>（¥800・第2章まで無料）です。
+</div>
+
+<div class="footer">
+ブラウザの中だけで処理し、ファイルは送信しません。 ・ <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="claude-code-thinking-session-rescue-jp.html">拡張思考セッションの救出</a> ・ <a href="index.html">診断ツール集</a>
+</div>
+
+</div>
+
+<script>
+const CANCEL = 'Cancelled: parallel tool call';
+function textOf(content){
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return content.map(b => (b && typeof b === 'object' && typeof b.text === 'string') ? b.text : (typeof b === 'string' ? b : '')).join('\n');
+  if (content && typeof content === 'object' && typeof content.text === 'string') return content.text;
+  return content == null ? '' : JSON.stringify(content);
+}
+function audit(text){
+  const uses = {}, cancelled = [], events = [];
+  let userMsgIndex = 0;
+  for (const line of text.split('\n')){
+    if (!line.trim()) continue;
+    let o; try { o = JSON.parse(line); } catch(e){ continue; }
+    const m = o && o.message;
+    if (!m || typeof m !== 'object') continue;
+    const content = m.content;
+    if (m.role === 'assistant' && Array.isArray(content)){
+      for (const b of content){
+        if (b && b.type === 'tool_use'){
+          const cmd = (b.input && (b.input.command || b.input.file_path || b.input.pattern)) || '';
+          uses[b.id] = { cmd: String(cmd).slice(0,120), name: b.name || '' };
+        }
+      }
+    }
+    if (m.role === 'user' && Array.isArray(content)){
+      userMsgIndex++;
+      const ev = [];
+      for (const b of content){
+        if (b && b.type === 'tool_result'){
+          const t = textOf(b.content).replace(/^[\s"'\[\]{}]+/, '');
+          if (t.startsWith(CANCEL)) { cancelled.push(b.tool_use_id); ev.push(b.tool_use_id); }
+        }
+      }
+      if (ev.length) events.push({ idx: userMsgIndex, ids: ev });
+    }
+  }
+  return { uses, cancelled, events };
+}
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function render(r){
+  const out = document.getElementById('out');
+  out.style.display = 'block';
+  const nEvents = r.events.length, nCancelled = r.cancelled.length;
+  let html = '<div class="summary">';
+  html += `<div class="stat ${nEvents?'red':'green'}"><div class="n">${nEvents}</div><div class="l">巻き添えキャンセルが起きたターン</div></div>`;
+  html += `<div class="stat ${nCancelled?'red':'green'}"><div class="n">${nCancelled}</div><div class="l">キャンセルされたコール（捏造の候補）</div></div>`;
+  html += '</div>';
+  if (!nEvents){
+    html += '<div class="verdict clean">このログには、本体が <code>Cancelled: parallel tool call …</code> になっているツール結果は見つかりませんでした。少なくともこのセッションでは、巻き添えキャンセルの跡はありません。</div>';
+  } else {
+    html += `<div class="verdict hit">巻き添えキャンセルの跡が <strong>${nEvents}</strong> ターンで見つかりました。下のコールは結果が届いていません。<strong>これらの「実行結果」を後続でモデルが語っていたら、それは受け取った結果ではなく捏造の疑いがあります。</strong></div>`;
+    for (const ev of r.events){
+      html += '<div class="event"><div class="h">巻き添えになったコール（' + ev.ids.length + ' 件）</div><ul>';
+      for (const id of ev.ids){
+        const u = r.uses[id];
+        const label = u && u.cmd ? esc(u.cmd) : (u && u.name ? esc(u.name) : '(対応する呼び出しが見つからない)');
+        html += `<li>本来のコマンド: <code>${label}</code></li>`;
+      }
+      html += '</ul></div>';
+    }
+  }
+  out.innerHTML = html;
+  out.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function handle(file){
+  const reader = new FileReader();
+  reader.onload = e => { try { render(audit(e.target.result)); } catch(err){ const o=document.getElementById('out'); o.style.display='block'; o.innerHTML='<div class="verdict hit">読み込みに失敗しました: '+esc(err.message)+'</div>'; } };
+  reader.readAsText(file);
+}
+const drop = document.getElementById('drop'), file = document.getElementById('file');
+file.addEventListener('change', e => { if (e.target.files[0]) handle(e.target.files[0]); });
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+</script>
+</body>
+</html>
