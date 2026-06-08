@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeの .claude フォルダを別の場所へ移す方法（CLAUDE_CONFIG_DIRとVS Codeの落とし穴）</title>
+<meta name="description" content="Claude Code の設定フォルダ .claude は CLAUDE_CONFIG_DIR で別ドライブ・別の場所へ移せます。Cドライブの容量対策にも有効。ただし VS Code 拡張は CLAUDE_CONFIG_DIR を無視する既知のバグがあります。CLIでの移し方、VS Code での注意、そして「本当に危険なのはどの設定か」までを実機の事実で整理します。">
+<meta property="og:title" content="Claude Codeの .claude フォルダを別の場所へ移す方法（CLAUDE_CONFIG_DIRとVS Codeの落とし穴）">
+<meta property="og:description" content=".claude は CLAUDE_CONFIG_DIR で移せる。ただし VS Code 拡張は無視する。CLIでの移し方とVS Codeの注意、本当に危険な設定の切り分け。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-config-dir-location-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Claude Codeの .claude フォルダを別の場所へ移す方法","inLanguage":"ja","description":"CLAUDE_CONFIG_DIR による .claude の再配置と、VS Code 拡張が無視する既知のバグ、本当に危険な設定の切り分け","author":{"@type":"Organization","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:760px;margin:0 auto}
+.back{margin-bottom:1.2rem}
+.back a{color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.45rem;line-height:1.5;margin-bottom:1.2rem}
+h2{color:#f0f6fc;font-size:1.15rem;margin:2rem 0 .8rem;padding-top:.5rem;border-top:1px solid #21262d}
+h3{color:#f0f6fc;font-size:1rem;margin:1.3rem 0 .5rem}
+p{margin-bottom:.9rem;color:#adbac7}
+ul,ol{margin:.5rem 0 1rem 1.4rem}
+li{margin-bottom:.45rem;color:#adbac7}
+code{background:#161b22;padding:.12rem .4rem;border-radius:5px;color:#79c0ff;font-size:.86rem;font-family:'Fira Code',ui-monospace,monospace}
+pre{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;overflow-x:auto;margin:.5rem 0 1.1rem}
+pre code{background:none;padding:0;color:#c9d1d9;font-size:.82rem}
+.lede{background:#161b22;border:1px solid #30363d;border-left:3px solid #58a6ff;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;color:#adbac7;font-size:.9rem}
+.lede strong{color:#f0f6fc}
+.warn{background:#1c1810;border:1px solid #d29922;border-radius:8px;padding:1rem 1.3rem;margin:1rem 0;font-size:.88rem;color:#e3d2a7}
+.warn strong{color:#e3b341}
+.tldr{background:#101c12;border:1px solid #2ea043;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-size:.9rem}
+.tldr strong{color:#56d364}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:.5rem 0 1.2rem;font-size:.85rem}
+th,td{border:1px solid #30363d;padding:.5rem .7rem;text-align:left}
+th{background:#161b22;color:#f0f6fc}
+td{color:#adbac7}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:1.8rem 0;font-size:.88rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681}
+.footer a{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="back"><a href="index.html">← cc-safe-setup</a></div>
+<h1>Claude Codeの <code>.claude</code> フォルダを別の場所へ移す方法<br>——<code>CLAUDE_CONFIG_DIR</code> と VS Code の落とし穴</h1>
+
+<div class="tldr">
+<strong>先に結論：</strong> <code>.claude</code> は <code>CLAUDE_CONFIG_DIR</code> 環境変数で別ドライブ・別フォルダへ移せます（Cドライブの容量対策にも有効）。<strong>ただし VS Code 拡張は現状この変数を無視します</strong>（既知のバグ）。だから CLI では今日から移せますが、VS Code 統合ターミナルで使っている人は効きません。
+</div>
+
+<p><code>.claude</code> は、Claude Code が設定・認証情報・会話の履歴・セッションの記録をためる場所です。既定では、ホームディレクトリの下（Windows なら <code>C:\Users\&lt;ユーザー名&gt;\.claude</code>、macOS/Linux なら <code>~/.claude</code>）に作られます。</p>
+
+<p>これを別の場所に移したい理由は、だいたい次のどれかです。</p>
+<ul>
+<li>Cドライブの空きが少なく、<code>.claude</code> が育って容量を圧迫している（長時間使うと数GBになります）</li>
+<li>設定や認証情報をユーザーフォルダの外で管理したい</li>
+<li>複数のアカウント・プロファイルを切り替えたい</li>
+</ul>
+
+<h2>移し方（CLIの場合）</h2>
+
+<p>公式の仕組みとして、<strong><code>CLAUDE_CONFIG_DIR</code></strong> という環境変数があります。これを設定すると、本来 <code>~/.claude</code> に置かれるものが、すべて指定したフォルダの下に移ります（<a href="https://code.claude.com/docs/en/claude-directory" target="_blank" rel="noopener">公式ドキュメント</a>）。</p>
+
+<h3>Windows（PowerShell）</h3>
+<pre><code># 一時的に（このセッションだけ）
+$env:CLAUDE_CONFIG_DIR = "D:\claude-config"
+
+# 恒久的に（ユーザー環境変数に登録）
+[Environment]::SetEnvironmentVariable("CLAUDE_CONFIG_DIR", "D:\claude-config", "User")</code></pre>
+
+<h3>macOS / Linux（bash / zsh）</h3>
+<pre><code># ~/.bashrc または ~/.zshrc に追記
+export CLAUDE_CONFIG_DIR="$HOME/data/claude-config"</code></pre>
+
+<p>設定したら、既存の <code>~/.claude</code> の中身を新しい場所へコピー（または移動）してから Claude Code を起動します。認証は移行後にやり直しになることがあるので、一度ログインし直してください。</p>
+
+<div class="warn">
+<strong>⚠ VS Code を使っている人への注意。</strong> VS Code 拡張は、現状 <code>CLAUDE_CONFIG_DIR</code> を無視します（<a href="https://github.com/anthropics/claude-code/issues/30538" target="_blank" rel="noopener">Issue #30538</a>）。シェルで <code>export</code> しても、VS Code の <code>claudeCode.environmentVariables</code> に書いても、拡張側には反映されません。VS Code 統合ターミナルから <code>claude</code> を直接起動する場合に効くことはありますが、拡張のUIから使う経路では効かない、という食い違いがあります。素の CLI（普通のターミナル）で使うのが、今のところ確実です。
+</div>
+
+<h2>知っておくと安心な、関連する既知の挙動</h2>
+<table>
+<tr><th>挙動</th><th>参照</th></tr>
+<tr><td>VS Code 拡張が <code>CLAUDE_CONFIG_DIR</code> を無視する</td><td><a href="https://github.com/anthropics/claude-code/issues/30538" target="_blank" rel="noopener">#30538</a></td></tr>
+<tr><td>変数を設定しても、各ワークスペースに <code>.claude/</code> が作られることがある</td><td><a href="https://github.com/anthropics/claude-code/issues/3833" target="_blank" rel="noopener">#3833</a></td></tr>
+<tr><td><code>/ide</code> コマンドが、変数設定時に IDE を検出できないことがある</td><td><a href="https://github.com/anthropics/claude-code/issues/4739" target="_blank" rel="noopener">#4739</a></td></tr>
+</table>
+
+<p>つまり、<code>CLAUDE_CONFIG_DIR</code> は「移すための正式な仕組み」ですが、コンポーネントによって効き方にムラがあります。UIから第一級の設定として選べるようにしてほしい、という要望が出ているのは、こうした食い違いが理由です。</p>
+
+<h2>「セキュリティが心配」なら、見る場所が少し違う</h2>
+
+<p><code>.claude</code> の置き場所を気にする人の多くは、セキュリティを心配しています。ここは切り分けが大事です。</p>
+
+<p><strong>グローバルの <code>~/.claude</code></strong> に入っているのは、おもに<strong>あなた自身の</strong>認証情報・設定・履歴です。だから、これを別ドライブへ移すのは「権限とドライブの衛生」の話で、外部からの攻撃の話ではありません。置き場所を変えても、守るべきは「そのフォルダを誰が読めるか」です。</p>
+
+<p>外部のコードからの本当の攻撃面は、別のところにあります。<strong>プロジェクトの中の <code>.claude/settings.json</code> と <code>.mcp.json</code></strong> です。これらは、クローンしてきたリポジトリが同梱でき、「このフォルダを信頼」を押した瞬間に、hook の自動実行・API キーの送信先の書き換え（<code>ANTHROPIC_BASE_URL</code>）・MCP サーバの起動を許可してしまいます（<a href="https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/" target="_blank" rel="noopener">CVE-2025-59536 / CVE-2026-21852</a>）。</p>
+
+<p>つまり、<strong>グローバルの置き場所</strong>と<strong>プロジェクトの設定</strong>は、別の問題として扱うのが正解です。前者は衛生、後者は「信頼する前に中身を読む」べき攻撃面です。</p>
+
+<div class="cta">
+受け取ったリポジトリの <code>.claude/settings.json</code> が安全かどうかを、信頼する前に貼り付けて確認できる無料ツールを用意しています。<br>
+→ <a href="claude-config-trap-scanner-jp.html">.claude/ 設定 危険度スキャナ</a><br>
+設定まわりの安全を一通り点検したい人は、無料の設定集 <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> もどうぞ。
+</div>
+
+<h2>まとめ</h2>
+<ul>
+<li><code>.claude</code> は <code>CLAUDE_CONFIG_DIR</code> で別ドライブ・別フォルダへ移せる（Cドライブの容量対策にも有効）。</li>
+<li>ただし VS Code 拡張は現状この変数を無視する（#30538）。確実なのは素の CLI。</li>
+<li>グローバルの <code>~/.claude</code> の置き場所は「権限とドライブの衛生」の話。</li>
+<li>外部からの本当の攻撃面は、プロジェクトの <code>.claude/settings.json</code> / <code>.mcp.json</code>（CVE-2025-59536 / CVE-2026-21852）。信頼する前に中身を読む。</li>
+</ul>
+
+<div class="footer">
+事実は <a href="https://code.claude.com/docs/en/claude-directory" target="_blank" rel="noopener">公式ドキュメント</a>と GitHub の各 Issue（#30538 / #3833 / #4739）、<a href="https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/" target="_blank" rel="noopener">Check Point Research の開示</a>に基づきます。<br>
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="index.html">他の安全ツール</a> ・ <a href="claude-config-trap-scanner-jp.html">.claude/ 設定 危険度スキャナ</a>
+</div>
+</div>
+</body>
+</html>
