@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Claude Code 認証の静かな失効 自己診断 — あなたはどの経路か（7軸）、止め方と再発の予防</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Claude Codeの認証が作業の途中で警告なく切れる「静かな失効」の自己診断。6つの質問で7つの経路(OAuthリフレッシュの破損/macOSスリープ/セッションの失効/VS Code拡張/複数の窓のずれ/Cowork/第三者のSSO)のどれかを切り分け、経路ごとの復旧と検証済みの予防のhookを示す。ブラウザ内で完結、登録なし、送信なし。">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626; --blue: #2563eb; --purple: #7c3aed; --teal: #0891b2; --pink: #db2777;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.7; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef3c7; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.35rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.bars { margin: 1rem 0; }
+.bar-row { display: flex; align-items: center; margin: 0.4rem 0; }
+.bar-label { width: 54px; font-weight: 600; font-size: 0.92rem; }
+.bar-track { flex: 1; background: #f3f4f6; border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.4s; }
+.bar-19a { background: var(--blue); } .bar-19b { background: var(--teal); } .bar-19c { background: var(--amber); }
+.bar-19d { background: var(--green); } .bar-19e { background: var(--purple); } .bar-19f { background: var(--pink); } .bar-19g { background: var(--red); }
+.bar-pct { width: 50px; text-align: right; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+.top-pattern { background: #fef2f2; border-left: 4px solid var(--red); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.top-pattern h3 { margin-top: 0; color: var(--red); }
+.loop-warning { background: #f5f3ff; border-left: 4px solid var(--purple); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.loop-warning h3 { margin-top: 0; color: var(--purple); }
+.apikey-warning { background: #fffbeb; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.apikey-warning h3 { margin-top: 0; color: var(--amber); }
+.recovery { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.recovery h3 { margin-top: 0; color: var(--green); }
+.prevention { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.prevention h3 { margin-top: 0; color: var(--blue); }
+.hook-install { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.9rem; font-family: ui-monospace, monospace; }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+.kbd { background: #f3f4f6; border: 1px solid var(--border); border-radius: 3px; padding: 0.1rem 0.35rem; font-size: 0.85em; font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+
+<h1>Claude Code 認証の静かな失効 自己診断</h1>
+<div class="meta">6つの質問 ・ 約2分 ・ ブラウザ内で完結、登録なし、送信なし ・ CC0 ・ v1.0（2026-06-09）</div>
+
+<div class="intro">
+<strong>何が起きているか:</strong> ログインは確かに通っていたのに、しばらく作業した後に <code>401</code> や <code>Needs authentication</code> や <code>Not logged in</code> が出て、それまでの流れが止まる。認証の「成功しました」は一瞬の状態でしかなく、その後 裏側の認証だけが警告なく失効し、次にツールを呼んだ瞬間に初めて壁にぶつかる。失うのは、その失効に巻き込まれた作業の途中の成果だ。2026年の5月中旬から下旬の17日間だけで、関連する報告が39件以上 公開のissueに積み上がった。<strong>同じ「静かな失効」でも入口は7つに分かれ、入口ごとに止め方と予防が違う。</strong> この診断は、あなたがどの経路かを切り分ける。
+</div>
+
+<div class="disclosure">
+<strong>開示:</strong> 予防の節は、このリポジトリ（cc-safe-setup、MIT）の検証済みの認証のhookに導線する。どれも作業を止めるものではなく、失効を「見える化」する助言の層だ。失効そのものを防ぐ根治はAnthropic側の仕事で、利用者の側でできるのは、作業の途中で死ぬ前に気づけるようにすることだ。このページは単一のHTMLで、解析や送信や追跡は一切しない。保存して手元で動かせる。
+</div>
+
+<h2>6つの質問</h2>
+
+<form id="audit-form">
+
+<div class="q" data-id="q1">
+<div class="label">1. 認証が最初に切れたのは、どの直後だったか？</div>
+<div class="hint">きっかけが、どの経路かを最も強く決める。</div>
+<label><input type="radio" name="q1" value="b"> マシンをスリープから復帰させた直後。</label>
+<label><input type="radio" name="q1" value="c"> 特にきっかけなく、しばらく使った後で（対話の利用で）。</label>
+<label><input type="radio" name="q1" value="a"> MCPサーバーの認証や再認証の直後、または複数のサービス/ショップを切り替えた後。</label>
+<label><input type="radio" name="q1" value="e"> 別の窓でログインやログアウトをした後、古い窓だけがおかしい。</label>
+<label><input type="radio" name="q1" value="d"> VS Code（や Cursor）の拡張で、毎日のように再ログインを求められる。</label>
+<label><input type="radio" name="q1" value="f"> Cowork／デスクトップのサンドボックスの中で。</label>
+<label><input type="radio" name="q1" value="g"> Bedrock／Vertex／SSO など第三者の経由で、初日は平気で2日目以降に。</label>
+</div>
+
+<div class="q" data-id="q2">
+<div class="label">2. 症状の形に最も近いのは？</div>
+<div class="hint">同じ401でも、無限ループか、表示の矛盾か、復帰後の一発目かで経路が分かれる。</div>
+<label><input type="radio" name="q2" value="a"> <code>401</code> が無限に続き、リトライでは直らず、完全な再ログインでしか戻らない。</label>
+<label><input type="radio" name="q2" value="e"> <code>/account</code> は「未認証」と出るのに、同じ画面の使用量のバーは実際の消費を出している（矛盾）。</label>
+<label><input type="radio" name="q2" value="b"> スリープからの復帰後、最初のツールの呼び出しで初めて出た。表示上は同じユーザーのまま。</label>
+<label><input type="radio" name="q2" value="x"> 「認証が必要です」が、上記のどれとも違う形で突然 出た。</label>
+</div>
+
+<div class="q" data-id="q3">
+<div class="label">3. 失効の直前に、トークンの更新や認証の最中の「一時的な上流のエラー（5xxなど）」に心当たりはあるか？</div>
+<div class="hint">更新の最中の一回の一時エラーが、認証の状態を恒久的に壊してループにすることがある。</div>
+<label><input type="radio" name="q3" value="a"> ある（更新や認証の最中に一時的なエラーが見えた／その頃 不安定だった）。</label>
+<label><input type="radio" name="q3" value="n"> ない／わからない。</label>
+</div>
+
+<div class="q" data-id="q4">
+<div class="label">4. Claude Code の窓（やセッション）を、複数 同時に開いているか？</div>
+<div class="hint">片方の窓のログイン操作が、ディスク上の認証の情報を書き換え、もう片方を古い状態にする。</div>
+<label><input type="radio" name="q4" value="e"> はい、複数の窓やアカウントを並行で使っている。</label>
+<label><input type="radio" name="q4" value="n"> いいえ、ひとつだけ。</label>
+</div>
+
+<div class="q" data-id="q5">
+<div class="label">5. 認証の方式は？</div>
+<div class="hint">第三者の経路は2日目の失効が出やすく、環境変数の残りは別の混乱を生む。</div>
+<label><input type="radio" name="q5" value="s"> 購読（サブスク）のログイン。</label>
+<label><input type="radio" name="q5" value="g"> 第三者の経路（Bedrock／Vertex／企業のSSO など）。</label>
+<label><input type="radio" name="q5" value="k"> <code>ANTHROPIC_API_KEY</code> を設定している、または設定の有無がわからない。</label>
+</div>
+
+<div class="q" data-id="q6">
+<div class="label">6. このセッションは自律運用（<code>/loop</code>・cron・headless の自動の再開）で動いているか？</div>
+<div class="hint">自動の再開だと、一度の失効が「直らないまま枠を溶かし続ける」ループになりうる。</div>
+<label><input type="radio" name="q6" value="a"> はい（<code>/loop</code>・cron・スケジュール実行・headless など）。</label>
+<label><input type="radio" name="q6" value="n"> いいえ（対話の利用で、画面で401を見て対処できる）。</label>
+</div>
+
+<button type="button" class="btn" id="submit-btn" disabled>診断を見る →</button>
+</form>
+
+<div class="result" id="result-box">
+<h2>診断</h2>
+
+<div class="bars" id="bars"></div>
+
+<div class="top-pattern" id="top-pattern-box">
+<h3 id="top-pattern-title">最も可能性の高い経路</h3>
+<p id="top-pattern-body"></p>
+</div>
+
+<div class="loop-warning" id="loop-warning-box" style="display:none">
+<h3>自律運用での増幅を検知</h3>
+<p>自動の再開で動いています。失効が <strong>直らないまま枠を溶かし続けるループ</strong> になりえます（再開→401→また再開→また401）。<strong>まずループを止めてください。</strong> 成功しない要求に、API のトークンや従量の枠や上限の予算を使い続けます。止めてから、下の経路ごとの復旧を実行してください。</p>
+</div>
+
+<div class="apikey-warning" id="apikey-warning-box" style="display:none">
+<h3>環境変数の残りの罠の可能性</h3>
+<p><code>ANTHROPIC_API_KEY</code> が設定されていると、購読のログインではなく API の鍵の方が優先され、意図しない経路で動いたり、認証の状態の見え方が食い違ったりします。サブスクで使っているつもりなら、まずこの環境変数が残っていないかを確認してください（<code>echo $ANTHROPIC_API_KEY</code> や シェルの設定ファイル、<code>~/.claude/settings.json</code> の <code>env</code> を点検）。残っていれば外して、認証の経路を一本化します。</p>
+</div>
+
+<div class="recovery">
+<h3>復旧（最も可能性の高い経路に合わせて）</h3>
+<div id="recovery-body"></div>
+</div>
+
+<div class="prevention">
+<h3>再発の予防（これから）</h3>
+<div id="prevention-body"></div>
+</div>
+
+<h3>もしこの種の失効が繰り返すなら</h3>
+<p>このページは「認証の静かな失効」に絞っている。同じ「成功したように見えて実は失敗している」沈黙の失敗は、ほかにも 副の作業者の嘘の完了の報告、トークンの想定外の膨張、ファイルの静かな書き換えなど、いくつもの形で起きる。</p>
+<ul>
+<li><a href="https://github.com/yurukusa/cc-safe-setup" target="_blank">cc-safe-setup</a>（無料・MIT）: Claude Code の安全のためのhook集。この診断が挙げた認証のhookもすべてここに入っている。</li>
+<li><a href="https://zenn.dev/yurukusa/books/token-savings-guide" target="_blank">Token Book（¥2,500）</a>: 失効や枠の枯渇など、作業の途中の失敗の費用の経済を扱う。冒頭の章は無料の試し読み。</li>
+<li><a href="https://ko-fi.com/yurukusa/tiers" target="_blank">CC Safety Lab（月額 ¥500）</a>: 新しく現れる事故のクラスタを、出荷したhookと運用の点検表と上流の状況の追跡つきで、毎月ひとつ扱う。認証の静かな失効は中核のクラスタのひとつ。</li>
+</ul>
+
+</div>
+
+<footer>
+v1.0 公開 2026-06-09。ブラウザ内で完結する自己診断 — 解析も登録も送信も追跡もしない。HTMLを保存すれば手元で動く。CC0 / パブリックドメイン。出典は <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/claude-code-auth-silent-failure-diagnostic-jp.html">GitHub</a>。新しい経路が現れたら追記する。
+</footer>
+
+<script>
+(function () {
+  const form = document.getElementById('audit-form');
+  const btn = document.getElementById('submit-btn');
+  const resultBox = document.getElementById('result-box');
+  const bars = document.getElementById('bars');
+  const topTitle = document.getElementById('top-pattern-title');
+  const topBody = document.getElementById('top-pattern-body');
+  const loopBox = document.getElementById('loop-warning-box');
+  const apikeyBox = document.getElementById('apikey-warning-box');
+  const recoveryBody = document.getElementById('recovery-body');
+  const preventionBody = document.getElementById('prevention-body');
+
+  // 各回答が、どの軸に何点を足すか。LOOP と APIKEY は軸でなく別のフラグ。
+  const scoring = {
+    q1: { b:{'19B':3}, c:{'19C':3}, a:{'19A':3}, e:{'19E':3}, d:{'19D':3}, f:{'19F':3}, g:{'19G':3} },
+    q2: { a:{'19A':2,'19C':1}, e:{'19E':3}, b:{'19B':2}, x:{'19A':0.3,'19B':0.3,'19C':0.3,'19D':0.3,'19E':0.3,'19F':0.3,'19G':0.3} },
+    q3: { a:{'19A':2}, n:{} },
+    q4: { e:{'19E':2}, n:{} },
+    q5: { s:{}, g:{'19G':2}, k:{'APIKEY':1} },
+    q6: { a:{'LOOP':5}, n:{} }
+  };
+
+  const axes = ['19A','19B','19C','19D','19E','19F','19G'];
+
+  function getAnswers() {
+    const d = new FormData(form);
+    return { q1:d.get('q1'), q2:d.get('q2'), q3:d.get('q3'), q4:d.get('q4'), q5:d.get('q5'), q6:d.get('q6') };
+  }
+  function enableSubmit() {
+    const a = getAnswers();
+    btn.disabled = !(a.q1 && a.q2 && a.q3 && a.q4 && a.q5 && a.q6);
+  }
+  form.addEventListener('change', enableSubmit);
+
+  function calculate() {
+    const a = getAnswers();
+    const scores = {'19A':0,'19B':0,'19C':0,'19D':0,'19E':0,'19F':0,'19G':0,'LOOP':0,'APIKEY':0};
+    for (const k of ['q1','q2','q3','q4','q5','q6']) {
+      const ans = a[k]; if (!ans) continue;
+      const delta = scoring[k][ans] || {};
+      for (const [p,v] of Object.entries(delta)) scores[p] += v;
+    }
+    return scores;
+  }
+
+  const info = {
+    '19A': {
+      title: '19A — OAuth／MCP の更新の破損',
+      body: 'トークンの更新の最中に上流が一時的な 5xx を返すと、その一回の失敗で認証の状態が壊れ、以後ずっと 401 が返り続けるループに入る。更新の直前まで有効で、リトライでは直らず、完全な再認証が要る。MCP の OAuth でも、再認証のたびに古いトークンを孤児にする・空のトークンを保存する・完了しても尊重されない、といった近い形が起きる（#61912 / #59460 / #59725 / #60260 / #61139）。',
+      recovery: '<strong>完全な再認証が要る経路。</strong>リトライや単なる再起動では戻らない。<ol><li>MCP の経路なら、その MCP サーバーの認証をやり直す（古いトークンを消してから再認証）。</li><li>本体の認証なら <code>/login</code> をやり直す。</li><li>複数のサービス/ショップを切り替えていたなら、切り替えの前後で別々に認証し直す。</li></ol>'
+    },
+    '19B': {
+      title: '19B — macOS のスリープ復帰での失効',
+      body: '作業の途中でマシンがスリープし、眠っている間にトークンが期限切れになる。復帰後の最初のツールの呼び出しで初めて 401 が出る。画面の表示は同じユーザーのままなので気づきにくい（#59937 / #60104）。',
+      recovery: '<ol><li>復帰後、まとまった作業を始める前に認証の状態を確認する（下の <code>auth-status-checker</code> か <code>/login</code>）。</li><li>すでに 401 が出ているなら <code>/login</code> をやり直す。リトライだけでは戻らない。</li></ol>'
+    },
+    '19C': {
+      title: '19C — セッションの期限の静かな失効',
+      body: 'しばらく使っていると、上流からの予告なく 401 や「認証が必要」に変わる。やっかいなのは、復旧のための再認証そのものが失敗の状態に入っていることがある点だ（#60938 / #62354 / #61912 / #63919）。',
+      recovery: '<ol><li><code>/login</code> をやり直す。</li><li>再認証そのものが失敗するなら、いったんクライアントを終了し、認証情報の保管（OS のキーチェーンや認証ファイル）を確認してから入り直す。</li><li>毎日の最初に一度 認証を点検する区切りを作ると、2日目の失効を作業の途中ではなく区切りで見つけられる（下の <code>auth-expiry-reminder</code>）。</li></ol>'
+    },
+    '19D': {
+      title: '19D — VS Code／拡張の強制的な再ログイン',
+      body: '拡張が毎日のように再ログインを求めてくる。本体の CLI とは別の認証の状態を持つために起きる（#61923）。',
+      recovery: '<ol><li>拡張の側で改めてサインインする。</li><li>本体の CLI と拡張で別々の認証になっていないかを確認し、可能なら経路を一本化する。</li><li>毎日 求められること自体が苦痛なら、上流の修正を待つ間、作業の開始時の点検に組み込んでおく。</li></ol>'
+    },
+    '19E': {
+      title: '19E — 複数の窓のあいだのずれ',
+      body: 'ある窓で長い作業をしている最中に、別の窓でログインやログアウトをすると、ディスク上の認証の情報が書き換わる。最初の窓は記憶の中の古いトークンで動き続けるが、その窓の <code>/account</code> は「未認証」と表示しながら、同じ画面の使用量のバーは実際の消費を出す、という矛盾が起きる（#62790）。',
+      recovery: '<ol><li>どの窓のアカウントを使いたいかを決め、その窓で <code>/account</code> を確認する。</li><li>意図したアカウントでなければ、その窓で改めて <code>/login</code> し直す。</li><li>並行作業を続けるなら、窓ごとに認証情報の書き換えが起きたことを知らせる仕組みを入れておく（下の <code>multi-window-auth-drift-detector</code>）。</li></ol>'
+    },
+    '19F': {
+      title: '19F — Cowork／サンドボックスでの認証の失敗',
+      body: 'Cowork／デスクトップのサンドボックスの中で認証が通らない、または失効する（#61563）。<strong>正直な注記:</strong> cc-safe-setup の hook は CLI／IDE 向けで、Cowork のサンドボックスの層には届かない。だから下の予防の hook はこの経路には効かない。',
+      recovery: '<ol><li>デスクトップのアプリ側でサインインの状態を確認し、入り直す。</li><li>サンドボックスの認証は本体とは別の経路なので、本体での再認証が反映されないことがある。アプリの再起動を試す。</li><li>この経路は利用者の側でできることが限られるので、再現する条件を控えて公式に報告するのが根治に近い。</li></ol>'
+    },
+    '19G': {
+      title: '19G — 第三者の SSO の2日目の失効',
+      body: 'Bedrock や Vertex、企業の SSO など第三者の経路で、初日は平気なのに2日目以降に静かに切れる（#63185 / #62103）。短命のトークンの更新が想定どおりに続かないために起きる。',
+      recovery: '<ol><li>第三者の側の認証（SSO のセッション、クラウドの資格情報）を更新し直す。</li><li>初日 OK・2日目 NG の型なら、毎日の最初に第三者の資格情報の有効期限を点検する区切りを作る（下の <code>auth-expiry-reminder</code>）。</li><li>更新の自動化が効いているか（プロファイルやトークンの更新の設定）を確認する。</li></ol>'
+    }
+  };
+
+  function buildBars(scores) {
+    const total = axes.reduce((a,p)=>a+scores[p],0) || 1;
+    bars.innerHTML = axes.map(p => {
+      const pct = Math.round(scores[p]/total*100);
+      return `<div class="bar-row"><span class="bar-label">${p}</span><span class="bar-track"><span class="bar-fill bar-${p.toLowerCase()}" style="width:${pct}%"></span></span><span class="bar-pct">${pct}%</span></div>`;
+    }).join('');
+  }
+
+  function showResult() {
+    const scores = calculate();
+    buildBars(scores);
+
+    const top = axes.reduce((a,b)=> scores[b] > scores[a] ? b : a);
+    topTitle.textContent = info[top].title;
+    topBody.innerHTML = info[top].body;
+    recoveryBody.innerHTML = info[top].recovery;
+
+    loopBox.style.display = scores['LOOP'] > 0 ? '' : 'none';
+    apikeyBox.style.display = scores['APIKEY'] > 0 ? '' : 'none';
+
+    // 予防の節。一般の起動時の確認 + 上位の軸に合うhook + 自律運用の警告。
+    const general = '<strong>起動時に認証の状態を確認する</strong>（どの経路にも効く土台）。<div class="hook-install">cp ~/cc-safe-setup/examples/auth-status-checker.sh ~/.claude/hooks/<br>chmod +x ~/.claude/hooks/auth-status-checker.sh<br># ~/.claude/settings.json の SessionStart に登録</div>セッションの開始時に、認証の状態と、失効していたときの対処の選択肢を示す。作業を止めない助言の層。';
+
+    const hookByAxis = {
+      '19A': '<strong>更新の破損のループの兆候を検知</strong>: <code>oauth-refresh-monitor.sh</code> は、成功の信号の後に 401 の文字列が現れる、という更新の破損の兆候を捉えて、無限ループにはまる前に知らせる。',
+      '19B': '<strong>スリープ復帰を検知して確認を促す</strong>: <code>auth-macos-sleep-detector.sh</code> は、macOS が最近スリープから復帰したことを検知し、最初のツールの呼び出しの前に認証の確認を促す。',
+      '19C': '<strong>毎日の点検の区切りを作る</strong>: <code>auth-expiry-reminder.sh</code> は、その日の最初に認証の状態を点検する区切りを作り、2日目の静かな失効を作業の途中ではなく区切りで見つけられるようにする。',
+      '19D': '本体の CLI 側は上の <code>auth-status-checker</code> で起動時に確認できる。拡張の側の強制の再ログインは上流の挙動なので、当面は起動時の点検で痛みを和らげる。',
+      '19E': '<strong>複数の窓のずれを検知</strong>: <code>multi-window-auth-drift-detector.sh</code> は、セッションの開始後にディスク上の認証の情報が書き換わったことを検知し、古い窓で気づかずに使い続けるのを防ぐ。',
+      '19F': 'この経路（Cowork のサンドボックス）には cc-safe-setup の hook は届かない。当面はアプリ側の再認証と再起動、そして再現の条件を控えての公式の報告が現実的。',
+      '19G': '<strong>毎日の点検の区切りを作る</strong>: <code>auth-expiry-reminder.sh</code> は、第三者の資格情報の2日目の失効を、作業の途中ではなく区切りで見つけられるようにする。'
+    };
+
+    let loopBlock = '';
+    if (scores['LOOP'] > 0) {
+      loopBlock = '<br><br><strong>自律運用なら、失効で枠を溶かす前に止める</strong>。自動の再開の層は 401 を読まずに再開を続けるので、失効が直らないまま枠を消費し続ける。再開の前に認証の状態を確認する仕組みを入れ、失効していたら再開を止める運用にする。';
+    }
+
+    preventionBody.innerHTML = general + '<br><br>' + (hookByAxis[top] || '') + loopBlock +
+      '<br><br><span style="color:#6b7280;font-size:0.9rem">いずれの hook も作業を止めない助言の層で、失効そのものを防ぐわけではない。だが、認証の事故のいちばんの損失は失効そのものより「気づかずに作業を続けて、巻き込まれて消えた途中の成果」にある。見える化するだけで損失はかなり小さくなる。</span>';
+
+    resultBox.classList.add('show');
+    resultBox.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  btn.addEventListener('click', showResult);
+})();
+</script>
+
+</body>
+</html>

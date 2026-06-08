@@ -67,6 +67,11 @@ a:hover{text-decoration:underline}
   <div class="nm">自律 /loop・wakeup の暴走監査 <span class="arrow">→</span></div>
   <div class="ds"><code>/loop</code> や wakeup で自律運用すると、道具が偽の指示を繰り返し注入し、人がいない間に同じところを回って枠を溶かすことがあります。<code>.jsonl</code> を貼ると、繰り返し注入の run と無人で消費したターン数を洗い出します。</div>
 </a>
+<a class="tool" href="claude-code-auth-silent-failure-diagnostic-jp.html">
+  <div class="cat">認証が作業の途中で黙って切れる</div>
+  <div class="nm">認証の静かな失効 自己診断（7軸） <span class="arrow">→</span></div>
+  <div class="ds">ログインは通っていたのに、しばらくすると <code>401</code> や「認証が必要」で作業ごと止まる時に。6つの質問で、7つの経路（OAuthの更新の破損／macOSのスリープ／セッションの失効／VS Code拡張／複数の窓のずれ／Cowork／第三者のSSO）のどれかを切り分け、経路ごとの止め方と検証済みの予防の hook を示します。</div>
+</a>
 
 <a class="tool" href="claude-code-deny-coverage-checker-jp.html">
   <div class="cat">秘密が守れているか不安（権限）</div>
