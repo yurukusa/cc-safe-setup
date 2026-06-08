@@ -1482,6 +1482,10 @@ async function audit() {
     console.log();
     console.log(c.bold + '  Go deeper (all free to start):' + c.reset);
     if (score < 80) {
+      // Lead the low-score (peak-concern) path with the free incident catalog,
+      // not a book link: the 100 real incidents validate the abstract risks just
+      // shown and cost nothing, so the deeper path stays free-education-first.
+      console.log(c.dim + '  • 100 real incidents these guards prevent:  https://yurukusa.github.io/cc-safe-setup/incidents.html' + c.reset);
       console.log(c.dim + '  • Incident-prevention guide (Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
     }
     console.log(c.dim + '  • Cut token cost (Ch.1 free):  https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
