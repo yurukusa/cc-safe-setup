@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code の事故を防ぐ・調べる 無料の診断ツール集（日本語・ブラウザ内処理）</title>
+<meta name="description" content="Claude Code で起きる事故を、困っている種類ごとに調べられる無料の診断ツールをまとめました。トークンが何に消えているか、セッションが二度と開けない時の救出、どの CLI 版が安全か、permissions.deny が本当に守れているか、受け取った .claude 設定が罠でないか。すべてブラウザの中だけで処理し、送信しません。">
+<meta property="og:title" content="Claude Code の事故を防ぐ・調べる 無料の診断ツール集（日本語）">
+<meta property="og:description" content="費用・データ喪失・版の失敗・権限・設定の罠。困りごとごとに選べる無料の診断ツール。ブラウザ内処理・送信なし。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-tools-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Claude Code 安全・診断ツール集（日本語）","inLanguage":"ja","description":"Claude Code の事故を困りごとごとに調べる無料の診断ツール集。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:780px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;line-height:1.5;margin-bottom:.8rem}
+.lede{color:#adbac7;font-size:.92rem;margin-bottom:1.8rem}
+.lede strong{color:#f0f6fc}
+.tool{display:block;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem 1.3rem;margin-bottom:1rem;transition:border-color .15s,background .15s}
+.tool:hover{border-color:#1f6feb;background:#0f1b2d;text-decoration:none}
+.tool .cat{font-size:.74rem;color:#8b949e;letter-spacing:.04em;margin-bottom:.25rem}
+.tool .nm{color:#f0f6fc;font-size:1.05rem;font-weight:600;margin-bottom:.35rem}
+.tool .nm .arrow{color:#58a6ff;font-weight:400}
+.tool .ds{color:#adbac7;font-size:.86rem}
+.tool .ds code{background:#0d1117;padding:.1rem .35rem;border-radius:4px;color:#79c0ff;font-size:.82rem;font-family:'Fira Code',ui-monospace,monospace}
+.priv{text-align:center;color:#6e7681;font-size:.8rem;margin:1.5rem 0}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:2rem 0 1rem;font-size:.9rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681;text-align:center}
+.footer a{color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code の事故を防ぐ・調べる<br>無料の診断ツール集</h1>
+
+<p class="lede">Claude Code を長く使っていると、いろいろな「気づきにくい事故」に出会います。トークンが想定の何倍も消える、長いセッションが突然開けなくなる、編集が静かに失敗する……。困っている種類ごとに、<strong>自分の状態をその場で調べられる無料の診断ツール</strong>を用意しました。すべて<strong>あなたのブラウザの中だけで処理し、ファイルやログはどこにも送信しません</strong>。気になるものから試してください。</p>
+
+<a class="tool" href="token-drain-analyzer.html">
+  <div class="cat">費用・トークンが想定より速く消える</div>
+  <div class="nm">トークン消費アナライザー <span class="arrow">→</span></div>
+  <div class="ds">「軽い作業のはずなのに枠がすぐ枯れる」時に。自分の <code>.jsonl</code> を解析して、トークンが実際に何に消えているか（多くは毎ターンの文脈の再送＝<code>cache_read</code>）を可視化し、バグか設計どおりかを切り分けます。</div>
+</a>
+
+<a class="tool" href="claude-code-cli-version-parse-safety-jp.html">
+  <div class="cat">作業がツールの失敗で消える</div>
+  <div class="nm">CLI 版別 parse 失敗の安全度チェッカー <span class="arrow">→</span></div>
+  <div class="ds"><code>tool call could not be parsed</code> で進行中の作業ごとターンが消える時に。自分のログから版別の失敗率を集計し、<strong>あなたにとって最も安全な CLI 版</strong>を見つけます（最悪の版は環境ごとに違います）。共有できるスコアカードつき。</div>
+</a>
+
+<a class="tool" href="claude-code-thinking-session-rescue-jp.html">
+  <div class="cat">セッションが二度と開けない（データの喪失）</div>
+  <div class="nm">拡張思考セッション救出ツール <span class="arrow">→</span></div>
+  <div class="ds">拡張思考の長いセッションを開き直すと <code>400 thinking blocks cannot be modified</code> が出て永久に開けなくなった時に。壊れた <code>.jsonl</code> から、会話を失わずに開き直せる復旧版を作ります。</div>
+</a>
+
+<a class="tool" href="claude-code-deny-coverage-checker-jp.html">
+  <div class="cat">秘密が守れているか不安（権限）</div>
+  <div class="nm">permissions.deny 網羅チェッカー <span class="arrow">→</span></div>
+  <div class="ds"><code>deny</code> に <code>.env</code> や鍵を書いても、<code>cat</code> や <code>python</code> のサブプロセスで素通りされることがあります。自分の <code>deny</code> ルールを貼ると、何を守れていて何が素通りするかを判定します。</div>
+</a>
+
+<a class="tool" href="claude-config-trap-scanner-jp.html">
+  <div class="cat">受け取った設定が安全か（サプライチェーン）</div>
+  <div class="nm">.claude 設定の罠スキャナ <span class="arrow">→</span></div>
+  <div class="ds">他人から受け取ったリポジトリの <code>.claude/</code> 設定を、信頼して開く前に検査します。貼り付けるだけで、hook の自動実行・環境変数の上書きによる鍵の漏れ・MCP の自動起動・権限の自己付与の4つの危険を判定します。</div>
+</a>
+
+<p class="priv">どのツールも、入力はあなたのブラウザの中だけで処理されます。ログやファイルがサーバーに送られることはありません。</p>
+
+<div class="cta">
+こうした「気づけない静かな事故」を、<strong>実行の手前で止める</strong>無料のフック集が <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> です（<code>rm -rf</code>、強制 push、秘密の漏れ、壊れたデプロイを止める例を多数収録。<code>npx cc-safe-setup</code> ひとつで導入）。<br><br>
+実際に出会った「成功と報告されたのに、実は失敗していた」事故と、その見つけ方・防ぎ方を一冊にまとめたのが <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック</a>（¥800・第2章まで無料）です。
+</div>
+
+<div class="footer">
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（GitHub）</a> ・ ブラウザの中だけで処理し、ファイルは送信しません。
+</div>
+</div>
+</body>
+</html>
