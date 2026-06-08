@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>あなたの Claude Code、どの版が「tool call could not be parsed」を起こしにくい？ 版別の安全度を測るツール</title>
+<meta name="description" content="Claude Code の The model's tool call could not be parsed が、自分の環境でどの CLI 版で起きやすいかを、自分のログ(.jsonl)から版別に集計します。最悪の版は環境ごとに違うので、自分の最良の版を見つけて固定するためのツール。ブラウザの中だけで処理し、送信しません。">
+<meta property="og:title" content="あなたの Claude Code、どの版が parse 失敗を起こしにくい？(版別の安全度スコア)">
+<meta property="og:description" content="tool call could not be parsed の発生率を、自分のログから版別に集計。最悪の版は人それぞれ。自分の最良の版を見つける。ブラウザ内処理・送信なし。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-cli-version-parse-safety-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code CLI 版別 parse 失敗 安全度チェッカー","applicationCategory":"DeveloperApplication","inLanguage":"ja","operatingSystem":"Browser","offers":{"@type":"Offer","price":"0"},"description":"tool call could not be parsed の発生率を自分のログから版別に集計。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:760px;margin:0 auto}
+.back{margin-bottom:1.2rem}
+.back a{color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.4rem;line-height:1.5;margin-bottom:1.2rem}
+h2{color:#f0f6fc;font-size:1.15rem;margin:2rem 0 .8rem;padding-top:.5rem;border-top:1px solid #21262d}
+p{margin-bottom:.9rem;color:#adbac7}
+ul,ol{margin:.5rem 0 1rem 1.4rem}
+li{margin-bottom:.45rem;color:#adbac7}
+code{background:#161b22;padding:.12rem .4rem;border-radius:5px;color:#79c0ff;font-size:.86rem;font-family:'Fira Code',ui-monospace,monospace}
+.lede{background:#161b22;border:1px solid #30363d;border-left:3px solid #f85149;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;color:#adbac7;font-size:.9rem}
+.lede strong{color:#f0f6fc}
+.drop{border:2px dashed #30363d;border-radius:10px;padding:2rem 1.2rem;text-align:center;background:#11161d;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:#1f6feb;background:#0f1b2d}
+.drop strong{color:#f0f6fc;display:block;margin-bottom:.3rem}
+.drop span{font-size:.82rem;color:#8b949e}
+.note-priv{font-size:.78rem;color:#6e7681;margin-top:.7rem}
+#out{margin-top:1.2rem}
+table{width:100%;border-collapse:collapse;margin:.6rem 0;font-size:.86rem}
+th,td{text-align:right;padding:.4rem .6rem;border-bottom:1px solid #21262d;font-family:'Fira Code',ui-monospace,monospace}
+th{color:#8b949e;font-weight:600;font-size:.78rem}
+td.v{text-align:left;color:#c9d1d9}
+tr.best td{color:#56d364}
+tr.worst td{color:#ffa198}
+.badge{display:inline-block;font-size:.72rem;padding:.05rem .45rem;border-radius:4px;margin-left:.4rem}
+.badge.best{background:#0f2417;color:#56d364}
+.badge.worst{background:#3d1418;color:#ffa198}
+.verdict{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.3rem;margin:1rem 0;font-size:.92rem;color:#e3d2a7}
+.verdict strong{color:#f0f6fc}
+.share{margin-top:1rem}
+.share textarea{width:100%;min-height:120px;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.7rem;color:#c9d1d9;font-family:'Fira Code',ui-monospace,monospace;font-size:.78rem;line-height:1.55;resize:vertical}
+button{background:#238636;color:#fff;border:none;border-radius:6px;padding:.55rem 1.2rem;font-size:.88rem;font-weight:600;cursor:pointer;margin-top:.5rem}
+button:hover{background:#2ea043}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:1.8rem 0;font-size:.88rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681}
+.footer a{color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.card{border-radius:8px;padding:1rem 1.2rem;margin-bottom:.8rem;font-size:.9rem;border:1px solid #30363d;background:#161b22}
+.card.yellow{border-left:4px solid #d29922}
+.card .hd{color:#f0f6fc;font-weight:600;margin-bottom:.4rem}
+.card .nt{color:#adbac7;font-size:.86rem}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="back"><a href="index.html">← 他の Claude Code 安全ツール</a></div>
+
+<h1>あなたの Claude Code、どの版が<br><code>tool call could not be parsed</code> を起こしにくい？</h1>
+
+<div class="lede">
+編集の途中で <code>The model's tool call could not be parsed (retry also failed)</code> が出て、進行中の作業ごとターンが消える。これは<strong>あなたのプロンプトのせいではなく、CLI 側の版に依存するリグレッション</strong>です。やっかいなのは、<strong>いちばん悪い版が環境ごとに違う</strong>こと。だから「この版に下げろ」という他人のおすすめは当てになりません。自分のログから、自分にとって安全な版を測りましょう。
+</div>
+
+<div class="drop" id="drop">
+<strong>~/.claude/projects/ の中の .jsonl を、ここにドラッグ（複数可）</strong>
+<span>フォルダごと選んでも、ファイルを何個か選んでも構いません</span>
+<input type="file" id="file" accept=".jsonl,.json,application/json" multiple webkitdirectory style="display:none">
+<input type="file" id="file2" accept=".jsonl,.json,application/json" multiple style="display:none">
+<div class="note-priv">送信は発生しません（このページの中だけで処理します）。版番号と発生率だけを集計します。</div>
+</div>
+<div style="text-align:center;margin-top:.5rem"><a href="#" id="pickfiles" style="font-size:.82rem">フォルダではなくファイルを選ぶ</a></div>
+
+<div id="out"></div>
+
+<h2>結果の読み方</h2>
+<ul>
+<li><strong>per-mille（千分率）</strong>が、その版での parse 失敗の起きやすさです。低いほど安全。</li>
+<li>サンプル数（msgs）が少ない版は、たまたまの数字なので参考程度に。目安として 200 件以上の版で比べます。</li>
+<li>緑が<strong>あなたにとって最も安全な版</strong>、赤が最も危険な版です。あなたの最良の版に固定して、1日使ってからもう一度測り直すのがおすすめです。</li>
+</ul>
+
+<div class="card yellow">
+<div class="hd">固定のしかた</div>
+<div class="nt">いちばん安全だった版に固定するには、ターミナルで <code>npm i -g @anthropic-ai/claude-code@&lt;version&gt;</code>（&lt;version&gt; は緑の版番号）。固定した後、しばらく使ってからこのツールでまた測れば、改善したか確かめられます。</div>
+</div>
+
+<h2>なぜ「自分で測る」のか</h2>
+<p>ある報告では CLI <code>2.1.165</code> で失敗率が約8倍に跳ねた、と計測つきで挙がっています。ところが別の環境では、まったく違う版が悪く出ます（このツールの作者のログでは <code>2.1.165</code> はむしろ低く、別の版が高く出ました）。OS、ターミナル、並列のツール呼び出しの量、拡張思考の有無で、悪い版は変わります。だから万人向けの「正解の版」は存在せず、<strong>自分のログで測るのが唯一あてになる</strong>のです。</p>
+
+<div class="cta">
+parse 失敗より重い「拡張思考のセッションが resume で二度と開けなくなる」事故には、壊れた記録から復旧版を作る <a href="https://yurukusa.github.io/cc-safe-setup/claude-code-thinking-session-rescue-jp.html">セッション救出ツール</a> を用意しています（同じくブラウザ内処理・送信なし）。<br>
+こうした「気づけない静かな喪失」を実行の手前で止める無料のフック集が <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>、実際の事故と検証の手順をまとめた読み物が <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック</a>（¥800・第2章まで無料）です。
+</div>
+
+<div class="footer">
+ブラウザの中だけで処理し、ファイルは送信しません。 ・ <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="claude-code-thinking-session-rescue-jp.html">セッション救出ツール</a> ・ <a href="claude-code-deny-coverage-checker-jp.html">deny 網羅チェッカー</a>
+</div>
+</div>
+
+<script>
+var drop=document.getElementById("drop"), fileDir=document.getElementById("file"), fileFlat=document.getElementById("file2"), out=document.getElementById("out");
+document.getElementById("pickfiles").addEventListener("click",function(e){ e.preventDefault(); fileFlat.click(); });
+drop.addEventListener("click",function(){ fileDir.click(); });
+drop.addEventListener("dragover",function(e){ e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave",function(){ drop.classList.remove("over"); });
+drop.addEventListener("drop",function(e){ e.preventDefault(); drop.classList.remove("over"); if(e.dataTransfer.files.length) handle(e.dataTransfer.files); });
+fileDir.addEventListener("change",function(e){ if(e.target.files.length) handle(e.target.files); });
+fileFlat.addEventListener("change",function(e){ if(e.target.files.length) handle(e.target.files); });
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function tallyText(text, tot, fail){
+  var lines=text.split("\n");
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    if(!line || line.charAt(0)!=="{") continue;
+    var v=null;
+    var m=line.match(/"version"\s*:\s*"([^"]+)"/);
+    if(m) v=m[1];
+    if(!v) continue;
+    tot[v]=(tot[v]||0)+1;
+    if(line.indexOf("malformed and could not be parsed")>=0) fail[v]=(fail[v]||0)+1;
+  }
+}
+
+function render(tot, fail){
+  var rows=[];
+  for(var v in tot){ if(tot[v]>=1){ rows.push({v:v, n:tot[v], f:fail[v]||0, rate:(fail[v]||0)/tot[v]*1000}); } }
+  // 版番号順に並べる(意味のある時系列)
+  rows.sort(function(a,b){ return a.v.localeCompare(b.v, undefined, {numeric:true}); });
+  var eligible=rows.filter(function(r){ return r.n>=200; });
+  var best=null, worst=null;
+  eligible.forEach(function(r){
+    if(best===null || r.rate<best.rate) best=r;
+    if(worst===null || r.rate>worst.rate) worst=r;
+  });
+  if(rows.length===0){
+    out.innerHTML='<div class="card yellow"><div class="hd">版の情報が見つかりませんでした</div><div class="nt">これは Claude Code のセッションの記録（1行1 JSON の .jsonl）ですか？ 場所は ~/.claude/projects/ の中です。古い記録には version が無い場合があります。</div></div>';
+    return;
+  }
+  var html='';
+  if(best && worst && best.v!==worst.v){
+    html+='<div class="verdict">あなたの環境で最も安全なのは <strong>'+esc(best.v)+'</strong>（'+best.rate.toFixed(2)+'‰）、最も危険なのは <strong>'+esc(worst.v)+'</strong>（'+worst.rate.toFixed(2)+'‰）でした。';
+    if(worst.rate>0) html+=' その差は約 '+(worst.rate/(best.rate||0.001)).toFixed(0)+' 倍です。';
+    html+='</div>';
+  } else if(eligible.length){
+    html+='<div class="verdict">十分なサンプル（200件以上）のある版では、parse 失敗はほぼ見られませんでした。良い状態です。</div>';
+  }
+  html+='<table><thead><tr><th class="v">version</th><th>msgs</th><th>fails</th><th>per-mille</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var cls=""; var badge="";
+    if(best && r.v===best.v){ cls="best"; badge='<span class="badge best">最良</span>'; }
+    if(worst && r.v===worst.v && worst.v!==(best&&best.v)){ cls="worst"; badge='<span class="badge worst">最悪</span>'; }
+    html+='<tr class="'+cls+'"><td class="v">'+esc(r.v)+badge+'</td><td>'+r.n+'</td><td>'+r.f+'</td><td>'+r.rate.toFixed(2)+'</td></tr>';
+  });
+  html+='</tbody></table>';
+
+  // 共有用テキスト(版番号と率だけ・個人情報なし)
+  var shareLines=["私の Claude Code の parse 失敗率（版別・自分のログ集計）:"];
+  rows.forEach(function(r){ if(r.n>=200) shareLines.push("  "+r.v+"  "+r.rate.toFixed(2)+"‰ ("+r.f+"/"+r.n+")"); });
+  if(best) shareLines.push("→ 私の最良の版: "+best.v);
+  shareLines.push("測定: https://yurukusa.github.io/cc-safe-setup/claude-code-cli-version-parse-safety-jp.html");
+  html+='<div class="share"><div style="font-size:.82rem;color:#8b949e;margin-bottom:.3rem">この結果を共有する（版番号と率だけ・個人情報は含みません）:</div>';
+  html+='<textarea id="sharetext" readonly>'+esc(shareLines.join("\n"))+'</textarea><br>';
+  html+='<button id="copybtn">結果をコピー</button></div>';
+
+  out.innerHTML=html;
+  document.getElementById("copybtn").onclick=function(){
+    var ta=document.getElementById("sharetext"); ta.select();
+    try{ document.execCommand("copy"); this.textContent="コピーしました"; }catch(e){ this.textContent="手動で選択してコピーしてください"; }
+  };
+}
+
+function handle(fileList){
+  var files=[].slice.call(fileList).filter(function(f){ return /\.jsonl$|\.json$/.test(f.name); });
+  if(!files.length){ out.innerHTML='<div class="card yellow"><div class="hd">.jsonl が見つかりませんでした</div><div class="nt">~/.claude/projects/ の中の .jsonl を選んでください。</div></div>'; return; }
+  out.innerHTML='<div class="card"><div class="nt">'+files.length+' 個のファイルを集計中…</div></div>';
+  var tot={}, fail={}, done=0;
+  files.forEach(function(f){
+    var reader=new FileReader();
+    reader.onload=function(){ try{ tallyText(reader.result, tot, fail); }catch(e){} done++; if(done===files.length) render(tot, fail); };
+    reader.onerror=function(){ done++; if(done===files.length) render(tot, fail); };
+    reader.readAsText(f);
+  });
+}
+</script>
+</body>
+</html>
