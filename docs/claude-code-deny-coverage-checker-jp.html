@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>その permissions.deny、本当に秘密を守れてる？ Claude Code deny 網羅チェッカー</title>
+<meta name="description" content="Claude Code の permissions.deny に .env や鍵を書いても、cat や python のサブプロセスで素通りされることがあります。あなたの deny ルールを貼り付けると、何を守れていて何が素通りするかを、ブラウザの中だけで赤・黄・緑で判定します。送信は一切しません。">
+<meta property="og:title" content="その permissions.deny、本当に秘密を守れてる？ Claude Code deny 網羅チェッカー">
+<meta property="og:description" content="deny に書いた .env が cat や python で読まれていないか。貼り付けて1分で網羅を判定（ブラウザ内処理・送信なし）。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-deny-coverage-checker-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code permissions.deny 網羅チェッカー","applicationCategory":"SecurityApplication","inLanguage":"ja","operatingSystem":"Browser","offers":{"@type":"Offer","price":"0"},"description":"permissions.deny の網羅を赤黄緑で判定。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:760px;margin:0 auto}
+.back{margin-bottom:1.2rem}
+.back a{color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.45rem;line-height:1.5;margin-bottom:1.2rem}
+h2{color:#f0f6fc;font-size:1.15rem;margin:2rem 0 .8rem;padding-top:.5rem;border-top:1px solid #21262d}
+p{margin-bottom:.9rem;color:#adbac7}
+ul,ol{margin:.5rem 0 1rem 1.4rem}
+li{margin-bottom:.45rem;color:#adbac7}
+code{background:#161b22;padding:.12rem .4rem;border-radius:5px;color:#79c0ff;font-size:.86rem;font-family:'Fira Code',ui-monospace,monospace}
+.lede{background:#161b22;border:1px solid #30363d;border-left:3px solid #58a6ff;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;color:#adbac7;font-size:.9rem}
+.lede strong{color:#f0f6fc}
+.tldr{background:#101c12;border:1px solid #2ea043;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;font-size:.9rem}
+.tldr strong{color:#56d364}
+textarea{width:100%;min-height:150px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.9rem;color:#c9d1d9;font-family:'Fira Code',ui-monospace,monospace;font-size:.82rem;line-height:1.6;resize:vertical}
+.row{display:flex;gap:.6rem;align-items:center;margin:.8rem 0 1.5rem;flex-wrap:wrap}
+button{background:#238636;color:#fff;border:none;border-radius:6px;padding:.6rem 1.3rem;font-size:.9rem;font-weight:600;cursor:pointer}
+button:hover{background:#2ea043}
+.sample{background:none;color:#58a6ff;border:1px solid #30363d;padding:.55rem 1rem;font-weight:400}
+.note-priv{font-size:.78rem;color:#6e7681}
+#out{margin-top:1rem}
+.card{border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.8rem;font-size:.88rem;border:1px solid #30363d;background:#161b22}
+.card.red{border-left:4px solid #f85149}
+.card.yellow{border-left:4px solid #d29922}
+.card.green{border-left:4px solid #2ea043}
+.card .rule{font-family:'Fira Code',ui-monospace,monospace;color:#f0f6fc;font-weight:600;margin-bottom:.4rem;font-size:.86rem}
+.card .tag{display:inline-block;font-size:.72rem;padding:.1rem .5rem;border-radius:4px;margin-left:.5rem;vertical-align:middle}
+.tag.red{background:#3d1418;color:#ffa198}
+.tag.yellow{background:#2e2410;color:#e3b341}
+.tag.green{background:#0f2417;color:#56d364}
+.card ul{margin:.3rem 0 .3rem 1.2rem}
+.card .lbl{color:#8b949e;font-size:.78rem;margin-top:.5rem}
+.card .nt{color:#adbac7;margin-top:.45rem;font-size:.84rem}
+.verdict{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1rem;font-size:.9rem;color:#e3d2a7}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:1.8rem 0;font-size:.88rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681}
+.footer a{color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="back"><a href="index.html">← cc-safe-setup</a></div>
+<h1>その <code>permissions.deny</code>、本当に秘密を守れてる？<br>Claude Code の deny ルール網羅チェッカー</h1>
+
+<div class="tldr">
+<strong>先に結論：</strong> <code>permissions.deny</code> に <code>.env</code> や鍵を書いても、それは「壁」ではなく「正面の入口の注意書き」です。<code>cat</code> や <code>python -c</code> といった裏口は塞げません。あなたの deny ルールを貼り付けると、何を守れていて何が素通りするかを判定します。<strong>すべてブラウザの中だけで処理し、どこにも送信しません。</strong>
+</div>
+
+<p>「<code>Read(.env)</code> を deny に書いたのに、中身を読まれた」という報告が実際にあります。これはバグというより、<code>deny</code> が <strong>best-effort（できる範囲での防御）</strong>で、ハードなサンドボックスではないために起きます。下に貼り付けて、自分の設定の穴を見てください。</p>
+
+<h2>あなたの deny ルールを貼る</h2>
+<p><code>settings.json</code> の <code>permissions.deny</code> の部分でも、<code>Read(...)</code> の羅列でも構いません。</p>
+<textarea id="inp" placeholder='例:
+"deny": [
+  "Read(./.env)",
+  "Read(**/secrets/**)",
+  "Read(~/.ssh/**)"
+]'></textarea>
+<div class="row">
+<button onclick="run()">網羅をチェック</button>
+<button class="sample" onclick="loadSample()">サンプルを入れる</button>
+<span class="note-priv">送信は発生しません（このページの中だけで処理）</span>
+</div>
+<div id="out"></div>
+
+<h2>判定の読み方</h2>
+<ul>
+<li><strong style="color:#f85149">赤</strong>：簡単に素通りされる。守れているつもりで守れていない（例：<code>Read(.env)</code> だけで <code>cat .env</code> が塞がれていない）。</li>
+<li><strong style="color:#d29922">黄</strong>：ツールとシェルの読みは塞げているが、<code>python</code> や <code>node</code> のサブプロセスは依然素通りする。サンドボックスではない。</li>
+<li><strong style="color:#2ea043">緑</strong>：このチェッカーの範囲では大きな穴は無い。ただし「deny は最終防衛ではない」前提は変わらない。</li>
+</ul>
+
+<div class="verdict">
+<strong>大原則。</strong> 本当に読まれたくない秘密（本番の鍵、認証情報）は、<code>deny</code> に頼らず、利用者の機械の権限とスコープで守ってください。作業ディレクトリやスコープの外に置く。<code>deny</code> は多層防御の一層として使い、それ単独で秘密が守られたとは考えないことです。
+</div>
+
+<div class="cta">
+受け取った他人のリポジトリの <code>.claude/settings.json</code> が危険でないかを、信頼する前に貼って確認する無料ツールもあります。<br>
+→ <a href="claude-config-trap-scanner-jp.html">.claude/ 設定 危険度スキャナ</a><br>
+取り返しのつかない操作を実行の手前で止める hook 集は無料の <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>、事故の型ごとの止め方は <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本（無料章あり）</a>にまとめてあります。
+</div>
+
+<div class="footer">
+判定の根拠：<code>deny</code> は <code>Read</code>/<code>Grep</code>/<code>Glob</code> と、認識された一部の <code>Bash</code> の読みコマンドに効くが、<code>Bash</code> のルールはコマンド文字列に一致しファイルのパスを守らず、<code>python</code>/<code>node</code> 等の任意のサブプロセスは対象外（<a href="https://code.claude.com/docs/en/permissions" target="_blank" rel="noopener">公式ドキュメント</a>）。<br>
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="index.html">他の安全ツール</a> ・ <a href="claude-config-trap-scanner-jp.html">罠スキャナ</a>
+</div>
+</div>
+
+<script>
+var FILE_READ_TOOLS = ["Read", "Grep", "Glob"];
+var SHELL_READERS = ["cat","head","tail","sed","less","more","nl","od","xxd","strings","awk","grep"];
+
+function extractRules(text){
+  var rules=[], re=/([A-Za-z]+)\(([^)]*)\)/g, m;
+  while((m=re.exec(text))!==null){ rules.push({tool:m[1], pattern:m[2].trim(), raw:m[0]}); }
+  return rules;
+}
+function looksLikePath(p){
+  if(/^[a-z][a-z0-9_-]*:/.test(p)) return false;
+  return /[\/.~]|^\*\*|\*$/.test(p)||p.indexOf("/")>=0||p.charAt(0)==="."||p.charAt(0)==="~"||p.indexOf("**")>=0;
+}
+function analyzeRule(rule, allRules){
+  var tool=rule.tool, pattern=rule.pattern;
+  var out={rule:rule.raw, level:"yellow", protects:[], bypasses:[], note:""};
+  if(FILE_READ_TOOLS.indexOf(tool)>=0){
+    out.protects.push(tool+" ツールによる "+pattern+" の読み取りをブロック");
+    var hasShellReaderDeny=allRules.some(function(r){
+      return r.tool==="Bash" && SHELL_READERS.some(function(c){ return new RegExp("^"+c+"\\b|^"+c+":").test(r.pattern); });
+    });
+    if(!hasShellReaderDeny){
+      out.bypasses.push("シェルの読みコマンド (cat / less / head / sed など) で同じファイルを読める。対応する Bash(cat:*) 等の deny が無い");
+      out.level="red";
+      out.note="シェルの読みコマンドが塞がれていない。cat や less で簡単に素通りできる。最低でも Bash(cat:*) などを足す。それでもサブプロセスは残る。";
+    } else {
+      out.level="yellow";
+      out.note="Read 系とシェルの読みは塞げている。ただし python -c や node のサブプロセスは依然として素通りする。deny はサンドボックスではない。";
+    }
+    out.bypasses.push("python -c \"open('...').read()\" や node の fs など、任意のサブプロセスは deny の対象外で素通りする");
+  } else if(tool==="Bash"){
+    if(looksLikePath(pattern)){
+      out.level="red";
+      out.bypasses.push("Bash のルールは『コマンドの文字列』に一致するだけで、ファイルのパスを守らない。Bash("+pattern+") はパスを保護しない");
+      out.note="ファイルを守りたいなら、パスではなくコマンド側を書く（例 Bash(cat:*)）。読み取りツール自体は Read("+pattern+") で。";
+    } else {
+      out.level="yellow";
+      out.protects.push("コマンド "+pattern+" の実行をブロック");
+      out.bypasses.push("別のコマンドや python/node などのサブプロセスからは同じ操作ができる場合がある");
+      out.note="コマンド単位のブロックは有効だが、等価な別経路は残る。多層防御の一層として使う。";
+    }
+  } else {
+    out.level="yellow";
+    out.note=tool+" のルール。このチェッカーは Read/Grep/Glob/Bash の読み取りの網羅を主に見る。";
+  }
+  return out;
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function run(){
+  var text=document.getElementById("inp").value;
+  var rules=extractRules(text), out=document.getElementById("out");
+  if(rules.length===0){ out.innerHTML='<div class="card yellow"><div class="nt">deny ルールを認識できませんでした。<code>Read(...)</code> や <code>Bash(...)</code> の形で貼ってください。</div></div>'; return; }
+  var results=rules.map(function(r){ return analyzeRule(r, rules); });
+  var reds=results.filter(function(x){return x.level==="red";}).length;
+  var html='';
+  var v = reds>0 ? (reds+" 件のルールが簡単に素通りされます。下を確認してください。") : "ツールとシェルの読みは概ね塞げています。ただし deny はサンドボックスではなく、サブプロセスは常に残ります。";
+  html+='<div class="verdict">'+esc(v)+'</div>';
+  results.forEach(function(x){
+    html+='<div class="card '+x.level+'">';
+    html+='<div class="rule">'+esc(x.rule)+'<span class="tag '+x.level+'">'+(x.level==="red"?"素通りされる":x.level==="yellow"?"部分的":"概ね安全")+'</span></div>';
+    if(x.protects.length){ html+='<div class="lbl">守れているもの</div><ul>'+x.protects.map(function(p){return "<li>"+esc(p)+"</li>";}).join("")+'</ul>'; }
+    if(x.bypasses.length){ html+='<div class="lbl">素通りされるもの</div><ul>'+x.bypasses.map(function(p){return "<li>"+esc(p)+"</li>";}).join("")+'</ul>'; }
+    if(x.note){ html+='<div class="nt">'+esc(x.note)+'</div>'; }
+    html+='</div>';
+  });
+  out.innerHTML=html;
+}
+function loadSample(){
+  document.getElementById("inp").value='"deny": [\n  "Read(./.env)",\n  "Read(**/secrets/**)",\n  "Read(~/.ssh/**)",\n  "Bash(rm:*)"\n]';
+  run();
+}
+</script>
+</body>
+</html>
