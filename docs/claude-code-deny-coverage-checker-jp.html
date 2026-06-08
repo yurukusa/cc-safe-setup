@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>その permissions.deny、本当に秘密を守れてる？ Claude Code deny 網羅チェッカー</title>
-<meta name="description" content="Claude Code の permissions.deny に .env や鍵を書いても、cat や python のサブプロセスで素通りされることがあります。あなたの deny ルールを貼り付けると、何を守れていて何が素通りするかを、ブラウザの中だけで赤・黄・緑で判定します。送信は一切しません。">
+<meta name="description" content="Claude Code の permissions.deny に .env や鍵を書いても、cat や python のサブプロセスで素通りされることがあります。あなたの deny ルールを貼り付けると、何を守れていて何が素通りするかを、ブラウザの中だけで判定します。送信は一切しません。">
 <meta property="og:title" content="その permissions.deny、本当に秘密を守れてる？ Claude Code deny 網羅チェッカー">
 <meta property="og:description" content="deny に書いた .env が cat や python で読まれていないか。貼り付けて1分で網羅を判定（ブラウザ内処理・送信なし）。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-deny-coverage-checker-jp.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code permissions.deny 網羅チェッカー","applicationCategory":"SecurityApplication","inLanguage":"ja","operatingSystem":"Browser","offers":{"@type":"Offer","price":"0"},"description":"permissions.deny の網羅を赤黄緑で判定。ブラウザ内処理・送信なし。"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code permissions.deny 網羅チェッカー","applicationCategory":"SecurityApplication","inLanguage":"ja","operatingSystem":"Browser","offers":{"@type":"Offer","price":"0"},"description":"permissions.deny の網羅を判定。ブラウザ内処理・送信なし。"}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
@@ -84,7 +84,7 @@ a:hover{text-decoration:underline}
 <ul>
 <li><strong style="color:#f85149">赤</strong>：簡単に素通りされる。守れているつもりで守れていない（例：<code>Read(.env)</code> だけで <code>cat .env</code> が塞がれていない）。</li>
 <li><strong style="color:#d29922">黄</strong>：ツールとシェルの読みは塞げているが、<code>python</code> や <code>node</code> のサブプロセスは依然素通りする。サンドボックスではない。</li>
-<li><strong style="color:#2ea043">緑</strong>：このチェッカーの範囲では大きな穴は無い。ただし「deny は最終防衛ではない」前提は変わらない。</li>
+<li><strong style="color:#2ea043">緑（完全に安全）</strong>：このチェッカーでは出ません。<code>python -c</code> や <code>node</code> の任意のサブプロセスは、どんな <code>deny</code> を書いても素通りするため、deny だけで「完全に守れた」状態は原理的に作れないからです。到達できる最良は黄で、本当の秘密は機械の権限とスコープ（作業ディレクトリの外に置く）で守ってください。</li>
 </ul>
 
 <div class="verdict">
