@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code のセッションが 400「thinking blocks cannot be modified」で開けない時の救出ツール</title>
+<meta name="description" content="拡張思考(extended thinking)を使った Claude Code のセッションが、resume すると 400 thinking blocks cannot be modified を返して二度と開けなくなる事故の救出ツール。壊れた .jsonl をブラウザに渡すと、署名つきの空 thinking ブロックを安全に取り除いた復旧版を、ブラウザの中だけで作って返します。送信は一切しません。">
+<meta property="og:title" content="Claude Code の「永久に壊れたセッション」を救出する（400 thinking blocks cannot be modified）">
+<meta property="og:description" content="拡張思考のセッションが resume で永久に開けなくなる事故を、壊れた .jsonl から復旧。ブラウザ内処理・送信なし。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-thinking-session-rescue-jp.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code 拡張思考セッション救出ツール","applicationCategory":"DeveloperApplication","inLanguage":"ja","operatingSystem":"Browser","offers":{"@type":"Offer","price":"0"},"description":"400 thinking blocks cannot be modified で開けないセッションを復旧。ブラウザ内処理・送信なし。"}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#0d1117;color:#c9d1d9;line-height:1.8;padding:2rem 1rem}
+.container{max-width:760px;margin:0 auto}
+.back{margin-bottom:1.2rem}
+.back a{color:#58a6ff;text-decoration:none;font-size:.85rem}
+h1{color:#f0f6fc;font-size:1.4rem;line-height:1.5;margin-bottom:1.2rem}
+h2{color:#f0f6fc;font-size:1.15rem;margin:2rem 0 .8rem;padding-top:.5rem;border-top:1px solid #21262d}
+p{margin-bottom:.9rem;color:#adbac7}
+ul,ol{margin:.5rem 0 1rem 1.4rem}
+li{margin-bottom:.45rem;color:#adbac7}
+code{background:#161b22;padding:.12rem .4rem;border-radius:5px;color:#79c0ff;font-size:.86rem;font-family:'Fira Code',ui-monospace,monospace}
+pre{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.9rem 1rem;overflow-x:auto;margin-bottom:1rem}
+pre code{background:none;padding:0;color:#c9d1d9;font-size:.8rem;line-height:1.6}
+.lede{background:#161b22;border:1px solid #30363d;border-left:3px solid #f85149;border-radius:8px;padding:1rem 1.3rem;margin-bottom:1.5rem;color:#adbac7;font-size:.9rem}
+.lede strong{color:#f0f6fc}
+.drop{border:2px dashed #30363d;border-radius:10px;padding:2rem 1.2rem;text-align:center;background:#11161d;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:#1f6feb;background:#0f1b2d}
+.drop strong{color:#f0f6fc;display:block;margin-bottom:.3rem}
+.drop span{font-size:.82rem;color:#8b949e}
+.note-priv{font-size:.78rem;color:#6e7681;margin-top:.7rem}
+#out{margin-top:1.2rem}
+.card{border-radius:8px;padding:1rem 1.2rem;margin-bottom:.8rem;font-size:.9rem;border:1px solid #30363d;background:#161b22}
+.card.red{border-left:4px solid #f85149}
+.card.yellow{border-left:4px solid #d29922}
+.card.green{border-left:4px solid #2ea043}
+.card .hd{color:#f0f6fc;font-weight:600;margin-bottom:.5rem}
+.card .nt{color:#adbac7;margin-top:.4rem;font-size:.86rem}
+.tag{display:inline-block;font-size:.72rem;padding:.1rem .5rem;border-radius:4px;margin-left:.5rem;vertical-align:middle}
+.tag.red{background:#3d1418;color:#ffa198}
+.tag.green{background:#0f2417;color:#56d364}
+button.dl{background:#238636;color:#fff;border:none;border-radius:6px;padding:.6rem 1.3rem;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.7rem}
+button.dl:hover{background:#2ea043}
+.cta{background:#0f1b2d;border:1px solid #1f6feb;border-radius:8px;padding:1.2rem 1.4rem;margin:1.8rem 0;font-size:.88rem;color:#adbac7}
+.cta a{color:#79c0ff;font-weight:600}
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681}
+.footer a{color:#58a6ff}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="back"><a href="index.html">← 他の Claude Code 安全ツール</a></div>
+
+<h1>Claude Code のセッションが <code>400 thinking blocks cannot be modified</code> で<br>二度と開けなくなった時の救出ツール</h1>
+
+<div class="lede">
+拡張思考（extended thinking）とツール呼び出しを使った長いセッションを <code>resume</code> や <code>continue</code> した瞬間、<code>API Error: 400 … `thinking` or `redacted_thinking` blocks in the latest assistant message cannot be modified</code> が出て、<strong>そのセッションが二度と開けなくなる</strong>事故があります。何を打っても、何も打たなくても、同じ 400 が返り続けます。何時間ぶんもの会話が、開いた瞬間に永久に閉じ込められます。
+</div>
+
+<p><strong>原因（要約）。</strong> Claude Code はセッションの記録（<code>~/.claude/projects/&lt;slug&gt;/&lt;id&gt;.jsonl</code>）に拡張思考のブロックを保存する時、<strong>thinking のテキストを空（<code>""</code>）にしたまま <code>signature</code> だけを残します</strong>。resume などで記録から会話を組み直すと、この「中身が空なのに署名つき」のブロックがそのまま API に送られ、署名が本文と一致せず 400 になります。元の thinking の本文はもうディスクに無いので、正しい形に戻せず、セッションが永久に汚染されます。これは特殊な状態ではなく、拡張思考を使ったほぼ全てのセッションが、一度の組み直し（resume / continue / 離席からの復帰の自動圧縮）でこの状態になり得ます。</p>
+
+<p><strong>このツールがすること。</strong> 壊れた <code>.jsonl</code> を下の枠に渡すと、<strong>署名つきの空 thinking ブロックを取り除いた復旧版</strong>をブラウザの中だけで作って返します。thinking だけだった行は <code>[thinking]</code> というテキストの目印に置き換えて、ツール呼び出しの対応関係（threading）を壊しません。<strong>ファイルはどこにも送信しません</strong>（全てこのページの中で処理）。元ファイルは触らず、復旧版をダウンロードする方式です。</p>
+
+<div class="drop" id="drop">
+<strong>壊れた .jsonl をここにドラッグ、またはクリックして選択</strong>
+<span>~/.claude/projects/&lt;slug&gt;/&lt;セッションID&gt;.jsonl</span>
+<input type="file" id="file" accept=".jsonl,.json,application/json" style="display:none">
+<div class="note-priv">送信は発生しません（このページの中だけで処理します）</div>
+</div>
+
+<div id="out"></div>
+
+<h2>復旧の手順</h2>
+<ol>
+<li>事故が起きたセッションの <code>.jsonl</code> を上の枠に渡す。場所は <code>~/.claude/projects/</code> の中の、プロジェクトごとのフォルダにあります（ファイル名がセッションID）。</li>
+<li>判定が出たら、<strong>復旧版をダウンロード</strong>する。</li>
+<li><strong>元ファイルをまず退避</strong>してから、復旧版で置き換える。ターミナルなら次の通り（<code>&lt;path&gt;</code> は元ファイルの場所）:
+<pre><code>cp "&lt;path&gt;" "&lt;path&gt;.bak"      # 念のため元を退避
+mv ~/Downloads/&lt;復旧版&gt;.jsonl "&lt;path&gt;"</code></pre>
+</li>
+<li>もう一度 <code>claude --resume</code> でそのセッションを開く。署名つきの空ブロックが無くなっているので、400 は出なくなります。おかしければ <code>mv "&lt;path&gt;.bak" "&lt;path&gt;"</code> で元に戻せます。</li>
+</ol>
+
+<h2>ターミナルだけで直したい場合</h2>
+<p>ブラウザを使わず、同じ処理を手元で走らせるスクリプトです（先に <code>.bak</code> へ退避します）。</p>
+<pre><code>F="$HOME/.claude/projects/&lt;slug&gt;/&lt;session-id&gt;.jsonl"
+python3 - "$F" &lt;&lt;'PY'
+import json, sys, shutil
+f = sys.argv[1]
+shutil.copy2(f, f + ".bak")
+out = []
+for line in open(f, encoding="utf-8"):
+    line = line.rstrip("\n")
+    if not line: continue
+    o = json.loads(line)
+    msg = o.get("message")
+    if isinstance(msg, dict) and isinstance(msg.get("content"), list):
+        new = [b for b in msg["content"]
+               if not (isinstance(b, dict) and b.get("type") in ("thinking","redacted_thinking"))]
+        if len(new) != len(msg["content"]):
+            msg["content"] = new or [{"type":"text","text":"[thinking]"}]
+    out.append(json.dumps(o, ensure_ascii=False))
+open(f, "w", encoding="utf-8").write("\n".join(out) + "\n")
+print("rescued; backup at", f + ".bak")
+PY</code></pre>
+
+<h2>resume の前に、壊れていないか先に確かめる</h2>
+<p>大事なセッションは、resume する前にこの読み取りだけのチェックで「組み直すと 400 になる種」を持っていないか確認できます。<code>0</code> より大きければ、resume の前にコピーを取っておくのが安全です。</p>
+<pre><code>grep -c '"type":"thinking","thinking":""' "$HOME/.claude/projects/&lt;slug&gt;/&lt;session-id&gt;.jsonl"</code></pre>
+
+<div class="cta">
+こうした「気づけない静かなデータの喪失」を実行の手前で止める無料のフック集が <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> です（<code>rm -rf</code> や強制 push、秘密の漏れ、壊れたデプロイを止める例を多数収録）。<br>
+「道具が成功と報告したのに、実際にはデータが静かに失われていた」型の事故を、体験と防御の手順でまとめた読み物が <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック</a> です。
+</div>
+
+<h2>本当の直し方について（正直に）</h2>
+<p>根本の修正は Claude Code 側（thinking の本文も保存する、または組み直しの時に末尾の署名つきブロックを落とす）でしか出来ません。このツールは、それまでの間、<strong>閉じ込められた会話を失わずにセッションを開き直す</strong>ための応急の救出です。元ファイルは退避してから置き換えてください。署名を消すので、その assistant の応答は次回以降「思考の過程」を持たない形になりますが、会話の本文とツールの結果はそのまま残ります。</p>
+
+<div class="footer">
+ブラウザの中だけで処理し、ファイルは送信しません。 ・ <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ・ <a href="claude-code-deny-coverage-checker-jp.html">deny 網羅チェッカー</a> ・ <a href="claude-config-trap-scanner-jp.html">設定の罠スキャナ</a>
+</div>
+</div>
+
+<script>
+var drop=document.getElementById("drop"), fileInput=document.getElementById("file"), out=document.getElementById("out");
+drop.addEventListener("click",function(){ fileInput.click(); });
+drop.addEventListener("dragover",function(e){ e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave",function(){ drop.classList.remove("over"); });
+drop.addEventListener("drop",function(e){
+  e.preventDefault(); drop.classList.remove("over");
+  if(e.dataTransfer.files.length) handle(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change",function(e){
+  if(e.target.files.length) handle(e.target.files[0]);
+});
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function rescueText(text){
+  var lines=text.split("\n");
+  var poison=0, changedLines=0, parseFail=0, total=0, assistantThinking=0;
+  var outLines=[];
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    if(line.trim()===""){ continue; }
+    total++;
+    var o;
+    try{ o=JSON.parse(line); }
+    catch(e){ parseFail++; outLines.push(line); continue; }
+    var msg=o.message;
+    if(msg && Object.prototype.toString.call(msg.content)==="[object Array]"){
+      var before=msg.content.length;
+      var kept=[];
+      for(var j=0;j<msg.content.length;j++){
+        var b=msg.content[j];
+        if(b && (b.type==="thinking"||b.type==="redacted_thinking")){
+          assistantThinking++;
+          if(b.type==="thinking" && (!b.thinking||b.thinking==="") && b.signature){ poison++; }
+        } else { kept.push(b); }
+      }
+      if(kept.length!==before){
+        changedLines++;
+        msg.content = kept.length ? kept : [{type:"text",text:"[thinking]"}];
+      }
+    }
+    outLines.push(JSON.stringify(o));
+  }
+  return {text:outLines.join("\n")+"\n", poison:poison, changedLines:changedLines, parseFail:parseFail, total:total, assistantThinking:assistantThinking};
+}
+
+function handle(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    var r;
+    try{ r=rescueText(reader.result); }
+    catch(e){ out.innerHTML='<div class="card red"><div class="hd">読み取れませんでした</div><div class="nt">'+esc(String(e))+'</div></div>'; return; }
+    if(r.total===0){
+      out.innerHTML='<div class="card yellow"><div class="hd">セッションの行を認識できませんでした</div><div class="nt">これは Claude Code のセッションの記録（1行1 JSON の .jsonl）ですか？ 場所は ~/.claude/projects/ の中です。</div></div>';
+      return;
+    }
+    var html="";
+    if(r.poison>0){
+      html+='<div class="card red"><div class="hd">壊れる種を検出しました<span class="tag red">'+r.poison+' 件の署名つき空 thinking</span></div>';
+      html+='<div class="nt">この記録は、組み直すと <code>400 thinking blocks cannot be modified</code> になる「中身が空なのに署名つき」の thinking ブロックを '+r.poison+' 件持っています。下の復旧版で置き換えると開けるようになります。</div></div>';
+    } else {
+      html+='<div class="card green"><div class="hd">署名つきの空 thinking は見つかりませんでした<span class="tag green">この種では低リスク</span></div>';
+      html+='<div class="nt">この記録には、400 を引き起こす「空なのに署名つき」の thinking ブロックは見当たりませんでした（拡張思考のブロックは合計 '+r.assistantThinking+' 件）。別の原因かもしれません。それでも復旧版（thinking を取り除いた版）は下から取得できます。</div></div>';
+    }
+    html+='<div class="card"><div class="hd">復旧版</div>';
+    html+='<div class="nt">'+r.total+' 行のうち '+r.changedLines+' 行から thinking / redacted_thinking を取り除きました'+(r.parseFail>0?'（解釈できなかった '+r.parseFail+' 行はそのまま温存）':'')+'。元ファイルは触っていません。<strong>必ず元ファイルを退避してから</strong>置き換えてください。</div>';
+    var btn=document.createElement("button");
+    btn.className="dl"; btn.textContent="復旧版をダウンロード";
+    btn.onclick=function(){
+      var blob=new Blob([r.text],{type:"application/json"});
+      var a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download=(file.name.replace(/\.jsonl$/,"")||"session")+".rescued.jsonl";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    };
+    html+='<div id="dlslot"></div></div>';
+    out.innerHTML=html;
+    document.getElementById("dlslot").appendChild(btn);
+  };
+  reader.readAsText(file);
+}
+</script>
+</body>
+</html>
