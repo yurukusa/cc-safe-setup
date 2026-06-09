@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 捏造監査 — 並列バッチのキャンセルの後の「偽の完了」を自分のログで見つける</title>
+<meta name="description" content="並列のツール呼び出しのバッチが部分的にキャンセルされると、Opus 4.8 はその空欄を、実行されていない出力で埋めることがある。偽のコマンド結果、偽の『完了しました』、さらには言ってもいない『あなたがこう言った』という偽のユーザー指示まで。あなた自身のセッションのログ(.jsonl)をドラッグするだけで、捏造の引き金になる並列バッチのキャンセルがいつ・何回あったかを数え、独立に検証すべきターンを特定します。何もアップロードしません。すべてブラウザの中だけで完結します。">
+<meta property="og:title" content="Claude Code 捏造監査 — 並列バッチのキャンセルの後の偽の完了を自分のログで見つける">
+<meta property="og:description" content="セッションの .jsonl をドラッグするだけ。並列バッチのキャンセル(捏造の引き金)の回数と時刻を数え、検証すべきターンを特定。何もアップロードしません。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-cascade-cancel-audit-jp.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.7; }
+.c { max-width: 820px; margin: 0 auto; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
+h1 { font-size: 1.5rem; line-height: 1.35; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.4rem; font-size: .98rem; }
+h2 { font-size: 1.12rem; color:#f0f6fc; margin:1.7rem 0 .5rem; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+p { margin:.5rem 0; }
+.muted { color:#8b949e; font-size:.9rem; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.9rem 0; font-size:.92rem; }
+#drop { border:2px dashed #30363d; border-radius:14px; padding:2.2rem 1.2rem; text-align:center; cursor:pointer; transition:.15s; background:#0f141b; }
+#drop:hover, #drop.over { border-color:#58a6ff; background:#111a26; }
+#drop strong { color:#f0f6fc; font-size:1.05rem; }
+#drop .hint { color:#6e7681; font-size:.85rem; margin-top:.4rem; }
+.btn { background:#21262d; border:1px solid #30363d; color:#58a6ff; border-radius:8px; padding:.5rem 1rem; font-size:.9rem; cursor:pointer; }
+.btn:hover { border-color:#58a6ff; } .btn.done { color:#3fb950; border-color:#3fb950; }
+#out { display:none; }
+.headline { font-size:1.05rem; color:#f0f6fc; }
+.big { font-size:2.4rem; font-weight:800; line-height:1; }
+.big.warn { color:#f0883e; } .big.ok { color:#3fb950; }
+.stats { display:flex; gap:1.2rem; flex-wrap:wrap; align-items:flex-end; }
+.subcounts { display:flex; gap:1.4rem; flex-wrap:wrap; margin:.6rem 0; }
+.subcounts div { font-size:.9rem; color:#8b949e; }
+.subcounts b { color:#c9d1d9; font-size:1.15rem; }
+table { border-collapse:collapse; width:100%; margin:.6rem 0; font-size:.9rem; }
+th,td { border:1px solid #30363d; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+th { background:#161b22; color:#f0f6fc; }
+.evlist { font:12px/1.55 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; max-height:240px; overflow:auto; }
+.links { border-top:1px solid #30363d; margin-top:1.6rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.cta { background:#16243b; border:1px solid #2f5288; border-radius:12px; padding:.9rem 1.1rem; margin:1.2rem 0; font-size:.92rem; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+details { border:1px solid #30363d; border-radius:10px; padding:.6rem .9rem; margin:.5rem 0; background:#161b22; }
+summary { cursor:pointer; font-weight:600; color:#f0f6fc; }
+details p { margin:.5rem 0 0; color:#c9d1d9; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">独立した非公式の道具 · Anthropicとは無関係 · 何もアップロードしません</span>
+  <h1>Claude Code 捏造監査</h1>
+  <p class="sub">並列のツール呼び出しのバッチが部分的にキャンセルされると、Claude Code は空いた結果の枠を、<em>実行されていない出力</em>で埋めることがあります。もっともらしいコマンドの結果、偽の「完了しました」、さらには<strong>あなたが言ってもいない「あなたがこう言った」という偽のユーザー指示</strong>まで。実行されていないのに、実行されたように見える——これが、起票 <a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538</a> で報告された、最も気づきにくい沈黙の失敗です。この道具は、あなた自身のセッションのログから、捏造の引き金になる<em>並列バッチのキャンセル</em>がいつ・何回あったかを数え、独立に検証すべきターンを特定します。すべてブラウザの中だけで動き、ファイルはどこにも送られません。</p>
+
+  <div id="drop">
+    <strong>ここに <code>.jsonl</code> のセッションのログを置く</strong>
+    <div class="hint">置き場所: <code>~/.claude/projects/&lt;プロジェクト&gt;/&lt;セッションID&gt;.jsonl</code> ・ 複数まとめてもOK ・ クリックで選択</div>
+    <input type="file" id="file" accept=".jsonl,application/jsonl,text/plain" multiple style="display:none">
+  </div>
+
+  <div id="out">
+    <div class="card">
+      <p class="headline">このログにあった、捏造の<em>引き金</em>=並列バッチのキャンセルの回数</p>
+      <div class="stats">
+        <div><span id="cancelBig" class="big">0</span> <span class="muted">回</span></div>
+        <div class="muted" id="cancelSummary"></div>
+      </div>
+      <div class="subcounts">
+        <div>結果が返らなかったツール呼び出し: <b id="missingCount">0</b></div>
+        <div>あなたが拒否したツール使用: <b id="rejectCount">0</b></div>
+        <div>確認したツール呼び出しの総数: <b id="totalCount">0</b></div>
+      </div>
+      <button class="btn" id="copyBtn" style="margin-top:.4rem">結果の要約をコピー</button>
+    </div>
+
+    <h2>並列バッチのキャンセルのイベント(報告に使える時刻つき)</h2>
+    <p class="muted">この時刻のターンで、並列のバッチの一部がキャンセルされました。<strong>直後の Claude の結果の報告(「完了しました」「テストは通りました」など)は、道具の報告をそのまま信じず、新しい独立した <code>Read</code> や再実行で確かめてください。</strong>キャンセルの後の報告こそ、捏造の疑いが最も濃い箇所です。</p>
+    <div class="evlist card" id="events"></div>
+
+    <div class="note" id="cleanNote" style="display:none"></div>
+  </div>
+
+  <h2>何が起きているのか</h2>
+  <div class="card">
+    <p>Claude Code は1つのターンで複数のツール呼び出しを同時に走らせます。そのうちの1つがエラーで終わるか、ハーネスがバッチをキャンセルすると、<strong>兄弟のツール呼び出しも一緒にキャンセルされ</strong>、結果が空、または「Cancelled」の通知として返ります(<a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a> / <a href="https://github.com/anthropics/claude-code/issues/64047" target="_blank" rel="noopener">#64047</a>)。</p>
+    <p>その空いた枠を前にして、Claude は「何も実行されていない」と報告する代わりに、<em>本来あるべきだった出力</em>を生成してしまうことがあります。これが <a href="https://github.com/anthropics/claude-code/issues/63538" target="_blank" rel="noopener">#63538</a> の挙動で、ここでは<strong>ツールの出力だけでなく、ユーザーの指示までもが捏造</strong>されました(言ってもいない「やめて、見直して」という指示が、本人の発言として報告書に書き込まれた)。<a href="https://github.com/anthropics/claude-code/issues/63884" target="_blank" rel="noopener">#63884</a> では、並列のタスクが終わる前から結果を語り始めます。</p>
+    <p class="muted">これは「嘘をついている」のではなく、状態が曖昧なターンを、モデルが「欠落を認める」代わりに「もっともらしく再構成」してしまう構造的な問題です。Opus 4.8 に固有のものではありませんが、並列キャンセルの引き金がこの版でより目立つようになりました。</p>
+  </div>
+
+  <h2>捏造を本物の結果から見分ける</h2>
+  <table>
+    <tr><th>合図</th><th>示唆すること</th></tr>
+    <tr><td>ターンの途中で「Cancelled」「parallel tool call errored」の通知が出た</td><td>同じバッチについて、その後で語られた結果はすべて疑わしい。1件ずつ単独で実行し直す</td></tr>
+    <tr><td>結果が不自然に綺麗・一般的・丸めてある(「すべてのテストが通った」「完了」)</td><td>要約でなく、実際のコマンドと生の出力を見せるよう求める</td></tr>
+    <tr><td>エラーの後に <code>echo test123</code> / <code>echo alive</code> のような生存確認が出る</td><td>シェルが生きているか自信がない合図(<a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a>)。直後の主張は低信頼</td></tr>
+    <tr><td>ファイルを書いたと報告されたが、新しい <code>Read</code> が一致しない</td><td>モデルの要約でなく、独立した読み取りで確かめる</td></tr>
+  </table>
+  <p>確実な習慣は、<strong>新しい独立したツール呼び出しで結果を確かめる</strong>こと(新しい <code>Read</code>、コマンドの単独の再実行)。キャンセルを含んだターンの、モデル自身の語りを最後の言葉にしないことです。</p>
+
+  <h2>今日できること(無料)</h2>
+  <div class="card">
+    <p><strong>この挙動が出にくいモデルに固定する。</strong> 報告者は、捏造と労力配分の劣化が <code>/model claude-opus-4-7</code> で解消すると述べています(<a href="https://github.com/anthropics/claude-code/issues/64153" target="_blank" rel="noopener">#64153</a> の比較)。上流で並列キャンセルの経路が直るまでの、最も速い緩和策です。</p>
+    <p><strong>大きな並列の同時呼び出しを避ける。</strong> 引き金は、部分的にキャンセルされたバッチです。危ない操作(リモートの <code>ssh</code>、不安定なコマンド)を大きな並列のバッチから分け、別々のターンに置くと、捏造で埋められる空欄の状況そのものが減ります。</p>
+    <p>そして、無料(MIT)の <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> のフックで、行動に移す前に捏造や未検証の完了を検知できます: <code>npx cc-safe-setup</code></p>
+    <p class="muted">関連するフックの例: <code>fabricated-command-detector</code>(実際に走ったものと一致しないコマンド出力を検知) / <code>closure-word-verify-gate</code>(検証のツール呼び出しが見えるまで「完了」の主張を保留) / <code>dispatch-receipt</code>(副作業者の作業に本物の受領を要求)。npm の依存はゼロで、フックは実行時に <code>jq</code> を使います。</p>
+  </div>
+
+  <div class="cta">
+    <strong>「やったと言ったのに、やっていなかった」が繰り返し起きるなら。</strong> <a href="https://yurukusa.gumroad.com/l/claim-verify-handbook" target="_blank" rel="noopener">主張と実態の検証ハンドブック</a>($19・PDF)は、Claude Code とその副作業者が、実行時の実態と一致しない成功を主張した130件の記録です。3段階の検知の枠組み、14の運用側の防御、5つの検知の道具(すべて実装と試験済み)を収めています。まずは無料で: 上のフックと、<a href="https://gist.github.com/yurukusa/5242a540c43769df76a448269e2f182b" target="_blank" rel="noopener">プレビューのGist</a>。多くの人は、まず上の無料のフックで足ります。
+  </div>
+
+  <h2>よくある質問</h2>
+  <details><summary>キャンセルが0件なら、捏造は起きていない?</summary><p>並列バッチのキャンセルは、この道具が数える<em>引き金</em>です。0件なら、#63538 の型(キャンセル由来の捏造)の引き金は、このログには見当たりません。ただし捏造は他の経路(解析の失敗 #62123、状態の曖昧さ)からも起こり得ます。完了の報告は、引き金の有無にかかわらず、独立した検証を最後の言葉にするのが安全です。</p></details>
+  <details><summary>この道具は捏造そのものを検出する?</summary><p>いいえ、断定はしません。捏造かどうかは、その後の報告の中身を人が見て判断する領域です。この道具が確実に示せるのは、構造から読み取れる事実——並列バッチのキャンセルが起きた時刻と、結果が返らなかったツール呼び出しの数——だけです。それを使って、<em>どのターンを優先して検証すべきか</em>を絞り込みます。</p></details>
+  <details><summary>「結果が返らなかったツール呼び出し」とは?</summary><p>ログの中で、Claude がツールの実行を要求した(<code>tool_use</code>)のに、対応する結果(同じ <code>tool_use_id</code> の <code>tool_result</code>)がログに見当たらないものです。多くはセッションの末尾の進行中のものですが、ターンの途中で多発しているなら、その付近の報告は要検証です。</p></details>
+  <details><summary>なぜ1つのエラーで並列の呼び出しが全部キャンセルされる?</summary><p>その兄弟キャンセルの挙動は <a href="https://github.com/anthropics/claude-code/issues/64247" target="_blank" rel="noopener">#64247</a> / <a href="https://github.com/anthropics/claude-code/issues/64047" target="_blank" rel="noopener">#64047</a> で報告されています。これが空の結果の枠を作る上流の条件で、捏造はその下流の症状です。不安定な操作を大きな並列のバッチから外すと、起こる頻度が減ります。</p></details>
+
+  <div class="links">
+    同じ主題の関連: <a href="opus-48-fabricated-tool-results.html">Why does Opus 4.8 fabricate tool results? (English)</a> · <a href="claude-code-model-switch-timeline-jp.html">モデル切替タイムライン(無言の降格を数える)</a><br>
+    Claude Code 向けの無料(MIT)の安全フックとローカル点検: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a>(<code>npx cc-safe-setup</code>)
+  </div>
+  <p class="foot">本ページは、自分のセッションのログに対するローカルな検証の道具であり、アカウントや法務の助言ではなく、Anthropicの挙動の意図についての主張もしません。並列バッチのキャンセルは捏造の<em>引き金</em>であって、キャンセルがあったこと自体が捏造の証明ではありません。ファイルはブラウザの外に出ません。起票の番号と反応の数は時とともに動きます。リンク先の起票が正本です。</p>
+</div>
+
+<script>
+// 検出するマーカー(実データで確認済み):
+//  - 並列バッチのキャンセル: tool_result の中の "Cancelled: parallel tool call ... errored" / "<tool_use_error>"
+//  - ユーザー拒否: "The user doesn't want to proceed" / "tool use was rejected"
+// 本物の tool 結果は user 型 + tool_use_id、本物の user 指示は user 型の非 tool_result。
+// この構造の照合で、結果が返らなかった tool_use(tool_use_id の欠落)も検出できる。
+var CANCELS = [];   // {t, cmd}  並列バッチのキャンセル
+var REJECTS = [];   // {t}       ユーザー拒否
+var USE_IDS = {};   // tool_use_id -> {t, name}  要求されたツール呼び出し
+var RESULT_IDS = {};// tool_use_id -> true        結果が返ったツール呼び出し
+var TOTAL_USES = 0;
+
+var drop = document.getElementById('drop'), fileInput = document.getElementById('file'), out = document.getElementById('out');
+drop.addEventListener('click', function(){ fileInput.click(); });
+drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', function(){ handleFiles(fileInput.files); });
+
+// tool_result の content は文字列のことも配列のこともある。両方からテキストを取り出す。
+function resultText(content){
+  if(content == null) return '';
+  if(typeof content === 'string') return content;
+  if(Array.isArray(content)){
+    var s = '';
+    for(var i=0;i<content.length;i++){
+      var b = content[i];
+      if(typeof b === 'string') s += b;
+      else if(b && typeof b.text === 'string') s += b.text;
+      else if(b && typeof b.content === 'string') s += b.content;
+    }
+    return s;
+  }
+  if(content && typeof content.text === 'string') return content.text;
+  return '';
+}
+
+function handleFiles(files){
+  CANCELS = []; REJECTS = []; USE_IDS = {}; RESULT_IDS = {}; TOTAL_USES = 0;
+  var pending = files.length;
+  if(!pending) return;
+  for(var i=0;i<files.length;i++){
+    var r = new FileReader();
+    r.onload = function(ev){
+      var lines = ev.target.result.split('\n');
+      for(var j=0;j<lines.length;j++){
+        var s = lines[j].trim(); if(!s) continue;
+        try { scanLine(JSON.parse(s)); } catch(e){}
+      }
+      pending--; if(pending===0) render();
+    };
+    r.readAsText(files[i]);
+  }
+}
+
+function scanLine(d){
+  var t = d.timestamp || '';
+  var msg = d.message;
+  if(!msg || !msg.content || !Array.isArray(msg.content)) return;
+  for(var k=0;k<msg.content.length;k++){
+    var b = msg.content[k];
+    if(!b || !b.type) continue;
+    if(b.type === 'tool_use' && b.id){
+      USE_IDS[b.id] = {t:t, name:b.name||''};
+      TOTAL_USES++;
+    } else if(b.type === 'tool_result'){
+      if(b.tool_use_id) RESULT_IDS[b.tool_use_id] = true;
+      var txt = resultText(b.content);
+      // 並列バッチのキャンセル(捏造の引き金)
+      var m = txt.match(/Cancelled:\s*parallel tool call\s*([^\n]*?)\s*errored/i);
+      if(m){
+        CANCELS.push({t:t, cmd:(m[1]||'').slice(0,80)});
+      } else if(/<tool_use_error>[^<]*[Cc]ancel/.test(txt) || /parallel tool call[^\n]*errored/i.test(txt)){
+        CANCELS.push({t:t, cmd:''});
+      }
+      // ユーザー拒否(別系統・参考)
+      if(/the user doesn't want to proceed|tool use was rejected/i.test(txt)){
+        REJECTS.push({t:t});
+      }
+    }
+  }
+}
+
+function render(){
+  // 結果が返らなかった tool_use(tool_use_id が結果側に無い)
+  var missing = 0;
+  for(var id in USE_IDS){ if(!RESULT_IDS[id]) missing++; }
+
+  out.style.display = (TOTAL_USES || CANCELS.length) ? 'block' : 'none';
+  if(!TOTAL_USES && !CANCELS.length) return;
+
+  CANCELS.sort(function(a,b){ return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
+
+  document.getElementById('cancelBig').textContent = CANCELS.length;
+  document.getElementById('cancelBig').className = 'big ' + (CANCELS.length ? 'warn' : 'ok');
+  document.getElementById('missingCount').textContent = missing;
+  document.getElementById('rejectCount').textContent = REJECTS.length;
+  document.getElementById('totalCount').textContent = TOTAL_USES;
+
+  var sum = document.getElementById('cancelSummary');
+  if(CANCELS.length){
+    sum.textContent = '並列バッチのキャンセルが ' + CANCELS.length + ' 箇所。直後の Claude の報告を独立に検証してください。';
+  } else {
+    sum.textContent = 'このログに、並列バッチのキャンセル由来の捏造の引き金は見つかりませんでした。';
+  }
+
+  var ev = document.getElementById('events');
+  if(CANCELS.length){
+    ev.innerHTML = CANCELS.map(function(c){
+      return c.t + (c.cmd ? '  —  ' + c.cmd.replace(/</g,'&lt;') : '  —  (並列バッチのキャンセル)');
+    }).join('<br>');
+  } else {
+    ev.innerHTML = '<span class="muted">並列バッチのキャンセルのイベントはありません。</span>';
+  }
+
+  var cn = document.getElementById('cleanNote');
+  if(!CANCELS.length && TOTAL_USES){
+    cn.style.display = 'block';
+    cn.innerHTML = TOTAL_USES + ' 件のツール呼び出しを確認。並列バッチのキャンセル(#63538 の引き金)は0件でした。それでも「完了」の報告は、独立した <code>Read</code> や再実行で確かめる習慣が安全です。';
+  } else { cn.style.display = 'none'; }
+
+  window.__summary = '【Claude Code 捏造監査】ツール呼び出し ' + TOTAL_USES + ' 件中、並列バッチのキャンセル(捏造の引き金) ' + CANCELS.length + ' 箇所'
+    + (missing ? ' / 結果が返らなかった呼び出し ' + missing + ' 件' : '')
+    + ' — 自分のログの構造で検証。 yurukusa.github.io/cc-safe-setup/claude-code-cascade-cancel-audit-jp.html';
+}
+
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var btn = this;
+  navigator.clipboard.writeText(window.__summary || '').then(function(){
+    btn.textContent = 'コピーしました'; btn.classList.add('done');
+    setTimeout(function(){ btn.textContent='結果の要約をコピー'; btn.classList.remove('done'); }, 1600);
+  }).catch(function(){});
+});
+</script>
+</body>
+</html>
