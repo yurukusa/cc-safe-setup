@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code モデル切替タイムライン — ログから無言の降格を可視化する</title>
-<meta name="description" content="固定したはずのモデルが、いつ・何回、無言で下位モデルへ降格したか。あなた自身のセッションのログ(.jsonl)をブラウザにドラッグするだけで、ターンごとの提供モデルを時系列で可視化し、Opusから非Opusへの降格の回数と時刻を数えます。何もアップロードしません。すべてブラウザの中だけで完結します。">
-<meta property="og:title" content="Claude Code モデル切替タイムライン — 無言の降格を自分のログで数える">
-<meta property="og:description" content="セッションの .jsonl をドラッグするだけ。message.model から、いつ・何回モデルが下位へ降格したかを時系列で可視化。何もアップロードしません。">
+<title>Claude Code Model-Switch Timeline — see silent downgrades in your own logs</title>
+<meta name="description" content="When did your fixed model silently drop to a cheaper tier, and how many times? Drag your own session log (.jsonl) into the browser to visualize the served model per turn over time and count every Opus→non-Opus downgrade with timestamps. Nothing is uploaded — it all runs in your browser.">
+<meta property="og:title" content="Claude Code Model-Switch Timeline — count silent downgrades from your own logs">
+<meta property="og:description" content="Drag your session .jsonl. From message.model, visualize when and how many times the model silently dropped to a lower tier. Nothing is uploaded.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline-jp.html">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline.html">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.7; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.7; }
 .c { max-width: 820px; margin: 0 auto; }
 .tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
 h1 { font-size: 1.5rem; line-height: 1.35; margin-bottom: .5rem; color: #f0f6fc; }
@@ -53,70 +53,70 @@ th { background:#161b22; color:#f0f6fc; }
 </head>
 <body>
 <div class="c">
-  <span class="tag">独立した非公式の道具 · Anthropicとは無関係 · 何もアップロードしません</span>
-  <h1>Claude Code モデル切替タイムライン</h1>
-  <p class="sub">固定したはずのモデルが、いつ・何回、無言で下位のモデルへ降格していたか。あなた自身のセッションのログをここに置くだけで、各ターンで<em>実際に応答したモデル</em>を時系列に並べ、Opusから非Opusへの降格の回数と時刻を数えます。判定の正本は <code>message.model</code> で、UIの表示よりも信頼できます。すべてブラウザの中だけで動き、ファイルはどこにも送られません。</p>
+  <span class="tag">Independent, unofficial · not affiliated with Anthropic · nothing is uploaded</span>
+  <h1>Claude Code Model-Switch Timeline</h1>
+  <p class="sub">When — and how many times — did the model you pinned silently drop to a lower tier? Drop your own session log here and it lays out the model that <em>actually served</em> each turn in time order, then counts every Opus→non-Opus downgrade with timestamps. The source of truth is <code>message.model</code>, which is more reliable than any UI badge. Everything runs in your browser; the file never leaves your machine.</p>
 
   <div id="drop">
-    <strong>ここに <code>.jsonl</code> のセッションのログを置く</strong>
-    <div class="hint">置き場所: <code>~/.claude/projects/&lt;プロジェクト&gt;/&lt;セッションID&gt;.jsonl</code> ・ 複数まとめてもOK ・ クリックで選択</div>
+    <strong>Drop your <code>.jsonl</code> session log here</strong>
+    <div class="hint">Location: <code>~/.claude/projects/&lt;project&gt;/&lt;session-id&gt;.jsonl</code> · multiple files OK · or click to choose</div>
     <input type="file" id="file" accept=".jsonl,application/jsonl,text/plain" multiple style="display:none">
   </div>
 
   <div id="out">
     <div class="card">
-      <p class="headline">このログで、固定の上位モデル(Opus)から下位の段へ<em>無言で落ちた</em>回数</p>
+      <p class="headline">Times this log <em>silently dropped</em> from the top tier (Opus) to a lower one</p>
       <div class="stats">
-        <div><span id="downBig" class="big">0</span> <span class="muted">回</span></div>
+        <div><span id="downBig" class="big">0</span> <span class="muted">downgrades</span></div>
         <div class="muted" id="downSummary"></div>
       </div>
-      <button class="btn" id="copyBtn" style="margin-top:.8rem">結果の要約をコピー</button>
+      <button class="btn" id="copyBtn" style="margin-top:.8rem">Copy summary</button>
     </div>
 
     <div class="toggle">
-      集計の対象:
-      <label><input type="radio" name="win" value="all" checked> 全期間</label>
-      <label><input type="radio" name="win" value="7"> 直近7日</label>
-      <label><input type="radio" name="win" value="30"> 直近30日</label>
+      Window:
+      <label><input type="radio" name="win" value="all" checked> All time</label>
+      <label><input type="radio" name="win" value="7"> Last 7 days</label>
+      <label><input type="radio" name="win" value="30"> Last 30 days</label>
     </div>
 
-    <h2>モデル別のターン数</h2>
+    <h2>Turns per model</h2>
     <div class="legend">
-      <span><i class="sw t-opus"></i>Opus(最上位)</span>
-      <span><i class="sw t-sonnet"></i>Sonnet(中位)</span>
-      <span><i class="sw t-haiku"></i>Haiku(下位)</span>
-      <span><i class="sw t-unknown"></i>その他</span>
+      <span><i class="sw t-opus"></i>Opus (top)</span>
+      <span><i class="sw t-sonnet"></i>Sonnet (mid)</span>
+      <span><i class="sw t-haiku"></i>Haiku (low)</span>
+      <span><i class="sw t-unknown"></i>Other</span>
     </div>
     <table id="modelTable"><tbody></tbody></table>
 
-    <h2>時系列のタイムライン</h2>
-    <p class="muted">左が古く、右が新しい。色が下位へ変わる箇所が、段をまたぐ切替です。</p>
+    <h2>Timeline</h2>
+    <p class="muted">Oldest on the left, newest on the right. A color change to a lower tier is a tier-crossing switch.</p>
     <div class="timeline" id="timeline"></div>
 
-    <h2>降格のイベント(報告に使える時刻つき)</h2>
-    <p class="muted">Opusから非Opusへ静かに落ちた瞬間だけを抜き出します。これが、保守する人が追える「鋭い証拠」です。</p>
+    <h2>Downgrade events (timestamped, report-ready)</h2>
+    <p class="muted">Only the moments it quietly dropped from Opus to a non-Opus tier. These are the "sharp evidence" a maintainer can act on.</p>
     <div class="evlist card" id="events"></div>
 
     <div class="note" id="weakNote" style="display:none"></div>
   </div>
 
   <div class="note">
-    <strong>ログが証明すること、しないこと。</strong> <code>message.model</code> は「どのモデルがそのターンを提供したか」を教えてくれますが、「わざと下げた」という意図までは証明しません。観測した事実(ターンごとの提供モデルと時刻)を報告し、原因の判断はルーティングを監査できる人に委ねてください。Opus同士(4-7と4-8)の入れ替わりは弱い手がかり、Opusから非Opusへの降格が鋭い証拠です。
+    <strong>What the log proves, and what it doesn't.</strong> <code>message.model</code> tells you <em>which</em> model served a turn — it does not prove intent or that anything was "deliberately downgraded." Report the observed facts (served model and timestamp per turn) and leave the cause to whoever can audit routing. An Opus↔Opus swap (4-7 vs 4-8) is a weak signal; an Opus→non-Opus drop is the sharp one.
   </div>
 
   <div class="links">
-    同じ主題のコマンドの版(<code>jq</code> / <code>python3</code> でコピペ): <a href="claude-code-which-model-served-jp.html">Claude Codeが実際にどのモデルで動いたかを自分で確認する</a><br>
-    Claude Code 向けの無料(MIT)の安全フックとローカル点検: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a>(<code>npx cc-safe-setup</code>) · <a href="claude-code-which-model-served.html">English version of the command guide</a> · <a href="claude-code-model-switch-timeline.html">English version of this tool</a>
+    Command version of the same thing (copy-paste <code>jq</code> / <code>python3</code>): <a href="claude-code-which-model-served.html">How to check which model actually served your Claude Code turns</a><br>
+    Free (MIT) safety hooks and local checks for Claude Code: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> (<code>npx cc-safe-setup</code>) · <a href="claude-code-model-switch-timeline-jp.html">日本語版</a>
   </div>
-  <p class="foot">本ページは、自分のセッションのログに対するローカルな検証の道具であり、アカウントや法務の助言ではなく、Anthropicのルーティングの意図についての主張もしません。ファイルはブラウザの外に出ません。モデルやUsage Policyの疑問は、Anthropic自身の文書とサポートで確認してください。</p>
+  <p class="foot">This page is a local way to inspect your own session logs. It is not account or legal advice and makes no claim about Anthropic's routing intent. Your files never leave the browser. For questions about models or the Usage Policy, check Anthropic's own docs and support.</p>
 </div>
 
 <script>
-// tier: モデル名から段を導く。opus=3(最上位), sonnet=2, haiku=1, その他=0。
-// 名前に段が明示されているので、段をまたいだ瞬間を機械的に判定できる。
+// tier: derive the tier from the model name. opus=3 (top), sonnet=2, haiku=1, other=0.
+// The tier is explicit in the name, so a tier-crossing switch can be detected mechanically.
 function tier(m){ if(!m) return 0; if(m.indexOf('opus')>=0) return 3; if(m.indexOf('sonnet')>=0) return 2; if(m.indexOf('haiku')>=0) return 1; return 0; }
 function tclass(t){ return t===3?'t-opus':t===2?'t-sonnet':t===1?'t-haiku':'t-unknown'; }
-var TURNS = []; // {t: ISO文字列, m: モデルID}
+var TURNS = []; // {t: ISO string, m: model id}
 
 var drop = document.getElementById('drop'), fileInput = document.getElementById('file'), out = document.getElementById('out');
 drop.addEventListener('click', function(){ fileInput.click(); });
@@ -165,7 +165,6 @@ function render(){
   out.style.display = rows.length ? 'block' : 'none';
   if(!rows.length){ return; }
 
-  // モデル別の集計
   var counts = {}, total = rows.length;
   rows.forEach(function(x){ counts[x.m] = (counts[x.m]||0)+1; });
   var pairs = Object.keys(counts).map(function(k){ return [k, counts[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
@@ -177,7 +176,6 @@ function render(){
     tb.appendChild(tr);
   });
 
-  // 降格イベント(opus(3)→ <3)と、Opus同士の弱い入れ替わり
   var downs = [], weakSwaps = 0, prev = null, prevM = null;
   rows.forEach(function(x){
     var t = tier(x.m);
@@ -193,14 +191,13 @@ function render(){
   document.getElementById('downBig').className = 'big ' + (downs.length? 'warn':'ok');
   var sumEl = document.getElementById('downSummary');
   if(downs.length){
-    sumEl.textContent = total + ' ターン中、Opus から下位の段へ無言で落ちた区間が ' + downs.length + ' 箇所。';
+    sumEl.textContent = downs.length + ' spans where Opus silently dropped to a lower tier, across ' + total + ' turns.';
   } else if(hadOpus){
-    sumEl.textContent = total + ' ターンを確認。Opus から下位の段への降格は見つかりませんでした。';
+    sumEl.textContent = 'Checked ' + total + ' turns. No Opus→lower-tier downgrade found.';
   } else {
-    sumEl.textContent = total + ' ターンを確認。この窓に Opus のターンはありません。';
+    sumEl.textContent = 'Checked ' + total + ' turns. No Opus turns in this window.';
   }
 
-  // タイムライン(最大600セグメントに圧縮して描く)
   var tl = document.getElementById('timeline'); tl.innerHTML = '';
   var step = Math.max(1, Math.ceil(rows.length/600));
   for(var i=0;i<rows.length;i+=step){
@@ -211,33 +208,30 @@ function render(){
     tl.appendChild(seg);
   }
 
-  // イベントの一覧
   var ev = document.getElementById('events');
   if(downs.length){
     ev.innerHTML = downs.map(function(d){ return d.t + '  ' + d.from + '  →  ' + d.to; }).join('<br>');
   } else {
-    ev.innerHTML = '<span class="muted">降格のイベントはありません。</span>';
+    ev.innerHTML = '<span class="muted">No downgrade events.</span>';
   }
 
-  // 弱い手がかりの注記
   var wn = document.getElementById('weakNote');
   if(weakSwaps>0){
     wn.style.display = 'block';
-    wn.innerHTML = '参考: Opus同士(例 <code>4-7</code>↔<code>4-8</code>)の入れ替わりが ' + weakSwaps + ' 回ありました。どちらも最上位で、質に体感できる差は出にくく、通常の運用でも起こります。<strong>弱い手がかり</strong>として扱ってください。';
+    wn.innerHTML = 'For reference: there were ' + weakSwaps + ' Opus↔Opus swaps (e.g. <code>4-7</code>↔<code>4-8</code>). Both are top-tier, the quality difference is usually imperceptible, and this happens in normal operation. Treat it as a <strong>weak signal</strong>.';
   } else { wn.style.display = 'none'; }
 
-  // 共有用の要約
-  window.__summary = '【Claude Code モデル切替タイムライン】' + total + 'ターン中、Opusから下位の段への無言の降格 ' + downs.length + '回'
-    + (weakSwaps? ' / Opus同士の入れ替わり ' + weakSwaps + '回(弱い手がかり)':'')
-    + ' — 自分のログ(message.model)で検証。 yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline-jp.html';
+  window.__summary = '[Claude Code Model-Switch Timeline] Across ' + total + ' turns: ' + downs.length + ' silent Opus→lower-tier downgrades'
+    + (weakSwaps? ' / ' + weakSwaps + ' Opus↔Opus swaps (weak signal)':'')
+    + ' — verified from my own logs (message.model). yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline.html';
 }
 
 document.querySelectorAll('input[name=win]').forEach(function(el){ el.addEventListener('change', render); });
 document.getElementById('copyBtn').addEventListener('click', function(){
   var btn = this;
   navigator.clipboard.writeText(window.__summary || '').then(function(){
-    btn.textContent = 'コピーしました'; btn.classList.add('done');
-    setTimeout(function(){ btn.textContent='結果の要約をコピー'; btn.classList.remove('done'); }, 1600);
+    btn.textContent = 'Copied'; btn.classList.add('done');
+    setTimeout(function(){ btn.textContent='Copy summary'; btn.classList.remove('done'); }, 1600);
   }).catch(function(){});
 });
 </script>
