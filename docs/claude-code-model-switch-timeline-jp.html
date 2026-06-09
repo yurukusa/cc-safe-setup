@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code モデル切替タイムライン — ログから無言の降格を可視化する</title>
+<meta name="description" content="固定したはずのモデルが、いつ・何回、無言で下位モデルへ降格したか。あなた自身のセッションのログ(.jsonl)をブラウザにドラッグするだけで、ターンごとの提供モデルを時系列で可視化し、Opusから非Opusへの降格の回数と時刻を数えます。何もアップロードしません。すべてブラウザの中だけで完結します。">
+<meta property="og:title" content="Claude Code モデル切替タイムライン — 無言の降格を自分のログで数える">
+<meta property="og:description" content="セッションの .jsonl をドラッグするだけ。message.model から、いつ・何回モデルが下位へ降格したかを時系列で可視化。何もアップロードしません。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline-jp.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.7; }
+.c { max-width: 820px; margin: 0 auto; }
+.tag { display:inline-block; background:#1f2a3a; color:#58a6ff; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:14px; letter-spacing:.02em; }
+h1 { font-size: 1.5rem; line-height: 1.35; margin-bottom: .5rem; color: #f0f6fc; }
+.sub { color: #8b949e; margin-bottom: 1.4rem; font-size: .98rem; }
+h2 { font-size: 1.12rem; color:#f0f6fc; margin:1.7rem 0 .5rem; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.1rem 1.2rem; margin:1rem 0; }
+p { margin:.5rem 0; }
+.muted { color:#8b949e; font-size:.9rem; }
+code { background:#0b0f14; border:1px solid #30363d; border-radius:5px; padding:1px 5px; font-size:.88em; color:#cfe0ff; }
+.note { background:#13233a; border-left:3px solid #58a6ff; padding:.7rem .9rem; border-radius:0 8px 8px 0; margin:.9rem 0; font-size:.92rem; }
+#drop { border:2px dashed #30363d; border-radius:14px; padding:2.2rem 1.2rem; text-align:center; cursor:pointer; transition:.15s; background:#0f141b; }
+#drop:hover, #drop.over { border-color:#58a6ff; background:#111a26; }
+#drop strong { color:#f0f6fc; font-size:1.05rem; }
+#drop .hint { color:#6e7681; font-size:.85rem; margin-top:.4rem; }
+.btn { background:#21262d; border:1px solid #30363d; color:#58a6ff; border-radius:8px; padding:.5rem 1rem; font-size:.9rem; cursor:pointer; }
+.btn:hover { border-color:#58a6ff; } .btn.done { color:#3fb950; border-color:#3fb950; }
+#out { display:none; }
+.headline { font-size:1.05rem; color:#f0f6fc; }
+.big { font-size:2.4rem; font-weight:800; line-height:1; }
+.big.warn { color:#f0883e; } .big.ok { color:#3fb950; }
+.stats { display:flex; gap:1.2rem; flex-wrap:wrap; align-items:flex-end; }
+.timeline { display:flex; flex-wrap:wrap; gap:2px; margin:.7rem 0; }
+.seg { height:22px; border-radius:3px; }
+.legend { display:flex; gap:1rem; flex-wrap:wrap; font-size:.85rem; margin:.5rem 0; }
+.legend span { display:inline-flex; align-items:center; gap:.35rem; }
+.sw { width:13px; height:13px; border-radius:3px; display:inline-block; }
+.t-opus { background:#3fb950; } .t-sonnet { background:#d29922; } .t-haiku { background:#f85149; } .t-unknown { background:#6e7681; }
+table { border-collapse:collapse; width:100%; margin:.6rem 0; font-size:.9rem; }
+th,td { border:1px solid #30363d; padding:.4rem .6rem; text-align:left; }
+th { background:#161b22; color:#f0f6fc; }
+.evlist { font:12px/1.5 'SFMono-Regular',Consolas,Menlo,monospace; color:#d7dce6; max-height:180px; overflow:auto; }
+.toggle { font-size:.85rem; color:#8b949e; margin:.6rem 0; }
+.toggle label { cursor:pointer; margin-right:1rem; }
+.links { border-top:1px solid #30363d; margin-top:1.6rem; padding-top:1rem; font-size:.92rem; }
+.links a { color:#58a6ff; text-decoration:none; } .links a:hover { text-decoration:underline; }
+.foot { color:#6e7681; font-size:.82rem; margin-top:1.6rem; border-top:1px solid #21262d; padding-top:.9rem; }
+</style>
+</head>
+<body>
+<div class="c">
+  <span class="tag">独立した非公式の道具 · Anthropicとは無関係 · 何もアップロードしません</span>
+  <h1>Claude Code モデル切替タイムライン</h1>
+  <p class="sub">固定したはずのモデルが、いつ・何回、無言で下位のモデルへ降格していたか。あなた自身のセッションのログをここに置くだけで、各ターンで<em>実際に応答したモデル</em>を時系列に並べ、Opusから非Opusへの降格の回数と時刻を数えます。判定の正本は <code>message.model</code> で、UIの表示よりも信頼できます。すべてブラウザの中だけで動き、ファイルはどこにも送られません。</p>
+
+  <div id="drop">
+    <strong>ここに <code>.jsonl</code> のセッションのログを置く</strong>
+    <div class="hint">置き場所: <code>~/.claude/projects/&lt;プロジェクト&gt;/&lt;セッションID&gt;.jsonl</code> ・ 複数まとめてもOK ・ クリックで選択</div>
+    <input type="file" id="file" accept=".jsonl,application/jsonl,text/plain" multiple style="display:none">
+  </div>
+
+  <div id="out">
+    <div class="card">
+      <p class="headline">このログで、固定の上位モデル(Opus)から下位の段へ<em>無言で落ちた</em>回数</p>
+      <div class="stats">
+        <div><span id="downBig" class="big">0</span> <span class="muted">回</span></div>
+        <div class="muted" id="downSummary"></div>
+      </div>
+      <button class="btn" id="copyBtn" style="margin-top:.8rem">結果の要約をコピー</button>
+    </div>
+
+    <div class="toggle">
+      集計の対象:
+      <label><input type="radio" name="win" value="all" checked> 全期間</label>
+      <label><input type="radio" name="win" value="7"> 直近7日</label>
+      <label><input type="radio" name="win" value="30"> 直近30日</label>
+    </div>
+
+    <h2>モデル別のターン数</h2>
+    <div class="legend">
+      <span><i class="sw t-opus"></i>Opus(最上位)</span>
+      <span><i class="sw t-sonnet"></i>Sonnet(中位)</span>
+      <span><i class="sw t-haiku"></i>Haiku(下位)</span>
+      <span><i class="sw t-unknown"></i>その他</span>
+    </div>
+    <table id="modelTable"><tbody></tbody></table>
+
+    <h2>時系列のタイムライン</h2>
+    <p class="muted">左が古く、右が新しい。色が下位へ変わる箇所が、段をまたぐ切替です。</p>
+    <div class="timeline" id="timeline"></div>
+
+    <h2>降格のイベント(報告に使える時刻つき)</h2>
+    <p class="muted">Opusから非Opusへ静かに落ちた瞬間だけを抜き出します。これが、保守する人が追える「鋭い証拠」です。</p>
+    <div class="evlist card" id="events"></div>
+
+    <div class="note" id="weakNote" style="display:none"></div>
+  </div>
+
+  <div class="note">
+    <strong>ログが証明すること、しないこと。</strong> <code>message.model</code> は「どのモデルがそのターンを提供したか」を教えてくれますが、「わざと下げた」という意図までは証明しません。観測した事実(ターンごとの提供モデルと時刻)を報告し、原因の判断はルーティングを監査できる人に委ねてください。Opus同士(4-7と4-8)の入れ替わりは弱い手がかり、Opusから非Opusへの降格が鋭い証拠です。
+  </div>
+
+  <div class="links">
+    同じ主題のコマンドの版(<code>jq</code> / <code>python3</code> でコピペ): <a href="claude-code-which-model-served-jp.html">Claude Codeが実際にどのモデルで動いたかを自分で確認する</a><br>
+    Claude Code 向けの無料(MIT)の安全フックとローカル点検: <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a>(<code>npx cc-safe-setup</code>) · <a href="claude-code-which-model-served.html">English version of the command guide</a>
+  </div>
+  <p class="foot">本ページは、自分のセッションのログに対するローカルな検証の道具であり、アカウントや法務の助言ではなく、Anthropicのルーティングの意図についての主張もしません。ファイルはブラウザの外に出ません。モデルやUsage Policyの疑問は、Anthropic自身の文書とサポートで確認してください。</p>
+</div>
+
+<script>
+// tier: モデル名から段を導く。opus=3(最上位), sonnet=2, haiku=1, その他=0。
+// 名前に段が明示されているので、段をまたいだ瞬間を機械的に判定できる。
+function tier(m){ if(!m) return 0; if(m.indexOf('opus')>=0) return 3; if(m.indexOf('sonnet')>=0) return 2; if(m.indexOf('haiku')>=0) return 1; return 0; }
+function tclass(t){ return t===3?'t-opus':t===2?'t-sonnet':t===1?'t-haiku':'t-unknown'; }
+var TURNS = []; // {t: ISO文字列, m: モデルID}
+
+var drop = document.getElementById('drop'), fileInput = document.getElementById('file'), out = document.getElementById('out');
+drop.addEventListener('click', function(){ fileInput.click(); });
+drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', function(){ handleFiles(fileInput.files); });
+
+function handleFiles(files){
+  TURNS = [];
+  var pending = files.length;
+  if(!pending) return;
+  for(var i=0;i<files.length;i++){
+    var r = new FileReader();
+    r.onload = function(ev){
+      var lines = ev.target.result.split('\n');
+      for(var j=0;j<lines.length;j++){
+        var s = lines[j].trim(); if(!s) continue;
+        try {
+          var d = JSON.parse(s);
+          if(d.type === 'assistant'){
+            var m = d.message && d.message.model;
+            var t = d.timestamp || '';
+            if(m && m !== '<synthetic>') TURNS.push({t:t, m:m});
+          }
+        } catch(e){}
+      }
+      pending--; if(pending===0) render();
+    };
+    r.readAsText(files[i]);
+  }
+}
+
+function currentWindow(){
+  var v = document.querySelector('input[name=win]:checked').value;
+  if(v==='all') return null;
+  var days = parseInt(v,10);
+  var d = new Date(Date.now() - days*86400000);
+  return d.toISOString().slice(0,10);
+}
+
+function render(){
+  var cut = currentWindow();
+  var rows = TURNS.filter(function(x){ return x.t; }).slice().sort(function(a,b){ return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
+  if(cut) rows = rows.filter(function(x){ return x.t.slice(0,10) >= cut; });
+  out.style.display = rows.length ? 'block' : 'none';
+  if(!rows.length){ return; }
+
+  // モデル別の集計
+  var counts = {}, total = rows.length;
+  rows.forEach(function(x){ counts[x.m] = (counts[x.m]||0)+1; });
+  var pairs = Object.keys(counts).map(function(k){ return [k, counts[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+  var tb = document.querySelector('#modelTable tbody'); tb.innerHTML = '';
+  pairs.forEach(function(p){
+    var tr = document.createElement('tr');
+    var pct = Math.round(p[1]*1000/total)/10;
+    tr.innerHTML = '<td><span class="sw '+tclass(tier(p[0]))+'"></span> <code>'+p[0]+'</code></td><td>'+p[1]+'</td><td>'+pct+'%</td>';
+    tb.appendChild(tr);
+  });
+
+  // 降格イベント(opus(3)→ <3)と、Opus同士の弱い入れ替わり
+  var downs = [], weakSwaps = 0, prev = null, prevM = null;
+  rows.forEach(function(x){
+    var t = tier(x.m);
+    if(prev !== null){
+      if(prev===3 && t<3) downs.push({t:x.t, from:prevM, to:x.m});
+      else if(prev===3 && t===3 && prevM!==x.m) weakSwaps++;
+    }
+    prev = t; prevM = x.m;
+  });
+
+  var hadOpus = rows.some(function(x){ return tier(x.m)===3; });
+  document.getElementById('downBig').textContent = downs.length;
+  document.getElementById('downBig').className = 'big ' + (downs.length? 'warn':'ok');
+  var sumEl = document.getElementById('downSummary');
+  if(downs.length){
+    sumEl.textContent = total + ' ターン中、Opus から下位の段へ無言で落ちた区間が ' + downs.length + ' 箇所。';
+  } else if(hadOpus){
+    sumEl.textContent = total + ' ターンを確認。Opus から下位の段への降格は見つかりませんでした。';
+  } else {
+    sumEl.textContent = total + ' ターンを確認。この窓に Opus のターンはありません。';
+  }
+
+  // タイムライン(最大600セグメントに圧縮して描く)
+  var tl = document.getElementById('timeline'); tl.innerHTML = '';
+  var step = Math.max(1, Math.ceil(rows.length/600));
+  for(var i=0;i<rows.length;i+=step){
+    var seg = document.createElement('div');
+    seg.className = 'seg ' + tclass(tier(rows[i].m));
+    seg.style.width = '6px';
+    seg.title = rows[i].t + '  ' + rows[i].m;
+    tl.appendChild(seg);
+  }
+
+  // イベントの一覧
+  var ev = document.getElementById('events');
+  if(downs.length){
+    ev.innerHTML = downs.map(function(d){ return d.t + '  ' + d.from + '  →  ' + d.to; }).join('<br>');
+  } else {
+    ev.innerHTML = '<span class="muted">降格のイベントはありません。</span>';
+  }
+
+  // 弱い手がかりの注記
+  var wn = document.getElementById('weakNote');
+  if(weakSwaps>0){
+    wn.style.display = 'block';
+    wn.innerHTML = '参考: Opus同士(例 <code>4-7</code>↔<code>4-8</code>)の入れ替わりが ' + weakSwaps + ' 回ありました。どちらも最上位で、質に体感できる差は出にくく、通常の運用でも起こります。<strong>弱い手がかり</strong>として扱ってください。';
+  } else { wn.style.display = 'none'; }
+
+  // 共有用の要約
+  window.__summary = '【Claude Code モデル切替タイムライン】' + total + 'ターン中、Opusから下位の段への無言の降格 ' + downs.length + '回'
+    + (weakSwaps? ' / Opus同士の入れ替わり ' + weakSwaps + '回(弱い手がかり)':'')
+    + ' — 自分のログ(message.model)で検証。 yurukusa.github.io/cc-safe-setup/claude-code-model-switch-timeline-jp.html';
+}
+
+document.querySelectorAll('input[name=win]').forEach(function(el){ el.addEventListener('change', render); });
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var btn = this;
+  navigator.clipboard.writeText(window.__summary || '').then(function(){
+    btn.textContent = 'コピーしました'; btn.classList.add('done');
+    setTimeout(function(){ btn.textContent='結果の要約をコピー'; btn.classList.remove('done'); }, 1600);
+  }).catch(function(){});
+});
+</script>
+</body>
+</html>
