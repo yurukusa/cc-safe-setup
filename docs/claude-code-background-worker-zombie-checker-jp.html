@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>背景workerゾンビ・チェッカー（Claude Code・止めたはずの背景の作業が生きていないか／日本語・ブラウザ内処理）</title>
+<meta name="description" content="claude daemon status の出力を貼るだけで、止めたはずの背景の作業（worker）が生きていないか、自動更新で孤児になっていないかを赤黄緑で判定します。トークンを溶かす前に気づくための、ブラウザ内で完結する無料の自己診断。">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-background-worker-zombie-checker-jp.html">
+<style>
+  :root{--bg:#0f1115;--card:#1a1e26;--ink:#e7ecf3;--muted:#9aa6b6;--line:#2a3340;
+        --green:#34d399;--yellow:#fbbf24;--red:#f87171;--accent:#60a5fa;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+       line-height:1.7;padding:0 16px}
+  .wrap{max-width:760px;margin:0 auto;padding:40px 0 80px}
+  h1{font-size:1.5rem;line-height:1.4;margin:0 0 8px}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:.96rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:18px 0}
+  label{display:block;font-weight:600;margin:0 0 8px}
+  textarea{width:100%;min-height:150px;background:#0b0d11;color:var(--ink);border:1px solid var(--line);
+           border-radius:8px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;resize:vertical}
+  .hint{color:var(--muted);font-size:.85rem;margin:8px 0 0}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em}
+  button{background:var(--accent);color:#07111f;border:0;border-radius:8px;padding:11px 20px;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:14px}
+  button:hover{filter:brightness(1.08)}
+  .verdict{display:none;margin-top:22px}
+  .badge{display:inline-block;font-weight:800;padding:6px 14px;border-radius:999px;font-size:.95rem;margin-bottom:12px}
+  .b-green{background:rgba(52,211,153,.15);color:var(--green);border:1px solid var(--green)}
+  .b-yellow{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid var(--yellow)}
+  .b-red{background:rgba(248,113,113,.15);color:var(--red);border:1px solid var(--red)}
+  .big{font-size:1.15rem;font-weight:700;margin:6px 0}
+  ul{margin:10px 0;padding-left:22px}
+  li{margin:6px 0}
+  .stat{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0}
+  .stat div{background:#0b0d11;border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:120px}
+  .stat .n{font-size:1.4rem;font-weight:800}
+  .stat .k{color:var(--muted);font-size:.8rem}
+  .foot{color:var(--muted);font-size:.85rem;margin-top:30px;border-top:1px solid var(--line);padding-top:18px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>背景workerゾンビ・チェッカー</h1>
+  <p class="sub">止めたはずの背景の作業（worker）が、まだ生きてトークンを溶かしていないか。<code>claude daemon status</code> の出力を貼るだけで判定します。ブラウザの中だけで処理し、どこにも送りません。</p>
+
+  <div class="card">
+    <label for="in">ターミナルで <code>claude daemon status</code> を実行して、出力をそのまま貼ってください</label>
+    <textarea id="in" placeholder="例:
+version: 2.1.169
+bg workers:   8 running (control.sock), 8 in roster.json
+              5 from a different CLI version
+holding this daemon open:
+  8 bg workers running (daemon waits for them to settle)"></textarea>
+    <p class="hint">何も背景で動かしていないつもりなら、健全な出力は <code>not running</code> や <code>bg workers: 0</code> です。貼った内容は送信されません。</p>
+    <button id="go">判定する</button>
+  </div>
+
+  <div class="verdict card" id="verdict"></div>
+
+  <div class="foot">
+    <p><b>なぜこれが要るのか。</b> 背景の作業は「停止」を押しても止まらないことがあります（パネルの「停止」は終端でないことがある）。生き残った worker は、気づかないうちにトークンを使い続けます。実例として、明示的に何度も止めた背景の作業が21時間以上生き、約16万トークンを消費して超過の課金まで起きた報告（<a href="https://github.com/anthropics/claude-code/issues/66339" target="_blank" rel="noopener">#66339</a>）や、自動更新で古い版の worker が孤児になり、生きているのに接続できなくなる報告（<a href="https://github.com/anthropics/claude-code/issues/66358" target="_blank" rel="noopener">#66358</a>）があります。根っこの直しは提供の側ですが、生きている数を「見る」ことは今すぐ自分でできます。</p>
+    <p>同じ主題の、止め方と備えの解説 →
+      <a href="https://note.com/yurukusa/n/nb10a7c6e3de7" target="_blank" rel="noopener">「止めたはずの作業が裏で生き続けることがある」</a>。
+      セッション開始時に自動で同じ確認をする無料の hook（<code>daemon-zombie-worker-surfacer.sh</code>）や、他の安全の道具は
+      <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> にあります（導入は任意・中身は全部読めます）。</p>
+  </div>
+</div>
+
+<script>
+// Parse the text of `claude daemon status`. Returns the signals we can read.
+function parseDaemonStatus(text){
+  text = text || "";
+  const notRunning = /\bnot running\b/i.test(text);
+  // bg worker count: take the largest integer on the "bg workers:" line.
+  let workers = 0;
+  const wl = text.split(/\n/).find(l => /bg workers?\s*:/i.test(l));
+  if(wl){
+    const nums = (wl.match(/\d+/g) || []).map(Number);
+    if(nums.length) workers = Math.max.apply(null, nums);
+  }
+  // version skew: "N from a different (CLI) version"
+  let skew = 0;
+  const sl = text.split(/\n/).find(l => /from a different (cli )?version/i.test(l));
+  if(sl){
+    const m = sl.match(/(\d+)\s+from a different/i) || sl.match(/(\d+)/);
+    if(m) skew = Number(m[1]);
+  }
+  return {notRunning, workers, skew, hasInput: text.trim().length > 0};
+}
+
+function render(r){
+  const v = document.getElementById('verdict');
+  if(!r.hasInput){
+    v.style.display = 'block';
+    v.innerHTML = '<span class="badge b-yellow">入力なし</span><div class="big">出力を貼ってください。</div>';
+    return;
+  }
+  let cls, badge, head, steps;
+  const stat = '<div class="stat">'
+    + '<div><div class="n">'+r.workers+'</div><div class="k">登録された worker</div></div>'
+    + '<div><div class="n">'+r.skew+'</div><div class="k">版ずれの孤児</div></div>'
+    + '</div>';
+
+  if(r.skew > 0){
+    cls='b-red'; badge='要対応（孤児あり）';
+    head = r.skew+' 個の worker が古い版から取り残されています。生きているのに接続できず、自動では消えません。';
+    steps = '<ul>'
+      + '<li>まず一覧で確かめる: <code>claude agents --json</code></li>'
+      + '<li>版ずれの孤児は再接続できないので、デーモン（または Claude Code）を完全に再起動して片付ける。</li>'
+      + '<li>再起動の前に、消えてほしくない作業の控えを取っておく。</li>'
+      + '</ul>';
+  } else if(r.workers > 0){
+    cls='b-yellow'; badge='注意（生きている作業あり）';
+    head = r.workers+' 個の背景の作業が、まだ登録されています。新しいセッションの開始の時点でこれがあるなら、前のセッションから生き残ったものです。意図して動かしているのでなければ、トークンを使い続けている恐れがあります。';
+    steps = '<ul>'
+      + '<li>一覧で中身を確かめる: <code>claude agents --json</code></li>'
+      + '<li>止めたつもりなら、パネルの「停止」だけでは止まらないことがある。報告（#66339）で実際に効いたのは、親のセッションそのものを削除すること。</li>'
+      + '<li>削除の前に、消えてほしくない作業の控えを取る。</li>'
+      + '</ul>';
+  } else {
+    cls='b-green'; badge='健全';
+    head = r.notRunning
+      ? 'デーモンは動いておらず、生き残った背景の作業もありません。'
+      : '生き残った背景の作業（worker）は見つかりませんでした。';
+    steps = '<ul><li>いまは問題なし。長いセッションや自動更新の後に、ときどきこの確認をすると安心です。</li></ul>';
+  }
+  v.style.display = 'block';
+  v.innerHTML = '<span class="badge '+cls+'">'+badge+'</span>'
+    + '<div class="big">'+head+'</div>' + stat + steps;
+}
+
+document.getElementById('go').addEventListener('click', function(){
+  render(parseDaemonStatus(document.getElementById('in').value));
+});
+</script>
+</body>
+</html>
