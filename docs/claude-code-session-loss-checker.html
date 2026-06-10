@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Loss Checker — Did Claude Code Silently Empty Your Transcript?</title>
+<meta name="description" content="Claude Code history blank / a session disappeared? Drag your .jsonl session logs and check, in your browser, which sessions lost their user/assistant content (metadata-only stub). Nothing is uploaded.">
+<meta property="og:title" content="Session Loss Checker — Did Claude Code Silently Empty Your Transcript?">
+<meta property="og:description" content="A session's history shows up blank? Drag your own .jsonl logs and see which sessions became metadata-only stubs with the conversation gone — and how to stop losing work.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-code-session-loss-checker.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-session-loss-checker.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Claude Code Session Loss Checker","description":"In-browser check of Claude Code .jsonl session logs to detect transcripts that lost their user/assistant content and became metadata-only stubs.","url":"https://yurukusa.github.io/cc-safe-setup/claude-code-session-loss-checker.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.5}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.2rem 0 .6rem}
+.priv{background:#0c2a17;border:1px solid #1c5132;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:#7ee2a8;margin-bottom:1rem}
+.drop{background:#161b22;border:2px dashed #30363d;border-radius:10px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:all .15s}
+.drop:hover,.drop.over{border-color:#f97316;background:#1c2128}
+.drop p{color:#8b949e;font-size:.85rem;margin-top:.4rem}
+.btn{background:#f97316;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600}
+.btn:hover{background:#ea580c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#f97316;color:#f97316}
+.hide{display:none}
+.score{font-size:2.6rem;font-weight:700;text-align:center;margin:.3rem 0}
+.score.red{color:#f87171}.score.yellow{color:#fbbf24}.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.82rem;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.6rem 0}
+th,td{text-align:right;padding:.35rem .5rem;border-bottom:1px solid #21262d}
+th{color:#8b949e;font-weight:600}td:first-child,th:first-child{text-align:left;color:#e6edf3}
+.tag{display:inline-block;padding:.05rem .45rem;border-radius:4px;font-size:.7rem;font-weight:600}
+.tag.stub{background:#3d1418;color:#f87171}.tag.ok{background:#0c2a17;color:#4ade80}.tag.empty{background:#3a2e0a;color:#fbbf24}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem;margin:1rem 0}
+.verdict{border-left:4px solid #f97316;padding-left:.9rem;margin:.8rem 0}
+.verdict.ok{border-color:#4ade80}
+.verdict.warn{border-color:#fbbf24}
+.lever{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0;font-size:.83rem}
+.lever b{color:#f97316}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;font-size:.74rem;color:#e6edf3;overflow-x:auto;white-space:pre-wrap;margin:.6rem 0}
+.note{color:#8b949e;font-size:.78rem;margin:.6rem 0}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.82rem;margin-bottom:.4rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+.err{color:#f87171;font-size:.82rem;margin:.5rem 0}
+.big{color:#f0f6fc;font-weight:700}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Session Loss Checker</h1>
+<p class="sub">Opened a Claude Code session and the history is <b>blank</b>? A transcript can exist on disk yet hold no conversation — the <code>.jsonl</code> file is left as a metadata-only stub with your <code>user</code>/<code>assistant</code> turns gone. This reads your <b>real</b> session logs and tells you which sessions kept their content and which lost it.</p>
+
+<div class="priv">🔒 100% in your browser. Your logs are parsed locally with JavaScript and <b>never uploaded</b> — there is no server. Disconnect from the network and it still works.</div>
+
+<h2>1. Pick your session logs</h2>
+<p class="note">They live in <code>~/.claude/projects/</code> (each project is a folder of <code>.jsonl</code> files; the file name is the session id). Select that folder, or drag in any <code>.jsonl</code> files.</p>
+<div class="drop" id="drop">
+  <button class="btn" id="pickFolder" type="button">Select ~/.claude/projects folder</button>
+  <button class="btn btn-outline" id="pickFiles" type="button">…or pick .jsonl files</button>
+  <p>or drag &amp; drop .jsonl files here</p>
+  <input id="fFolder" type="file" webkitdirectory directory multiple class="hide">
+  <input id="fFiles" type="file" accept=".jsonl" multiple class="hide">
+</div>
+<div id="status" class="note"></div>
+<div id="err" class="err"></div>
+
+<div id="results" class="hide">
+  <h2>2. How many sessions lost content</h2>
+  <div class="card">
+    <div id="score" class="score"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <table id="tbl"><thead><tr><th>session (file id)</th><th>lines</th><th>content turns</th><th>version</th><th>status</th></tr></thead><tbody></tbody></table>
+    <p class="note">"content turns" = lines that are a real <code>user</code>, <code>assistant</code>, or <code>queue-operation</code> record. A file with lines but <b>0 content turns</b> is a metadata-only stub: the sidebar shows it empty.</p>
+  </div>
+
+  <h2>3. What this means</h2>
+  <div id="verdict"></div>
+
+  <h2>4. Stop losing work — regardless of the cause</h2>
+  <div class="lever"><b>Mirror your transcripts.</b> Copy <code>~/.claude/projects/**/*.jsonl</code> somewhere safe on a schedule, and <b>skip the copy when the source is smaller than your backup</b> — so an emptied stub never overwrites a good backup. If the originals are saved before they are emptied, the cause does not matter: you keep your work.</div>
+  <div class="lever"><b>If you are being hit right now, fully relaunch — don't just upgrade.</b> In the reported native-installer window (2.1.168–2.1.170, see <a href="https://github.com/anthropics/claude-code/issues/66486">#66486</a> / <a href="https://github.com/anthropics/claude-code/issues/66734">#66734</a>) interactive sessions stub out while spawned/headless sessions persist fine, and the break can outlive an on-disk binary upgrade because it lives in a long-running process. Quitting <b>all</b> Claude Code instances and relaunching has restored persistence per those reports.</div>
+  <div class="lever"><b>Check before you exit, not after.</b> Once a session is a stub, the content is gone. The cheap habit is to glance at the history (or run this check) before you close a long session.</div>
+
+  <div class="note"><b>Honest caveat:</b> this detects a <em>symptom</em> — a transcript with no <code>user</code>/<code>assistant</code> records — not a specific bug. The same empty-stub shape has been reported under more than one cause (an older writer regression in 2.1.144/2.1.145, <a href="https://github.com/anthropics/claude-code/issues/60984">#60984</a>; and the native-installer window above), and the root cause of the recent one is still being investigated upstream. The value here is catching the loss and having a backup, which holds no matter which cause it is.</div>
+
+  <div class="actions">
+    <button class="btn" id="copyCard" type="button">Copy shareable summary</button>
+    <button class="btn btn-outline" id="again" type="button">Check again</button>
+  </div>
+</div>
+
+<div class="cta">
+  <h3>Catch the next silent loss automatically</h3>
+  <p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> is a free set of Claude Code safety hooks — one of them (<code>session-persistence-verifier</code>) runs this exact check every session and warns you the moment a turn finishes with zero persisted records, before you lose the thread. <code>npx cc-safe-setup</code></p>
+</div>
+
+<p class="footer">Runs entirely client-side. No data leaves your machine. Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>.</p>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let lastSummary="";
+function fmt(n){return n.toLocaleString();}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function analyze(texts){
+  const out=[];
+  for(const t of texts){
+    const fid=(t.name||"session").replace(/\.jsonl$/,"");
+    let lines=0,content=0,aiTitle=0,version="",ts="";
+    for(const line of t.body.split("\n")){
+      if(!line.trim())continue; lines++;
+      let o; try{o=JSON.parse(line);}catch(e){continue;}
+      const type=o.type||(o.message&&o.message.role)||"";
+      if(type==="user"||type==="assistant"||type==="queue-operation")content++;
+      else if(type==="ai-title")aiTitle++;
+      const v=o.version||(o.message&&o.message.version); if(v&&!version)version=v;
+      if(o.timestamp&&!ts)ts=o.timestamp;
+    }
+    const status= lines===0?"empty":(content>0?"ok":"stub");
+    out.push({id:fid.length>30?fid.slice(0,30)+"…":fid,lines,content,aiTitle,version:version||"?",ts:(ts||"").slice(0,10),status});
+  }
+  return out;
+}
+function render(rows){
+  if(!rows.length){$("#err").textContent="No .jsonl session files were read.";return;}
+  $("#err").textContent="";
+  const stubs=rows.filter(r=>r.status==="stub");
+  const ok=rows.filter(r=>r.status==="ok");
+  const el=$("#score");
+  el.textContent=stubs.length;
+  el.className="score "+(stubs.length>0?"red":"green");
+  $("#scoreLabel").innerHTML= stubs.length>0
+    ? `of ${rows.length} session(s) lost their conversation content (metadata-only stub)`
+    : `metadata-only stubs across ${rows.length} session(s) — every session kept its content`;
+  // sort: stubs first, then by lines desc
+  const order={stub:0,empty:1,ok:2};
+  rows.sort((a,b)=> order[a.status]-order[b.status] || b.lines-a.lines);
+  $("#tbl tbody").innerHTML=rows.map(r=>{
+    const tag= r.status==="stub"?'<span class="tag stub">STUB — content lost</span>'
+      : r.status==="empty"?'<span class="tag empty">empty file</span>'
+      : '<span class="tag ok">healthy</span>';
+    return `<tr><td>${esc(r.id)}</td><td>${fmt(r.lines)}</td><td>${fmt(r.content)}</td><td>${esc(r.version)}</td><td>${tag}</td></tr>`;
+  }).join("");
+  let v="";
+  if(stubs.length>0){
+    v=`<div class="verdict warn"><p><span class="big">${stubs.length} session(s) have lost their conversation.</span> Those files have log lines but no <code>user</code>/<code>assistant</code> records — only metadata like the auto title — so the sidebar shows them empty and the content is not recoverable from the file. If a <code>version</code> shows above for a stub, it tells you which build wrote it (the recent reports cluster on the native-installer 2.1.168–2.1.170 window).</p><p style="margin-top:.5rem">Set up the mirror backup below now, and if you are still on an affected session, fully relaunch Claude Code (not just upgrade) before doing more work.</p></div>`;
+  } else if(ok.length){
+    v=`<div class="verdict ok"><p><span class="big">All your sessions kept their content.</span> Every file here has real <code>user</code>/<code>assistant</code> turns — none are empty stubs. Good. The mirror backup below is still the cheapest insurance against the next silent loss, since it does not depend on the cause being fixed.</p></div>`;
+  } else {
+    v=`<div class="verdict warn"><p>No content-bearing sessions and no clear stubs — the files may be empty or a format this check doesn't recognize. Make sure you picked the <code>.jsonl</code> files inside <code>~/.claude/projects/</code>.</p></div>`;
+  }
+  $("#verdict").innerHTML=v;
+  lastSummary=`Claude Code session check: ${stubs.length} of ${rows.length} sessions lost their content (empty metadata-only stub, user/assistant turns gone).\n`+
+    (stubs.length?`Fix that holds regardless of cause: mirror ~/.claude/projects/**/*.jsonl with a smaller-than-backup skip, and fully relaunch (not just upgrade) on the 2.1.168-2.1.170 window.\n`:`All sessions intact. Mirror backup is still the cheap insurance.\n`)+
+    `Checked in-browser, nothing uploaded: https://yurukusa.github.io/cc-safe-setup/claude-code-session-loss-checker.html`;
+  $("#results").classList.remove("hide");
+  $("#status").textContent=`Checked ${fmt(rows.length)} session file(s) — all in your browser.`;
+}
+async function handle(fileList){
+  const files=[...fileList].filter(f=>f.name.endsWith(".jsonl"));
+  if(!files.length){$("#err").textContent="No .jsonl files found. Pick the folder ~/.claude/projects/ or its .jsonl files.";return;}
+  $("#status").textContent=`Reading ${files.length} file(s)…`;
+  const texts=[];
+  for(const f of files){try{texts.push({name:f.name,body:await f.text()});}catch(e){}}
+  render(analyze(texts));
+}
+$("#pickFolder").onclick=()=>$("#fFolder").click();
+$("#pickFiles").onclick=()=>$("#fFiles").click();
+$("#fFolder").onchange=e=>handle(e.target.files);
+$("#fFiles").onchange=e=>handle(e.target.files);
+const drop=$("#drop");
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files)handle(e.dataTransfer.files);});
+$("#again").onclick=()=>{$("#results").classList.add("hide");$("#status").textContent="";$("#fFolder").value="";$("#fFiles").value="";};
+$("#copyCard").onclick=()=>{navigator.clipboard.writeText(lastSummary).then(()=>{$("#copyCard").textContent="Copied!";setTimeout(()=>$("#copyCard").textContent="Copy shareable summary",1500);});};
+</script>
+</body>
+</html>
