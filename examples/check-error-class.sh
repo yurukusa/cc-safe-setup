@@ -3,5 +3,5 @@
 # TRIGGER: PreToolUse  MATCHER: "Edit|Write"
 CONTENT=$(cat | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null)
 [ -z "$CONTENT" ] && exit 0
-echo "NOTE: Warn on throwing non-Error objects" >&2
+echo "$CONTENT" | grep -qE "throw +['\"]" && echo "NOTE: throwing a string literal — use throw new Error(...) to preserve the stack" >&2
 exit 0
