@@ -198,7 +198,7 @@
   {
     "url": "claude-code-hooks-testing-guide.html",
     "title": "How to Test Claude Code Hooks — Validation Guide — cc-safe-setup",
-    "description": "9,200+ tests for 734 hooks. How to validate your hooks work correctly before trusting them in production.",
+    "description": "213 test files for 734 hooks. How to validate your hooks work correctly before trusting them in production.",
     "keywords": "claude code hook testing, validate hooks, cc-safe-setup verify, pretooluse hook test, hook validation, cc-safe-setup",
     "snippet": "A hook that doesn't work is worse than no hook at all. It gives you false confidence that you're protected while dangerous commands slip through. Here's how to validate your hooks actually block what they should."
   },
@@ -436,7 +436,7 @@
   {
     "url": "hub.html",
     "title": "cc-safe-setup: Claude Code Safety Hub",
-    "description": "734 example hooks, 56 commands, 28 browser tools, 30K+ total installs. Make Claude Code safe for autonomous operation. Prevents rm -rf, database destruction, force-push, secret leaks, and more.",
+    "description": "734 example hooks, 56 commands, 28 browser tools, 30K+ npm downloads (cumulative). Make Claude Code safe for autonomous operation. Prevents rm -rf, database destruction, force-push, secret leaks, and more.",
     "keywords": "claude code, hooks, safety, autonomous, pretooluse, rm rf, git push, secrets, cc-safe-setup, database protection, production safety",
     "snippet": ""
   },
@@ -772,7 +772,7 @@
   {
     "url": "safety-audit.html",
     "title": "Claude Code Safety Audit — Professional Review of Your AI Development Setup",
-    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (700+ hooks, 9,200+ tests).",
+    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (700+ hooks, 213 test files).",
     "keywords": "claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant",
     "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
   },
