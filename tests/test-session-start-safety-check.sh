@@ -64,7 +64,7 @@ make_repo "$TMPROOT/autostash"
 output=$( cd "$TMPROOT/autostash" && bash "$HOOK" 2>&1 )
 rc=$?
 if [ "$rc" -eq 0 ] \
-   && printf '%s' "$output" | grep -q "crash/teleport auto-stashes" \
+   && printf '%s' "$output" | grep -q "harness auto-stashes" \
    && printf '%s' "$output" | grep -q "stash apply" \
    && printf '%s' "$output" | grep -q "66060"; then
     assert_pass "auto-stash → surfaced with recovery guidance"
@@ -110,6 +110,27 @@ if [ "$rc" -eq 0 ]; then
     assert_pass "dirty tree → still exit 0 (advisory, never blocks)"
 else
     assert_fail "expected exit 0, got rc=$rc"
+fi
+
+# --- Test: jq missing → loud fail-open warning, still exit 0 (advisory) ---
+# The jq check uses only shell builtins and runs before the git-repo gate, so a
+# bare PATH (no jq, no git) still reaches it; git's absence then trips the
+# `|| exit 0` gate. This proves the suite surfaces a missing jq instead of
+# letting the jq-based hooks silently fail open undetected.
+output=$( PATH="/nonexistent-bin-for-test" /bin/bash "$HOOK" 2>&1 )
+rc=$?
+if [ "$rc" -eq 0 ] && printf '%s' "$output" | grep -q "jq is not installed"; then
+    assert_pass "jq missing → fail-open warning surfaced, exit 0"
+else
+    assert_fail "jq missing: expected warning + exit 0, got rc=$rc output=[$output]"
+fi
+
+# --- Test: jq present (normal) → no jq warning ---
+output=$( cd "$TMPROOT/clean" && bash "$HOOK" 2>&1 )
+if printf '%s' "$output" | grep -q "jq is not installed"; then
+    assert_fail "jq present but jq warning printed (false positive)"
+else
+    assert_pass "jq present → no jq warning (no false positive)"
 fi
 
 echo ""
