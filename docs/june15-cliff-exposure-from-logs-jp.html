@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6月15日の課金の崖、自分は影響を受ける？ — 実機のログから判定（Claude Code・Pool 2）</title>
+<meta name="description" content="6月15日からプログラム経由のClaude Codeの利用（claude -p、Agent SDK、CI）が別の有料の枠（Pool 2）に分けられます。推定でなく、あなたの実機のセッションのログを読んで、対話とプログラムの比率を出します。ブラウザの中だけで完結、アップロードなし。">
+<meta property="og:title" content="6月15日の崖、自分は影響を受ける？ — 実機のログから判定">
+<meta property="og:description" content="「自分は影響を受けるか」を推定でなく実データで。~/.claude/projects のログを入れると、記録された起動の種類から、対話（Pool 1）とプログラム（Pool 2）の比率を出します。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"6月15日の崖の露出チェッカー（Claude Code）","description":"Claude Codeのセッションのログを読み、記録された起動の種類で対話（Pool 1）とプログラム（Pool 2）に振り分けて、6月15日の課金の変更への露出を実データで判定するブラウザ内のツール。","url":"https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.7}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.4rem;line-height:1.4}
+.sub{color:#8b949e;font-size:.86rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.2rem 0 .6rem}
+.priv{background:#0c2a17;border:1px solid #1c5132;border-radius:8px;padding:.7rem 1rem;font-size:.84rem;color:#7ee2a8;margin-bottom:1rem}
+.drop{background:#161b22;border:2px dashed #30363d;border-radius:10px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:all .15s}
+.drop:hover,.drop.over{border-color:#f97316;background:#1c2128}
+.drop p{color:#8b949e;font-size:.85rem;margin-top:.4rem}
+.btn{background:#f97316;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600}
+.btn:hover{background:#ea580c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#f97316;color:#f97316}
+.hide{display:none}
+.score{font-size:2.6rem;font-weight:700;text-align:center;margin:.3rem 0}
+.score.red{color:#f87171}.score.yellow{color:#fbbf24}.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.84rem;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin:.6rem 0}
+th,td{text-align:right;padding:.35rem .5rem;border-bottom:1px solid #21262d}
+th{color:#8b949e;font-weight:600}td:first-child,th:first-child{text-align:left;color:#e6edf3}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem;margin:1rem 0}
+.verdict{border-left:4px solid #f97316;padding-left:.9rem;margin:.8rem 0}
+.verdict.ok{border-color:#4ade80}
+.verdict.warn{border-color:#fbbf24}
+.verdict.hot{border-color:#f87171}
+.note{color:#8b949e;font-size:.8rem;margin:.6rem 0}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.84rem;margin-bottom:.4rem}
+.footer{text-align:center;color:#484f58;font-size:.72rem;margin-top:2rem}
+.err{color:#f87171;font-size:.84rem;margin:.5rem 0}
+.big{color:#f0f6fc;font-weight:700}
+code{background:#161b22;border:1px solid #21262d;border-radius:4px;padding:.05rem .3rem;font-size:.85em}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>6月15日の課金の崖、自分は影響を受ける？ — 実機のログから判定</h1>
+<p class="sub">2026年6月15日から、プログラム経由のClaude Codeの利用（<code>claude -p</code>、Agent SDK、CIやcronの中の呼び出し）が、月ごとの枠が決まった<b>別の有料の枠（Pool 2）</b>に分けられます。対話の <code>claude</code> のセッションは変わりません。多くの「自分は影響を受ける？」の道具は<em>推定</em>を求めます。これは、あなたのログに<b>実際に記録された起動の種類</b>を読んで、それで利用を振り分けます。（手早く、ログなしで知りたいなら、<a href="june-15-billing-cliff-exposure-jp.html">20秒の質問式の診断</a>をどうぞ。このページはその実データ版です。）</p>
+
+<div class="priv">🔒 すべてブラウザの中だけ。ログはあなたの端末でJavaScriptが読みます。<b>どこにもアップロードしません</b>。サーバーはありません。ネットワークを切っても動きます。</div>
+
+<h2>1. セッションのログを選ぶ</h2>
+<p class="note"><code>~/.claude/projects/</code> の中にあります（プロジェクトごとに <code>.jsonl</code> のファイルのフォルダ）。そのフォルダを選ぶか、<code>.jsonl</code> のファイルをここにドラッグしてください。</p>
+<div class="drop" id="drop">
+  <button class="btn" id="pickFolder" type="button">~/.claude/projects のフォルダを選ぶ</button>
+  <button class="btn btn-outline" id="pickFiles" type="button">…または .jsonl のファイルを選ぶ</button>
+  <p>または .jsonl のファイルをここにドラッグ＆ドロップ</p>
+  <input id="fFolder" type="file" webkitdirectory directory multiple class="hide">
+  <input id="fFiles" type="file" accept=".jsonl" multiple class="hide">
+</div>
+<div id="status" class="note"></div>
+<div id="err" class="err"></div>
+
+<div id="results" class="hide">
+  <h2>2. あなたのどれだけがプログラム経由か</h2>
+  <div class="card">
+    <div id="progScore" class="score"></div>
+    <div class="score-label">の<b>活動</b>が<b>プログラム経由</b>の起動でした（6月15日からPool 2に移る部分）</div>
+    <table id="splitTbl"><thead><tr><th>起動の種類（entrypoint）</th><th>6月15日からの枠</th><th>セッション</th><th>活動（応答数）</th></tr></thead><tbody></tbody></table>
+    <h3 style="color:#f0f6fc;font-size:.92rem;margin:.8rem 0 .3rem">重いプログラムのセッション（あれば）</h3>
+    <table id="progTbl"><thead><tr><th>セッション</th><th>起動</th><th>活動（応答数）</th><th>作業ディレクトリ</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <h2>3. あなたにとっての意味</h2>
+  <div id="verdict"></div>
+
+  <div class="note"><b>正直な限界 — 動く前に読んでください：</b>
+  <ul style="margin:.4rem 0 .2rem 1.1rem;font-size:.8rem">
+    <li>これは<b>記録された <code>entrypoint</code> で、セッションごと</b>に分類します。6月15日が実際に分ける単位です。<code>cli</code> は対話（Pool 1）。<code>sdk-cli</code> など <code>cli</code> でないものはプログラム経由（Pool 2）。</li>
+    <li><b>画面なしの <code>claude -p</code> は、版によっては <code>cli</code> で記録される</b>ことがあります。スクリプトやcronやCIの中でClaudeを動かしていて、それが下に出ていないなら、この表示はあなたのPool 2の露出を<em>過小に</em>見せています。表示よりも、自分の自動化の知識を信じてください。</li>
+    <li>「活動」は<b>応答のターンの数</b>です。正確なトークンや金額ではなく、量の代理です。少数の重いプログラムのセッションは、多数の小さいものより重要です。</li>
+    <li>対話のセッションの<em>中の</em>子エージェントや安全装置やMCPがどちらの枠に課金されるかは<b>予測しません</b>。Anthropicはその分け方を定義しておらず、断定する人は推測です。この道具は、実際に定義されている部分にとどめます。</li>
+  </ul></div>
+
+  <div class="actions">
+    <button class="btn" id="copyCard" type="button">共有用のまとめをコピー</button>
+    <button class="btn btn-outline" id="again" type="button">もう一度</button>
+  </div>
+</div>
+
+<div class="cta">
+  <h3>露出が分かったら、次は対応の経路を選ぶ</h3>
+  <p>もし利用のかなりの部分がプログラム経由なら、問いは<em>どの</em>経路が自分に合うか（対話への畳み込み／<code>claude -p</code>の最適化／APIへの移行／混在）になります。<a href="https://zenn.dev/yurukusa/books/june-15-cliff-survival?utm_source=cliff-exposure-tool-jp&utm_medium=tool&utm_campaign=june15">6月15日の課金分離に備える（¥800）</a>が、それぞれの費用と制限と手順、単一の指標 M、18日間の時系列まで通します。第1章と第2章は無料で試し読みできます。</p>
+  <p>消費そのものを減らすなら：<a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=cliff-exposure-tool-jp&utm_medium=tool&utm_campaign=june15">トークン消費を半分にする実践ガイド（¥2,500）</a>。</p>
+  <p>プログラムの費用の暴走を止める無料の安全装置：<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — <code>npx cc-safe-setup</code>。</p>
+</div>
+
+<p class="footer">すべてブラウザの中で動きます。データは端末から出ません。<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の一部です。</p>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let lastSummary="";
+function fmt(n){return n.toLocaleString();}
+function aggregate(texts){
+  const sess={}; let lines=0;
+  for(const t of texts){
+    const fileSid=(t.name||"").replace(/\.jsonl$/,"").slice(0,8)||"session";
+    for(const line of t.body.split("\n")){
+      if(!line.trim())continue; lines++;
+      let o; try{o=JSON.parse(line);}catch(e){continue;}
+      const sid=(o.sessionId||fileSid);
+      const s=sess[sid]||(sess[sid]={ep:null,msgs:0,cwd:""});
+      if(o.entrypoint && !s.ep) s.ep=o.entrypoint;
+      if(o.cwd && !s.cwd) s.cwd=o.cwd;
+      if(o.type==="assistant") s.msgs++;
+    }
+  }
+  return {sess,lines};
+}
+function isProg(ep){ return ep && ep!=="cli"; }
+function render(a){
+  const ids=Object.keys(a.sess).filter(id=>a.sess[id].ep);
+  if(ids.length===0){$("#err").textContent="分類できるセッションが見つかりませんでした。~/.claude/projects/ の中の .jsonl のファイルを選んでください。各セッションは読み取り対象の entrypoint を記録しています。";return;}
+  $("#err").textContent="";
+  const groups={}; let totMsgs=0, progMsgs=0, totSess=0;
+  for(const id of ids){
+    const s=a.sess[id]; const ep=s.ep;
+    const g=groups[ep]||(groups[ep]={sessions:0,msgs:0});
+    g.sessions++; g.msgs+=s.msgs; totSess++; totMsgs+=s.msgs;
+    if(isProg(ep)) progMsgs+=s.msgs;
+  }
+  const denom = totMsgs>0 ? totMsgs : totSess;
+  const num = totMsgs>0 ? progMsgs : ids.filter(id=>isProg(a.sess[id].ep)).length;
+  const pct = denom ? Math.round(num/denom*1000)/10 : 0;
+  const el=$("#progScore"); el.textContent=pct+"%";
+  el.className="score "+(pct>=40?"red":pct>=5?"yellow":"green");
+  const order=Object.keys(groups).sort((x,y)=>groups[y].msgs-groups[x].msgs);
+  $("#splitTbl tbody").innerHTML=order.map(ep=>{
+    const g=groups[ep]; const prog=isProg(ep);
+    const pool=prog?'<b style="color:#f87171">Pool 2（有料）</b>':'<span style="color:#4ade80">Pool 1（変わらない）</span>';
+    return `<tr><td>${ep}${prog?'':'（対話）'}</td><td style="text-align:left">${pool}</td><td>${fmt(g.sessions)}</td><td>${fmt(g.msgs)}</td></tr>`;
+  }).join("");
+  const prog=ids.filter(id=>isProg(a.sess[id].ep)).sort((x,y)=>a.sess[y].msgs-a.sess[x].msgs).slice(0,8);
+  $("#progTbl tbody").innerHTML = prog.length? prog.map(id=>{
+    const s=a.sess[id];
+    return `<tr><td>${id.slice(0,8)}</td><td>${s.ep}</td><td>${fmt(s.msgs)}</td><td style="text-align:left">${(s.cwd||"?").split("/").slice(-2).join("/")}</td></tr>`;
+  }).join("") : `<tr><td colspan="4" style="text-align:center;color:#4ade80">このログにプログラム経由のセッションはありませんでした。</td></tr>`;
+  let v="";
+  if(pct<5){
+    v=`<div class="verdict ok"><p><span class="big">あなたはほぼ対話だけ。6月15日の影響はごくわずかです。</span> プログラム経由の活動は ${pct}%。Pool 2 の枠（Pro 月$20 / Max 5x 月$100 / Max 20x 月$200）は、その水準なら十分です。<code>claude -p</code> をスクリプト化したりCIに組み込み始めたら、その時だけ気にすれば十分です。</p>
+    <p style="margin-top:.5rem">下の「正直な限界」も確認してください。もし下に出ない画面なしの実行があるなら、この緑は疑ってください。</p></div>`;
+  } else if(pct<40){
+    v=`<div class="verdict warn"><p><span class="big">あなたの一部は確かにプログラム経由です。</span> 活動の ${pct}% が <code>claude -p</code> やSDKの形の起動でした。6月15日から、その部分は対話の購読ではなく、別の Pool 2 の枠を使います。あふれるかどうかは量しだいです。そのプログラムの利用をAPI料金で見積もり（単一の指標 <b>M</b>）、自分のplanのPool 2の枠と比べて、対話に畳み込むかAPIに移すかを決めてください。</p></div>`;
+  } else {
+    v=`<div class="verdict hot"><p><span class="big">これは最も強く影響を受ける形です。</span> 活動の ${pct}% がプログラム経由 — 6月15日の分離が Pool 2 に切り分けるまさにその利用です。重い自動化なら、枠を使い切った後は同じ作業がフルのAPI料金で課金され、数倍の費用になりえます。15日より前に5分の棚卸しと対応の経路の選択をしておくことが、7月の請求を実際に変える場合です。</p></div>`;
+  }
+  $("#verdict").innerHTML=v;
+  lastSummary=`Claude Code — 私の6月15日の崖の露出（実機のログから）：\n`+
+    `分類した ${fmt(totSess)} セッションのうち、活動の ${pct}% がプログラム経由（6月15日からPool 2）。\n`+
+    order.map(ep=>`  ${ep}${isProg(ep)?' -> Pool 2':' -> Pool 1'}: ${fmt(groups[ep].sessions)} セッション, ${fmt(groups[ep].msgs)} 応答`).join("\n")+
+    `\nブラウザ内で判定: https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html`;
+  $("#results").classList.remove("hide");
+  $("#status").textContent=`${fmt(a.lines)} 行のログから ${fmt(totSess)} セッションを分類しました — すべてあなたのブラウザの中で。`;
+}
+async function handle(fileList){
+  const files=[...fileList].filter(f=>f.name.endsWith(".jsonl"));
+  if(!files.length){$("#err").textContent=".jsonl のファイルが見つかりませんでした。~/.claude/projects/ のフォルダか、その中の .jsonl を選んでください。";return;}
+  $("#status").textContent=`${files.length} 個のファイルを読み込み中…`;
+  const texts=[];
+  for(const f of files){try{texts.push({name:f.name,body:await f.text()});}catch(e){}}
+  render(aggregate(texts));
+}
+$("#pickFolder").onclick=()=>$("#fFolder").click();
+$("#pickFiles").onclick=()=>$("#fFiles").click();
+$("#fFolder").onchange=e=>handle(e.target.files);
+$("#fFiles").onchange=e=>handle(e.target.files);
+const drop=$("#drop");
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files)handle(e.dataTransfer.files);});
+$("#again").onclick=()=>{$("#results").classList.add("hide");$("#status").textContent="";$("#fFolder").value="";$("#fFiles").value="";};
+$("#copyCard").onclick=()=>{navigator.clipboard.writeText(lastSummary).then(()=>{$("#copyCard").textContent="コピーしました";setTimeout(()=>$("#copyCard").textContent="共有用のまとめをコピー",1500);});};
+</script>
+</body>
+</html>
