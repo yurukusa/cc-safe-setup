@@ -261,10 +261,32 @@ npx cc-safe-setup --audit  # Check your score
 npx cc-safe-setup --doctor # Diagnose issues
 ```
 
+## Undocumented settings (verified from the bundled binary)
+
+These `settings.json` keys are not in the official docs but are real and read at runtime. Defaults below were verified by inspecting the bundled `@anthropic-ai/claude-code` binary. Internal short names change between versions — rely on the **key name and default**, not on any internal symbol. Behaviour may change in future releases; re-verify before depending on them.
+
+| Key | Default | What it does | Why you might set it |
+|-----|---------|--------------|----------------------|
+| `switchModelsOnFlag` | `true` | When a safety classifier flags a message, the session auto-switches to a different (often larger/costlier) model to keep going. `false` makes the session **pause** instead. | Set `false` to keep your model and cost assumptions stable, and to notice flags instead of being silently moved to another model. |
+| `skillListingMaxDescChars` | `1536` | Per-skill `description` character cap in the skill listing sent to the model. Longer descriptions are **silently truncated** (from the end). | A skill that "won't auto-trigger" can be a truncated description. Put trigger words first, keep descriptions short, or raise this (costs more per-turn context). |
+| `skillListingBudgetFraction` | `0.01` (1%) | Fraction of the context window reserved for the whole skill listing. When the listing exceeds it, descriptions are shortened to fit. | Many skills ⇒ less room per skill ⇒ more truncation. Prune unused skills, or raise this (costs more per-turn context). |
+
+```json
+{
+  "switchModelsOnFlag": false,
+  "skillListingMaxDescChars": 4096,
+  "skillListingBudgetFraction": 0.03
+}
+```
+
+Raising the two skill-listing caps opts you into higher per-turn context cost (the listing is sent every turn). Prefer trimming descriptions and pruning skills first.
+
 ## Troubleshooting
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
+| Skill won't auto-trigger | `description` truncated past `skillListingMaxDescChars` (default 1536), or too many skills under the 1% listing budget | Put trigger words first, shorten descriptions, prune unused skills (see Undocumented settings above) |
+| Model changed mid-session | `switchModelsOnFlag` is `true` by default; a safety flag auto-switched the model | Set `"switchModelsOnFlag": false` to pause instead |
 | Hooks don't fire | Not registered in settings.json | `npx cc-safe-setup` |
 | Hooks don't block | Wrong exit code (not 2) | Check `echo $?` after test |
 | "jq: command not found" | jq not installed | `brew install jq` / `apt install jq` |
