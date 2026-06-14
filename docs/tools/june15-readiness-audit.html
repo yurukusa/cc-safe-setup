@@ -166,19 +166,19 @@ License: CC0 (public domain). Reuse and adapt freely.
 const GAPS = {
   q1: {
     high: { label: "High Pool 2 exposure", desc: "Frequent <code>claude -p</code> or SDK use means most cost moves to Pool 2 post-cliff. Migration Playbook Edition 2 Chapter 7 covers Pool 1/Pool 2 attribution and the daily measurement loop." },
-    mid: { label: "Moderate Pool 2 exposure", desc: "Occasional headless invocations. Worth checking your <code>history | grep -c 'claude -p'</code> count before the cliff." },
+    mid: { label: "Moderate Pool 2 exposure", desc: "Occasional headless invocations. Worth checking your <code>history | grep -c 'claude -p'</code> count now." },
   },
   q2: {
     high: { label: "Higher overage risk", desc: "Spend above $100/month exposes more dollars to the Pool 2 split. Use the <a href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html' target='_blank'>Pool 2 Estimator</a> to model the exact impact." },
     mid: { label: "Moderate spend exposure", desc: "Your monthly spend means the Pool 2 split is meaningful. Migration Playbook Edition 2 Chapter 4 (Path A vs A') walks through the stay-and-fortify decision." },
   },
   q3: {
-    high: { label: "No baseline = no measurement", desc: "Without a pre-cliff <code>/cost</code> snapshot, you cannot tell whether post-cliff billing matches the documented behavior. Run <code>claude /cost --json &gt; baseline-2026-06-14.json</code> before the cliff." },
-    mid: { label: "Plan to capture a baseline", desc: "Add a calendar reminder for 2026-06-14 to capture the <code>/cost --json</code> snapshot." },
+    high: { label: "No baseline = no measurement", desc: "Without a <code>/cost</code> baseline you cannot tell whether your billing matches the documented Pool 1/Pool 2 behavior. The cliff has fired, so capture a post-cliff reference now: <code>claude /cost --json &gt; cost-snapshot-2026-06-15.json</code>, then compare each week against it." },
+    mid: { label: "Capture a baseline now", desc: "Capture the <code>/cost --json</code> snapshot now as your post-cliff reference point, and re-snapshot weekly." },
   },
   q4: {
     high: { label: "No cost-guard hook", desc: "A PreToolUse cost-guard hook would have caught the €84.68 overage in Issue #61704. Migration Playbook Edition 2 Chapter 7 ships a tested cost-guard template." },
-    mid: { label: "Cost-guard hook not installed", desc: "Worth installing before the cliff. Examples in <code>cc-safe-setup</code> repo." },
+    mid: { label: "Cost-guard hook not installed", desc: "Worth installing now. Examples in <code>cc-safe-setup</code> repo." },
   },
   q5: {
     high: { label: "Heavy sub-agent dispatch", desc: "Sub-agents from headless parents may route to Pool 2. The dispatch pattern affects which credit bucket carries the load. Migration Playbook Edition 2 Chapter 4 (Path A') extends the safe-dispatch framework." },
@@ -198,7 +198,7 @@ const GAPS = {
   },
   q9: {
     high: { label: "No billing alert", desc: "Set a billing alert in your Anthropic account dashboard. Independent of in-app metrics." },
-    mid: { label: "Billing alert not configured", desc: "Takes 2 minutes to set up. Worth doing before the cliff." },
+    mid: { label: "Billing alert not configured", desc: "Takes 2 minutes to set up. Worth doing now." },
   },
   q10: {
     high: { label: "No refund template", desc: "If you encounter the €84.68/$80-style overage pattern post-cliff, a pre-written Issue body cuts your filing time from 30 minutes to 3 minutes. The free <a href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' target='_blank'>Wrong Charge Diagnostic</a> tool generates the template." },
