@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 15 Cliff Exposure — Read Your Own Logs (Claude Code Pool 2)</title>
+<meta name="description" content="The June 15 billing change moves programmatic Claude Code usage (claude -p, Agent SDK, CI) into a separate paid pool. Instead of guessing, this reads your real session logs in-browser and shows how much of your usage was actually programmatic vs interactive.">
+<meta property="og:title" content="June 15 Cliff Exposure — from your real Claude Code logs">
+<meta property="og:description" content="Stop estimating whether the June 15 split hits you. Drop your ~/.claude/projects logs and see, from the recorded entrypoint, how much of your usage was programmatic (Pool 2) vs interactive (Pool 1).">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"June 15 Cliff Exposure Checker for Claude Code","description":"In-browser classifier that reads Claude Code session logs and splits usage into interactive (Pool 1) and programmatic (Pool 2) by the recorded entrypoint, to estimate exposure to the June 15 billing change.","url":"https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.5}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.2rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.2rem 0 .6rem}
+.priv{background:#0c2a17;border:1px solid #1c5132;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:#7ee2a8;margin-bottom:1rem}
+.drop{background:#161b22;border:2px dashed #30363d;border-radius:10px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:all .15s}
+.drop:hover,.drop.over{border-color:#f97316;background:#1c2128}
+.drop p{color:#8b949e;font-size:.85rem;margin-top:.4rem}
+.btn{background:#f97316;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600}
+.btn:hover{background:#ea580c}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#c9d1d9}
+.btn-outline:hover{border-color:#f97316;color:#f97316}
+.hide{display:none}
+.score{font-size:2.6rem;font-weight:700;text-align:center;margin:.3rem 0}
+.score.red{color:#f87171}.score.yellow{color:#fbbf24}.score.green{color:#4ade80}
+.score-label{text-align:center;color:#8b949e;font-size:.82rem;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.6rem 0}
+th,td{text-align:right;padding:.35rem .5rem;border-bottom:1px solid #21262d}
+th{color:#8b949e;font-weight:600}td:first-child,th:first-child{text-align:left;color:#e6edf3}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.1rem;margin:1rem 0}
+.verdict{border-left:4px solid #f97316;padding-left:.9rem;margin:.8rem 0}
+.verdict.ok{border-color:#4ade80}
+.verdict.warn{border-color:#fbbf24}
+.verdict.hot{border-color:#f87171}
+.lever{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0;font-size:.83rem}
+.lever b{color:#f97316}
+.note{color:#8b949e;font-size:.78rem;margin:.6rem 0}
+.actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.cta{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:1rem;margin-top:1.5rem}
+.cta h3{color:#f0f6fc;font-size:.95rem;margin-bottom:.4rem}
+.cta p{color:#8b949e;font-size:.82rem;margin-bottom:.4rem}
+.footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:2rem}
+.err{color:#f87171;font-size:.82rem;margin:.5rem 0}
+.big{color:#f0f6fc;font-weight:700}
+code{background:#161b22;border:1px solid #21262d;border-radius:4px;padding:.05rem .3rem;font-size:.82em}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>June 15 Cliff Exposure — from your real logs</h1>
+<p class="sub">On 2026-06-15, programmatic Claude Code usage (<code>claude -p</code>, the Agent SDK, anything in CI/cron) moves into a <b>separate paid pool (Pool 2)</b> with a fixed monthly budget per plan. Interactive <code>claude</code> sessions are unchanged. Most "am I affected?" tools make you <em>estimate</em>. This one reads the <b>entrypoint your logs actually recorded</b> and splits your usage by it. (Want a 20-second version with no logs? Use the <a href="june-15-billing-cliff-exposure.html">questionnaire check</a> instead — this page is the precise, real-data companion.)</p>
+
+<div class="priv">🔒 100% in your browser. Your logs are parsed locally with JavaScript and <b>never uploaded</b> — there is no server. Disconnect from the network and it still works.</div>
+
+<h2>1. Pick your session logs</h2>
+<p class="note">They live in <code>~/.claude/projects/</code> (each project is a folder of <code>.jsonl</code> files). Select that folder, or drag in any <code>.jsonl</code> files.</p>
+<div class="drop" id="drop">
+  <button class="btn" id="pickFolder" type="button">Select ~/.claude/projects folder</button>
+  <button class="btn btn-outline" id="pickFiles" type="button">…or pick .jsonl files</button>
+  <p>or drag &amp; drop .jsonl files here</p>
+  <input id="fFolder" type="file" webkitdirectory directory multiple class="hide">
+  <input id="fFiles" type="file" accept=".jsonl" multiple class="hide">
+</div>
+<div id="status" class="note"></div>
+<div id="err" class="err"></div>
+
+<div id="results" class="hide">
+  <h2>2. How much of you is programmatic?</h2>
+  <div class="card">
+    <div id="progScore" class="score"></div>
+    <div class="score-label">of your recent <b>activity</b> ran as a <b>programmatic</b> invocation (the part that moves to Pool 2)</div>
+    <table id="splitTbl"><thead><tr><th>invocation (entrypoint)</th><th>pool from Jun 15</th><th>sessions</th><th>activity (msgs)</th></tr></thead><tbody></tbody></table>
+    <h3 style="color:#f0f6fc;font-size:.92rem;margin:.8rem 0 .3rem">Your heaviest programmatic sessions (if any)</h3>
+    <table id="progTbl"><thead><tr><th>session</th><th>entrypoint</th><th>activity (msgs)</th><th>working dir</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <h2>3. What this means for you</h2>
+  <div id="verdict"></div>
+
+  <div class="note"><b>Honest limits — read these before acting:</b>
+  <ul style="margin:.4rem 0 .2rem 1.1rem;font-size:.78rem">
+    <li>This classifies <b>whole sessions by their recorded <code>entrypoint</code></b> — the dimension June 15 actually splits on. <code>cli</code> = interactive (Pool 1). <code>sdk-cli</code> and anything non-<code>cli</code> = programmatic (Pool 2).</li>
+    <li><b>Headless <code>claude -p</code> may be recorded as <code>cli</code></b> in some versions. If you run Claude in scripts, cron, or CI and it isn't showing up below, this view <em>under</em>states your Pool 2 exposure — trust your own knowledge of your automation over this number.</li>
+    <li>"Activity" is the <b>count of assistant turns</b> — a volume proxy, not exact tokens or dollars. A few heavy programmatic sessions matter more than many tiny ones.</li>
+    <li>It does <b>not</b> predict how subagents, hooks, or MCP <em>inside</em> an interactive session are billed. Anthropic has not defined that split; anyone asserting it is guessing. This tool stays on the part that's actually defined.</li>
+  </ul></div>
+
+  <div class="actions">
+    <button class="btn" id="copyCard" type="button">Copy shareable summary</button>
+    <button class="btn btn-outline" id="again" type="button">Check again</button>
+  </div>
+</div>
+
+<div class="cta">
+  <h3>You know your exposure — now pick a response path</h3>
+  <p>If a real share of your usage is programmatic, the question becomes <em>which</em> of four paths fits you (fold into interactive / optimize <code>claude -p</code> / move to the API / mix). The <a href="https://zenn.dev/yurukusa/books/june-15-cliff-survival?utm_source=cliff-exposure-tool&utm_medium=tool&utm_campaign=june15">June 15 cliff survival guide (¥800, JP)</a> walks each path with its cost, limits, and steps, plus the single metric M and an 18-day timeline. The first two chapters are free.</p>
+  <p>To cut the underlying consumption itself: <a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=cliff-exposure-tool&utm_medium=tool&utm_campaign=june15">Token Book — JP (¥2,500)</a> · <a href="https://yurukusa.gumroad.com/l/azrdt">EN (name your price)</a>.</p>
+  <p>Free guardrails against runaway programmatic cost: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — <code>npx cc-safe-setup</code>.</p>
+</div>
+
+<p class="footer">Runs entirely client-side. No data leaves your machine. Part of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>.</p>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let lastSummary="";
+function fmt(n){return n.toLocaleString();}
+// Group log lines by sessionId; each session gets the entrypoint it recorded and a count of assistant turns.
+function aggregate(texts){
+  const sess={}; let lines=0;
+  for(const t of texts){
+    const fileSid=(t.name||"").replace(/\.jsonl$/,"").slice(0,8)||"session";
+    for(const line of t.body.split("\n")){
+      if(!line.trim())continue; lines++;
+      let o; try{o=JSON.parse(line);}catch(e){continue;}
+      const sid=(o.sessionId||fileSid);
+      const s=sess[sid]||(sess[sid]={ep:null,msgs:0,cwd:""});
+      if(o.entrypoint && !s.ep) s.ep=o.entrypoint;
+      if(o.cwd && !s.cwd) s.cwd=o.cwd;
+      if(o.type==="assistant") s.msgs++;
+    }
+  }
+  return {sess,lines};
+}
+function isProg(ep){ return ep && ep!=="cli"; }   // anything other than interactive cli is programmatic
+function render(a){
+  const ids=Object.keys(a.sess).filter(id=>a.sess[id].ep); // only sessions we could classify
+  if(ids.length===0){$("#err").textContent="No classifiable sessions found. Pick the .jsonl files inside ~/.claude/projects/ — each session records an 'entrypoint' the tool reads.";return;}
+  $("#err").textContent="";
+  const groups={}; let totMsgs=0, progMsgs=0, totSess=0;
+  for(const id of ids){
+    const s=a.sess[id]; const ep=s.ep;
+    const g=groups[ep]||(groups[ep]={sessions:0,msgs:0});
+    g.sessions++; g.msgs+=s.msgs; totSess++; totMsgs+=s.msgs;
+    if(isProg(ep)) progMsgs+=s.msgs;
+  }
+  // headline: programmatic share of activity (fall back to session share if no activity recorded)
+  const denom = totMsgs>0 ? totMsgs : totSess;
+  const num = totMsgs>0 ? progMsgs : ids.filter(id=>isProg(a.sess[id].ep)).length;
+  const pct = denom ? Math.round(num/denom*1000)/10 : 0;
+  const el=$("#progScore"); el.textContent=pct+"%";
+  el.className="score "+(pct>=40?"red":pct>=5?"yellow":"green");
+  // split table
+  const order=Object.keys(groups).sort((x,y)=>groups[y].msgs-groups[x].msgs);
+  $("#splitTbl tbody").innerHTML=order.map(ep=>{
+    const g=groups[ep]; const prog=isProg(ep);
+    const pool=prog?'<b style="color:#f87171">Pool 2 (paid)</b>':'<span style="color:#4ade80">Pool 1 (unchanged)</span>';
+    return `<tr><td>${ep}${prog?'':' (interactive)'}</td><td style="text-align:left">${pool}</td><td>${fmt(g.sessions)}</td><td>${fmt(g.msgs)}</td></tr>`;
+  }).join("");
+  // heaviest programmatic sessions
+  const prog=ids.filter(id=>isProg(a.sess[id].ep)).sort((x,y)=>a.sess[y].msgs-a.sess[x].msgs).slice(0,8);
+  $("#progTbl tbody").innerHTML = prog.length? prog.map(id=>{
+    const s=a.sess[id];
+    return `<tr><td>${id.slice(0,8)}</td><td>${s.ep}</td><td>${fmt(s.msgs)}</td><td style="text-align:left">${(s.cwd||"?").split("/").slice(-2).join("/")}</td></tr>`;
+  }).join("") : `<tr><td colspan="4" style="text-align:center;color:#4ade80">No programmatic sessions found in these logs.</td></tr>`;
+  // verdict
+  let v="";
+  if(pct<5){
+    v=`<div class="verdict ok"><p><span class="big">You're almost entirely interactive — June 15 barely touches you.</span> ${pct}% of your activity ran programmatically. The Pool 2 budget ($20 Pro / $100 Max 5x / $200 Max 20x per month) is plenty for that level. Keep an eye on it only if you start scripting <code>claude -p</code> or wiring it into CI.</p>
+    <p style="margin-top:.5rem">Re-check the honest limits below — if you <em>do</em> run headless jobs that aren't showing here, treat this green with suspicion.</p></div>`;
+  } else if(pct<40){
+    v=`<div class="verdict warn"><p><span class="big">A real slice of you is programmatic.</span> ${pct}% of your activity ran as <code>claude -p</code>/SDK-style invocations. From June 15 that slice draws on the separate Pool 2 budget, not your interactive subscription. Whether it overflows depends on volume: estimate that programmatic usage at API rates (your single metric <b>M</b>) against your plan's Pool 2 budget and decide if you need to fold it back into interactive or move it to the API.</p></div>`;
+  } else {
+    v=`<div class="verdict hot"><p><span class="big">This is the profile that gets hit hardest.</span> ${pct}% of your activity is programmatic — exactly the usage the June 15 split carves into Pool 2. If that's heavy automation, the same workload can cost several times more once the budget is exhausted and overage bills at full API rates. This is the case where doing the 5-minute audit and picking a response path <em>before</em> the 15th actually changes your July bill.</p></div>`;
+  }
+  $("#verdict").innerHTML=v;
+  lastSummary=`Claude Code — my June 15 cliff exposure (from real logs):\n`+
+    `${pct}% of my activity is programmatic (Pool 2 from Jun 15) across ${fmt(totSess)} classified sessions.\n`+
+    order.map(ep=>`  ${ep}${isProg(ep)?' -> Pool 2':' -> Pool 1'}: ${fmt(groups[ep].sessions)} sessions, ${fmt(groups[ep].msgs)} msgs`).join("\n")+
+    `\nChecked in-browser: https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs.html`;
+  $("#results").classList.remove("hide");
+  $("#status").textContent=`Classified ${fmt(totSess)} sessions from ${fmt(a.lines)} log lines — all in your browser.`;
+}
+async function handle(fileList){
+  const files=[...fileList].filter(f=>f.name.endsWith(".jsonl"));
+  if(!files.length){$("#err").textContent="No .jsonl files found. Pick the folder ~/.claude/projects/ or its .jsonl files.";return;}
+  $("#status").textContent=`Reading ${files.length} file(s)…`;
+  const texts=[];
+  for(const f of files){try{texts.push({name:f.name,body:await f.text()});}catch(e){}}
+  render(aggregate(texts));
+}
+$("#pickFolder").onclick=()=>$("#fFolder").click();
+$("#pickFiles").onclick=()=>$("#fFiles").click();
+$("#fFolder").onchange=e=>handle(e.target.files);
+$("#fFiles").onchange=e=>handle(e.target.files);
+const drop=$("#drop");
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files)handle(e.dataTransfer.files);});
+$("#again").onclick=()=>{$("#results").classList.add("hide");$("#status").textContent="";$("#fFolder").value="";$("#fFiles").value="";};
+$("#copyCard").onclick=()=>{navigator.clipboard.writeText(lastSummary).then(()=>{$("#copyCard").textContent="Copied!";setTimeout(()=>$("#copyCard").textContent="Copy shareable summary",1500);});};
+</script>
+</body>
+</html>
