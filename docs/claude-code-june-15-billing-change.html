@@ -7,7 +7,7 @@
 <meta name="description" content="On 2026-06-15 Anthropic moves programmatic Claude usage (Agent SDK, claude -p, Claude Code GitHub Actions, third-party agents) to a separate monthly credit pool billed at API rates. Interactive Claude Code is unchanged. Who's affected, the credit amounts, and the two actions to take.">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-june-15-billing-change.html">
 <meta property="og:title" content="Claude Code's June 15, 2026 billing change — who's affected and what to do">
-<meta property="og:description" content="Programmatic usage (Agent SDK, claude -p, GitHub Actions, third-party agents) splits to a separate credit pool at API rates. Interactive terminal use is unchanged. The two actions to take before June 15.">
+<meta property="og:description" content="Programmatic usage (Agent SDK, claude -p, GitHub Actions, third-party agents) splits to a separate credit pool at API rates. Interactive terminal use is unchanged. The two actions to take now.">
 <meta property="og:type" content="article">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--ink:#e6e9ef;--mut:#9aa3b2;--acc:#5b9cff;--ok:#7ee0c0;--line:#2a2f3a;--warn:#ffcf6b}
@@ -41,7 +41,7 @@
 <div class="wrap">
   <span class="tag">Announced 2026-05-13 · effective 2026-06-15 · verify against Anthropic's own email/docs</span>
   <h1>Claude Code's June 15, 2026 billing change</h1>
-  <p class="sub">Anthropic is moving <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. Here's who's affected and what to do before June 15.</p>
+  <p class="sub">Anthropic is moving <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. It takes effect today (2026-06-15) — here's who's affected and what to do now.</p>
 
   <div class="card">
     <strong>The one-sentence version:</strong> if you run Claude through the <strong>Agent SDK</strong>, <code>claude -p</code>, <strong>Claude Code GitHub Actions</strong>, or a <strong>third-party agent</strong>, that usage leaves your normal subscription limit on 2026-06-15 and starts drawing from a fixed monthly credit billed at <strong>full API rates, with no rollover</strong>. If you only use Claude Code interactively in your terminal (and claude.ai / Cowork), nothing changes.
@@ -69,7 +69,7 @@
       <tr><td>Enterprise — Premium seat</td><td>$200</td></tr>
     </tbody>
   </table>
-  <p class="note">Metered at full API list prices with no rollover. Because it's billed at API rates rather than the subscription's effective rate, heavy programmatic users can see the same workload cost noticeably more once it draws from this pool — which is why estimating your programmatic usage before June 15 matters. <span class="warn">Note:</span> on seat-based Enterprise plans, <strong>Standard seats can't claim the Agent SDK credit</strong>; only Premium seats can.</p>
+  <p class="note">Metered at full API list prices with no rollover. Because it's billed at API rates rather than the subscription's effective rate, heavy programmatic users can see the same workload cost noticeably more once it draws from this pool — which is why estimating your programmatic usage now matters. <span class="warn">Note:</span> on seat-based Enterprise plans, <strong>Standard seats can't claim the Agent SDK credit</strong>; only Premium seats can.</p>
 
   <h2>Are you affected?</h2>
   <div class="two">
@@ -86,9 +86,9 @@
   </ol>
   <p class="note">Tip: once you know your monthly programmatic token volume, price it at the <strong>full API list rates</strong> (Opus 4.5–4.8 input $5 / output $25 / cached read $0.50 per million; Sonnet 4.6 $3 / $15; Haiku 4.5 $1 / $5) to see whether it fits inside your plan's credit. Source: <a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener">Anthropic pricing</a>.</p>
 
-  <h2>What to do before June 15</h2>
+  <h2>What to do now</h2>
   <ol>
-    <li><strong>Claim your credit.</strong> Anthropic sends a claim email before June 15; claim the Agent SDK credit once through your Claude account. Watch for it and don't miss the window.</li>
+    <li><strong>Claim your credit.</strong> Anthropic sends a claim email for the Agent SDK credit; claim it once through your Claude account if you haven't yet. Watch for it and don't miss the window.</li>
     <li><strong>Decide on overflow.</strong> Choose whether to enable "usage credits" so that programmatic usage past the monthly credit <em>bills at API rates</em> instead of being rejected. Rejection is safer for budget; overflow is safer for uptime. Pick deliberately.</li>
     <li><strong>Estimate your programmatic usage now</strong> so the new credit isn't a surprise. If your <code>claude -p</code> / CI / Agent SDK workload already costs more than your plan's credit at API rates, plan to reduce it or budget the overflow.</li>
   </ol>
