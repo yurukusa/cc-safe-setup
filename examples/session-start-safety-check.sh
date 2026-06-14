@@ -25,6 +25,20 @@
 #   }
 # }
 
+# Verify jq is available BEFORE the git-repo gate, because this concern is not
+# git-specific. Almost every safety hook in this kit parses the tool input with
+# `jq`; when jq is missing, those hooks cannot see the command and most fall
+# through to "allow" (fail-open) — the suite is silently inert while still
+# appearing installed. Surface this loudly at session start so a missing
+# dependency never masquerades as protection. (Fail-open safety hooks: #67917.)
+# Uses only shell builtins, so it works even on a bare PATH.
+if ! command -v jq > /dev/null 2>&1; then
+    echo "⚠ WARNING: jq is not installed, but the safety hooks parse tool input with jq." >&2
+    echo "  Without jq, most blocking hooks fail OPEN (they allow the command instead of" >&2
+    echo "  blocking it), so your safety hooks are effectively inert until jq is installed." >&2
+    echo "  Install:  (Debian/Ubuntu) sudo apt-get install jq    (macOS) brew install jq" >&2
+fi
+
 # Only run in git repos
 git rev-parse --git-dir > /dev/null 2>&1 || exit 0
 
