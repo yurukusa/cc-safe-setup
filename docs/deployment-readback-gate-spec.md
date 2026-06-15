@@ -54,10 +54,10 @@ The **receipt schema is the stable contract** — not the hook. CI/audit tooling
 
 ## Implementation status
 
-- [ ] Generic Stop-hook decision function (pure: normalized receipt → decision). Unit-testable with mock receipts, no external API — covers all four branches (`allow`, `refuse-mismatch`, `refuse-query-failure`, stale-refuse).
-- [ ] `gh` deployments adapter (first provider).
-- [ ] Tests in `tests/` matching the repo's `test-*-receipt.sh` style.
-- [ ] settings.json install snippet (Stop hook).
+- [x] Generic Stop-hook decision function (pure: normalized receipt → decision). Shipped as [`examples/deployment-readback-gate.sh`](../examples/deployment-readback-gate.sh) — covers all four branches (`allow`, `refuse-mismatch`, `refuse-query-failure`, `refuse-stale`), fails closed on an unauditable receipt, anchors staleness to the claim, and writes the decided receipt outside the transcript.
+- [x] Tests — [`tests/test-deployment-readback-gate.sh`](../tests/test-deployment-readback-gate.sh), 10 cases (all branches + missing-field + unparseable-time + receipt-written), all passing.
+- [x] settings.json install snippet (Stop hook) — see the hook header.
+- [ ] `gh` deployments adapter (first provider) — emits the normalized receipt on stdout, piped into the gate.
 
 The generic decision function is the safe place to start because it is deterministic and provider-free; adapters can be added incrementally without changing it.
 
