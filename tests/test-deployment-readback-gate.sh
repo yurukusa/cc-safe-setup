@@ -17,6 +17,11 @@ run_test() {
   fi
 }
 
+# Not-applicable inputs must pass through (exit 0) — repo convention for hooks.
+run_test "not-applicable: empty JSON {} exits 0" 0 '{}'
+run_test "not-applicable: empty string exits 0" 0 ''
+run_test "not-applicable: unrelated tool input exits 0" 0 '{"tool_input":{"command":"ls"}}'
+
 # Fresh, matching, success -> allow (exit 0). readback 2s before claim, window 300s.
 run_test "allow: fresh + matching + success" 0 '{
   "claim_span":"deployment complete for api@abc123","claim_time":"2026-06-16T03:40:00.000Z",
