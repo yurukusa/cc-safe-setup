@@ -108,11 +108,21 @@ ASSISTANT_TEXT=""
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     # Read the last assistant message from JSONL transcript.
     # Iterate from the bottom up, take the first message with role=assistant.
+    #
+    # Parse PER LINE with `fromjson?` rather than slurping the whole window
+    # with `jq -rs`. A single transcript line carrying a raw control char
+    # (U+0000-U+001F, e.g. an unescaped newline from a large tool-output or
+    # heredoc block) makes a slurp fail outright ("control characters ... must
+    # be escaped"), which would empty ASSISTANT_TEXT and silently fail the gate
+    # open exactly when the transcript is large/messy. fromjson? drops only the
+    # unparseable line; -c keeps each assistant message as one JSON object so we
+    # can take the most-recent (first after tac) and still preserve multi-line
+    # text. See anthropics/claude-code#68665.
     ASSISTANT_TEXT=$(tac "$TRANSCRIPT_PATH" 2>/dev/null \
-        | jq -rs '
-            map(select(.message.role == "assistant" or .role == "assistant"))
-            | first
-            | (.message.content // .content // empty)
+        | jq -cR 'fromjson? | select(.message.role == "assistant" or .role == "assistant")' 2>/dev/null \
+        | head -n 1 \
+        | jq -r '
+            (.message.content // .content // empty)
             | if type == "array" then map(select(.type == "text") | .text) | join("\n") else . end
         ' 2>/dev/null \
         || true)

@@ -273,6 +273,31 @@ else
     assert_fail "expected CC_REFUSAL_GATE_DISABLE=1 mention in feedback"
 fi
 
+# --- Test 22: transcript with a raw control-char line still detects the refusal ---
+# Regression for the jq-slurp failure (anthropics/claude-code#68665): a single
+# transcript line carrying a raw U+0001 (e.g. a large tool-output block) used to
+# make `jq -rs` fail over the whole window, emptying ASSISTANT_TEXT and failing
+# the gate open. Per-line `fromjson?` parsing must skip the bad line and still
+# surface the most-recent assistant refusal from the transcript_path branch.
+TRANSCRIPT=$(mktemp)
+{
+    printf '%s\n' '{"message":{"role":"user","content":"please finalize config.json"}}'
+    # bad line: raw control char inside a JSON string (strictly invalid JSON)
+    printf '{"message":{"role":"assistant","content":[{"type":"text","text":"big tool dump \x01 raw"}]}}\n'
+    # most-recent assistant message: an explicit refusal
+    printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"I will not modify config.json — operator finalized it."}]}}'
+} > "$TRANSCRIPT"
+INPUT=$(jq -nc --arg tp "$TRANSCRIPT" \
+    '{tool_name:"Edit", tool_input:{file_path:"/repo/src/config.json"}, transcript_path:$tp}')
+output=$(printf '%s' "$INPUT" | bash "$HOOK" 2>&1)
+rc=$?
+if [ "$rc" -eq 2 ] && echo "$output" | grep -q "REFUSAL-SIDE ARREST"; then
+    assert_pass "control-char transcript line → gate still fires (no fail-open)"
+else
+    assert_fail "expected exit 2 despite control-char line, got rc=$rc output=$output"
+fi
+rm -f "$TRANSCRIPT"
+
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ] || exit 1
