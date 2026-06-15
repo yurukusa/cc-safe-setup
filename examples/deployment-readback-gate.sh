@@ -56,9 +56,16 @@ RECEIPT_DIR="${CC_READBACK_RECEIPT_DIR:-$HOME/.claude/state/deployments/readback
 
 INPUT=$(cat)
 
-# jq is required to parse the normalized receipt.
+# This gate only acts on a normalized readback receipt produced by an adapter.
+# Empty stdin, "{}", or unrelated input means no deployment claim is being
+# gated here — pass through. Hooks must not block on irrelevant input.
+if ! printf '%s' "$INPUT" | grep -qE '"(claimed_ref|authority|queried_state|claim_span)"'; then
+  exit 0
+fi
+
+# A receipt is present; jq is required to evaluate it.
 if ! command -v jq >/dev/null 2>&1; then
-  echo "deployment-readback-gate: jq not found; cannot audit claim — failing closed" >&2
+  echo "deployment-readback-gate: jq not found; cannot audit a present receipt — failing closed" >&2
   exit 2
 fi
 
