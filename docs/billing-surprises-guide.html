@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code billing surprises — why your subscription or credits drain unexpectedly</title>
-<meta name="description" content="The common reasons Claude Code consumes your API credits or quota unexpectedly — auth precedence, the June 15 Agent SDK credit split, cache inflation, parallel agents, trial-and-error loops — and how to check and fix each.">
+<meta name="description" content="The common reasons Claude Code consumes your API credits or quota unexpectedly — auth precedence, a second Anthropic CLI overwriting your shared credential file, the June 15 Agent SDK credit split, cache inflation, parallel agents, trial-and-error loops — and how to check and fix each.">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
@@ -51,7 +51,20 @@ echo $ANTHROPIC_AUTH_TOKEN</code></pre>
 </div>
 
 <div class="case">
-<h2>2. From June 15, 2026: Agent SDK and <code>claude -p</code> draw from a separate credit pool</h2>
+<h2>2. A second Anthropic CLI overwrote your shared credential file</h2>
+<span class="tag">silent — no API key set</span>
+<p>Claude Code reads credentials from a config directory it <strong>shares with other Anthropic command-line tools</strong> (<code>~/.config/anthropic/</code> on Linux/macOS). If you have ever run the standalone <code>ant</code> / Anthropic API CLI — or another tool that writes there — it can leave a Console/API-org config in that directory. On its next start Claude Code reads that file, authenticates as the API org, and bills every call to API credits / Extra Usage — even with an active subscription that is far from its limits and <em>with no <code>ANTHROPIC_API_KEY</code> set anywhere</em>. This is the case section 1's check misses. Re-running <code>/login</code> flips the on-screen banner but not the file on disk, so the drain continues. Users in <a href="https://github.com/anthropics/claude-code/issues/60901">#60901</a>, <a href="https://github.com/anthropics/claude-code/issues/60742">#60742</a>, and <a href="https://github.com/anthropics/claude-code/issues/62770">#62770</a> report it only stops after removing the file (in the most stubborn case, only after uninstalling the second CLI).</p>
+<h3>How to check</h3>
+<pre><code>ls -la ~/.config/anthropic/
+cat ~/.config/anthropic/active_config 2>/dev/null
+# look for a Console/API org id, or an api_key / org you did not set for Claude Code</code></pre>
+<p>The signature: <code>/status</code> shows <em>API Usage Billing</em> while you hold an active subscription, your 5-hour and weekly limits are nowhere near full, yet Extra Usage / API credits keep draining — and you have used another Anthropic CLI on this machine.</p>
+<h3>Fix</h3>
+<p>Remove the config the other tool wrote — users report deleting the offending entry under <code>~/.config/anthropic/</code> (e.g. <code>configs/default.json</code> or the <code>active_config</code> pointer) — then run <code>claude</code> and re-login so it re-establishes the subscription token. Confirm with <code>/status</code>. If you keep using both CLIs, the file can be rewritten again: re-login after using the other tool, or give each tool a separate config home. <strong>If you have no API key (section 1), a clean config (this section), and usage is <em>still</em> misrouted</strong> — that points to a server-side entitlement miss (<a href="https://github.com/anthropics/claude-code/issues/45572">#45572</a>, <a href="https://github.com/anthropics/claude-code/issues/61166">#61166</a>), which only Anthropic support can resolve.</p>
+</div>
+
+<div class="case">
+<h2>3. From June 15, 2026: Agent SDK and <code>claude -p</code> draw from a separate credit pool</h2>
 <span class="tag timely">timely — June 15</span>
 <p>Per the official docs: "Starting June 15, 2026, Agent SDK and <code>claude -p</code> usage on subscription plans will draw from a new monthly Agent SDK credit, separate from your interactive usage limits." If you run headless/scripted Claude Code (cron jobs, CI, <code>claude -p</code> pipelines, Agent SDK apps), that usage moves to a different pool on that date. A job that "just worked" against your interactive limit may start hitting a separate credit ceiling — or, if you've wired in an API key for automation, bill API credits instead.</p>
 <h3>How to check</h3>
@@ -61,7 +74,7 @@ echo $ANTHROPIC_AUTH_TOKEN</code></pre>
 </div>
 
 <div class="case">
-<h2>3. Cache creation inflated on a single large request</h2>
+<h2>4. Cache creation inflated on a single large request</h2>
 <span class="tag common">common</span>
 <p>A single turn that reads a very large file, a huge diff, or a long tool output can balloon <code>cache_creation</code> tokens far beyond what the visible work suggests. Because cache-creation tokens are billed, one oversized request can spike a session's cost with no obvious cause in the transcript.</p>
 <h3>How to check</h3>
@@ -71,7 +84,7 @@ echo $ANTHROPIC_AUTH_TOKEN</code></pre>
 </div>
 
 <div class="case">
-<h2>4. Parallel sub-agents or multi-tool workers re-create the cache per lane</h2>
+<h2>5. Parallel sub-agents or multi-tool workers re-create the cache per lane</h2>
 <span class="tag common">common</span>
 <p>When several sub-agents (or several vendors' workers) run in parallel against the same repo, each has its own context window and can re-create the prompt cache independently. The combined token cost is super-linear: a fan-out of N workers does not cost 1× — observed multipliers run 3–5×, and one reported run hit ~887K tokens/min.</p>
 <h3>How to check</h3>
@@ -81,7 +94,7 @@ echo $ANTHROPIC_AUTH_TOKEN</code></pre>
 </div>
 
 <div class="case">
-<h2>5. Trial-and-error loops burn quota without converging</h2>
+<h2>6. Trial-and-error loops burn quota without converging</h2>
 <span class="tag common">common</span>
 <p>Sometimes the model keeps editing-running-reverting on a problem it could have reasoned out first, consuming quota each cycle without resolving the issue. This isn't a billing bug — it's a workflow one — but it shows up as "my quota vanished and the bug is still there."</p>
 <h3>How to check</h3>
