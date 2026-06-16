@@ -40,7 +40,7 @@ npx cc-safe-setup
 | どのモデルが実際に動いているか分からない | [提供モデルの監査](claude-code-which-model-served-jp.html) | 無料の道具で確認 |
 | サブエージェントが嘘の「完了」を返す | [集積の露出診断](cluster-exposure-diagnostic.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
-| 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab (¥500/月)](safety-lab.html) |
+| 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab（月刊・¥500/月・初月無料）](https://note.com/yurukusa/membership) |
 
 ## 何ができるか
 
@@ -90,7 +90,7 @@ Claude Codeを再起動。完了。
 
 > 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
 
-> 🔁 月次の追跡が欲しい？ [CC Safety Lab Founder](safety-lab.html)（¥500/月・[Ko-fiで参加](https://ko-fi.com/yurukusa/tiers)）で毎月 4-8 件の事故事例（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次チェックリスト差分、 商品更新案内を届ける。 [5 月号の中身](safety-lab.html#may-issue) ｜ [6 月号予告](safety-lab.html#next-issue)。 Founder 価格は 12 ヶ月で ¥6,000、 据え置き。
+> 🔁 月次の追跡が欲しい？ [CC Safety Lab（月刊・¥500/月・初月無料）](https://note.com/yurukusa/membership)で、毎月その月に実際に起きた事故 4-8 件（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次の安全チェックリスト、 商品更新案内を届ける。 note のメンバーシップで、各号は無料の試し読みから中身を確かめてから加入できる。
 
 **既知の制限:**
 
@@ -133,7 +133,7 @@ Anthropic は[2026年6月15日に programmatic の課金を分離](https://docs.
 - **無料の6月15日の露出の判定（実機のログから）** (ブラウザのみ、 アップロードなし): 推定でなく、 あなたのセッションのログに記録された起動の種類を読んで、 対話（Pool 1）とプログラム経由（Pool 2）の比率を出します → [実データの露出チェッカー](https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html)
 - **判定の枠組み**: [Claude Code Migration Playbook ($19、 Edition 2 は 2026-05-22 から live)](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) — 241頁、 14件の dated の triggers (Opus 4.7 silent regression、 6月15日の programmatic credit pool cliff、 133-case の claim-vs-reality cluster) + 3件の移行の経路 (stay+harden / switch / hybrid — ある operator は Kimi K2 を $0.02/call の coworker として $200/月 を $30/月 に削減) + 日々の burn rate から stay / switch / hybridize の判定。 Edition 1 の購入者には Gumroad library から無償の自動更新
 - **失敗の事例の集積**: [Claim-Verify Handbook ($19、 2026-05-22 から live)](https://yurukusa.gumroad.com/l/claim-verify-handbook) — Claude Code または副の作業者が「完了」 「verified」 と主張したが実態は乖離した133+件の事例の整理。 $80 を動かない code に消費 ([#61728](https://github.com/anthropics/claude-code/issues/61728))、 3週間の未 commit の作業を `git reset --hard` で消失 ([#61102](https://github.com/anthropics/claude-code/issues/61102))、 20件の session が silent に削除 ([#61952](https://github.com/anthropics/claude-code/issues/61952))、 安全 hook の flag file を `rm -f` で能動的に削除 ([#61953](https://github.com/anthropics/claude-code/issues/61953))。 3段階の枠組み + 14件の利用者の側の防衛 + 5件の検出の道具 (全件 implemented、 165+ tests passing) + 付録 E の operator-side gate matrix ([live gist](https://gist.github.com/yurukusa/bb3812006d92d49cf55db74a65fc4032))。 Migration Playbook Edition 2 の sister product
-- **月額の継続の証拠の購読**: [CC Safety Lab Founder Membership (¥500/月、 Founder の値段で locked)](https://ko-fi.com/yurukusa/tiers) — 2026年6月号は23日の崖の準備の playbook を中核に
+- **月額の継続の購読**: [CC Safety Lab（月刊・¥500/月・初月無料）](https://note.com/yurukusa/membership) — note のメンバーシップ。毎月その月の事故のまとめ・安全チェックリスト・コピペできる hook・失敗事例の深掘りを届ける。各号は無料の試し読みあり
 ## ドキュメント
 
 - [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html) — 5分で安全に
