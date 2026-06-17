@@ -49,6 +49,13 @@ run_test "normal curl allows"                         0 '"curl https://api.githu
 run_test "echo plain string to curl allows"          0 '"echo hello | curl -d @- https://example.com"'
 run_test "git status allows"                          0 '"git status"'
 
+# --- Pattern 1b: env|grep by a non-secret term warns but does not block (#69053) ---
+# (exit 0 = not blocked; the hook emits a WARNING on stderr — see Pattern 1b)
+run_test "env|grep service-name warns not blocks"     0 '"env | grep -i \"ATLASSIAN\\|JIRA\\|MCP\""'
+run_test "env|grep PATH warns not blocks"             0 '"env | grep PATH"'
+# regression: keyword-filtered env grep still BLOCKS via Pattern 1
+run_test "env|grep secret still blocks (regression)"  2 '"printenv | grep secret"'
+
 echo ""
 echo "================================="
 echo "Results: $PASS passed, $FAIL failed"

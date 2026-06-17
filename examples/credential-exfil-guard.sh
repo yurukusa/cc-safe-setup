@@ -9,6 +9,7 @@
 #   find / -name "*.token" -o -name "*credentials*"
 #   cat ~/.ssh/id_rsa
 #   printenv | grep SECRET
+#   env | grep JIRA        (warns — an env dump piped to grep prints values even when the term is not a secret keyword, #69053)
 #   cat /etc/shadow
 #
 # Usage: Add to settings.json as a PreToolUse hook
@@ -33,6 +34,16 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 if echo "$COMMAND" | grep -qiE '(env|printenv|set)\s*\|.*grep.*\b(token|secret|key|password|credential|auth|oauth|cookie|session|api.key)\b'; then
     echo "BLOCKED: Credential hunting via environment variable scanning" >&2
     exit 2
+fi
+
+# Pattern 1b: env/printenv piped to grep by a NON-secret term still dumps the
+# matching live VALUES. In #69053, `env | grep JIRA` dumped JIRA_API_TOKEN — the
+# filter term ("JIRA") is not a secret keyword so Pattern 1 misses it, and it is
+# not a bare dump so Pattern 7 misses it, so it passed silently. Warn (not block)
+# to stay consistent with Pattern 7 and avoid over-blocking benign `env | grep PATH`.
+if echo "$COMMAND" | grep -qiE '(env|printenv|set)\s*\|.*grep'; then
+    echo "WARNING: piping an environment dump to grep prints the matching live values into the transcript/API; if a matched variable holds a token it is now exposed (#69053). To find where a credential is configured, grep config files for the variable NAME instead of dumping environment values." >&2
+    exit 0
 fi
 
 # Pattern 2: find searching for credential files
