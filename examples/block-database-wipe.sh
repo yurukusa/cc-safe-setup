@@ -2,15 +2,16 @@
 # block-database-wipe.sh — Block destructive database commands
 #
 # Prevents accidental database destruction from commands like:
-#   - Laravel: migrate:fresh, migrate:reset, db:wipe
-#   - Django: flush, sqlflush
-#   - Rails: db:drop, db:reset
+#   - Laravel: migrate:fresh, migrate:refresh, migrate:reset, db:wipe
+#   - Django: flush, sqlflush, migrate <app> zero
+#   - Rails: db:drop, db:reset, db:schema:load
 #   - Raw SQL: DROP DATABASE, TRUNCATE
 #   - Symfony/Doctrine: fixtures:load (without --append), schema:drop, database:drop
 #   - Prisma: migrate reset, db push --force-reset
+#   - TypeORM/Sequelize: schema:drop, db:drop
 #   - PostgreSQL: dropdb
 #
-# Born from GitHub Issues #37405, #37439, #34729, #37574
+# Born from GitHub Issues #37405, #37439, #34729, #37574, #69059
 #
 # Usage: Add to settings.json as a PreToolUse hook
 #
@@ -31,7 +32,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [[ -z "$COMMAND" ]] && exit 0
 
 # Laravel destructive commands
-if echo "$COMMAND" | grep -qiE 'artisan\s+(migrate:fresh|migrate:reset|db:wipe|db:seed\s+--force)'; then
+if echo "$COMMAND" | grep -qiE 'artisan\s+(migrate:fresh|migrate:refresh|migrate:reset|db:wipe|db:seed\s+--force)'; then
     echo "BLOCKED: Destructive Laravel database command" >&2
     echo "Command: $COMMAND" >&2
     exit 2
@@ -46,14 +47,16 @@ if echo "$COMMAND" | grep -qE 'artisan.*--env='; then
     fi
 fi
 
-# Django destructive commands
-if echo "$COMMAND" | grep -qiE 'manage\.py\s+(flush|sqlflush)'; then
+# Django destructive commands (flush wipes data; "migrate <app> zero" unapplies all
+# migrations for an app, dropping its tables)
+if echo "$COMMAND" | grep -qiE 'manage\.py\s+(flush|sqlflush)' \
+   || echo "$COMMAND" | grep -qiE 'manage\.py\s+migrate\s+\w+\s+zero'; then
     echo "BLOCKED: Destructive Django database command" >&2
     exit 2
 fi
 
-# Rails destructive commands
-if echo "$COMMAND" | grep -qiE 'rake\s+db:(drop|reset)|rails\s+db:(drop|reset)'; then
+# Rails destructive commands (db:schema:load drops and recreates every table from schema.rb)
+if echo "$COMMAND" | grep -qiE '(rake|rails)\s+db:(drop|reset|schema:load)'; then
     echo "BLOCKED: Destructive Rails database command" >&2
     exit 2
 fi
@@ -73,6 +76,13 @@ fi
 # Prisma destructive commands
 if echo "$COMMAND" | grep -qiE 'prisma\s+migrate\s+reset|prisma\s+db\s+push\s+--force-reset'; then
     echo "BLOCKED: Destructive Prisma database command" >&2
+    exit 2
+fi
+
+# TypeORM / Sequelize destructive commands
+# typeorm "schema:drop" drops the whole schema; sequelize(-cli) "db:drop" drops the database
+if echo "$COMMAND" | grep -qiE 'typeorm\s+schema:drop|sequelize(-cli)?\s+db:drop'; then
+    echo "BLOCKED: Destructive TypeORM/Sequelize database command" >&2
     exit 2
 fi
 
