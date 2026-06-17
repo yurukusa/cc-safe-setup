@@ -143,12 +143,16 @@ hr.section-break { border: none; border-top: 1px dashed #d1d5db; margin: 3rem 0;
 <!-- ============== ENGLISH ============== -->
 <p class="lang-switch"><a href="#">🌐 日本語版へ戻る</a></p>
 
-<h1>CC Safety Lab — a monthly Japanese-language digest of Claude Code incidents and safe-operation practices</h1>
+<h1>CC Safety Lab — a monthly digest of Claude Code incidents and safe-operation practices</h1>
 <p class="subtitle">Files deleted. Token spend ballooning 20x. A subagent reporting "done" with zero tool calls logged — real incidents from 800+ hours of running Claude Code autonomously. Every version and quota change spawns new failure modes, and hundreds of GitHub Issues a month are impossible to track. Each month I distill that month's incidents, fixes, and prevention hooks into one report.</p>
 
-<p style="font-size:0.95rem;color:#374151;"><strong>Note:</strong> the monthly membership (CC Safety Lab, ¥500/month, first month free) is written in <strong>Japanese</strong> and delivered via <a href="https://note.com/yurukusa/membership">note</a>. If you read Japanese, you can preview the lead chapter of each issue for free from the links in the Japanese section above.</p>
+<p style="font-size:0.95rem;color:#374151;">There are now <strong>two monthly memberships</strong>, both built from the same monthly incident research:</p>
+<ul class="may-issue" style="list-style:none;">
+<li><strong><a href="https://yurukusa.gumroad.com/l/xatlwf" style="color:#166534;">Claude Code Safety Brief — English ($5/month)</a></strong> — each month: the Claude Code failures that actually landed on the issue tracker, with user-side detection, recovery, and prevention for each (verified on a real setup), plus new and updated MIT hooks. Cancel anytime.</li>
+<li><strong><a href="https://note.com/yurukusa/membership" style="color:#166534;">CC Safety Lab — Japanese (¥500/month)</a></strong> — the original, in Japanese, on note. First month free; free lead-chapter previews from the Japanese section above.</li>
+</ul>
 
-<p style="font-size:0.95rem;color:#374151;">For English readers, the same body of work is available as free tools and one-time books:</p>
+<p style="font-size:0.95rem;color:#374151;">Prefer free tools or a one-time book? The same body of work is also available as:</p>
 <ul class="may-issue" style="list-style:none;">
 <li><strong><a href="https://github.com/yurukusa/cc-safe-setup" style="color:#166534;">cc-safe-setup</a> (MIT, free)</strong> — <code>npx cc-safe-setup</code> installs 8 safety hooks (blocks <code>rm -rf</code>, prevents pushes to main, catches secret leaks, validates syntax after each edit). Browser demos and incident trackers included.</li>
 <li><strong><a href="https://yurukusa.gumroad.com/l/iglmx" style="color:#166534;">Autonomous Claude Ops (~$6)</a></strong> — the honest failure-data wedge from 800+ hours of autonomous operation, including the exact data-loss and cost failure modes.</li>
