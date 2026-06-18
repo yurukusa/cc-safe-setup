@@ -148,6 +148,21 @@ RC=$?
 assert_exit "Clear-Disk blocked" "$RC" 2
 assert_contains "Clear-Disk disk-level detected" "$OUT" "disk_level_destructive"
 
+# Test 18: PowerShell tool destructive command → blocked (#69397 regression).
+# The PowerShell tool is separate from Bash; a Bash-only gate let this through.
+INPUT=$(jq -n '{tool_name: "PowerShell", tool_input: {command: "Remove-Item -Recurse -Force C:\\Users\\me\\project"}}')
+OUT=$(printf '%s' "$INPUT" | bash "$HOOK" 2>&1)
+RC=$?
+assert_exit "PowerShell-tool Remove-Item -Recurse -Force blocked (#69397)" "$RC" 2
+assert_contains "PowerShell-tool destructive detected" "$OUT" "remove_item_recurse_force"
+
+# Test 19: PowerShell tool benign command → not blocked
+INPUT=$(jq -n '{tool_name: "PowerShell", tool_input: {command: "Get-ChildItem"}}')
+OUT=$(printf '%s' "$INPUT" | bash "$HOOK" 2>&1)
+RC=$?
+assert_exit "PowerShell-tool benign command not blocked" "$RC" 0
+assert_not_contains "PowerShell-tool benign no warning" "$OUT" "BLOCKED"
+
 # Summary
 echo
 echo "=== windows-destructive-command-guard tests: ${PASS} passed, ${FAIL} failed ==="
