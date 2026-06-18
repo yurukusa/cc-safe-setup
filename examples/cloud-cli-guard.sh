@@ -16,13 +16,20 @@
 #   az storage account delete
 #   az sql db delete
 #   az group delete
+#   az ad group delete   (the irreversible deletion in #69397)
 #
 # Does NOT block:
 #   gcloud compute instances list/describe
 #   az vm list/show
 #   gcloud/az read-only operations
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
+#   On Windows, az/gcloud commonly run through the PowerShell tool,
+#   which is separate from Bash in Claude Code. A Bash-only matcher
+#   never fires on the PowerShell tool, so the irreversible
+#   `az ad group delete` in #69397 ran with no permission prompt.
+#   Register with matcher "Bash|PowerShell"; both tools populate
+#   tool_input.command.
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

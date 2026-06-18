@@ -679,7 +679,18 @@ Or browse all available examples in [`examples/`](examples/):
 
 ## Windows Support
 
-Works on Windows via WSL or Git Bash. Native PowerShell is not supported (hooks are bash scripts).
+Works on Windows via WSL or Git Bash. The hooks are bash scripts, so a host with no bash at all (PowerShell-only, no Git Bash) cannot run them.
+
+**The PowerShell tool is separate from the Bash tool.** Claude Code ships two distinct shell tools — `Bash` and [`PowerShell`](https://code.claude.com/docs/en/tools) — and on Windows it often runs commands through the PowerShell tool. A hook registered with `matcher: "Bash"` **never fires** on a PowerShell-tool command. That blind spot let a destructive `az ad group delete` run with no permission prompt in [#69397](https://github.com/anthropics/claude-code/issues/69397). If you run on Windows with Git Bash (so bash is available to execute the hook) and want the destructive guards to cover the PowerShell tool, register the shell-command guards with `matcher: "Bash|PowerShell"`:
+
+```json
+{
+  "matcher": "Bash|PowerShell",
+  "hooks": [{ "type": "command", "command": "bash ~/.claude/hooks/windows-destructive-command-guard.sh" }]
+}
+```
+
+The `windows-destructive-command-guard.sh`, `powershell-remove-item-guard.sh`, and `cloud-cli-guard.sh` examples all read `tool_input.command`, which both tools populate, so they work unchanged once the matcher includes `PowerShell`.
 
 **Common issue:** If you see `Permission denied` or `No such file` errors after install, run:
 

@@ -18,11 +18,19 @@
 #
 #   The cc-safe-setup hook collection has rm-rf coverage on the
 #   POSIX side but no equivalent for the Windows command surface.
-#   This hook closes that gap: it inspects Bash-tool commands for
+#   This hook closes that gap: it inspects shell-tool commands for
 #   Windows-side destructive command shapes and blocks the chain
 #   before the dangerous step executes.
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
+#
+#   IMPORTANT: Claude Code's PowerShell tool is a SEPARATE tool from
+#   Bash (see https://code.claude.com/docs/en/tools). A hook matched
+#   only on "Bash" never fires when Claude runs a command through the
+#   native PowerShell tool — which is exactly how the destructive
+#   command slipped past with no permission prompt in #69397. This
+#   guard therefore accepts both tool names; register it with
+#   matcher "Bash|PowerShell" so it covers the PowerShell tool too.
 #
 # CONFIG:
 #   WINDOWS_DESTRUCTIVE_BLOCK=1   (1 = block, 0 = warn-only)
@@ -30,6 +38,9 @@
 # Born from: https://github.com/anthropics/claude-code/issues/56603
 #   (May 6 2026 — Opus 4.7 cmd /c rd /s /q catastrophic data loss
 #    via PowerShell quoting interaction on Unicode/space path)
+#   and https://github.com/anthropics/claude-code/issues/69397
+#   (Jun 2026 — destructive command via the PowerShell tool ran with
+#    no permission prompt; Bash-only guards/matchers do not fire)
 # ================================================================
 
 set -euo pipefail
@@ -39,11 +50,17 @@ BLOCK_MODE="${WINDOWS_DESTRUCTIVE_BLOCK:-1}"
 # Read JSON input from stdin
 INPUT=$(cat)
 
-# Only act when the tool is Bash
+# Act on either shell tool. The PowerShell tool is separate from Bash
+# in Claude Code; the #56603 incident command ran through the PowerShell
+# tool, and #69397 showed a Bash-only gate lets PowerShell-tool commands
+# through. Both tools carry the command string in tool_input.command.
 TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-[ "$TOOL_NAME" = "Bash" ] || exit 0
+case "$TOOL_NAME" in
+  Bash|PowerShell) ;;
+  *) exit 0 ;;
+esac
 
-# Extract the Bash command
+# Extract the command
 CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$CMD" ] && exit 0
 

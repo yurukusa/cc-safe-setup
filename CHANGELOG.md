@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+- **Fix: PowerShell-tool blind spot in the Windows destructive guards (#69397)** —
+  Claude Code's `PowerShell` tool is a separate tool from `Bash`, and a hook matched
+  only on `"Bash"` never fires on a PowerShell-tool command. That blind spot let a
+  destructive `az ad group delete` run with no permission prompt. The
+  `windows-destructive-command-guard.sh` previously hard-exited unless
+  `tool_name == "Bash"`; it now accepts `Bash` or `PowerShell` so it inspects
+  PowerShell-tool commands too. `powershell-remove-item-guard.sh` and
+  `cloud-cli-guard.sh` headers now declare `MATCHER: "Bash|PowerShell"` (their logic
+  already reads `tool_input.command`, which both tools populate). README "Windows
+  Support" documents the separate-tool caveat and the `"Bash|PowerShell"` matcher.
+
 ## [30.0.1] - 2026-05-28 → 2026-06-05
 Post-launch safety-hook expansion. The example-hook catalog grew from 707 to
 824+, driven by a sustained "issue → tested hook" workflow against the highest-

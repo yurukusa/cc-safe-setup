@@ -5,7 +5,7 @@
 #         permanently deleting user profile folders and source code (#29249).
 #         Also prevents wholesale C: drive deletion via PowerShell (#41708).
 #
-# How it works: Intercepts Bash commands containing PowerShell Remove-Item patterns.
+# How it works: Intercepts shell-tool commands containing PowerShell Remove-Item patterns.
 #   Hard-blocks when -Recurse targets system directories, user profiles, or paths
 #   that could traverse NTFS junctions (node_modules, .pnpm). For -Recurse -Force on
 #   any other absolute drive/UNC path it asks for confirmation instead of blocking —
@@ -13,7 +13,12 @@
 #   -Force bypassed the Recycle Bin and no confirmation was requested.
 #
 # TRIGGER: PreToolUse
-# MATCHER: "Bash"
+# MATCHER: "Bash|PowerShell"
+#   Claude Code's PowerShell tool is separate from Bash. Register with
+#   matcher "Bash|PowerShell" so Remove-Item run through the native
+#   PowerShell tool is inspected too — a Bash-only matcher never fires
+#   on the PowerShell tool (#69397). The command is read from
+#   tool_input.command, which both tools populate.
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
