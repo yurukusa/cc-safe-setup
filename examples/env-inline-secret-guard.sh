@@ -10,7 +10,7 @@
 #   If found, blocks with exit 2 and suggests environment variable usage.
 #
 # TRIGGER: PreToolUse
-# MATCHER: "Bash"
+# MATCHER: "Bash|PowerShell"
 
 set -euo pipefail
 

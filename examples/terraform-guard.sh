@@ -4,7 +4,7 @@
 # which is the same teardown as `destroy` (a Terraform destroy has wiped a
 # production database in the wild — DataTalks, and the class in
 # anthropics/claude-code#27063).
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 if echo "$COMMAND" | grep -qE '\b(terraform|tofu)\s+destroy\b'; then

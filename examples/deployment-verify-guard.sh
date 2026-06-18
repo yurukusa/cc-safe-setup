@@ -16,7 +16,7 @@
 #
 # See: https://github.com/anthropics/claude-code/issues/40861
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 #
 # Configuration:
 #   CC_DEPLOY_COMMANDS — regex pattern for deploy commands

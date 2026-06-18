@@ -11,7 +11,7 @@
 #   - docker system prune --force (removes all unused data)
 #
 # TRIGGER: PreToolUse
-# MATCHER: "Bash"
+# MATCHER: "Bash|PowerShell"
 # ================================================================
 
 INPUT=$(cat)

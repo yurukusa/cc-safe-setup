@@ -10,7 +10,7 @@
 # The gh CLI is powerful but destructive operations should require
 # explicit human approval, not AI autonomy.
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

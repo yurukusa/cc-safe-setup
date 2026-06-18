@@ -1,5 +1,5 @@
 #!/bin/bash
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 #
 # sql-bulk-delete-warn: warn when a SQL DELETE/UPDATE statement is about to
 # run via psql / mysql / sqlite3 / sqlcmd without a row-count safeguard.
