@@ -12,7 +12,7 @@
 #   CC_K8S_PROD_NAMESPACES="production:prod:default" (colon-separated)
 #
 # TRIGGER: PreToolUse
-# MATCHER: "Bash"
+# MATCHER: "Bash|PowerShell"
 
 set -euo pipefail
 

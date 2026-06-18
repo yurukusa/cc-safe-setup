@@ -1,6 +1,6 @@
 #!/bin/bash
 # no-deploy-friday.sh — Block deploys on Fridays
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 # "Don't deploy on Friday" — every ops team ever
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0

@@ -12,13 +12,13 @@
 # {
 #   "hooks": {
 #     "PreToolUse": [{
-#       "matcher": "Bash",
+#       "matcher": "Bash|PowerShell",
 #       "hooks": [{ "type": "command", "command": "~/.claude/hooks/deploy-guard.sh" }]
 #     }]
 #   }
 # }
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

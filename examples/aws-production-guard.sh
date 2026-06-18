@@ -6,7 +6,7 @@
 #           aws rds delete-db-instance, aws cloudformation delete-stack
 #
 # TRIGGER: PreToolUse
-# MATCHER: "Bash"
+# MATCHER: "Bash|PowerShell"
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

@@ -1,6 +1,6 @@
 #!/bin/bash
 # aws-region-guard.sh — Warn when AWS commands target unexpected regions
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 echo "$COMMAND" | grep -qE '^\s*aws\s' || exit 0

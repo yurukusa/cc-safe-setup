@@ -1,6 +1,6 @@
 #!/bin/bash
 # kubernetes-guard.sh — Block destructive kubectl commands
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 COMMAND=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 if echo "$COMMAND" | grep -qE '\bkubectl\s+delete\s+(namespace|ns|node)\b'; then
