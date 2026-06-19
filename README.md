@@ -16,6 +16,10 @@ Installs 8 safety hooks in ~10 seconds. Blocks `rm -rf /`, prevents pushes to ma
 
 > **What's a hook?** A checkpoint that runs before Claude executes a command. Like airport security, it inspects what's about to happen and blocks anything dangerous before it reaches the gate.
 
+![5 real, public Claude Code incidents and the one-line guard that stops each — rm -rf, migrate:fresh, submodule deinit, the silent billing leak, and the Windows Bash-vs-PowerShell blind spot](docs/cc-accidents-at-a-glance.png)
+
+*Five real, public incidents — each with the one line that stops it. All verified firsthand against the issue tracker; `npx cc-safe-setup` ships the guards.*
+
 **What problem are you solving today?** — routing informed by the 6 readers who actually bought the books on the right column
 
 | Your situation | Start here (free) | Go deeper (¥800-$19) |
