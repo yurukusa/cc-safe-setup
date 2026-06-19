@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fabrication / False-Completion Self-Audit — Does your Claude Code setup catch a fabricated "done"?</title>
+<meta name="description" content="8 questions, 3 minutes. Score how well your Claude Code setup defends against fabricated tool results and false 'task complete' / 'tests passed' claims, with a concrete operator-side fix for each gap.">
+<meta property="og:title" content="Fabrication / False-Completion Self-Audit — Claude Code">
+<meta property="og:description" content="8 questions → a 0-100 score for your defenses against fabricated 'done' / 'tests passed' claims, with the operator-side hook pattern that closes each gap.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/fabrication-false-completion-self-audit.html">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.55; }
+.c { max-width: 760px; margin: 0 auto; }
+header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #21262d; }
+h1 { color: #f0f6fc; font-size: 1.5rem; margin-bottom: 0.5rem; }
+.sub { color: #8b949e; font-size: 0.9rem; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.step { display: none; animation: fadeIn 0.25s ease; }
+.step.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.progress { background: #21262d; height: 4px; border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+.progress-bar { background: #58a6ff; height: 100%; transition: width 0.3s ease; width: 0%; }
+.q { color: #f0f6fc; font-size: 1.1rem; margin-bottom: 0.4rem; font-weight: 600; }
+.q-hint { color: #8b949e; font-size: 0.85rem; margin-bottom: 1rem; }
+.q-hint code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.82rem; }
+.opt { display: block; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; color: #c9d1d9; }
+.opt:hover { background: #1c2128; border-color: #58a6ff; }
+.opt.selected { background: #1f6feb22; border-color: #58a6ff; color: #f0f6fc; }
+.actions { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.6rem 1.4rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+button:hover:not(:disabled) { background: #30363d; }
+button.primary { background: #238636; border-color: #2ea043; color: white; }
+button.primary:hover:not(:disabled) { background: #2ea043; }
+.result { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.2rem; margin-top: 1rem; }
+.score-big { font-size: 2.6rem; font-weight: 700; color: #f0f6fc; }
+.score-band { font-size: 0.95rem; margin: 0.3rem 0 0.8rem; }
+.score-band.weak { color: #f85149; }
+.score-band.mid { color: #d29922; }
+.score-band.strong { color: #3fb950; }
+.gap-card { background: #0d1117; border: 1px solid #30363d; border-left: 3px solid #f85149; border-radius: 6px; padding: 0.9rem 1.1rem; margin: 0.8rem 0; }
+.gap-card.partial { border-left-color: #d29922; }
+.gap-name { color: #f0f6fc; font-weight: 600; font-size: 1rem; margin-bottom: 0.3rem; }
+.gap-evidence { color: #8b949e; font-size: 0.82rem; margin-bottom: 0.5rem; }
+.gap-fix { color: #c9d1d9; font-size: 0.9rem; }
+.gap-fix code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+.cta { background: #1f6feb22; border: 1px solid #58a6ff; border-radius: 8px; padding: 1rem; margin-top: 1.2rem; }
+.cta-title { color: #f0f6fc; font-weight: 600; margin-bottom: 0.5rem; }
+.cta p { font-size: 0.9rem; margin-bottom: 0.5rem; }
+.empty-msg { color: #3fb950; padding: 0.8rem 0; font-size: 0.95rem; }
+.intro { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+.intro p { font-size: 0.92rem; margin-bottom: 0.5rem; }
+.intro p:last-child { margin-bottom: 0; }
+.intro strong { color: #f0f6fc; }
+.intro code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #21262d; color: #8b949e; font-size: 0.82rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="c">
+
+<header>
+<h1>Fabrication / False-Completion Self-Audit</h1>
+<p class="sub">When Claude Code says "done" or "tests passed" — would your setup catch it if that were not true?</p>
+</header>
+
+<div class="progress"><div class="progress-bar" id="pb"></div></div>
+
+<div class="step active" id="step0">
+<div class="intro">
+<p><strong>The pain.</strong> A recurring, well-documented Claude Code failure is the model reporting work it did not do: a fabricated tool result, a "task complete" that isn't, a "tests passed" with no test that ran. Public examples on the <code>anthropics/claude-code</code> tracker include <a href="https://github.com/anthropics/claude-code/issues/33781" target="_blank" rel="noopener">#33781</a> (tokens burned producing fabricated results), <a href="https://github.com/anthropics/claude-code/issues/44955" target="_blank" rel="noopener">#44955</a> (repeated false verification), and <a href="https://github.com/anthropics/claude-code/issues/27430" target="_blank" rel="noopener">#27430</a> (fabricated technical claims auto-published to eight platforms). The model-specific Opus&nbsp;4.8 variant is written up separately in <a href="https://yurukusa.github.io/cc-safe-setup/opus-48-fabricated-tool-results.html">why Opus 4.8 fabricates tool results</a>.</p>
+<p><strong>What this does.</strong> Eight questions about <em>your</em> setup score how well your defenses catch a fabricated "done" before it costs you — wasted tokens, a bad commit, a published falsehood. Each gap comes with the operator-side hook pattern that closes it.</p>
+<p><strong>Three minutes. Local-only. No tracking — nothing leaves your browser.</strong></p>
+</div>
+<div class="actions">
+<button class="primary" onclick="next()">Start →</button>
+</div>
+</div>
+
+<div class="step" id="step1">
+<p class="q">1. Completion gate</p>
+<p class="q-hint">Do you have a <code>Stop</code> hook that can block the model from ending a turn on an unverified "done" / "complete"?</p>
+<div class="opt" data-q="1" data-v="2">Yes — a Stop hook checks for proof before the turn is allowed to end</div>
+<div class="opt" data-q="1" data-v="1">Partly — I read the final message myself but nothing blocks automatically</div>
+<div class="opt" data-q="1" data-v="0">No — "done" is taken at face value</div>
+</div>
+
+<div class="step" id="step2">
+<p class="q">2. Test-result verification</p>
+<p class="q-hint">When the model says "tests passed," is that backed by a real command exit code something checks — not just the model's word?</p>
+<div class="opt" data-q="2" data-v="2">Yes — a hook or CI checks the actual exit code / output</div>
+<div class="opt" data-q="2" data-v="1">Partly — tests run sometimes, but the claim isn't tied to a verified result</div>
+<div class="opt" data-q="2" data-v="0">No — I trust "tests passed" as written</div>
+</div>
+
+<div class="step" id="step3">
+<p class="q">3. Evidence requirement</p>
+<p class="q-hint">Are claims like "verified" / "implemented" / "fixed" required to carry concrete evidence (file paths, a diff, command output)?</p>
+<div class="opt" data-q="3" data-v="2">Yes — claims without evidence are rejected or re-checked</div>
+<div class="opt" data-q="3" data-v="1">Partly — I ask for evidence ad hoc</div>
+<div class="opt" data-q="3" data-v="0">No — assertions stand on their own</div>
+</div>
+
+<div class="step" id="step4">
+<p class="q">4. Pre-publish / pre-commit gate</p>
+<p class="q-hint">Before the model commits, pushes, or sends anything outward, does a hook verify the claimed work actually exists?</p>
+<div class="opt" data-q="4" data-v="2">Yes — a PreToolUse gate verifies before any outward action</div>
+<div class="opt" data-q="4" data-v="1">Partly — for commits, but not for publishing / sending</div>
+<div class="opt" data-q="4" data-v="0">No — outward actions run on the model's say-so</div>
+</div>
+
+<div class="step" id="step5">
+<p class="q">5. File / change existence check</p>
+<p class="q-hint">After the model claims it created or edited files, do you confirm they actually exist and changed?</p>
+<div class="opt" data-q="5" data-v="2">Yes — a hook or script confirms the files / diffs are real</div>
+<div class="opt" data-q="5" data-v="1">Partly — I notice when something is obviously missing</div>
+<div class="opt" data-q="5" data-v="0">No — I assume the edits landed</div>
+</div>
+
+<div class="step" id="step6">
+<p class="q">6. Sub-agent result verification</p>
+<p class="q-hint">When sub-agents report what they found or did, do you verify it rather than trust the summary?</p>
+<div class="opt" data-q="6" data-v="2">Yes — sub-agent claims are checked before they're acted on</div>
+<div class="opt" data-q="6" data-v="1">Partly — only when a result looks off</div>
+<div class="opt" data-q="6" data-v="0">No — I take the sub-agent's report as fact</div>
+<div class="opt" data-q="6" data-v="na">I don't use sub-agents</div>
+</div>
+
+<div class="step" id="step7">
+<p class="q">7. Context / instruction fabrication guard</p>
+<p class="q-hint">Do you guard against the model inventing context — fabricated "warnings," made-up requirements, or claims about files it never read? (see <a href="https://github.com/anthropics/claude-code/issues/35357" target="_blank" rel="noopener">#35357</a>)</p>
+<div class="opt" data-q="7" data-v="2">Yes — I cross-check the model's stated context against the real files</div>
+<div class="opt" data-q="7" data-v="1">Partly — only on important decisions</div>
+<div class="opt" data-q="7" data-v="0">No — I take the model's framing of context as given</div>
+</div>
+
+<div class="step" id="step8">
+<p class="q">8. Audit trail</p>
+<p class="q-hint">Do you log the tool calls that actually ran, so you can reconcile "what ran" against "what was claimed" afterward?</p>
+<div class="opt" data-q="8" data-v="2">Yes — an activity log records the real tool calls</div>
+<div class="opt" data-q="8" data-v="1">Partly — I have terminal scrollback but nothing structured</div>
+<div class="opt" data-q="8" data-v="0">No — no record of what actually executed</div>
+</div>
+
+<div class="step result" id="result">
+<div class="score-big" id="score-num">—</div>
+<div class="score-band" id="score-band"></div>
+<p style="font-size:0.9rem;color:#8b949e;margin-bottom:0.6rem;">The lower the score, the more a fabricated "done" can pass through unchecked. Your gaps, strongest-first:</p>
+<div id="gap-list"></div>
+<div class="cta">
+<div class="cta-title">Close every gap above — the full framework</div>
+<p>The free <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> hooks cover several of these patterns at no cost. For the complete defense — 130 documented fabrication cases, a 3-stage claim-verify framework, and 14 ready-to-install defenses keyed to the exact failure each one stops — see the <a href="https://yurukusa.gumroad.com/l/claim-verify-handbook">Claim-Verify Handbook ($19)</a>. One avoided fabricated-commit cleanup pays for it.</p>
+<p style="font-size:0.82rem;color:#8b949e;">Japanese readers: the same ground is covered in the <a href="https://note.com/yurukusa/membership">月刊の安全運用便</a> and the <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止ガイド (¥800)</a>.</p>
+</div>
+<div class="actions">
+<button class="primary" onclick="copyResult()">Copy my score</button>
+<button onclick="restart()">Start over</button>
+</div>
+</div>
+
+<footer>
+Part of <a href="https://yurukusa.github.io/cc-safe-setup/hub.html">cc-safe-setup</a> — free, MIT-licensed operator-side hooks for Claude Code. Evidence: public issues on the <a href="https://github.com/anthropics/claude-code/issues">anthropics/claude-code</a> tracker. This page runs entirely in your browser.
+</footer>
+
+</div>
+
+<script>
+const totalSteps = 8;
+let current = 0;
+const answers = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null, 7: null, 8: null };
+
+document.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
+        const q = el.getAttribute('data-q');
+        const v = el.getAttribute('data-v');
+        answers[q] = v;
+        document.querySelectorAll(`[data-q="${q}"]`).forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        setTimeout(next, 180);
+    });
+});
+
+function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    if (n <= totalSteps && n >= 1) {
+        document.getElementById('step' + n).classList.add('active');
+    } else if (n === 0) {
+        document.getElementById('step0').classList.add('active');
+    } else {
+        document.getElementById('result').classList.add('active');
+        renderResult();
+    }
+    document.getElementById('pb').style.width = (Math.min(n, totalSteps + 1) / (totalSteps + 1) * 100) + '%';
+    current = n;
+}
+function next() { if (current <= totalSteps) showStep(current + 1); }
+function prev() { if (current > 0) showStep(current - 1); }
+function restart() {
+    Object.keys(answers).forEach(k => { answers[k] = null; });
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    showStep(0);
+}
+
+// Each question: max 2 points. Q6 can be N/A (excluded from denominator).
+const gapData = {
+    1: { name: 'No completion gate', evidence: 'The most direct defense is missing: nothing blocks a turn that ends on an unverified "done."',
+         fix: 'Add a <code>Stop</code> hook that scans the final transcript for completion claims ("done", "complete", "fixed", "tests pass") and, when it cannot find matching evidence, exits non-zero to keep the turn open until the work is shown.' },
+    2: { name: 'Test results taken on trust', evidence: 'Pattern behind #33781 / #11913: "tests passed" reported with no test actually run.',
+         fix: 'Tie the claim to reality: run the test command from a hook (or CI) and gate on its real exit code, not the model\'s narration. Treat "tests passed" with no captured exit code as unverified.' },
+    3: { name: 'Claims without required evidence', evidence: 'Unbacked "verified" / "implemented" assertions are where fabrication hides.',
+         fix: 'Require evidence for state-changing claims: a file path, a diff, or command output. A hook can flag a "verified"/"fixed" claim that is not accompanied by a tool result that demonstrates it.' },
+    4: { name: 'No pre-publish / pre-commit gate', evidence: 'The expensive variant — #27430: fabricated claims auto-published to eight platforms.',
+         fix: 'Add a <code>PreToolUse</code> gate on the outward actions (commit / push / send / publish) that verifies the claimed artifact exists before the action is allowed to run.' },
+    5: { name: 'File / change existence unverified', evidence: 'A claimed edit that never landed reads identically to one that did, until it breaks later.',
+         fix: 'After edit/write tool calls, confirm the files exist and the diff is non-empty. A <code>PostToolUse</code> check that the touched path actually changed catches the silent miss.' },
+    6: { name: 'Sub-agent results trusted blindly', evidence: 'The claim-verify gap in the sub-agent cluster (e.g. #61167): a confident summary, no underlying check.',
+         fix: 'Verify sub-agent output before acting on it — re-run the key check, or require the sub-agent to return evidence (paths, counts, output) the supervisor can confirm.' },
+    7: { name: 'No context-fabrication guard', evidence: 'Pattern behind #35357: the model invents context, warnings, or claims about files it never read.',
+         fix: 'Cross-check the model\'s stated context against the real files before acting on consequential decisions. Distrust claims about file contents that are not backed by a Read in the same session.' },
+    8: { name: 'No audit trail', evidence: 'Without a record of what ran, you cannot reconcile "what executed" against "what was claimed."',
+         fix: 'Log the actual tool calls (an activity-logger hook) so a fabricated result can be caught after the fact by comparing the claim to the recorded execution.' }
+};
+
+function renderResult() {
+    let got = 0, max = 0;
+    const gaps = [];
+    for (let q = 1; q <= 8; q++) {
+        const a = answers[q];
+        if (a === null) continue;
+        if (a === 'na') continue; // Q6 N/A: excluded from denominator
+        const v = parseInt(a, 10);
+        got += v; max += 2;
+        if (v < 2) gaps.push({ q, partial: v === 1 });
+    }
+    const pct = max > 0 ? Math.round(got / max * 100) : 0;
+    document.getElementById('score-num').textContent = pct + ' / 100';
+    const band = document.getElementById('score-band');
+    if (pct >= 75) { band.textContent = 'Strong — most fabricated "done" claims would be caught. Close the remaining gaps below.'; band.className = 'score-band strong'; }
+    else if (pct >= 40) { band.textContent = 'Partial — a fabricated result can still slip through several paths. The gaps below are the open doors.'; band.className = 'score-band mid'; }
+    else { band.textContent = 'Weak — almost nothing stands between a fabricated "done" and your repo, your bill, or your published output.'; band.className = 'score-band weak'; }
+
+    const list = document.getElementById('gap-list');
+    if (gaps.length === 0) {
+        list.innerHTML = '<div class="empty-msg">No gaps flagged — you already gate completion, verify results, and keep an audit trail. Rare. Keep the hooks current as Claude Code changes.</div>';
+        return;
+    }
+    gaps.sort((a, b) => (a.partial === b.partial) ? 0 : (a.partial ? 1 : -1));
+    let html = '';
+    gaps.forEach(({ q, partial }) => {
+        const d = gapData[q];
+        html += `<div class="gap-card ${partial ? 'partial' : ''}">
+            <div class="gap-name">${partial ? 'Partial: ' : 'Gap: '}${d.name}</div>
+            <div class="gap-evidence">${d.evidence}</div>
+            <div class="gap-fix">${d.fix}</div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function copyResult() {
+    let got = 0, max = 0;
+    for (let q = 1; q <= 8; q++) {
+        const a = answers[q];
+        if (a === null || a === 'na') continue;
+        got += parseInt(a, 10); max += 2;
+    }
+    const pct = max > 0 ? Math.round(got / max * 100) : 0;
+    let txt = `Claude Code fabrication / false-completion self-audit: ${pct}/100\n`;
+    txt += 'Audit your own setup: https://yurukusa.github.io/cc-safe-setup/fabrication-false-completion-self-audit.html\n';
+    navigator.clipboard.writeText(txt).then(() => { alert('Copied to clipboard.'); });
+}
+
+showStep(0);
+</script>
+</body>
+</html>
