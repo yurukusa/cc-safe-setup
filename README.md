@@ -781,6 +781,10 @@ See [Issue #1](https://github.com/yurukusa/cc-safe-setup/issues/1) for details.
 - [Opus 4.7 Survival Cheatsheet](https://gist.github.com/yurukusa/f2d6e261338eeda70f0ed9507f995c13), 46 known problems, quick fixes under 60 seconds, full reference table
 - [Token-Usage Leaderboard Anti-Pattern](https://gist.github.com/yurukusa/ac41d467d97f3711129070d8e311db4f), why internal token leaderboards fail (Goodhart's law), 5 better metrics, and the Uber case study (Fortune 2026-05-26: AI budget burnt in 4 months after leaderboard rollout)
 
+### Newsletter (free)
+
+These tools change weekly, and so do the failure modes. The [**Claude Code Safety Brief**](https://yurukusa.substack.com) is a free monthly email: that month's verified incidents from the public issue trackers (Claude Code, Cursor, Copilot, Codex), the copy-paste settings that stop them, and what changed in the tools. No hype — just what broke and the lines that fix it.
+
 ### Professional Services
 
 The hooks above stay free (MIT) forever. If you'd rather have a person help, there are two paid tracks:
