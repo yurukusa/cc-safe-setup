@@ -442,6 +442,10 @@ Install safety hooks as Claude Code plugins, no npm required:
 
 Also listed on [claudemarketplaces.com](https://claudemarketplaces.com).
 
+## Writing your own hook
+
+Hit a failure mode no existing hook covers? [**Detection-rule grammar**](docs/detection-rule-grammar.md) — the documented path from "I see this dark pattern" to "here is a hook that detects it": the 3-layer detection stack, the 4 rule-grammar primitives, the false-positive economy, and a worked example. Builds on [@waitdeadai](https://github.com/waitdeadai)'s authoring field manual.
+
 ## Common Pain Points (from GitHub Issues)
 
 | Problem | Issue | Fix |
