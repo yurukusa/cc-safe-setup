@@ -57,9 +57,17 @@ The **receipt schema is the stable contract** — not the hook. CI/audit tooling
 - [x] Generic Stop-hook decision function (pure: normalized receipt → decision). Shipped as [`examples/deployment-readback-gate.sh`](../examples/deployment-readback-gate.sh) — covers all four branches (`allow`, `refuse-mismatch`, `refuse-query-failure`, `refuse-stale`), fails closed on an unauditable receipt, anchors staleness to the claim, and writes the decided receipt outside the transcript.
 - [x] Tests — [`tests/test-deployment-readback-gate.sh`](../tests/test-deployment-readback-gate.sh), 10 cases (all branches + missing-field + unparseable-time + receipt-written), all passing.
 - [x] settings.json install snippet (Stop hook) — see the hook header.
-- [ ] `gh` deployments adapter (first provider) — emits the normalized receipt on stdout, piped into the gate.
+- [x] `gh` deployments adapter (first provider) — [`examples/deployment-readback-gh-adapter.sh`](../examples/deployment-readback-gh-adapter.sh). Detects a deployment-completion claim in the Stop closeout (configurable phrase list, with benign-context exclusion so "deployed locally" / "about to deploy" do not trip it), reads the GitHub Deployments API for that ref/environment, and emits the normalized receipt on stdout — piped into the gate. `readback_time` is sourced from the deployment **status** `created_at` (the authority's own timestamp), and unreachable/erroring queries emit `queried_state: "query-failure"` so the gate fails closed. Tests: [`tests/test-deployment-readback-gh-adapter.sh`](../tests/test-deployment-readback-gh-adapter.sh), 26 cases (claim detection, all gate branches via the real gate, strict/advisory target resolution, ref parsing), GitHub API mocked for determinism.
 
-The generic decision function is the safe place to start because it is deterministic and provider-free; adapters can be added incrementally without changing it.
+Install (adapter piped into the gate):
+
+```json
+{ "hooks": { "Stop": [{ "hooks": [{ "type": "command",
+  "command": "~/.claude/hooks/deployment-readback-gh-adapter.sh | ~/.claude/hooks/deployment-readback-gate.sh",
+  "env": { "DRG_REPO": "owner/repo", "DRG_ENVIRONMENT": "production" } }] }] } }
+```
+
+The generic decision function is the safe place to start because it is deterministic and provider-free; adapters are added incrementally without changing it — the `gh` adapter above is the first, and Vercel / Cloud Run / k8s adapters follow the same output contract.
 
 ---
 
