@@ -13,6 +13,8 @@
 #   wildcard/glob rm reaching into a user/home/absolute path, e.g.
 #     rm -f ~/Downloads/*copy*.md  (unpredictable match set — see #64559)
 #   find -delete (any path)
+#   find ... | xargs rm  without the null-delimited pair -print0 / xargs -0 (#69793 —
+#     a path with spaces splits into multiple targets and rm -rf wipes an unrelated dir)
 #   shred (any file)
 #   unlink on critical paths
 #
@@ -110,6 +112,29 @@ if echo "$COMMAND" | grep -qE 'find\s.*-delete'; then
     fi
     echo "BLOCKED: find -delete outside safe directory: $FIND_PATH" >&2
     exit 2
+fi
+
+# --- find | xargs rm without a null delimiter (#69793) ---
+# find prints newline-separated paths; xargs WITHOUT -0 splits on ANY whitespace.
+# So a single path containing spaces, e.g. "./Google Photos/a.jpg", is split into
+# two arguments: "./Google" and "Photos/a.jpg". With rm -rf, the first token can
+# match an UNRELATED real directory ("./Google") and wipe it whole — the reporter
+# in #69793 lost ~28,800 files this way. The rm checks above can't catch this:
+# the delete targets are produced by find at runtime, so there is no literal path
+# in the command string to inspect. The only safe form is the null-delimited pair
+# find -print0 | xargs -0 (or avoid xargs: find -delete / -exec rm {} +).
+if echo "$COMMAND" | grep -qE 'xargs\b[^|]*\b(rm|rmdir|unlink|shred|trash|trash-put)\b'; then
+    # Require BOTH halves of the null-delimited pair: find's -print0 and xargs's -0.
+    if ! echo "$COMMAND" | grep -qE '\-print0' \
+       || ! echo "$COMMAND" | grep -qE 'xargs\s+[^|]*(-0|--null)'; then
+        echo "BLOCKED: 'xargs rm' without a null delimiter — paths with spaces split into multiple targets (#69793)." >&2
+        echo "  A path like './Google Photos/a.jpg' splits into './Google' and 'Photos/a.jpg';" >&2
+        echo "  rm -rf may then wipe an unrelated real directory. Use one of:" >&2
+        echo "    find ... -delete" >&2
+        echo "    find ... -exec rm -rf {} +" >&2
+        echo "    find ... -print0 | xargs -0 rm -rf" >&2
+        exit 2
+    fi
 fi
 
 # --- shred ---
