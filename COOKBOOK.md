@@ -164,6 +164,10 @@ npx cc-safe-setup --install-example rm-safety-net
 ```
 
 Blocks rm -rf on any non-safe path (only allows node_modules, dist, build, /tmp, __pycache__).
+Also blocks `find ... | xargs rm` when the null-delimited pair `find -print0 | xargs -0` is
+missing — without it, a path with spaces (`./Google Photos/a.jpg`) splits into two targets and
+`rm -rf` can wipe an unrelated directory (#69793). Use `find -delete`, `find -exec rm {} +`, or
+`find -print0 | xargs -0 rm`.
 
 ## Auto Mode False Positive Fix
 
