@@ -10,7 +10,8 @@
 #   git checkout .            (discards all changes)
 #   git restore <files>       (same effect as checkout --)
 #   git restore .             (discards all working tree changes)
-#   git stash drop            (permanently deletes stashed changes)
+#   git stash drop            (permanently deletes one stashed change)
+#   git stash clear           (permanently deletes ALL stashed changes — #69850)
 #
 # Does NOT block:
 #   git checkout <branch>     (switching branches — safe)
@@ -61,11 +62,16 @@ if echo "$COMMAND" | grep -qE 'git\s+restore\s+' && ! echo "$COMMAND" | grep -qE
     exit 2
 fi
 
-# Block: git stash drop (permanently deletes stashed changes)
-if echo "$COMMAND" | grep -qE 'git\s+stash\s+drop'; then
-    echo "BLOCKED: git stash drop permanently deletes stashed changes." >&2
+# Block: git stash drop / git stash clear (permanently delete stashed changes).
+# clear wipes EVERY stash at once. This is the #69850 loss path: work is moved into
+# a stash (working tree goes clean), then the stash is discarded — equivalent to
+# git reset --hard. Auto-stash-before-danger hooks miss it because the tree is clean
+# at drop/clear time, so blocking the discard itself is the reliable guard.
+if echo "$COMMAND" | grep -qE 'git\s+stash\s+(drop|clear)'; then
+    echo "BLOCKED: git stash drop/clear permanently deletes stashed changes (#69850)." >&2
     echo "" >&2
-    echo "If you're sure, use 'git stash pop' to apply and remove in one step." >&2
+    echo "Keep the stash until you are sure it is no longer needed." >&2
+    echo "To restore the work, use 'git stash pop'." >&2
     exit 2
 fi
 

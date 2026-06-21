@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+- **`uncommitted-discard-guard.sh`: also block `git stash clear` (#69850)** — the guard
+  already blocked `git stash drop`, but not `git stash clear`, which wipes EVERY stash at
+  once. The #69850 incident is the stash-then-discard loss path: work is moved into a stash
+  (the working tree goes clean), then the stash is discarded — equivalent to
+  `git reset --hard`. Auto-stash-before-danger hooks miss this because the tree is clean at
+  drop/clear time, so blocking the discard itself is the reliable guard. `git stash`,
+  `git stash pop`, and `git stash list` remain allowed. Tests added to `test.sh`.
 - **`rm-safety-net.sh`: catch `find | xargs rm` without a null delimiter (#69793)** —
   `find` prints newline-separated paths, but `xargs` without `-0` splits on ANY
   whitespace, so a single path with spaces (`./Google Photos/a.jpg`) splits into two
