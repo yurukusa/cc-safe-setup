@@ -87,6 +87,16 @@ run_test "find node_modules -delete allows (safe target)" 0 '"find node_modules 
 # --- BLOCK: shred (other destructive primitive) ---
 run_test "shred secret.key blocks"          2 '"shred secret.key"'
 
+# --- find | xargs rm without null delimiter (#69793) ---
+run_test "find | xargs rm -rf (no -0) blocks"        2 '"find . | xargs rm -rf"'
+run_test "find -type f | xargs rm blocks"            2 '"find . -type f | xargs rm"'
+run_test "find -print0 | xargs rm (no -0) blocks"    2 '"find . -print0 | xargs rm -rf"'
+run_test "find | xargs -0 rm (no -print0) blocks"    2 '"find . | xargs -0 rm"'
+run_test "find -print0 | xargs -0 rm -rf allows"     0 '"find . -print0 | xargs -0 rm -rf"'
+run_test "find -print0 | xargs -0 rm node_modules allows" 0 '"find . -print0 | xargs -0 rm -rf node_modules"'
+run_test "find -exec rm {} + allows (no xargs)"      0 '"find . -exec rm -rf {} +"'
+run_test "find | xargs grep allows (not destructive)" 0 '"find . | xargs grep foo"'
+
 echo
 echo "========================"
 echo "Results: $PASS passed, $FAIL failed"

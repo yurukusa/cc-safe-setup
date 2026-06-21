@@ -1,6 +1,17 @@
 # Changelog
 
 ## [Unreleased]
+- **`rm-safety-net.sh`: catch `find | xargs rm` without a null delimiter (#69793)** —
+  `find` prints newline-separated paths, but `xargs` without `-0` splits on ANY
+  whitespace, so a single path with spaces (`./Google Photos/a.jpg`) splits into two
+  arguments (`./Google` and `Photos/a.jpg`). With `rm -rf`, the first token can match
+  an unrelated real directory and wipe it — the reporter lost ~28,800 files this way.
+  The existing `rm` checks can't catch it because the delete targets are produced by
+  `find` at runtime, so there is no literal path in the command string. The hook now
+  blocks `find ... | xargs ... rm` (and `rmdir`/`unlink`/`shred`/`trash`) unless the
+  null-delimited pair `find -print0 | xargs -0` is present, and points to the safe
+  forms (`find -delete`, `find -exec rm {} +`, `find -print0 | xargs -0 rm`). Eight
+  tests added to `tests/test-rm-safety-net.sh` (49 pass, no regression).
 - **Fix: PowerShell-tool blind spot in the Windows destructive guards (#69397)** —
   Claude Code's `PowerShell` tool is a separate tool from `Bash`, and a hook matched
   only on `"Bash"` never fires on a PowerShell-tool command. That blind spot let a
