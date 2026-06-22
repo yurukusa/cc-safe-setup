@@ -57,6 +57,7 @@ code{background:#161b22;border:1px solid #21262d;border-radius:4px;padding:.05re
 <body>
 <div class="c">
 <h1>6月15日の課金の崖、自分は影響を受ける？ — 実機のログから判定</h1>
+<div style="border-left:4px solid #d97706;background:#fffbeb;padding:12px;margin:12px 0"><strong>追記（2026年6月22日）: この課金分離は施行の当日に一時停止されました。</strong> 6月15日に予定された分離はその日に一時停止され、当面は何も変わりません（<code>claude -p</code>・Agent SDK・GitHub Actions は今も通常の購読の枠から課金されます）。撤回ではなく停止で再び実施され得るので、本ツールは「再来への備え」としてお使いください（<a href="https://the-decoder.com/anthropic-backs-off-unpopular-billing-overhaul-as-price-war-with-openai-looms/">出典</a>）。</div>
 <p class="sub">2026年6月15日から、プログラム経由のClaude Codeの利用（<code>claude -p</code>、Agent SDK、CIやcronの中の呼び出し）が、月ごとの枠が決まった<b>別の有料の枠（Pool 2）</b>に分けられます。対話の <code>claude</code> のセッションは変わりません。多くの「自分は影響を受ける？」の道具は<em>推定</em>を求めます。これは、あなたのログに<b>実際に記録された起動の種類</b>を読んで、それで利用を振り分けます。（手早く、ログなしで知りたいなら、<a href="june-15-billing-cliff-exposure-jp.html">20秒の質問式の診断</a>をどうぞ。このページはその実データ版です。）</p>
 
 <div class="priv">🔒 すべてブラウザの中だけ。ログはあなたの端末でJavaScriptが読みます。<b>どこにもアップロードしません</b>。サーバーはありません。ネットワークを切っても動きます。</div>

@@ -39,9 +39,12 @@
 </head>
 <body>
 <div class="wrap">
-  <span class="tag">Announced 2026-05-13 · effective 2026-06-15 · verify against Anthropic's own email/docs</span>
+  <span class="tag">Announced 2026-05-13 · was due 2026-06-15 · <strong>PAUSED on the day</strong> · verify against Anthropic's own email/docs</span>
   <h1>Claude Code's June 15, 2026 billing change</h1>
-  <p class="sub">Anthropic is moving <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. It takes effect today (2026-06-15) — here's who's affected and what to do now.</p>
+  <div class="card" style="border-left:4px solid #d97706;background:#fffbeb">
+    <p style="margin:0"><strong>Update (2026-06-22): Anthropic paused this on the day it was due.</strong> The split was scheduled for 2026-06-15 but Anthropic paused it that day — <em>nothing changed for now</em>; <code>claude -p</code>, the Agent SDK, and GitHub Actions still draw from your normal subscription limits (<a href="https://the-decoder.com/anthropic-backs-off-unpopular-billing-overhaul-as-price-war-with-openai-looms/">the-decoder</a>, <a href="https://www.digitalapplied.com/blog/anthropic-claude-credit-overhaul-june-15-2026">digitalapplied</a>). It remains officially announced and could still return — so treat this page as <strong>preparation in case it comes back</strong>, not a live emergency.</p>
+  </div>
+  <p class="sub">Under the announced change, Anthropic would move <strong>programmatic</strong> Claude usage off your subscription pool onto a separate, dollar-metered credit pool. <strong>Interactive</strong> use is unchanged. It was due 2026-06-15 but was paused that day (see above) — here's who would be affected and what to do if it returns.</p>
 
   <div class="card">
     <strong>The one-sentence version:</strong> if you run Claude through the <strong>Agent SDK</strong>, <code>claude -p</code>, <strong>Claude Code GitHub Actions</strong>, or a <strong>third-party agent</strong>, that usage leaves your normal subscription limit on 2026-06-15 and starts drawing from a fixed monthly credit billed at <strong>full API rates, with no rollover</strong>. If you only use Claude Code interactively in your terminal (and claude.ai / Cowork), nothing changes.
