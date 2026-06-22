@@ -52,6 +52,18 @@ The **receipt schema is the stable contract** — not the hook. CI/audit tooling
 3. **Staleness — anchored to the claim, not wall-clock.** Refuse if `claim_time - readback_time > stale_if_older_than_ms`. A cached or replayed "success" readback from an hour ago must not be allowed to ratify a claim made now. Anchoring to `claim_time` and sourcing `readback_time` from the authority's response closes the replay gap where a harness re-serves a prior successful readback.
 4. **`allow`** only when the readback is fresh **and** matching **and** `success`.
 
+## Adapter authoring contract
+
+A new authority is added by writing **one adapter** — never by editing the gate or the receipt schema. To keep every provider boring and identical (the property that makes the pattern portable), an adapter MUST:
+
+1. **Emit exactly the normalized shape, and nothing else, on stdout** — `{ authority, queried_ref, queried_state, readback_time, stale_if_older_than_ms }` (plus the claim fields it resolved: `claim_span`, `claim_time`, `target`, `claimed_ref`, `readback_query`). One JSON object, no logs on stdout (diagnostics go to stderr) so the pipe into the gate stays clean.
+2. **Make no decision.** The adapter never writes `decision` and never refuses; it only reports what the authority said. `allow | refuse-mismatch | refuse-query-failure | refuse-stale` is the gate's job alone. An adapter that decides has leaked gate semantics and breaks portability.
+3. **Source `readback_time` from the authority's own response** (e.g. the deployment/status `created_at`), never from wall-clock or "now". This is what makes claim-anchored staleness real and closes the replay gap.
+4. **Fail closed by reporting, not by allowing.** Unreachable / errored / rate-limited readbacks emit `queried_state: "query-failure"` so the gate refuses; reached-but-no-record emits a non-`success` state (e.g. `not_found`). An adapter must never swallow an error into a `success`-looking receipt.
+5. **Keep all provider knowledge inside itself.** API endpoints, auth, ref/target resolution, and claim detection (the configurable phrase list + benign-context exclusion) live in the adapter. The gate must remain provider-free, so the *same* gate binary decides every provider's receipts unchanged.
+
+Conformance test: pipe the adapter's stdout into the unmodified `deployment-readback-gate.sh` and assert the decision for fixed authority states (success / mismatch / query-failure / stale), with the provider API mocked for determinism — exactly as [`tests/test-deployment-readback-gh-adapter.sh`](../tests/test-deployment-readback-gh-adapter.sh) does for `gh`. If a new adapter needs a gate change to pass, that is the signal that gate semantics leaked into the adapter (or vice versa).
+
 ## Implementation status
 
 - [x] Generic Stop-hook decision function (pure: normalized receipt → decision). Shipped as [`examples/deployment-readback-gate.sh`](../examples/deployment-readback-gate.sh) — covers all four branches (`allow`, `refuse-mismatch`, `refuse-query-failure`, `refuse-stale`), fails closed on an unauditable receipt, anchors staleness to the claim, and writes the decided receipt outside the transcript.
