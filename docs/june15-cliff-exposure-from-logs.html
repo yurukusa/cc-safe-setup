@@ -59,6 +59,7 @@ code{background:#161b22;border:1px solid #21262d;border-radius:4px;padding:.05re
 <body>
 <div class="c">
 <h1>June 15 Cliff Exposure — from your real logs</h1>
+<div style="border-left:4px solid #d97706;background:#fffbeb;padding:12px;margin:12px 0"><strong>Update (2026-06-22): Anthropic paused this on the day it was due.</strong> The June 15 split was paused on 2026-06-15 — nothing changed for now; <code>claude -p</code> / Agent SDK / GitHub Actions still draw from your normal subscription limits (<a href="https://the-decoder.com/anthropic-backs-off-unpopular-billing-overhaul-as-price-war-with-openai-looms/">the-decoder</a>). It remains announced and could return — use this as preparation, not a live emergency.</div>
 <p class="sub">On 2026-06-15, programmatic Claude Code usage (<code>claude -p</code>, the Agent SDK, anything in CI/cron) moves into a <b>separate paid pool (Pool 2)</b> with a fixed monthly budget per plan. Interactive <code>claude</code> sessions are unchanged. Most "am I affected?" tools make you <em>estimate</em>. This one reads the <b>entrypoint your logs actually recorded</b> and splits your usage by it. (Want a 20-second version with no logs? Use the <a href="june-15-billing-cliff-exposure.html">questionnaire check</a> instead — this page is the precise, real-data companion. <a href="june15-cliff-exposure-from-logs-jp.html">日本語版</a>.)</p>
 
 <div class="priv">🔒 100% in your browser. Your logs are parsed locally with JavaScript and <b>never uploaded</b> — there is no server. Disconnect from the network and it still works.</div>
