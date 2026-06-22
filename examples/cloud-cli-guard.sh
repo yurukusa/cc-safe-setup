@@ -10,7 +10,8 @@
 # Detects:
 #   gcloud compute instances delete
 #   gcloud sql instances delete
-#   gcloud storage rm
+#   gcloud storage rm / gcloud storage rb   (objects / buckets — #70024)
+#   gsutil rm / gsutil rb                    (legacy GCS removal, incl. gsutil -m rm)
 #   gcloud projects delete
 #   az vm delete
 #   az storage account delete
@@ -41,6 +42,23 @@ if echo "$COMMAND" | grep -qE '\bgcloud\s+.*(delete|destroy|remove|reset)\b'; th
     echo "BLOCKED: Destructive Google Cloud operation detected." >&2
     echo "  Command: $COMMAND" >&2
     echo "  Use 'gcloud ... describe' or 'gcloud ... list' to check first." >&2
+    exit 2
+fi
+
+# Block cloud-storage object/bucket removal via the `rm`/`rb` subcommands.
+# The gcloud check above keys on delete|destroy|remove|reset, but Google Cloud
+# Storage removal uses the literal subcommand `rm` (objects) and `rb` (buckets) —
+# `gcloud storage rm` / `gsutil rm` — none of which contain "remove". Without this
+# branch those slip past the guard entirely (and rm-safety-net only fires on a
+# command that *starts* with `rm`, not on `gcloud storage rm`). #70024: an agent
+# ran `gcloud storage rm -r` after a failed `mv` and destroyed the source objects.
+if echo "$COMMAND" | grep -qE '\bgcloud\s+storage\s+(rm|rb)\b' \
+   || echo "$COMMAND" | grep -qE '\bgsutil\s+(-[a-zA-Z]+\s+)*(rm|rb)\b'; then
+    echo "BLOCKED: Destructive Google Cloud Storage removal detected." >&2
+    echo "  Command: $COMMAND" >&2
+    echo "  This deletes cloud objects/buckets irreversibly. Confirm the copy/move" >&2
+    echo "  succeeded first ('gcloud storage ls' / 'cp'); never delete after an" >&2
+    echo "  unverified transfer (#70024)." >&2
     exit 2
 fi
 
