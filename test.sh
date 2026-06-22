@@ -18553,6 +18553,36 @@ test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r",
 test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"/etc/hosts"}}' 0 "worktree-escape: allows path outside the repo"
 test_ex worktree-escape-write-guard.sh '{"tool_name":"Bash","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"command":"ls"}}' 0 "worktree-escape: ignores non-edit tools"
 
+echo "reroute-after-block-guard.sh:"
+# Issue #70112: a blocked action followed by a reroute toward the SAME target
+# slips past stateless PreToolUse hooks. This guard reads the transcript and
+# stops the same-target retry-after-block unless explicitly re-authorized.
+RB_TMP="$(mktemp -d)"
+cat > "$RB_TMP/blocked.jsonl" <<'RBJSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_rb","name":"Bash","input":{"command":"git push origin main && cat src/app.py"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_rb","is_error":true,"content":"PreToolUse:Bash hook error: [bash /h/block-push.sh]: blocked"}]}}
+RBJSONL
+cat > "$RB_TMP/ok.jsonl" <<'RBJSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_ok","name":"Bash","input":{"command":"cat src/app.py"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_ok","is_error":false,"content":"file contents"}]}}
+RBJSONL
+cat > "$RB_TMP/ghreject.jsonl" <<'RBJSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_gh","name":"Bash","input":{"command":"git push origin/main"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_gh","is_error":true,"content":"remote: error: GH006: Protected branch update failed; blocked by required reviews"}]}}
+RBJSONL
+cat > "$RB_TMP/refblock.jsonl" <<'RBJSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_ref","name":"Bash","input":{"command":"git push origin/main"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_ref","is_error":true,"content":"PreToolUse:Bash hook error: [bash /h/block-push.sh]: blocked"}]}}
+RBJSONL
+test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/blocked.jsonl\",\"tool_input\":{\"command\":\"git -C . push --force origin main; cat src/app.py\"}}" 2 "reroute: same-target retry after block blocked"
+test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/blocked.jsonl\",\"tool_input\":{\"command\":\"ls docs/readme.md\"}}" 0 "reroute: unrelated target after block allowed"
+test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/ok.jsonl\",\"tool_input\":{\"command\":\"rm src/app.py\"}}" 0 "reroute: no gate fired, allowed"
+CC_REROUTE_ALLOW=1 test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/blocked.jsonl\",\"tool_input\":{\"command\":\"git push --force origin main; cat src/app.py\"}}" 0 "reroute: explicit override allowed"
+test_ex reroute-after-block-guard.sh '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' 0 "reroute: no transcript_path fails open"
+test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/ghreject.jsonl\",\"tool_input\":{\"command\":\"git push --force origin/main\"}}" 0 "reroute: git server rejection is not a gate, allowed"
+test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/refblock.jsonl\",\"tool_input\":{\"command\":\"git log origin/main --oneline\"}}" 0 "reroute: git ref is not a concrete target, allowed"
+rm -rf "$RB_TMP"
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then

@@ -1,6 +1,16 @@
 # Changelog
 
 ## [Unreleased]
+- **`reroute-after-block-guard.sh`: stop a reroute toward a just-blocked target (#70112)** —
+  PreToolUse hooks are stateless, so the trajectory in #70112 (a gate fires; the agent
+  substitutes an equivalent path toward the SAME target; the next hook evaluates a fresh,
+  individually-defensible action and lets it run) slips through every guardrail. This new
+  example reads the transcript: if the previous tool call was stopped by a PreToolUse hook
+  block or a permission denial, and the current action shares a concrete path-like target,
+  it stops and surfaces. A fired gate should raise the bar for proceeding, not trigger a
+  search for an unblocked route. Fail-open by design (no transcript / previous succeeded /
+  no shared target → allowed); `CC_REROUTE_ALLOW=1` for a conscious one-shot retry,
+  `CC_REROUTE_DISABLE=1` to disable. Tests added to `test.sh`.
 - **`uncommitted-discard-guard.sh`: also block `git stash clear` (#69850)** — the guard
   already blocked `git stash drop`, but not `git stash clear`, which wipes EVERY stash at
   once. The #69850 incident is the stash-then-discard loss path: work is moved into a stash
