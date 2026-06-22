@@ -18533,6 +18533,18 @@ test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"whil
 test_ex api-busyloop-guard.sh '{}' 0 "api-busyloop: empty input passes"
 CC_API_BUSYLOOP_GUARD=off test_ex api-busyloop-guard.sh '{"tool_name":"Bash","tool_input":{"command":"until gh run view 1; do true; done"}}' 0 "api-busyloop: off mode passes"
 
+echo "worktree-escape-write-guard.sh:"
+# Issue #70069: in a worktree session, an absolute file_path under the repo
+# root but outside the worktree means the edit silently lands on the main checkout.
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"/home/dev/r/packages/a/b.ts"}}' 2 "worktree-escape: blocks Edit escaping onto main checkout"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Write","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"/home/dev/r/package.json"}}' 2 "worktree-escape: blocks Write to repo-root file"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"/home/dev/r/.claude/worktrees/fx/packages/a/b.ts"}}' 0 "worktree-escape: allows in-worktree absolute path"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"packages/a/b.ts"}}' 0 "worktree-escape: allows relative path"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r","tool_input":{"file_path":"/home/dev/r/packages/a/b.ts"}}' 0 "worktree-escape: inactive outside a worktree"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Edit","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"file_path":"/etc/hosts"}}' 0 "worktree-escape: allows path outside the repo"
+test_ex worktree-escape-write-guard.sh '{"tool_name":"Bash","cwd":"/home/dev/r/.claude/worktrees/fx","tool_input":{"command":"ls"}}' 0 "worktree-escape: ignores non-edit tools"
+
+TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
     echo "FAILURES: $FAIL"
