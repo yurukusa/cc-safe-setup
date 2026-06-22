@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-23T01:16:45+09:00
+Updated: 2026-06-23T01:18:17+09:00
 
 ## Git
 - Branch: `feat/worktree-escape-write-guard-70069`
@@ -7,13 +7,13 @@ Updated: 2026-06-23T01:16:45+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4e98480c checkpoint: auto-save 01:16:45
+- Last commit: fd442fd8 checkpoint: auto-save 01:16:56
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-06-23.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-06-23.md
 ./test.sh
 ./tests/worktree-escape-write-guard.test.sh
 ./examples/worktree-escape-write-guard.sh
