@@ -27,8 +27,9 @@ fi
 
 # git push --force (not --force-with-lease)
 if echo "$COMMAND" | grep -qE 'git\s+push.*--force($|\s)' && ! echo "$COMMAND" | grep -q 'force-with-lease'; then
-    echo "BLOCKED: git push --force can destroy remote history." >&2
-    echo "Use --force-with-lease for safer force-push." >&2
+    echo "BLOCKED: git push --force can destroy remote history and overwrite others' commits." >&2
+    echo "If --force-with-lease just failed, that failure means someone else pushed changes you do not have locally." >&2
+    echo "Do NOT escalate to --force; run git fetch, then rebase/merge, then push again. (issue #70378)" >&2
     exit 2
 fi
 
