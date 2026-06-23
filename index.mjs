@@ -704,7 +704,7 @@ function examples() {
       'ssh-key-protect.sh': 'Block reading/copying SSH private keys',
       'staged-secret-scan.sh': 'Block git commit if staged diff contains secrets',
       'strict-allowlist.sh': 'Only allow explicitly permitted commands',
-      'strip-coauthored-by.sh': 'Remove or warn about Co-Authored-By trailers',
+      'strip-coauthored-by.sh': 'Warn on Co-Authored-By trailers; block commits leaking the private Claude-Session URL (#69669)',
       'symlink-guard.sh': 'Detect symlink/junction traversal before rm',
       'symlink-protect.sh': 'Symlink Protect',
       'system-package-guard.sh': 'Block system-level package installations',
