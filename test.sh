@@ -10696,6 +10696,12 @@ test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"feat: 
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit --amend"}}' 0 "strip-coauthor: amend without message passes"
 CC_ALLOW_COAUTHOR=1 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"feat Co-Authored-By: Claude\""}}' 0 "strip-coauthor: CC_ALLOW_COAUTHOR=1 allows"
 test_ex strip-coauthored-by.sh '{"tool_input":{"command":""}}' 0 "strip-coauthor: empty command"
+# --- strip-coauthored-by: session-id URL leak (#69669) ---
+echo "strip-coauthored-by.sh (session-id leak):"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"fix bug Claude-Session: https://claude.ai/code/session_abc123\""}}' 2 "strip-coauthor: blocks Claude-Session URL trailer (exit 2)"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"cd repo && git commit -m \"x https://claude.ai/code/session_z\""}}' 2 "strip-coauthor: blocks session URL in chained command (exit 2)"
+CC_ALLOW_SESSION_TRAILER=1 test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"x Claude-Session: https://claude.ai/code/session_z\""}}' 0 "strip-coauthor: CC_ALLOW_SESSION_TRAILER=1 allows"
+test_ex strip-coauthored-by.sh '{"tool_input":{"command":"git commit -m \"plain message no trailers\""}}' 0 "strip-coauthor: clean commit passes silently"
 echo ""
 
 # --- typescript-strict-check additional tests ---
