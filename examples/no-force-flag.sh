@@ -25,9 +25,13 @@ if echo "$COMMAND" | grep -qE 'npm\s+install.*--force|npm\s+i\s.*--force'; then
     exit 2
 fi
 
-# git push --force (not --force-with-lease)
-if echo "$COMMAND" | grep -qE 'git\s+push.*--force($|\s)' && ! echo "$COMMAND" | grep -q 'force-with-lease'; then
-    echo "BLOCKED: git push --force can destroy remote history and overwrite others' commits." >&2
+# git push --force / -f (not --force-with-lease)
+# -f is git's official short form and is exactly equivalent to --force; the old
+# pattern only matched the long form, so `git push -f` slipped through entirely.
+# Require -f to be a standalone flag (preceded by whitespace) so a branch name
+# ending in "-f" (e.g. `git push origin feature-f`) is not falsely blocked.
+if echo "$COMMAND" | grep -qE 'git\s+push.*\s(-f\b|--force($|\s))' && ! echo "$COMMAND" | grep -q 'force-with-lease'; then
+    echo "BLOCKED: git push --force/-f can destroy remote history and overwrite others' commits." >&2
     echo "If --force-with-lease just failed, that failure means someone else pushed changes you do not have locally." >&2
     echo "Do NOT escalate to --force; run git fetch, then rebase/merge, then push again. (issue #70378)" >&2
     exit 2
