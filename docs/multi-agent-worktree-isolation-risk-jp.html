@@ -43,7 +43,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 <div class="container">
 
 <h1>マルチエージェントの worktree 隔離 データ毀損リスク自己診断</h1>
-<p class="subtitle">サブエージェントを <code>isolation: worktree</code> で並列に走らせる運用で、隔離が黙って無効になり、コミットが意図しないブランチへ静かに着地する事故への露出を、5問で測ります。<strong>答えは送信されません。採点は全てこのページの中だけで動きます。</strong></p>
+<p class="subtitle">サブエージェントを <code>isolation: worktree</code> で並列に走らせる運用で、隔離が黙って無効になり、コミットが意図しないブランチへ静かに着地する事故への露出を、5問で測ります。<strong>答えは送信されません。採点は全てこのページの中だけで動きます。</strong> <a href="multi-agent-worktree-isolation-risk.html">English</a>.</p>
 
 <div class="mech">
 <strong>この型がなぜ怖いか。</strong> 報告されている事例では、先行したサブエージェントの worktree が孤立した後、親(lead)セッションの作業ディレクトリが <code>.claude/worktrees/</code> 配下に残ってしまう。次にサブエージェントを起動すると「すでに worktree の中にいる」と誤判定されて隔離がスキップされ、サブエージェントが親の作業コピー(別ブランチの作業中の変更)を直接編集してコミットを積む。<strong>エラーも警告も出ず</strong>、後のリベースや force push で初めて、変更が違うブランチに着地していたと分かる、という流れだそうです。普段こまめに git を使う人ほど「コミットしたから安全」と思い込みやすく、防御が原理的に効きにくい盲点だと報告されています。</div>
