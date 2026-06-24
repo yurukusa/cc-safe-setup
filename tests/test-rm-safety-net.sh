@@ -97,6 +97,18 @@ run_test "find -print0 | xargs -0 rm node_modules allows" 0 '"find . -print0 | x
 run_test "find -exec rm {} + allows (no xargs)"      0 '"find . -exec rm -rf {} +"'
 run_test "find | xargs grep allows (not destructive)" 0 '"find . | xargs grep foo"'
 
+# --- BLOCK: multi-target rm where a SAFE arg is last (last-arg-only bypass) ---
+# Before the fix, awk '{print $NF}' inspected only the last token, so a safe last
+# arg (node_modules, /tmp/...) made the whole command early-exit while the critical
+# FIRST arg was never checked.
+run_test "rm critical first, safe-dir last blocks"   2 '"rm -rf /home/user/data node_modules"'
+run_test "rm ssh key first, /tmp last blocks"        2 '"rm /home/user/.ssh/id_rsa /tmp/dummy"'
+run_test "rm /etc first, dist last blocks"           2 '"rm -rf /etc/cron.d dist"'
+run_test "rm safe-dir first, critical last blocks"   2 '"rm -rf node_modules /home/user/x"'
+# --- ALLOW: legit multi-target deletes still pass (no regression) ---
+run_test "rm two dist files allows"                  0 '"rm dist/a.js dist/b.js"'
+run_test "rm bare glob *.pyc allows"                 0 '"rm *.pyc"'
+
 echo
 echo "========================"
 echo "Results: $PASS passed, $FAIL failed"

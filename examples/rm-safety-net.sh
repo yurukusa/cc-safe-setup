@@ -47,6 +47,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     # Safe targets that can be deleted freely
     SAFE_TARGETS="node_modules|dist|build|__pycache__|\.cache|\.pytest_cache|coverage|\.nyc_output|\.next|\.nuxt|tmp|temp"
+    CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|(^|/)\.env"
 
     # Extract the target (last argument after flags)
     TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+[^;|&]*' | awk '{print $NF}')
@@ -56,6 +57,22 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
         echo "BLOCKED: path traversal detected in rm target" >&2
         exit 2
     fi
+
+    # Inspect EVERY non-flag argument for critical paths, not just the last one.
+    # The single-TARGET checks below use `awk '{print $NF}'` (last arg only), so
+    # "rm -rf /home/user/data node_modules" would early-exit on the safe LAST arg
+    # (node_modules) and never inspect the critical FIRST arg — a real bypass.
+    # set -f disables glob expansion of the split words (so "rm *.pyc" stays literal).
+    set -f
+    for arg in $(echo "$COMMAND" | grep -oP 'rm\s+\K[^;|&]*'); do
+        case "$arg" in -*) continue ;; esac   # skip flags
+        if echo "$arg" | grep -qE "$CRITICAL"; then
+            set +f
+            echo "BLOCKED: rm targeting critical path: $arg" >&2
+            exit 2
+        fi
+    done
+    set +f
 
     # Allow safe targets
     if echo "$TARGET" | grep -qE "^(\./)?(${SAFE_TARGETS})(/|$)"; then
@@ -87,7 +104,8 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     # .env is matched at the start OR after any path segment, so a nested path
     # like backend/.env or src/.env is caught too (#65034 — Claude deleted a
     # .env living in a subdirectory, which the start-anchored pattern missed).
-    CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|(^|/)\.env"
+    # CRITICAL is defined once near the top of this block (also used by the
+    # multi-argument loop above). This single-TARGET check stays as a backstop.
     if echo "$TARGET" | grep -qE "$CRITICAL"; then
         echo "BLOCKED: rm targeting critical path: $TARGET" >&2
         exit 2
