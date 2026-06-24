@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Agent Worktree Isolation Risk Self-Check — when commits land on the wrong branch with no error</title>
+<meta name="description" content="When you run sub-agents with isolation: worktree, isolation can silently turn off — the sub-agent edits the lead's working copy and commits land on a different branch, with no error or warning. Five questions to score your exposure, plus the fix.">
+<meta property="og:title" content="Multi-Agent Worktree Isolation Risk Self-Check">
+<meta property="og:description" content="An isolated sub-agent silently edits the lead's working copy and commits land on the wrong branch — no error. Score your exposure in 5 questions.">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.35; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 2rem; }
+.question { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.5rem 1.7rem; margin: 1.2rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.question h2 { font-size: 1.05rem; margin-bottom: 0.9rem; color: #1f2937; }
+.option { display: block; padding: 0.6rem 0.8rem; margin: 0.4rem 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: background 0.15s; }
+.option:hover { background: #f3f4f6; }
+.option input { margin-right: 0.6rem; }
+.option.selected { background: #dbeafe; border-color: #2563eb; }
+#scoreBtn { display: block; width: 100%; padding: 1rem; margin: 2rem 0 1rem; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+#scoreBtn:hover { background: #15803d; }
+#scoreBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+#result { background: white; border-radius: 10px; padding: 1.8rem; margin: 2rem 0; border: 2px solid #e2e8f0; display: none; }
+#result h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
+#result .verdict { padding: 0.4rem 1rem; border-radius: 999px; font-weight: bold; display: inline-block; margin-bottom: 1rem; }
+#result .high { background: #dc2626; color: white; }
+#result .mid { background: #f59e0b; color: white; }
+#result .low { background: #94a3b8; color: white; }
+#result .score-display { font-size: 0.95rem; color: #555; margin-bottom: 1rem; }
+#result h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
+#result ul { padding-left: 1.3rem; margin-bottom: 0.8rem; }
+#result li { margin: 0.5rem 0; font-size: 0.95rem; }
+#result a { color: #2563eb; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.88em; }
+.mech { background: #f8fafc; border-left: 4px solid #2563eb; padding: 1rem 1.3rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.88rem; color: #555; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Multi-Agent Worktree Isolation Risk Self-Check</h1>
+<p class="subtitle">Five questions → how exposed are you to the failure where <code>isolation: worktree</code> silently turns off and a sub-agent's commits land on the wrong branch? <strong>Your answers are never sent anywhere — all scoring runs in your browser.</strong> <a href="multi-agent-worktree-isolation-risk-jp.html">日本語版</a>.</p>
+
+<div class="mech">
+<strong>Why this one is dangerous.</strong> In the reported cases, after an earlier sub-agent's worktree is stranded, the lead session's working directory is left under <code>.claude/worktrees/</code>. When the next sub-agent spawns, the guard reportedly mistakes this for "already inside a worktree," skips isolation, and the sub-agent edits the lead's working copy (the in-progress changes of a different branch) directly and commits there. <strong>No error, no warning.</strong> You only find out later — on a rebase or a force-push — that the commits landed on the wrong branch. The operators who keep committing frequently are the ones most likely to assume "I committed, so I'm safe," which is exactly why this blind spot is hard to catch.</div>
+
+<div class="question" data-q="1">
+<h2>1. Do you run sub-agents in parallel with <code>isolation: worktree</code>?</h2>
+<label class="option"><input type="radio" name="q1" value="0"> No — I don't use sub-agents, or only serially</label>
+<label class="option"><input type="radio" name="q1" value="10"> Sometimes — one or two in parallel occasionally</label>
+<label class="option"><input type="radio" name="q1" value="20"> Yes — routinely several in parallel under worktree isolation</label>
+</div>
+
+<div class="question" data-q="2">
+<h2>2. Do you check that the lead session's working directory hasn't been left under <code>.claude/worktrees/</code>?</h2>
+<label class="option"><input type="radio" name="q2" value="0"> I check <code>pwd</code> and <code>git branch</code> at every spawn</label>
+<label class="option"><input type="radio" name="q2" value="10"> Occasionally, when I think of it</label>
+<label class="option"><input type="radio" name="q2" value="20"> No — I don't usually think about where I'm launched from</label>
+</div>
+
+<div class="question" data-q="3">
+<h2>3. Have you ever found a sub-agent's commits had landed on a branch you didn't intend?</h2>
+<label class="option"><input type="radio" name="q3" value="0"> No, or I can always trace which branch each commit went to</label>
+<label class="option"><input type="radio" name="q3" value="12"> Suspected, but never traced the cause</label>
+<label class="option"><input type="radio" name="q3" value="20"> Yes — the branch was off and I had to fix it by hand</label>
+</div>
+
+<div class="question" data-q="4">
+<h2>4. Do you have a <code>PreToolUse</code> guard that stops writes from escaping the current repo's worktree before they execute?</h2>
+<label class="option"><input type="radio" name="q4" value="0"> Yes — writes outside the worktree are blocked before they run</label>
+<label class="option"><input type="radio" name="q4" value="12"> I scope some things via permissions, but don't check the worktree boundary</label>
+<label class="option"><input type="radio" name="q4" value="20"> Nothing — I rely on the model's judgment</label>
+</div>
+
+<div class="question" data-q="5">
+<h2>5. Are you protected against parallel sub-agents editing the same file and clobbering each other?</h2>
+<label class="option"><input type="radio" name="q5" value="0"> I design non-overlapping file ownership, or don't run in parallel</label>
+<label class="option"><input type="radio" name="q5" value="10"> I try to keep them apart, but nothing enforces it</label>
+<label class="option"><input type="radio" name="q5" value="20"> Not protected</label>
+</div>
+
+<button id="scoreBtn" disabled>Score my exposure</button>
+
+<div id="result">
+<h2 id="verdictTitle"></h2>
+<span class="verdict" id="verdictBadge"></span>
+<div class="score-display" id="scoreText"></div>
+<div id="verdictBody"></div>
+</div>
+
+<div class="disclosure">
+This self-check is based on reported cases — <a href="https://github.com/anthropics/claude-code/issues/70456">anthropics/claude-code#70456</a> (isolation silently disabled, falls back to in-place edits) and <a href="https://github.com/anthropics/claude-code/issues/70069">#70069</a> (paths resolved against the repo root instead of the worktree root). These are not my own experience — they are reports shared on the tracker. The mitigation I point to, <code>worktree-escape-write-guard.sh</code>, is a guard implemented in cc-safe-setup with regression tests. Scoring runs entirely in your browser; answers are not collected or transmitted. The recommendations are pointers, not a substitute for verifying behavior in your own setup.
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-24 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://yurukusa.gumroad.com/l/swpeu">AGENTS.md × Claude Code Interop Handbook</a>
+</footer>
+
+</div>
+
+<script>
+const btn = document.getElementById('scoreBtn');
+const result = document.getElementById('result');
+const verdictTitle = document.getElementById('verdictTitle');
+const verdictBadge = document.getElementById('verdictBadge');
+const scoreText = document.getElementById('scoreText');
+const verdictBody = document.getElementById('verdictBody');
+const options = document.querySelectorAll('.option');
+
+function checkComplete() {
+  const answered = [1,2,3,4,5].every(n => document.querySelector(`input[name="q${n}"]:checked`));
+  btn.disabled = !answered;
+}
+
+options.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const q = opt.parentElement.dataset.q;
+    document.querySelectorAll(`.question[data-q="${q}"] .option`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    setTimeout(checkComplete, 10);
+  });
+});
+
+btn.addEventListener('click', () => {
+  let score = 0;
+  for (let i = 1; i <= 5; i++) {
+    score += parseInt(document.querySelector(`input[name="q${i}"]:checked`).value, 10);
+  }
+  let title, verdict, body;
+
+  if (score >= 55) {
+    title = 'High exposure to this failure';
+    verdict = '<span class="verdict high">High exposure</span>';
+    body = `
+      <p>Your score (${score}/100) is the configuration where silent-isolation-disable is most likely: parallel worktree-isolated sub-agents, no launch-position check, and no boundary guard. If commits land on the wrong branch, you won't notice at the time.</p>
+      <h3>Do this first</h3>
+      <ul>
+        <li><strong>Stop worktree escapes before they execute.</strong> Install <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a> (<code>PreToolUse</code>, pure string comparison, deterministic): it derives the repo and worktree roots from the current directory and refuses the write if the target is inside the repo but outside the worktree. Install via <code>npx cc-safe-setup</code>.</li>
+        <li><strong>Check your launch position.</strong> Before spawning a sub-agent, confirm the lead's <code>pwd</code> isn't stranded under <code>.claude/worktrees/</code>. If it is, return to the repo root before spawning.</li>
+      </ul>
+      <h3>Go deeper</h3>
+      <ul>
+        <li>The multi-tool, multi-agent setup that keeps <code>AGENTS.md</code> and <code>CLAUDE.md</code> drift-proof across Cursor / Codex / Copilot / Cline: <a href="https://yurukusa.gumroad.com/l/swpeu">AGENTS.md × Claude Code Interop Handbook ($12)</a> — 9-tool matrix, templates, migration runbook.</li>
+        <li>The broader data-loss failure surface (including the harness-driven and silent variants): <a href="https://yurukusa.gumroad.com/l/iglmx">Autonomous Claude Ops (EN, ~$6)</a>.</li>
+      </ul>
+    `;
+  } else if (score >= 25) {
+    title = 'Partial exposure';
+    verdict = '<span class="verdict mid">Partial exposure</span>';
+    body = `
+      <p>Your score (${score}/100) is a configuration that can hit this failure under the wrong conditions. Your parallelism frequency and launch-position habit move the exposure up or down.</p>
+      <h3>Lower your exposure, in order</h3>
+      <ul>
+        <li>Install <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a> first — a boundary guard is your backstop for the times you forget to check the launch position.</li>
+        <li>Give parallel sub-agents non-overlapping file or directory ownership. As long as they don't overlap, the clobber variant can't happen.</li>
+      </ul>
+      <h3>Background</h3>
+      <ul>
+        <li>Sub-agent boundaries and the interop failure surface are laid out in the <a href="https://yurukusa.gumroad.com/l/swpeu">AGENTS.md × Claude Code Interop Handbook ($12)</a>. Free defense hooks: <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>.</li>
+      </ul>
+    `;
+  } else {
+    title = 'Low exposure to this failure';
+    verdict = '<span class="verdict low">Low exposure</span>';
+    body = `
+      <p>Your score (${score}/100) means the silent-isolation-disable case is unlikely to hit you — you either don't run parallel sub-agents, or you watch the launch position and the boundary.</p>
+      <h3>Worth having anyway</h3>
+      <ul>
+        <li>If you scale up parallel sub-agents later, install <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>'s <code>worktree-escape-write-guard.sh</code> first so the boundary holds as your setup changes.</li>
+        <li>For the more common data-loss cases (a <code>git reset --hard</code> you didn't type, untracked files wiped by a full-file rewrite), see <a href="https://yurukusa.gumroad.com/l/iglmx">Autonomous Claude Ops (EN, ~$6)</a>.</li>
+      </ul>
+      <h3>When to re-check</h3>
+      <ul>
+        <li>Come back once you run parallel sub-agents routinely — that raises your exposure a notch.</li>
+      </ul>
+    `;
+  }
+
+  verdictTitle.textContent = title;
+  verdictBadge.outerHTML = verdict;
+  scoreText.textContent = `Score: ${score} / 100`;
+  verdictBody.innerHTML = body;
+  result.style.display = 'block';
+  result.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+</script>
+</body>
+</html>
