@@ -94,6 +94,7 @@ pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem;
 <ul>
 <li>エージェント間の文脈共有が困難（コンテキスト圧縮で文脈を忘れる）</li>
 <li>ファイル競合（同じファイルを同時に編集する事故）</li>
+<li><code>isolation: worktree</code> の隔離が黙って無効になり、サブエージェントが親の作業コピーを踏んでコミットが別ブランチへ静かに着地する（エラーも警告も出ない）→ <a href="multi-agent-worktree-isolation-risk-jp.html">worktree 隔離リスクの自己診断（無料・5問）</a>で露出を測る</li>
 <li>トークン消費が予想の2〜3倍になることがある</li>
 <li>デバッグが極めて困難（どのエージェントが何をしたか追跡しにくい）</li>
 </ul>
