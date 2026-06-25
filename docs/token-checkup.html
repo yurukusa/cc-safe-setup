@@ -301,6 +301,23 @@ function showResults() {
     </div>
   `;
 
+  // Japanese browsers: surface the Japanese Zenn edition as the primary CTA, right
+  // after the score, before the English $17 Ko-fi CTA. Japanese readers arriving from
+  // Japanese articles otherwise see an English-first page whose primary button points
+  // at the English edition; the Japanese edition is what actually converts for them.
+  if ((navigator.language || '').toLowerCase().startsWith('ja')) {
+    const jp = document.createElement('div');
+    jp.className = 'cta';
+    jp.style.cssText = 'border-color:#58a6ff;margin-bottom:.8rem';
+    jp.innerHTML =
+      '<h3>日本語で全手順を読む</h3>' +
+      '<p>上の最適化の続きと、トークン節約の他の経路（キャッシュ管理・サブエージェント・hook 設計・800 時間の実測の数値）は、日本語の『Claude Code のトークン消費を半分にする本』にまとまっています。第 1 章まで無料で試し読みできます。</p>' +
+      '<a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=token-checkup&utm_medium=tool-jp&utm_campaign=token-book" class="btn" style="display:inline-block;text-decoration:none;margin:.3rem;font-size:1rem;padding:.8rem 2rem">日本語版を読む（¥2,500・第 1 章無料）</a>';
+    const firstCta = el.querySelector('.cta');
+    if (firstCta) firstCta.parentNode.insertBefore(jp, firstCta);
+    else el.appendChild(jp);
+  }
+
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   updateProgress(TOTAL);
