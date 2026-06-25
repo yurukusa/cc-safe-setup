@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>購読しているのに従量課金される Claude Code 自己診断 — 4つの原因のどれか、止め方と切り分け</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Claude Codeで「定額の購読をしているのに従量課金が走る・前払いのクレジットが減る」時の自己診断。5つの質問で4つの原因(共有設定の上書き/環境変数ANTHROPIC_API_KEYの優先/サーバー側の購読資格の解決の失敗/Desktop版とCLIの併存)を切り分け、原因ごとの止め方を示す。Redditで187ドルの想定外の請求の報告(起票68406)。ブラウザ内で完結、登録なし、送信なし。">
+<style>
+:root {
+  --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --accent: #ea580c; --green: #16a34a; --amber: #d97706; --red: #dc2626; --blue: #2563eb; --purple: #7c3aed; --teal: #0891b2;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", system-ui, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; max-width: 760px; margin: 1.5rem auto; padding: 0 1rem; background: var(--bg); color: var(--fg); line-height: 1.7; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.intro { background: #fef2f2; border-left: 4px solid var(--red); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.disclosure { background: #f3f4f6; border-left: 4px solid var(--muted); padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--muted); border-radius: 4px; }
+.q { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.q .label { font-weight: 600; margin-bottom: 0.5rem; }
+.q .hint { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.q label { display: block; padding: 0.35rem 0; cursor: pointer; }
+.q input[type="radio"] { margin-right: 0.5rem; }
+.btn { background: var(--accent); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 1rem; }
+.btn:hover { background: #c2410c; }
+.btn[disabled] { background: var(--muted); cursor: not-allowed; }
+.result { display: none; margin-top: 2rem; padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: 8px; }
+.result.show { display: block; }
+.first-step { background: #fffbeb; border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.first-step h3 { margin-top: 0; color: var(--amber); }
+.cause { background: #f0f9ff; border-left: 4px solid var(--blue); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 4px; }
+.cause h3 { margin-top: 0; color: var(--blue); }
+.cause.hot { background: #fef2f2; border-left-color: var(--red); }
+.cause.hot h3 { color: var(--red); }
+.fix { background: #ecfdf5; border-left: 4px solid var(--green); padding: 0.8rem 1rem; margin: 0.5rem 0; border-radius: 4px; }
+.fix h4 { margin: 0 0 0.3rem; color: var(--green); }
+a { color: var(--accent); }
+footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+.book { background: #f9fafb; border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem 1rem; margin: 0.6rem 0; }
+.book .t { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>購読しているのに従量課金される — Claude Code 自己診断</h1>
+<div class="meta">5つの質問 ・ 約2分 ・ ブラウザ内で完結、登録なし、送信なし ・ CC0 ・ v1.0（2026-06-26）</div>
+
+<div class="intro">
+「定額の購読を使っているはずなのに、従量課金が走る」「枠に余裕があるのに前払いのクレジット(Extra Usage)が減る」——2026年6月15日の課金の分離(対話的な利用と、プログラム的な利用の課金の扱いが分かれた変更)の前後で、この相談が複数の独立な経路で急増しました。Redditでは <strong>187ドルの想定外の請求</strong> の報告も出ています(GitHub 起票 68406)。症状は同じでも、根本の原因は次の4つに分かれます。この診断で、自分がどれかを切り分けます。
+</div>
+
+<div class="q" data-q="key">
+  <div class="label">Q1. 環境変数 <code>ANTHROPIC_API_KEY</code> が設定されていますか？</div>
+  <div class="hint"><code>echo $ANTHROPIC_API_KEY</code> を実行。シェルの設定ファイル(<code>.bashrc</code> / <code>.zshrc</code>)、<code>.env</code>、CIの環境変数、<code>~/.claude/settings.json</code> の <code>env</code> も見てください。</div>
+  <label><input type="radio" name="key" value="yes"> 設定されている(または、どこかに残っているかもしれない)</label>
+  <label><input type="radio" name="key" value="no"> 設定されていないと確認した</label>
+</div>
+
+<div class="q" data-q="multi">
+  <div class="label">Q2. Anthropic 系のツールを複数入れていますか？</div>
+  <div class="hint">別の Anthropic 系の CLI や SDK、社内ツールなど、<code>~/.config/anthropic</code> を共有しうるものを複数入れているか。</div>
+  <label><input type="radio" name="multi" value="yes"> 複数入れている / 分からない</label>
+  <label><input type="radio" name="multi" value="no"> Claude Code だけ</label>
+</div>
+
+<div class="q" data-q="desktop">
+  <div class="label">Q3. Desktop 版と、標準の CLI を同時に使っていますか？</div>
+  <div class="hint">デスクトップのアプリと、ターミナルの <code>claude</code> コマンドの両方を、同じアカウントで併用しているか。</div>
+  <label><input type="radio" name="desktop" value="yes"> 両方を併用している</label>
+  <label><input type="radio" name="desktop" value="no"> どちらか片方だけ</label>
+</div>
+
+<div class="q" data-q="room">
+  <div class="label">Q4. 枠に余裕があるのに、前払いのクレジット(Extra Usage)が減っていますか？</div>
+  <div class="hint">5時間や週の枠にまだ余裕がある(例: 5時間で約9%、週で約15%しか使っていない)のに、Extra Usage の前払いのクレジットが減っているか。</div>
+  <label><input type="radio" name="room" value="yes"> 枠に余裕があるのにクレジットが減っている</label>
+  <label><input type="radio" name="room" value="no"> 枠を使い切ってからクレジットが減っている / 分からない</label>
+</div>
+
+<div class="q" data-q="seen">
+  <div class="label">Q5. 利用の画面で「消費の出どころ」を確認しましたか？</div>
+  <div class="hint">対話的な利用とプログラム的な利用の、どちらで枠やクレジットが減っているかを、利用の画面で見たか。</div>
+  <label><input type="radio" name="seen" value="yes"> 確認した</label>
+  <label><input type="radio" name="seen" value="no"> まだ確認していない</label>
+</div>
+
+<button class="btn" id="go" disabled>原因を切り分ける</button>
+
+<div class="result" id="result"></div>
+
+<footer>
+<p>この診断は、2026年6月のClaude Codeの費用の流出の事故(GitHub 起票 68406 / 68296 / 68285 / 68501、Reddit・HN で表面化したパターン、運用のログ)から作りました。他人の起票で知った事実は伝聞として、仕組みで手元で確かめられた部分だけを断定で書いています。判定はすべてあなたのブラウザの中だけで行い、入力や結果はどこにも送信しません。CC0。</p>
+<p>作者: yurukusa(Claude Code 自律運用 800+ 時間、<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の作者)。<a href="claude-code-tools-jp.html">他の無料の診断ツール一覧へ</a>。</p>
+</footer>
+
+<script>
+var names=['key','multi','desktop','room','seen'];
+function answered(){return names.every(function(n){return document.querySelector('input[name="'+n+'"]:checked');});}
+document.querySelectorAll('input[type=radio]').forEach(function(r){r.addEventListener('change',function(){document.getElementById('go').disabled=!answered();});});
+function val(n){var e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'';}
+
+var FIRST='<div class="first-step"><h3>どの原因でも、最初の一手は同じ</h3><p>推測で設定を触る前に、<strong>利用の画面で「消費がどこから出ているか」を必ず見てください</strong>。対話的な利用で減っているのか、プログラム的・非対話的な利用(編集機の連携・MCPの常駐・定期の実行・一回の呼び出し)で減っているのかで、原因が分かれます。</p></div>';
+
+var BOOKS='<h3>この費用の問題を、根本から整理したい人へ</h3>'+
+'<div class="book"><div class="t"><a href="https://zenn.dev/yurukusa/books/june-15-cliff-survival?utm_source=ghio-overcharge-diag&utm_medium=tool&utm_campaign=cliff-book">Claude Code の6月15日の課金分離に備える</a>（Zenn・¥800・無料の試し読みあり）</div>5分の棚卸しと、留まる・切り替える・混ぜるの4つの対応の経路。この診断で扱った課金の分離の前後の費用の流出に、利用者の側で具体的に備える日本語の手引き。</div>'+
+'<div class="book"><div class="t"><a href="https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=ghio-overcharge-diag&utm_medium=tool&utm_campaign=token-book">Claude Code のトークン消費を半分にする本</a>（Zenn・¥2,500・第1章まで無料）</div>課金の経路を一本化した先で、消費そのものを構造的に減らす全26章。Part 2 に「購読なのに課金がおかしい」の3系統の切り分けの背景がある。</div>'+
+'<div class="book"><div class="t"><a href="https://note.com/yurukusa/membership?utm_source=ghio-overcharge-diag&utm_medium=tool&utm_campaign=membership">Claude Code 安全運用便</a>（note メンバーシップ・月額¥500・初月無料）</div>毎月その月の事故と仕様の変更を、チェックリストとコピペの設定を添えて配信。費用の流出のような「黙って起きる事故」を月に一度まとめて追える。</div>'+
+'<div class="book"><div class="t"><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（無料）</div>破壊的なコマンドを実行の前で止める設定、活動のログ、退避の hook。</div>';
+
+function cause(hot,title,body){return '<div class="cause'+(hot?' hot':'')+'"><h3>'+title+'</h3>'+body+'</div>';}
+
+document.getElementById('go').addEventListener('click',function(){
+  var key=val('key'),multi=val('multi'),desktop=val('desktop'),room=val('room'),seen=val('seen');
+  var html='<h2>切り分けの結果</h2>';
+  if(seen==='no') html+=FIRST;
+  var causes=[];
+  // 系統B: ANTHROPIC_API_KEY の優先(最有力・$187型)
+  if(key==='yes'){
+    causes.push(cause(true,'最有力 — 系統B: 環境変数 ANTHROPIC_API_KEY の優先',
+      '<p>環境変数に API キーがあると、購読の OAuth より<strong>キーの方が優先され、従量課金で走ります</strong>(起票68406の187ドルの型)。あなたは Q1 でキーが設定されている(かもしれない)と答えました。まずここを疑います。</p>'+
+      '<div class="fix"><h4>止め方</h4>シェルの設定ファイル(<code>.bashrc</code> / <code>.zshrc</code>)、<code>.env</code>、CIの環境変数、<code>~/.claude/settings.json</code> の <code>env</code> を確認し、購読で使うなら <code>ANTHROPIC_API_KEY</code> を外して、認証の経路を購読の一本に揃えます。外したあと、新しいシェルで <code>echo $ANTHROPIC_API_KEY</code> が空であることを確かめます。</div>'));
+  }
+  // 系統A: 共有設定の上書き
+  if(multi==='yes'){
+    causes.push(cause(false,'系統A: 共有の設定ファイルの上書き',
+      '<p>別の Anthropic 系のコマンドが <code>~/.config/anthropic</code> を共有していて、購読の状態を外してしまう型です。複数の Anthropic 系のツールを入れている人は、ここを疑います。</p>'+
+      '<div class="fix"><h4>止め方</h4>共有の設定のファイルを削除して、Claude Code で再ログインします。再ログインのあと、購読の状態に戻っているかを利用の画面で確かめます。</div>'));
+  }
+  // 第4型: Desktop + CLI 併存
+  if(desktop==='yes' && key==='no'){
+    causes.push(cause(false,'第4の型: Desktop 版と CLI の併存',
+      '<p>API キーが無く、購読の枠に余裕があっても、Desktop 版と標準の CLI を同時に使っていると、購読の前払いのクレジットが CLI 側に消費されることがあります(起票68501)。購読への切り替えの操作では止まらず、CLI をアンインストールするまで止まらない、という報告です(ここは伝聞)。</p>'+
+      '<div class="fix"><h4>止め方</h4>利用の画面の「消費の出どころ」と、非対話の入口(編集機の連携・MCPの常駐・定期の実行・一回の呼び出し)を点検します。CLI 側で意図せず消費しているなら、使わない方を止める(必要ならアンインストールする)ことを検討します。</div>'));
+  }
+  // 系統C: サーバー側
+  if(room==='yes' && key==='no' && multi==='no'){
+    causes.push(cause(false,'系統C: サーバー側の購読の資格の解決の失敗',
+      '<p>鍵も設定の汚染も無いのに、サーバー側で購読が認識されない型です。枠に余裕があるのに Extra Usage が減るのは、たいていここです。<strong>利用者側の設定では直せません。</strong></p>'+
+      '<div class="fix"><h4>止め方</h4>利用の画面で「消費の出どころ」を確認し、枠に余裕があるのにクレジットが減っている状況を、Anthropic のサポートに伝えます。利用者側で設定をいじっても直らないので、まず状況を正確に記録して連絡するのが近道です。</div>'));
+  }
+  if(causes.length===0){
+    html+=cause(false,'今の回答からは、4つの典型の原因のどれにも強くは当てはまりません',
+      '<p>環境変数も無く、Anthropic 系のツールも一つ、Desktop と CLI の併用も無い場合、まずは「消費の出どころ」を利用の画面で確認してください。対話とプログラムのどちらで減っているかが分かると、上の4つのどれに近いかが見えてきます。それでも枠に余裕があるのにクレジットが減るなら、系統C(サーバー側)に近いので、状況を記録して Anthropic のサポートに伝えます。</p>');
+  } else {
+    html+='<p>あなたの回答に当てはまる原因は次のとおりです(上にあるものほど、まず疑う順です)。</p>'+causes.join('');
+  }
+  html+=BOOKS;
+  var r=document.getElementById('result');
+  r.innerHTML=html; r.classList.add('show'); r.scrollIntoView({behavior:'smooth'});
+});
+</script>
+
+</body>
+</html>
