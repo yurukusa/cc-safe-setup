@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKILL.md Token Checkup — What your skills cost every session</title>
+<meta name="description" content="Paste your SKILL.md and see the always-on token cost it adds to every Claude Code session — even when the skill never fires. Spots the heavy blocks to move out with progressive disclosure. Free, browser-only, nothing sent anywhere.">
+<meta property="og:title" content="SKILL.md Token Checkup — what your skills cost every session">
+<meta property="og:description" content="Paste a SKILL.md, see its always-on token cost and how much progressive disclosure would save. Browser-only, no upload.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup.html">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"SKILL.md Token Checkup","description":"Estimate the always-on token cost a SKILL.md adds to every Claude Code session, and how much progressive disclosure would save.","url":"https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.55}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:1.3rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+textarea{width:100%;min-height:200px;background:#161b22;border:2px solid #30363d;border-radius:8px;color:#c9d1d9;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;padding:.9rem;resize:vertical}
+textarea:focus{outline:none;border-color:#f97316}
+button{background:#f97316;color:#0d1117;border:none;border-radius:8px;padding:.7rem 1.4rem;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.8rem}
+button:hover{background:#fb8c3a}
+.muted{color:#8b949e;font-size:.78rem;margin-top:.5rem}
+.res{display:none;margin-top:1.5rem;animation:fade .3s ease}
+.res.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem;margin-bottom:1rem}
+.big{font-size:2rem;color:#f0f6fc;font-weight:800}
+.big.warn{color:#f97316}
+.big.good{color:#3fb950}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.35rem 0;border-bottom:1px solid #21262d}
+.row:last-child{border-bottom:none}
+.row .k{color:#8b949e;font-size:.85rem}
+.row .v{color:#f0f6fc;font-weight:600}
+.tag{display:inline-block;background:#2a1a0a;border:1px solid #f97316;color:#f0a868;border-radius:5px;padding:.1rem .45rem;font-size:.72rem;margin:.15rem .2rem .15rem 0}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.4rem 0 .6rem}
+ul{margin:.4rem 0 .4rem 1.2rem}
+li{margin:.3rem 0;font-size:.9rem}
+code{background:#161b22;border:1px solid #30363d;border-radius:4px;padding:.1rem .35rem;font-family:ui-monospace,monospace;font-size:.82rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem;overflow-x:auto;font-size:.8rem;margin:.5rem 0}
+.cta{background:#0d2818;border:1px solid #238636;border-radius:10px;padding:1.1rem;margin-top:1.5rem}
+.cta h2{margin-top:0;color:#3fb950}
+.disclaim{color:#6e7681;font-size:.74rem;margin-top:1.5rem;border-top:1px solid #21262d;padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>SKILL.md Token Checkup</h1>
+<p class="sub">Every installed skill's <code>SKILL.md</code> loads into context on <em>every</em> Claude Code session — whether or not the skill ever fires. Paste one below and see the always-on cost, plus the heavy blocks you could move out. Browser-only; nothing is uploaded.</p>
+
+<textarea id="in" placeholder="Paste the full contents of a SKILL.md here (frontmatter + body)..."></textarea>
+<button onclick="run()">Check this SKILL.md</button>
+<p class="muted">Don't have one handy? List your skills' sizes first:<br>
+<code>for f in ~/.claude/skills/*/SKILL.md .claude/skills/*/SKILL.md; do [ -f "$f" ] &amp;&amp; printf '%6s  %s\n' "$(wc -c &lt; "$f")" "$f"; done | sort -rn</code></p>
+
+<div class="res" id="res"></div>
+
+<div class="disclaim">
+Token counts are an estimate (~4 characters per token, the common rough rule for English/code; CJK text runs heavier, so treat the number as a floor). The point isn't the exact figure — it's the <em>always-on</em> portion you pay on every turn, and how much of it is detail that only matters when the skill fires. Nothing you paste leaves your browser.
+</div>
+</div>
+
+<script>
+function estTokens(s){ return Math.round(s.length/4); }
+
+function run(){
+  var raw = document.getElementById('in').value;
+  var res = document.getElementById('res');
+  if(!raw.trim()){ res.className='res on'; res.innerHTML='<div class="card">Paste a SKILL.md first.</div>'; return; }
+
+  var total = estTokens(raw);
+
+  // Split frontmatter (between leading --- ... ---) from body.
+  var fm = '', body = raw;
+  var m = raw.match(/^\s*---\s*[\r\n]([\s\S]*?)[\r\n]---\s*[\r\n]?/);
+  if(m){ fm = m[0]; body = raw.slice(m[0].length); }
+
+  // Layer-1 keep = frontmatter (name/description/trigger) + a short pointer line.
+  // Estimate the "thin" frontmatter: name + description + trigger lines only.
+  var keepLines = [];
+  fm.split(/[\r\n]+/).forEach(function(l){
+    if(/^\s*(name|description|trigger|when)\s*:/i.test(l)) keepLines.push(l);
+  });
+  var layer1Chars = keepLines.join('\n').length + 120; // + a one-line "read reference/… when this fires"
+  var layer1 = estTokens('x'.repeat(layer1Chars));
+
+  // Detect heavy blocks that belong in layer 2/3 (load on demand, not always-on).
+  var heavy = [];
+  var codeFences = (body.match(/```/g)||[]).length;
+  if(codeFences>=2) heavy.push('Code / config blocks ('+Math.floor(codeFences/2)+')');
+  var tableRows = (body.match(/^\s*\|.*\|\s*$/gm)||[]).length;
+  if(tableRows>=2) heavy.push('Tables ('+tableRows+' rows — e.g. error/status code lists)');
+  if(/\b(POST|GET|PUT|DELETE)\b\s+\/|Authorization:|Bearer|endpoint|api\//i.test(body)) heavy.push('API specs / endpoints');
+  if(/^\s*\w+:\s*$/m.test(body) && /^\s{2,}\w+:/m.test(body)) heavy.push('YAML / nested config');
+  var headings = (body.match(/^#{2,}\s/gm)||[]).length;
+  if(headings>=4) heavy.push(headings+' sections (long-tail detail / examples)');
+
+  if(layer1 > total) layer1 = total;
+  var saved = total - layer1;
+  var pct = total>0 ? Math.round(saved/total*100) : 0;
+  // Per-month: assume ~3 sessions/day as a mid estimate.
+  var perMonth = saved * 90;
+
+  var verdict, vclass;
+  if(total < 250){ verdict='Already lean'; vclass='good'; }
+  else if(pct >= 40){ verdict='Heavy — strong candidate for progressive disclosure'; vclass='warn'; }
+  else { verdict='Moderate'; vclass='warn'; }
+
+  var h = '';
+  h += '<div class="card"><div class="muted">This SKILL.md, always-on per session</div><div class="big '+(total>=250?'warn':'good')+'">'+total.toLocaleString()+' tokens</div>';
+  h += '<div class="muted" style="margin-top:.4rem">Verdict: <strong>'+verdict+'</strong></div></div>';
+
+  h += '<div class="card">';
+  h += '<div class="row"><span class="k">Paid on EVERY session now</span><span class="v">'+total.toLocaleString()+' tok</span></div>';
+  h += '<div class="row"><span class="k">If you keep only Layer 1 (name + description + trigger + a pointer)</span><span class="v '+(saved>0?'':'')+'">~'+layer1.toLocaleString()+' tok</span></div>';
+  h += '<div class="row"><span class="k">Moved to load-on-demand (Layer 2/3)</span><span class="v" style="color:#3fb950">~'+saved.toLocaleString()+' tok ('+pct+'%)</span></div>';
+  if(saved>0) h += '<div class="row"><span class="k">Saved per month (~3 sessions/day, this one skill)</span><span class="v" style="color:#3fb950">~'+perMonth.toLocaleString()+' tok</span></div>';
+  h += '</div>';
+
+  if(heavy.length){
+    h += '<h2>What to move out of the always-on part</h2>';
+    h += '<p style="font-size:.9rem;color:#8b949e">These were detected in the body. None of them are needed until the skill actually fires — move them into <code>reference/</code> files the skill reads on demand:</p><div style="margin-top:.5rem">';
+    heavy.forEach(function(t){ h += '<span class="tag">'+t+'</span>'; });
+    h += '</div>';
+  } else if(total>=250){
+    h += '<h2>Trim the body</h2><p style="font-size:.9rem;color:#8b949e">No obvious heavy blocks detected, but the body is still large. Keep Layer 1 to the trigger + a one-line pointer, and move step-by-step detail into a reference file.</p>';
+  }
+
+  h += '<h2>The fix: 3-layer progressive disclosure</h2>';
+  h += '<ul>';
+  h += '<li><strong>Layer 1 (always-on, keep tiny):</strong> <code>name</code>, a one-line <code>description</code>, a precise <code>trigger</code>, and one line: "when this fires, read <code>reference/…</code>".</li>';
+  h += '<li><strong>Layer 2 (on demand):</strong> API specs, error/status tables, config — moved into <code>reference/*.md</code> that Claude reads only after the skill fires.</li>';
+  h += '<li><strong>Layer 3 (rare):</strong> worked examples and edge cases, referenced from Layer 2.</li>';
+  h += '</ul>';
+  h += '<p style="font-size:.85rem;color:#8b949e">On a session where this skill never fires, Layers 2/3 never enter context — so the '+pct+'% above stops being a fixed tax on every turn.</p>';
+
+  h += '<div class="cta"><h2>Go deeper</h2>';
+  h += '<p style="font-size:.9rem">This is the core of the technique that cut my own SKILL.md tokens ~40% across 800+ hours of Claude Code. The full write-up — 10 recipes, testing skills, team sharing, advanced patterns — is a short book:</p>';
+  h += '<ul>';
+  h += '<li><a href="https://zenn.dev/yurukusa/books/a1b2c3d4e5f6g7">Claude Code Skills 実践レシピ集 (¥500, JP)</a> — intro + chapter 1 free.</li>';
+  h += '<li><a href="https://gist.github.com/yurukusa/5ac4a78225d81caf7f72bd520208cf74">Free English gist</a> of the progressive-disclosure pattern (before/after).</li>';
+  h += '<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — free MIT hooks for Claude Code safety &amp; cost.</li>';
+  h += '<li><a href="https://yurukusa.substack.com">Agent Safety Brief</a> — one verified Claude Code incident a month, free, no payment.</li>';
+  h += '</ul></div>';
+
+  res.className='res on';
+  res.innerHTML = h;
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
