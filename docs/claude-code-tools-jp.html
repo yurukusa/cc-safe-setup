@@ -40,6 +40,24 @@ a:hover{text-decoration:underline}
 
 <p class="lede">Claude Code を長く使っていると、いろいろな「気づきにくい事故」に出会います。トークンが想定の何倍も消える、長いセッションが突然開けなくなる、編集が静かに失敗する……。困っている種類ごとに、<strong>自分の状態をその場で調べられる無料の診断ツール</strong>を用意しました。すべて<strong>あなたのブラウザの中だけで処理し、ファイルやログはどこにも送信しません</strong>。気になるものから試してください。</p>
 
+<a class="tool" href="claude-code-incident-digest-2026-06-jp.html">
+  <div class="cat">今月の事故を一か所で総点検したい</div>
+  <div class="nm">2026年6月 Claude Code 事故まとめ <span class="arrow">→</span></div>
+  <div class="ds">今月 GitHub で報告された取り返しのつかない事故を、データ消失・設定汚染・費用・捏造・相互運用の5つに分けて一覧にしました。各事故に、何が静かに壊れるかの一段の説明と、設定で先回りする手当てへのリンクつき。月刊で続けます。</div>
+</a>
+
+<a class="tool" href="subagent-inheritance-risk-jp.html">
+  <div class="cat">サブエージェントに安全設定が継承されない</div>
+  <div class="nm">サブエージェントの継承 自己診断（5問） <span class="arrow">→</span></div>
+  <div class="ds">サブエージェント（<code>Agent</code> / <code>Task</code>）には <code>CLAUDE.md</code> も hook もメモリも継承されないと報告されています。親で効いていた安全の歯止めが、いちばん自律で長く走る子の作業では外れている——その縦の相互運用への露出を5問で測り、注入と上限の手当てを示します。</div>
+</a>
+
+<a class="tool" href="multi-agent-worktree-isolation-risk-jp.html">
+  <div class="cat">worktree の隔離が黙って無効になる</div>
+  <div class="nm">worktree 隔離 データ毀損リスク自己診断（5問） <span class="arrow">→</span></div>
+  <div class="ds">サブエージェントを <code>isolation: worktree</code> で並列に走らせると、隔離が黙って無効になり、コミットが意図しないブランチへ静かに着地する事故が報告されています。エラーも警告も出ない型への露出を5問で測り、実行前に止めるガードを示します。</div>
+</a>
+
 <a class="tool" href="claude-code-model-switch-timeline-jp.html">
   <div class="cat">固定したモデルが勝手に切り替わる・降格する</div>
   <div class="nm">モデル切替タイムライン <span class="arrow">→</span></div>
