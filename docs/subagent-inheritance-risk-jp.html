@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サブエージェントに、あなたの安全設定は届いていますか — Claude Code 親子エージェントの相互運用 自己診断</title>
+<meta name="description" content="Claude Code のサブエージェント(Agent/Task)には、CLAUDE.md も hook もメモリも継承されないと報告されています。親で効いていた安全の歯止めが、いちばん自律で長く走る子の作業では外れている——その露出を5問で自己診断します。注入hookと上限ガードの手当てつき。">
+<meta property="og:title" content="サブエージェントに、あなたの安全設定は届いていますか — 親子エージェントの相互運用 自己診断">
+<meta property="og:description" content="CLAUDE.md も hook もメモリも、子のサブエージェントには継承されない。親で効く安全の歯止めが子で外れる縦の相互運用への露出を5問で測る。">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; line-height: 1.8; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.55rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 2rem; }
+.question { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.5rem 1.7rem; margin: 1.2rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.question h2 { font-size: 1.05rem; margin-bottom: 0.9rem; color: #1f2937; }
+.option { display: block; padding: 0.6rem 0.8rem; margin: 0.4rem 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: background 0.15s; }
+.option:hover { background: #f3f4f6; }
+.option input { margin-right: 0.6rem; }
+.option.selected { background: #dbeafe; border-color: #2563eb; }
+#scoreBtn { display: block; width: 100%; padding: 1rem; margin: 2rem 0 1rem; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+#scoreBtn:hover { background: #15803d; }
+#scoreBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+#result { background: white; border-radius: 10px; padding: 1.8rem; margin: 2rem 0; border: 2px solid #e2e8f0; display: none; }
+#result h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+#result .verdict { padding: 0.4rem 1rem; border-radius: 999px; font-weight: bold; display: inline-block; margin-bottom: 1rem; }
+#result .high { background: #dc2626; color: white; }
+#result .mid { background: #f59e0b; color: white; }
+#result .low { background: #94a3b8; color: white; }
+#result .score-display { font-size: 0.95rem; color: #555; margin-bottom: 1rem; }
+#result h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: #1f2937; }
+#result ul { padding-left: 1.3rem; margin-bottom: 0.8rem; }
+#result li { margin: 0.5rem 0; font-size: 0.95rem; }
+#result a { color: #2563eb; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.88em; }
+.mech { background: #f8fafc; border-left: 4px solid #2563eb; padding: 1rem 1.3rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.88rem; color: #555; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>サブエージェントに、あなたの安全設定は届いていますか</h1>
+<p class="subtitle">Claude Code のサブエージェント(<code>Agent</code> / <code>Task</code>)には、<code>CLAUDE.md</code> も hook もメモリも継承されないと報告されています。親で効いていた安全の歯止めが、いちばん自律で長く走る子の作業では外れている——その縦の相互運用への露出を、5問で測ります。<strong>答えは送信されません。採点は全てこのページの中だけで動きます。</strong></p>
+
+<div class="mech">
+<strong>この型がなぜ怖いか。</strong> サブエージェントは、親と同じ設定で動くように見えて、実際は親の設定の文脈を持たない別の実行単位だと報告されています。<code>CLAUDE.md</code> は子に継承されず(<code>omitClaudeMd</code> の扱い)、<code>settings.json</code> の hook は子のツール呼び出しに発火せず、メモリも子の側では保存されない、という起票が続いています。つまり、危ない操作を止める hook や、作風・安全のルールを、親では効いていることを確かめても、重い作業を子に投げた瞬間にその作業は歯止めの外に出ます。<strong>エラーも警告も出ません。</strong>いちばん自律で長く走るのが子だとすれば、ちょうど見張りの効かない領域で長時間走っていることになります。さらに、役割の文脈が継承されないために、子が「自分も分割していい」と解釈して孫を生み、費用が膨らんだという報告もあります。</div>
+
+<div class="question" data-q="1">
+<h2>1. サブエージェント(<code>Agent</code> / <code>Task</code>、Explore / Plan などの子)を、どれくらい使いますか</h2>
+<label class="option"><input type="radio" name="q1" value="0"> ほとんど使わない — 作業はほぼ親セッションだけ</label>
+<label class="option"><input type="radio" name="q1" value="10"> ときどき — 調べ物などで1〜2体を呼ぶことがある</label>
+<label class="option"><input type="radio" name="q1" value="20"> 日常的に使う — 重い作業や並列の作業を子に任せる運用</label>
+</div>
+
+<div class="question" data-q="2">
+<h2>2. <code>CLAUDE.md</code> に書いた安全・作風のルールを、子のプロンプトに届ける仕組み(注入)を入れていますか</h2>
+<label class="option"><input type="radio" name="q2" value="0"> 入れている — 子の起動時に必要なルールが必ず差し込まれる</label>
+<label class="option"><input type="radio" name="q2" value="10"> 一部のルールを毎回プロンプトに手で書いている</label>
+<label class="option"><input type="radio" name="q2" value="20"> 何もしていない — <code>CLAUDE.md</code> は子にも効くと思っていた</label>
+</div>
+
+<div class="question" data-q="3">
+<h2>3. <code>settings.json</code> の hook(危ない操作を止める PreToolUse など)が、子のツール呼び出しにも効いているかを確認したことがありますか</h2>
+<label class="option"><input type="radio" name="q3" value="0"> 確認した — 子のツール呼び出しでも hook が発火するのをログで見た</label>
+<label class="option"><input type="radio" name="q3" value="12"> 親では効いているのを見たが、子では確かめていない</label>
+<label class="option"><input type="radio" name="q3" value="20"> 確認していない — 子にも当然効くと思っている</label>
+</div>
+
+<div class="question" data-q="4">
+<h2>4. 子がさらに孫を生む(再帰のスポーン)、または子の数が増えすぎることに、上限の仕組みで備えていますか</h2>
+<label class="option"><input type="radio" name="q4" value="0"> 備えている — 子の数や深さに上限を置く仕組みを入れている</label>
+<label class="option"><input type="radio" name="q4" value="12"> 気をつけているが、仕組みでは止めていない</label>
+<label class="option"><input type="radio" name="q4" value="20"> 特に備えていない — 基盤に任せている</label>
+</div>
+
+<div class="question" data-q="5">
+<h2>5. コミット・PR・外部サービスへの接続のような、外向きで取り返しのつかない行動を、ルールとメモリを持つ親の側に限定していますか</h2>
+<label class="option"><input type="radio" name="q5" value="0"> はい — 子は調べる・読むなど内部で完結する作業に絞っている</label>
+<label class="option"><input type="radio" name="q5" value="10"> だいたいそうだが、子にも一部の外向きの行動を任せる</label>
+<label class="option"><input type="radio" name="q5" value="20"> 区別していない — 子にもコミットや外部接続を任せる</label>
+</div>
+
+<button id="scoreBtn" disabled>露出を採点する</button>
+
+<div id="result">
+<h2 id="verdictTitle"></h2>
+<span class="verdict" id="verdictBadge"></span>
+<div class="score-display" id="scoreText"></div>
+<div id="verdictBody"></div>
+</div>
+
+<div class="disclosure">
+この診断は、報告されている事例(<a href="https://github.com/anthropics/claude-code/issues/40459">anthropics/claude-code#40459</a>=サブエージェントが <code>CLAUDE.md</code> の文脈を失う、<a href="https://github.com/anthropics/claude-code/issues/69260">#69260</a>=hook が子のツール呼び出しに発火しない、<a href="https://github.com/anthropics/claude-code/issues/69283">#69283</a>=子がメモリ・ルールを継承しない、<a href="https://github.com/anthropics/claude-code/issues/69578">#69578</a>=再帰のスポーンで予期しない費用)をもとにしています。これらは私の直接の体験でなく、起票で共有された報告です。一方、対策として挙げる <code>subagent-claudemd-inject.sh</code> / <code>subagent-spawn-rate-monitor.sh</code> / <code>max-subagent-count.sh</code> は cc-safe-setup に実装され、試験を通した hook です。採点はあなたのブラウザの中だけで動き、答えは収集も送信もしません。recommendations は出発点で、各環境での検証の代わりにはなりません。
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-25 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a>
+</footer>
+
+</div>
+
+<script>
+const btn = document.getElementById('scoreBtn');
+const result = document.getElementById('result');
+const verdictTitle = document.getElementById('verdictTitle');
+const verdictBadge = document.getElementById('verdictBadge');
+const scoreText = document.getElementById('scoreText');
+const verdictBody = document.getElementById('verdictBody');
+const options = document.querySelectorAll('.option');
+
+function checkComplete() {
+  const answered = [1,2,3,4,5].every(n => document.querySelector(`input[name="q${n}"]:checked`));
+  btn.disabled = !answered;
+}
+
+options.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const q = opt.parentElement.dataset.q;
+    document.querySelectorAll(`.question[data-q="${q}"] .option`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    setTimeout(checkComplete, 10);
+  });
+});
+
+btn.addEventListener('click', () => {
+  let score = 0;
+  for (let i = 1; i <= 5; i++) {
+    score += parseInt(document.querySelector(`input[name="q${i}"]:checked`).value, 10);
+  }
+  let title, verdict, body;
+
+  if (score >= 55) {
+    title = 'この縦の相互運用への露出が高い構成です';
+    verdict = '<span class="verdict high">露出 高</span>';
+    body = `
+      <p>あなたの点数(${score}/100)は、サブエージェントを日常的に使うのに、ルールも hook も子に届ける仕組みが無い構成です。親で効いている安全の歯止めが、いちばん長く走る子の作業では外れていても、その場では気づけません。子が孫を生んで費用が膨らむ型にも備えがありません。</p>
+      <h3>いますぐ効く一手</h3>
+      <ul>
+        <li><strong>子に届けたい数行を、起動時に注入する。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-claudemd-inject.sh"><code>subagent-claudemd-inject.sh</code></a>(<code>PreToolUse</code>・matcher は <code>Agent</code>)を入れる。<code>CLAUDE.md</code> の中で子にも必ず効かせたいルールに <code>SUBAGENT:</code> の印を付けておくと、子の起動時にその数行だけが子のプロンプトへ差し込まれます。<code>npx cc-safe-setup</code> で導入できます。</li>
+        <li><strong>子の数と深さに上限を置く。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-spawn-rate-monitor.sh"><code>subagent-spawn-rate-monitor.sh</code></a> と <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/max-subagent-count.sh"><code>max-subagent-count.sh</code></a> で、孫の連鎖が指数で広がる前に止める。基盤の最後の歯止めは費用の事故を防ぐには遅すぎます。</li>
+        <li><strong>外向きの行動は親に残す。</strong> コミット・PR・外部接続は、ルールとメモリを持つ親の側で行い、子は調べる・読むなど内部で完結する作業に絞る。</li>
+      </ul>
+      <h3>もっと深く知る</h3>
+      <ul>
+        <li>この縦の相互運用(サブエージェントに <code>CLAUDE.md</code>・hook・メモリが継承されない)を、起きた事故と利用者側の手当てまで章で扱う <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本(¥1,500・第2章まで無料、第10章でこの主題を整理)</a>。</li>
+        <li>サブエージェントの境界や、より広いデータ消失の事故に備えるなら <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本(¥800・第3章まで無料)</a>。同書は <a href="https://www.amazon.co.jp/dp/B0H69B7SVZ">Amazon Kindle(B0H69B7SVZ)</a> でも公開していて、Kindle Unlimited なら追加の費用なしで読めます(Kindle 版は購入時点の版で、Zenn 版のような追補の自動更新は入りません)。</li>
+      </ul>
+    `;
+  } else if (score >= 25) {
+    title = '部分的に露出しています';
+    verdict = '<span class="verdict mid">露出 中</span>';
+    body = `
+      <p>あなたの点数(${score}/100)は、条件が揃えばこの縦の相互運用に当たりうる構成です。子を使う頻度や、ルール・hook を子に届けているかで、露出は上にも下にも動きます。</p>
+      <h3>露出を下げる順番</h3>
+      <ul>
+        <li>まず <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-claudemd-inject.sh"><code>subagent-claudemd-inject.sh</code></a> を入れて、安全と作風に関わる数行だけは子にも確実に届ける。<code>CLAUDE.md</code> 全部でなく <code>SUBAGENT:</code> の印を付けた行だけを選んで届けるのが要点です。</li>
+        <li>子を並列で増やすなら、その前に <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/max-subagent-count.sh"><code>max-subagent-count.sh</code></a> で数の上限を置く。子が孫を生む型は、頻度が上がるほど起きやすくなります。</li>
+      </ul>
+      <h3>背景を読む</h3>
+      <ul>
+        <li>縦の相互運用の整理は <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本(¥1,500・第10章)</a>、サブエージェントの境界と事故は <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本(¥800・第3章まで無料)</a>。無料の防御の hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>。</li>
+      </ul>
+    `;
+  } else {
+    title = 'この縦の相互運用への露出は低い構成です';
+    verdict = '<span class="verdict low">露出 低</span>';
+    body = `
+      <p>あなたの点数(${score}/100)では、ルールや hook が子に届かないことで困る型に当たる確率は低いです。子をあまり使わない、または届ける仕組みと上限を置いている構成です。</p>
+      <h3>いま効く備え</h3>
+      <ul>
+        <li>将来サブエージェントの利用や並列を増やすなら、その前に <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の <code>subagent-claudemd-inject.sh</code> と <code>max-subagent-count.sh</code> を入れておくと、運用が変わっても歯止めが子まで届きます。</li>
+        <li>道具どうし(Claude Code / Codex / Cursor 等)をまたいだ横の相互運用(<code>CLAUDE.md</code> と <code>AGENTS.md</code> のずれ)に備えるなら <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本(¥1,500)</a>。</li>
+      </ul>
+      <h3>また測るとき</h3>
+      <ul>
+        <li>サブエージェントを並列で常用するようになったら、もう一度この診断に戻ってください。子の常用は露出を一段上げます。</li>
+      </ul>
+    `;
+  }
+
+  verdictTitle.textContent = title;
+  verdictBadge.outerHTML = verdict;
+  scoreText.textContent = `点数: ${score} / 100`;
+  verdictBody.innerHTML = body;
+  result.style.display = 'block';
+  result.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+</script>
+</body>
+</html>
