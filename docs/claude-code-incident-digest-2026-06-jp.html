@@ -58,6 +58,18 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 <p class="links">→ 詳しい機構と手当て: 事故防止本 第46章</p>
 </div>
 
+<div class="item">
+<h3>Write が「成功」を返したのに、ファイルの末尾が NUL バイトで壊れている</h3>
+<p>Windows の Cowork 環境で、Write や Edit が成功を返しながら、ファイルの末尾を NUL バイトで静かに破損させる事故が報告されています。バイト数は変わらないため、<code>wc -c</code> や <code>tail</code> での見た目の確認では気づけない、という性質が厄介な型です。検知は <code>grep -aPq '\x00'</code> のように NUL を直接探す必要があり、よく提案される <code>grep -c $'\x00'</code> は改行で誤動作することを手元で確認しました。</p>
+<p class="links">→ 手当て: cc-safe-setup の <code>write-nul-corruption-detector.sh</code>(PostToolUse で Write/Edit の後に NUL を検出して止める) ／ 詳しい機構: 事故防止本 第22章</p>
+</div>
+
+<div class="item">
+<h3>git checkout --orphan と git rm -rf を続けて、プロジェクトと .git 履歴を丸ごと消す</h3>
+<p><code>git checkout --orphan tmp</code> で新しい孤立ブランチに移った直後に <code>git rm -rf .</code> を実行し、Unity プロジェクトの全ファイルと .git の履歴ごと、3年分の作業を完全に消失させた事故が報告されています。孤立ブランチでは元の履歴への参照が外れているため、削除を取り消す足場が残らない、という機構です。</p>
+<p class="links">→ 手当て: cc-safe-setup の <code>git-rm-orphan-wipe-guard.sh</code> ／ 詳しい機構と手当て: 事故防止本 第50章</p>
+</div>
+
 <h2>2. 設定の汚染</h2>
 
 <div class="item">
@@ -112,7 +124,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 </div>
 
 <footer>
-yurukusa · MIT · 2026-06-25 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a>
+yurukusa · MIT · 2026-06-26 更新 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a>
 </footer>
 
 </div>
