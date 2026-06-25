@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年6月 Claude Code 事故まとめ — 今月、静かに起きた取り返しのつかない事故</title>
+<meta name="description" content="2026年6月にGitHubで報告されたClaude Codeの取り返しのつかない事故を、データ消失・設定汚染・費用・捏造・相互運用の5つに分けて一か所にまとめました。各事故に、何が静かに壊れるかの一段の説明と、設定で先回りする手当てへのリンクをつけています。月刊で継続。">
+<meta property="og:title" content="2026年6月 Claude Code 事故まとめ">
+<meta property="og:description" content="今月、Claude Codeで静かに起きた取り返しのつかない事故を、データ消失・設定汚染・費用・捏造・相互運用の5分類で一覧。各事故に先回りの手当てのリンクつき。">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; line-height: 1.8; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 1.8rem; }
+h2 { font-size: 1.2rem; margin: 2rem 0 0.3rem; color: #1f2937; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem; }
+.item { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.2rem 1.4rem; margin: 1rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.item h3 { font-size: 1.02rem; margin-bottom: 0.5rem; color: #1f2937; }
+.item p { font-size: 0.94rem; margin-bottom: 0.5rem; }
+.item .links { font-size: 0.88rem; color: #555; }
+.item .links a { color: #2563eb; }
+.intro-box { background: #f8fafc; border-left: 4px solid #2563eb; padding: 1rem 1.3rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+.cta { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 1.4rem 1.6rem; margin: 2.5rem 0 1rem; }
+.cta h2 { border: none; margin-top: 0; }
+.cta a { color: #047857; font-weight: bold; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.86rem; color: #555; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.88em; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>2026年6月 Claude Code 事故まとめ</h1>
+<p class="subtitle">今月、Claude Code で静かに起きた「取り返しのつかない事故」を、一か所にまとめました。データ消失・設定汚染・費用・捏造・相互運用の5つに分け、それぞれ何が静かに壊れるかを一段で説明し、設定で先回りする手当てへのリンクをつけています。</p>
+
+<div class="intro-box">
+このまとめは、GitHub の <code>anthropics/claude-code</code> で今月報告された事故のうち、エラーも警告も出ないまま進んでしまう「静かな」型を中心に選んでいます。各事故の事実関係は、私の直接の体験でなく、起票で共有された報告です(伝聞)。一方、対策として挙げる hook や手順は、cc-safe-setup で実装し試験を通したもの、または自分の運用で確かめたものです(断定)。日本語で月次の Claude Code の事故をまとめた場所はほかに見当たらないので、毎月続けます。
+</div>
+
+<h2>1. データ消失</h2>
+
+<div class="item">
+<h3>worktree で隔離したはずの編集が、本流(main)に着地する</h3>
+<p>サブエージェントを worktree で並列に走らせると、隔離が黙って無効になり、親の作業コピーを直接編集してコミットが別ブランチへ静かに着地する事故が報告されています。エラーも警告も出ず、後のリベースや force push で初めて気づく型です。</p>
+<p class="links">→ 露出を測る: <a href="multi-agent-worktree-isolation-risk-jp.html">worktree 隔離 データ毀損リスク自己診断</a> ／ 手当て: cc-safe-setup の <code>worktree-escape-write-guard.sh</code></p>
+</div>
+
+<div class="item">
+<h3>プロジェクトのフォルダを移動・リネームしたら、会話の履歴が丸ごと消える</h3>
+<p>プロジェクトのフォルダを移動したりリネームしたりすると、それまでの会話の履歴が参照できなくなる事故が報告されています。履歴は作業ディレクトリのパスに紐づくため、パスが変わると孤児になる、という機構だそうです。</p>
+<p class="links">→ 事前のバックアップの実用手順: <a href="https://zenn.dev/yurukusa/articles/backup-claude-projects-history">~/.claude/projects/ を5分でバックアップする(検証済み)</a></p>
+</div>
+
+<div class="item">
+<h3>「安全な」force-with-lease が弾かれた直後、--force へ昇格して他人の作業を消す</h3>
+<p><code>--force-with-lease</code> が弾かれたとき、その失敗を無視して <code>--force</code> へ昇格すると、他者が積んだコミットを上書きで消す事故が報告されています。安全側の操作のつもりが、一段の昇格で取り返しのつかない上書きに変わる型です。</p>
+<p class="links">→ 詳しい機構と手当て: 事故防止本 第46章</p>
+</div>
+
+<h2>2. 設定の汚染</h2>
+
+<div class="item">
+<h3>あなたが信頼した後に、設定ファイルが外から書き換えられる</h3>
+<p>一度信頼した後で、<code>~/.claude.json</code> や <code>settings.json</code> が、Claude の外(導入後スクリプトや悪性の MCP)から書き換えられる経路が報告されています。Claude の編集を止める hook はあっても、外からの汚染は別経路で入ります。</p>
+<p class="links">→ 手当て(読み取りだけの起動時の点検): cc-safe-setup の <code>mcp-config-poisoning-audit.sh</code> ／ 事故防止本 第45章</p>
+</div>
+
+<h2>3. 費用</h2>
+
+<div class="item">
+<h3>6月15日の課金分離で、同じ運用の費用が跳ねる</h3>
+<p>Anthropic の課金の分離(施行当日に一時停止・再実施し得る)で、同じ運用の費用が大きく膨らむ見込みが議論されました。自分の構成がどれだけ露出しているかは、ログから測れます。</p>
+<p class="links">→ 露出を測る: <a href="june-15-billing-cliff-exposure-jp.html">6月15日の課金分離 露出の自己診断</a></p>
+</div>
+
+<div class="item">
+<h3>起動しただけ・接続が切れただけで、利用枠や費用が焼ける</h3>
+<p>認証が静かに失敗して作業が止まる、起動の構成によって枠が早く減る、といった費用と枠の事故が報告されています。プロセスが生きていても、ログを見ないと「正常」かどうかは分かりません。</p>
+<p class="links">→ 認証の静かな失敗の診断: <a href="claude-code-auth-silent-failure-diagnostic-jp.html">認証のサイレント失敗 自己診断</a></p>
+</div>
+
+<h2>4. 捏造(嘘の完了・作話)</h2>
+
+<div class="item">
+<h3>モデルが「プロンプトインジェクションを受けた」と思い込み、自動メモリに書いて毎セッション再発させる</h3>
+<p>モデルが、道具の出力に注入があったと作話し、それを自動のメモリに確定の事実として書き込み、次のセッション以降も読み込まれて同じ作話を再発させる、という閉じた輪が報告されています。本物の注入か作話かは、会話の記録の構造で見分けられます。</p>
+<p class="links">→ 見分けと汚染メモリの除去: 事故防止本 第48章</p>
+</div>
+
+<h2>5. 相互運用(複数の道具・親子のエージェント)</h2>
+
+<div class="item">
+<h3>サブエージェントに、あなたの安全設定が継承されない</h3>
+<p>サブエージェント(Agent / Task)には <code>CLAUDE.md</code> も hook もメモリも継承されない、という報告が続いています。親で効いていた安全の歯止めが、いちばん自律で長く走る子の作業ではちょうど外れている、という縦の相互運用の事故です。役割の文脈が継承されず、子が孫を生んで費用が膨らんだ報告もあります。</p>
+<p class="links">→ 露出を測る: <a href="subagent-inheritance-risk-jp.html">サブエージェントの継承 自己診断</a> ／ 整理: <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本 第10章</a></p>
+</div>
+
+<div class="cta">
+<h2>毎月のまとめを続けます</h2>
+<p>このまとめは月刊で続けます。今月の事故を一か所で総点検したい方、来月号も読みたい方へ。</p>
+<p style="margin-top:0.6rem">
+・無料の月次のまとめ(抜粋・速報)は <a href="https://note.com/yurukusa/n/n5f83f1f464d1">note の月刊まとめ(2026年6月号)</a> で。<br>
+・取り返しのつかない事故を設定で先回りする全手順は <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本(¥800・第3章まで無料)</a>。同書は <a href="https://www.amazon.co.jp/dp/B0H69B7SVZ">Amazon Kindle(B0H69B7SVZ)</a> でも公開していて、Kindle Unlimited なら追加の費用なしで読めます。<br>
+・無料の防御の hook 集は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>(<code>npx cc-safe-setup</code>)。
+</p>
+</div>
+
+<div class="disclosure">
+各事故の事実関係は GitHub の起票で共有された報告にもとづく伝聞で、私の直接の体験ではありません。対策の hook と手順は cc-safe-setup に実装し試験を通したもの、または自分の運用で確かめたものです。リンク先の自己診断は、すべてあなたのブラウザの中だけで動き、答えは収集も送信もしません。
+</div>
+
+<footer>
+yurukusa · MIT · 2026-06-25 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a>
+</footer>
+
+</div>
+</body>
+</html>
