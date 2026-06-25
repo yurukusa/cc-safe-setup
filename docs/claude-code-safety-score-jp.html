@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>あなたのClaude Codeの安全設定は何点？——12問の環境安全スコア自己診断</title>
+<meta name="description" content="12問・3分。Claude Code を「ほぼ無人」で安全に走らせるための設定が、あなたの環境にどれだけ揃っているかを0〜100点で採点します。足りない対策ごとに、どの hook と、事故防止本のどの章で塞げるかを示します。ブラウザの中だけで動き、答えは送信しません。">
+<meta property="og:title" content="あなたのClaude Codeの安全設定は何点？">
+<meta property="og:description" content="12問→0〜100点。データ消失・暴走・課金・捏造を設定で先回りできているか採点し、足りない対策ごとに塞ぎ方を示します。">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 1.5rem; line-height: 1.65; }
+.c { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 1.5rem; color: #f0f6fc; margin-bottom: 0.5rem; line-height: 1.4; }
+.lead { color: #8b949e; font-size: 0.95rem; margin-bottom: 1.5rem; }
+.progress { background: #21262d; height: 5px; border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+.progress-bar { background: #58a6ff; height: 100%; transition: width 0.3s ease; width: 0%; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 1.4rem; margin-bottom: 1rem; }
+.qnum { color: #58a6ff; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.4rem; }
+.qtext { font-size: 1.08rem; color: #f0f6fc; margin-bottom: 0.3rem; }
+.qhint { color: #8b949e; font-size: 0.85rem; margin-bottom: 1rem; }
+.qhint code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.82rem; }
+.opt { display: block; width: 100%; text-align: left; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 0.85rem 1.1rem; margin-bottom: 0.55rem; cursor: pointer; color: #c9d1d9; font-size: 0.95rem; transition: background 0.15s, border-color 0.15s; }
+.opt:hover { background: #1c2128; border-color: #58a6ff; }
+.hidden { display: none; }
+.score-big { font-size: 3rem; font-weight: 700; color: #f0f6fc; text-align: center; }
+.score-band { font-size: 1.05rem; text-align: center; margin: 0.2rem 0 1rem; font-weight: 700; }
+.weak { color: #f85149; } .mid { color: #d29922; } .strong { color: #3fb950; }
+.gap { background: #161b22; border-left: 3px solid #f85149; border-radius: 0 6px 6px 0; padding: 0.8rem 1.1rem; margin-bottom: 0.7rem; font-size: 0.92rem; }
+.gap .fix { color: #8b949e; font-size: 0.86rem; margin-top: 0.3rem; }
+.gap .fix code { background: #21262d; padding: 0.1rem 0.4rem; border-radius: 3px; }
+.cta { background: #132013; border: 1px solid #2ea043; border-radius: 10px; padding: 1.4rem; margin: 1.5rem 0; }
+.cta h2 { color: #3fb950; font-size: 1.15rem; margin-bottom: 0.6rem; }
+.cta a { color: #58a6ff; font-weight: 700; }
+.note { color: #8b949e; font-size: 0.84rem; margin-top: 1.5rem; border-top: 1px solid #21262d; padding-top: 1rem; }
+a { color: #58a6ff; }
+button.restart { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 8px; padding: 0.6rem 1.2rem; cursor: pointer; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="c">
+<h1>あなたのClaude Codeの安全設定は何点？</h1>
+<p class="lead">本書の著者は、Claude Code の環境診断スコアを <strong>19点から85点</strong>へ上げて、800時間以上「ほぼ無人」で走らせられるようにしました。あなたの今の環境は何点でしょうか。12問・3分。データが消える・暴走する・課金が膨らむ・嘘の完了を返す——こうした取り返しのつかない事故を、設定で先回りできているかを採点します。<br><strong>ブラウザの中だけで動き、答えは収集も送信もしません。</strong></p>
+
+<div class="progress"><div class="progress-bar" id="bar"></div></div>
+
+<div id="quiz"></div>
+
+<div id="result" class="hidden">
+<div class="card">
+<div class="score-big"><span id="score">0</span> <span style="font-size:1.2rem;color:#8b949e">/ 100点</span></div>
+<div class="score-band" id="band"></div>
+<p id="summary" style="text-align:center;color:#8b949e;font-size:0.9rem;"></p>
+</div>
+<h2 style="font-size:1.1rem;color:#f0f6fc;margin:1.2rem 0 0.7rem;">埋めると点数が上がる、足りない対策</h2>
+<div id="gaps"></div>
+<div class="cta">
+<h2>足りない対策を、設定で先回りする</h2>
+<p>上の「足りない対策」は、どれも実際に起きた事故から逆算したものです。各対策の hook と設定の全手順、症状から該当章へ直接飛べる早見表、19点から85点へ上げた全工程は、<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=safety-score&utm_medium=tool&utm_campaign=score-to-book">Claude Code 事故防止ハンドブック</a>（¥800・第3章まで無料・全50章）にまとめています。</p>
+<p style="margin-top:0.6rem;">Kindle 版（<a href="https://www.amazon.co.jp/dp/B0H69B7SVZ">Amazon</a>）は Kindle Unlimited なら追加の費用なしで読めます。無料の防御 hook の集まりは <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（<code>npx cc-safe-setup</code>）。</p>
+</div>
+<button class="restart" onclick="location.reload()">もう一度やる</button>
+</div>
+
+<div class="note">
+この診断は、GitHub の起票で実際に報告された Claude Code の事故と、cc-safe-setup で実装し試験を通した hook をもとに作っています。点数は、各対策の有無を重みづけで合計した目安です。リンク先の本では、それぞれの事故の機構と防ぎ方を、起票の番号つきで検証しています。
+</div>
+
+<script>
+// 各設問: 重み付き。事故の深刻度(取り返しのつかなさ)で重みを変える。
+const QS = [
+ {q:"破壊的なコマンド（<code>rm -rf</code>・<code>git reset --hard</code>・<code>git clean -fd</code> など）を、実行の手前で一旦止める仕組みがある", hint:"ブラックリストだけでなく、PreToolUse の hook で「危険な操作は確定の前に止める」設計が堅実。", w:12, gap:"破壊的なコマンドが確認なく走ると、ファイルもデータも一瞬で消えます。", fix:"cc-safe-setup の <code>rm-safety-net</code> / <code>polyglot-rm-guard</code>。事故防止本 第2章・早見表A。"},
+ {q:"重要な作業の前に、退避のスナップショットかこまめなコミットを取っている", hint:"<code>git stash create</code> は作業ツリーを触らない非破壊の退避。自動化の中でも安全。", w:9, gap:"退避が無いと、事故が起きたときに戻る足場がありません。", fix:"事故防止本 第5章（5分で復旧する手順）。"},
+ {q:"子エージェントの「完了しました」を、実際のファイルの状態で検証している", hint:"読み取り専用のはずの子が「保存した」と嘘の完了を返す事故が報告されています。", w:9, gap:"嘘の完了をそのまま信じると、出来ていない作業を出来たことにしてしまいます。", fix:"cc-safe-setup の完了検証 hook。事故防止本 第2章・第9章。"},
+ {q:"トークン費用に歯止めがある（当日累計の閾値の警告、<code>/usage</code> の定期確認）", hint:"背景の処理が「完了」風に見えて裏で枠を焼き続ける事故があります。", w:8, gap:"費用の見張りが無いと、気づいたら枠やお金が溶けています（6月15日の課金分離以降は直接の出費に）。", fix:"cc-safe-setup の <code>daily-cost-guard.sh</code>。事故防止本 第4章。"},
+ {q:"設定ファイル（<code>~/.claude.json</code>・<code>settings.json</code>）が外から汚染されていないか点検している", hint:"導入後スクリプトや悪性の MCP が、Claude の外から設定を書き換える経路が報告されています。", w:8, gap:"信頼した後に設定を書き換えられると、安全の歯止めが静かに外れます。", fix:"cc-safe-setup の <code>mcp-config-poisoning-audit.sh</code>。事故防止本 第45章。"},
+ {q:"worktree や孤立ブランチでの、思わぬ場所への書き込み・削除を止める仕組みがある", hint:"worktree の隔離が黙って無効になり本流に着地する、孤立ブランチの後の削除で履歴ごと消える、などの事故。", w:9, gap:"隔離が崩れると、別ブランチに着地した作業や、履歴ごと消えた作業に後で気づきます。", fix:"cc-safe-setup の <code>worktree-escape-write-guard.sh</code> / <code>git-rm-orphan-wipe-guard.sh</code>。事故防止本 第44章・第50章。"},
+ {q:"（Windows を使うなら）書き込みが「成功」を返しても、ファイルの破損を検知できる", hint:"Cowork で Write が成功を返しつつ末尾を NUL バイトで壊す事故。バイト数が変わらず気づけません。", w:6, gap:"成功の戻り値を信じて、静かに壊れたファイルを見逃します。", fix:"cc-safe-setup の <code>write-nul-corruption-detector.sh</code>。事故防止本 第22章。"},
+ {q:"長い会話の履歴が飛ぶ前に、自動圧縮の監視か履歴のバックアップをしている", hint:"切ったはずの自動圧縮が発火して長い履歴が消える、フォルダ移動で履歴が孤児になる事故。", w:6, gap:"履歴が飛ぶと、それまでの文脈と判断の記録が戻りません。", fix:"事故防止本 第4章・第22章・第47章。"},
+ {q:"<code>git push --force-with-lease</code> が弾かれたとき、<code>--force</code> へ昇格しない運用になっている", hint:"安全側の操作が弾かれた直後の昇格で、他人の作業を上書きで消す事故。", w:6, gap:"一段の昇格で、取り返しのつかない上書きに変わります。", fix:"事故防止本 第46章。弾かれたら <code>git fetch</code> で取り込む。"},
+ {q:"<code>CLAUDE.md</code> や自動メモリが、作話や誤った情報で汚染されていないか点検している", hint:"モデルが受けてもいない注入を作話し、自動メモリに書いて毎セッション再発させる事故。", w:6, gap:"汚染された永続記憶は、確信のある誤りを何度も再発させます。", fix:"事故防止本 第48章。記録の構造で本物の注入か作話かを見分ける。"},
+ {q:"「正常」を、プロセスの生存でなくログの中身で確認している", hint:"認証が静かに失敗して止まる、起動の構成で枠が早く減る、などはログを見ないと分かりません。", w:5, gap:"プロセスが生きているだけで「正常」と判断すると、静かな失敗を見逃します。", fix:"事故防止本 第4章（監視）。"},
+ {q:"cc-safe-setup などの防御 hook を、実際に導入している", hint:"<code>npx cc-safe-setup</code> で、上の多くの対策をまとめて入れられます。", w:10, gap:"そもそも hook が入っていないと、上の歯止めはどれも効きません。", fix:"<a href='https://github.com/yurukusa/cc-safe-setup'>cc-safe-setup</a> を導入。事故防止本 第9章（hook カタログ）。"},
+];
+const TOTAL_W = QS.reduce((s,x)=>s+x.w,0);
+let cur=0, earned=0, gaps=[];
+const quiz=document.getElementById('quiz'), bar=document.getElementById('bar');
+
+function render(){
+ if(cur>=QS.length){ finish(); return; }
+ const x=QS[cur];
+ bar.style.width = (cur/QS.length*100)+'%';
+ quiz.innerHTML = `<div class="card">
+   <div class="qnum">設問 ${cur+1} / ${QS.length}</div>
+   <div class="qtext">${x.q}</div>
+   <div class="qhint">${x.hint}</div>
+   <button class="opt" data-v="1">はい、入っている／やっている</button>
+   <button class="opt" data-v="0.5">一部だけ／たまにやる</button>
+   <button class="opt" data-v="0">いいえ、無い</button>
+ </div>`;
+ quiz.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+   const v=parseFloat(b.dataset.v);
+   earned += x.w * v;
+   if(v<1) gaps.push({...x, level:v});
+   cur++; render();
+ });
+}
+function finish(){
+ bar.style.width='100%';
+ quiz.classList.add('hidden');
+ const score = Math.round(earned/TOTAL_W*100);
+ document.getElementById('score').textContent = score;
+ const band=document.getElementById('band'), sum=document.getElementById('summary');
+ if(score<=40){ band.textContent='危険ゾーン — 取り返しのつかない事故に無防備'; band.className='score-band weak';
+   sum.textContent='著者も最初はこのあたりでした（19点）。下の対策から順に入れれば、月に何度もの事故を月0回に近づけられます。'; }
+ else if(score<=70){ band.textContent='途中 — 主要な穴がまだ残っている'; band.className='score-band mid';
+   sum.textContent='基本は入っていますが、残った穴の一つが取り返しのつかない事故につながります。下の対策で埋めましょう。'; }
+ else { band.textContent='良好 — ほぼ無人で走らせられる水準に近い'; band.className='score-band strong';
+   sum.textContent='よく備えています。残りの対策を埋めると、著者の到達点（85点）に近づきます。'; }
+ const gw=document.getElementById('gaps');
+ if(gaps.length===0){ gw.innerHTML='<p style="color:#3fb950;">足りない対策はありませんでした。すばらしい備えです。</p>'; }
+ else {
+   gaps.sort((a,b)=>b.w-a.w);
+   gw.innerHTML = gaps.map(g=>`<div class="gap"><strong>${g.level===0.5?'一部のみ：':''}${g.gap}</strong><div class="fix">→ 塞ぎ方：${g.fix}</div></div>`).join('');
+ }
+ document.getElementById('result').classList.remove('hidden');
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+render();
+</script>
+</div>
+</body>
+</html>
