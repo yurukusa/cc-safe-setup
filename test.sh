@@ -18589,6 +18589,18 @@ test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\
 test_ex reroute-after-block-guard.sh "{\"tool_name\":\"Bash\",\"transcript_path\":\"$RB_TMP/refblock.jsonl\",\"tool_input\":{\"command\":\"git log origin/main --oneline\"}}" 0 "reroute: git ref is not a concrete target, allowed"
 rm -rf "$RB_TMP"
 
+echo "write-nul-corruption-detector.sh:"
+printf 'clean text line\n' > /tmp/ccss-nul-clean.txt
+printf 'good stuff\x00\x00\x00corrupted' > /tmp/ccss-nul-bad.txt
+printf 'AAAAAA\x00\x00\x00\x00\x00\x00' > /tmp/ccss-nul-pad.txt
+printf 'img\x00\x00data' > /tmp/ccss-nul.png
+test_ex write-nul-corruption-detector.sh '{}' 0 "nul-detector: empty input passes"
+test_ex write-nul-corruption-detector.sh '{"tool_name":"Write","tool_input":{"file_path":"/nonexistent/xyz.txt"}}' 0 "nul-detector: missing file passes"
+test_ex write-nul-corruption-detector.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/ccss-nul-clean.txt"}}' 0 "nul-detector: clean text passes"
+test_ex write-nul-corruption-detector.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/ccss-nul-bad.txt"}}' 2 "nul-detector: NUL corruption flagged"
+test_ex write-nul-corruption-detector.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/ccss-nul-pad.txt"}}' 2 "nul-detector: NUL padding (size-preserving) flagged"
+test_ex write-nul-corruption-detector.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/ccss-nul.png"}}' 0 "nul-detector: binary extension skipped"
+
 TOTAL=$((PASS + FAIL))
 echo "Results: $PASS/$TOTAL passed"
 if [ "$FAIL" -gt 0 ]; then
