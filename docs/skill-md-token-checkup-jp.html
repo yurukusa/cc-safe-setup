@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKILL.md トークン自己診断 — そのスキル、毎セッション何トークン食ってる？</title>
+<meta name="description" content="SKILL.md は発火しなくても毎セッション文脈に常駐します。自分の SKILL.md を貼ると、毎回かかる常駐トークンと、3層に分けた後の削減見込みを実測。重い塊（API仕様・表・設定）を切り出す指針も。ブラウザの中だけで処理し、貼った内容は送信しません。">
+<meta property="og:title" content="SKILL.md トークン自己診断 — そのスキル、毎セッション何トークン食ってる？">
+<meta property="og:description" content="SKILL.md を貼ると常駐トークンと Progressive Disclosure 後の削減見込みを実測。ブラウザ内完結・非送信。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup-jp.html">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup-jp.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"SKILL.md トークン自己診断","description":"SKILL.md が毎セッション加える常駐トークンと、Progressive Disclosure 後の削減見込みを実測する自己診断。","url":"https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup-jp.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","inLanguage":"ja","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem;line-height:1.7}
+.c{max-width:760px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.4rem}
+.sub{color:#8b949e;font-size:.9rem;margin-bottom:1.3rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+textarea{width:100%;min-height:200px;background:#161b22;border:2px solid #30363d;border-radius:8px;color:#c9d1d9;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;padding:.9rem;resize:vertical}
+textarea:focus{outline:none;border-color:#f97316}
+button{background:#f97316;color:#0d1117;border:none;border-radius:8px;padding:.7rem 1.4rem;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.8rem}
+button:hover{background:#fb8c3a}
+.muted{color:#8b949e;font-size:.8rem;margin-top:.5rem}
+.res{display:none;margin-top:1.5rem;animation:fade .3s ease}
+.res.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.1rem;margin-bottom:1rem}
+.big{font-size:2rem;color:#f0f6fc;font-weight:800}
+.big.warn{color:#f97316}
+.big.good{color:#3fb950}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.35rem 0;border-bottom:1px solid #21262d}
+.row:last-child{border-bottom:none}
+.row .k{color:#8b949e;font-size:.85rem}
+.row .v{color:#f0f6fc;font-weight:600;white-space:nowrap}
+.tag{display:inline-block;background:#2a1a0a;border:1px solid #f97316;color:#f0a868;border-radius:5px;padding:.1rem .45rem;font-size:.74rem;margin:.15rem .2rem .15rem 0}
+h2{color:#f0f6fc;font-size:1.05rem;margin:1.4rem 0 .6rem}
+ul{margin:.4rem 0 .4rem 1.2rem}
+li{margin:.3rem 0;font-size:.9rem}
+code{background:#161b22;border:1px solid #30363d;border-radius:4px;padding:.1rem .35rem;font-family:ui-monospace,monospace;font-size:.82rem}
+.cta{background:#0d2818;border:1px solid #238636;border-radius:10px;padding:1.1rem;margin-top:1.5rem}
+.cta h2{margin-top:0;color:#3fb950}
+.disclaim{color:#6e7681;font-size:.76rem;margin-top:1.5rem;border-top:1px solid #21262d;padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>SKILL.md トークン自己診断</h1>
+<p class="sub">入れているスキルの <code>SKILL.md</code> は、そのスキルが<strong>発火しなくても毎セッション</strong>文脈に読み込まれます。下に1つ貼ると、毎回かかる常駐トークンと、外に出せる重い塊を表示します。<strong>ブラウザの中だけで処理し、貼った内容はどこにも送信しません。</strong></p>
+
+<textarea id="in" placeholder="SKILL.md の全文（先頭の --- の設定 + 本文）をここに貼り付け..."></textarea>
+<button onclick="run()">この SKILL.md を診断</button>
+<p class="muted">手元に無い時は、まず各スキルの大きさを一覧で：<br>
+<code>for f in ~/.claude/skills/*/SKILL.md .claude/skills/*/SKILL.md; do [ -f "$f" ] &amp;&amp; printf '%6s  %s\n' "$(wc -c &lt; "$f")" "$f"; done | sort -rn</code></p>
+
+<div class="res" id="res"></div>
+
+<div class="disclaim">
+トークン数は概算です（約4文字＝1トークンという英語・コード向けの粗い目安。日本語は1文字あたりのトークンが重いので、出る数字は<em>下限</em>と思ってください）。大事なのは正確な数字でなく、<em>毎ターン必ず払う常駐の部分</em>のうち、スキルが発火した時にしか要らない詳細がどれだけ混じっているか、です。貼った SKILL.md はブラウザの外に出ません。
+</div>
+</div>
+
+<script>
+function estTokens(s){ return Math.round(s.length/4); }
+
+function run(){
+  var raw = document.getElementById('in').value;
+  var res = document.getElementById('res');
+  if(!raw.trim()){ res.className='res on'; res.innerHTML='<div class="card">先に SKILL.md を貼ってください。</div>'; return; }
+
+  var total = estTokens(raw);
+
+  var fm = '', body = raw;
+  var m = raw.match(/^\s*---\s*[\r\n]([\s\S]*?)[\r\n]---\s*[\r\n]?/);
+  if(m){ fm = m[0]; body = raw.slice(m[0].length); }
+
+  var keepLines = [];
+  fm.split(/[\r\n]+/).forEach(function(l){
+    if(/^\s*(name|description|trigger|when)\s*:/i.test(l)) keepLines.push(l);
+  });
+  var layer1Chars = keepLines.join('\n').length + 120;
+  var layer1 = estTokens('x'.repeat(layer1Chars));
+
+  var heavy = [];
+  var codeFences = (body.match(/```/g)||[]).length;
+  if(codeFences>=2) heavy.push('コード/設定ブロック（'+Math.floor(codeFences/2)+'個）');
+  var tableRows = (body.match(/^\s*\|.*\|\s*$/gm)||[]).length;
+  if(tableRows>=2) heavy.push('表（'+tableRows+'行 — エラー/ステータス一覧など）');
+  if(/\b(POST|GET|PUT|DELETE)\b\s+\/|Authorization:|Bearer|endpoint|api\//i.test(body)) heavy.push('API 仕様 / エンドポイント');
+  if(/^\s*\w+:\s*$/m.test(body) && /^\s{2,}\w+:/m.test(body)) heavy.push('YAML / 入れ子の設定');
+  var headings = (body.match(/^#{2,}\s/gm)||[]).length;
+  if(headings>=4) heavy.push(headings+'個の節（細かい詳細 / 例）');
+
+  if(layer1 > total) layer1 = total;
+  var saved = total - layer1;
+  var pct = total>0 ? Math.round(saved/total*100) : 0;
+  var perMonth = saved * 90;
+
+  var verdict;
+  if(total < 250){ verdict='すでに軽い'; }
+  else if(pct >= 40){ verdict='重い — 3層化の効果が大きい'; }
+  else { verdict='ふつう'; }
+
+  var h = '';
+  h += '<div class="card"><div class="muted">この SKILL.md が毎セッション常駐させるトークン</div><div class="big '+(total>=250?'warn':'good')+'">'+total.toLocaleString()+' トークン</div>';
+  h += '<div class="muted" style="margin-top:.4rem">判定: <strong>'+verdict+'</strong></div></div>';
+
+  h += '<div class="card">';
+  h += '<div class="row"><span class="k">いま毎セッション払っている</span><span class="v">'+total.toLocaleString()+' tok</span></div>';
+  h += '<div class="row"><span class="k">Layer 1 だけ残した場合（name + description + trigger + 1行の案内）</span><span class="v">~'+layer1.toLocaleString()+' tok</span></div>';
+  h += '<div class="row"><span class="k">必要な時だけ読む側（Layer 2/3）へ移せる</span><span class="v" style="color:#3fb950">~'+saved.toLocaleString()+' tok（'+pct+'%）</span></div>';
+  if(saved>0) h += '<div class="row"><span class="k">月あたりの節約（1日3セッション・このスキル1個で）</span><span class="v" style="color:#3fb950">~'+perMonth.toLocaleString()+' tok</span></div>';
+  h += '</div>';
+
+  if(heavy.length){
+    h += '<h2>常駐の部分から外せる塊</h2>';
+    h += '<p style="font-size:.9rem;color:#8b949e">本文から検出しました。どれもスキルが発火するまでは不要です。<code>reference/</code> のファイルに移し、発火した時だけ読ませてください：</p><div style="margin-top:.5rem">';
+    heavy.forEach(function(t){ h += '<span class="tag">'+t+'</span>'; });
+    h += '</div>';
+  } else if(total>=250){
+    h += '<h2>本文を削る</h2><p style="font-size:.9rem;color:#8b949e">明確な重い塊は検出されませんでしたが、本文がまだ大きいです。Layer 1 は trigger と1行の案内だけにし、手順の詳細は reference のファイルへ移してください。</p>';
+  }
+
+  h += '<h2>直し方：3層の Progressive Disclosure</h2>';
+  h += '<ul>';
+  h += '<li><strong>Layer 1（常駐・極小に保つ）：</strong> <code>name</code>、1行の <code>description</code>、正確な <code>trigger</code>、そして「発火したら <code>reference/…</code> を読む」の1行だけ。</li>';
+  h += '<li><strong>Layer 2（必要な時だけ）：</strong> API 仕様・エラー/ステータスの表・設定を <code>reference/*.md</code> へ移し、スキルが発火した後にだけ読ませる。</li>';
+  h += '<li><strong>Layer 3（まれ）：</strong> 動く例や端の事例。Layer 2 から参照する。</li>';
+  h += '</ul>';
+  h += '<p style="font-size:.85rem;color:#8b949e">このスキルが発火しないセッションでは Layer 2/3 は文脈に入りません。だから上の '+pct+'% が、毎ターンの固定の税ではなくなります。</p>';
+
+  h += '<div class="cta"><h2>もっと深く</h2>';
+  h += '<p style="font-size:.9rem">これは、800時間以上 Claude Code を動かす中で自分の SKILL.md のトークンを約40%減らせた手法の核心です。10個のレシピ・スキルの試験・チーム共有・上級の最適化までの全体は、短い本にまとめています：</p>';
+  h += '<ul>';
+  h += '<li><a href="https://zenn.dev/yurukusa/books/a1b2c3d4e5f6g7">Claude Code Skills 実践レシピ集（¥500）</a> — はじめにと第1章は無料で試し読み。</li>';
+  h += '<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — Claude Code の安全と費用のための無料の MIT hook 集。</li>';
+  h += '<li><a href="https://yurukusa.github.io/cc-safe-setup/skill-md-token-checkup.html">English version</a> of this tool.</li>';
+  h += '</ul></div>';
+
+  res.className='res on';
+  res.innerHTML = h;
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
