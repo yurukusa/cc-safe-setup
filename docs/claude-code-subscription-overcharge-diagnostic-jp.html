@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>購読しているのに従量課金される Claude Code 自己診断 — 4つの原因のどれか、止め方と切り分け</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Claude Codeで「定額の購読をしているのに従量課金が走る・前払いのクレジットが減る」時の自己診断。5つの質問で4つの原因(共有設定の上書き/環境変数ANTHROPIC_API_KEYの優先/サーバー側の購読資格の解決の失敗/Desktop版とCLIの併存)を切り分け、原因ごとの止め方を示す。Redditで187ドルの想定外の請求の報告(起票68406)。ブラウザ内で完結、登録なし、送信なし。">
+<meta name="description" content="Claude Codeで「定額の購読をしているのに従量課金が走る・前払いのクレジットが減る・請求が急に膨らむ」時の自己診断。6つの質問で5つの原因(共有設定の上書き/環境変数ANTHROPIC_API_KEYの優先/サーバー側の購読資格の解決の失敗/Desktop版とCLIの併存/既定モデルの無断昇格と自動補充の重なり)を切り分け、原因ごとの止め方を示す。Redditで187ドル(起票68406)・6日で506ドル(起票71481)の想定外の請求の報告。ブラウザ内で完結、登録なし、送信なし。">
 <style>
 :root {
   --bg: #fafafa; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
@@ -46,10 +46,10 @@ code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-siz
 <body>
 
 <h1>購読しているのに従量課金される — Claude Code 自己診断</h1>
-<div class="meta">5つの質問 ・ 約2分 ・ ブラウザ内で完結、登録なし、送信なし ・ CC0 ・ v1.0（2026-06-26）</div>
+<div class="meta">6つの質問 ・ 約2分 ・ ブラウザ内で完結、登録なし、送信なし ・ CC0 ・ v1.1（2026-06-26）</div>
 
 <div class="intro">
-「定額の購読を使っているはずなのに、従量課金が走る」「枠に余裕があるのに前払いのクレジット(Extra Usage)が減る」——2026年6月15日の課金の分離(対話的な利用と、プログラム的な利用の課金の扱いが分かれた変更)の前後で、この相談が複数の独立な経路で急増しました。Redditでは <strong>187ドルの想定外の請求</strong> の報告も出ています(GitHub 起票 68406)。症状は同じでも、根本の原因は次の4つに分かれます。この診断で、自分がどれかを切り分けます。
+「定額の購読を使っているはずなのに、従量課金が走る」「枠に余裕があるのに前払いのクレジット(Extra Usage)が減る」——2026年6月15日の課金の分離(対話的な利用と、プログラム的な利用の課金の扱いが分かれた変更)の前後で、この相談が複数の独立な経路で急増しました。Redditでは <strong>187ドルの想定外の請求</strong> の報告も出ています(GitHub 起票 68406)。さらに6月の末には、既定のモデルが通知なく上位へ切り替わり自動の補充が重なって <strong>6日で506ドル</strong> という、別の機構の費用の流出も表面化しました(起票71481)。症状は似ていても、根本の原因は次の5つに分かれます。この診断で、自分がどれかを切り分けます。
 </div>
 
 <div class="q" data-q="key">
@@ -80,8 +80,15 @@ code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-siz
   <label><input type="radio" name="room" value="no"> 枠を使い切ってからクレジットが減っている / 分からない</label>
 </div>
 
+<div class="q" data-q="bill">
+  <div class="label">Q5. 1回1回のやり取りが急に高くなった、もしくはクレジットが自動で補充されていますか？</div>
+  <div class="hint">枠の減りの速さでなく、<strong>同じ作業の単価</strong>が急に上がった感覚があるか。あわせて、Anthropic の管理画面で自動の補充(auto-reload / 自動チャージ)を有効にしているか。鍵を作り直した直後やアップグレードの直後から請求が膨らんだ心当たりがあるか。</div>
+  <label><input type="radio" name="bill" value="yes"> 単価が急に上がった / 自動の補充を有効にしている / 心当たりがある</label>
+  <label><input type="radio" name="bill" value="no"> そうではない / 分からない</label>
+</div>
+
 <div class="q" data-q="seen">
-  <div class="label">Q5. 利用の画面で「消費の出どころ」を確認しましたか？</div>
+  <div class="label">Q6. 利用の画面で「消費の出どころ」を確認しましたか？</div>
   <div class="hint">対話的な利用とプログラム的な利用の、どちらで枠やクレジットが減っているかを、利用の画面で見たか。</div>
   <label><input type="radio" name="seen" value="yes"> 確認した</label>
   <label><input type="radio" name="seen" value="no"> まだ確認していない</label>
@@ -92,12 +99,12 @@ code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 3px; font-siz
 <div class="result" id="result"></div>
 
 <footer>
-<p>この診断は、2026年6月のClaude Codeの費用の流出の事故(GitHub 起票 68406 / 68296 / 68285 / 68501、Reddit・HN で表面化したパターン、運用のログ)から作りました。他人の起票で知った事実は伝聞として、仕組みで手元で確かめられた部分だけを断定で書いています。判定はすべてあなたのブラウザの中だけで行い、入力や結果はどこにも送信しません。CC0。</p>
+<p>この診断は、2026年6月のClaude Codeの費用の流出の事故(GitHub 起票 68406 / 68296 / 68285 / 68501 / 71481、Reddit・HN で表面化したパターン、運用のログ)から作りました。他人の起票で知った事実は伝聞として、仕組みで手元で確かめられた部分だけを断定で書いています。判定はすべてあなたのブラウザの中だけで行い、入力や結果はどこにも送信しません。CC0。</p>
 <p>作者: yurukusa(Claude Code 自律運用 800+ 時間、<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の作者)。<a href="claude-code-tools-jp.html">他の無料の診断ツール一覧へ</a>。</p>
 </footer>
 
 <script>
-var names=['key','multi','desktop','room','seen'];
+var names=['key','multi','desktop','room','bill','seen'];
 function answered(){return names.every(function(n){return document.querySelector('input[name="'+n+'"]:checked');});}
 document.querySelectorAll('input[type=radio]').forEach(function(r){r.addEventListener('change',function(){document.getElementById('go').disabled=!answered();});});
 function val(n){var e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'';}
@@ -113,10 +120,17 @@ var BOOKS='<h3>この費用の問題を、根本から整理したい人へ</h3>
 function cause(hot,title,body){return '<div class="cause'+(hot?' hot':'')+'"><h3>'+title+'</h3>'+body+'</div>';}
 
 document.getElementById('go').addEventListener('click',function(){
-  var key=val('key'),multi=val('multi'),desktop=val('desktop'),room=val('room'),seen=val('seen');
+  var key=val('key'),multi=val('multi'),desktop=val('desktop'),room=val('room'),bill=val('bill'),seen=val('seen');
   var html='<h2>切り分けの結果</h2>';
   if(seen==='no') html+=FIRST;
   var causes=[];
+  // 系統D: 既定のモデルの無断の昇格 + 自動の補充の重なり(6月最大・$506型・起票71481)
+  if(bill==='yes'){
+    causes.push(cause(true,'要注意 — 系統D: 既定のモデルの無断の昇格 + 自動の補充の重なり',
+      '<p>設定したつもりのモデル(例 <code>sonnet</code>)ではなく、上位のモデル(<code>opus</code>)で走っていると、同じ作業でも<strong>トークンの単価が数倍</strong>になります。そこに自動の補充(クレジットの自動チャージ)が重なると、初回で気づく前に請求が積み上がります。6日で<strong>506ドル</strong>の想定外の請求の報告があり、新しい API キーを作った直後の数分から始まっていたとのことです(起票71481・ここは伝聞)。これは「購読が従量にバイパスされる」型とは別で、<strong>走るモデルそのものの単価</strong>と<strong>自動の補充</strong>が原因です。</p>'+
+      '<div class="fix"><h4>確かめ方</h4>記録の <code>.jsonl</code> の <code>model</code> の欄を時系列で見て、<strong>実際に走ったモデル</strong>を確かめます(設定したつもりではなく、記録がどのモデルで走ったか。ここは手元で確かめられる断定の部分です)。切り替わった時刻も <code>model</code> の変化点で分かります。</div>'+
+      '<div class="fix"><h4>予防(3つ)</h4>① 使うモデルを明示で固定する。② 環境を変えた(鍵を作り直した・アップグレードした)直後を、点検の節目にする。③ 自動の補充に<strong>上限と通知</strong>を付けて、初回で気づけるようにする。</div>'));
+  }
   // 系統B: ANTHROPIC_API_KEY の優先(最有力・$187型)
   if(key==='yes'){
     causes.push(cause(true,'最有力 — 系統B: 環境変数 ANTHROPIC_API_KEY の優先',
