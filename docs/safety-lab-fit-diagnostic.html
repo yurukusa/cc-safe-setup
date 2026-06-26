@@ -121,7 +121,7 @@ footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top:
 
 <ul>
 <li><strong>Score 55–85 (Strong fit):</strong> Multiple factors indicate ongoing exposure to new failure patterns. The ¥500/month subscription typically pays for itself in 1–3 months through avoided incidents.</li>
-<li><strong>Score 30–54 (Moderate fit):</strong> Some exposure to new patterns. Consider the membership (first month free) and evaluate over 2–3 months. The free hooks in this repository may cover most of your needs.</li>
+<li><strong>Score 30–54 (Moderate fit):</strong> Some exposure to new patterns. Consider the membership and evaluate over 2–3 months. The free hooks in this repository may cover most of your needs.</li>
 <li><strong>Score 0–29 (Weak fit):</strong> Your current setup has low exposure to new failure clusters. The free hooks at <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> and the free <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d">May 2026 issue Part 1 preview Gist</a> likely cover what you need.</li>
 </ul>
 
@@ -187,7 +187,7 @@ submitBtn.addEventListener('click', () => {
       <div class="rec">
         <h3>Strong fit — Subscribe</h3>
         <p>Your score (${score}/85) indicates ongoing exposure to new Claude Code failure clusters. At ¥500/month, the subscription typically pays for itself in 1–3 months through avoided incidents. The first month is free, so you can try it before deciding.</p>
-        <p><a href="https://note.com/yurukusa/membership" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month, first month free)</a></p>
+        <p><a href="https://note.com/yurukusa/membership" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month)</a></p>
         <p style="margin-top: 1rem; font-size: 0.9rem;">Want to evaluate first? The <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1</a> (~6,000 words, 9 clusters) is free to read in full so you can judge the writing depth before subscribing.</p>
       </div>
     `;
@@ -197,9 +197,9 @@ submitBtn.addEventListener('click', () => {
     recHTML = `
       <div class="rec mid">
         <h3>Moderate fit — Consider the membership</h3>
-        <p>Your score (${score}/85) suggests some exposure to new patterns. The free hooks in this repository may cover most of your needs. If you want monthly updates on emerging clusters, the membership (¥500/month, first month free) lets you try it before deciding.</p>
-        <p><strong>Recommended sequence:</strong> Read the <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1</a> (free, ~6,000 words). If the writing depth matches what you want monthly, join (first month free).</p>
-        <p><a href="https://note.com/yurukusa/membership" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month, first month free)</a></p>
+        <p>Your score (${score}/85) suggests some exposure to new patterns. The free hooks in this repository may cover most of your needs. If you want monthly updates on emerging clusters, the membership (¥500/month) lets you try it before deciding.</p>
+        <p><strong>Recommended sequence:</strong> Read the <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d" target="_blank">May 2026 issue Part 1</a> (free, ~6,000 words). If the writing depth matches what you want monthly, join.</p>
+        <p><a href="https://note.com/yurukusa/membership" class="cta-btn" target="_blank">→ Join Safety Lab (¥500/month)</a></p>
       </div>
     `;
   } else {
@@ -209,7 +209,7 @@ submitBtn.addEventListener('click', () => {
       <div class="rec bad">
         <h3>Weak fit — Use free materials</h3>
         <p>Your score (${score}/85) indicates low current exposure to new failure clusters. The free <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> hooks and the free <a href="https://gist.github.com/yurukusa/fcfeb14b0b2cae476ebb55b8a9b7975d">May 2026 issue Part 1 preview Gist</a> likely cover what you need.</p>
-        <p>If your situation changes (higher spend, more incidents, production exposure), revisit this diagnostic. The membership is ¥500/month with the first month free, so the option remains open.</p>
+        <p>If your situation changes (higher spend, more incidents, production exposure), revisit this diagnostic. The membership is ¥500/month, so the option remains open.</p>
       </div>
     `;
   }
