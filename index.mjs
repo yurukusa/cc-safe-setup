@@ -1080,6 +1080,7 @@ function examples() {
       'subagent-budget-guard.sh': 'Subagent Budget Guard',
       'subagent-claudemd-inject.sh': 'Inject CLAUDE.md rules into subagent prompts',
       'subagent-context-size-guard.sh': 'Warn on thin subagent prompts',
+      'subagent-forged-system-reminder-guard.sh': 'Quarantine forged <system-reminder> markup in a subagent result',
       'subagent-scope-guard.sh': 'Limit subagent file access scope',
       'subagent-scope-validator.sh': 'Validate subagent task scope before launch',
       'subagent-tool-call-limiter.sh': 'Limit total tool calls per session',
