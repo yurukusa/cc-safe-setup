@@ -98,6 +98,11 @@ These are drawn from incidents reported this month on GitHub's <code>anthropics/
 <p class="links">→ How to tell the two 401 shapes apart, and fix without changing your billing: don't pick "use the API" as a repair; clear the OS keychain/credential-manager entry and re-login</p>
 </div>
 
+<div class="item">
+<h3>Subagents recursively spawn and burn millions of tokens in minutes</h3>
+<p>A large cluster (#68619 and folds) reports subagents spawning child agents 50+ levels deep, torching a 5-hour session limit in minutes (4M tokens in under 5 minutes in one case). <code>CLAUDE_CODE_FORK_SUBAGENT=0</code> is ignored because subagents don't inherit settings/hooks — the cap only reaches the first level. A permission <em>denial</em> acts as a spawn trigger rather than a stop, which is what ignites the compound loop.</p>
+<p class="links">→ Why config doesn't stop it and what does (pre-grant to remove the denial trigger, detect + <code>/exit</code>, recover work from the transcript): <a href="https://gist.github.com/yurukusa/4c77d3f72a29318da978f6c01678c6e6">subagent recursion token-burn write-up</a></p>
+</div>
 <h2>4. Fabrication (false completion, confabulation)</h2>
 
 <div class="item">
