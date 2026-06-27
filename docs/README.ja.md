@@ -43,6 +43,7 @@ npx cc-safe-setup
 | サブエージェントが嘘の「完了」を返す | [集積の露出診断](cluster-exposure-diagnostic.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
 | サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership) |
 
 ## 何ができるか
