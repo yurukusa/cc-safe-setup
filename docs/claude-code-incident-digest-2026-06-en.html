@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 2026 Claude Code Incident Digest — the irreversible failures that happened quietly this month</title>
+<meta name="description" content="The irreversible Claude Code failures reported on GitHub in June 2026, sorted into five classes — data loss, config poisoning, cost, fabrication, and interop. Each entry has a one-line explanation of what breaks silently and a link to a preventive fix. Updated monthly.">
+<meta property="og:title" content="June 2026 Claude Code Incident Digest">
+<meta property="og:description" content="This month's quiet, irreversible Claude Code failures in one place — data loss, config poisoning, cost, fabrication, interop — each with a link to a preventive fix.">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.subtitle { color: #666; font-size: 1rem; margin-bottom: 1.8rem; }
+h2 { font-size: 1.2rem; margin: 2rem 0 0.3rem; color: #1f2937; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem; }
+.item { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.2rem 1.4rem; margin: 1rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.item h3 { font-size: 1.02rem; margin-bottom: 0.5rem; color: #1f2937; }
+.item p { font-size: 0.94rem; margin-bottom: 0.5rem; }
+.item .links { font-size: 0.88rem; color: #555; }
+.item .links a { color: #2563eb; }
+.intro-box { background: #f8fafc; border-left: 4px solid #2563eb; padding: 1rem 1.3rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+.cta { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 1.4rem 1.6rem; margin: 2.5rem 0 1rem; }
+.cta h2 { border: none; margin-top: 0; }
+.cta a { color: #047857; font-weight: bold; }
+.disclosure { background: #fef9c3; border-left: 4px solid #ca8a04; padding: 1rem 1.3rem; margin: 2rem 0 1rem; border-radius: 0 6px 6px 0; font-size: 0.86rem; color: #555; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.88em; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>June 2026 Claude Code Incident Digest</h1>
+<p class="subtitle">The irreversible Claude Code failures that happened <em>quietly</em> this month, collected in one place. Sorted into five classes — data loss, config poisoning, cost, fabrication, and interop — each with a one-line explanation of what breaks silently and a link to a preventive fix.</p>
+
+<div class="intro-box">
+These are drawn from incidents reported this month on GitHub's <code>anthropics/claude-code</code>, focused on the <em>silent</em> kind — the ones that proceed with no error and no warning. The facts of each incident are reports shared in the issues, not my own first-hand experience (hearsay). The hooks and procedures I point to as fixes are implemented and tested in cc-safe-setup, or verified in my own operation (asserted). I haven't found another monthly Claude Code incident roundup in English, so I'll keep this going each month.
+</div>
+
+<h2>1. Data loss</h2>
+
+<div class="item">
+<h3>Edits you isolated in a worktree land on <code>main</code></h3>
+<p>Running subagents in parallel worktrees can silently disable the isolation, so the child edits the parent's working copy directly and commits land quietly on a different branch. No error, no warning — you find out only on a later rebase or force-push.</p>
+<p class="links">→ Measure your exposure: <a href="multi-agent-worktree-isolation-risk.html">worktree isolation risk self-check</a> · Fix: cc-safe-setup's <code>worktree-escape-write-guard.sh</code></p>
+</div>
+
+<div class="item">
+<h3>You <code>grep</code> your own history and it's "not found" — the conversation isn't gone, the search silently no-ops</h3>
+<p>Claude Code's project folder names start with a hyphen, so <code>grep</code> and <code>find</code> read the name as an <em>option flag</em> and return "not found" without ever running the search. If you habitually append <code>2&gt;/dev/null</code>, you're left with an empty result and a success code — indistinguishable from genuinely having nothing. The records were there the whole time, but you conclude they're "gone" and delete for real in a panic. One reporter spent three months unable to trust their own history.</p>
+<p class="links">→ Self-check that scans every folder correctly, and the workaround: prefix with <code>--</code> or <code>./</code>, or use absolute paths · Fix: don't act on a silent empty result — confirm with an explicit path first</p>
+</div>
+
+<div class="item">
+<h3>A "safe" <code>--force-with-lease</code> is rejected, then escalated to <code>--force</code>, wiping someone else's work</h3>
+<p>When <code>--force-with-lease</code> is rejected, ignoring that failure and escalating to <code>--force</code> overwrites commits other people pushed. An operation meant to be the safe one turns, in a single escalation, into an irreversible overwrite.</p>
+<p class="links">→ Fix: treat a rejected lease as a stop, never auto-escalate to <code>--force</code></p>
+</div>
+
+<div class="item">
+<h3><code>Write</code> returns "success" but the file's tail is corrupted with NUL bytes</h3>
+<p>In Windows Cowork environments, <code>Write</code>/<code>Edit</code> return success while silently corrupting the tail of the file with NUL bytes. The byte count is unchanged, so <code>wc -c</code> or <code>tail</code> won't reveal it. Detection needs to look for NUL directly with <code>grep -aPq '\x00'</code>; the commonly-suggested <code>grep -c $'\x00'</code> misbehaves on newlines (confirmed locally).</p>
+<p class="links">→ Fix: cc-safe-setup's <code>write-nul-corruption-detector.sh</code> (PostToolUse — detects NUL after Write/Edit and stops)</p>
+</div>
+
+<div class="item">
+<h3><code>git checkout --orphan</code> followed by <code>git rm -rf</code> wipes the project and all <code>.git</code> history</h3>
+<p>Moving to a fresh orphan branch with <code>git checkout --orphan tmp</code> and then running <code>git rm -rf .</code> deleted every file of a Unity project plus the entire <code>.git</code> history — three years of work, gone. On an orphan branch the reference to the original history is detached, so nothing remains to undo the deletion.</p>
+<p class="links">→ Fix: cc-safe-setup's <code>git-rm-orphan-wipe-guard.sh</code></p>
+</div>
+
+<h2>2. Config poisoning &amp; secret leaks</h2>
+
+<div class="item">
+<h3>Your config files are rewritten from <em>outside</em> after you trusted them</h3>
+<p>After you've trusted a project once, <code>~/.claude.json</code> and <code>settings.json</code> can be rewritten from outside Claude — by a post-install script or a malicious MCP server. Hooks that stop Claude's own edits don't cover this external path.</p>
+<p class="links">→ Fix (read-only startup audit): cc-safe-setup's <code>mcp-config-poisoning-audit.sh</code></p>
+</div>
+
+<div class="item">
+<h3>Running <code>pass show</code> or <code>env</code> pins a live token into a permanent log file</h3>
+<p>An agent ran a command expecting a decrypt error; <code>gpg</code> was unlocked, so a live <code>ghp_</code> token printed to stdout instead. Claude Code stores every <code>Bash</code> command's stdout verbatim in <code>~/.claude/projects/**/*.jsonl</code> (confirmed locally) — so the key is pinned to disk even after it scrolls off screen. The dangerous reflex is deleting the file; the real fix is to <strong>rotate the key first</strong>, then clean up. Wrong order locks in the damage.</p>
+<p class="links">→ Self-check (<code>grep</code> your own transcripts) and the rotate-before-delete procedure: <a href="https://gist.github.com/yurukusa/b3a33370f87bc85cee717ba509c3bf74">secrets-in-transcripts write-up</a></p>
+</div>
+
+<h2>3. Cost</h2>
+
+<div class="item">
+<h3>Quota and cost burn from just starting up, or from a dropped connection</h3>
+<p>Auth fails silently and work stalls; certain startup configurations drain quota faster. A live process tells you nothing — you can't call it "fine" without reading the logs.</p>
+<p class="links">→ Diagnose billing/cost anomalies: <a href="billing-incident-detection.html">billing incident detection self-check</a></p>
+</div>
+
+<div class="item">
+<h3>A sudden 401 locks you out, and switching to "use the API" silently meters you</h3>
+<p>One morning <code>401 Invalid authentication credentials</code> locks you out, and <code>/login</code> and reinstalling don't help — reported from several countries. In desperation people pick the login option to "use the API," which quietly moves them onto pay-as-you-go metering, separate from their subscription, and burns real money (real losses reported). Most 401s are an empty/stale credential (old entries left in the OS keychain or credential manager) or an auth callback that can't reach a headless machine — switching the billing mouth doesn't fix either.</p>
+<p class="links">→ How to tell the two 401 shapes apart, and fix without changing your billing: don't pick "use the API" as a repair; clear the OS keychain/credential-manager entry and re-login</p>
+</div>
+
+<h2>4. Fabrication (false completion, confabulation)</h2>
+
+<div class="item">
+<h3>The model fabricates a tool result in-prose and proceeds as if it were real</h3>
+<p>The model emits a <code>tool_use</code> (e.g. <code>git push</code>) and, in the <em>same</em> turn, writes a plausible fake result (<code>ad207e6..5acbd61 main -&gt; main</code>, "File updated successfully") before any real result arrives — or when the tool never ran — then continues as if it were true. This produced high-confidence false reports of an irreversible push and misled parallel sessions. A real tool result is recorded separately as <code>toolUseResult</code> in the transcript; a fabricated one is just prose with no matching entry, so you can tell them apart.</p>
+<p class="links">→ Fix (model-independent): a PostToolUse hook that re-reads ground truth (<code>git ls-remote</code>, <code>ls</code>/Read) after the op, so any fabricated "success" is contradicted by injected fact · Related: cc-safe-setup's <code>subagent-forged-system-reminder-guard.sh</code></p>
+</div>
+
+<div class="item">
+<h3>The model decides it was "prompt-injected," writes it to auto-memory, and re-triggers every session</h3>
+<p>The model confabulates that a tool's output contained an injection, writes that as settled fact into auto-memory, and the entry is reloaded every later session — re-triggering the same confabulation in a closed loop. Whether it was a real injection or a confabulation can be told from the structure of the conversation record.</p>
+<p class="links">→ Tell them apart, then remove the poisoned memory: inspect the <code>.jsonl</code> role structure with <code>jq</code></p>
+</div>
+
+<h2>5. Interop (multiple tools, parent/child agents)</h2>
+
+<div class="item">
+<h3>Your safety settings are not inherited by subagents</h3>
+<p>Subagents (Agent / Task) inherit neither <code>CLAUDE.md</code> nor hooks nor memory — a recurring report. The safety brakes that held in the parent are exactly off in the child that runs most autonomously, for the longest. Role context isn't inherited either, and children spawning grandchildren have blown up cost.</p>
+<p class="links">→ Measure your exposure: <a href="multi-agent-safety.html">multi-agent safety self-check</a></p>
+</div>
+
+<div class="cta">
+<h2>This continues monthly</h2>
+<p>I keep this roundup going every month. If you want the month's incidents reviewed in one place — and next month's as they happen:</p>
+<p style="margin-top:0.6rem">
+· The free <a href="https://yurukusa.gumroad.com/l/ymujuj">Safety Brief</a> is a 2-minute setup that stops most "Claude deleted my work" and surprise-bill incidents — a good free starting point.<br>
+· To follow the latest incidents continuously, across tools, before they're written up — the monthly <a href="https://yurukusa.gumroad.com/l/xatlwf">Claude Code Safety Lab ($5/mo)</a>. A faster, broader feed than any one-time write-up can be.<br>
+· The free guardrail hooks are <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> (<code>npx cc-safe-setup</code>) — most of the fixes linked above ship there.
+</p>
+</div>
+
+<div class="disclosure">
+The facts of each incident are based on reports shared in GitHub issues (hearsay), not my own first-hand experience. The fixes — hooks and procedures — are implemented and tested in cc-safe-setup, or verified in my own operation. The linked self-checks all run entirely in your browser; nothing is collected or sent.
+</div>
+
+<footer>
+yurukusa · MIT · updated 2026-06-28 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="claude-code-incident-digest-2026-06-jp.html">日本語版</a>
+</footer>
+
+</div>
+</body>
+</html>
