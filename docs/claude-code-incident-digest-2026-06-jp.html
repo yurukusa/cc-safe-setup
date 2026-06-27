@@ -51,6 +51,11 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 <p>プロジェクトのフォルダを移動したりリネームしたりすると、それまでの会話の履歴が参照できなくなる事故が報告されています。履歴は作業ディレクトリのパスに紐づくため、パスが変わると孤児になる、という機構だそうです。</p>
 <p class="links">→ 事前のバックアップの実用手順: <a href="https://zenn.dev/yurukusa/articles/backup-claude-projects-history">~/.claude/projects/ を5分でバックアップする(検証済み)</a></p>
 </div>
+<div class="item">
+<h3>自分で grep しても「見つからない」——会話は消えていないのに、検索が黙って空振りする</h3>
+<p>Claude Code のプロジェクトのフォルダ名は先頭がハイフンになるため、<code>grep</code> や <code>find</code> がその名前を「オプションの指定」と誤読し、検索を一度も走らせずに「見つからなかった」ふりをします。癖で <code>2&gt;/dev/null</code> を付けていると、空の結果と成功コードだけが残り、本当に探して無かったのと見分けがつきません。記録は最初からずっと在るのに「消えた」と思い込み、慌てて本当に消す二次災害の入り口になります。報告者は3か月、自分の履歴を信じられなくなりました。</p>
+<p class="links">→ 全フォルダを正しく走査する自己診断と回避策: <a href="https://qiita.com/yurukusa/items/0d5ee279f11252c05b04">「会話が消えた」と思ったら、まずこのスクリプトを走らせる</a> ／ 詳しい機構: 事故防止本 第54章</p>
+</div>
 
 <div class="item">
 <h3>「安全な」force-with-lease が弾かれた直後、--force へ昇格して他人の作業を消す</h3>
@@ -92,6 +97,11 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 <p class="links">→ 認証の静かな失敗の診断: <a href="claude-code-auth-silent-failure-diagnostic-jp.html">認証のサイレント失敗 自己診断</a></p>
 </div>
 
+<div class="item">
+<h3>突然の 401 で詰まり、「API で使う」に切り替えて従量課金される</h3>
+<p>ある朝とつぜん <code>401 Invalid authentication credentials</code> で締め出され、<code>/login</code> も再インストールも効かない、という報告が複数の国から続いています。困った末にログインの選択肢の「API で使う」を選ぶと、サブスクとは別の従量課金の口へ静かに移り、実費を溶かします(実損の報告あり)。401 の多くは、手元の資格情報が空(OS のキーチェーンや資格情報マネージャーに古いものが残る)か、画面のないマシンで認証の折り返しが届かないのが原因で、課金の口を替えても直りません。</p>
+<p class="links">→ 401 の2つの切り分けと、課金の口を替えずに直す手当て: 事故防止本 第55章</p>
+</div>
 <h2>4. 捏造(嘘の完了・作話)</h2>
 
 <div class="item">
@@ -124,7 +134,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin: 3rem 0 1re
 </div>
 
 <footer>
-yurukusa · MIT · 2026-06-26 更新 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a>
+yurukusa · MIT · 2026-06-28 更新 · <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">事故防止本</a> · <a href="https://zenn.dev/yurukusa/books/agents-md-interop">AGENTS.md 相互運用本</a>
 </footer>
 
 </div>
