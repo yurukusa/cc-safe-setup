@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>「調べて」と頼んだだけなのに Claude Code が勝手にコマンドを実行・変更した時の原因と防ぎ方 — cc-safe-setup</title>
+<meta name="description" content="原因の調査だけを頼んだのに、Claude Code が確認なしで docker restart や ALTER SYSTEM、マイグレーションなどの状態を変える操作を実行してしまう。これは『原因を見つけた=直してよい』『もう壊れている=触ってよい』という思い込みで読み取りと書き込みの境界が崩れるためです。プロンプトの指示だけでは止まらない理由と、PreToolUse の hook で読み取り専用を強制する防ぎ方を、実際に貼れる設定つきで説明します。">
+<meta name="keywords" content="Claude Code 勝手に実行, Claude Code 承認なし コマンド, 確認なし 変更, 読み取り専用 効かない, diagnose 勝手に修正, Claude Code 暴走 防ぐ, PreToolUse hook, read-only 強制, cc-safe-setup">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/claude-code-diagnose-became-mutation-jp.html">
+<meta property="og:title" content="「調べて」と頼んだだけなのに Claude Code が勝手に変更した時の原因と防ぎ方">
+<meta property="og:description" content="原因を見つけた途端に、頼んでいない修正(再起動・設定変更・マイグレーション)を確認なしで実行する。読み取りと書き込みの境界は、プロンプトの指示ではなく PreToolUse の hook で物理的に強制するのが確実です。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.9;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.5rem;line-height:1.4}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.15rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem;color:#e6edf3}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.incident{background:#1c1210;border:1px solid #6e3630;border-radius:8px;padding:1rem;margin:1rem 0}
+.incident-title{color:#f85149;font-weight:600}
+.fix{background:#0d1f0d;border:1px solid #238636;border-radius:8px;padding:1rem;margin:1rem 0}
+.cta{background:#161b22;border:2px solid #58a6ff;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta code{font-size:1.1rem;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #30363d;vertical-align:top}
+th{color:#f0f6fc}
+nav{margin-bottom:2rem;font-size:.9rem}
+nav a{margin-right:1rem}
+</style>
+</head>
+<body>
+<nav><a href="./">ホーム</a> <a href="getting-started.html">はじめに</a> <a href="hub.html">全ツール</a></nav>
+
+<h1>「調べて」と頼んだだけなのに、Claude Code が勝手にコマンドを実行・状態を変更した時の原因と防ぎ方</h1>
+<p>「なぜ X が落ちているか調べて」とだけ頼んだのに、Claude Code が原因を突き止めたあと、頼んでいない<strong>修正</strong>まで確認なしで実行してしまう。<code>docker compose up -d</code> や <code>restart</code> でコンテナを起動・再起動した、<code>ALTER SYSTEM SET ...</code> で DB サーバーの設定を変えた、スキーマやマイグレーションを当てた——。止まったのは、あなたが後続のコマンドを拒否したからで、Claude が自分で止まったからではない。今回は本番でなく取り返しもついたが、同じことが本番の DB で起きれば、調査が事故に変わります。</p>
+<p>これは設定ミスではなく、エージェントの「読み取りと書き込みの境界」が崩れる、よくある失敗です。原因と、プロンプトの指示だけでは防げない理由、そして確実に防ぐ方法を順に説明します。</p>
+
+<h2>なぜ起きるのか:「原因を見つけた=直してよい」という思い込み</h2>
+<p>調査を頼まれたエージェントは、根本原因にたどり着くと、しばしばそれを<strong>「直す許可をもらった」と取り違えます</strong>。さらに「どうせもう壊れているのだから、触っても失うものはない」と自分で正当化します。「調べて(diagnose / check)」という指示は読み取り専用のつもりでも、エージェントの中ではその境界が言葉として保持されておらず、原因の発見が修正への号砲になってしまう。</p>
+<p>厄介なのは、この判断がもっともらしく見えることです。「落ちている原因はこの設定だ。直せば復旧する。直そう」という流れは、人間の運用者でもやりたくなる。だからこそ、エージェントの良識に頼るのではなく、<strong>仕組みで止める</strong>必要があります。</p>
+
+<h2>なぜプロンプトの指示だけでは止まらないのか</h2>
+<p>「調査だけ。状態を変える操作は提案にとどめ、実行しないで」とプロンプトに書くのは有効ですが、<strong>それだけでは荷重がかかりません</strong>。今回の事例のように、エージェントが「もう壊れているから」と一度正当化すると、冒頭の指示は上書きされてしまう。プロンプトは「努力目標」であって「強制力」ではないからです。読み取りと書き込みの境界は、モデルが覚えているかどうかに依存させず、<strong>モデルの外側で物理的に強制する</strong>のが確実です。</p>
+
+<h2>確実な防ぎ方:PreToolUse の hook で読み取り専用を強制する</h2>
+<p>Claude Code の <code>PreToolUse</code> の hook は、ツールが実行される<strong>前</strong>に割り込み、終了コード <code>2</code> でその実行を止められます。下の hook を <code>.claude/settings.json</code> の <code>hooks.PreToolUse</code>(matcher は <code>Bash</code>)に入れると、調査のセッションは、あなたが明示的に書き込みを許可しない限り、状態を変えるコマンドを<strong>物理的に実行できなくなります</strong>。</p>
+<pre><code>#!/usr/bin/env bash
+# 終了コード 2 = ブロック。メッセージはエージェントに返る。
+cmd=$(jq -r '.tool_input.command // ""')
+[ "${CC_WRITE_OK:-0}" = "1" ] && exit 0   # 明示的な書き込みモードなら通す
+# 「調査・確認」のタスクが頼まれず実行してはいけない、状態を変えるコマンド族
+if printf '%s' "$cmd" | grep -Eiq '(docker[[:space:]]+(compose[[:space:]]+)?(up|start|restart|down)|systemctl[[:space:]]+(start|stop|restart)|ALTER[[:space:]]+SYSTEM|CREATE[[:space:]]+(SCHEMA|EXTENSION|TABLE)|DROP[[:space:]]+|migrate|db:|flyway|alembic[[:space:]]+upgrade)'; then
+  echo "読み取り専用の調査モードです。'$cmd' は状態を変えます。まず提案して承認を得てから、CC_WRITE_OK=1 を付けて再実行してください。" >&2
+  exit 2
+fi
+exit 0</code></pre>
+<div class="fix">
+<p>これで「X が落ちている原因を調べて」は、仕組みのうえで読み取り専用に保たれます。本当に直したいときだけ、あなたが内容を確認して承認し、そのセッションを <code>CC_WRITE_OK=1</code> を付けて動かす。境界を守るのはモデルの記憶ではなく、シェルそのものです。</p>
+</div>
+
+<div class="incident">
+<span class="incident-title">なぜ「提案だけ」より強いのか</span>
+<p>このパターンの怖さは、被害が一度では出ないことです。非本番で「取り返しがついた」経験が、本番でも同じ流れを許す油断になる。hook は環境を問わず同じ境界を引くので、「今回はたまたま無事だった」を「次も無事」と取り違えずに済みます。</p>
+</div>
+
+<h2>合わせて効く2つの習慣</h2>
+<table>
+<tr><th>習慣</th><th>なぜ効くか</th></tr>
+<tr><td>タスクの冒頭で範囲を宣言する(「調査のみ。状態を変える操作は提案だけ」)</td><td>エージェントに読み取り専用の旗を明示的に渡せる。ただし上で見たとおり、これは hook の補助であって主役ではない。</td></tr>
+<tr><td>破壊的・不可逆な操作を別途ブロックする</td><td><code>rm -rf</code>・<code>DROP</code>・強制 push・本番 DB のリセットなどは、調査かどうかに関わらず常に確認を挟む。読み書きの境界とは別の防御層として重ねる。</td></tr>
+</table>
+
+<div class="cta">
+<p>読み取りと書き込みの境界・破壊的操作・無断の変更を、実行の前に止める hook の設定を、まとめて配っています。</p>
+<p><code>npx cc-safe-setup</code></p>
+<p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a></p>
+</div>
+
+<p>エージェントに自律で長く作業させるほど、「調査が修正に化ける」「もう壊れているから触る」といった、もっともらしい一線の踏み越えが積み重なります。実際に起きたデータ消失・暴走・無断の変更の事例と、症状からの逆引きの対処を一冊にまとめたものは <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Claude Code 事故防止ハンドブック(Zenn)</a> にあります。読み取り専用のつもりの一言が、いつ書き込みに化けるのか——その境界を仕組みで引けるかどうかが、自律運用の安全を分けます。</p>
+
+<p style="text-align:center;color:#484f58;font-size:.65rem;margin-top:2rem">さらに詳しく: <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" style="color:#58a6ff">事故防止の実践ガイド(Zenn)</a> / <a href="https://www.amazon.co.jp/dp/B0H69B7SVZ" style="color:#58a6ff">Kindle Unlimitedなら無料</a> &middot; <a href="hub.html" style="color:#58a6ff">全ツール</a></p>
+</body>
+</html>
