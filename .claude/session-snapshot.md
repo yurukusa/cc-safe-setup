@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-11T06:21:43+09:00
+Updated: 2026-06-29T22:19:15+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `docs/verify-hooks-fire-not-just-configured-2026-06-28`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 3e41467 fix: remove inflated/false npm download & install claims (credibility) (#758)
+- Last commit: bde71795 checkpoint: auto-save 22:19:02
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./tests/test-tool-retry-budget-guard.sh
-./tests/test-transcript-contamination-detector.sh
-./tests/test-ultrareview-large-diff-advisor.sh
-./tests/test-userprompt-submit-receipt.sh
-./tests/test-verify-after-publish-reminder.sh
-./tests/test-version-bump-detector.sh
-./tests/test-version-regression-warner.sh
-./tests/test-webfetch-runaway-guard.sh
-./tests/test-wellness-break-reminder.sh
+./docs/README.ja.md
+./README.md
+./examples/no-force-flag.sh
+./test.sh
+./examples/subagent-forged-system-reminder-guard.sh
+./.claude/session-logs/2026-06-23.md
+./tests/git-rm-orphan-wipe-guard.test.sh
+./tests/mcp-config-poisoning-audit.test.sh
+./tests/reroute-after-block-guard.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
