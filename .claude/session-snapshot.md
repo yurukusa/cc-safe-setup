@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-30T04:33:37+09:00
+Updated: 2026-06-30T04:33:42+09:00
 
 ## Git
 - Branch: `docs/verify-hooks-fire-not-just-configured-2026-06-28`
@@ -7,7 +7,7 @@ Updated: 2026-06-30T04:33:37+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: faae5784 checkpoint: auto-save 04:33:32
+- Last commit: ce678b5f recovery: pre-compact checkpoint (1 files, 20260629-193342)
 
 ## Recent Files
 ```
