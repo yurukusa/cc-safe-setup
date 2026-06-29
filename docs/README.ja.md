@@ -134,26 +134,19 @@ Claude Codeを再起動。完了。
 
 Anthropic は[2026年6月15日に programmatic の課金を分離](https://docs.claude.com/en/api/billing)する（予定だったが当日に一時停止・上の訂正を参照）。 `claude -p` や SDK の呼び出しが別の credit の bucket に routing される。 2026年5月、 起票で財務の損失の報告が表面化: [#61704 自信を持ったが間違いの billing の主張で €60の限度を €84.68 で超過](https://github.com/anthropics/claude-code/issues/61704)、 [#61728 動かない code を動いているかのように提示して $80 の損失](https://github.com/anthropics/claude-code/issues/61728)、 [#61086 修正の請け合いの後の malformed の tool call の繰り返しで token の浪費](https://github.com/anthropics/claude-code/issues/61086)、 [#61699 production の deployment の session で繰り返しの欺瞞](https://github.com/anthropics/claude-code/issues/61699)。 **モデルは Anthropic 自身の課金の logic を training data から検証できない。** 6月15日の後、 モデルの billing の主張と実際の課金の routing の乖離が更に広がる。
 **今日利用可能の利用者の側の防衛:**
-- **無料の90秒の対話の診断** (日本語の道具): [Claude Code の課金で間違われた？](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/78dafd28f5dc839f6b0c78130591fe2e/raw/wrong-charge-diagnostic-ja.html) — 5件の質問で利用者の事例を filed reports (€84.68、 $80) に照合、 support.anthropic.com に貼り付けるための返金の論理の素案を生成。 signup 不要、 telemetry なし、 単一の HTML ([英語版](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html))。
-- **無料の billing-axis の整理** (install 不要): [日本語版の長編 Gist](https://gist.github.com/yurukusa/65d9ce96fab8d767ed0a088fb1e20152) — 4件の filed cases、 9行の cluster の目録、 4件の利用者の側の防衛、 効く返金の論理 ([英語版](https://gist.github.com/yurukusa/4ca735cb192219581d303afe5f63d2eb))
-- **無料の6月15日の見積もりの道具** (browser のみ、 signup 不要): 直近30日の利用を貼り付けて post-June-15 の見積もりを取得 → [Pool 2 の estimator](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/b78e1cb9234a5d12b27b61c9d82637d9/raw/june-15-pool2-estimator.html)
-- **無料の6月15日の露出の判定（実機のログから）** (ブラウザのみ、 アップロードなし): 推定でなく、 あなたのセッションのログに記録された起動の種類を読んで、 対話（Pool 1）とプログラム経由（Pool 2）の比率を出します → [実データの露出チェッカー](https://yurukusa.github.io/cc-safe-setup/june15-cliff-exposure-from-logs-jp.html)
+- **無料の90秒の対話の診断** (日本語の道具): Claude Code の課金で間違われた？ — 5件の質問で利用者の事例を filed reports (€84.68、 $80) に照合、 support.anthropic.com に貼り付けるための返金の論理の素案を生成。 signup 不要、 telemetry なし、 単一の HTML。
+- **無料の billing-axis の整理** (install 不要): 日本語版の長編 Gist — 4件の filed cases、 9行の cluster の目録、 4件の利用者の側の防衛、 効く返金の論理
+- **無料の6月15日の見積もりの道具** (browser のみ、 signup 不要): 直近30日の利用を貼り付けて post-June-15 の見積もりを取得 → Pool 2 の estimator
+- **無料の6月15日の露出の判定（実機のログから）** (ブラウザのみ、 アップロードなし): 推定でなく、 あなたのセッションのログに記録された起動の種類を読んで、 対話（Pool 1）とプログラム経由（Pool 2）の比率を出します → 実データの露出チェッカー
 - **判定の枠組み**: [Claude Code Migration Playbook ($19、 Edition 2 は 2026-05-22 から live)](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) — 241頁、 14件の dated の triggers (Opus 4.7 silent regression、 6月15日の programmatic credit pool cliff、 133-case の claim-vs-reality cluster) + 3件の移行の経路 (stay+harden / switch / hybrid — ある operator は Kimi K2 を $0.02/call の coworker として $200/月 を $30/月 に削減) + 日々の burn rate から stay / switch / hybridize の判定。 Edition 1 の購入者には Gumroad library から無償の自動更新
-- **失敗の事例の集積**: [Claim-Verify Handbook ($19、 2026-05-22 から live)](https://yurukusa.gumroad.com/l/claim-verify-handbook) — Claude Code または副の作業者が「完了」 「verified」 と主張したが実態は乖離した133+件の事例の整理。 $80 を動かない code に消費 ([#61728](https://github.com/anthropics/claude-code/issues/61728))、 3週間の未 commit の作業を `git reset --hard` で消失 ([#61102](https://github.com/anthropics/claude-code/issues/61102))、 20件の session が silent に削除 ([#61952](https://github.com/anthropics/claude-code/issues/61952))、 安全 hook の flag file を `rm -f` で能動的に削除 ([#61953](https://github.com/anthropics/claude-code/issues/61953))。 3段階の枠組み + 14件の利用者の側の防衛 + 5件の検出の道具 (全件 implemented、 165+ tests passing) + 付録 E の operator-side gate matrix ([live gist](https://gist.github.com/yurukusa/bb3812006d92d49cf55db74a65fc4032))。 Migration Playbook Edition 2 の sister product
+- **失敗の事例の集積**: [Claim-Verify Handbook ($19、 2026-05-22 から live)](https://yurukusa.gumroad.com/l/claim-verify-handbook) — Claude Code または副の作業者が「完了」 「verified」 と主張したが実態は乖離した133+件の事例の整理。 $80 を動かない code に消費 ([#61728](https://github.com/anthropics/claude-code/issues/61728))、 3週間の未 commit の作業を `git reset --hard` で消失 ([#61102](https://github.com/anthropics/claude-code/issues/61102))、 20件の session が silent に削除 ([#61952](https://github.com/anthropics/claude-code/issues/61952))、 安全 hook の flag file を `rm -f` で能動的に削除 ([#61953](https://github.com/anthropics/claude-code/issues/61953))。 3段階の枠組み + 14件の利用者の側の防衛 + 5件の検出の道具 (全件 implemented、 165+ tests passing) + 付録 E の operator-side gate matrix。 Migration Playbook Edition 2 の sister product
 - **月額の継続の購読**: [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership) — note のメンバーシップ。毎月その月の事故のまとめ・安全チェックリスト・コピペできる hook・失敗事例の深掘りを届ける。各号は無料の試し読みあり
 ## ドキュメント
 
-- [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html) — 5分で安全に
-- [Hook Selector](https://yurukusa.github.io/cc-safe-setup/hook-selector.html) — 5問で最適なhookセットを推薦
-- [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html) — 許可プロンプトを減らす
-- [OWASP MCP対応表](https://yurukusa.github.io/cc-safe-setup/owasp-mcp-hooks.html) — OWASP MCP Top 10全リスク対策
-- [Defense Kit](https://gist.github.com/yurukusa/823f76c4783e45809735c92b660bd2ed) — 事故10件と対応するhook 10件と即時のinstallコマンド10件
-- [トークン消費の順位表のアンチパターン](https://gist.github.com/yurukusa/ac41d467d97f3711129070d8e311db4f) — 社内のトークン消費の順位表が Goodhart の法則で失敗する理由、 5 つの代替の指標、 Uber の事例 (Fortune 2026-05-26: 順位表の導入で 2026 年の AI 予算を 4 ヶ月で消耗)
 - [settings.jsonリファレンス](../SETTINGS_REFERENCE.md) — 全設定の解説
 - [COOKBOOK](../COOKBOOK.md) — レシピ集
 - [トラブルシューティング](../TROUBLESHOOTING.md) — 動かない時の対処法
-- [Web版ツール](https://yurukusa.github.io/cc-safe-setup/hub.html) — 全ツール一覧
-- [Safety Audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) — プロによる安全設定レビュー（$50〜）
+- [Safety Audit](../SERVICES.md) — プロによる安全設定レビュー（$50〜）
 
 hookの仕組みと設定方法は[Claude Code公式ドキュメント](https://code.claude.com/docs/en/hooks)を参照。
 
