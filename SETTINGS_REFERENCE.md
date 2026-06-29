@@ -299,8 +299,8 @@ Run `npx cc-safe-setup --doctor` for automated diagnosis.
 ## Resources
 
 - [Official Hooks Documentation](https://code.claude.com/docs/en/hooks)
-- [COOKBOOK.md](https://github.com/yurukusa/claude-code-hooks/blob/main/COOKBOOK.md) — 20 hook recipes
+- [COOKBOOK.md](./COOKBOOK.md) — 20 hook recipes
 - [Migration Guide](MIGRATION.md) — from permissions to hooks
-- [Ecosystem Comparison](https://yurukusa.github.io/cc-safe-setup/ecosystem.html) — all hook projects
-- [Token Checkup](https://yurukusa.github.io/cc-safe-setup/token-checkup.html) — free 30-second token diagnostic
+- Ecosystem Comparison — all hook projects
+- Token Checkup — free 30-second token diagnostic
 - [Token Book](https://zenn.dev/yurukusa/books/token-savings-guide) — cut your token consumption in half (¥2,500, chapter 1 free)

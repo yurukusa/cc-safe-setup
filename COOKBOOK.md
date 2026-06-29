@@ -129,11 +129,11 @@ npx cc-safe-setup --simulate "git push --force origin main"
 
 All browser-based, nothing leaves your machine:
 
-- [Safety Hub](https://yurukusa.github.io/cc-safe-setup/hub.html) — All 23 tools
-- [Validator](https://yurukusa.github.io/cc-safe-setup/validator.html) — Paste settings.json, get score
-- [Permission Checker](https://yurukusa.github.io/cc-safe-setup/permission-checker.html) — Find broken paths
-- [Playground](https://yurukusa.github.io/cc-safe-setup/playground.html) — Write and test hooks
-- [Hook Builder](https://yurukusa.github.io/cc-safe-setup/builder.html) — Generate hooks from English
+- Safety Hub — All 23 tools
+- Validator — Paste settings.json, get score
+- Permission Checker — Find broken paths
+- Playground — Write and test hooks
+- Hook Builder — Generate hooks from English
 
 ## 27. Bypass Protected Directory Prompts (PermissionRequest)
 
@@ -346,10 +346,10 @@ Install as a PreToolUse hook with matcher `WebFetch`. By default allows all doma
 
 ## Further Reading
 
-- [Getting Started](https://yurukusa.github.io/cc-safe-setup/getting-started.html)
-- [Common Mistakes](https://yurukusa.github.io/cc-safe-setup/common-mistakes.html)
-- [Auto-Approve Guide](https://yurukusa.github.io/cc-safe-setup/auto-approve-guide.html)
-- [Credential Protection](https://yurukusa.github.io/cc-safe-setup/prevent-credential-leak.html)
+- Getting Started
+- Common Mistakes
+- Auto-Approve Guide
+- Credential Protection
 - [Troubleshooting](TROUBLESHOOTING.md)
 - [Settings Reference](SETTINGS_REFERENCE.md)
 - **[Hook Design Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — 14 chapters on hook design patterns, testing, and real incident postmortems. Chapter 3 free.

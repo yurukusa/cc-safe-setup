@@ -50,7 +50,7 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 1. **Top 3 waste patterns** found in your logs, ranked by estimated cost. Each tied to a specific Ch.8 symptom number.
 2. **Per-pattern fix**: the exact hook, CLAUDE.md change, or workflow adjustment that addresses it. Example hooks from `cc-safe-setup/examples/` that you can install in one command.
 3. **Estimated savings range** (stated as a range, not a single number — the actual savings depend on your next month's usage pattern).
-4. **`cc-token-diet` walkthrough**: if you haven't run [cc-token-diet](https://github.com/yurukusa/cc-token-diet) yet, I include the command line and help interpret the output.
+4. **`cc-token-diet` walkthrough**: if you haven't run cc-token-diet yet, I include the command line and help interpret the output.
 
 **Not included:** real-time monitoring, implementation (you apply the fixes yourself), or a guarantee that your $ spend will drop by a specific amount. If the report does not identify at least one addressable waste pattern, full refund via Ko-fi.
 
@@ -83,10 +83,10 @@ Founder rate is grandfathered — you keep the ¥500 price even if the tier is l
 
 ## Why these prices
 
-Comparable AI-audit consulting runs $150–$300/hour and $999+ per productized report, based on Q1 2026 market data. This offering is deliberately priced at the bottom of that range because it is AI-assisted: I apply the same 7-check framework documented in the [free self-audit Gist](https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c), plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that — but it is an honest $29 of value.
+Comparable AI-audit consulting runs $150–$300/hour and $999+ per productized report, based on Q1 2026 market data. This offering is deliberately priced at the bottom of that range because it is AI-assisted: I apply the same 7-check framework documented in the free self-audit Gist, plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that — but it is an honest $29 of value.
 
 ---
 
 ## Questions before booking
 
-Open a [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general) or message on Ko-fi.
+Open a General Discussion or message on Ko-fi.
