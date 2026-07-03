@@ -10,6 +10,27 @@ npx cc-safe-setup --doctor
 
 This checks jq, settings.json, file permissions, shebangs, and common misconfigurations. If it says "All checks passed" but hooks still don't fire, read on.
 
+## "No hooks fire at all on Windows" (Git for Windows PATH bug)
+
+If you are on the Windows Desktop app with Git for Windows installed, and **every** `"type": "command"` hook silently does nothing — including these guards — regardless of the command, this is likely an upstream shell-resolution bug, not your config.
+
+Symptoms (visible if you run the CLI with `--output-format stream-json` and watch the `hook_response` events):
+
+```
+Error occurred while executing hook command: Executable not found in $PATH: "C:\Program Files\Git\bin"
+Failed to run: EFTYPE: inappropriate file type or format, uv_spawn
+```
+
+Note the path is missing the trailing `\bash.exe`. The hook runner enumerates `$PATH`, hits the bare `C:\Program Files\Git\bin` entry that the Git for Windows installer adds, and tries to spawn that **directory** as the shell instead of appending `\bash.exe`. It fails during shell auto-detection, before your command ever runs — so the failure is identical no matter what the hook does, and nothing is surfaced in the normal UI.
+
+How to confirm it is this and not a config problem:
+
+- The `--doctor` above says everything is fine, yet no hook has any effect.
+- Registering a trivial hook (`echo fired >> C:\Users\you\hook.log` on `SessionStart`) produces no log line.
+- The stream-json error names the `Git\bin` directory (without `bash.exe`).
+
+This is tracked upstream at [anthropics/claude-code#73971](https://github.com/anthropics/claude-code/issues/73971) (has-repro). Until it is fixed there, a machine hitting this cannot run command hooks, so do not assume these guards are protecting a Windows machine with this symptom — verify with the log test above first. WSL2 sessions resolve the shell differently and are not affected the same way; running Claude Code under WSL2 is the reliable path on Windows while the upstream fix is pending.
+
 ## "Hook doesn't block anything"
 
 ### 1. Did you restart Claude Code?
