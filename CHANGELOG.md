@@ -1,6 +1,20 @@
 # Changelog
 
 ## [Unreleased]
+- **`warn-cron-cost-trap.sh`: warn on short-interval recurring CronCreate (#74547)** —
+  a recurring `CronCreate` does not run cheaply in the background: each fire is a full
+  turn that re-reads the accumulated conversation, so per-fire cost grows with the
+  session and the total climbs roughly quadratically with the number of fires. Issue
+  #74547 reports ~USD 500 burned by an ~11-minute recurring schedule that polled an
+  empty directory 88 times in 16 hours. This PostToolUse hook (matcher `CronCreate`)
+  parses the minute field of `.tool_input.cron` — `*` → 1 min, `*/N` → N, comma-lists →
+  smallest consecutive gap with 60-wraparound, `A-B` ranges → 1 min (fires every minute
+  in the range), single value → hourly — and, only when
+  `recurring` is true and the derived interval is below the threshold (default 15 min),
+  prints a one-time cost warning. Advisory by design (always exit 0, never blocks);
+  fail-open on missing jq / no cron / unparseable minute field. `CC_CRON_COST_TRAP_DISABLE=1`
+  to disable, `CC_CRON_COST_TRAP_THRESHOLD_MIN=N` to tune. Standalone test added at
+  `tests/test-warn-cron-cost-trap.sh` (21 assertions). Pairs with `cron-create-receipt.sh`.
 - **`reroute-after-block-guard.sh`: stop a reroute toward a just-blocked target (#70112)** —
   PreToolUse hooks are stateless, so the trajectory in #70112 (a gate fires; the agent
   substitutes an equivalent path toward the SAME target; the next hook evaluates a fresh,
