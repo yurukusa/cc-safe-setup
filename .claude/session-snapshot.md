@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-07T19:42:05+09:00
+Updated: 2026-07-07T19:42:46+09:00
 
 ## Git
 - Branch: `fix/cli-remove-self-defeating-sales-count-2026-07-07`
@@ -7,7 +7,7 @@ Updated: 2026-07-07T19:42:05+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 9c4fd48b checkpoint: auto-save 19:39:21
+- Last commit: 60a0a8b7 checkpoint: pre-compact auto-save (2 files, 20260707-104224)
 
 ## Recent Files
 ```
