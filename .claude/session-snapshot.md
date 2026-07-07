@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-06-11T06:21:43+09:00
+Updated: 2026-07-06T16:16:08+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `feat/warn-cron-cost-trap-hook-2026-07-06`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 3e41467 fix: remove inflated/false npm download & install claims (credibility) (#758)
+- Last commit: 193e96cf recovery: pre-compact checkpoint (1 files, 20260706-071608)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./tests/test-tool-retry-budget-guard.sh
-./tests/test-transcript-contamination-detector.sh
-./tests/test-ultrareview-large-diff-advisor.sh
-./tests/test-userprompt-submit-receipt.sh
-./tests/test-verify-after-publish-reminder.sh
-./tests/test-version-bump-detector.sh
-./tests/test-version-regression-warner.sh
-./tests/test-webfetch-runaway-guard.sh
-./tests/test-wellness-break-reminder.sh
+./.claude/session-logs/2026-07-06.md
+./.claude/pre-compact-checkpoint.md
+./tests/test-warn-cron-cost-trap.sh
+./examples/warn-cron-cost-trap.sh
+./test.sh
+./CHANGELOG.md
+./examples/README.md
+./TROUBLESHOOTING.md
+./examples/write-empty-content-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)

@@ -6163,7 +6163,7 @@ async function main() {
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=june15-cliff' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — ¥11,373 / 12 purchases / 3 months');
+  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own battle-tested playbooks from 800h of autonomous runs');
   console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, monthly cluster digest)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
