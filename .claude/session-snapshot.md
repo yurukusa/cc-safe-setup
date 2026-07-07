@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-07T16:07:39+09:00
+Updated: 2026-07-07T19:38:09+09:00
 
 ## Git
 - Branch: `fix/cli-remove-self-defeating-sales-count-2026-07-07`
@@ -7,20 +7,20 @@ Updated: 2026-07-07T16:07:39+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: c78e8703 checkpoint: auto-save 16:07:38
+- Last commit: 54d18897 checkpoint: auto-save 19:37:50
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-07.md
+./examples/README.md
+./test.sh
+./examples/git-flag-bypass-guard.sh
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-07-07.md
 ./CHANGELOG.md
 ./.claude/session-logs/2026-07-06.md
 ./tests/test-warn-cron-cost-trap.sh
 ./examples/warn-cron-cost-trap.sh
-./test.sh
-./examples/README.md
-./TROUBLESHOOTING.md
 ```
 
 ## Active TODOs: 1 file(s)
