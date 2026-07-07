@@ -15,7 +15,7 @@ npx cc-safe-setup --shield                    # install recommended set
 |----------|-------|---------|
 | Destructive Command Prevention | 14 | `destructive-guard`, `branch-guard`, `no-sudo-guard`, `symlink-guard`, `shell-wrapper-guard`, `compound-inject-guard` |
 | Data Protection | 5 | `block-database-wipe`, `secret-guard`, `hardcoded-secret-detector` |
-| Git Safety | 11 | `git-config-guard`, `no-verify-blocker`, `push-requires-test-pass` |
+| Git Safety | 12 | `git-config-guard`, `no-verify-blocker`, `push-requires-test-pass`, `git-flag-bypass-guard` |
 | Auto-Approve (PreToolUse) | 11 | `auto-approve-readonly`, `auto-approve-build`, `auto-approve-docker` |
 | Auto-Approve (PermissionRequest) | 7 | `allow-git-hooks-dir`, `allow-protected-dirs`, `edit-always-allow` |
 | Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |

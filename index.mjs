@@ -500,6 +500,7 @@ function examples() {
       'git-checkout-uncommitted-guard.sh': 'Block branch switching with uncommitted changes',
       'git-config-guard.sh': 'Block git config --global modifications',
       'git-crypt-worktree-guard.sh': 'Block worktree creation in git-crypt repos',
+      'git-flag-bypass-guard.sh': 'Block deny-rule bypass via flags inserted before a git subcommand (#18613)',
       'git-history-rewrite-guard.sh': 'Block git history rewriting commands',
       'git-hook-bypass-guard.sh': 'Git Hook Bypass Guard',
       'git-index-lock-cleanup.sh': 'Remove stale .git/index.lock after git commands',

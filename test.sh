@@ -12133,6 +12133,43 @@ test_ex compound-inject-guard.sh '{"tool_input":{"command":"echo x || rm -rf /ho
 test_ex compound-inject-guard.sh '{"tool_input":{"command":""}}' 0 "compound-inject: empty command"
 echo ""
 
+# ========== git-flag-bypass-guard (#18613) ==========
+# deny rule prefix match is bypassed by inserting a flag between `git` and
+# the subcommand. This hook resolves the effective subcommand and blocks it.
+echo "git-flag-bypass-guard.sh:"
+# bypass forms -> blocked
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /path/to/repo commit -m test"}}' 2 "git-flag-bypass: -C path insertion blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git --no-pager commit -m x"}}' 2 "git-flag-bypass: --no-pager insertion blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git --git-dir=.git commit"}}' 2 "git-flag-bypass: --git-dir= joined blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git --git-dir .git commit"}}' 2 "git-flag-bypass: --git-dir separated value blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -c user.name=foo commit"}}' 2 "git-flag-bypass: -c config insertion blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git --work-tree=. commit"}}' 2 "git-flag-bypass: --work-tree= joined blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git --namespace=ns commit"}}' 2 "git-flag-bypass: --namespace= joined blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git commit -m plain"}}' 2 "git-flag-bypass: plain git commit (denied subcommand)"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"/usr/bin/git commit"}}' 2 "git-flag-bypass: absolute path git blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /a -c k=v commit"}}' 2 "git-flag-bypass: multiple flags then commit blocked"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"GIT_DIR=/x git -C /r commit"}}' 2 "git-flag-bypass: env prefix then bypass blocked"
+# config CC_GIT_FLAG_DENY (inherited by the child bash)
+export CC_GIT_FLAG_DENY="commit,push"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /r push"}}' 2 "git-flag-bypass: config push blocked when in deny list"
+export CC_GIT_FLAG_DENY="push"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /r commit"}}' 0 "git-flag-bypass: config commit allowed when deny=push only"
+export CC_GIT_FLAG_DENY=""
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /r commit"}}' 0 "git-flag-bypass: empty deny disables hook"
+unset CC_GIT_FLAG_DENY
+# normal commands -> pass
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /repo log"}}' 0 "git-flag-bypass: git log not denied"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git status"}}' 0 "git-flag-bypass: git status passes"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /repo push"}}' 0 "git-flag-bypass: push not in default deny"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"ls -la"}}' 0 "git-flag-bypass: non-git command passes"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"echo git commit"}}' 0 "git-flag-bypass: echo git commit not real git"
+# boundaries
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git"}}' 0 "git-flag-bypass: git alone no subcommand"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":"git -C /repo"}}' 0 "git-flag-bypass: flags only no subcommand"
+test_ex git-flag-bypass-guard.sh '{}' 0 "git-flag-bypass: empty input"
+test_ex git-flag-bypass-guard.sh '{"tool_input":{"command":""}}' 0 "git-flag-bypass: empty command"
+echo ""
+
 # ========== pre-compact-checkpoint (PreCompact event) ==========
 echo "pre-compact-checkpoint.sh:"
 test_ex pre-compact-checkpoint.sh '{}' 0 "pre-compact-checkpoint: empty input"
