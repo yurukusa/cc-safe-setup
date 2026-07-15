@@ -34,9 +34,15 @@ fi
 # We check if the rm target is a parent of, or the same as, the mv source
 
 # Get all mv source paths (first arg after mv and optional flags)
-MV_SOURCES=$(echo "$COMMAND" | grep -oP '\bmv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+# Flag-skip must consume BOTH short (-rf) and long (--backup, --backup=numbered)
+# options. The earlier pattern `-[a-zA-Z]+` only ate short flags, so a long
+# option was mis-captured as the source path and the overlap check silently
+# never fired — e.g. `mv --backup=numbered src dst && rm -rf src` slipped
+# through (exit 0). `--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?` eats one flag of any
+# shape; the `*` repeats for stacked flags before the first real path token.
+MV_SOURCES=$(echo "$COMMAND" | grep -oP '\bmv\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' 2>/dev/null || true)
 # Get all rm targets
-RM_TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+RM_TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' 2>/dev/null || true)
 
 [ -z "$MV_SOURCES" ] && exit 0
 [ -z "$RM_TARGETS" ] && exit 0
