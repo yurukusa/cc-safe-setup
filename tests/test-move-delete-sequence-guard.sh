@@ -58,6 +58,12 @@ test_hook '{"tool_input":{"command":"git mv old.txt new.txt"}}' 0 "Allow git mv 
 test_hook '{"tool_input":{"command":"mv /home/user/projects/webapp/src/index.js /tmp/safe/ && rm -rf /home/user/projects/webapp/src"}}' 2 "Block real-world: save one file, delete rest of src"
 test_hook '{"tool_input":{"command":"mv /home/user/data/important.db /tmp/ ; rm -r /home/user/data"}}' 2 "Block real-world: save DB, delete data dir"
 
+# --- Block: long-option variants (regression for the long-flag bypass) ---
+# 短オプションだけを読み飛ばす正規表現だと、長いオプションが移動元と誤認され素通りしていた。
+test_hook '{"tool_input":{"command":"mv --backup=numbered /home/user/project/main.py /tmp/ && rm -rf /home/user/project"}}' 2 "Block mv --backup=numbered then rm -rf parent (valued long flag)"
+test_hook '{"tool_input":{"command":"mv --verbose /home/user/data/x.db /tmp/ ; rm -rf /home/user/data"}}' 2 "Block mv --verbose then rm -rf parent (long flag)"
+test_hook '{"tool_input":{"command":"mv --no-clobber /var/app/conf/a.yml /tmp/ && rm -rf /var/app/conf"}}' 2 "Block mv --no-clobber then rm -rf parent (long flag)"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed out of $((PASS + FAIL)) tests"
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1

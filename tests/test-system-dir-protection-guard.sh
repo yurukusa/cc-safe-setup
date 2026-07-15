@@ -57,6 +57,12 @@ test_hook '{"tool_input":{"command":"sudo chmod -R 755 /usr"}}' 2 "Block sudo ch
 test_hook '{"tool_input":{"command":"chown -R user:user /var"}}' 2 "Block chown -R /var"
 test_hook '{"tool_input":{"command":"sudo chown -R root:root /opt"}}' 2 "Block sudo chown -R /opt"
 
+# --- Block: long-option variants (regression for the long-flag bypass) ---
+# 短オプションだけを読み飛ばす正規表現だと、長いオプションが対象パスと誤認され素通りしていた。
+test_hook '{"tool_input":{"command":"mv --backup=numbered /etc /tmp/etc_backup"}}' 2 "Block mv --backup=numbered /etc (valued long flag)"
+test_hook '{"tool_input":{"command":"rm --recursive --force /etc"}}' 2 "Block rm --recursive --force /etc (long flags)"
+test_hook '{"tool_input":{"command":"mv --verbose /usr/local /tmp/"}}' 2 "Block mv --verbose /usr/local (long flag)"
+
 # --- Allow: Safe operations ---
 test_hook '{"tool_input":{"command":"rm -rf /tmp/junk"}}' 0 "Allow rm -rf /tmp/junk"
 test_hook '{"tool_input":{"command":"rm node_modules"}}' 0 "Allow rm node_modules"
