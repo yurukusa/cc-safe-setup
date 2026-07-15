@@ -219,7 +219,7 @@ if (HELP) {
 
   More: https://github.com/yurukusa/cc-safe-setup
   Find hooks: npx cc-hook-registry search <keyword>
-  Test hooks: npx cc-hook-test <hook.sh>
+  Test hooks: npx cc-safe-setup --test-hook <name>
 
   Token Checkup: https://yurukusa.github.io/cc-safe-setup/token-checkup.html
   Token Book:    https://yurukusa.github.io/cc-safe-setup/token-book.html
@@ -4725,7 +4725,7 @@ exit 0`,
   }
 
   console.log();
-  console.log(c.dim + '  Test it: npx cc-hook-test ' + hookPath + c.reset);
+  console.log(c.dim + '  Test it: npx cc-safe-setup --test-hook ' + hookPath + c.reset);
   console.log(c.dim + '  Restart Claude Code to activate.' + c.reset);
   console.log();
 }
