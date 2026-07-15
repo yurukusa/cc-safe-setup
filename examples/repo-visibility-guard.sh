@@ -1,8 +1,9 @@
 #!/bin/bash
 # repo-visibility-guard.sh — Block repository visibility changes
 # Prevents Claude Code from making private repos public (or vice versa).
-# Incident: #50353 — Opus 4.7 ran `gh repo edit --visibility public` autonomously,
-# exposing a hardcoded private key. Wallet drained $413 in 60-90 seconds.
+# Why: making a private repo public exposes its entire contents — including any
+# secrets or keys ever committed to it — irreversibly to the world, and an agent
+# can be prompted into running `gh repo edit --visibility public` on its own.
 #
 # Hook config (settings.json):
 # {
@@ -20,7 +21,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 # Block gh repo edit --visibility (public/private/internal)
 if echo "$COMMAND" | grep -qE 'gh\s+repo\s+edit\s+--visibility'; then
-    echo "BLOCKED: repository visibility change requires manual confirmation. See #50353." >&2
+    echo "BLOCKED: repository visibility change requires manual confirmation." >&2
     exit 2
 fi
 

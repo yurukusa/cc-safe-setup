@@ -4,7 +4,7 @@
 #   they exhaust RAM/swap into an OOM / kernel panic.
 #
 # Solves a recurring May–June 2026 class (anthropics/claude-code #64366, #68647,
-# #66020, #68933, #61748, …): MCP servers and sub-agent children outlive the
+# #68933, #61748, …): MCP servers and sub-agent children outlive the
 # session that spawned them — reparented to PID 1 — and accumulate until the box
 # swaps to death or kernel-panics. This is *process/memory* exhaustion, distinct
 # from MCP token/context bloat. The actionable moment is the start of your NEXT

@@ -51,7 +51,7 @@ printf '%s\t%s\t%s\t%s\t%s\n' \
 # after the first two turns of a resumed session"). Threshold: first-user
 # message under 500 bytes while total already exceeds 50 KB = drift candidate.
 if [ "$TURN_COUNT" -gt 4 ] && [ "$FIRST_LEN" -lt 500 ] && [ "$TOTAL_LEN" -gt 50000 ]; then
-  echo "⚠ resume-drift signal: messages[0]=${FIRST_LEN}B / total=${TOTAL_LEN}B (see #43278)" >&2
+  echo "⚠ resume-drift signal: messages[0]=${FIRST_LEN}B / total=${TOTAL_LEN}B" >&2
 fi
 
 exit 0
