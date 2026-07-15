@@ -36,13 +36,16 @@ fi
 TARGETS=""
 
 # rm: all non-flag arguments
+# flag-skip eats short (-rf), long (--force) and valued (--x=y) options; a
+# short-only skip let a leading long flag be taken as the path (mv case below),
+# silently dropping the real source from the collision check.
 if echo "$COMMAND" | grep -qE '\brm\s'; then
-    TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(-[a-zA-Z]+\s+)*\K[^\s;&|]+(\s+[^\s;&|]+)*' 2>/dev/null || true)
+    TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K[^\s;&|]+(\s+[^\s;&|]+)*' 2>/dev/null || true)
 fi
 
 # mv: first non-flag argument (source)
 if echo "$COMMAND" | grep -qE '\bmv\s'; then
-    MV_TARGET=$(echo "$COMMAND" | grep -oP '\bmv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+    MV_TARGET=$(echo "$COMMAND" | grep -oP '\bmv\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' 2>/dev/null || true)
     TARGETS="$TARGETS $MV_TARGET"
 fi
 

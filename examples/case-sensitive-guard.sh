@@ -51,7 +51,9 @@ TARGET=""
 if echo "$COMMAND" | grep -qE '^\s*mkdir'; then
     TARGET=$(echo "$COMMAND" | grep -oP 'mkdir\s+(-p\s+)?\K\S+' | tail -1)
 elif echo "$COMMAND" | grep -qE '^\s*rm\s'; then
-    TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(-[rf]+\s+)*\K\S+' | tail -1)
+    # Skip any flag shape (short -rf, long --force, valued --x=y), not just [rf],
+    # so a leading long flag is not mis-captured as the target path.
+    TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' | tail -1)
 fi
 
 if [[ -z "$TARGET" ]]; then

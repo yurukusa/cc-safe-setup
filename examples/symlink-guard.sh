@@ -32,8 +32,11 @@ if ! echo "$COMMAND" | grep -qE '^\s*rm\s+.*-[rf]'; then
     exit 0
 fi
 
-# Extract target path
-TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(-[rf]+\s+)*\K\S+' | tail -1)
+# Extract target path.
+# Skip any flag shape (short -rf, long --force, valued --x=y), not just [rf];
+# a narrow skip mis-captured a leading flag as the path and the -e check below
+# then silently bailed, leaving the real rm target unexamined.
+TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' | tail -1)
 
 if [[ -z "$TARGET" ]] || [[ ! -e "$TARGET" ]]; then
     exit 0

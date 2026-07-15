@@ -57,8 +57,11 @@ is_system_dir() {
 
 # --- rm / unlink on system directories ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?(rm|unlink)\s'; then
-    # Extract targets after rm and flags
-    TARGETS=$(echo "$COMMAND" | grep -oP '(rm|unlink)\s+(-[a-zA-Z]+\s+)*\K[^;|&]+' 2>/dev/null || true)
+    # Extract targets after rm and flags.
+    # flag-skip must eat short (-rf), long (--force) and valued (--x=y) options;
+    # a short-only skip left long flags glued to the target string and, worse,
+    # let a leading long flag be mistaken for the path in the mv case below.
+    TARGETS=$(echo "$COMMAND" | grep -oP '(rm|unlink)\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K[^;|&]+' 2>/dev/null || true)
     for target in $TARGETS; do
         if is_system_dir "$target"; then
             echo "BLOCKED: Destructive operation on system directory: $target" >&2
@@ -73,8 +76,11 @@ fi
 
 # --- mv (moving system directories) ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?mv\s'; then
-    # Get the source of the mv (first non-flag argument)
-    MV_SOURCE=$(echo "$COMMAND" | grep -oP 'mv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+    # Get the source of the mv (first non-flag argument).
+    # A short-only flag-skip mis-captured a leading long option (e.g.
+    # `mv --backup=numbered /etc/x /dst`) as the source, so the system-dir
+    # check silently saw the flag instead of /etc/x. Broaden the skip.
+    MV_SOURCE=$(echo "$COMMAND" | grep -oP 'mv\s+(--?[A-Za-z][A-Za-z0-9_-]*(=\S+)?\s+)*\K\S+' 2>/dev/null || true)
     if is_system_dir "$MV_SOURCE"; then
         echo "BLOCKED: Moving system directory: $MV_SOURCE" >&2
         echo "Command: $COMMAND" >&2
