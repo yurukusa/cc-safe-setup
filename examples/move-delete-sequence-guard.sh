@@ -3,8 +3,10 @@
 #
 # Solves: Agent moves files to a temp location, then deletes the parent directory,
 #   effectively destroying the moved files' original context and siblings.
-#   - #49129: mv files to /tmp && rm -rf parent/ — lost 50GB of data
-#   - #49792: Opus 4.7 moves files, then deletes the source directory
+#   - #49129: moved images into a log/ subfolder inside the project dir, then
+#             rm -rf'd that parent dir — ~1500 files / ~50GB permanently lost
+#   - #72625: unguarded rm -rf after a silently-failed mv — irreversible data
+#             loss on a cloud-sync (file-provider) mount
 #
 # Pattern detected:
 #   mv <source> <dest> && rm -rf <source_parent>
