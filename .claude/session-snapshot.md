@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-07T19:46:14+09:00
+Updated: 2026-07-17T00:24:10+09:00
 
 ## Git
 - Branch: `fix/cli-remove-self-defeating-sales-count-2026-07-07`
@@ -7,20 +7,20 @@ Updated: 2026-07-07T19:46:14+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ba896a84 checkpoint: auto-save 19:46:13
+- Last commit: 68a86401 recovery: pre-compact checkpoint (3 files, 20260716-152410)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-07-07.md
-./examples/README.md
-./test.sh
-./examples/git-flag-bypass-guard.sh
-./CHANGELOG.md
-./.claude/session-logs/2026-07-06.md
-./tests/test-warn-cron-cost-trap.sh
-./examples/warn-cron-cost-trap.sh
+./examples/mcp-tool-guard.sh
+./examples/memory-write-guard.sh
+./examples/resume-drift-watcher.sh
+./examples/mcp-orphan-leak-warner.sh
+./examples/repo-visibility-guard.sh
+./examples/move-delete-sequence-guard.sh
+./tests/test-system-dir-protection-guard.sh
+./tests/test-move-delete-sequence-guard.sh
+./examples/case-sensitive-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
