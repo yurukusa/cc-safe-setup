@@ -64,8 +64,11 @@ MODE="${CC_MEMORY_WRITE_APPROVAL:-off}"
 case "$MODE" in
     ask)
         # Emit a PreToolUse permission decision. In an interactive session
-        # this surfaces an approve/deny prompt; non-interactively it gates
-        # the write (Claude Code treats it as not-approved).
+        # this surfaces an approve/deny prompt. NOTE: under
+        # permissions.defaultMode=bypassPermissions an "ask" decision is
+        # silently auto-approved (anthropics/claude-code#77212) and does NOT
+        # gate the write. For enforcement in bypass mode set
+        # CC_MEMORY_WRITE_APPROVAL=block (exit 2), which is always honored.
         jq -n --arg f "$FILE" '{
             hookSpecificOutput: {
                 hookEventName: "PreToolUse",

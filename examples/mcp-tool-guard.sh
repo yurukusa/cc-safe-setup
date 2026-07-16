@@ -77,6 +77,11 @@ if [ "$GUARD" != "off" ]; then
                 a=$(echo "$a" | xargs)
                 [ -z "$a" ] && continue
                 if [[ "$TOOL" == *"$a"* ]]; then
+                    # NOTE: MODE=bypassPermissions silently auto-approves an
+                    # "ask" decision (anthropics/claude-code#77212), so the ask
+                    # branch below does NOT gate under bypassPermissions. For
+                    # hard enforcement in any auto-approve mode use
+                    # CC_MCP_AUTOMATION_GUARD=block (exit 2), which is honored.
                     case "$GUARD" in
                         ask)
                             printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Confirm MCP automation action %s — permission mode %s is auto-approving."}}\n' "$TOOL" "$MODE"
