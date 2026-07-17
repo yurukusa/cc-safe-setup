@@ -1,6 +1,6 @@
 {
   "name": "cc-safe-setup",
-  "version": "30.0.1",
+  "version": "30.0.2",
   "description": "Safety hooks for Claude Code: PreToolUse/PostToolUse/Stop guards that block destructive or irreversible operations at the tool boundary and surface silent failures. Interactive installer, dependency-free scripts.",
   "main": "index.mjs",
   "bin": {
