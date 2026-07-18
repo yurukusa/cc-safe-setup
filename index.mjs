@@ -380,6 +380,8 @@ async function verify() {
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"sudo rm -rf /var"}}', expect: 2, desc: 'blocks sudo + destructive' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}', expect: 2, desc: 'blocks PowerShell Remove-Item' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"Remove-Item ./file.txt"}}', expect: 0, desc: 'allows single file Remove-Item' },
+    { hook: 'branch-guard', input: '{"tool_input":{"command":"npm test && git push --force origin main"}}', expect: 2, desc: 'blocks chained force-push (compound)' },
+    { hook: 'secret-guard', input: '{"tool_input":{"command":"cd app && git add .env"}}', expect: 2, desc: 'blocks chained git add .env (compound)' },
   ];
 
   let pass = 0, fail = 0;
