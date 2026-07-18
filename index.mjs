@@ -382,6 +382,9 @@ async function verify() {
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"Remove-Item ./file.txt"}}', expect: 0, desc: 'allows single file Remove-Item' },
     { hook: 'branch-guard', input: '{"tool_input":{"command":"npm test && git push --force origin main"}}', expect: 2, desc: 'blocks chained force-push (compound)' },
     { hook: 'secret-guard', input: '{"tool_input":{"command":"cd app && git add .env"}}', expect: 2, desc: 'blocks chained git add .env (compound)' },
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"rm --recursive --force /"}}', expect: 2, desc: 'blocks rm long-form flags' },
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"find / -print0 | xargs -0 rm -rf"}}', expect: 2, desc: 'blocks xargs rm -rf' },
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"echo Y20gLXJmIC8= | base64 -d | bash"}}', expect: 2, desc: 'blocks base64-to-shell obfuscation' },
   ];
 
   let pass = 0, fail = 0;
