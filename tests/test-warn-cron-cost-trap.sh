@@ -40,6 +40,13 @@ assert_not_contains "step20 no warn" "$OUT" "$WARN"
 OUT=$(echo '{"tool_input":{"cron":"*/5 * * * *","recurring":false}}' | bash "$HOOK_ABS" 2>&1)
 assert_not_contains "oneshot no warn" "$OUT" "$WARN"
 
+# Test 6b: short interval with recurring OMITTED -> CronCreate defaults to
+# recurring, so this most-dangerous form must still warn (regression guard
+# for the `recurring // false` default-direction bug).
+OUT=$(echo '{"tool_input":{"cron":"*/5 * * * *"}}' | bash "$HOOK_ABS" 2>&1)
+assert_contains "omitted recurring warns" "$OUT" "$WARN"
+assert_contains "omitted interval 5" "$OUT" "every 5 min"
+
 # Test 7: comma list with a small gap anywhere (0,1,30) -> min gap 1 -> warns
 OUT=$(echo '{"tool_input":{"cron":"0,1,30 * * * *","recurring":true}}' | bash "$HOOK_ABS" 2>&1)
 assert_contains "list gap1 warns" "$OUT" "$WARN"

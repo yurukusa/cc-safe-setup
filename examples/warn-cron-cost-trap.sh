@@ -39,8 +39,9 @@
 #     a,b,c,...    -> smallest consecutive gap, with 60-wraparound
 #     A-B (range)  -> 1 minute (fires every minute within the range)
 #     single value -> 60 minutes (fires at most hourly -> safe)
-#   Warns only when recurring is true AND the derived interval is
-#   below the threshold (default 15 minutes).
+#   Warns unless recurring is explicitly false, AND the derived interval is
+#   below the threshold (default 15 minutes). An omitted recurring defaults
+#   to recurring, so the omitted short-interval case is included.
 #
 # DEFENSIVE BEHAVIOR:
 #   - Always exits 0 (advisory only, never blocks)
@@ -83,14 +84,19 @@ esac
 INPUT=$(cat)
 
 CRON_EXPR=$(printf '%s' "$INPUT" | jq -r '.tool_input.cron // empty' 2>/dev/null)
-RECURRING=$(printf '%s' "$INPUT" | jq -r '.tool_input.recurring // false' 2>/dev/null)
+# Take the raw value: do NOT use jq's // default here. jq's // returns the
+# right-hand side when the left is null OR false, so `recurring // false`
+# would collapse an explicit `false` into the default and misfire.
+RECURRING=$(printf '%s' "$INPUT" | jq -r '.tool_input.recurring' 2>/dev/null)
 
 # Nothing to do if there is no cron expression
 [ -z "$CRON_EXPR" ] && exit 0
 
-# Only recurring schedules have the compounding trap. A one-shot fire
-# re-loads the conversation once and stops.
-[ "$RECURRING" = "true" ] || exit 0
+# Only recurring schedules have the compounding trap. Exclude a schedule ONLY
+# when recurring is explicitly false (a genuine one-shot fire). When recurring
+# is omitted, CronCreate defaults to recurring, so an omitted short-interval
+# registration — the most dangerous form — must still be caught.
+[ "$RECURRING" = "false" ] && exit 0
 
 # Extract the minute field (first whitespace-separated field)
 MINUTE=$(printf '%s' "$CRON_EXPR" | awk '{print $1}')
