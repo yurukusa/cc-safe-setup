@@ -25,8 +25,11 @@
 #
 # WHY OPT-IN: existing installs and headless/CI runs must keep working
 #   unchanged, so the prompt is never on unless the operator asks for it.
-#   In a non-interactive session "ask" cannot prompt and is treated as a
-#   refusal — the safe direction for an unattended write.
+#   CAUTION: under bypassPermissions (or --dangerously-skip-permissions)
+#   an "ask" decision is silently auto-approved and does NOT gate the
+#   write (#77212, open at the time of writing). Only a hard refusal is
+#   always honored — use CC_MEMORY_WRITE_APPROVAL=block (exit 2) to
+#   enforce in unattended runs.
 #
 # TRIGGER: PreToolUse  MATCHER: "Write|Edit|MultiEdit"
 #
@@ -64,8 +67,9 @@ MODE="${CC_MEMORY_WRITE_APPROVAL:-off}"
 case "$MODE" in
     ask)
         # Emit a PreToolUse permission decision. In an interactive session
-        # this surfaces an approve/deny prompt; non-interactively it gates
-        # the write (Claude Code treats it as not-approved).
+        # this surfaces an approve/deny prompt. CAUTION: under
+        # bypassPermissions the "ask" is silently auto-approved and the
+        # write proceeds (#77212) — use =block to enforce unattended.
         jq -n --arg f "$FILE" '{
             hookSpecificOutput: {
                 hookEventName: "PreToolUse",

@@ -52,6 +52,10 @@ fi
 # the Recycle Bin, and no confirmation was requested (SSD/TRIM made it unrecoverable).
 # Use "ask" rather than a hard block so routine build/dependency cleanup just gets one
 # confirmation instead of being denied; relative paths (./build) don't trigger at all.
+# CAUTION: under bypassPermissions an "ask" decision is silently auto-approved
+# (#77212), so this confirmation never appears there — exactly the unattended
+# runs where #64310-style deletions happen. Do not rely on this branch as a
+# hard stop under auto-approve modes; the hard blocks above (exit 2) still hold.
 if echo "$COMMAND" | grep -qiE '\-Force' \
    && echo "$COMMAND" | grep -qiE '[A-Za-z]:[\\/]|\\\\[A-Za-z0-9]'; then
   printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Confirm: Remove-Item -Recurse -Force on an absolute path. -Force bypasses the Recycle Bin and is unrecoverable on SSD/TRIM. Verify the target path is correct (and that any move/copy finished) before deleting (#64310)."}}'
