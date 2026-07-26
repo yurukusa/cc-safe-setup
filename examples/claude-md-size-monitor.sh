@@ -1,3 +1,17 @@
+#!/bin/bash
+# ================================================================
+# claude-md-size-monitor.sh — Warn when CLAUDE.md exceeds the token budget
+# ================================================================
+# PURPOSE:
+#   This hook reports at session start via hookSpecificOutput /
+#   additionalContext. Without the TRIGGER header below, the
+#   installer registered it under the default PreToolUse/Bash,
+#   so it fired on every Bash call and never ran at session start.
+#
+# TRIGGER: SessionStart
+# MATCHER: ""
+# ================================================================
+
 set -u
 INPUT=$(cat)
 TOKEN_BUDGET="${CC_CLAUDE_MD_TOKEN_BUDGET:-5000}"

@@ -1,5 +1,18 @@
 #!/bin/bash
 # ================================================================
+# bypass-mode-effective-verifier.sh — Warn when bypass mode is actually in effect
+# ================================================================
+# PURPOSE:
+#   This hook reports at session start via hookSpecificOutput /
+#   additionalContext. Without the TRIGGER header below, the
+#   installer registered it under the default PreToolUse/Bash,
+#   so it fired on every Bash call and never ran at session start.
+#
+# TRIGGER: SessionStart
+# MATCHER: ""
+# ================================================================
+
+# ================================================================
 # bypass-mode-effective-verifier.sh — Warn about partial bypass-mode
 # coverage when --dangerously-skip-permissions is active
 # ================================================================

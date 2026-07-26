@@ -40,7 +40,7 @@
 #   Candidate cluster #21 — Plugin lifecycle integrity gap
 #   Sub-axis 21A — additive hook-registration growth (#64022).
 #
-# TRIGGER: SessionStart  MATCHER: (any)
+# TRIGGER: SessionStart  MATCHER: ""
 #
 # ENV:
 #   CC_PLUGIN_HOOKS_BLOAT_THRESHOLD     default 5  (warn when same command appears >5×)

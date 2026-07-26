@@ -1,3 +1,17 @@
+#!/bin/bash
+# ================================================================
+# skills-load-verifier.sh — Warn when a SKILL.md cannot be loaded
+# ================================================================
+# PURPOSE:
+#   This hook reports at session start via hookSpecificOutput /
+#   additionalContext. Without the TRIGGER header below, the
+#   installer registered it under the default PreToolUse/Bash,
+#   so it fired on every Bash call and never ran at session start.
+#
+# TRIGGER: SessionStart
+# MATCHER: ""
+# ================================================================
+
 set -u
 INPUT=$(cat)
 MIN_DESC_LEN="${CC_SKILLS_MIN_DESC_LEN:-10}"
