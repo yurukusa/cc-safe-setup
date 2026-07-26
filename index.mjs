@@ -5855,7 +5855,77 @@ async function doctor() {
     pass('hooks directory exists (' + files.length + ' scripts)');
   }
 
-  // 13. Check Claude Code version (needs hooks support)
+  // 13. Check that each installed hook sits on the event it declares.
+  // A hook wired to the wrong event installs cleanly, reports success, and then
+  // never fires — the worst failure this project has, because the operator
+  // believes they are covered. Two ways it happens: the header form that older
+  // installs did not parse (fixed in installExample, but settings.json written
+  // before that keeps the wrong entry), and hand-edited settings. Read-only:
+  // report the mismatch and how to correct it, never rewrite settings here.
+  try {
+    const declaredFor = (scriptPath) => {
+      if (!existsSync(scriptPath)) return null;
+      const body = readFileSync(scriptPath, 'utf8');
+      const t = body.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(\S+)/m);
+      if (!t) return null;
+      const mRaw =
+        body.match(/^#\s*[Mm][Aa][Tt][Cc][Hh][Ee][Rr]:\s*(.+)$/m) ||
+        body.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*\S+\s+[Mm][Aa][Tt][Cc][Hh][Ee][Rr]:\s*(.+)$/m);
+      let matcher = null;
+      if (mRaw) {
+        const q = mRaw[1].match(/^"([^"]*)"/);
+        matcher = q ? q[1] : mRaw[1].trim();
+      }
+      return { trigger: t[1], matcher };
+    };
+
+    const settings = existsSync(SETTINGS_PATH)
+      ? JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'))
+      : {};
+    const mismatched = [];
+    let inspected = 0;
+    for (const [event, entries] of Object.entries(settings.hooks || {})) {
+      for (const entry of (entries || [])) {
+        const registered = entry.matcher;
+        for (const h of (entry.hooks || [])) {
+          const hit = String(h.command || '').match(/([^/\\ "']+\.sh)/);
+          if (!hit) continue;
+          const decl = declaredFor(join(HOOKS_DIR, hit[1]));
+          if (!decl) continue;
+          inspected++;
+          // "Edit|Write" and "Write|Edit" select the same tools. Comparing the
+          // raw strings would report a difference that changes nothing, and a
+          // diagnostic that cries wolf stops being read.
+          const asSet = (v) => (v == null ? null :
+            String(v).split('|').map(s => s.trim()).filter(Boolean).sort().join('|'));
+          const wrongEvent = decl.trigger !== event;
+          const wrongMatcher = decl.matcher !== null &&
+            asSet(decl.matcher) !== asSet(registered ?? '');
+          if (wrongEvent || wrongMatcher) {
+            mismatched.push({ name: hit[1], event, registered, decl });
+          }
+        }
+      }
+    }
+    if (inspected === 0) {
+      pass('no installed hook declares an event to verify');
+    } else if (mismatched.length === 0) {
+      pass('every installed hook sits on the event it declares (' + inspected + ' checked)');
+    } else {
+      fail(mismatched.length + ' of ' + inspected + ' installed hooks are wired to the wrong event or tool — they run at the wrong time, or never');
+      for (const m of mismatched) {
+        console.log(c.dim + '    ' + m.name + ': registered ' + m.event +
+          ' matcher ' + JSON.stringify(m.registered ?? null) +
+          ', declares ' + m.decl.trigger + ' matcher ' + JSON.stringify(m.decl.matcher) + c.reset);
+      }
+      console.log(c.dim + '    Fix: npx cc-safe-setup --install-example <name> rewrites the entry from the header,' + c.reset);
+      console.log(c.dim + '    or correct the event and matcher in ~/.claude/settings.json by hand.' + c.reset);
+    }
+  } catch (e) {
+    warn('could not verify hook events against their headers (' + e.message + ')');
+  }
+
+  // 14. Check Claude Code version (needs hooks support)
   try {
     const ver = execSync('claude --version 2>/dev/null || echo "not found"', { stdio: 'pipe' }).toString().trim();
     if (ver === 'not found') {
