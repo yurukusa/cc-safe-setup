@@ -78,6 +78,10 @@ if [ "$GUARD" != "off" ]; then
                 [ -z "$a" ] && continue
                 if [[ "$TOOL" == *"$a"* ]]; then
                     case "$GUARD" in
+                        # CAUTION: under bypassPermissions an "ask" decision is
+                        # silently auto-approved (#77212) — the very mode this
+                        # branch fires in. Use CC_MCP_AUTOMATION_GUARD=block to
+                        # actually enforce under auto-approve modes.
                         ask)
                             printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Confirm MCP automation action %s — permission mode %s is auto-approving."}}\n' "$TOOL" "$MODE"
                             exit 0 ;;
