@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T05:06:35+09:00
+Updated: 2026-07-27T05:06:41+09:00
 
 ## Git
 - Branch: `fix/sessionstart-hook-headers-2026-07-27`
@@ -7,7 +7,7 @@ Updated: 2026-07-27T05:06:35+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 27dc1c30 checkpoint: auto-save 05:06:27
+- Last commit: 0ae88039 recovery: pre-compact checkpoint (1 files, 20260726-200641)
 
 ## Recent Files
 ```
