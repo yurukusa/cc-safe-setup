@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T05:03:10+09:00
+Updated: 2026-07-27T05:03:42+09:00
 
 ## Git
 - Branch: `fix/sessionstart-hook-headers-2026-07-27`
@@ -7,11 +7,13 @@ Updated: 2026-07-27T05:03:10+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d85c2efe checkpoint: auto-save 05:02:54
+- Last commit: 537a64a3 checkpoint: auto-save 05:03:40
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-07-27.md
+./.claude/pre-compact-checkpoint.md
 ./examples/parallel-batch-size-limiter.sh
 ./examples/parallel-cascade-detector.sh
 ./examples/plugin-hooks-json-bloat-detector.sh
@@ -19,8 +21,6 @@ Updated: 2026-07-27T05:03:10+09:00
 ./examples/bypass-mode-effective-verifier.sh
 ./examples/claude-md-size-monitor.sh
 ./examples/skills-load-verifier.sh
-./examples/agents-md-sync-checker.sh
-./examples/mcp-tool-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
