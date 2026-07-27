@@ -96,13 +96,13 @@ function parse(text) {
     if (at >= 0) {
       const body = text.slice(at);
       const scale = function (v) {
-        const mm = String(v).trim().match(/^([0-9,.]+)\s*([km])?$/i);
+        const mm = String(v).trim().match(/^([0-9,.]+)\s*([kmbt])?$/i);
         if (!mm) return 0;
         const n = parseFloat(mm[1].replace(/,/g, '')) || 0;
         const u = (mm[2] || '').toLowerCase();
-        return Math.round(n * (u === 'k' ? 1e3 : u === 'm' ? 1e6 : 1));
+        return Math.round(n * ({k: 1e3, m: 1e6, b: 1e9, t: 1e12}[u] || 1));
       };
-      const re = /([0-9][0-9,.]*\s*[km]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
+      const re = /([0-9][0-9,.]*\s*[kmbt]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
       const sum = { creation: 0, read: 0, input: 0, output: 0 };
       let m, found = false;
       while ((m = re.exec(body)) !== null) {
