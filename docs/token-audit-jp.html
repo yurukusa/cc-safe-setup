@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トークン消費の詳しい診断 — Claude Code の /cost と設定から、どこで膨らんでいるかを見る</title>
+<meta name="description" content="Claude Code の /cost の出力と settings.json と CLAUDE.md を貼ると、トークンがどこで膨らんでいるかを診断します。キャッシュの効き、費用の内訳、CLAUDE.md の常駐コストまで。ブラウザの中だけで処理し、貼った内容はどこにも送信しません。無料。">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/token-audit-jp.html">
+<meta property="og:title" content="トークン消費の詳しい診断 — Claude Code のどこで膨らんでいるか">
+<meta property="og:description" content="/cost の出力を貼ると、キャッシュの効きと費用の内訳と CLAUDE.md の常駐コストを診断します。ブラウザ内で完結・非送信。">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:1.5rem}
+.c{max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;font-size:1.5rem;margin-bottom:.3rem}
+h2{color:#f0f6fc;font-size:1.1rem;margin:1.5rem 0 .5rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+h3{color:#f0f6fc;font-size:.95rem;margin:.8rem 0 .3rem}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:1.5rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+textarea{width:100%;background:#161b22;border:1px solid #30363d;color:#c9d1d9;border-radius:8px;padding:.8rem;font-family:'SF Mono',Consolas,monospace;font-size:.8rem;resize:vertical;min-height:120px}
+textarea:focus{border-color:#58a6ff;outline:none}
+.btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.2rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:.9rem;margin:.5rem .3rem .5rem 0}
+.btn:hover{background:#2ea043}
+.btn-outline{background:transparent;color:#58a6ff;border:1px solid #30363d}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0}
+.score{font-size:2rem;font-weight:700;text-align:center;padding:1rem}
+.score-good{color:#3fb950}
+.score-warn{color:#d29922}
+.score-bad{color:#f85149}
+.metric{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #21262d;font-size:.85rem}
+.metric:last-child{border:none}
+.label{color:#8b949e}
+.rec{background:#1a1504;border:1px solid #d29922;border-radius:6px;padding:.8rem;margin:.5rem 0;font-size:.85rem}
+.rec-fix{background:#0d1f0d;border:1px solid #3fb950}
+.hidden{display:none}
+pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.8rem;margin:.4rem 0}
+.footer{text-align:center;padding:2rem;color:#484f58;font-size:.75rem;margin-top:2rem;border-top:1px solid #21262d}
+.tab-bar{display:flex;gap:0;margin-bottom:1rem}
+.tab{padding:.5rem 1rem;cursor:pointer;border:1px solid #30363d;background:#0d1117;color:#8b949e;font-size:.85rem}
+.tab:first-child{border-radius:8px 0 0 8px}
+.tab:last-child{border-radius:0 8px 8px 0}
+.tab.active{background:#161b22;color:#f0f6fc;border-color:#58a6ff}
+.panel{display:none}
+.panel.active{display:block}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>トークン消費の詳しい診断</h1>
+<p class="sub">Claude Code の <code>/cost</code> の出力や <code>settings.json</code> を貼ると、トークンがどこで膨らんでいるかを診断します。<strong>ブラウザの中だけで処理し、貼った内容はどこにも送信しません。</strong></p>
+
+<div class="tab-bar">
+<div class="tab active" onclick="switchTab('cost')">📊 /cost の出力</div>
+<div class="tab" onclick="switchTab('settings')">⚙️ settings.json</div>
+<div class="tab" onclick="switchTab('claudemd')">📝 CLAUDE.md</div>
+</div>
+
+<div id="panel-cost" class="panel active">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">Claude Code で <code>/cost</code> を実行して、出力をここに貼ってください：</p>
+<textarea id="cost-input" placeholder="Session cost: $2.47&#10;Total tokens: 847,293&#10;  Input:  623,841 (cache_read: 412,000, cache_creation: 211,841)&#10;  Output: 223,452&#10;Duration: 45 minutes"></textarea>
+</div>
+
+<div id="panel-settings" class="panel">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem"><code>~/.claude/settings.json</code> を貼ってください：</p>
+<textarea id="settings-input" placeholder='{ "permissions": { ... }, "hooks": { ... } }'></textarea>
+</div>
+
+<div id="panel-claudemd" class="panel">
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">CLAUDE.md の中身を貼ってください：</p>
+<textarea id="claudemd-input" placeholder="# Project Rules&#10;..."></textarea>
+</div>
+
+<button class="btn" onclick="analyze()">診断する</button>
+<button class="btn btn-outline" onclick="loadExample()">例を入れて試す</button>
+
+<div id="results" class="hidden">
+
+<h2>全体の健全度</h2>
+<div class="card">
+<div id="overall-score" class="score">—</div>
+<p id="overall-summary" style="text-align:center;font-size:.85rem;color:#8b949e"></p>
+</div>
+
+<h2>費用の内訳</h2>
+<div class="card" id="cost-breakdown"></div>
+
+<h2>キャッシュの効き</h2>
+<div class="card" id="cache-analysis"></div>
+
+<h2>安全の状態</h2>
+<div class="card" id="safety-analysis"></div>
+
+<h2>直し方の提案</h2>
+<div id="recommendations"></div>
+
+<h2>入れるとよい hook</h2>
+<div id="hook-recommendations"></div>
+
+<div class="card" style="text-align:center;margin-top:1.5rem;border-color:#58a6ff">
+<h3 style="margin-bottom:.5rem">全部の手順をまとめて読みたい方へ</h3>
+<p style="font-size:.85rem;color:#8b949e;margin-bottom:.8rem">800時間の運用で実際に出た29の症状と、hook の雛形と、CLAUDE.md の削り方をまとめた本です。はじめにと第1章は無料で読めます。</p>
+<a href="https://zenn.dev/yurukusa/books/token-savings-guide" class="btn" style="text-decoration:none">トークン節約ガイド（¥2,500）</a>
+<a href="skill-md-token-checkup-jp.html" class="btn btn-outline" style="text-decoration:none">SKILL.md の自己診断（無料）</a>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+<p>cc-safe-setup — Claude Code の安全のための hook を908本、無料・MIT で公開しています</p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="hub.html">道具の一覧</a> · <a href="opus-47-survival-guide.html">Opus 4.7 サバイバルガイド（英語）</a></p>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function loadExample() {
+  document.getElementById('cost-input').value = `Session cost: $4.82
+Total tokens: 1,247,293
+  Input:  923,841 (cache_read: 312,000, cache_creation: 611,841)
+  Output: 323,452
+Duration: 38 minutes
+Model: claude-opus-4-7`;
+  document.getElementById('settings-input').value = JSON.stringify({
+    "permissions": {
+      "allow": ["Bash(git *)"],
+      "deny": []
+    },
+    "hooks": {}
+  }, null, 2);
+  document.getElementById('claudemd-input').value = `# プロジェクトの規約
+## コードの書き方
+- TypeScript を使う
+- ESLint の規則に従う
+- 新しい関数には必ずテストを書く
+- 変数名は意味の分かる名前にする
+- 複雑なロジックにはコメントを添える
+## Git の規約
+- main へ直接 push しない
+- コミットメッセージは規約に沿った形式で書く
+- 変更は400行以内に収める
+## 構成
+- src/ にソースコードを置く
+- tests/ にテストを置く
+- docs/ に文書を置く
+- 依存は注入する形にする
+- SOLID の原則に従う
+（... これより下に80行ほど続く）`;
+  analyze();
+}
+
+function estTokens(s){
+  // 日本語は1文字がほぼ1トークン、英数字と記号は約4文字で1トークン。
+  // 文字数を一律に4で割ると、日本語の CLAUDE.md では実際の約3分の1しか出ない。
+  // 較正: 実測 23,348字 = 17,960トークン（1.30字/トークン）に対し、この式は 1.35字/トークン。
+  var cjk = (s.match(/[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/g) || []).length;
+  return Math.round(cjk + (s.length - cjk) / 4);
+}
+
+function parseNumber(s) {
+  return parseFloat(s.replace(/[,$]/g, '')) || 0;
+}
+
+function analyze() {
+  const costText = document.getElementById('cost-input').value;
+  const settingsText = document.getElementById('settings-input').value;
+  const claudemdText = document.getElementById('claudemd-input').value;
+
+  let score = 100;
+  const recs = [];
+  const hooks = [];
+  const metrics = {};
+
+  // Parse /cost output
+  if (costText.trim()) {
+    const costMatch = costText.match(/\$([0-9,.]+)/);
+    const totalMatch = costText.match(/Total tokens?:\s*([0-9,]+)/i);
+    const inputMatch = costText.match(/Input:\s*([0-9,]+)/i);
+    const outputMatch = costText.match(/Output:\s*([0-9,]+)/i);
+    const cacheReadMatch = costText.match(/cache_read:\s*([0-9,]+)/i);
+    const cacheCreateMatch = costText.match(/cache_creation:\s*([0-9,]+)/i);
+    const durationMatch = costText.match(/Duration:\s*(\d+)\s*min/i);
+    const modelMatch = costText.match(/Model:\s*([\w.-]+)/i);
+
+    metrics.cost = costMatch ? parseNumber(costMatch[1]) : 0;
+    metrics.totalTokens = totalMatch ? parseNumber(totalMatch[1]) : 0;
+    metrics.inputTokens = inputMatch ? parseNumber(inputMatch[1]) : 0;
+    metrics.outputTokens = outputMatch ? parseNumber(outputMatch[1]) : 0;
+    metrics.cacheRead = cacheReadMatch ? parseNumber(cacheReadMatch[1]) : 0;
+    metrics.cacheCreate = cacheCreateMatch ? parseNumber(cacheCreateMatch[1]) : 0;
+    metrics.duration = durationMatch ? parseInt(durationMatch[1]) : 0;
+    metrics.model = modelMatch ? modelMatch[1] : 'unknown';
+
+    // Cache efficiency
+    const totalCache = metrics.cacheRead + metrics.cacheCreate;
+    metrics.cacheRate = totalCache > 0 ? (metrics.cacheRead / totalCache * 100) : 0;
+
+    // Cost per minute
+    metrics.costPerMin = metrics.duration > 0 ? metrics.cost / metrics.duration : 0;
+
+    // Scoring
+    if (metrics.cacheRate < 50) { score -= 30; recs.push({type:'bad', text:'キャッシュがほとんど効いていません（' + metrics.cacheRate.toFixed(0) + '%）。目安は80%以上です。ファイルの変更か、5分以上の間があくことで、キャッシュが繰り返し捨てられている可能性があります。', fix:'長く離れる前に /compact を使う。セッションの途中で CLAUDE.md を編集しない。'}); }
+    else if (metrics.cacheRate < 80) { score -= 15; recs.push({type:'warn', text:'キャッシュの効きが目安を下回っています（' + metrics.cacheRate.toFixed(0) + '%）。目安は80%以上です。', fix:'skills/ の中身や CLAUDE.md が、やりとりの合間に変わっていないか確かめる。'}); }
+
+    if (metrics.costPerMin > 0.15) { score -= 20; recs.push({type:'bad', text:'1分あたりの費用が高めです（$' + metrics.costPerMin.toFixed(2) + '/分）。無駄の少ないセッションはおおむね $0.03〜0.08/分です。', fix:'/config で思考の深さ（effort）を high か medium へ下げることを検討する。'}); }
+
+    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 が使われています。この版はトークンが約35%増えることと、安全の判定が過剰に働くことが報告されています。', fix:'Opus 4.6 に固定することを検討する： /model claude-opus-4-6'}); }
+
+    if (metrics.outputTokens > metrics.inputTokens * 0.5) { score -= 10; recs.push({type:'warn', text:'入力に対して出力が多めです（' + (metrics.outputTokens/metrics.inputTokens*100).toFixed(0) + '%）。返答が冗長になっている可能性があります。', fix:'CLAUDE.md に「簡潔に。聞かれない限り説明を足さない」と書く。'}); }
+  }
+
+  // Parse settings.json
+  if (settingsText.trim()) {
+    try {
+      const settings = JSON.parse(settingsText);
+      const hooks_conf = settings.hooks || {};
+      const preToolUse = hooks_conf.PreToolUse || [];
+      const postToolUse = hooks_conf.PostToolUse || [];
+      const totalHooks = preToolUse.length + postToolUse.length;
+
+      metrics.hookCount = totalHooks;
+
+      if (totalHooks === 0) {
+        score -= 25;
+        recs.push({type:'bad', text:'hook が1つも登録されていません。危ない操作を止める仕組みが無い状態で動いています。', fix:'次を実行する： npx github:yurukusa/cc-safe-setup'});
+        hooks.push({name:'cc-safe-setup の基本セット', cmd:'npx github:yurukusa/cc-safe-setup', reason:'まず入れておきたい安全の hook を8本入れます'});
+      } else if (totalHooks < 3) {
+        score -= 10;
+        recs.push({type:'warn', text:'登録されている hook が ' + totalHooks + ' 本だけです。まずは5〜8本を目安にしてください。', fix:'次を実行する： npx github:yurukusa/cc-safe-setup --install-example model-version-alert'});
+      }
+
+      const perms = settings.permissions || {};
+      const deny = perms.deny || [];
+      if (deny.length === 0) {
+        score -= 10;
+        recs.push({type:'warn', text:'permissions に拒否の規則が1つもありません。危ない書き方を止める規則を足すことを検討してください。', fix:'rm -rf や git reset --hard などを拒否の一覧に入れる。'});
+      }
+    } catch(e) {
+      // Invalid JSON, skip
+    }
+  }
+
+  // Parse CLAUDE.md
+  if (claudemdText.trim()) {
+    const lines = claudemdText.split('\n').filter(l => l.trim());
+    metrics.claudemdLines = lines.length;
+    metrics.claudemdTokensEstimate = estTokens(claudemdText);
+
+    if (lines.length > 80) {
+      score -= 15;
+      recs.push({type:'bad', text:'CLAUDE.md が ' + lines.length + ' 行（約 ' + metrics.claudemdTokensEstimate + ' トークン）あります。これは毎回のやりとりに必ず載る固定の費用です。', fix:'40行以下へ削る。hook や検査の道具で機械的に守れる規則は、CLAUDE.md から外へ出す。'});
+    } else if (lines.length > 40) {
+      score -= 5;
+      recs.push({type:'warn', text:'CLAUDE.md が ' + lines.length + ' 行あります。もう少し削れます。', fix:'1行ごとに毎回のやりとりで費用がかかります。検査の道具や CI が既に守らせているものは消す。'});
+    }
+
+    // Check for common anti-patterns
+    if (/don.t|never|do not|禁止/i.test(claudemdText)) {
+      const negCount = (claudemdText.match(/don.t|never|do not|禁止/gi) || []).length;
+      if (negCount > 5) {
+        score -= 5;
+        recs.push({type:'warn', text: negCount + ' 個の禁止の規則があります。禁止の形は、許可の形より効きが弱く、トークンも多く使います。', fix:'「Xをするな」を、許可する物の一覧と hook による強制へ置き換える。'});
+      }
+    }
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  // Render results
+  document.getElementById('results').classList.remove('hidden');
+
+  const scoreEl = document.getElementById('overall-score');
+  scoreEl.textContent = score + '/100';
+  scoreEl.className = 'score ' + (score >= 70 ? 'score-good' : score >= 40 ? 'score-warn' : 'score-bad');
+  document.getElementById('overall-summary').textContent = score >= 80 ? 'トークンの使い方は健全です。' : score >= 50 ? '改善の余地があります。下の提案を見てください。' : '大きな無駄が出ています。下の提案を早めに当ててください。';
+
+  // Cost breakdown
+  const costDiv = document.getElementById('cost-breakdown');
+  if (metrics.cost) {
+    costDiv.innerHTML = `
+      <div class="metric"><span class="label">このセッションの費用</span><span>$${metrics.cost.toFixed(2)}</span></div>
+      <div class="metric"><span class="label">経過した時間</span><span>${metrics.duration} 分</span></div>
+      <div class="metric"><span class="label">1分あたりの費用</span><span>$${metrics.costPerMin.toFixed(3)}</span></div>
+      <div class="metric"><span class="label">トークンの合計</span><span>${metrics.totalTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">入力のトークン</span><span>${metrics.inputTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">出力のトークン</span><span>${metrics.outputTokens.toLocaleString()}</span></div>
+      <div class="metric"><span class="label">モデル</span><span>${metrics.model || 'unknown'}</span></div>
+    `;
+  } else {
+    costDiv.innerHTML = '<p style="color:#8b949e;font-size:.85rem">/cost の出力を貼ると内訳が出ます</p>';
+  }
+
+  // Cache analysis
+  const cacheDiv = document.getElementById('cache-analysis');
+  if (metrics.cacheRead || metrics.cacheCreate) {
+    const rateClass = metrics.cacheRate >= 80 ? 'score-good' : metrics.cacheRate >= 50 ? 'score-warn' : 'score-bad';
+    cacheDiv.innerHTML = `
+      <div class="metric"><span class="label">キャッシュが効いた割合</span><span class="${rateClass}" style="font-weight:700">${metrics.cacheRate.toFixed(1)}%</span></div>
+      <div class="metric"><span class="label">cache_read</span><span>${metrics.cacheRead.toLocaleString()} トークン</span></div>
+      <div class="metric"><span class="label">cache_creation</span><span>${metrics.cacheCreate.toLocaleString()} トークン</span></div>
+      <div class="metric"><span class="label">費用の倍率</span><span>${metrics.cacheRate >= 80 ? '1倍（良い状態）' : metrics.cacheRate >= 50 ? '約3〜5倍（高め）' : '約10〜20倍（かなり悪い）'}</span></div>
+    `;
+  } else {
+    cacheDiv.innerHTML = '<p style="color:#8b949e;font-size:.85rem">cache_read と cache_creation の値も含めて貼ると診断できます</p>';
+  }
+
+  // Safety analysis
+  const safetyDiv = document.getElementById('safety-analysis');
+  const hookInfo = metrics.hookCount !== undefined ? `<div class="metric"><span class="label">登録されている hook</span><span>${metrics.hookCount}</span></div>` : '';
+  const claudeInfo = metrics.claudemdLines ? `<div class="metric"><span class="label">CLAUDE.md の大きさ</span><span>${metrics.claudemdLines} 行（毎回 約${metrics.claudemdTokensEstimate} トークン）</span></div>` : '';
+  safetyDiv.innerHTML = hookInfo + claudeInfo || '<p style="color:#8b949e;font-size:.85rem">settings.json と CLAUDE.md を貼ると診断できます</p>';
+
+  // Recommendations
+  const recDiv = document.getElementById('recommendations');
+  if (recs.length === 0) {
+    recDiv.innerHTML = '<div class="rec rec-fix">問題は見つかりませんでした。よく整理された設定です。</div>';
+  } else {
+    recDiv.innerHTML = recs.map(r => `<div class="rec ${r.type === 'bad' ? '' : 'rec-fix'}"><strong>${r.type === 'bad' ? '🔴' : '🟡'} ${r.text}</strong><br><em>直し方: ${r.fix}</em></div>`).join('');
+  }
+
+  // Hook recommendations
+  const hookDiv = document.getElementById('hook-recommendations');
+  if (hooks.length > 0) {
+    hookDiv.innerHTML = hooks.map(h => `<div class="card"><strong>${h.name}</strong><p style="font-size:.85rem;color:#8b949e">${h.reason}</p><pre><code>${h.cmd}</code></pre></div>`).join('');
+  } else if (metrics.hookCount > 0) {
+    hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">hook は登録されています。さらに守りを厚くしたい場合は <a href="opus-47-survival-guide.html">Opus 4.7 サバイバルガイド（英語・66節）</a> を見てください。</p></div>';
+  } else {
+    hookDiv.innerHTML = '<div class="card"><pre><code>npx github:yurukusa/cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">この1行で、まず入れておきたい安全の hook を8本入れられます。</p></div>';
+  }
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
