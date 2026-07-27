@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T10:12:15+09:00
+Updated: 2026-07-27T10:14:05+09:00
 
 ## Git
 - Branch: `fix/doctor-wiring-check-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T10:12:15+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 07e0525b checkpoint: auto-save 10:12:13
+- Last commit: 5551bffd checkpoint: auto-save 10:12:27
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-27.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-07-27.md
 ./test.sh
 ./examples/parallel-cascade-detector.sh
 ./examples/plugin-hooks-json-bloat-detector.sh
