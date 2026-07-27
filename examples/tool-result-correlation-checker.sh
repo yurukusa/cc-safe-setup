@@ -37,7 +37,7 @@
 #   indistinguishability) when a cancelled call's slot is filled
 #   by a routed-elsewhere result from another batch.
 #
-# TRIGGER: PostToolUse  MATCHER: (any tool)
+# TRIGGER: PostToolUse  MATCHER: ""
 #
 # ENV:
 #   CC_TOOL_CORRELATION_THRESHOLD   default 1 (warn on first mismatch)

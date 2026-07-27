@@ -1,3 +1,17 @@
+#!/bin/bash
+# ================================================================
+# agents-md-sync-checker.sh — Warn when AGENTS.md and CLAUDE.md drift apart
+# ================================================================
+# PURPOSE:
+#   This hook reports at session start via hookSpecificOutput /
+#   additionalContext. Without the TRIGGER header below, the
+#   installer registered it under the default PreToolUse/Bash,
+#   so it fired on every Bash call and never ran at session start.
+#
+# TRIGGER: SessionStart
+# MATCHER: ""
+# ================================================================
+
 set -u
 INPUT=$(cat)
 DELTA_PCT="${CC_AGENTS_MD_SIZE_DELTA_PCT:-20}"
