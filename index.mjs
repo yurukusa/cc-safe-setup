@@ -5925,6 +5925,120 @@ async function doctor() {
     warn('could not verify hook events against their headers (' + e.message + ')');
   }
 
+  // 15. Check for near-miss (misspelled) keys in settings.json.
+  //
+  // Claude Code ignores unknown settings keys in silence: no warning, no error,
+  // exit code 0. Measured on v2.1.220 with isolated --settings files:
+  //   permissions.denyy   -> the denied command ran, exit 0, zero warnings
+  //   hooks.PreToolUsee   -> the hook was never invoked, zero warnings
+  //   sandbox.failIfUnavailble -> started unprotected, exit 0
+  // The hook body was unchanged in the second case; only the event key differed.
+  // `claude doctor` does not check spelling, and there is no non-interactive
+  // command that prints the effective settings. So a control can be void from
+  // the day it was written and look exactly like a control that works: both
+  // produce "nothing bad happened".
+  //
+  // Design: only report keys that are ONE or TWO edits away from a known key.
+  // An unknown key that is far from every known one is probably a setting this
+  // release of cc-safe-setup has not heard of yet, and shouting about it would
+  // train the operator to ignore this diagnostic. Read-only: never rewrite.
+  const KNOWN_TOP = [
+    'permissions', 'hooks', 'env', 'model', 'defaultMode', 'sandbox', 'statusLine',
+    'apiKeyHelper', 'includeCoAuthoredBy', 'cleanupPeriodDays', 'forceLoginMethod',
+    'outputStyle', 'autoUpdates', 'alwaysThinkingEnabled', 'spinnerTipsEnabled',
+    'enableAllProjectMcpServers', 'enabledMcpjsonServers', 'disabledMcpjsonServers',
+    'awsAuthRefresh', 'awsCredentialExport', 'otelHeadersHelper',
+  ];
+  const KNOWN_EVENTS = [
+    'PreToolUse', 'PostToolUse', 'Notification', 'Stop', 'SubagentStop',
+    'SubagentStart', 'UserPromptSubmit', 'PreCompact', 'PostCompact',
+    'SessionStart', 'SessionEnd', 'DirectoryAdded',
+  ];
+  const KNOWN_PERMISSION_KEYS = ['allow', 'deny', 'ask', 'additionalDirectories', 'defaultMode'];
+  // sandbox sub-keys. `failIfUnavailable` is the one that decides whether a
+  // missing dependency stops the session or silently drops the sandbox, so a
+  // typo here is the difference between "refused to start" and "ran unprotected".
+  const KNOWN_SANDBOX_KEYS = [
+    'enabled', 'failIfUnavailable', 'network', 'allowedDomains', 'strictAllowlist',
+    'autoAllowBashIfSandboxed', 'allowManagedDomainsOnly', 'allowUnixSockets',
+    'allowLocalBinding', 'excludedPaths',
+  ];
+
+  const editDistance = (a, b) => {
+    const m = a.length, n = b.length;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) {
+        cur[j] = Math.min(
+          prev[j] + 1,
+          cur[j - 1] + 1,
+          prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+        );
+      }
+      prev = cur;
+    }
+    return prev[n];
+  };
+
+  // Near-miss only. Requires the key to be long enough that a 1-edit match is
+  // meaningful: on a 3-letter key, distance 1 hits unrelated words constantly.
+  const nearMiss = (key, known) => {
+    if (known.includes(key)) return null;
+    let best = null;
+    for (const k of known) {
+      if (Math.abs(k.length - key.length) > 2) continue;
+      const d = editDistance(key.toLowerCase(), k.toLowerCase());
+      const limit = k.length >= 8 ? 2 : 1;
+      if (d > 0 && d <= limit && (best === null || d < best.d)) best = { k, d };
+    }
+    return best;
+  };
+
+  try {
+    const settings = existsSync(SETTINGS_PATH)
+      ? JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'))
+      : null;
+    if (settings === null) {
+      // Check 2 already reported the missing file; do not repeat it here.
+    } else {
+      const typos = [];
+      for (const key of Object.keys(settings)) {
+        const hit = nearMiss(key, KNOWN_TOP);
+        if (hit) typos.push({ where: '', key, suggest: hit.k });
+      }
+      for (const key of Object.keys(settings.permissions || {})) {
+        const hit = nearMiss(key, KNOWN_PERMISSION_KEYS);
+        if (hit) typos.push({ where: 'permissions.', key, suggest: hit.k });
+      }
+      for (const key of Object.keys(settings.hooks || {})) {
+        const hit = nearMiss(key, KNOWN_EVENTS);
+        if (hit) typos.push({ where: 'hooks.', key, suggest: hit.k });
+      }
+      const sandboxRoot = settings.sandbox || {};
+      for (const key of Object.keys(sandboxRoot)) {
+        const hit = nearMiss(key, KNOWN_SANDBOX_KEYS);
+        if (hit) typos.push({ where: 'sandbox.', key, suggest: hit.k });
+      }
+      for (const key of Object.keys(sandboxRoot.network || {})) {
+        const hit = nearMiss(key, KNOWN_SANDBOX_KEYS);
+        if (hit) typos.push({ where: 'sandbox.network.', key, suggest: hit.k });
+      }
+      if (typos.length === 0) {
+        pass('no misspelled settings keys (checked top level, permissions, hook events, sandbox)');
+      } else {
+        fail(typos.length + ' settings key(s) look like typos — Claude Code ignores unknown keys in silence, so these controls are not in force');
+        for (const t of typos) {
+          console.log(c.dim + '    "' + t.where + t.key + '" — did you mean "' + t.where + t.suggest + '"?' + c.reset);
+        }
+        console.log(c.dim + '    Nothing warns you about this: a misspelled key and a working control both look like "nothing bad happened".' + c.reset);
+        console.log(c.dim + '    After fixing, confirm by tripping the control on purpose and watching it stop.' + c.reset);
+      }
+    }
+  } catch (e) {
+    warn('could not check settings keys for typos (' + e.message + ')');
+  }
+
   // 14. Check Claude Code version (needs hooks support)
   try {
     const ver = execSync('claude --version 2>/dev/null || echo "not found"', { stdio: 'pipe' }).toString().trim();
