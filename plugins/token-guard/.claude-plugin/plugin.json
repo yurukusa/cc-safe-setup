@@ -1,7 +1,7 @@
 {
   "name": "token-guard",
   "description": "Token consumption guards for Claude Code. Warns on large file reads (100KB+), limits unique file reads per session, estimates token budget, and caps subagent spawns. From 800+ hours of autonomous operation data.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "yurukusa"
   },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); FP=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FP\" ] || [ ! -f \"$FP\" ] && exit 0; SZ=$(stat -c%s \"$FP\" 2>/dev/null || stat -f%z \"$FP\" 2>/dev/null); [ \"$SZ\" -gt 102400 ] 2>/dev/null && echo \"Warning [token-guard]: $(basename $FP) is $((SZ/1024))KB. Use limit parameter to read only what you need.\" || true"
+            "command": "INPUT=$(cat); FP=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.file_path // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"file_path\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).file_path||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$FP\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-token-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [token-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$FP\" ] || [ ! -f \"$FP\" ] && exit 0; SZ=$(stat -c%s \"$FP\" 2>/dev/null || stat -f%z \"$FP\" 2>/dev/null); [ \"$SZ\" -gt 102400 ] 2>/dev/null && echo \"Warning [token-guard]: $(basename $FP) is $((SZ/1024))KB. Use limit parameter to read only what you need.\" || true"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "BUDGET=${CC_READ_BUDGET:-100}; WARN=${CC_READ_WARN:-50}; T=/tmp/cc-read-budget-$PPID; INPUT=$(cat); FP=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FP\" ] && exit 0; C=0; if [ -f \"$T\" ]; then grep -qF \"$FP\" \"$T\" || echo \"$FP\" >> \"$T\"; C=$(wc -l < \"$T\"); else echo \"$FP\" > \"$T\"; C=1; fi; [ \"$C\" -ge \"$BUDGET\" ] && { echo \"[BLOCK token-guard] Read budget reached (${BUDGET} files). Use Glob/Grep to narrow down.\"; exit 2; }; [ \"$C\" -ge \"$WARN\" ] && echo \"Warning [token-guard]: ${C}/${BUDGET} files read.\"; exit 0"
+            "command": "BUDGET=${CC_READ_BUDGET:-100}; WARN=${CC_READ_WARN:-50}; T=/tmp/cc-read-budget-$PPID; INPUT=$(cat); FP=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.file_path // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"file_path\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).file_path||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$FP\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-token-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [token-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$FP\" ] && exit 0; C=0; if [ -f \"$T\" ]; then grep -qF \"$FP\" \"$T\" || echo \"$FP\" >> \"$T\"; C=$(wc -l < \"$T\"); else echo \"$FP\" > \"$T\"; C=1; fi; [ \"$C\" -ge \"$BUDGET\" ] && { echo \"[BLOCK token-guard] Read budget reached (${BUDGET} files). Use Glob/Grep to narrow down.\"; exit 2; }; [ \"$C\" -ge \"$WARN\" ] && echo \"Warning [token-guard]: ${C}/${BUDGET} files read.\"; exit 0"
           }
         ]
       },

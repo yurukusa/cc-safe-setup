@@ -30,3 +30,8 @@ jobs:
           [ "$ERRORS" -eq 0 ] || exit 1
       - name: Full test suite
         run: bash test.sh
+      # The hooks shipped inside the marketplace plugins are not covered by test.sh.
+      # They were unverified until a defect shipped: every one of them parsed stdin
+      # with jq and silently exited 0 when jq was absent.
+      - name: Marketplace plugin hooks
+        run: bash tests/test-marketplace-plugins.sh

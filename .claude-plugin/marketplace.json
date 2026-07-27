@@ -14,7 +14,7 @@
       "name": "safety-essentials",
       "source": "./plugins/safety-essentials",
       "description": "5 essential safety hooks: block rm -rf, force-push, hard-reset, env overwrites, and package publish. The minimum viable safety net.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "yurukusa"
       },
@@ -40,7 +40,7 @@
       "name": "git-protection",
       "source": "./plugins/git-protection",
       "description": "Git safety hooks: block force-push, protect main/master, prevent hard reset, guard interactive rebase, and block git clean -fd.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "yurukusa"
       },
@@ -66,7 +66,7 @@
       "name": "credential-guard",
       "source": "./plugins/credential-guard",
       "description": "Protect secrets and credentials: block writes to .env files, detect API keys in commands, prevent hardcoded tokens, guard service account files.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "yurukusa"
       },
@@ -92,7 +92,7 @@
       "name": "token-guard",
       "source": "./plugins/token-guard",
       "description": "Token consumption guards: large-read warning (100KB+), per-session read budget, subagent cap, and a token budget that asks for /compact.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "yurukusa"
       },

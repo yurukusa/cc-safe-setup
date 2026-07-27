@@ -1,7 +1,7 @@
 {
   "name": "credential-guard",
   "description": "Protect secrets and credentials from Claude Code. Blocks writes to .env files, detects API keys in shell commands, prevents hardcoded tokens, and guards service account JSON files.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "yurukusa"
   },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret'; then echo \"BLOCKED [credential-guard]: Writing to sensitive file: $FILE\" >&2; exit 2; fi"
+            "command": "INPUT=$(cat); FILE=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.file_path // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"file_path\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).file_path||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$FILE\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-credential-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [credential-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret' && ! echo \"$FILE\" | grep -qiE '\\.env\\.(example|sample|template|dist)$'; then echo \"BLOCKED [credential-guard]: Writing to sensitive file: $FILE\" >&2; exit 2; fi"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret'; then echo \"BLOCKED [credential-guard]: Editing sensitive file: $FILE\" >&2; exit 2; fi"
+            "command": "INPUT=$(cat); FILE=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.file_path // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"file_path\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).file_path||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$FILE\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-credential-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [credential-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE '\\.env$|\\.env\\.|credentials|secret' && ! echo \"$FILE\" | grep -qiE '\\.env\\.(example|sample|template|dist)$'; then echo \"BLOCKED [credential-guard]: Editing sensitive file: $FILE\" >&2; exit 2; fi"
           }
         ]
       },
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE '(sk|pk|api|key|token|secret|password)[-_]?[a-zA-Z0-9]{20,}'; then echo 'WARNING [credential-guard]: Possible API key or token detected in command. Verify no secrets are exposed.' >&2; fi"
+            "command": "INPUT=$(cat); CMD=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.command // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"command\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).command||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$CMD\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-credential-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [credential-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE '(sk|pk|api|key|token|secret|password)[-_]?[a-zA-Z0-9]{20,}'; then echo 'WARNING [credential-guard]: Possible API key or token detected in command. Verify no secrets are exposed.' >&2; fi"
           }
         ]
       },
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE 'serviceaccount.*\\.json|key\\.json|credentials\\.json'; then echo \"BLOCKED [credential-guard]: Writing to service account file: $FILE\" >&2; exit 2; fi"
+            "command": "INPUT=$(cat); FILE=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.file_path // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"file_path\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).file_path||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$FILE\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-credential-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [credential-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$FILE\" ] && exit 0; if echo \"$FILE\" | grep -qE 'serviceaccount.*\\.json|key\\.json|credentials\\.json'; then echo \"BLOCKED [credential-guard]: Writing to service account file: $FILE\" >&2; exit 2; fi"
           }
         ]
       },
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'ANTHROPIC_API_KEY|OPENAI_API_KEY|AWS_SECRET|GITHUB_TOKEN|DATABASE_URL'; then echo 'WARNING [credential-guard]: Environment variable with potential secret detected in command.' >&2; fi"
+            "command": "INPUT=$(cat); CMD=$(printf %s \"$INPUT\" | { if command -v jq >/dev/null 2>&1; then jq -r '.tool_input.command // empty' 2>/dev/null; elif command -v python3 >/dev/null 2>&1; then python3 -c 'import sys,json;d=json.load(sys.stdin);print((d.get(\"tool_input\") or {}).get(\"command\") or \"\")' 2>/dev/null; elif command -v node >/dev/null 2>&1; then node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(String((JSON.parse(s).tool_input||{}).command||\"\"))}catch(e){}})' 2>/dev/null; else echo __CCHOOK_NO_PARSER__; fi; }); if [ \"$CMD\" = \"__CCHOOK_NO_PARSER__\" ]; then W=/tmp/cc-noparser-warned-credential-guard-$PPID; [ -f \"$W\" ] || { echo \"WARNING [credential-guard]: cannot inspect tool calls - jq, python3 and node are all unavailable, so this plugin is NOT protecting you. Install any one of them.\" >&2; : > \"$W\"; }; exit 0; fi; [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qE 'ANTHROPIC_API_KEY|OPENAI_API_KEY|AWS_SECRET|GITHUB_TOKEN|DATABASE_URL'; then echo 'WARNING [credential-guard]: Environment variable with potential secret detected in command.' >&2; fi"
           }
         ]
       }
