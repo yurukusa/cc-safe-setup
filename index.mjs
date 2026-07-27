@@ -340,7 +340,7 @@ function status() {
     console.log(c.bold + '  All ' + installed + ' hooks installed.' + c.reset);
   } else {
     console.log(c.bold + '  ' + installed + '/' + Object.keys(HOOKS).length + ' hooks installed.' + c.reset);
-    console.log('  ' + c.dim + 'Run: npx cc-safe-setup' + c.reset);
+    console.log('  ' + c.dim + 'Run: npx github:yurukusa/cc-safe-setup' + c.reset);
   }
   if (installedExamples.length > 0) {
     console.log('  ' + c.dim + '+ ' + installedExamples.length + ' example hooks' + c.reset);
@@ -423,7 +423,7 @@ async function verify() {
   console.log();
   console.log(c.bold + '  ' + pass + '/' + (pass + fail) + ' tests passed.' + c.reset);
   if (fail > 0) {
-    console.log('  ' + c.red + fail + ' failures.' + c.reset + ' Run ' + c.blue + 'npx cc-safe-setup' + c.reset + ' to reinstall.');
+    console.log('  ' + c.red + fail + ' failures.' + c.reset + ' Run ' + c.blue + 'npx github:yurukusa/cc-safe-setup' + c.reset + ' to reinstall.');
     process.exit(1);
   }
   console.log();
@@ -3541,7 +3541,7 @@ async function quickfix() {
           safetyHooks++;
         } else {
           console.log(c.yellow + '  △' + c.reset + ` Missing critical hook: ${name}`);
-          console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+          console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup' + c.reset);
           warnings++;
         }
       }
@@ -3562,7 +3562,7 @@ async function quickfix() {
   }
   if (warnings > 0) {
     console.log();
-    console.log(c.yellow + '  Run npx cc-safe-setup to install missing safety hooks' + c.reset);
+    console.log(c.yellow + '  Run npx github:yurukusa/cc-safe-setup to install missing safety hooks' + c.reset);
     console.log(c.yellow + '  Run npx cc-safe-setup --doctor for detailed diagnosis' + c.reset);
   }
   console.log();
@@ -3792,7 +3792,7 @@ async function migrate() {
   if (found === 0 && suggestions.length === 0) {
     console.log(c.green + '  No migration needed. All hooks are cc-safe-setup native.' + c.reset);
   } else {
-    console.log(c.dim + '  Run npx cc-safe-setup to install built-in replacements.' + c.reset);
+    console.log(c.dim + '  Run npx github:yurukusa/cc-safe-setup to install built-in replacements.' + c.reset);
   }
   console.log();
 }
@@ -4300,7 +4300,7 @@ function scorecard() {
   line();
   if (n === 0) {
     line(c.yellow + 'No core hooks installed yet.' + c.reset);
-    line('Run ' + c.bold + 'npx cc-safe-setup' + c.reset + ' to install in ~10s.');
+    line('Run ' + c.bold + 'npx github:yurukusa/cc-safe-setup' + c.reset + ' to install in ~10s.');
   } else {
     line('Now blocking:');
     const shown = PRIORITY.filter(id => active.includes(id)).slice(0, 4);
@@ -4929,7 +4929,7 @@ async function exportConfig() {
   console.log();
 
   if (!existsSync(SETTINGS_PATH)) {
-    console.log(c.red + '  No settings.json found. Run npx cc-safe-setup first.' + c.reset);
+    console.log(c.red + '  No settings.json found. Run npx github:yurukusa/cc-safe-setup first.' + c.reset);
     process.exit(1);
   }
 
@@ -5777,7 +5777,7 @@ async function doctor() {
   // 2. Check settings.json exists
   if (!existsSync(SETTINGS_PATH)) {
     fail('~/.claude/settings.json does not exist');
-    console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+    console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup' + c.reset);
   } else {
     pass('settings.json exists');
 
@@ -5891,7 +5891,7 @@ async function doctor() {
   // 12. Check hooks directory
   if (!existsSync(HOOKS_DIR)) {
     fail('~/.claude/hooks/ directory does not exist');
-    console.log(c.dim + '    Fix: npx cc-safe-setup' + c.reset);
+    console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup' + c.reset);
   } else {
     const files = readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'));
     pass('hooks directory exists (' + files.length + ' scripts)');
