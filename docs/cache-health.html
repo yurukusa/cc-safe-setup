@@ -41,12 +41,11 @@ a{color:#58a6ff}
 <div class="card">
 <textarea id="input" placeholder="Paste your /cost output here. Example:
 
-Session cost:
-  Input tokens:          12,345
-  Cache creation:        69,922
-  Cache read:            45,000
-  Output tokens:          8,000
-  Total cost:            $0.42"></textarea>
+Total cost:            $0.42
+Total duration (API):  3m 8s
+Total duration (wall): 21m 40s
+Usage by model:
+   claude-sonnet-4-6:  12.3k input, 8.0k output, 45.0k cache read, 69.9k cache write"></textarea>
 <button class="btn" onclick="analyze()">Diagnose</button>
 <button class="btn" style="background:#30363d" onclick="loadExample()">Load Example</button>
 </div>
@@ -66,12 +65,11 @@ Built by <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> Â
 
 <script>
 function loadExample() {
-  document.getElementById('input').value = `Session cost:
-  Input tokens:          12,345
-  Cache creation:        69,922
-  Cache read:            45,000
-  Output tokens:          8,000
-  Total cost:            $0.42`;
+  document.getElementById('input').value = `Total cost:            $0.42
+Total duration (API):  3m 8s
+Total duration (wall): 21m 40s
+Usage by model:
+   claude-sonnet-4-6:  12.3k input, 8.0k output, 45.0k cache read, 69.9k cache write ($0.42)`;
 }
 
 function parse(text) {
@@ -86,6 +84,43 @@ function parse(text) {
   for (const [re, key] of patterns) {
     const m = text.match(re);
     if (m) nums[key] = parseFloat(m[1].replace(/,/g, ''));
+  }
+
+  // The patterns above expect "Cache creation: 69,922", but the real /cost prints the
+  // numbers before the words and calls them "cache read" / "cache write":
+  //   Usage by model:
+  //      claude-sonnet-4-6:  3.2k input, 5.0k output, 662.4k cache read, 183.6k cache write
+  // Only run this when the shape above found nothing, so the older shape is untouched.
+  if (!nums.creation && !nums.read) {
+    const at = text.search(/Usage\s+by\s+model\s*:/i);
+    if (at >= 0) {
+      const body = text.slice(at);
+      const scale = function (v) {
+        const mm = String(v).trim().match(/^([0-9,.]+)\s*([km])?$/i);
+        if (!mm) return 0;
+        const n = parseFloat(mm[1].replace(/,/g, '')) || 0;
+        const u = (mm[2] || '').toLowerCase();
+        return Math.round(n * (u === 'k' ? 1e3 : u === 'm' ? 1e6 : 1));
+      };
+      const re = /([0-9][0-9,.]*\s*[km]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
+      const sum = { creation: 0, read: 0, input: 0, output: 0 };
+      let m, found = false;
+      while ((m = re.exec(body)) !== null) {
+        const n = scale(m[1]);
+        const key = m[2].toLowerCase().replace(/\s+/g, ' ');
+        if (key === 'cache read') sum.read += n;
+        else if (key === 'cache write') sum.creation += n;   // cache write == cache_creation
+        else if (key === 'input') sum.input += n;
+        else sum.output += n;
+        found = true;
+      }
+      if (found) {
+        nums.creation = sum.creation;
+        nums.read = sum.read;
+        nums.input = sum.input;
+        nums.output = sum.output;
+      }
+    }
   }
   return nums;
 }

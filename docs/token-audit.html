@@ -60,7 +60,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;
 
 <div id="panel-cost" class="panel active">
 <p style="font-size:.85rem;color:#8b949e;margin-bottom:.5rem">Run <code>/cost</code> in Claude Code and paste the output here:</p>
-<textarea id="cost-input" placeholder="Session cost: $2.47&#10;Total tokens: 847,293&#10;  Input:  623,841 (cache_read: 412,000, cache_creation: 211,841)&#10;  Output: 223,452&#10;Duration: 45 minutes"></textarea>
+<textarea id="cost-input" placeholder="Total cost:            $2.47&#10;Total duration (API):  8m 12s&#10;Total duration (wall): 45m 3s&#10;Usage by model:&#10;   claude-opus-4-7:  12.4k input, 223.4k output, 412.0k cache read, 211.8k cache write"></textarea>
 </div>
 
 <div id="panel-settings" class="panel">
@@ -124,12 +124,11 @@ function switchTab(name) {
 }
 
 function loadExample() {
-  document.getElementById('cost-input').value = `Session cost: $4.82
-Total tokens: 1,247,293
-  Input:  923,841 (cache_read: 312,000, cache_creation: 611,841)
-  Output: 323,452
-Duration: 38 minutes
-Model: claude-opus-4-7`;
+  document.getElementById('cost-input').value = `Total cost:            $4.82
+Total duration (API):  9m 41s
+Total duration (wall): 38m 12s
+Usage by model:
+   claude-opus-4-7:  12.4k input, 323.4k output, 312.0k cache read, 611.8k cache write ($4.82)`;
   document.getElementById('settings-input').value = JSON.stringify({
     "permissions": {
       "allow": ["Bash(git *)"],
@@ -162,6 +161,43 @@ function parseNumber(s) {
   return parseFloat(s.replace(/[,$]/g, '')) || 0;
 }
 
+// Expand suffixed numbers like "3.2k", "662.4k", "1.2m".
+// Claude Code's /cost prints the per-model breakdown in this form.
+function parseScaled(s) {
+  var m = String(s).trim().match(/^([0-9,.]+)\s*([km])?$/i);
+  if (!m) return 0;
+  var n = parseFloat(m[1].replace(/,/g, '')) || 0;
+  var unit = (m[2] || '').toLowerCase();
+  return Math.round(n * (unit === 'k' ? 1e3 : unit === 'm' ? 1e6 : 1));
+}
+
+// Read the per-model breakdown that Claude Code's /cost actually prints:
+//   Usage by model:
+//      claude-sonnet-4-6:  3.2k input, 5.0k output, 662.4k cache read, 183.6k cache write ($1.38)
+// Only the text after "Usage by model:" is scanned, because the lines above it also
+// contain the words input/output and would be picked up by mistake.
+// Multiple models are listed on separate lines, so they are summed.
+function parseUsageByModel(text) {
+  var at = text.search(/Usage\s+by\s+model\s*:/i);
+  if (at < 0) return null;
+  var body = text.slice(at);
+  var sum = { input: 0, output: 0, cacheRead: 0, cacheCreate: 0, models: [] };
+  var re = /([0-9][0-9,.]*\s*[km]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
+  var m, found = false;
+  while ((m = re.exec(body)) !== null) {
+    var n = parseScaled(m[1]);
+    var key = m[2].toLowerCase().replace(/\s+/g, ' ');
+    if (key === 'input') sum.input += n;
+    else if (key === 'output') sum.output += n;
+    else if (key === 'cache read') sum.cacheRead += n;
+    else sum.cacheCreate += n;   // "cache write" is what used to be called cache_creation
+    found = true;
+  }
+  var names = body.match(/^\s*([\w.-]+):\s*[0-9]/gm);
+  if (names) sum.models = names.map(function (x) { return x.trim().replace(/:.*$/, ''); });
+  return found ? sum : null;
+}
+
 function analyze() {
   const costText = document.getElementById('cost-input').value;
   const settingsText = document.getElementById('settings-input').value;
@@ -191,6 +227,28 @@ function analyze() {
     metrics.cacheCreate = cacheCreateMatch ? parseNumber(cacheCreateMatch[1]) : 0;
     metrics.duration = durationMatch ? parseInt(durationMatch[1]) : 0;
     metrics.model = modelMatch ? modelMatch[1] : 'unknown';
+
+    // Only if the shape above did not match, re-read the text as the real /cost output.
+    // Order matters: running this first would misread "Total tokens: 1,247,293" followed by
+    // "Input:" on the next line as "a number followed by the word input".
+    if (!totalMatch && !inputMatch) {
+      const usage = parseUsageByModel(costText);
+      if (usage) {
+        metrics.cacheRead = usage.cacheRead;
+        metrics.cacheCreate = usage.cacheCreate;
+        // The old "Input" figure included cache reads and writes, so keep the same meaning
+        metrics.inputTokens = usage.input + usage.cacheRead + usage.cacheCreate;
+        metrics.outputTokens = usage.output;
+        metrics.totalTokens = metrics.inputTokens + metrics.outputTokens;
+        if (usage.models.length) metrics.model = usage.models.join(', ');
+      }
+      // Prefer wall time, which is the elapsed time the reader actually experienced
+      const wallMatch = costText.match(/Total\s+duration\s*\(wall\):\s*(?:(\d+)\s*h\s*)?(\d+)\s*m/i)
+                     || costText.match(/Total\s+duration\s*\(API\):\s*(?:(\d+)\s*h\s*)?(\d+)\s*m/i);
+      if (wallMatch) metrics.duration = parseInt(wallMatch[1] || 0) * 60 + parseInt(wallMatch[2]);
+      const totalCostMatch = costText.match(/Total\s+cost:\s*\$([0-9,.]+)/i);
+      if (totalCostMatch) metrics.cost = parseNumber(totalCostMatch[1]);
+    }
 
     // Cache efficiency
     const totalCache = metrics.cacheRead + metrics.cacheCreate;
