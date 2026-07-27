@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T16:20:34+09:00
+Updated: 2026-07-27T16:20:50+09:00
 
 ## Git
 - Branch: `fix/bsd-grep-portability-2026-07-27`
@@ -7,14 +7,14 @@ Updated: 2026-07-27T16:20:34+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: b7af947f checkpoint: auto-save 16:20:29
+- Last commit: 72338cb7 checkpoint: auto-save 16:20:49
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./.claude/session-logs/2026-07-27.md
-./CLAUDE.md
 ./.claude/pre-compact-checkpoint.md
+./CLAUDE.md
 ./examples/rm-safety-net.sh
 ./examples/write-nul-corruption-detector.sh
 ./examples/claim-verify-detector.sh
