@@ -1,13 +1,13 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T10:16:48+09:00
+Updated: 2026-07-27T12:37:32+09:00
 
 ## Git
-- Branch: `fix/doctor-wiring-check-2026-07-27`
+- Branch: `fix/plugin-hooks-silent-without-jq-2026-07-27`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ce3ca39f recovery: pre-compact checkpoint (1 files, 20260727-011648)
+- Last commit: 3a2edbc7 recovery: pre-compact checkpoint (1 files, 20260727-033732)
 
 ## Recent Files
 ```
@@ -15,12 +15,12 @@ Updated: 2026-07-27T10:16:48+09:00
 ./.claude/session-logs/2026-07-27.md
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
-./examples/parallel-cascade-detector.sh
-./examples/plugin-hooks-json-bloat-detector.sh
-./examples/skills-load-verifier.sh
-./examples/tool-result-correlation-checker.sh
+./README.md
 ./examples/agents-md-sync-checker.sh
 ./examples/bypass-mode-effective-verifier.sh
+./examples/claude-md-size-monitor.sh
+./examples/parallel-batch-size-limiter.sh
+./examples/parallel-cascade-detector.sh
 ```
 
 ## Active TODOs: 1 file(s)
