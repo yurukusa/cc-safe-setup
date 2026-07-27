@@ -4311,7 +4311,7 @@ function scorecard() {
   line(c.dim + 'Part of a 746-hook library mapped to 73+' + c.reset);
   line(c.dim + 'documented Claude Code incidents.' + c.reset);
   line();
-  line(c.blue + 'npx cc-safe-setup' + c.reset + c.dim + '      MIT · free' + c.reset);
+  line(c.blue + 'npx github:yurukusa/cc-safe-setup' + c.reset + c.dim + '      MIT · free' + c.reset);
   rule('└', '┘');
   console.log();
   console.log('  ' + c.dim + 'Screenshot it · share your score · github.com/yurukusa/cc-safe-setup' + c.reset);
@@ -5788,7 +5788,7 @@ async function doctor() {
       pass('settings.json is valid JSON');
     } catch (e) {
       fail('settings.json has invalid JSON: ' + e.message);
-      console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx cc-safe-setup' + c.reset);
+      console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup' + c.reset);
     }
 
     if (settings) {
@@ -6217,7 +6217,7 @@ function scan() {
 
   // Display recommendations
   console.log(c.bold + '  Recommended hooks:' + c.reset);
-  console.log('  ' + c.dim + 'npx cc-safe-setup' + c.reset + ' (8 built-in hooks)');
+  console.log('  ' + c.dim + 'npx github:yurukusa/cc-safe-setup' + c.reset + ' (8 built-in hooks)');
   for (const ex of examples) {
     console.log('  ' + c.dim + 'npx cc-safe-setup --install-example ' + ex + c.reset);
   }
