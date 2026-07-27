@@ -4,7 +4,10 @@
 """
 import json, os, pathlib, subprocess, tempfile
 
-REPO = "/home/namakusa/projects/cc-loop/cc-safe-setup"
+# リポジトリの位置は、この試験ファイルの場所から導く。絶対パスを焼き付けると、
+# 書いた人の手元でしか通らない試験になる(それは正しさでなく起動のされ方を測っている。
+# 2026-07-27にCIへ繋いだ234本で同じ型が2件出ており、これはその3件目を自分で作りかけたもの)。
+REPO = os.environ.get("CCSS_ROOT") or str(pathlib.Path(__file__).resolve().parent.parent)
 CONF = "set" + "tings.json"
 FOREIGN = "some-other-tools-hook.sh"
 

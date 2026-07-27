@@ -29,7 +29,7 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 0
 fi
 
-output=$(python3 "$ROOT/tests/shield-no-silent-adoption.test.py" 2>&1)
+output=$(CCSS_ROOT="$ROOT" python3 "$ROOT/tests/shield-no-silent-adoption.test.py" 2>&1)
 status=$?
 printf '%s\n' "$output"
 
