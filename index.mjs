@@ -6275,9 +6275,10 @@ async function main() {
   console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,270 reactions).' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'Sister handbooks:' + c.reset + ' Claim-Verify Handbook live ($19); Sub-Agent Observability Handbook preview (full PDF pending)');
-  console.log('  ' + c.dim + '  Claim-Verify Handbook (130 cases of operator-vs-runtime divergence) — live, $19, PDF on purchase' + c.reset);
-  console.log('  ' + c.dim + '    https://yurukusa.gumroad.com/l/claim-verify-handbook?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=cvh-live  (free preview: gist.github.com/yurukusa/5242a540c43769df76a448269e2f182b)' + c.reset);
+  // 2026-07-27: Claim-Verify Handbook はいま未公開(商品ページの is_published が false)。
+  // 買えない商品を、導入直後の全利用者へ「live, $19」と案内していたので2行を落とした。
+  // URLは HTTP 200 を返すため、応答の番号だけでは死んでいると分からない。
+  console.log('  ' + c.blue + 'Sister handbook:' + c.reset + ' Sub-Agent Observability Handbook preview (full PDF pending)');
   console.log('  ' + c.dim + '  Sub-Agent Observability Handbook (7-case sub-agent cluster + 4 defense hooks) — free preview, full PDF pending' + c.reset);
   console.log('  ' + c.dim + '    https://gist.github.com/yurukusa/bc61438321b369dbd3765e2bd9702a80  (free Chapter 1 preview, EN)' + c.reset);
   console.log();

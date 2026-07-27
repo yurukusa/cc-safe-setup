@@ -38,7 +38,6 @@ License: MIT. Author: yurukusa (@yurukusa_dev).
 
 Companion to:
   - cc-safe-setup (MIT) — https://github.com/yurukusa/cc-safe-setup
-  - Claude Code Claim-Verify Handbook — https://yurukusa.gumroad.com/l/claim-verify-handbook
 """
 from __future__ import annotations
 

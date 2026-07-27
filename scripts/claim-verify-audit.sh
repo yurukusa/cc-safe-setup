@@ -16,7 +16,6 @@
 #
 # Companion to:
 # - Claude Code Claim-Verify Handbook (Edition 1, ships 2026-05-22)
-#   https://yurukusa.gumroad.com/l/claim-verify-handbook
 # - cc-safe-setup (MIT, ~730 PreToolUse/PostToolUse hooks)
 #   https://github.com/yurukusa/cc-safe-setup
 #
