@@ -12,7 +12,10 @@
 
 set -uo pipefail
 
-HOOK="$(dirname "$0")/../examples/memory-orphan-detector.sh"
+# This suite cds into temp project dirs before invoking the hook, so a relative
+# path here only resolves when the suite itself was launched with an absolute
+# path. Resolve it once, up front.
+HOOK="$(cd "$(dirname "$0")/../examples" && pwd)/memory-orphan-detector.sh"
 PASS=0
 FAIL=0
 

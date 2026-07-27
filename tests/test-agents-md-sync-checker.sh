@@ -27,6 +27,18 @@ assert_contains() {
         FAIL=$((FAIL + 1))
     fi
 }
+assert_matches() {
+    local desc="$1"
+    local output="$2"
+    local pattern="$3"
+    if echo "$output" | grep -qE "$pattern"; then
+        echo "  PASS: $desc"
+        PASS=$((PASS + 1))
+    else
+        echo "  FAIL: $desc — expected pattern '$pattern' in output: $output"
+        FAIL=$((FAIL + 1))
+    fi
+}
 output=$(echo '{}' | CC_AGENTS_MD_FILES="$TMP/missing-agents.md" CC_CLAUDE_MD_FILES_FOR_SYNC="$TMP/missing-claude.md" bash "$HOOK")
 assert_no_output "neither file present produces no output" "$output"
 echo "claude only" > "$TMP/claude-only.md"
@@ -92,7 +104,9 @@ fi
 output=$(echo '{}' | CC_AGENTS_MD_FILES="$TMP/exit-a.md" CC_CLAUDE_MD_FILES_FOR_SYNC="$TMP/missing.md" bash "$HOOK")
 assert_contains "warning references #6235" "$output" "#6235"
 assert_contains "warning lists mitigation patterns" "$output" "Mitigation patterns"
-assert_contains "warning includes reaction count" "$output" "5,196 reactions"
+# 反応の数は上流の起票の実数なので、固定するとこの試験は数が動いた日に落ちる
+# (実際に5,196から5,268へ動いて落ちていた)。数そのものでなく形を見る。
+assert_matches "warning includes reaction count" "$output" "[0-9,]+ reactions"
 mkdir -p "$TMP/agents-dir"
 echo "first match" > "$TMP/agents-dir/agents-first.md"
 echo "second" > "$TMP/agents-second.md"
