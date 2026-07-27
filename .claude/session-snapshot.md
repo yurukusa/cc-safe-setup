@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-28T00:41:32+09:00
+Updated: 2026-07-28T00:41:53+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-07-28T00:41:32+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: dd2b8723 checkpoint: auto-save 00:41:27
+- Last commit: 9cba01e4 checkpoint: auto-save 00:41:52
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-07-28.md
 ./.claude/pre-compact-checkpoint.md
 ./tests/doctor-misspelled-settings-keys.test.sh
 ./tests/test-marketplace-plugins.sh
@@ -20,7 +21,6 @@ Updated: 2026-07-28T00:41:32+09:00
 ./tests/worktree-hooks-path-fix.test.sh
 ./examples/session-summary.sh
 ./examples/settings-hooks-key-restorer.sh
-./examples/settings-json-model-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
