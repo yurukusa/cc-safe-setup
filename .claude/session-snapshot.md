@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T09:46:12+09:00
+Updated: 2026-07-27T09:46:44+09:00
 
 ## Git
 - Branch: `fix/matcher-resolution-merge-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T09:46:12+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e68fa26e recovery: pre-compact checkpoint (1 files, 20260727-004612)
+- Last commit: 88da507f recovery: pre-compact checkpoint (1 files, 20260727-004644)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-07-27.md
+./.claude/pre-compact-checkpoint.md
 ./examples/parallel-cascade-detector.sh
 ./examples/plugin-hooks-json-bloat-detector.sh
 ./examples/skills-load-verifier.sh
