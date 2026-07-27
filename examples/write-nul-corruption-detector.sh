@@ -33,12 +33,14 @@ case "$FILE" in
         exit 0 ;;
 esac
 
-# Detect NUL bytes. -a treats the file as text so grep still scans it; the PCRE
-# \x00 matches a literal NUL. (Plain `grep $'\x00'` is unreliable across inputs.)
-if grep -aPq '\x00' "$FILE" 2>/dev/null; then
+# Detect NUL bytes by counting them out. The previous check used `grep -aPq`,
+# but -P is GNU-only: on BSD grep (macOS) it failed, the failure was swallowed
+# by 2>/dev/null, and the corrupted write was reported as clean. Comparing the
+# byte count with and without NULs is exact and works on every platform.
+if [ "$(wc -c < "$FILE" 2>/dev/null || echo 0)" -ne "$(tr -d '\000' < "$FILE" 2>/dev/null | wc -c)" ]; then
     echo "⚠ NUL bytes found in $FILE right after Write/Edit — the write may have landed corrupted (e.g. Cowork/Windows silent NUL-padding, #70414)." >&2
     echo "  The tool reported success, but a text file should not contain NUL. The byte count can be unchanged, so 'wc -c' and 'tail' will not reveal this." >&2
-    echo "  Verify:  grep -aPc '\\x00' \"$FILE\"   (expect 0)" >&2
+    echo "  Verify:  tr -d '\\000' < \"$FILE\" | wc -c   (compare with wc -c on the file itself)" >&2
     echo "  Inspect: cat -v \"$FILE\" | tail        (NUL shows as ^@)" >&2
     echo "  Recover: git checkout -- \"$FILE\"  (if tracked), or re-write and re-verify before trusting 'done'." >&2
     exit 2
