@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T09:50:33+09:00
+Updated: 2026-07-27T09:52:23+09:00
 
 ## Git
 - Branch: `fix/matcher-resolution-merge-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T09:50:33+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 832e5919 checkpoint: auto-save 09:50:32
+- Last commit: 939204c3 checkpoint: auto-save 09:50:45
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-27.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-07-27.md
 ./test.sh
 ./examples/parallel-cascade-detector.sh
 ./examples/plugin-hooks-json-bloat-detector.sh
