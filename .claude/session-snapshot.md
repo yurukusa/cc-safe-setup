@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T10:15:11+09:00
+Updated: 2026-07-27T10:15:43+09:00
 
 ## Git
 - Branch: `fix/doctor-wiring-check-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T10:15:11+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e383fec4 recovery: pre-compact checkpoint (1 files, 20260727-011510)
+- Last commit: 8cc0a01d recovery: pre-compact checkpoint (1 files, 20260727-011543)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-07-27.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/parallel-cascade-detector.sh
 ./examples/plugin-hooks-json-bloat-detector.sh
