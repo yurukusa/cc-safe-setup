@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T17:36:45+09:00
+Updated: 2026-07-27T17:37:03+09:00
 
 ## Git
 - Branch: `fix/destructive-guard-find-inverted-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T17:36:45+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 92048030 recovery: pre-compact checkpoint (1 files, 20260727-083645)
+- Last commit: 2f1b9dec recovery: pre-compact checkpoint (1 files, 20260727-083703)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-07-27.md
+./.claude/pre-compact-checkpoint.md
 ./tests/destructive-guard-find-deletion.test.sh
 ./tests/core-scripts-parser-fallback.test.sh
 ./CLAUDE.md
