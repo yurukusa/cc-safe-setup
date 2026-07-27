@@ -65,7 +65,14 @@ code{background:#161b22;border:1px solid #30363d;border-radius:4px;padding:.1rem
 </div>
 
 <script>
-function estTokens(s){ return Math.round(s.length/4); }
+// 日本語は1文字がほぼ1トークン、英数字と記号は約4文字で1トークン。
+// 文字数を一律に4で割ると、日本語の SKILL.md では実際の約3分の1しか出ない。
+// 較正の根拠: 自分の指示書とメモリ索引の実測（23,348字 = 17,960トークン = 1.30字/トークン）に対し、
+// この式は 1.35字/トークン を返す（誤差4%）。一律 length/4 は 4.00字/トークン想定で3倍外れる。
+function estTokens(s){
+  var cjk = (s.match(/[　-ヿ㐀-䶿一-鿿＀-￯]/g) || []).length;
+  return Math.round(cjk + (s.length - cjk) / 4);
+}
 
 function run(){
   var raw = document.getElementById('in').value;
@@ -82,8 +89,10 @@ function run(){
   fm.split(/[\r\n]+/).forEach(function(l){
     if(/^\s*(name|description|trigger|when)\s*:/i.test(l)) keepLines.push(l);
   });
-  var layer1Chars = keepLines.join('\n').length + 120;
-  var layer1 = estTokens('x'.repeat(layer1Chars));
+  // ★実際の文字列で見積もる。'x'.repeat(文字数) で渡すと文字種が失われ、
+  //   日本語の name / description が全て英数字として数えられて軽く出る。
+  //   末尾の +30 は「1行の案内」に足す120字ぶんの余裕（英数字換算で約30トークン）。
+  var layer1 = estTokens(keepLines.join('\n')) + 30;
 
   var heavy = [];
   var codeFences = (body.match(/```/g)||[]).length;
