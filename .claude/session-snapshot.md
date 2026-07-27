@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T16:23:38+09:00
+Updated: 2026-07-27T16:23:43+09:00
 
 ## Git
 - Branch: `fix/bsd-grep-portability-2026-07-27`
@@ -7,7 +7,7 @@ Updated: 2026-07-27T16:23:38+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4795b6d6 checkpoint: auto-save 16:23:31
+- Last commit: 1e31074a recovery: pre-compact checkpoint (1 files, 20260727-072343)
 
 ## Recent Files
 ```
