@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T12:33:34+09:00
+Updated: 2026-07-27T12:33:50+09:00
 
 ## Git
 - Branch: `fix/plugin-hooks-silent-without-jq-2026-07-27`
@@ -7,7 +7,7 @@ Updated: 2026-07-27T12:33:34+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d637b032 checkpoint: auto-save 12:33:30
+- Last commit: d93c580d checkpoint: auto-save 12:33:49
 
 ## Recent Files
 ```
