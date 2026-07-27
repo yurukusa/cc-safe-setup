@@ -8,6 +8,28 @@ npx cc-safe-setup
 
 The command is interactive: it shows what each hook does and lets you choose which to install into your `~/.claude/settings.json` (or a project-local `.claude/settings.json`). Nothing is installed without your confirmation. MIT licensed.
 
+## The npm release is behind this repository
+
+`npx cc-safe-setup` currently installs **29.8.0**, published 2026-04-20. This repository is at **30.0.4**. Publishing is blocked on renewing an npm credential, so npm keeps serving 29.8.0 until that is done.
+
+The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.0 allow three operations that 30.0.4 refuses:
+
+| Command seen by the hook | 29.8.0 | 30.0.4 |
+| --- | --- | --- |
+| `rm -rf $HOME/x` — home directory reached through a shell variable | allowed | blocked |
+| `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
+| `true && git add .env` — a secret staged through a chained command | allowed | blocked |
+
+29.8.0 ships 698 example hooks against this repository's 908 — among the 210 missing is `agents-md-sync-checker`. It also predates a fix for example hooks that were registered under a matcher other than the one they declare, which let them install without ever firing.
+
+To install the current code directly from this repository:
+
+```sh
+npx github:yurukusa/cc-safe-setup
+```
+
+That resolves to the default branch. To pin an exact revision, append a commit SHA — `npx github:yurukusa/cc-safe-setup#<sha>`. Pin by SHA rather than by tag: the tag names here come from an older numbering that no longer tracks `package.json`.
+
 ## Why this exists
 
 Claude Code can run shell commands, edit files, and call tools on your behalf. Most of the time that is fine. But a single command — `rm -rf`, a force-push, `terraform destroy`, `php artisan migrate:fresh`, a `git checkout --orphan` followed by `git rm -rf .` — can destroy work in a way that is not recoverable, and it can happen without an error or a warning.
