@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T17:37:38+09:00
+Updated: 2026-07-28T00:40:58+09:00
 
 ## Git
-- Branch: `fix/destructive-guard-find-inverted-2026-07-27`
+- Branch: `main`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: bbba2c97 recovery: pre-compact checkpoint (1 files, 20260727-083738)
+- Last commit: f362fde9 Merge pull request #909 from yurukusa/feat/doctor-detect-misspelled-settings-keys-2026-07-27
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-27.md
 ./.claude/pre-compact-checkpoint.md
-./tests/destructive-guard-find-deletion.test.sh
-./tests/core-scripts-parser-fallback.test.sh
-./CLAUDE.md
-./examples/rm-safety-net.sh
-./examples/write-nul-corruption-detector.sh
-./examples/claim-verify-detector.sh
-./examples/system-dir-protection-guard.sh
+./tests/doctor-misspelled-settings-keys.test.sh
+./tests/test-marketplace-plugins.sh
+./tests/test-memory-orphan-detector.sh
+./tests/test-parallel-batch-size-limiter.sh
+./tests/worktree-hooks-path-fix.test.sh
+./examples/session-summary.sh
+./examples/settings-hooks-key-restorer.sh
+./examples/settings-json-model-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
