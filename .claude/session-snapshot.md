@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-28T00:40:58+09:00
+Updated: 2026-07-28T00:41:32+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-07-28T00:40:58+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f362fde9 Merge pull request #909 from yurukusa/feat/doctor-detect-misspelled-settings-keys-2026-07-27
+- Last commit: dd2b8723 checkpoint: auto-save 00:41:27
 
 ## Recent Files
 ```
