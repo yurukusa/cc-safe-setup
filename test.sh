@@ -290,7 +290,11 @@ test_hook "destructive-guard" '{"tool_input":{"command":"git push origin feature
 # Windows PowerShell destructive commands
 test_hook "destructive-guard" '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}' 2 "PowerShell Remove-Item -Recurse -Force blocked"
 test_hook "destructive-guard" '{"tool_input":{"command":"rd /s /q C:\\"}}' 2 "Windows rd /s /q blocked"
-test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 0 "rm -rf $HOME passes (literal dollar sign not expanded)"
+# A hook sees the command before the shell expands it, so it cannot know what
+# $HOME will become. Treating the literal string as dangerous is the only safe
+# reading, and 30.0.2 made the guard do that. This case asserted exit 0 until
+# now, which pinned the pre-30.0.2 hole open as the expected behaviour.
+test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf $HOME"}}' 2 'rm -rf $HOME blocked (unexpanded variable, destination unknowable)'
 test_hook "destructive-guard" '{"tool_input":{"command":"git checkout -- ."}}' 0 "git checkout -- . passes (git checkout guards handle --force only)"
 test_hook "destructive-guard" '{"tool_input":{"command":"rm -rf .git"}}' 0 "rm -rf .git passes (relative path, not root)"
 test_hook "destructive-guard" '{"tool_input":{"command":"rm file.txt"}}' 0 "rm single file allowed"
