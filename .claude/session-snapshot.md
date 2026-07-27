@@ -1,13 +1,13 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T09:55:05+09:00
+Updated: 2026-07-27T10:16:16+09:00
 
 ## Git
-- Branch: `fix/matcher-resolution-merge-2026-07-27`
+- Branch: `fix/doctor-wiring-check-2026-07-27`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 29555ec4 recovery: pre-compact checkpoint (1 files, 20260727-005505)
+- Last commit: 1a733a8b recovery: pre-compact checkpoint (1 files, 20260727-011616)
 
 ## Recent Files
 ```
