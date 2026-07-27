@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-28T00:41:53+09:00
+Updated: 2026-07-28T00:43:54+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-07-28T00:41:53+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 9cba01e4 checkpoint: auto-save 00:41:52
+- Last commit: d6d93665 checkpoint: auto-save 00:42:03
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-28.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-07-28.md
 ./tests/doctor-misspelled-settings-keys.test.sh
 ./tests/test-marketplace-plugins.sh
 ./tests/test-memory-orphan-detector.sh
