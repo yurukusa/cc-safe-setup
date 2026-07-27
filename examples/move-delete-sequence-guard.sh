@@ -33,10 +33,29 @@ fi
 # Pattern: mv <src> <dst> [&&;||] rm [-rf] <target>
 # We check if the rm target is a parent of, or the same as, the mv source
 
+# The extraction below used grep -oP, which is GNU-only. BSD grep (macOS)
+# rejects -P outright, so both variables came back empty, and the two [ -z ]
+# checks under this block read that as "nothing to compare" and exited 0 —
+# the guard was off on macOS with no sign of it. Keep the GNU path exactly as
+# it was and add an equivalent for platforms without PCRE.
+if echo x | grep -qP x 2>/dev/null; then HAS_PCRE=1; else HAS_PCRE=0; fi
+
+# Reads a command line on stdin, prints the first argument after $1 and its flags.
+# \b and \K have no POSIX equivalent, so the fallback matches the command word
+# with its leading boundary and strips that prefix afterwards.
+extract_operand() {
+    if [ "$HAS_PCRE" = 1 ]; then
+        grep -oP "\\b$1\\s+(-[a-zA-Z]+\\s+)*\\K\\S+" 2>/dev/null || true
+    else
+        grep -oE "(^|[^a-zA-Z])$1[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*[^[:space:]]+" 2>/dev/null \
+            | sed -E "s/^[^a-zA-Z]?$1[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*//" || true
+    fi
+}
+
 # Get all mv source paths (first arg after mv and optional flags)
-MV_SOURCES=$(echo "$COMMAND" | grep -oP '\bmv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+MV_SOURCES=$(echo "$COMMAND" | extract_operand mv)
 # Get all rm targets
-RM_TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+RM_TARGETS=$(echo "$COMMAND" | extract_operand rm)
 
 [ -z "$MV_SOURCES" ] && exit 0
 [ -z "$RM_TARGETS" ] && exit 0

@@ -62,17 +62,23 @@ EVIDENCE_RE='(\bran\b|\bexecuted\b|\bexit code\b|\bstatus code\b|\boutput shows\
 # Use grep -P for proper word boundaries and alternation. Fall back to grep -E
 # if -P is unavailable (e.g. busybox); the difference matters less than
 # returning a clean exit on minimal systems.
+# The mode flag has to travel with GREP. Setting GREP='grep -E' and then still
+# passing -ioP at the call site kept the PCRE flag on, so on BSD grep (macOS)
+# both greps failed, both variables came back empty, and the first [ -z ] exit
+# swallowed every warning this hook exists to produce.
 GREP=grep
+GREP_MODE=-ioP
 if ! echo "" | grep -P '' >/dev/null 2>&1; then
     GREP='grep -E'
+    GREP_MODE=-io
     DECISIVE_RE=$(printf '%s' "$DECISIVE_RE" | sed 's/\\b//g')
     EVIDENCE_RE=$(printf '%s' "$EVIDENCE_RE" | sed 's/\\b//g')
 fi
 
-DECISIVE_HIT=$(printf '%s' "$LAST_ASSISTANT" | $GREP -ioP "$DECISIVE_RE" 2>/dev/null | head -3 | paste -sd ',' -)
+DECISIVE_HIT=$(printf '%s' "$LAST_ASSISTANT" | $GREP $GREP_MODE "$DECISIVE_RE" 2>/dev/null | head -3 | paste -sd ',' -)
 [ -z "$DECISIVE_HIT" ] && exit 0
 
-EVIDENCE_HIT=$(printf '%s' "$LAST_ASSISTANT" | $GREP -ioP "$EVIDENCE_RE" 2>/dev/null | head -1)
+EVIDENCE_HIT=$(printf '%s' "$LAST_ASSISTANT" | $GREP $GREP_MODE "$EVIDENCE_RE" 2>/dev/null | head -1)
 [ -n "$EVIDENCE_HIT" ] && exit 0
 
 # Decisive without evidence — emit one advisory line.

@@ -43,6 +43,23 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 [ -z "$COMMAND" ] && exit 0
 
+# The extractions in this hook used grep -oP, which is GNU-only. BSD grep
+# (macOS) rejects -P, so the targets came back empty and every critical-path
+# check silently found nothing to inspect. The GNU path is left exactly as it
+# was; an equivalent runs where -P is absent. Defined at file scope because the
+# find/xargs sections below use it too.
+if echo x | grep -qP x 2>/dev/null; then HAS_PCRE=1; else HAS_PCRE=0; fi
+
+# $1 = command word, $2 = operand pattern. \K has no POSIX equivalent, so the
+# fallback matches from the command word and strips that prefix afterwards.
+extract_operand() {
+    if [ "$HAS_PCRE" = 1 ]; then
+        grep -oP "$1\\s+\\K$2" 2>/dev/null || true
+    else
+        grep -oE "$1[[:space:]]+$2" 2>/dev/null | sed -E "s/^$1[[:space:]]+//" || true
+    fi
+}
+
 # --- rm command analysis ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     # Safe targets that can be deleted freely
@@ -50,7 +67,11 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|(^|/)\.env"
 
     # Extract the target (last argument after flags)
-    TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+[^;|&]*' | awk '{print $NF}')
+    if [ "$HAS_PCRE" = 1 ]; then
+        TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+[^;|&]*' | awk '{print $NF}')
+    else
+        TARGET=$(echo "$COMMAND" | grep -oE 'rm[[:space:]]+[^;|&]*' | awk '{print $NF}')
+    fi
 
     # Block path traversal early
     if echo "$TARGET" | grep -qF '..'; then
@@ -64,7 +85,7 @@ if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
     # (node_modules) and never inspect the critical FIRST arg — a real bypass.
     # set -f disables glob expansion of the split words (so "rm *.pyc" stays literal).
     set -f
-    for arg in $(echo "$COMMAND" | grep -oP 'rm\s+\K[^;|&]*'); do
+    for arg in $(echo "$COMMAND" | extract_operand 'rm' '[^;|&]*'); do
         case "$arg" in -*) continue ;; esac   # skip flags
         if echo "$arg" | grep -qE "$CRITICAL"; then
             set +f
@@ -124,7 +145,7 @@ fi
 # --- find -delete ---
 if echo "$COMMAND" | grep -qE 'find\s.*-delete'; then
     # Allow find in safe directories only
-    FIND_PATH=$(echo "$COMMAND" | grep -oP 'find\s+\K[^\s]+')
+    FIND_PATH=$(echo "$COMMAND" | extract_operand 'find' '[^[:space:]]+')
     if echo "$FIND_PATH" | grep -qE '^\.|^node_modules|^dist|^build|^/tmp'; then
         exit 0
     fi

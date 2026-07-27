@@ -55,10 +55,29 @@ is_system_dir() {
     return 1
 }
 
+# The extractions below used grep -oP, which is GNU-only. BSD grep (macOS)
+# rejects -P outright, so every target list came back empty, the loops below
+# had nothing to iterate, and the guard exited 0 — `rm -rf /root` went through
+# on macOS with no sign that the protection was off. The GNU path is unchanged;
+# an equivalent is added for platforms without PCRE.
+if echo x | grep -qP x 2>/dev/null; then HAS_PCRE=1; else HAS_PCRE=0; fi
+
+# $1 = command alternation (e.g. "rm|unlink"), $2 = operand pattern.
+# \K has no POSIX equivalent, so the fallback matches the whole thing and
+# strips the command word and its flags afterwards.
+extract_operand() {
+    if [ "$HAS_PCRE" = 1 ]; then
+        grep -oP "($1)\\s+(-[a-zA-Z]+\\s+)*\\K$2" 2>/dev/null || true
+    else
+        grep -oE "($1)[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*$2" 2>/dev/null \
+            | sed -E "s/^($1)[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*//" || true
+    fi
+}
+
 # --- rm / unlink on system directories ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?(rm|unlink)\s'; then
     # Extract targets after rm and flags
-    TARGETS=$(echo "$COMMAND" | grep -oP '(rm|unlink)\s+(-[a-zA-Z]+\s+)*\K[^;|&]+' 2>/dev/null || true)
+    TARGETS=$(echo "$COMMAND" | extract_operand 'rm|unlink' '[^;|&]+')
     for target in $TARGETS; do
         if is_system_dir "$target"; then
             echo "BLOCKED: Destructive operation on system directory: $target" >&2
@@ -74,7 +93,7 @@ fi
 # --- mv (moving system directories) ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?mv\s'; then
     # Get the source of the mv (first non-flag argument)
-    MV_SOURCE=$(echo "$COMMAND" | grep -oP 'mv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+    MV_SOURCE=$(echo "$COMMAND" | extract_operand 'mv' '[^[:space:]]+')
     if is_system_dir "$MV_SOURCE"; then
         echo "BLOCKED: Moving system directory: $MV_SOURCE" >&2
         echo "Command: $COMMAND" >&2
@@ -87,7 +106,8 @@ fi
 
 # --- chmod -R / chown -R on system directories ---
 if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?(chmod|chown)\s+.*-R'; then
-    TARGETS=$(echo "$COMMAND" | grep -oP '(chmod|chown)\s+[^;|&]+' 2>/dev/null | awk '{print $NF}' || true)
+    # No \K here, so plain ERE is enough (POSIX classes instead of \s).
+    TARGETS=$(echo "$COMMAND" | grep -oE '(chmod|chown)[[:space:]]+[^;|&]+' 2>/dev/null | awk '{print $NF}' || true)
     for target in $TARGETS; do
         if is_system_dir "$target"; then
             echo "BLOCKED: Recursive permission change on system directory: $target" >&2
