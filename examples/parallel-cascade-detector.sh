@@ -28,7 +28,7 @@
 #   - #64052 (omar16100) - minimal reproduction on v2.1.158
 #   - #64047 (snichols) - the indistinguishability + fabrication
 #
-# TRIGGER: PostToolUse  MATCHER: (any tool)
+# TRIGGER: PostToolUse  MATCHER: ""
 #
 # ENV:
 #   CC_PARALLEL_CASCADE_THRESHOLD   default 5

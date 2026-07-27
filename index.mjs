@@ -1199,6 +1199,31 @@ async function installExample(name) {
     matcher = quoted ? quoted[1] : commentMatcher[1].trim();
   }
 
+  // The header is written two ways across examples/: on its own comment line
+  // (handled above) and appended to the TRIGGER line, as
+  // "# TRIGGER: PostToolUse  MATCHER: "Edit|Write"". Only the first form was
+  // recognised, so 415 of 908 examples silently fell back to the default
+  // matcher "Bash" — 221 of those declare another tool (Edit|Write and the
+  // like) and therefore never fired at all, and 46 declare "" (every tool) and
+  // were narrowed to Bash only. A guard that installs without error and then
+  // never runs is the worst failure this project has.
+  //
+  // Deliberately additive: the inline form is consulted only when neither the
+  // own-line comment nor an in-file "matcher" JSON resolved one. 31 examples
+  // carry an inline header that disagrees with a JSON snippet in the same file
+  // (e.g. auto-checkpoint declares Bash in the header and Edit|Write in the
+  // JSON) and which one is right has to be settled per file. Preferring the
+  // inline form here would flip those 31 silently, so their behaviour is left
+  // exactly as it is today and the conflict is tracked separately.
+  if (!commentMatcher && !matcherMatch) {
+    const inlineMatcher = content.match(
+      /^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*\S+\s+[Mm][Aa][Tt][Cc][Hh][Ee][Rr]:\s*(.+)$/m);
+    if (inlineMatcher) {
+      const quoted = inlineMatcher[1].match(/^"([^"]*)"/);
+      matcher = quoted ? quoted[1] : inlineMatcher[1].trim();
+    }
+  }
+
   // Update settings.json
   let settings = {};
   if (existsSync(SETTINGS_PATH)) {

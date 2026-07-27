@@ -26,7 +26,7 @@
 #   Candidate cluster #20 — parallel tool batch cancellation cascade
 #   Same cluster as parallel-cascade-detector.sh (PostToolUse companion).
 #
-# TRIGGER: PreToolUse  MATCHER: (any tool)
+# TRIGGER: PreToolUse  MATCHER: ""
 #
 # ENV:
 #   CC_PARALLEL_BATCH_LIMITER_THRESHOLD     default 6  (warn at 6+ siblings)
