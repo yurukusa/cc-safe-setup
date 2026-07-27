@@ -8,6 +8,24 @@ npx cc-safe-setup
 
 The command is interactive: it shows what each hook does and lets you choose which to install into your `~/.claude/settings.json` (or a project-local `.claude/settings.json`). Nothing is installed without your confirmation. MIT licensed.
 
+## Install as a Claude Code plugin
+
+The core guard sets are also published as Claude Code plugins from this repository. They install from inside Claude Code and track the default branch, so they do not depend on the npm release at all.
+
+```sh
+/plugin marketplace add yurukusa/cc-safe-setup
+/plugin install safety-essentials@cc-safe-setup
+```
+
+| Plugin | What it blocks |
+| --- | --- |
+| `safety-essentials` | `rm -rf`, force-push, `git reset --hard`, writes to `.env`, package publish |
+| `git-protection` | force-push, direct pushes to `main`/`master`, hard reset, interactive rebase, `git clean -fd` |
+| `credential-guard` | writes and edits to `.env` and service-account files, API keys in shell commands |
+| `token-guard` | reads over 100KB, a per-session read budget, subagent fan-out, a token budget that asks for `/compact` |
+
+These are the guards only. The example-hook library, `--doctor`, `--audit`, and the rest of the CLI come from the npm package or from this repository directly.
+
 ## The npm release is behind this repository
 
 `npx cc-safe-setup` currently installs **29.8.0**, published 2026-04-20. This repository is at **30.0.4**. Publishing is blocked on renewing an npm credential, so npm keeps serving 29.8.0 until that is done.

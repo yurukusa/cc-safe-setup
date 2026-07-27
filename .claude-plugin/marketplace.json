@@ -39,7 +39,7 @@
     {
       "name": "git-protection",
       "source": "./plugins/git-protection",
-      "description": "Git safety hooks: block force-push, protect main/master, prevent hard-reset, guard rebase, and auto-backup before destructive operations.",
+      "description": "Git safety hooks: block force-push, protect main/master, prevent hard reset, guard interactive rebase, and block git clean -fd.",
       "version": "1.1.0",
       "author": {
         "name": "yurukusa"
@@ -91,7 +91,7 @@
     {
       "name": "token-guard",
       "source": "./plugins/token-guard",
-      "description": "Token consumption guards: large-read warning (100KB+), read budget limit, subagent cap, and token budget tracking. Reduce waste by 20-40%.",
+      "description": "Token consumption guards: large-read warning (100KB+), per-session read budget, subagent cap, and a token budget that asks for /compact.",
       "version": "1.0.0",
       "author": {
         "name": "yurukusa"
