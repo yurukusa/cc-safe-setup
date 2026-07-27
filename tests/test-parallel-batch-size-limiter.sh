@@ -169,19 +169,27 @@ else
 fi
 
 # Test 10: After window expires, second batch can trigger fresh warning
+#
+# ★窓を100msでなく2000msにしている理由(2026-07-27)。この検査は6回の呼び出しが
+# 同じ窓に収まることを前提にするが、1回ごとに bash のプロセスを起こすので、
+# 混んだCIの走者では6回で100msを超える。すると古い事象が刈られて数が閾値に
+# 届かず、警告が出ずに落ちる。同じコミットで通る回と落ちる回が出ていた
+# (実測: 同一SHA db42f501 で Tests が1回成功・1回失敗)。
+# 窓を2000msへ広げ、待ちを2.5秒にすると、測りたい挙動(窓が切れたら数え直す)は
+# そのままで、遅い走者でも余裕が出る。
 reset_state
 # First batch
 for i in 1 2 3 4 5 6; do
   printf '%s' '{"tool_input": {"command": "ls"}}' \
-    | CC_PARALLEL_BATCH_LIMITER_STATE_DIR="$STATE" CC_PARALLEL_BATCH_LIMITER_THRESHOLD=6 CC_PARALLEL_BATCH_LIMITER_WINDOW_MS=100 bash "$HOOK" >/dev/null 2>&1
+    | CC_PARALLEL_BATCH_LIMITER_STATE_DIR="$STATE" CC_PARALLEL_BATCH_LIMITER_THRESHOLD=6 CC_PARALLEL_BATCH_LIMITER_WINDOW_MS=2000 bash "$HOOK" >/dev/null 2>&1
 done
 # Wait beyond window
-sleep 0.3
+sleep 2.5
 # Second batch
 LAST_OUT=""
 for i in 1 2 3 4 5 6; do
   LAST_OUT=$(printf '%s' '{"tool_input": {"command": "ls"}}' \
-    | CC_PARALLEL_BATCH_LIMITER_STATE_DIR="$STATE" CC_PARALLEL_BATCH_LIMITER_THRESHOLD=6 CC_PARALLEL_BATCH_LIMITER_WINDOW_MS=100 bash "$HOOK" 2>&1)
+    | CC_PARALLEL_BATCH_LIMITER_STATE_DIR="$STATE" CC_PARALLEL_BATCH_LIMITER_THRESHOLD=6 CC_PARALLEL_BATCH_LIMITER_WINDOW_MS=2000 bash "$HOOK" 2>&1)
 done
 if printf '%s' "$LAST_OUT" | grep -q "Large parallel batch"; then
   run_test "Second batch after window expires → fresh warning" pass
