@@ -2,7 +2,9 @@
   "name": "token-guard",
   "description": "Token consumption guards for Claude Code. Warns on large file reads (100KB+), limits unique file reads per session, estimates token budget, and caps subagent spawns. From 800+ hours of autonomous operation data.",
   "version": "1.0.0",
-  "author": { "name": "yurukusa" },
+  "author": {
+    "name": "yurukusa"
+  },
   "homepage": "https://yurukusa.github.io/cc-safe-setup/token-book.html",
   "repository": "https://github.com/yurukusa/cc-safe-setup",
   "license": "MIT",
@@ -38,7 +40,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": {},
+        "matcher": "",
         "hooks": [
           {
             "type": "command",

@@ -5,7 +5,7 @@
     "email": "yurukusa@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Safety hooks for Claude Code — 734 battle-tested hooks from 800+ hours of autonomous operation. Prevents rm -rf, force-push, credential leaks, unauthorized fund transfers, deny-rules bypass, and more.",
+    "description": "Safety hooks for Claude Code, from 800+ hours of autonomous operation. Four plugins that block rm -rf, force-push, hard reset, credential leaks, and runaway token spend. The companion CLI ships 908 further example hooks.",
     "version": "1.0.0",
     "pluginRoot": "./plugins"
   },
@@ -14,53 +14,106 @@
       "name": "safety-essentials",
       "source": "./plugins/safety-essentials",
       "description": "5 essential safety hooks: block rm -rf, force-push, hard-reset, env overwrites, and package publish. The minimum viable safety net.",
-      "version": "1.0.0",
-      "author": { "name": "yurukusa" },
+      "version": "1.1.0",
+      "author": {
+        "name": "yurukusa"
+      },
       "homepage": "https://yurukusa.github.io/cc-safe-setup/",
       "repository": "https://github.com/yurukusa/cc-safe-setup",
       "license": "MIT",
-      "keywords": ["safety", "hooks", "rm-rf", "force-push", "env", "essential"],
+      "keywords": [
+        "safety",
+        "hooks",
+        "rm-rf",
+        "force-push",
+        "env",
+        "essential"
+      ],
       "category": "safety",
-      "tags": ["beginner-friendly", "must-have", "pretooluse"]
+      "tags": [
+        "beginner-friendly",
+        "must-have",
+        "pretooluse"
+      ]
     },
     {
       "name": "git-protection",
       "source": "./plugins/git-protection",
       "description": "Git safety hooks: block force-push, protect main/master, prevent hard-reset, guard rebase, and auto-backup before destructive operations.",
-      "version": "1.0.0",
-      "author": { "name": "yurukusa" },
+      "version": "1.1.0",
+      "author": {
+        "name": "yurukusa"
+      },
       "homepage": "https://yurukusa.github.io/cc-safe-setup/",
       "repository": "https://github.com/yurukusa/cc-safe-setup",
       "license": "MIT",
-      "keywords": ["git", "force-push", "main-branch", "reset", "rebase", "backup"],
+      "keywords": [
+        "git",
+        "force-push",
+        "main-branch",
+        "reset",
+        "rebase",
+        "backup"
+      ],
       "category": "safety",
-      "tags": ["git", "version-control", "pretooluse"]
+      "tags": [
+        "git",
+        "version-control",
+        "pretooluse"
+      ]
     },
     {
       "name": "credential-guard",
       "source": "./plugins/credential-guard",
       "description": "Protect secrets and credentials: block writes to .env files, detect API keys in commands, prevent hardcoded tokens, guard service account files.",
-      "version": "1.0.0",
-      "author": { "name": "yurukusa" },
+      "version": "1.1.0",
+      "author": {
+        "name": "yurukusa"
+      },
       "homepage": "https://yurukusa.github.io/cc-safe-setup/",
       "repository": "https://github.com/yurukusa/cc-safe-setup",
       "license": "MIT",
-      "keywords": ["credentials", "secrets", "api-keys", "env", "tokens", "security"],
+      "keywords": [
+        "credentials",
+        "secrets",
+        "api-keys",
+        "env",
+        "tokens",
+        "security"
+      ],
       "category": "security",
-      "tags": ["credentials", "secrets", "pretooluse"]
+      "tags": [
+        "credentials",
+        "secrets",
+        "pretooluse"
+      ]
     },
     {
       "name": "token-guard",
       "source": "./plugins/token-guard",
       "description": "Token consumption guards: large-read warning (100KB+), read budget limit, subagent cap, and token budget tracking. Reduce waste by 20-40%.",
       "version": "1.0.0",
-      "author": { "name": "yurukusa" },
+      "author": {
+        "name": "yurukusa"
+      },
       "homepage": "https://yurukusa.github.io/cc-safe-setup/token-book.html",
       "repository": "https://github.com/yurukusa/cc-safe-setup",
       "license": "MIT",
-      "keywords": ["tokens", "cost", "budget", "optimization", "large-read", "subagent"],
+      "keywords": [
+        "tokens",
+        "cost",
+        "budget",
+        "optimization",
+        "large-read",
+        "subagent"
+      ],
       "category": "optimization",
-      "tags": ["token-saving", "cost-reduction", "pretooluse", "posttooluse"]
+      "tags": [
+        "token-saving",
+        "cost-reduction",
+        "pretooluse",
+        "posttooluse"
+      ]
     }
   ]
 }
