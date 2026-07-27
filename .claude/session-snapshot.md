@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T10:14:05+09:00
+Updated: 2026-07-27T10:15:05+09:00
 
 ## Git
 - Branch: `fix/doctor-wiring-check-2026-07-27`
@@ -7,7 +7,7 @@ Updated: 2026-07-27T10:14:05+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 5551bffd checkpoint: auto-save 10:12:27
+- Last commit: 0fbb0c0e checkpoint: auto-save 10:14:56
 
 ## Recent Files
 ```
