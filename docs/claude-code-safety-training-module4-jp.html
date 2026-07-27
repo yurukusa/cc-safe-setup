@@ -98,7 +98,7 @@ a { color:var(--blue); }
 <div class="step">
 <h3>手順 1. hook の一式を入れる</h3>
 <p>cc-safe-setup（無料・MIT）が、委譲と自動化の防御の hook を1コマンドで入れます。</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>これで <code>subagent-blast-radius-guard</code>（<code>Edit|Write</code>）と <code>auto-mode-safety-enforcer</code>（<code>Bash</code>）を含む hook が登録されます。サブエージェントの防御は既定が「警告」で、止めるのは opt-in です（途中で止めると委譲が壊れることがあるため）。止める運用にするには環境変数を設定します。</p>
 <pre><code>export CC_SUBAGENT_WRITE_GUARD=block</code></pre>
 </div>

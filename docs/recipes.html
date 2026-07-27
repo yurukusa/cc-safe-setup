@@ -51,7 +51,7 @@ input:focus{outline:none;border-color:#58a6ff}
 <h3 onclick="toggle(this)">Stop permission prompts for read-only commands</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash · Reduces prompts ~80%</div>
 <div class="recipe-desc">Auto-approve cat, ls, grep, git log, and 50+ other read-only commands.</div>
-<div class="install">npx cc-safe-setup --install-example auto-approve-readonly</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example auto-approve-readonly</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 [ -z "$COMMAND" ] && exit 0
@@ -73,7 +73,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Auto-approve test commands</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
 <div class="recipe-desc">npm test, pytest, go test, cargo test, jest, vitest — all auto-approved.</div>
-<div class="install">npx cc-safe-setup --install-example auto-approve-test</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example auto-approve-test</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 [ -z "$COMMAND" ] && exit 0
@@ -90,7 +90,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Block rm -rf, git reset --hard, and other destructive commands</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash · Prevents data loss</div>
 <div class="recipe-desc">The #1 safety hook. Blocks commands that cause irreversible damage. Built after a user lost C:\Users to rm -rf following NTFS junctions.</div>
-<div class="install">npx cc-safe-setup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup</div>
 <pre><code>#!/bin/bash
 # Built-in with cc-safe-setup. Blocks:
 # rm -rf on /, ~, .., /home, /etc
@@ -105,7 +105,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Prevent pushes to main/master</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
 <div class="recipe-desc">Block direct pushes to main and force-pushes to any branch. Built-in with cc-safe-setup.</div>
-<div class="install">npx cc-safe-setup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 [ -z "$COMMAND" ] && exit 0
@@ -122,7 +122,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Prevent committing secrets and .env files</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
 <div class="recipe-desc">Block git add .env, credential files, and git add . when .env exists.</div>
-<div class="install">npx cc-safe-setup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 [ -z "$COMMAND" ] && exit 0
@@ -139,7 +139,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Block silent memory file edits</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Edit|Write · Fixes Issue #38040</div>
 <div class="recipe-desc">Memory files shape AI behavior across sessions but bypass permission prompts. This hook blocks unreviewed writes.</div>
-<div class="install">npx cc-safe-setup --install-example memory-write-guard</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example memory-write-guard</div>
 <pre><code>#!/bin/bash
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
@@ -155,7 +155,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Block built-in skills that edit files silently</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Skill · Fixes Issue #38040</div>
 <div class="recipe-desc">Built-in skills like update-config and simplify modify files without showing changes. Block them and use Edit tool directly.</div>
-<div class="install">npx cc-safe-setup --install-example skill-gate</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example skill-gate</div>
 <pre><code>#!/bin/bash
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
@@ -175,7 +175,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Auto-check syntax after every file edit</h3>
 <div class="recipe-meta">Event: PostToolUse · Matcher: Edit|Write</div>
 <div class="recipe-desc">Catches Python, Shell, JSON, YAML, and JS syntax errors immediately after Claude edits a file.</div>
-<div class="install">npx cc-safe-setup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup</div>
 <pre><code>#!/bin/bash
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
@@ -193,7 +193,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Warn about fixup/WIP commits before push</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Bash</div>
 <div class="recipe-desc">Catches branches with fixup!, squash!, or WIP commits that should be squashed before pushing.</div>
-<div class="install">npx cc-safe-setup --install-example no-commit-fixup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example no-commit-fixup</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 echo "$COMMAND" | grep -qE '^\s*git\s+push\b' || exit 0
@@ -207,7 +207,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Verify file edits actually applied</h3>
 <div class="recipe-meta">Event: PostToolUse · Matcher: Edit|Write · Fixes Issue #32658</div>
 <div class="recipe-desc">Claude assumes edits succeed. This hook checks: file exists, isn't empty, new_string is present, no conflict markers.</div>
-<div class="install">npx cc-safe-setup --install-example edit-verify</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example edit-verify</div>
 <pre><code>#!/bin/bash
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
@@ -228,7 +228,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Auto-backup files before every edit</h3>
 <div class="recipe-meta">Event: PreToolUse · Matcher: Edit|Write · Enables rollback</div>
 <div class="recipe-desc">Creates a timestamped backup in .claude/checkpoints/ before every edit. Keeps last 20 per file.</div>
-<div class="install">npx cc-safe-setup --install-example auto-git-checkpoint</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --install-example auto-git-checkpoint</div>
 <pre><code>#!/bin/bash
 FILE=$(cat | jq -r '.tool_input.file_path // empty')
 [ -z "$FILE" ] || [ ! -f "$FILE" ] && exit 0
@@ -244,7 +244,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Monitor context window usage</h3>
 <div class="recipe-meta">Event: PostToolUse · Matcher: (all) · Prevents silent context loss</div>
 <div class="recipe-desc">Graduated warnings at 40%, 25%, 20%, 15% remaining context. Prevents the session from silently losing state.</div>
-<div class="install">npx cc-safe-setup</div>
+<div class="install">npx github:yurukusa/cc-safe-setup</div>
 <pre><code>#!/bin/bash
 # Built-in with cc-safe-setup
 # Monitors context_window_tokens_remaining from PostToolUse events
@@ -259,7 +259,7 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <h3 onclick="toggle(this)">Diagnose why hooks aren't working</h3>
 <div class="recipe-meta">CLI command · 13 automated checks</div>
 <div class="recipe-desc">Checks jq, settings.json validity, hook paths, permissions, shebang, and runs test inputs.</div>
-<div class="install">npx cc-safe-setup --doctor</div>
+<div class="install">npx github:yurukusa/cc-safe-setup --doctor</div>
 <pre><code># Checks performed:
 # 1. jq installed?
 # 2. settings.json exists?

@@ -298,7 +298,7 @@ function calculate() {
   if (duration > 60) {
     tips.push({
       level: 'warn',
-      text: `Sessions averaging ${duration} minutes will trigger context compaction. Install a PreCompact hook to auto-save before compaction: <code>npx cc-safe-setup --install-example pre-compact-checkpoint</code>`
+      text: `Sessions averaging ${duration} minutes will trigger context compaction. Install a PreCompact hook to auto-save before compaction: <code>npx github:yurukusa/cc-safe-setup --install-example pre-compact-checkpoint</code>`
     });
   }
 
@@ -340,7 +340,7 @@ function calculate() {
   // Always add a general tip
   tips.push({
     level: '',
-    text: `Install token-saving hooks with one command: <code>npx cc-safe-setup --install-example token-budget-guard</code>. The guard warns when consumption is high and blocks runaway sessions.`
+    text: `Install token-saving hooks with one command: <code>npx github:yurukusa/cc-safe-setup --install-example token-budget-guard</code>. The guard warns when consumption is high and blocks runaway sessions.`
   });
 
   document.getElementById('tips').innerHTML = tips.map(t =>

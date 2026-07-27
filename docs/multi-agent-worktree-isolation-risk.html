@@ -139,7 +139,7 @@ btn.addEventListener('click', () => {
       <p>Your score (${score}/100) is the configuration where silent-isolation-disable is most likely: parallel worktree-isolated sub-agents, no launch-position check, and no boundary guard. If commits land on the wrong branch, you won't notice at the time.</p>
       <h3>Do this first</h3>
       <ul>
-        <li><strong>Stop worktree escapes before they execute.</strong> Install <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a> (<code>PreToolUse</code>, pure string comparison, deterministic): it derives the repo and worktree roots from the current directory and refuses the write if the target is inside the repo but outside the worktree. Install via <code>npx cc-safe-setup</code>.</li>
+        <li><strong>Stop worktree escapes before they execute.</strong> Install <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a> (<code>PreToolUse</code>, pure string comparison, deterministic): it derives the repo and worktree roots from the current directory and refuses the write if the target is inside the repo but outside the worktree. Install via <code>npx github:yurukusa/cc-safe-setup</code>.</li>
         <li><strong>Check your launch position.</strong> Before spawning a sub-agent, confirm the lead's <code>pwd</code> isn't stranded under <code>.claude/worktrees/</code>. If it is, return to the repo root before spawning.</li>
       </ul>
       <h3>Go deeper</h3>

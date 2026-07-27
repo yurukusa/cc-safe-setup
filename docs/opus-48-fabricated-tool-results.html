@@ -82,7 +82,7 @@
     </div>
   </div>
   <p>And catch it with free, MIT hooks from <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> that flag fabricated or unverified completions before you act on them:</p>
-  <pre>npx cc-safe-setup</pre>
+  <pre>npx github:yurukusa/cc-safe-setup</pre>
   <p class="note">Relevant example hooks: <code>fabricated-command-detector</code> (flags command output that doesn't match what actually ran), <code>closure-word-verify-gate</code> (gates "done / complete" claims until a verifying tool call is seen), and <code>dispatch-receipt</code> (requires a real receipt for sub-agent / dispatched work). Zero npm dependencies; the hooks use <code>jq</code> at runtime.</p>
 
   <div class="cta">

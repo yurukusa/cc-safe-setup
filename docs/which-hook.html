@@ -51,46 +51,46 @@ const TREE = {
     { text: "Prevent dangerous commands", next: {
       q: "What kind of danger?",
       choices: [
-        { text: "rm -rf, git reset --hard", result: { name: "destructive-guard", desc: "Blocks rm -rf, git reset --hard, git clean -fd, chmod 777, PowerShell Remove-Item.", install: "npx cc-safe-setup" }},
-        { text: "Push to main/master", result: { name: "branch-guard", desc: "Blocks direct pushes to main and force-pushes.", install: "npx cc-safe-setup" }},
-        { text: "Commit secrets/.env", result: { name: "secret-guard", desc: "Blocks git add .env and credential files.", install: "npx cc-safe-setup" }},
-        { text: "All of the above", result: { name: "--shield", desc: "Maximum safety. Installs all guards + auto-detection.", install: "npx cc-safe-setup --shield" }}
+        { text: "rm -rf, git reset --hard", result: { name: "destructive-guard", desc: "Blocks rm -rf, git reset --hard, git clean -fd, chmod 777, PowerShell Remove-Item.", install: "npx github:yurukusa/cc-safe-setup" }},
+        { text: "Push to main/master", result: { name: "branch-guard", desc: "Blocks direct pushes to main and force-pushes.", install: "npx github:yurukusa/cc-safe-setup" }},
+        { text: "Commit secrets/.env", result: { name: "secret-guard", desc: "Blocks git add .env and credential files.", install: "npx github:yurukusa/cc-safe-setup" }},
+        { text: "All of the above", result: { name: "--shield", desc: "Maximum safety. Installs all guards + auto-detection.", install: "npx github:yurukusa/cc-safe-setup --shield" }}
       ]
     }},
     { text: "Reduce permission prompts", next: {
       q: "Which commands are you tired of approving?",
       choices: [
-        { text: "cat, ls, grep, git log", result: { name: "auto-approve-readonly", desc: "Auto-approves 50+ read-only commands. Reduces prompts ~80%.", install: "npx cc-safe-setup --install-example auto-approve-readonly" }},
-        { text: "npm test, pytest, go test", result: { name: "auto-approve-test", desc: "Auto-approves test runner commands across all languages.", install: "npx cc-safe-setup --install-example auto-approve-test" }},
-        { text: "npm run build, make", result: { name: "auto-approve-build", desc: "Auto-approves build commands.", install: "npx cc-safe-setup --install-example auto-approve-build" }},
-        { text: "All safe commands", result: { name: "--shield", desc: "Installs readonly + test + build auto-approve together.", install: "npx cc-safe-setup --shield" }}
+        { text: "cat, ls, grep, git log", result: { name: "auto-approve-readonly", desc: "Auto-approves 50+ read-only commands. Reduces prompts ~80%.", install: "npx github:yurukusa/cc-safe-setup --install-example auto-approve-readonly" }},
+        { text: "npm test, pytest, go test", result: { name: "auto-approve-test", desc: "Auto-approves test runner commands across all languages.", install: "npx github:yurukusa/cc-safe-setup --install-example auto-approve-test" }},
+        { text: "npm run build, make", result: { name: "auto-approve-build", desc: "Auto-approves build commands.", install: "npx github:yurukusa/cc-safe-setup --install-example auto-approve-build" }},
+        { text: "All safe commands", result: { name: "--shield", desc: "Installs readonly + test + build auto-approve together.", install: "npx github:yurukusa/cc-safe-setup --shield" }}
       ]
     }},
-    { text: "Protect specific files", result: { name: "--protect", desc: "Block edits to any file or directory. One command per path.", install: "npx cc-safe-setup --protect .env" }},
+    { text: "Protect specific files", result: { name: "--protect", desc: "Block edits to any file or directory. One command per path.", install: "npx github:yurukusa/cc-safe-setup --protect .env" }},
     { text: "Catch code errors", next: {
       q: "What kind of errors?",
       choices: [
-        { text: "Syntax errors after edits", result: { name: "syntax-check", desc: "Validates Python, Shell, JSON, YAML, JS after every edit.", install: "npx cc-safe-setup" }},
-        { text: "Edit didn't apply correctly", result: { name: "edit-verify", desc: "Checks file exists, isn't empty, new_string present, no conflict markers.", install: "npx cc-safe-setup --install-example edit-verify" }},
-        { text: "Commit without running tests", result: { name: "test-before-commit", desc: "Blocks git commit if no recent test results.", install: "npx cc-safe-setup --install-example test-before-commit" }}
+        { text: "Syntax errors after edits", result: { name: "syntax-check", desc: "Validates Python, Shell, JSON, YAML, JS after every edit.", install: "npx github:yurukusa/cc-safe-setup" }},
+        { text: "Edit didn't apply correctly", result: { name: "edit-verify", desc: "Checks file exists, isn't empty, new_string present, no conflict markers.", install: "npx github:yurukusa/cc-safe-setup --install-example edit-verify" }},
+        { text: "Commit without running tests", result: { name: "test-before-commit", desc: "Blocks git commit if no recent test results.", install: "npx github:yurukusa/cc-safe-setup --install-example test-before-commit" }}
       ]
     }},
     { text: "Monitor session health", next: {
       q: "What do you want to monitor?",
       choices: [
-        { text: "Context window running out", result: { name: "context-monitor", desc: "Graduated warnings at 40%, 25%, 20%, 15% remaining.", install: "npx cc-safe-setup" }},
-        { text: "Session state for compaction", result: { name: "session-state-saver", desc: "Auto-saves state every 50 tool calls. Survives compaction.", install: "npx cc-safe-setup --install-example session-state-saver" }},
-        { text: "Too many subagents", result: { name: "subagent-budget-guard", desc: "Limits concurrent subagents to prevent context overflow.", install: "npx cc-safe-setup --install-example subagent-budget-guard" }}
+        { text: "Context window running out", result: { name: "context-monitor", desc: "Graduated warnings at 40%, 25%, 20%, 15% remaining.", install: "npx github:yurukusa/cc-safe-setup" }},
+        { text: "Session state for compaction", result: { name: "session-state-saver", desc: "Auto-saves state every 50 tool calls. Survives compaction.", install: "npx github:yurukusa/cc-safe-setup --install-example session-state-saver" }},
+        { text: "Too many subagents", result: { name: "subagent-budget-guard", desc: "Limits concurrent subagents to prevent context overflow.", install: "npx github:yurukusa/cc-safe-setup --install-example subagent-budget-guard" }}
       ]
     }},
-    { text: "Enforce CLAUDE.md rules", result: { name: "claudemd-enforcer", desc: "Re-injects CLAUDE.md rules as warnings after compaction. Rules survive context loss.", install: "npx cc-safe-setup --install-example claudemd-enforcer" }},
+    { text: "Enforce CLAUDE.md rules", result: { name: "claudemd-enforcer", desc: "Re-injects CLAUDE.md rules as warnings after compaction. Rules survive context loss.", install: "npx github:yurukusa/cc-safe-setup --install-example claudemd-enforcer" }},
     { text: "Debug my hooks", next: {
       q: "What's the problem?",
       choices: [
-        { text: "Hooks aren't firing", result: { name: "--doctor", desc: "13-point diagnostic: jq, settings, paths, permissions, syntax.", install: "npx cc-safe-setup --doctor" }},
-        { text: "Don't know what hooks do", result: { name: "--simulate", desc: "Preview how hooks react to any command.", install: "npx cc-safe-setup --simulate \"rm -rf /\"" }},
-        { text: "Broken hook locked me out", result: { name: "--validate / --safe-mode", desc: "Validate finds and disables broken hooks. Safe-mode disables all.", install: "npx cc-safe-setup --validate" }},
-        { text: "Want to check all hooks", result: { name: "--validate", desc: "Syntax check + exit code test on all hooks. Auto-disables dangerous ones.", install: "npx cc-safe-setup --validate" }}
+        { text: "Hooks aren't firing", result: { name: "--doctor", desc: "13-point diagnostic: jq, settings, paths, permissions, syntax.", install: "npx github:yurukusa/cc-safe-setup --doctor" }},
+        { text: "Don't know what hooks do", result: { name: "--simulate", desc: "Preview how hooks react to any command.", install: "npx github:yurukusa/cc-safe-setup --simulate \"rm -rf /\"" }},
+        { text: "Broken hook locked me out", result: { name: "--validate / --safe-mode", desc: "Validate finds and disables broken hooks. Safe-mode disables all.", install: "npx github:yurukusa/cc-safe-setup --validate" }},
+        { text: "Want to check all hooks", result: { name: "--validate", desc: "Syntax check + exit code test on all hooks. Auto-disables dangerous ones.", install: "npx github:yurukusa/cc-safe-setup --validate" }}
       ]
     }}
   ]

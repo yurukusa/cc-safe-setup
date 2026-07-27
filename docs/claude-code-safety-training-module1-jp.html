@@ -95,7 +95,7 @@ a { color:var(--blue); }
 <div class="step">
 <h3>手順 1. hook の一式を入れる</h3>
 <p>cc-safe-setup（無料・MIT）が、削除・データ破壊・機密の防御の hook を1コマンドで入れます。</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>これで <code>rm-safety-net</code> / <code>prisma-migrate-guard</code> / <code>git-history-rewrite-guard</code> を含む hook が <code>~/.claude/settings.json</code> に登録されます。仕組みを理解するために、登録の形だけ示します（<code>PreToolUse</code> の Bash の hook）。</p>
 <pre><code>{
   "hooks": {
@@ -150,7 +150,7 @@ echo '{"tool_input":{"command":"rm -rf node_modules"}}' \
 <h2>4. 自社への適用</h2>
 <ul>
 <li>上の hook を、<strong>全員</strong>の環境に入れる（1人の無防備が組織のリスクになる）。</li>
-<li>プロジェクトで共有する場合は <code>npx cc-safe-setup --team</code> で <code>.claude/hooks/</code> に入れて git で配布する。</li>
+<li>プロジェクトで共有する場合は <code>npx github:yurukusa/cc-safe-setup --team</code> で <code>.claude/hooks/</code> に入れて git で配布する。</li>
 <li>本番のデータベースに、バックアップと時点の復旧（PITR）があるかを確認する（無いと <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a> のように戻せない）。これはモジュール 6（事故対応と復旧）で扱います。</li>
 </ul>
 

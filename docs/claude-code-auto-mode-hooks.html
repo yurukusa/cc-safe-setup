@@ -21,7 +21,7 @@
 <p>Auto Mode removes the confirmation step. Every tool call executes immediately. Without hooks, there is <strong>nothing</strong> between Claude and <code>rm -rf /</code>.</p>
 
 <h2>Minimum Safety Setup</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>This installs 8 hooks that catch the most dangerous operations:</p>
 
 <table style="width:100%;border-collapse:collapse;margin:1rem 0">
@@ -37,7 +37,7 @@
 </table>
 
 <h2>Maximum Safety for Auto Mode</h2>
-<pre><code>npx cc-safe-setup --shield</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --shield</code></pre>
 <p>Adds project-specific protections detected by scanning your codebase (database guards, Docker guards, framework-specific hooks).</p>
 
 <h2>Why CLAUDE.md Isn't Enough</h2>
@@ -45,7 +45,7 @@
 
 <div class="cta">
 <h2>Install Before Enabling Auto Mode</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">892 example hooks. 213 test files. Works with Auto Mode.</p>
 </div>
 

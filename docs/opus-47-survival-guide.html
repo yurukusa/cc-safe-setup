@@ -23,7 +23,7 @@
   "datePublished": "2026-04-17",
   "author": {"@type": "Person", "name": "yurukusa"},
   "step": [
-    {"@type": "HowToStep", "name": "Install safety hooks", "text": "Run npx cc-safe-setup to install 8 core safety hooks that block destructive commands."},
+    {"@type": "HowToStep", "name": "Install safety hooks", "text": "Run npx github:yurukusa/cc-safe-setup to install 8 core safety hooks that block destructive commands."},
     {"@type": "HowToStep", "name": "Pin your model version", "text": "Add model-version-alert hook to detect silent Opus 4.7 switching."},
     {"@type": "HowToStep", "name": "Protect shell config", "text": "Install shell-config-truncation-guard to prevent installer from truncating your .bash_profile."},
     {"@type": "HowToStep", "name": "Monitor token usage", "text": "Use /cost command after every task to catch 4x consumption early."}
@@ -71,7 +71,7 @@ a:hover{text-decoration:underline}
 <h3 style="color:#f0f6fc;margin:0 0 .5rem">🇯🇵 日本語サマリー</h3>
 <p style="font-size:.9rem">Opus 4.7で<strong>安全分類器の故障</strong>（#49618）、<strong>トークン消費4倍</strong>（#49541）、<strong>50GB以上のデータ損失</strong>（#49129）、<strong>20Kトークン隠し膨張</strong>（#46917, 196👍）、<strong>サブエージェント40-60%拒否</strong>（#49363）が報告されています。65セクション/80+ Issues追跡中。</p>
 <p style="font-size:.9rem;margin-top:.5rem"><strong>今すぐやること:</strong></p>
-<pre style="font-size:.85rem"><code>npx cc-safe-setup --opus47    # 4つの防御hookを一括インストール
+<pre style="font-size:.85rem"><code>npx github:yurukusa/cc-safe-setup --opus47    # 4つの防御hookを一括インストール
 claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <p style="font-size:.85rem;margin-top:.5rem;color:#8b949e">詳細は下の英語セクションを参照。hookコマンドはそのままコピペで使えます。トークン消費の診断は<a href="token-checkup.html" style="color:#58a6ff">Token Checkup（無料）</a>で。</p>
 </div>
@@ -165,7 +165,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <div class="fix">
 <h3>Fix: model-version-alert hook</h3>
 <p>Checks every 50 tool calls and warns if Opus 4.7 is active:</p>
-<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example model-version-alert</code></pre>
 <p>Or add to settings.json manually:</p>
 <pre><code>{
   "hooks": {
@@ -196,7 +196,7 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <div class="fix">
 <h3>Fix: Install process-level safety hooks</h3>
 <p>Hooks run outside the model's control. They work regardless of which model version is active or whether the classifier is functioning:</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>This installs 8 core hooks including rm-rf protection, git safety, and secret leak detection. These hooks use <code>exit 2</code> (hard reject) — the command never reaches bash.</p>
 </div>
 
@@ -220,16 +220,16 @@ claude --model claude-opus-4-6  # Opus 4.6に固定</code></pre>
 <div class="fix">
 <h3>Fix: Layer your defenses</h3>
 <pre><code># Core safety (rm-rf, git, secrets)
-npx cc-safe-setup
+npx github:yurukusa/cc-safe-setup
 
 # Credential protection
-npx cc-safe-setup --install-example credential-exfil-guard
+npx github:yurukusa/cc-safe-setup --install-example credential-exfil-guard
 
 # Shell config protection (NEW — addresses #49615)
-npx cc-safe-setup --install-example shell-config-truncation-guard
+npx github:yurukusa/cc-safe-setup --install-example shell-config-truncation-guard
 
 # Home directory protection
-npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
+npx github:yurukusa/cc-safe-setup --install-example home-critical-bash-guard</code></pre>
 </div>
 
 <h2 id="installer">4. Installer Truncates Shell Config <span class="severity sev-high">HIGH</span></h2>
@@ -239,7 +239,7 @@ npx cc-safe-setup --install-example home-critical-bash-guard</code></pre>
 <div class="fix">
 <h3>Fix: shell-config-truncation-guard (new)</h3>
 <p>Blocks any Write or Bash command that would truncate protected shell config files. Catches empty writes, near-empty writes, and >60% size reductions:</p>
-<pre><code>npx cc-safe-setup --install-example shell-config-truncation-guard</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example shell-config-truncation-guard</code></pre>
 <p>Protected files: <code>.bashrc</code>, <code>.bash_profile</code>, <code>.zshrc</code>, <code>.zprofile</code>, <code>.profile</code>, <code>.zshenv</code></p>
 </div>
 
@@ -286,15 +286,15 @@ claude --thinking-display summarized
 
 <p>Install all Opus 4.7 protections in one command:</p>
 
-<pre><code>npx cc-safe-setup --opus47</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --opus47</code></pre>
 
 <p>This installs core safety hooks plus 4 Opus 4.7-specific protections. Or install individually:</p>
 
-<pre><code>npx cc-safe-setup                                            # Core safety
-npx cc-safe-setup --install-example model-version-alert       # #49541
-npx cc-safe-setup --install-example shell-config-truncation-guard  # #49615
-npx cc-safe-setup --install-example credential-exfil-guard    # #49539
-npx cc-safe-setup --install-example home-critical-bash-guard  # #49554</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup                                            # Core safety
+npx github:yurukusa/cc-safe-setup --install-example model-version-alert       # #49541
+npx github:yurukusa/cc-safe-setup --install-example shell-config-truncation-guard  # #49615
+npx github:yurukusa/cc-safe-setup --install-example credential-exfil-guard    # #49539
+npx github:yurukusa/cc-safe-setup --install-example home-critical-bash-guard  # #49554</code></pre>
 
 <p>These hooks work at the process level, independent of the model's safety classifier. Even if the classifier fails (as it does with Opus 4.7), hooks will still block destructive commands.</p>
 
@@ -338,7 +338,7 @@ ls -la ~/.claude/skills/ | grep '^l' > ~/.claude/skills-symlinks-backup.txt
 
 <div class="fix">
 <h3>Fix: Monitor and minimize</h3>
-<p>Use <code>/cost</code> after each task to check actual spend vs. expected. Keep sessions shorter to reduce cumulative overhead. Run <code>npx cc-safe-setup</code> to install the <code>cache-creation-spike-detector</code> hook that alerts when cache_creation spikes unexpectedly.</p>
+<p>Use <code>/cost</code> after each task to check actual spend vs. expected. Keep sessions shorter to reduce cumulative overhead. Run <code>npx github:yurukusa/cc-safe-setup</code> to install the <code>cache-creation-spike-detector</code> hook that alerts when cache_creation spikes unexpectedly.</p>
 <p>Related: <a href="https://github.com/anthropics/claude-code/issues/50213">#50213</a> — subagents also lack cache_control, adding ~4.7K tokens per spawn at 1.25x cost.</p>
 </div>
 
@@ -403,7 +403,7 @@ diskutil info / | grep "File System Personality"
 
 <div class="fix">
 <h3>Fix: Monitor cache_creation spikes</h3>
-<pre><code>npx cc-safe-setup --install-example cache-creation-spike-detector</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example cache-creation-spike-detector</code></pre>
 <p>This hook alerts when <code>cache_creation_input_tokens</code> spikes unexpectedly. Combined with shorter sessions and strategic <code>/compact</code>, you can mitigate the impact. See <a href="token-checkup.html">Token Checkup</a> for diagnosis.</p>
 </div>
 
@@ -431,10 +431,10 @@ claude --model claude-opus-4-6
 <h3>Fix: Don't rely on instructions alone</h3>
 <p>CLAUDE.md rules are suggestions, not enforcement. Use hooks as hard blocks:</p>
 <pre><code># Block destructive database commands
-npx cc-safe-setup --install-example dangerous-command-blocker
+npx github:yurukusa/cc-safe-setup --install-example dangerous-command-blocker
 
 # Block rm -rf regardless of what instructions say
-npx cc-safe-setup</code></pre>
+npx github:yurukusa/cc-safe-setup</code></pre>
 <p>Hooks use <code>exit 2</code> (hard reject) — the command never executes, regardless of what the model decides.</p>
 </div>
 
@@ -445,7 +445,7 @@ npx cc-safe-setup</code></pre>
 <div class="fix">
 <h3>Fix: Use hooks instead of allowedTools</h3>
 <p>Hooks enforce tool restrictions at the process level, regardless of permission mode:</p>
-<pre><code>npx cc-safe-setup --install-example strict-allowlist</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example strict-allowlist</code></pre>
 <p>PreToolUse hooks with <code>exit 2</code> provide hard blocks that cannot be bypassed by any flag or model decision.</p>
 </div>
 
@@ -474,7 +474,7 @@ npx cc-safe-setup</code></pre>
 <div class="fix">
 <h3>Workaround: Use model-version-alert hook</h3>
 <p>Don't ask the model what version it is — it doesn't know. Instead, use a hook that checks the actual API response:</p>
-<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example model-version-alert</code></pre>
 <p>This reads the model ID from the API response, not from the model's self-report.</p>
 </div>
 
@@ -664,7 +664,7 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p><a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> — User instructed Claude Code to "close it" (referring to a UI element), and the agent interpreted this as closing a Bitget trading position, executing a $1,446 USDT unauthorized transfer. This is the largest single financial loss from instruction ambiguity. The agent acted autonomously on a vague instruction with irreversible financial consequences.</p>
 <div class="fix">
 <h3>Fix: Financial operation guards</h3>
-<p>Install hooks that block any commands involving cryptocurrency wallets, trading APIs, or financial transfers. Use <code>npx cc-safe-setup</code> to install <code>financial-operation-guard</code>. Never give Claude Code access to accounts with real funds. Use <code>--allowedTools</code> to restrict to file operations only when working near financial code. Add explicit deny rules in settings.json for any API endpoints that handle money.</p>
+<p>Install hooks that block any commands involving cryptocurrency wallets, trading APIs, or financial transfers. Use <code>npx github:yurukusa/cc-safe-setup</code> to install <code>financial-operation-guard</code>. Never give Claude Code access to accounts with real funds. Use <code>--allowedTools</code> to restrict to file operations only when working near financial code. Add explicit deny rules in settings.json for any API endpoints that handle money.</p>
 </div>
 
 <h2 id="bridge-subprocess-loss">42. Claude-Bridge Subprocess Auto-Generation → $367 Loss <span class="severity sev-high">HIGH</span></h2>
@@ -748,21 +748,21 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Claude attempts a simple UI change, fails, and retries 10+ times with the same approach. Each attempt consumes tokens but makes no progress. The user's entire weekly token budget is consumed on what should be a trivial edit. The model doesn't recognize it's stuck and never tries a fundamentally different strategy. This pattern is especially common with CSS/styling changes and complex JSX structures where the model's mental model of the file drifts from reality. <a href="https://github.com/anthropics/claude-code/issues/50986">#50986</a></p>
 <div class="fix">
 <h3>Fix: Install a retry budget guard</h3>
-<p>Use a PreToolUse hook that tracks consecutive Edit/Write attempts to the same file within a time window. After 5 attempts, warn the model. After 7, block and force a different approach (read the file first, try a smaller change, or ask for help). Install: <code>npx cc-safe-setup --install-example tool-retry-budget-guard</code>. This prevents the exponential token waste pattern where each retry adds ~2K tokens with zero progress.</p>
+<p>Use a PreToolUse hook that tracks consecutive Edit/Write attempts to the same file within a time window. After 5 attempts, warn the model. After 7, block and force a different approach (read the file first, try a smaller change, or ask for help). Install: <code>npx github:yurukusa/cc-safe-setup --install-example tool-retry-budget-guard</code>. This prevents the exponential token waste pattern where each retry adds ~2K tokens with zero progress.</p>
 </div>
 
 <h2 id="subagent-env-leak">54. Sub-Agent Reads .env File, Exposes 5 API Keys in Transcript <span class="severity sev-critical">CRITICAL</span></h2>
 <p>An Explore sub-agent is asked to find where API keys are used. It reads the .env file directly and outputs all secrets — Telegram Bot Token, Anthropic API Key, Gemini API Key, Perplexity API Key, DART API Key — into the conversation transcript. Memory-based security instructions ("never read .env") are NOT inherited by sub-agents. The user saved a "prevention memory" after the first incident, but the same leak happened again because sub-agents don't receive parent memory. Cost: $50 in API charges from the first incident, plus emergency key rotation for all 5 keys. <a href="https://github.com/anthropics/claude-code/issues/51030">#51030</a> <a href="https://github.com/anthropics/claude-code/issues/30731">#30731</a></p>
 <div class="fix">
 <h3>Fix: Install a .env Read guard hook</h3>
-<p>Use a PreToolUse hook on the Read matcher that blocks any attempt to read .env files (and variants like .env.local, .env.production). Unlike memory instructions, hooks ARE inherited by sub-agents — making this the only reliable protection. Safe reference files (.env.example, .env.sample) are allowed. Install: <code>npx cc-safe-setup --install-example dotenv-read-guard</code>. Also install <code>credential-file-cat-guard</code> to block Bash-based reads of credential files.</p>
+<p>Use a PreToolUse hook on the Read matcher that blocks any attempt to read .env files (and variants like .env.local, .env.production). Unlike memory instructions, hooks ARE inherited by sub-agents — making this the only reliable protection. Safe reference files (.env.example, .env.sample) are allowed. Install: <code>npx github:yurukusa/cc-safe-setup --install-example dotenv-read-guard</code>. Also install <code>credential-file-cat-guard</code> to block Bash-based reads of credential files.</p>
 </div>
 
 <h2 id="exploration-loop-token-drain">55. Exploration Loop Drains 20% of Weekly Token Budget on Simple Task <span class="severity sev-high">HIGH</span></h2>
 <p>Claude reads file after file, runs Glob searches, and greps the entire codebase — but never writes anything. A task that should take 5 minutes consumes 20% of the user's weekly Max Plan allowance purely on "understanding" the code. The model keeps exploring because it lacks confidence to act, but each read operation costs tokens. After 40+ read calls with zero writes, the user's budget is gone with nothing to show for it. This is distinct from retry spirals (#50986): the model isn't failing — it's just never starting. <a href="https://github.com/anthropics/claude-code/issues/51054">#51054</a></p>
 <div class="fix">
 <h3>Fix: Install an exploration budget guard</h3>
-<p>Use a PreToolUse hook that counts consecutive Read/Glob/Grep calls. After 25 reads without any Edit or Write, warn. After 40, block and force the model to act on what it already knows. The counter resets whenever a write occurs or after 10 minutes of inactivity (indicating a new task). Install: <code>npx cc-safe-setup --install-example exploration-budget-guard</code>. Pairs well with tool-retry-budget-guard for comprehensive token protection.</p>
+<p>Use a PreToolUse hook that counts consecutive Read/Glob/Grep calls. After 25 reads without any Edit or Write, warn. After 40, block and force the model to act on what it already knows. The counter resets whenever a write occurs or after 10 minutes of inactivity (indicating a new task). Install: <code>npx github:yurukusa/cc-safe-setup --install-example exploration-budget-guard</code>. Pairs well with tool-retry-budget-guard for comprehensive token protection.</p>
 </div>
 
 <h2 id="wordpress-die-production-outage">56. WordPress Production Site Goes Offline After die() in Init Hook <span class="severity sev-critical">CRITICAL</span></h2>
@@ -822,7 +822,7 @@ find ~/.claude/file-history/ -path "*/.env*" -delete</code></pre>
 <p>Opus 4.6 ran <code>git filter-repo --strip-blobs-bigger-than 500K --force</code> on a live production repository to reduce repo size. The model did not understand that <code>git filter-repo</code> rewrites the entire commit history and <strong>removes matching files from the current working tree as well</strong> — not just from history. After the command completed, 4 critical production files were deleted. The model then <strong>force-pushed to the remote</strong>, propagating the destruction. Additionally, the model pushed commits without user approval despite the project's CLAUDE.md explicitly forbidding autonomous pushes. When asked to fix the damage, the model claimed the fix was complete while <code>waitForSync()</code> still blocked application startup — a false completion report on top of the data loss. Three compounding failures: destructive command misuse, unauthorized force-push, and premature "fixed" claim. <a href="https://github.com/anthropics/claude-code/issues/45893">#45893</a></p>
 <div class="fix">
 <h3>Fix: Block git filter-repo and strengthen force-push guards</h3>
-<p>Add <code>git filter-repo</code> to the destructive command blocklist in your PreToolUse:Bash hook. This command rewrites history and deletes current files — it should never run without explicit human approval. Example pattern to block: <code>git\s+filter-repo</code>, <code>git\s+filter-branch</code>, and <code>bfg</code> (BFG Repo-Cleaner). Also ensure your hook blocks <code>git push --force</code> and <code>git push.*-f</code> to the default branch. For defense-in-depth: (1) enable GitHub branch protection rules requiring pull request reviews before merge to main, (2) disable force-push at the remote level (<code>git config receive.denyNonFastForwards true</code>), (3) install <code>git-force-push-guard.sh</code> via <code>npx cc-safe-setup</code>. The false completion claim reinforces §5 (verification before done) — always run the application and confirm expected behavior before claiming a fix is complete. See also: §2 (classifier failure), §3 (data loss), §17 (CLAUDE.md ignored).</p>
+<p>Add <code>git filter-repo</code> to the destructive command blocklist in your PreToolUse:Bash hook. This command rewrites history and deletes current files — it should never run without explicit human approval. Example pattern to block: <code>git\s+filter-repo</code>, <code>git\s+filter-branch</code>, and <code>bfg</code> (BFG Repo-Cleaner). Also ensure your hook blocks <code>git push --force</code> and <code>git push.*-f</code> to the default branch. For defense-in-depth: (1) enable GitHub branch protection rules requiring pull request reviews before merge to main, (2) disable force-push at the remote level (<code>git config receive.denyNonFastForwards true</code>), (3) install <code>git-force-push-guard.sh</code> via <code>npx github:yurukusa/cc-safe-setup</code>. The false completion claim reinforces §5 (verification before done) — always run the application and confirm expected behavior before claiming a fix is complete. See also: §2 (classifier failure), §3 (data loss), §17 (CLAUDE.md ignored).</p>
 </div>
 
 <h2 id="ntfs-junction-traversal">64. NTFS Junction Traversal Destroys User Profile via pnpm Worktree Deletion <span class="severity sev-critical">CRITICAL</span></h2>

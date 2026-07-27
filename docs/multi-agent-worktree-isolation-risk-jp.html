@@ -139,7 +139,7 @@ btn.addEventListener('click', () => {
       <p>あなたの点数(${score}/100)は、隔離が黙って無効になる事故が最も起きやすい構成です。worktree 隔離で並列に走らせ、起動位置を確認せず、境界を止める仕組みも無い、という組み合わせが揃っています。コミットが別ブランチへ静かに着地しても、その場では気づけません。</p>
       <h3>いますぐ効く一手</h3>
       <ul>
-        <li><strong>worktree の境界を実行前に止める。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a>(<code>PreToolUse</code>・文字列比較だけの決定論)を入れる。いまの作業ディレクトリからリポジトリと worktree のルートを導き、書き込み先がリポジトリの下かつ worktree の外なら実行を止めます。<code>npx cc-safe-setup</code> で導入できます。</li>
+        <li><strong>worktree の境界を実行前に止める。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/worktree-escape-write-guard.sh"><code>worktree-escape-write-guard.sh</code></a>(<code>PreToolUse</code>・文字列比較だけの決定論)を入れる。いまの作業ディレクトリからリポジトリと worktree のルートを導き、書き込み先がリポジトリの下かつ worktree の外なら実行を止めます。<code>npx github:yurukusa/cc-safe-setup</code> で導入できます。</li>
         <li><strong>起動位置を必ず確認する。</strong> サブエージェントを起動する前に、親の <code>pwd</code> が <code>.claude/worktrees/</code> の配下に残っていないかを見る。残っていたらリポジトリのルートへ戻してから起動する。</li>
       </ul>
       <h3>もっと深く知る</h3>

@@ -92,14 +92,14 @@ a:hover{text-decoration:underline}
 <h2>Method 4: Model Version Alert Hook</h2>
 <div class="method">
 <h3>Detect silent model switching</h3>
-<pre><code>npx cc-safe-setup --install-example model-version-alert</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example model-version-alert</code></pre>
 <p>Even after pinning, Claude Code can silently switch models mid-session. This hook checks every 50 tool calls and warns if Opus 4.7 is active. <span class="issue-ref"><a href="https://github.com/anthropics/claude-code/issues/49541">#49541</a></span></p>
 </div>
 
 <div class="warning">
 <h3>Important: Pinning alone isn't enough</h3>
 <p>The safety classifier, data loss, and credential issues exist independent of model version. Install safety hooks for baseline protection:</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>This adds 8 core hooks (rm-rf blocker, git protection, secret leak detection) in ~10 seconds.</p>
 </div>
 

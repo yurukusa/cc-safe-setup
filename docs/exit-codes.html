@@ -83,7 +83,7 @@ echo '{}' | bash ~/.claude/hooks/my-hook.sh
 echo $?   # Must be 0, not 2
 
 # Or use the automated validator:
-npx cc-safe-setup --validate</code></pre>
+npx github:yurukusa/cc-safe-setup --validate</code></pre>
 
 <div class="tip">
 <strong>Best practice:</strong> Never use matcher <code>""</code> during development. Use <code>"Bash"</code> to limit blast radius if something goes wrong.
@@ -97,8 +97,8 @@ npx cc-safe-setup --validate</code></pre>
 <tr><td>Hook blocks (exit 2, intentional)</td><td>Working as designed. The hook prevented a dangerous operation.</td></tr>
 <tr><td>Hook blocks (exit 2, syntax error)</td><td>From <strong>outside</strong> Claude Code: <code>rm ~/.claude/hooks/broken-hook.sh</code></td></tr>
 <tr><td>All tools blocked (matcher "")</td><td>From outside: <code>rm ~/.claude/hooks/broken-hook.sh</code> then restart Claude Code</td></tr>
-<tr><td>Can't identify the broken hook</td><td><code>npx cc-safe-setup --validate</code> (auto-detects and disables)</td></tr>
-<tr><td>Emergency: disable everything</td><td><code>npx cc-safe-setup --safe-mode</code></td></tr>
+<tr><td>Can't identify the broken hook</td><td><code>npx github:yurukusa/cc-safe-setup --validate</code> (auto-detects and disables)</td></tr>
+<tr><td>Emergency: disable everything</td><td><code>npx github:yurukusa/cc-safe-setup --safe-mode</code></td></tr>
 </table>
 
 <h2>Hook Template (Safe)</h2>

@@ -11,7 +11,7 @@
 <meta property="og:description" content="暴走するループが利用枠を焼き尽くすのを止める。頻度の制限とエラーの検知の hook。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の課金の暴走を防ぐ","description":"安全 hook を入れて Claude Code の暴走するループによる利用枠の浪費を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup を実行し、呼び出しの頻度の制限・連続エラーの遮断・使用量の追跡の hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の課金の暴走を防ぐ","description":"安全 hook を入れて Claude Code の暴走するループによる利用枠の浪費を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx github:yurukusa/cc-safe-setup を実行し、呼び出しの頻度の制限・連続エラーの遮断・使用量の追跡の hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -122,10 +122,10 @@ exit 0</code></pre>
 
 <div class="cta">
 <p>1コマンドで、費用の保護の hook を含む734の例の hook が入ります:</p>
-<p><code>npx cc-safe-setup --install-example tool-call-rate-limiter</code></p>
-<p><code>npx cc-safe-setup --install-example consecutive-error-breaker</code></p>
-<p><code>npx cc-safe-setup --install-example daily-usage-tracker</code></p>
-<p style="margin-top:1rem">あるいは全部入れる: <code>npx cc-safe-setup --shield</code></p>
+<p><code>npx github:yurukusa/cc-safe-setup --install-example tool-call-rate-limiter</code></p>
+<p><code>npx github:yurukusa/cc-safe-setup --install-example consecutive-error-breaker</code></p>
+<p><code>npx github:yurukusa/cc-safe-setup --install-example daily-usage-tracker</code></p>
+<p style="margin-top:1rem">あるいは全部入れる: <code>npx github:yurukusa/cc-safe-setup --shield</code></p>
 </div>
 
 <h2>関連する hook</h2>

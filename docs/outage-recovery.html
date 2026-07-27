@@ -15,8 +15,8 @@
   "name": "Protect Claude Code sessions from outages",
   "description": "3 hooks that automatically save your work before Claude Code disconnects or compacts context",
   "step": [
-    {"@type": "HowToStep", "name": "Install pre-compact checkpoint", "text": "npx cc-safe-setup --install-example pre-compact-checkpoint"},
-    {"@type": "HowToStep", "name": "Add session backup on start", "text": "npx cc-safe-setup --install-example session-backup-on-start"},
+    {"@type": "HowToStep", "name": "Install pre-compact checkpoint", "text": "npx github:yurukusa/cc-safe-setup --install-example pre-compact-checkpoint"},
+    {"@type": "HowToStep", "name": "Add session backup on start", "text": "npx github:yurukusa/cc-safe-setup --install-example session-backup-on-start"},
     {"@type": "HowToStep", "name": "Enable periodic auto-commit", "text": "Add PostToolUse hook that commits every 50 tool calls"}
   ]
 }
@@ -51,7 +51,7 @@ footer a { color: #2563eb; text-decoration: none; }
 <h2>Hook 1: Pre-compact checkpoint</h2>
 <p>Auto-saves all uncommitted changes before <code>/compact</code> runs. During the April 7 outage, this hook had saved 3 checkpoints before the session died.</p>
 
-<div class="install-cmd">npx cc-safe-setup --install-example pre-compact-checkpoint</div>
+<div class="install-cmd">npx github:yurukusa/cc-safe-setup --install-example pre-compact-checkpoint</div>
 
 <pre><code>#!/bin/bash
 # PreCompact hook — auto-commit before context compression
@@ -66,7 +66,7 @@ echo "Context compressed. Wait for instructions before resuming."</code></pre>
 <h2>Hook 2: Session state backup</h2>
 <p>Logs the HEAD commit at session start. When a session dies, you know exactly where to resume.</p>
 
-<div class="install-cmd">npx cc-safe-setup --install-example session-backup-on-start</div>
+<div class="install-cmd">npx github:yurukusa/cc-safe-setup --install-example session-backup-on-start</div>
 
 <pre><code>#!/bin/bash
 # SessionStart hook — log recovery point
@@ -94,7 +94,7 @@ if [ $((count % 50)) -eq 0 ]; then
 fi</code></pre>
 
 <h2>Quick setup</h2>
-<div class="install-cmd">npx cc-safe-setup</div>
+<div class="install-cmd">npx github:yurukusa/cc-safe-setup</div>
 <p>The interactive wizard installs all safety hooks based on your risk profile. 892 example hooks available.</p>
 
 <div class="cta">

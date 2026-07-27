@@ -11,7 +11,7 @@
 <meta property="og:description" content="DROP DATABASE・prisma migrate reset を Claude Code が警告なしに実行する前に止める。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code に本番データベースを消させない","description":"安全 hook を入れて Claude Code の破壊的なデータベースのコマンドを実行の前に止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup --install-example block-database-wipe を実行し、DROP DATABASE 等を止める hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code に本番データベースを消させない","description":"安全 hook を入れて Claude Code の破壊的なデータベースのコマンドを実行の前に止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx github:yurukusa/cc-safe-setup --install-example block-database-wipe を実行し、DROP DATABASE 等を止める hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -65,17 +65,17 @@ nav a{margin-right:1rem}
 <p>「本番のデータベースを消すな」という CLAUDE.md のルールは、プロンプトの文脈の一部にすぎません。文脈が一杯になればルールは押し出され、Claude がそのコマンドを「必要だ」と判断すれば無視されます。hook はプロセスの層で、モデルの制御の外で動きます。終了コード2で終わる PreToolUse の hook は、そのコマンドが実行される前に止めます——モデルはこれを迂回できません。</p>
 
 <h2>入れる</h2>
-<pre><code>npx cc-safe-setup --install-example block-database-wipe</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example block-database-wipe</code></pre>
 
 <p>あるいは安全の設定を丸ごと入れる:</p>
-<pre><code>npx cc-safe-setup --shield</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --shield</code></pre>
 
 <h2>Laravel の場合</h2>
 <p>Claude が <code>DB_DATABASE=production_db</code> の入った <code>.env</code> を読み込んだ状態で <code>php artisan migrate:fresh</code> を走らせた場合、この hook が止めます。ただし根本の原因は <a href="prevent-env-file-commit.html">.env がシェルに読み込まれること(English)</a> なので、両方を直してください。</p>
 
 <div class="cta">
 <h2>データベースを守る</h2>
-<pre><code>npx cc-safe-setup --install-example block-database-wipe</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example block-database-wipe</code></pre>
 <p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">892の hook · 9,200以上のテスト</p>
 </div>
 

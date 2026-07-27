@@ -75,20 +75,20 @@ a { color:var(--blue); }
 <div class="step">
 <h3>手順 1. baseline をリポジトリで共有する</h3>
 <p>プロジェクトの単位で hook を共有するには <code>--team</code> を使います。</p>
-<pre><code>npx cc-safe-setup --team</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --team</code></pre>
 <p>これで hook がリポジトリの <code>.claude/hooks/</code> に入ります。これを git にコミットすれば、リポジトリを clone した全員に baseline が配布され、各自の手作業の付け忘れがなくなります。</p>
 </div>
 
 <div class="step">
 <h3>手順 2. 自分の設定の安全のスコアを測る</h3>
 <p>監査は、設定の安全のスコア（0〜100）と、足りない防御の一覧を出します。</p>
-<pre><code>npx cc-safe-setup --audit</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --audit</code></pre>
 <p>スコア、評価（A/B/C/F）、検出した risk の数が表示されます。<code>--audit --fix</code> で自動で直せるものは直せます。スコアは設定の状態で変わるため、<strong>「何点以上を組織の必須にするか」を baseline として決めます</strong>（既定の CI の閾値は70点）。</p>
 </div>
 
 <div class="step">
 <h3>手順 3. CI のゲートを置く（閾値を下回ったら止める）</h3>
-<p>監査を CI に組み込み、スコアが閾値を下回ったら CI を落とします。次のワークフローを <code>.github/workflows/</code> に置きます（<code>npx cc-safe-setup --generate-ci</code> でも生成できます）。</p>
+<p>監査を CI に組み込み、スコアが閾値を下回ったら CI を落とします。次のワークフローを <code>.github/workflows/</code> に置きます（<code>npx github:yurukusa/cc-safe-setup --generate-ci</code> でも生成できます）。</p>
 <pre><code>name: Claude Code Safety
 on:
   pull_request:
@@ -104,7 +104,7 @@ jobs:
           node-version: 20
       - name: Run safety audit
         run: |
-          npx cc-safe-setup --audit --json > /tmp/audit.json 2>&1 || true
+          npx github:yurukusa/cc-safe-setup --audit --json > /tmp/audit.json 2>&1 || true
           SCORE=$(jq -r '.score // 0' /tmp/audit.json)
           echo "Safety score: $SCORE/100"
           if [ "$SCORE" -lt 70 ]; then

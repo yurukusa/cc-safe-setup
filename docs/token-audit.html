@@ -223,11 +223,11 @@ function analyze() {
 
       if (totalHooks === 0) {
         score -= 25;
-        recs.push({type:'bad', text:'No hooks configured. Your Claude Code runs without any safety guardrails.', fix:'Run: npx cc-safe-setup'});
-        hooks.push({name:'cc-safe-setup core', cmd:'npx cc-safe-setup', reason:'Install 8 essential safety hooks'});
+        recs.push({type:'bad', text:'No hooks configured. Your Claude Code runs without any safety guardrails.', fix:'Run: npx github:yurukusa/cc-safe-setup'});
+        hooks.push({name:'cc-safe-setup core', cmd:'npx github:yurukusa/cc-safe-setup', reason:'Install 8 essential safety hooks'});
       } else if (totalHooks < 3) {
         score -= 10;
-        recs.push({type:'warn', text:'Only ' + totalHooks + ' hook(s) configured. Recommended: 5-8 core hooks minimum.', fix:'Run: npx cc-safe-setup --install-example model-version-alert'});
+        recs.push({type:'warn', text:'Only ' + totalHooks + ' hook(s) configured. Recommended: 5-8 core hooks minimum.', fix:'Run: npx github:yurukusa/cc-safe-setup --install-example model-version-alert'});
       }
 
       const perms = settings.permissions || {};
@@ -326,7 +326,7 @@ function analyze() {
   } else if (metrics.hookCount > 0) {
     hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">Hooks are configured. For additional protection, see the <a href="opus-47-survival-guide.html">Survival Guide (66 sections)</a>.</p></div>';
   } else {
-    hookDiv.innerHTML = '<div class="card"><pre><code>npx cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">One command to install 8 essential safety hooks.</p></div>';
+    hookDiv.innerHTML = '<div class="card"><pre><code>npx github:yurukusa/cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">One command to install 8 essential safety hooks.</p></div>';
   }
 
   document.getElementById('results').scrollIntoView({behavior:'smooth'});

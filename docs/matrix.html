@@ -61,14 +61,14 @@ td code:hover{color:#58a6ff}
 
 <script>
 const H=[
-{n:'destructive-guard',c:'safety',t:'Pre',a:'block',d:'rm -rf, git reset --hard, git clean',i:'npx cc-safe-setup'},
-{n:'branch-guard',c:'safety',t:'Pre',a:'block',d:'Push to main/master, force-push',i:'npx cc-safe-setup'},
-{n:'secret-guard',c:'safety',t:'Pre',a:'block',d:'git add .env, credential files',i:'npx cc-safe-setup'},
-{n:'syntax-check',c:'quality',t:'Post',a:'warn',d:'Python/Shell/JSON/JS syntax after edits',i:'npx cc-safe-setup'},
-{n:'context-monitor',c:'monitor',t:'Post',a:'warn',d:'Context warnings at 40/25/20/15%',i:'npx cc-safe-setup'},
-{n:'comment-strip',c:'utility',t:'Pre',a:'warn',d:'Fix bash comments breaking permissions',i:'npx cc-safe-setup'},
-{n:'cd-git-allow',c:'approve',t:'Pre',a:'approve',d:'Auto-approve cd && git compounds',i:'npx cc-safe-setup'},
-{n:'api-error-alert',c:'monitor',t:'Stop',a:'monitor',d:'Notify on session API errors',i:'npx cc-safe-setup'},
+{n:'destructive-guard',c:'safety',t:'Pre',a:'block',d:'rm -rf, git reset --hard, git clean',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'branch-guard',c:'safety',t:'Pre',a:'block',d:'Push to main/master, force-push',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'secret-guard',c:'safety',t:'Pre',a:'block',d:'git add .env, credential files',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'syntax-check',c:'quality',t:'Post',a:'warn',d:'Python/Shell/JSON/JS syntax after edits',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'context-monitor',c:'monitor',t:'Post',a:'warn',d:'Context warnings at 40/25/20/15%',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'comment-strip',c:'utility',t:'Pre',a:'warn',d:'Fix bash comments breaking permissions',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'cd-git-allow',c:'approve',t:'Pre',a:'approve',d:'Auto-approve cd && git compounds',i:'npx github:yurukusa/cc-safe-setup'},
+{n:'api-error-alert',c:'monitor',t:'Stop',a:'monitor',d:'Notify on session API errors',i:'npx github:yurukusa/cc-safe-setup'},
 {n:'scope-guard',c:'safety',t:'Pre',a:'block',d:'Block operations outside project',i:'--install-example scope-guard'},
 {n:'no-sudo-guard',c:'safety',t:'Pre',a:'block',d:'Block all sudo commands',i:'--install-example no-sudo-guard'},
 {n:'protect-claudemd',c:'safety',t:'Pre',a:'block',d:'Block edits to CLAUDE.md/settings',i:'--install-example protect-claudemd'},
@@ -150,7 +150,7 @@ function render(){
     <td>${h.t}</td>
     <td class="${actClass[h.a]||''}">${h.a}</td>
     <td>${h.d}</td>
-    <td><code onclick="navigator.clipboard.writeText('npx cc-safe-setup ${h.i}');this.textContent='✓'">${h.i.substring(0,25)}</code></td>
+    <td><code onclick="navigator.clipboard.writeText('npx github:yurukusa/cc-safe-setup ${h.i}');this.textContent='✓'">${h.i.substring(0,25)}</code></td>
   </tr>`).join('');
 }
 render();

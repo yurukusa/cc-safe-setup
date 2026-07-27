@@ -83,16 +83,16 @@ nav a{margin-right:1rem}
 <h2>Install All 5 in One Command</h2>
 
 <div class="fix">
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.5rem">Installs 8 hooks (the 5 above plus syntax checking, session handoff, and auto-approve for safe read commands). Takes 10 seconds. No dependencies.</p>
 </div>
 
 <h2>Verify Your Setup</h2>
 <pre><code># Check all hooks are installed and working
-npx cc-safe-setup --doctor
+npx github:yurukusa/cc-safe-setup --doctor
 
 # Run the audit (0-100 safety score)
-npx cc-safe-setup --audit
+npx github:yurukusa/cc-safe-setup --audit
 
 # Full health check
 npx cc-health-check</code></pre>
@@ -102,11 +102,11 @@ npx cc-health-check</code></pre>
 <p>The <code>bypass-mode-effective-verifier</code> hook re-surfaces both at every session start: it reads settings.json for a persisted bypass default or the suppressed-warning flag and prints a standing reminder, and it names the gates the flag does not cover. It is advisory only (it never blocks), so it is safe to leave on in unattended runs.</p>
 <pre><code># Re-prints the bypass warning each session, even after the
 # upstream prompt has been silently suppressed (#65848)
-npx cc-safe-setup   # installs bypass-mode-effective-verifier</code></pre>
+npx github:yurukusa/cc-safe-setup   # installs bypass-mode-effective-verifier</code></pre>
 
 <div class="cta">
 <h2>Make Autonomous Mode Safe</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.8rem">Process-level protection that works even when the model forgets instructions. <span class="badge">213 test files</span> <span class="badge">734 examples</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
 </div>

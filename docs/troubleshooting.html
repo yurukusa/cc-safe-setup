@@ -39,7 +39,7 @@ pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem;
 <p class="sub">Click your problem. Follow the steps. Fixed in 2 minutes.</p>
 
 <div class="quick">
-<strong>Quick fix for most problems:</strong> <code>npx cc-safe-setup --quickfix</code>
+<strong>Quick fix for most problems:</strong> <code>npx github:yurukusa/cc-safe-setup --quickfix</code>
 </div>
 
 <div class="problem" onclick="this.classList.toggle('open')">
@@ -53,7 +53,7 @@ pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem;
 
 <div class="step">3. Is it registered in settings.json?</div>
 <pre>cat ~/.claude/settings.json | python3 -m json.tool | grep your-hook</pre>
-<div class="step-fix">Fix: <code>npx cc-safe-setup --shield</code> (auto-registers all hooks)</div>
+<div class="step-fix">Fix: <code>npx github:yurukusa/cc-safe-setup --shield</code> (auto-registers all hooks)</div>
 
 <div class="step">4. Is the matcher correct? <code>"Bash"</code> won't fire for Edit/Write</div>
 <div class="step-fix">Use <code>""</code> (empty) to match all tools, or <code>"Edit|Write"</code> for file ops</div>
@@ -83,9 +83,9 @@ pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.5rem;
 <div class="step">This is normal — CLAUDE.md rules degrade as context fills up.</div>
 <div class="step-fix"><strong>Solution: Convert critical rules to hooks.</strong></div>
 <pre># Example: "Don't push to main" as a hook instead of a rule
-npx cc-safe-setup  # Installs branch-guard</pre>
+npx github:yurukusa/cc-safe-setup  # Installs branch-guard</pre>
 <div class="step">For any rule that must be enforced 100%, create a hook:</div>
-<pre>npx cc-safe-setup --create "your rule in plain English"</pre>
+<pre>npx github:yurukusa/cc-safe-setup --create "your rule in plain English"</pre>
 <div class="step-fix">CLAUDE.md is for guidelines. Hooks are for hard constraints. Use both.</div>
 </div>
 </div>
@@ -94,10 +94,10 @@ npx cc-safe-setup  # Installs branch-guard</pre>
 <div class="problem-header"><span class="problem-icon">🔔</span> Too many permission prompts</div>
 <div class="problem-body">
 <div class="step">Install auto-approve hooks for safe commands:</div>
-<pre>npx cc-safe-setup --install-example auto-approve-build    # npm test, cargo build
-npx cc-safe-setup --install-example auto-approve-python   # pytest, mypy
-npx cc-safe-setup --install-example auto-approve-git-read # git status, git log
-npx cc-safe-setup --install-example compound-command-approver # cd && git log</pre>
+<pre>npx github:yurukusa/cc-safe-setup --install-example auto-approve-build    # npm test, cargo build
+npx github:yurukusa/cc-safe-setup --install-example auto-approve-python   # pytest, mypy
+npx github:yurukusa/cc-safe-setup --install-example auto-approve-git-read # git status, git log
+npx github:yurukusa/cc-safe-setup --install-example compound-command-approver # cd && git log</pre>
 <div class="step">Or add permissions in settings.json:</div>
 <pre>"permissions": {"allow": ["Bash(npm test)", "Bash(git status)", "Read(*)"]}</pre>
 <div class="step-fix">The <code>--profile standard</code> includes auto-approve hooks for common commands.</div>
@@ -111,7 +111,7 @@ npx cc-safe-setup --install-example compound-command-approver # cd && git log</p
 <pre>python3 -c "import json; json.load(open('$HOME/.claude/settings.json'))"</pre>
 <div class="step-fix">Common causes: trailing commas, comments (JSON doesn't allow them), unescaped quotes</div>
 <div class="step">Auto-fix:</div>
-<pre>npx cc-safe-setup --quickfix</pre>
+<pre>npx github:yurukusa/cc-safe-setup --quickfix</pre>
 <div class="step-fix">If totally broken: <code>echo '{}' > ~/.claude/settings.json</code> then re-run setup</div>
 </div>
 </div>
@@ -120,10 +120,10 @@ npx cc-safe-setup --install-example compound-command-approver # cd && git log</p
 <div class="problem-header"><span class="problem-icon">🔄</span> Claude keeps retrying the same failed command</div>
 <div class="problem-body">
 <div class="step">Install the error memory guard:</div>
-<pre>npx cc-safe-setup --install-example error-memory-guard</pre>
+<pre>npx github:yurukusa/cc-safe-setup --install-example error-memory-guard</pre>
 <div class="step-fix">After 3 failures of the same command, it blocks and says "try a different approach".</div>
 <div class="step">Also useful: loop detector</div>
-<pre>npx cc-safe-setup --install-example loop-detector</pre>
+<pre>npx github:yurukusa/cc-safe-setup --install-example loop-detector</pre>
 </div>
 </div>
 
@@ -131,10 +131,10 @@ npx cc-safe-setup --install-example compound-command-approver # cd && git log</p
 <div class="problem-header"><span class="problem-icon">💸</span> Session costs too much</div>
 <div class="problem-body">
 <div class="step">Install token budget guard:</div>
-<pre>npx cc-safe-setup --install-example token-budget-guard</pre>
+<pre>npx github:yurukusa/cc-safe-setup --install-example token-budget-guard</pre>
 <div class="step-fix">Warns at $10, blocks at $50 (configurable via <code>CC_TOKEN_BUDGET</code> and <code>CC_TOKEN_BLOCK</code>)</div>
 <div class="step">Monitor with:</div>
-<pre>npx cc-safe-setup --analyze</pre>
+<pre>npx github:yurukusa/cc-safe-setup --analyze</pre>
 </div>
 </div>
 
@@ -142,9 +142,9 @@ npx cc-safe-setup --install-example compound-command-approver # cd && git log</p
 <div class="problem-header"><span class="problem-icon">🧠</span> Context fills up too fast</div>
 <div class="problem-body">
 <div class="step">Three hooks help:</div>
-<pre>npx cc-safe-setup --install-example output-length-guard   # Warn on large outputs
-npx cc-safe-setup --install-example large-read-guard      # Warn before cat on large files
-npx cc-safe-setup --install-example compact-reminder      # Suggest /compact after N calls</pre>
+<pre>npx github:yurukusa/cc-safe-setup --install-example output-length-guard   # Warn on large outputs
+npx github:yurukusa/cc-safe-setup --install-example large-read-guard      # Warn before cat on large files
+npx github:yurukusa/cc-safe-setup --install-example compact-reminder      # Suggest /compact after N calls</pre>
 <div class="step-fix">The context-monitor hook (installed by default) warns at 40%, 25%, 20%, 15%.</div>
 </div>
 </div>
@@ -153,12 +153,12 @@ npx cc-safe-setup --install-example compact-reminder      # Suggest /compact aft
 <div class="problem-header"><span class="problem-icon">👥</span> Team members have different hook setups</div>
 <div class="problem-body">
 <div class="step">Use project-level hooks:</div>
-<pre>npx cc-safe-setup --team
+<pre>npx github:yurukusa/cc-safe-setup --team
 git add .claude/
 git commit -m "chore: add team safety hooks"</pre>
 <div class="step-fix">Hooks are copied to <code>.claude/hooks/</code> with relative paths. Works on any machine.</div>
 <div class="step">Generate CI to enforce:</div>
-<pre>npx cc-safe-setup --generate-ci</pre>
+<pre>npx github:yurukusa/cc-safe-setup --generate-ci</pre>
 </div>
 </div>
 
@@ -166,8 +166,8 @@ git commit -m "chore: add team safety hooks"</pre>
 <div class="problem-header"><span class="problem-icon">🔀</span> Hooks from different tools conflict</div>
 <div class="problem-body">
 <div class="step">Analyze what you have:</div>
-<pre>npx cc-safe-setup --migrate-from manual  # See all existing hooks
-npx cc-safe-setup --health               # Check hook health</pre>
+<pre>npx github:yurukusa/cc-safe-setup --migrate-from manual  # See all existing hooks
+npx github:yurukusa/cc-safe-setup --health               # Check hook health</pre>
 <div class="step-fix">Hooks in the same group run sequentially. If one consumes stdin, the next gets nothing.</div>
 <div class="step">Fix: Put each hook in a separate matcher group in settings.json.</div>
 </div>
@@ -175,8 +175,8 @@ npx cc-safe-setup --health               # Check hook health</pre>
 
 <div class="quick" style="margin-top:1rem">
 <strong>Still stuck?</strong>
-<code>npx cc-safe-setup --doctor</code> — full diagnosis<br>
-<code>npx cc-safe-setup --quickfix</code> — auto-fix common issues<br>
+<code>npx github:yurukusa/cc-safe-setup --doctor</code> — full diagnosis<br>
+<code>npx github:yurukusa/cc-safe-setup --quickfix</code> — auto-fix common issues<br>
 <a href="faq.html">FAQ</a> — 15 questions answered
 </div>
 

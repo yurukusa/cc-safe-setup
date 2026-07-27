@@ -149,7 +149,7 @@ function generate(template) {
 
   document.getElementById('hook-code').querySelector('code').textContent = hookCode;
   document.getElementById('settings-code').querySelector('code').textContent = settingsCode;
-  document.getElementById('cli-cmd').textContent = `npx cc-safe-setup --create "${desc}"`;
+  document.getElementById('cli-cmd').textContent = `npx github:yurukusa/cc-safe-setup --create "${desc}"`;
   document.getElementById('output').classList.remove('hidden');
 }
 

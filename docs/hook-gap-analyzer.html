@@ -100,8 +100,8 @@ const CATEGORIES = [
     weight: 25,
     desc: "Prevents rm -rf, git reset --hard, and other irreversible commands",
     checks: [
-      { id: "bash-guard", label: "Bash command guard (rm, git reset, etc.)", detect: h => hasHook(h, "PreToolUse", "Bash"), install: "npx cc-safe-setup --install-example destructive-command-guard" },
-      { id: "write-guard", label: "File write/edit guard (critical paths)", detect: h => hasHook(h, "PreToolUse", "Write") || hasHook(h, "PreToolUse", "Edit"), install: "npx cc-safe-setup --install-example scope-guard" },
+      { id: "bash-guard", label: "Bash command guard (rm, git reset, etc.)", detect: h => hasHook(h, "PreToolUse", "Bash"), install: "npx github:yurukusa/cc-safe-setup --install-example destructive-command-guard" },
+      { id: "write-guard", label: "File write/edit guard (critical paths)", detect: h => hasHook(h, "PreToolUse", "Write") || hasHook(h, "PreToolUse", "Edit"), install: "npx github:yurukusa/cc-safe-setup --install-example scope-guard" },
     ]
   },
   {
@@ -109,9 +109,9 @@ const CATEGORIES = [
     weight: 20,
     desc: "Prevents excessive token usage and cost overruns",
     checks: [
-      { id: "large-read", label: "Large file read guard (>100KB warning)", detect: h => hasHookPattern(h, "PreToolUse", "Read", /large|size|100/i), install: "npx cc-safe-setup --install-example large-read-guard" },
-      { id: "token-budget", label: "Token budget tracking", detect: h => hasHookPattern(h, "PostToolUse", "", /token|budget/i), install: "npx cc-safe-setup --install-example token-budget-guard" },
-      { id: "subagent-limit", label: "Subagent spawn limit", detect: h => hasHookPattern(h, "PreToolUse", "Agent", /subagent|agent/i), install: "npx cc-safe-setup --install-example subagent-budget-guard" },
+      { id: "large-read", label: "Large file read guard (>100KB warning)", detect: h => hasHookPattern(h, "PreToolUse", "Read", /large|size|100/i), install: "npx github:yurukusa/cc-safe-setup --install-example large-read-guard" },
+      { id: "token-budget", label: "Token budget tracking", detect: h => hasHookPattern(h, "PostToolUse", "", /token|budget/i), install: "npx github:yurukusa/cc-safe-setup --install-example token-budget-guard" },
+      { id: "subagent-limit", label: "Subagent spawn limit", detect: h => hasHookPattern(h, "PreToolUse", "Agent", /subagent|agent/i), install: "npx github:yurukusa/cc-safe-setup --install-example subagent-budget-guard" },
     ]
   },
   {
@@ -119,8 +119,8 @@ const CATEGORIES = [
     weight: 20,
     desc: "Protects work during context compaction and session boundaries",
     checks: [
-      { id: "precompact", label: "Pre-compaction checkpoint", detect: h => hasHook(h, "PreCompact", ""), install: "npx cc-safe-setup --install-example pre-compact-checkpoint" },
-      { id: "session-track", label: "Session start tracking", detect: h => hasHook(h, "SessionStart", ""), install: "npx cc-safe-setup --install-example session-budget-alert" },
+      { id: "precompact", label: "Pre-compaction checkpoint", detect: h => hasHook(h, "PreCompact", ""), install: "npx github:yurukusa/cc-safe-setup --install-example pre-compact-checkpoint" },
+      { id: "session-track", label: "Session start tracking", detect: h => hasHook(h, "SessionStart", ""), install: "npx github:yurukusa/cc-safe-setup --install-example session-budget-alert" },
     ]
   },
   {
@@ -128,8 +128,8 @@ const CATEGORIES = [
     weight: 20,
     desc: "Prevents exposure of API keys, tokens, and sensitive files",
     checks: [
-      { id: "env-guard", label: ".env / credential file protection", detect: h => hasHookPattern(h, "PreToolUse", "", /env|cred|secret|key|token/i), install: "npx cc-safe-setup --install-example env-guard" },
-      { id: "git-secret", label: "Git commit secret check", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /secret|commit|push/i), install: "npx cc-safe-setup --install-example git-secrets-guard" },
+      { id: "env-guard", label: ".env / credential file protection", detect: h => hasHookPattern(h, "PreToolUse", "", /env|cred|secret|key|token/i), install: "npx github:yurukusa/cc-safe-setup --install-example env-guard" },
+      { id: "git-secret", label: "Git commit secret check", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /secret|commit|push/i), install: "npx github:yurukusa/cc-safe-setup --install-example git-secrets-guard" },
     ]
   },
   {
@@ -137,8 +137,8 @@ const CATEGORIES = [
     weight: 15,
     desc: "Enforces syntax checks, test runs, and code standards",
     checks: [
-      { id: "syntax-check", label: "Post-edit syntax verification", detect: h => hasHookPattern(h, "PostToolUse", "", /syntax|compile|lint|py_compile/i), install: "npx cc-safe-setup --install-example syntax-check" },
-      { id: "test-guard", label: "Pre-commit test requirement", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /test|jest|pytest/i), install: "npx cc-safe-setup --install-example test-before-commit" },
+      { id: "syntax-check", label: "Post-edit syntax verification", detect: h => hasHookPattern(h, "PostToolUse", "", /syntax|compile|lint|py_compile/i), install: "npx github:yurukusa/cc-safe-setup --install-example syntax-check" },
+      { id: "test-guard", label: "Pre-commit test requirement", detect: h => hasHookPattern(h, "PreToolUse", "Bash", /test|jest|pytest/i), install: "npx github:yurukusa/cc-safe-setup --install-example test-before-commit" },
     ]
   }
 ];
@@ -270,7 +270,7 @@ function renderResults(score, totalHooks, eventCount, passCount, totalChecks, ca
   if (score < 40) {
     ctaHTML = `<h3>Your setup has critical gaps</h3>
       <p>Install production-tested safety hooks in 10 seconds:</p>
-      <a href="https://github.com/yurukusa/cc-safe-setup">npx cc-safe-setup</a>
+      <a href="https://github.com/yurukusa/cc-safe-setup">npx github:yurukusa/cc-safe-setup</a>
       <a class="secondary" href="https://yurukusa.github.io/cc-safe-setup/hook-selector.html">Browse 892 example hooks</a>`;
   } else if (score < 70) {
     ctaHTML = `<h3>Good start — here's how to close the gaps</h3>

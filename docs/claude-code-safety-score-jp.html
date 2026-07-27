@@ -57,7 +57,7 @@ button.restart { background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
 <div class="cta">
 <h2>足りない対策を、設定で先回りする</h2>
 <p>上の「足りない対策」は、どれも実際に起きた事故から逆算したものです。各対策の hook と設定の全手順、症状から該当章へ直接飛べる早見表、19点から85点へ上げた全工程は、<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=safety-score&utm_medium=tool&utm_campaign=score-to-book">Claude Code 事故防止ハンドブック</a>（¥800・第3章まで無料・全50章）にまとめています。</p>
-<p style="margin-top:0.6rem;">Kindle 版（<a href="https://www.amazon.co.jp/dp/B0H69B7SVZ">Amazon</a>）は Kindle Unlimited なら追加の費用なしで読めます。無料の防御 hook の集まりは <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（<code>npx cc-safe-setup</code>）。</p>
+<p style="margin-top:0.6rem;">Kindle 版（<a href="https://www.amazon.co.jp/dp/B0H69B7SVZ">Amazon</a>）は Kindle Unlimited なら追加の費用なしで読めます。無料の防御 hook の集まりは <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（<code>npx github:yurukusa/cc-safe-setup</code>）。</p>
 <p style="margin-top:0.6rem;">事故は毎月新しい型が出ます。点数を上げたあとも、その月に報告された新しい事故と対策を月に一度まとめて追いたい人は、無料の月刊まとめ <a href="https://note.com/yurukusa/n/n5f83f1f464d1?utm_source=safety-score&amp;utm_medium=tool&amp;utm_campaign=score-to-digest">Claude Code 事故まとめ</a> へ。さらに、検証済みの hook と安全チェックリストを添えて毎月15日ごろ受け取りたい人向けに、月額の <a href="https://note.com/yurukusa/membership?utm_source=safety-score&amp;utm_medium=tool&amp;utm_campaign=score-to-membership">Claude Code 安全運用便</a>（¥500）も用意しています。</p>
 </div>
 <button class="restart" onclick="location.reload()">もう一度やる</button>
@@ -81,7 +81,7 @@ const QS = [
  {q:"<code>git push --force-with-lease</code> が弾かれたとき、<code>--force</code> へ昇格しない運用になっている", hint:"安全側の操作が弾かれた直後の昇格で、他人の作業を上書きで消す事故。", w:6, gap:"一段の昇格で、取り返しのつかない上書きに変わります。", fix:"事故防止本 第46章。弾かれたら <code>git fetch</code> で取り込む。"},
  {q:"<code>CLAUDE.md</code> や自動メモリが、作話や誤った情報で汚染されていないか点検している", hint:"モデルが受けてもいない注入を作話し、自動メモリに書いて毎セッション再発させる事故。", w:6, gap:"汚染された永続記憶は、確信のある誤りを何度も再発させます。", fix:"事故防止本 第48章。記録の構造で本物の注入か作話かを見分ける。"},
  {q:"「正常」を、プロセスの生存でなくログの中身で確認している", hint:"認証が静かに失敗して止まる、起動の構成で枠が早く減る、などはログを見ないと分かりません。", w:5, gap:"プロセスが生きているだけで「正常」と判断すると、静かな失敗を見逃します。", fix:"事故防止本 第4章（監視）。"},
- {q:"cc-safe-setup などの防御 hook を、実際に導入している", hint:"<code>npx cc-safe-setup</code> で、上の多くの対策をまとめて入れられます。", w:10, gap:"そもそも hook が入っていないと、上の歯止めはどれも効きません。", fix:"<a href='https://github.com/yurukusa/cc-safe-setup'>cc-safe-setup</a> を導入。事故防止本 第9章（hook カタログ）。"},
+ {q:"cc-safe-setup などの防御 hook を、実際に導入している", hint:"<code>npx github:yurukusa/cc-safe-setup</code> で、上の多くの対策をまとめて入れられます。", w:10, gap:"そもそも hook が入っていないと、上の歯止めはどれも効きません。", fix:"<a href='https://github.com/yurukusa/cc-safe-setup'>cc-safe-setup</a> を導入。事故防止本 第9章（hook カタログ）。"},
 ];
 const TOTAL_W = QS.reduce((s,x)=>s+x.w,0);
 let cur=0, earned=0, gaps=[];

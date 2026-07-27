@@ -60,7 +60,7 @@ du -sh /tmp/claude-* 2>/dev/null | tail -1</code></pre>
 
 <div class="fix">
 <p>Install the temp-file-cleanup Stop hook:</p>
-<pre><code>npx cc-safe-setup --install-example temp-file-cleanup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example temp-file-cleanup</code></pre>
 <p>This runs automatically when Claude Code exits, deleting temp files older than 1 hour (keeping files from concurrent sessions).</p>
 </div>
 
@@ -73,7 +73,7 @@ find /tmp -maxdepth 1 -name "claude-*" -type f -mmin +60 -delete</code></pre>
 
 <div class="cta">
 <p><strong>Full safety setup in 10 seconds</strong></p>
-<p><code>npx cc-safe-setup</code></p>
+<p><code>npx github:yurukusa/cc-safe-setup</code></p>
 <p style="margin-top:.5rem;font-size:.9rem;color:#8b949e">8 safety hooks + 734 examples. 213 test files.</p>
 <p style="margin-top:.5rem"><code>npx cc-health-check</code> — 20-point diagnostic</p>
 </div>

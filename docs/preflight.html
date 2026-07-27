@@ -65,7 +65,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Destructive command guard installed</div>
 <div class="check-desc">rm -rf, git reset --hard, git clean -fd, chmod 777, PowerShell Remove-Item are blocked.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield</div>
 </div>
 </div>
 
@@ -74,7 +74,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Branch push guard installed</div>
 <div class="check-desc">No direct pushes to main/master. No force-pushes to any branch.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield</div>
 </div>
 </div>
 
@@ -83,7 +83,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Secret leak prevention installed</div>
 <div class="check-desc">git add .env, credential files, and git add . with .env present are blocked.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield</div>
 </div>
 </div>
 
@@ -92,7 +92,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Syntax checker installed</div>
 <div class="check-desc">Python, Shell, JSON, YAML errors caught immediately after every edit.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield</div>
 </div>
 </div>
 
@@ -106,7 +106,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Context window monitor active</div>
 <div class="check-desc">Warns at 40%, 25%, 20%, 15% remaining. Prevents silent session death.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield</div>
 </div>
 </div>
 
@@ -115,7 +115,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Edit verification hook installed</div>
 <div class="check-desc">Checks file exists, isn't empty, and new_string is present after every edit.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --install-example edit-verify</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --install-example edit-verify</div>
 </div>
 </div>
 
@@ -147,7 +147,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Auto-checkpoint or state saver installed</div>
 <div class="check-desc">Session state survives context compaction. Files backed up before edits.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --install-example session-state-saver</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --install-example session-state-saver</div>
 </div>
 </div>
 
@@ -161,7 +161,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">CLAUDE.md has clear instructions</div>
 <div class="check-desc">Project rules, scope boundaries, and "don't ask, decide" autonomy rules defined.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --shield (generates CLAUDE.md)</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --shield (generates CLAUDE.md)</div>
 </div>
 </div>
 
@@ -177,9 +177,9 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check" data-id="doctor">
 <div class="checkbox" onclick="toggle(this)"></div>
 <div class="check-body">
-<div class="check-title">npx cc-safe-setup --doctor passes</div>
+<div class="check-title">npx github:yurukusa/cc-safe-setup --doctor passes</div>
 <div class="check-desc">All 13 diagnostic checks pass. Hooks are properly registered and executable.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --doctor (shows what to fix)</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --doctor (shows what to fix)</div>
 </div>
 </div>
 
@@ -188,7 +188,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 <div class="check-body">
 <div class="check-title">Dangerous commands are blocked (verified)</div>
 <div class="check-desc">Tested with --simulate that rm -rf, git push main, etc. are actually blocked.</div>
-<div class="check-fix">Fix: npx cc-safe-setup --simulate "rm -rf /"</div>
+<div class="check-fix">Fix: npx github:yurukusa/cc-safe-setup --simulate "rm -rf /"</div>
 </div>
 </div>
 
@@ -196,7 +196,7 @@ h2{color:#f0f6fc;font-size:1rem;margin:1.2rem 0 .4rem;padding-bottom:.3rem;borde
 
 <div class="cta">
   <p style="font-size:.9rem;margin-bottom:.5rem"><strong>Pass all 14?</strong> You're ready for autonomous operation.</p>
-  <p style="font-size:.8rem;color:#8b949e">One command covers checks 1-6: <code>npx cc-safe-setup --shield</code></p>
+  <p style="font-size:.8rem;color:#8b949e">One command covers checks 1-6: <code>npx github:yurukusa/cc-safe-setup --shield</code></p>
 </div>
 
 <div class="footer">

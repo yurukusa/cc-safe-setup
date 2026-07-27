@@ -82,7 +82,7 @@ Example:
 <div class="footer">
   <a href="hub.html">Hub</a> · <a href="recipes.html">Recipes</a> · <a href="settings-reference.html">Settings Reference</a> ·
   <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a>
-  <br>Fix issues: <code>npx cc-safe-setup --doctor</code> · Full setup: <code>npx cc-safe-setup --shield</code>
+  <br>Fix issues: <code>npx github:yurukusa/cc-safe-setup --doctor</code> · Full setup: <code>npx github:yurukusa/cc-safe-setup --shield</code>
 
 <br><a href="token-book.html#en">📘 Token Book (¥2,500)</a> · <a href="token-checkup.html">Token Checkup</a>
 </div>
@@ -172,7 +172,7 @@ function validate() {
     settings = JSON.parse(input);
   } catch (e) {
     el.innerHTML = `<div class="item error"><span class="icon">✗</span>Invalid JSON: ${e.message}</div>
-    <div class="item info"><span class="icon">→</span>Fix: <code>npx cc-safe-setup --uninstall && npx cc-safe-setup</code></div>`;
+    <div class="item info"><span class="icon">→</span>Fix: <code>npx github:yurukusa/cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup</code></div>`;
     return;
   }
 
@@ -320,8 +320,8 @@ function validate() {
 
   if (score < 80) {
     html += `<h2>Quick Fix</h2>
-    <div class="item info"><span class="icon">→</span><code>npx cc-safe-setup --shield</code> — installs all essential hooks in 30 seconds</div>
-    <div class="item info"><span class="icon">→</span><code>npx cc-safe-setup --doctor</code> — diagnose why existing hooks aren't working</div>`;
+    <div class="item info"><span class="icon">→</span><code>npx github:yurukusa/cc-safe-setup --shield</code> — installs all essential hooks in 30 seconds</div>
+    <div class="item info"><span class="icon">→</span><code>npx github:yurukusa/cc-safe-setup --doctor</code> — diagnose why existing hooks aren't working</div>`;
   }
 
   el.innerHTML = html;

@@ -18,10 +18,10 @@
   "name": "How to detect Claude Code quality degradation with hooks",
   "description": "Install hooks that detect lazy file rewrites, skipped code reads, and untested commits in Claude Code.",
   "step": [
-    {"@type": "HowToStep", "name": "Install overwrite guard", "text": "npx cc-safe-setup --install-example overwrite-guard"},
-    {"@type": "HowToStep", "name": "Install diff size guard", "text": "npx cc-safe-setup --install-example diff-size-guard"},
-    {"@type": "HowToStep", "name": "Install commit quality gate", "text": "npx cc-safe-setup --install-example commit-quality-gate"},
-    {"@type": "HowToStep", "name": "Install test requirement", "text": "npx cc-safe-setup --install-example push-requires-test-pass"}
+    {"@type": "HowToStep", "name": "Install overwrite guard", "text": "npx github:yurukusa/cc-safe-setup --install-example overwrite-guard"},
+    {"@type": "HowToStep", "name": "Install diff size guard", "text": "npx github:yurukusa/cc-safe-setup --install-example diff-size-guard"},
+    {"@type": "HowToStep", "name": "Install commit quality gate", "text": "npx github:yurukusa/cc-safe-setup --install-example commit-quality-gate"},
+    {"@type": "HowToStep", "name": "Install test requirement", "text": "npx github:yurukusa/cc-safe-setup --install-example push-requires-test-pass"}
   ]
 }
 </script>
@@ -66,12 +66,12 @@ footer{margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.8
 
 <div class="install">
 <p>Install all quality hooks with one command:</p>
-<pre><code>npx cc-safe-setup --install-example overwrite-guard
-npx cc-safe-setup --install-example full-rewrite-detector
-npx cc-safe-setup --install-example diff-size-guard
-npx cc-safe-setup --install-example commit-quality-gate
-npx cc-safe-setup --install-example push-requires-test-pass
-npx cc-safe-setup --install-example pre-compact-checkpoint</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example overwrite-guard
+npx github:yurukusa/cc-safe-setup --install-example full-rewrite-detector
+npx github:yurukusa/cc-safe-setup --install-example diff-size-guard
+npx github:yurukusa/cc-safe-setup --install-example commit-quality-gate
+npx github:yurukusa/cc-safe-setup --install-example push-requires-test-pass
+npx github:yurukusa/cc-safe-setup --install-example pre-compact-checkpoint</code></pre>
 </div>
 
 <h2>What Each Hook Does</h2>
@@ -107,10 +107,10 @@ export CC_DIFF_BLOCK=20  # block at 20+ files changed</code></pre>
 <h2>Find More Hooks</h2>
 
 <pre><code># Search by keyword
-npx cc-safe-setup --examples quality
-npx cc-safe-setup --examples overwrite
-npx cc-safe-setup --examples diff
-npx cc-safe-setup --examples commit</code></pre>
+npx github:yurukusa/cc-safe-setup --examples quality
+npx github:yurukusa/cc-safe-setup --examples overwrite
+npx github:yurukusa/cc-safe-setup --examples diff
+npx github:yurukusa/cc-safe-setup --examples commit</code></pre>
 
 <p>Or use the <a href="hook-selector.html">Hook Selector</a> to get a personalized recommendation in 5 questions.</p>
 
