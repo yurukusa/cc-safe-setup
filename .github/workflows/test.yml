@@ -30,8 +30,29 @@ jobs:
           [ "$ERRORS" -eq 0 ] || exit 1
       - name: Full test suite
         run: bash test.sh
-      # The hooks shipped inside the marketplace plugins are not covered by test.sh.
-      # They were unverified until a defect shipped: every one of them parsed stdin
-      # with jq and silently exited 0 when jq was absent.
-      - name: Marketplace plugin hooks
-        run: bash tests/test-marketplace-plugins.sh
+      # tests/ holds 234 per-hook suites that nothing ever ran. test.sh does not
+      # source them and CI did not call them, so they were 234 test files that
+      # could not fail. That is how the marketplace plugins shipped with every
+      # block silently disabled whenever jq was missing: the shape was checked,
+      # the behaviour was not. Each suite gets its own HOME so state written to
+      # ~/.claude by one does not leak into the next, and stdin is closed so a
+      # suite that reads a hook's stdin cannot hang the job.
+      - name: Per-hook test suites (tests/)
+        run: |
+          mkdir -p "$HOME/test-homes"
+          PASS=0; FAIL=0; FAILED=""
+          for f in tests/*.sh; do
+            TH=$(mktemp -d -p "$HOME/test-homes")
+            cp "$HOME/.gitconfig" "$TH/.gitconfig" 2>/dev/null || true
+            if HOME="$TH" timeout 180 bash "$f" > "/tmp/$(basename "$f").log" 2>&1 < /dev/null; then
+              PASS=$((PASS + 1))
+            else
+              FAIL=$((FAIL + 1)); FAILED="$FAILED $(basename "$f")"
+              echo "::group::FAILED $(basename "$f")"
+              tail -40 "/tmp/$(basename "$f").log"
+              echo "::endgroup::"
+            fi
+            rm -rf "$TH"
+          done
+          echo "tests/: $PASS passed, $FAIL failed"
+          [ "$FAIL" -eq 0 ] || { echo "failing suites:$FAILED"; exit 1; }
