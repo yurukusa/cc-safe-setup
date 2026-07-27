@@ -204,6 +204,49 @@ code{background:#21262d;padding:.15rem .3rem;border-radius:3px;font-size:.8rem}
 </a>
 </div>
 
+<div class="section-title">日本語の道具 — 貼って、自分の数字を見る</div>
+
+<div class="grid">
+<a href="token-audit-jp.html" class="card" style="border-color:#a371f7">
+<div class="card-icon">🔬</div>
+<div class="card-title">トークン消費の詳しい診断</div>
+<div class="card-desc"><code>/cost</code> の出力と settings.json と CLAUDE.md を貼ると、費用の内訳・キャッシュの効き方・CLAUDE.md が毎回載せている常駐コストが出ます。日本語の文字数で数えるので、実際より軽く出ません。</div>
+<span class="card-tag" style="background:#a371f7">日本語・無料</span>
+</a>
+<a href="skill-md-token-checkup-jp.html" class="card" style="border-color:#a371f7">
+<div class="card-icon">📐</div>
+<div class="card-title">SKILL.md トークン自己診断</div>
+<div class="card-desc">SKILL.md は、そのスキルが発火しなくても毎セッション文脈に載ります。1つ貼ると、毎回かかる常駐トークンと、外へ出せる重い塊が分かります。</div>
+<span class="card-tag" style="background:#a371f7">日本語・無料</span>
+</a>
+<a href="claude-config-trap-scanner-jp.html" class="card" style="border-color:#da3633">
+<div class="card-icon">🪤</div>
+<div class="card-title">そのリポ、罠かも — 設定の危険度スキャナ</div>
+<div class="card-desc">拾ってきたリポを「信頼しますか」で はい と押す前に。.claude/settings.json と .mcp.json を貼ると、hook の自動実行・鍵の漏洩・MCP の自動起動を赤黄緑で判定します。</div>
+<span class="card-tag" style="background:#da3633">日本語・無料</span>
+</a>
+<a href="claude-code-deny-coverage-checker-jp.html" class="card" style="border-color:#da3633">
+<div class="card-icon">🕳️</div>
+<div class="card-title">その deny、どこが素通りするか</div>
+<div class="card-desc">permissions.deny に .env や鍵を書いても、cat や python 経由では抜けられます。自分の deny ルールを貼ると、守れているものと素通りするものが並びます。</div>
+<span class="card-tag" style="background:#da3633">日本語・無料</span>
+</a>
+<a href="claude-code-background-worker-zombie-checker-jp.html" class="card" style="border-color:#f0883e">
+<div class="card-icon">🧟</div>
+<div class="card-title">背景 worker ゾンビ・チェッカー</div>
+<div class="card-desc"><code>claude daemon status</code> の出力を貼ると、止めたはずの背景の作業が生き残っていないか、自動更新で孤児になっていないかを判定します。</div>
+<span class="card-tag" style="background:#f0883e">日本語・無料</span>
+</a>
+<a href="claude-code-cli-version-parse-safety-jp.html" class="card" style="border-color:#f0883e">
+<div class="card-icon">📊</div>
+<div class="card-title">どの版が tool call の解析失敗を起こしやすいか</div>
+<div class="card-desc">自分のログ（.jsonl）を読み込ませると、<code>tool call could not be parsed</code> が CLI の版ごとに何回起きたかを集計します。最悪の版は環境ごとに違うので、自分の実績で選べます。</div>
+<span class="card-tag" style="background:#f0883e">日本語・無料</span>
+</a>
+</div>
+
+<p style="text-align:center;color:#8b949e;font-size:.8rem;margin:.5rem 0 0">上の6つは、どれもブラウザの中だけで動きます。貼った内容や読み込んだログはどこにも送信されません（外部への通信の経路を持っていないことを確認済み）。</p>
+
 <div class="section-title">日本語ガイド — 実際の事故を防ぐ</div>
 
 <div class="grid">
