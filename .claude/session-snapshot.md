@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T09:46:44+09:00
+Updated: 2026-07-27T09:47:17+09:00
 
 ## Git
 - Branch: `fix/matcher-resolution-merge-2026-07-27`
@@ -7,7 +7,7 @@ Updated: 2026-07-27T09:46:44+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 88da507f recovery: pre-compact checkpoint (1 files, 20260727-004644)
+- Last commit: 72174da5 recovery: pre-compact checkpoint (1 files, 20260727-004717)
 
 ## Recent Files
 ```
