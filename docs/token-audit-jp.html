@@ -98,6 +98,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.6rem;
 
 <h2>入れるとよい hook</h2>
 <div id="hook-recommendations"></div>
+<div id="safety-offer"></div>
 
 <div class="card" style="text-align:center;margin-top:1.5rem;border-color:#58a6ff">
 <h3 style="margin-bottom:.5rem">全部の手順をまとめて読みたい方へ</h3>
@@ -214,6 +215,9 @@ function analyze() {
   const recs = [];
   const hooks = [];
   const metrics = {};
+  // 安全の側で問題が出たかどうか。出た時だけ、その主題を扱う本を案内する
+  // （この頁の主題はトークンなので、問題が出ていない読者には出さない）。
+  let safetyIssue = false;
 
   // Parse /cost output
   if (costText.trim()) {
@@ -287,10 +291,12 @@ function analyze() {
       metrics.hookCount = totalHooks;
 
       if (totalHooks === 0) {
+        safetyIssue = true;
         score -= 25;
         recs.push({type:'bad', text:'hook が1つも登録されていません。危ない操作を止める仕組みが無い状態で動いています。', fix:'次を実行する： npx github:yurukusa/cc-safe-setup'});
         hooks.push({name:'cc-safe-setup の基本セット', cmd:'npx github:yurukusa/cc-safe-setup', reason:'まず入れておきたい安全の hook を8本入れます'});
       } else if (totalHooks < 3) {
+        safetyIssue = true;
         score -= 10;
         recs.push({type:'warn', text:'登録されている hook が ' + totalHooks + ' 本だけです。まずは5〜8本を目安にしてください。', fix:'次を実行する： npx github:yurukusa/cc-safe-setup --install-example model-version-alert'});
       }
@@ -298,6 +304,7 @@ function analyze() {
       const perms = settings.permissions || {};
       const deny = perms.deny || [];
       if (deny.length === 0) {
+        safetyIssue = true;
         score -= 10;
         recs.push({type:'warn', text:'permissions に拒否の規則が1つもありません。危ない書き方を止める規則を足すことを検討してください。', fix:'rm -rf や git reset --hard などを拒否の一覧に入れる。'});
       }
@@ -392,6 +399,24 @@ function analyze() {
     hookDiv.innerHTML = '<div class="card"><p style="font-size:.85rem;color:#8b949e">hook は登録されています。さらに守りを厚くしたい場合は <a href="opus-47-survival-guide.html">Opus 4.7 サバイバルガイド（英語・66節）</a> を見てください。</p></div>';
   } else {
     hookDiv.innerHTML = '<div class="card"><pre><code>npx github:yurukusa/cc-safe-setup</code></pre><p style="font-size:.85rem;color:#8b949e">この1行で、まず入れておきたい安全の hook を8本入れられます。</p></div>';
+  }
+
+  // 案内は診断の結果に合わせる。この頁は「安全の状態」も診るので、そこで問題が出た読者には
+  // トークンの本ではなく、その主題を扱う本を置く。問題が出ていない読者には出さない。
+  const safetyOffer = document.getElementById('safety-offer');
+  if (safetyIssue) {
+    safetyOffer.innerHTML =
+      '<div class="card" style="border-color:#d29922">'
+      + '<h3 style="margin-bottom:.5rem">上の「安全の状態」で出た指摘について</h3>'
+      + '<p style="font-size:.85rem;color:#8b949e;margin-bottom:.8rem">'
+      + 'まず上の hook を入れてください。それが一番早い手当てです。'
+      + 'そのうえで、実際に起きた事故と、それを設定でどう先回りするかを通して読みたい場合は、'
+      + '800時間の運用で出た症状と対処をまとめた本があります。はじめにと早見表と第3章までは無料で読めます。'
+      + '</p>'
+      + '<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn" style="text-decoration:none">Anthropic公式ガイドにない事故防止（¥800）</a>'
+      + '</div>';
+  } else {
+    safetyOffer.innerHTML = '';
   }
 
   document.getElementById('results').scrollIntoView({behavior:'smooth'});
