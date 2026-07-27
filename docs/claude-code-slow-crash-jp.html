@@ -11,7 +11,7 @@
 <meta property="og:description" content="一時ファイルとログの蓄積で Claude Code が重くなる・落ちる。進行中の作業を失う前に直す手順。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code が急に遅い・固まる・落ちる原因と直し方","description":"一時ファイルとログの蓄積による Claude Code の遅さ・クラッシュを自分で切り分けて直す。","step":[{"@type":"HowToStep","name":"切り分けて直す","text":"--resume で復帰し、出力をファイルへ逃がし、一時ファイルを掃除する。予防に npx cc-safe-setup の hook を入れる。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code が急に遅い・固まる・落ちる原因と直し方","description":"一時ファイルとログの蓄積による Claude Code の遅さ・クラッシュを自分で切り分けて直す。","step":[{"@type":"HowToStep","name":"切り分けて直す","text":"--resume で復帰し、出力をファイルへ逃がし、一時ファイルを掃除する。予防に npx github:yurukusa/cc-safe-setup の hook を入れる。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -78,7 +78,7 @@ nav a{margin-right:1rem}
 
 <div class="cta">
 <h2>予防の hook をまとめて入れる</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.8rem">一時ファイルとログの肥大を見張り、破壊的なコマンドや秘密の漏洩も止めます。<span class="badge">892の hook</span> <span class="badge">9,200以上のテスト</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
 </div>

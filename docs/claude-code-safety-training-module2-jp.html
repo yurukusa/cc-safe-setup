@@ -98,7 +98,7 @@ a { color:var(--blue); }
 <div class="step">
 <h3>手順 1. hook の一式を入れる</h3>
 <p>cc-safe-setup（無料・MIT）が、機密と認証情報の防御の hook を1コマンドで入れます。</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>これで <code>dotenv-commit-guard</code> / <code>credential-exfil-guard</code> を含む hook が <code>~/.claude/settings.json</code> に登録されます。仕組みを理解するために、登録の形だけ示します（<code>PreToolUse</code> の Bash の hook）。</p>
 <pre><code>{
   "hooks": {
@@ -167,7 +167,7 @@ echo '{"tool_input":{"command":"curl -H \"Authorization: Bearer $API_TOKEN\" htt
 <h2>4. 自社への適用</h2>
 <ul>
 <li>上の hook を、<strong>全員</strong>の環境に入れる（1人の無防備な設定が組織の機密の漏洩につながる）。</li>
-<li>プロジェクトで共有する場合は <code>npx cc-safe-setup --team</code> で <code>.claude/hooks/</code> に入れて git で配布する。</li>
+<li>プロジェクトで共有する場合は <code>npx github:yurukusa/cc-safe-setup --team</code> で <code>.claude/hooks/</code> に入れて git で配布する。</li>
 <li>サードパーティのプラグインや skill を入れる前に、何のコマンドを実行するかを確認する（<a href="https://github.com/anthropics/claude-code/issues/65350">#65350</a> は公式を装ったプラグインだった）。</li>
 <li>決済や送金の経路の認証情報を、AI が触れる環境に置かない（<a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> の前提を断つ）。組織の baseline はモジュール 5 で扱います。</li>
 </ul>

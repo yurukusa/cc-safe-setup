@@ -280,7 +280,7 @@ function showResults() {
     hooksByEvent[event].push(h.name);
   });
 
-  const installCmd = `npx cc-safe-setup --install-example ${rec.slice(0, 5).map(h => h.name).join(' \\\n  --install-example ')}`;
+  const installCmd = `npx github:yurukusa/cc-safe-setup --install-example ${rec.slice(0, 5).map(h => h.name).join(' \\\n  --install-example ')}`;
 
   el.innerHTML = `
     <div class="result">

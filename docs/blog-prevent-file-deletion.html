@@ -47,7 +47,7 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-t
 <p class="meta">April 20, 2026 &middot; 5 min read &middot; by <a href="https://github.com/yurukusa">yurukusa</a></p>
 
 <div class="alert">
-<strong>TL;DR:</strong> Claude Code can and does run <code>rm -rf</code> on user directories. It has destroyed 50+ GB of data across multiple incidents. Run <code>npx cc-safe-setup</code> to install a hook that blocks it. Takes 10 seconds.
+<strong>TL;DR:</strong> Claude Code can and does run <code>rm -rf</code> on user directories. It has destroyed 50+ GB of data across multiple incidents. Run <code>npx github:yurukusa/cc-safe-setup</code> to install a hook that blocks it. Takes 10 seconds.
 </div>
 
 <h2>The Incidents</h2>
@@ -95,7 +95,7 @@ footer{text-align:center;color:#8b949e;font-size:.8rem;margin-top:3rem;padding-t
 
 <div class="fix">
 <strong>Install cc-safe-setup:</strong>
-<pre>npx cc-safe-setup</pre>
+<pre>npx github:yurukusa/cc-safe-setup</pre>
 <p>This installs 8 safety hooks into your <code>~/.claude/settings.json</code>. The <code>prevent-rm-rf</code> hook intercepts every Bash command and blocks any <code>rm</code> that targets dangerous paths (<code>/</code>, <code>~</code>, <code>.git</code>, <code>.ssh</code>, <code>.env</code>, and more).</p>
 </div>
 

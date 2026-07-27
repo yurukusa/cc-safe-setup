@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prevent Claude Code rm -rf Disasters — cc-safe-setup</title>
-<meta name="description" content="Claude Code can run rm -rf and delete your entire filesystem. Real incidents from GitHub Issues. One command to prevent it: npx cc-safe-setup.">
+<meta name="description" content="Claude Code can run rm -rf and delete your entire filesystem. Real incidents from GitHub Issues. One command to prevent it: npx github:yurukusa/cc-safe-setup.">
 <meta name="keywords" content="claude code rm -rf, claude code delete files, claude code safety, destructive command guard, pretooluse hook, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf.html">
 <meta property="og:title" content="Prevent Claude Code rm -rf Disasters">
 <meta property="og:description" content="Real incidents where Claude Code deleted filesystems. One command to prevent it.">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Prevent Claude Code rm -rf Disasters","description":"Install a safety hook to prevent Claude Code from running destructive rm -rf commands.","step":[{"@type":"HowToStep","name":"Install cc-safe-setup","text":"Run npx cc-safe-setup to install safety hooks including destructive command blocker."}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+{"@context":"https://schema.org","@type":"HowTo","name":"Prevent Claude Code rm -rf Disasters","description":"Install a safety hook to prevent Claude Code from running destructive rm -rf commands.","step":[{"@type":"HowToStep","name":"Install cc-safe-setup","text":"Run npx github:yurukusa/cc-safe-setup to install safety hooks including destructive command blocker."}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -101,13 +101,13 @@ exit 0</code></pre>
 
 <div class="cta">
 <h2>Install All 8 Safety Hooks in 10 Seconds</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.8rem">Blocks rm -rf, prevents force-push to main, catches secret leaks, validates syntax after every edit. <span class="badge">213 test files</span> <span class="badge">892 example hooks</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
 </div>
 
 <h2>Verify Your Setup</h2>
-<pre><code>npx cc-safe-setup --verify</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --verify</code></pre>
 <p>Sends test inputs to each hook and confirms they block correctly:</p>
 <pre><code>destructive-guard:
   &#10004; rm -rf / → BLOCKED

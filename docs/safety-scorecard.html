@@ -63,7 +63,7 @@ canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(
 <div class="controls">
 <button class="mini" onclick="setAll(true)">Check all</button>
 <button class="mini" onclick="setAll(false)">Clear all</button>
-<button class="mini" onclick="setAll('cc')">I run npx cc-safe-setup</button>
+<button class="mini" onclick="setAll('cc')">I run npx github:yurukusa/cc-safe-setup</button>
 </div>
 
 <div class="cardwrap">
@@ -77,7 +77,7 @@ canvas{max-width:100%;height:auto;border-radius:12px;box-shadow:0 8px 30px rgba(
 </div>
 
 <div class="install">
-<pre>npx cc-safe-setup</pre>
+<pre>npx github:yurukusa/cc-safe-setup</pre>
 <p>Installs all 8 hooks in ~10 seconds. Zero npm dependencies. MIT, free.<br>
 <a href="incidents.html">Browse 90 real incidents</a> · <a href="demo.html">See hooks block rm -rf live</a> · <a href="hub.html">All tools</a></p>
 <p style="margin-top:.7rem;font-size:.88rem;color:#8b949e">Closed your gaps? Stay ahead of next month's: <a href="https://yurukusa.substack.com">free monthly Safety Brief</a> — one verified incident → detection · recovery · prevention + the hook, no payment · or the <a href="https://yurukusa.gumroad.com/l/xatlwf">full monthly digest ($5/mo)</a>: every incident that month + new MIT hooks + the audit checklist.</p>
@@ -94,7 +94,7 @@ This is a self-assessment: the score reflects what you checked, not a scan of yo
 <script>
 // The reach mechanic that works in this niche is a compact artifact people *want*
 // to share (the ccusage cost scorecard, Karpathy's CLAUDE.md), not launch posts.
-// This is the browser twin of `npx cc-safe-setup --scorecard`: it reaches everyone
+// This is the browser twin of `npx github:yurukusa/cc-safe-setup --scorecard`: it reaches everyone
 // without needing npm, and encodes the score in the URL so a shared link reproduces
 // the exact card. The score stays honest — real coverage of 8 documented incidents,
 // never an invented points total — so it holds up when screenshotted.
@@ -214,7 +214,7 @@ function render(){
   ctx.strokeStyle = '#21262d'; ctx.lineWidth = px(1);
   ctx.beginPath(); ctx.moveTo(padX, y - px(22)); ctx.lineTo(W - padX, y - px(22)); ctx.stroke();
   ctx.font = '700 ' + px(20) + 'px ui-monospace,Menlo,monospace';
-  ctx.fillStyle = '#58a6ff'; ctx.fillText('npx cc-safe-setup', padX, y);
+  ctx.fillStyle = '#58a6ff'; ctx.fillText('npx github:yurukusa/cc-safe-setup', padX, y);
   ctx.font = '400 ' + px(15) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
   ctx.fillStyle = '#6e7681';
   const foot = 'MIT · free · github.com/yurukusa/cc-safe-setup';
@@ -226,7 +226,7 @@ function render(){
   const exposed = PROTECTIONS.filter((_,i)=>!state[i]).map(p=>p.name);
   let msg = 'My Claude Code safety: ' + n + '/' + N + ' core protections';
   if(n < N && exposed.length) msg += '. Still exposed to: ' + exposed.slice(0,2).join(', ') + (exposed.length>2?' +'+(exposed.length-2)+' more':'');
-  msg += '. Free hooks: npx cc-safe-setup';
+  msg += '. Free hooks: npx github:yurukusa/cc-safe-setup';
   const xurl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '&url=' + encodeURIComponent(url);
   document.getElementById('xshare').href = xurl;
 }

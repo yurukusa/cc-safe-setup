@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Getting Started — Make Claude Code Safe in 5 Minutes</title>
-<meta name="description" content="Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, production database destruction, force-push to main, secret leaks. Step-by-step for beginners. npx cc-safe-setup.">
+<meta name="description" content="Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, production database destruction, force-push to main, secret leaks. Step-by-step for beginners. npx github:yurukusa/cc-safe-setup.">
 <meta name="keywords" content="claude code, safety, hooks, setup, pretooluse, autonomous, beginner guide, cc-safe-setup, database protection, production safety">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/getting-started.html">
 <style>
@@ -66,7 +66,7 @@ sudo apt install jq</code><button class="copy" onclick="cp(this)">Copy</button><
 <div class="step-num">1</div>
 <h3>Run one command <span class="time">30 sec</span></h3>
 <p>This installs 8 safety hooks and configures your settings.json:</p>
-<pre><code>npx cc-safe-setup</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>You'll see a list of hooks. Press <code>Y</code> to install.</p>
 <div class="why">What gets installed: destructive command blocker, branch push guard, secret leak prevention, syntax checker, context monitor, bash comment stripper, cd+git auto-approver, API error alert.</div>
 </div>
@@ -84,7 +84,7 @@ claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <div class="step-num">3</div>
 <h3>Verify hooks work <span class="time">30 sec</span></h3>
 <p>Run the diagnostic to confirm everything is set up:</p>
-<pre><code>npx cc-safe-setup --doctor</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --doctor</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>All items should show <span style="color:#39d353">✓</span>. If any show <span style="color:#f85149">✗</span>, the doctor tells you how to fix it.</p>
 </div>
 
@@ -94,9 +94,9 @@ claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <div class="step-num">4</div>
 <h3>Simulate a dangerous command <span class="time">30 sec</span></h3>
 <p>See how hooks react without actually running the command:</p>
-<pre><code>npx cc-safe-setup --simulate "rm -rf /"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --simulate "rm -rf /"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>You should see: <span style="color:#f85149">✗ BLOCK — destructive-guard</span></p>
-<pre><code>npx cc-safe-setup --simulate "git status"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --simulate "git status"</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>You should see: <span style="color:#8b949e">→ This command would trigger a permission prompt</span></p>
 </div>
 
@@ -106,14 +106,14 @@ claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <div class="step-num">5</div>
 <h3>Auto-approve read-only commands <span class="time">30 sec</span></h3>
 <p>Tired of approving <code>ls</code>, <code>cat</code>, and <code>git log</code>? This hook auto-approves commands that can't modify anything:</p>
-<pre><code>npx cc-safe-setup --install-example auto-approve-readonly</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example auto-approve-readonly</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>Reduces permission prompts by about 80%. Only commands that write, delete, or push still require approval.</p>
 </div>
 
 <div class="step">
 <div class="step-num">6</div>
 <h3>Auto-approve test commands <span class="time">10 sec</span></h3>
-<pre><code>npx cc-safe-setup --install-example auto-approve-test</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example auto-approve-test</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>npm test, pytest, go test, cargo test — all auto-approved.</p>
 </div>
 
@@ -123,7 +123,7 @@ claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <div class="step-num">7</div>
 <h3>Shield mode <span class="time">30 sec</span></h3>
 <p>For autonomous sessions where Claude runs unattended:</p>
-<pre><code>npx cc-safe-setup --shield</code><button class="copy" onclick="cp(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --shield</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p>Installs everything from steps 1-6 plus: scope guard, memory write guard, skill gate, and project-specific hooks based on your tech stack.</p>
 </div>
 

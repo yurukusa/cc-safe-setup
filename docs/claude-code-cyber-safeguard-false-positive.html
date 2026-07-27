@@ -86,7 +86,7 @@ mv ~/.claude ~/.claude.bak     # has projects/history — back it up
   <p class="note">Works in the clean slate → you were replaying local state; recover by clearing just the offending session's transcript, then restore your backup selectively. Still blocked → it's account/server-side, and the <code>req_…</code> IDs from the blocked turns are what let Anthropic trace it independent of the (benign) content.</p>
 
   <p>If you run hooks, the free MIT <a href="https://github.com/yurukusa/cc-safe-setup" target="_blank" rel="noopener">cc-safe-setup</a> repo ships four advisory-only hooks built for exactly this cluster — none of them block, they just warn or break the bleed:</p>
-  <pre>npx cc-safe-setup</pre>
+  <pre>npx github:yurukusa/cc-safe-setup</pre>
   <table>
     <tr><th>Hook</th><th>What it does</th></tr>
     <tr><td><code>aup-large-tool-output-warner</code></td><td>PreToolUse: warns before a <code>cat</code>/<code>find</code> on a security-shaped path dumps a large output that can flip the classifier — suggests a size-capped variant</td></tr>

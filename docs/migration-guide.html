@@ -33,7 +33,7 @@ th{background:#161b22;color:#f0f6fc}
 <h1>Migrating to Claude Code</h1>
 <p class="sub">Safety setup guide for developers coming from Cursor, Windsurf, Aider, or Copilot</p>
 
-<button class="quick" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield — one command to set up everything',1500)">npx cc-safe-setup --shield — one command to set up everything</button>
+<button class="quick" onclick="navigator.clipboard.writeText('npx github:yurukusa/cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx github:yurukusa/cc-safe-setup --shield — one command to set up everything',1500)">npx github:yurukusa/cc-safe-setup --shield — one command to set up everything</button>
 
 <h2>Why Claude Code is Different</h2>
 
@@ -71,10 +71,10 @@ th{background:#161b22;color:#f0f6fc}
 cp .cursorrules CLAUDE.md  # Then edit to Claude Code format
 
 # 2. Install safety hooks
-npx cc-safe-setup --shield
+npx github:yurukusa/cc-safe-setup --shield
 
 # 3. Add auto-approve for your workflow
-npx cc-safe-setup --install-example auto-approve-build
+npx github:yurukusa/cc-safe-setup --install-example auto-approve-build
 </code></pre>
 
 <h3>Key hooks for Cursor migrants</h3>
@@ -96,9 +96,9 @@ npx cc-safe-setup --install-example auto-approve-build
 <pre><code># Convert Windsurf cascade rules
 # Windsurf's "Flows" → Claude Code's autonomous mode + hooks
 
-npx cc-safe-setup --shield
-npx cc-safe-setup --install-example context-snapshot  # Preserve state across sessions
-npx cc-safe-setup --install-example session-handoff   # Hand off between sessions
+npx github:yurukusa/cc-safe-setup --shield
+npx github:yurukusa/cc-safe-setup --install-example context-snapshot  # Preserve state across sessions
+npx github:yurukusa/cc-safe-setup --install-example session-handoff   # Hand off between sessions
 </code></pre>
 
 <h2>From Aider</h2>
@@ -109,9 +109,9 @@ npx cc-safe-setup --install-example session-handoff   # Hand off between session
 </div>
 
 <pre><code># Aider auto-commits → Claude Code needs explicit control
-npx cc-safe-setup --shield
-npx cc-safe-setup --install-example auto-checkpoint   # Similar to Aider's auto-commit
-npx cc-safe-setup --install-example verify-before-done # Ensure tests pass before commit
+npx github:yurukusa/cc-safe-setup --shield
+npx github:yurukusa/cc-safe-setup --install-example auto-checkpoint   # Similar to Aider's auto-commit
+npx github:yurukusa/cc-safe-setup --install-example verify-before-done # Ensure tests pass before commit
 
 # Aider's /lint → already covered by syntax-check hook
 # Aider's /test → use auto-approve-build to skip prompts
@@ -126,25 +126,25 @@ npx cc-safe-setup --install-example verify-before-done # Ensure tests pass befor
 
 <pre><code># Copilot Workspace creates PRs automatically
 # Claude Code needs branch protection
-npx cc-safe-setup --shield
-npx cc-safe-setup --install-example deploy-guard       # Prevent accidental deploys
-npx cc-safe-setup --install-example diff-size-guard    # Warn on large changes
-npx cc-safe-setup --install-example pr-description-check # Ensure PR quality
+npx github:yurukusa/cc-safe-setup --shield
+npx github:yurukusa/cc-safe-setup --install-example deploy-guard       # Prevent accidental deploys
+npx github:yurukusa/cc-safe-setup --install-example diff-size-guard    # Warn on large changes
+npx github:yurukusa/cc-safe-setup --install-example pr-description-check # Ensure PR quality
 </code></pre>
 
 <h2>Universal Setup (Any Tool)</h2>
 
 <pre><code># Step 1: Maximum safety
-npx cc-safe-setup --shield
+npx github:yurukusa/cc-safe-setup --shield
 
 # Step 2: Check what's installed
-npx cc-safe-setup --status
+npx github:yurukusa/cc-safe-setup --status
 
 # Step 3: Verify everything works
-npx cc-safe-setup --verify
+npx github:yurukusa/cc-safe-setup --verify
 
 # Step 4: View your safety score
-npx cc-safe-setup --audit
+npx github:yurukusa/cc-safe-setup --audit
 </code></pre>
 
 <h2>CLAUDE.md Template</h2>
@@ -183,7 +183,7 @@ npx cc-safe-setup --audit
 <tr><td><code>strict</code></td><td>33</td><td>Autonomous sessions, production repos</td></tr>
 </table>
 
-<pre><code>npx cc-safe-setup --profile strict  # For autonomous/production use
+<pre><code>npx github:yurukusa/cc-safe-setup --profile strict  # For autonomous/production use
 </code></pre>
 
 <div class="footer">

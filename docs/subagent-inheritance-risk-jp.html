@@ -139,7 +139,7 @@ btn.addEventListener('click', () => {
       <p>あなたの点数(${score}/100)は、サブエージェントを日常的に使うのに、ルールも hook も子に届ける仕組みが無い構成です。親で効いている安全の歯止めが、いちばん長く走る子の作業では外れていても、その場では気づけません。子が孫を生んで費用が膨らむ型にも備えがありません。</p>
       <h3>いますぐ効く一手</h3>
       <ul>
-        <li><strong>子に届けたい数行を、起動時に注入する。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-claudemd-inject.sh"><code>subagent-claudemd-inject.sh</code></a>(<code>PreToolUse</code>・matcher は <code>Agent</code>)を入れる。<code>CLAUDE.md</code> の中で子にも必ず効かせたいルールに <code>SUBAGENT:</code> の印を付けておくと、子の起動時にその数行だけが子のプロンプトへ差し込まれます。<code>npx cc-safe-setup</code> で導入できます。</li>
+        <li><strong>子に届けたい数行を、起動時に注入する。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-claudemd-inject.sh"><code>subagent-claudemd-inject.sh</code></a>(<code>PreToolUse</code>・matcher は <code>Agent</code>)を入れる。<code>CLAUDE.md</code> の中で子にも必ず効かせたいルールに <code>SUBAGENT:</code> の印を付けておくと、子の起動時にその数行だけが子のプロンプトへ差し込まれます。<code>npx github:yurukusa/cc-safe-setup</code> で導入できます。</li>
         <li><strong>子の数と深さに上限を置く。</strong> <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/subagent-spawn-rate-monitor.sh"><code>subagent-spawn-rate-monitor.sh</code></a> と <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/examples/max-subagent-count.sh"><code>max-subagent-count.sh</code></a> で、孫の連鎖が指数で広がる前に止める。基盤の最後の歯止めは費用の事故を防ぐには遅すぎます。</li>
         <li><strong>外向きの行動は親に残す。</strong> コミット・PR・外部接続は、ルールとメモリを持つ親の側で行い、子は調べる・読むなど内部で完結する作業に絞る。</li>
       </ul>

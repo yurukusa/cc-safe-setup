@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prevent Claude Code git reset --hard Disasters — cc-safe-setup</title>
-<meta name="description" content="Claude Code can run git reset --hard and wipe all uncommitted work. Real incidents from GitHub Issues. One command to prevent it: npx cc-safe-setup.">
+<meta name="description" content="Claude Code can run git reset --hard and wipe all uncommitted work. Real incidents from GitHub Issues. One command to prevent it: npx github:yurukusa/cc-safe-setup.">
 <meta name="keywords" content="claude code git reset hard, claude code lose changes, claude code undo, destructive git commands, pretooluse hook, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-git-reset-hard.html">
 <meta property="og:title" content="Prevent Claude Code git reset --hard Disasters">
@@ -102,12 +102,12 @@ exit 0</code></pre>
 
 <h2 id="discard-guard">Also Block: git checkout -- and git restore</h2>
 <p><code>git checkout -- &lt;files&gt;</code> and <code>git restore .</code> silently discard working tree changes — no confirmation, no undo. <a href="https://github.com/anthropics/claude-code/issues/37888">#37888</a> reported 30+ files of manual edits destroyed this way.</p>
-<pre><code>npx cc-safe-setup --install-example uncommitted-discard-guard</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example uncommitted-discard-guard</code></pre>
 <p>Blocks <code>git checkout --</code>, <code>git checkout .</code>, <code>git restore</code> (except <code>--staged</code>), and <code>git stash drop</code>.</p>
 
 <div class="cta">
 <h2>Install All 8 Safety Hooks in 10 Seconds</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.8rem">Blocks git reset --hard, rm -rf, force-push to main, secret leaks, and more. <span class="badge">213 test files</span> <span class="badge">734 examples</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started Guide</a></p>
 </div>

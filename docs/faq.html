@@ -36,7 +36,7 @@ details[open] summary{border-bottom:1px solid #21262d}
 <p class="sub">Every question we've been asked, answered. <a href="https://code.claude.com/docs/en/hooks">Official docs</a></p>
 
 <div class="quick">
-<strong>TL;DR:</strong> Hooks are shell scripts that run before/after Claude Code tools. <code>exit 2</code> = block. <code>exit 0</code> = allow. Install 8 safety hooks: <code>npx cc-safe-setup</code>
+<strong>TL;DR:</strong> Hooks are shell scripts that run before/after Claude Code tools. <code>exit 2</code> = block. <code>exit 0</code> = allow. Install 8 safety hooks: <code>npx github:yurukusa/cc-safe-setup</code>
 </div>
 
 <div class="cat">Basics</div>
@@ -68,8 +68,8 @@ details[open] summary{border-bottom:1px solid #21262d}
 <div class="answer">
 <p>Not really. You can:</p>
 <ol>
-<li>Use <code>npx cc-safe-setup</code> to install pre-built hooks (zero coding)</li>
-<li>Use <code>npx cc-safe-setup --create "your description"</code> to generate hooks from English</li>
+<li>Use <code>npx github:yurukusa/cc-safe-setup</code> to install pre-built hooks (zero coding)</li>
+<li>Use <code>npx github:yurukusa/cc-safe-setup --create "your description"</code> to generate hooks from English</li>
 <li>Use the <a href="builder.html">Hook Builder</a> web tool</li>
 <li>Copy-paste from the <a href="hooks-cheatsheet.html">Cheat Sheet</a></li>
 </ol>
@@ -129,7 +129,7 @@ exit 0</code></pre>
 <summary>Do hooks slow down Claude Code?</summary>
 <div class="answer">
 <p>No. Each hook runs in ~5ms (bash + jq). Even with 10 hooks chained, total overhead is <50ms per tool call — imperceptible compared to the API latency.</p>
-<p>You can measure: <code>npx cc-safe-setup --benchmark</code></p>
+<p>You can measure: <code>npx github:yurukusa/cc-safe-setup --benchmark</code></p>
 </div>
 </details>
 
@@ -137,7 +137,7 @@ exit 0</code></pre>
 <summary>Can Claude disable or modify hooks?</summary>
 <div class="answer">
 <p>Claude can edit <code>settings.json</code> via the Edit tool. To prevent this:</p>
-<pre><code>npx cc-safe-setup --install-example protect-claudemd</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example protect-claudemd</code></pre>
 <p>This hook blocks edits to CLAUDE.md and settings files.</p>
 </div>
 </details>
@@ -146,7 +146,7 @@ exit 0</code></pre>
 <summary>What if my hook has a bug?</summary>
 <div class="answer">
 <p>If a hook exits with code 1 (error), Claude Code treats it as a hook failure and <strong>ignores it</strong> — the tool call proceeds. This is by design: buggy hooks don't block all operations.</p>
-<p>Only <code>exit 2</code> blocks. If your hook accidentally exits 2 for everything, use <code>npx cc-safe-setup --doctor</code> to diagnose.</p>
+<p>Only <code>exit 2</code> blocks. If your hook accidentally exits 2 for everything, use <code>npx github:yurukusa/cc-safe-setup --doctor</code> to diagnose.</p>
 </div>
 </details>
 
@@ -165,7 +165,7 @@ exit 0</code></pre>
 <details>
 <summary>My hook doesn't fire — what's wrong?</summary>
 <div class="answer">
-<p>Run diagnostics: <code>npx cc-safe-setup --doctor</code></p>
+<p>Run diagnostics: <code>npx github:yurukusa/cc-safe-setup --doctor</code></p>
 <p>Common causes:</p>
 <ol>
 <li><strong>Not executable:</strong> <code>chmod +x ~/.claude/hooks/your-hook.sh</code></li>
@@ -174,7 +174,7 @@ exit 0</code></pre>
 <li><strong>settings.json syntax error:</strong> Validate with <code>python3 -c "import json; json.load(open('$HOME/.claude/settings.json'))"</code></li>
 <li><strong>jq not installed:</strong> <code>which jq</code> — install if missing</li>
 </ol>
-<p>Quick fix: <code>npx cc-safe-setup --quickfix</code></p>
+<p>Quick fix: <code>npx github:yurukusa/cc-safe-setup --quickfix</code></p>
 </div>
 </details>
 
@@ -212,8 +212,8 @@ echo "Exit: $?"</code></pre>
 <div class="answer">
 <p>Three ways:</p>
 <ol>
-<li><strong>One command:</strong> <code>npx cc-safe-setup</code> (installs 8 safety hooks)</li>
-<li><strong>Individual:</strong> <code>npx cc-safe-setup --install-example block-database-wipe</code></li>
+<li><strong>One command:</strong> <code>npx github:yurukusa/cc-safe-setup</code> (installs 8 safety hooks)</li>
+<li><strong>Individual:</strong> <code>npx github:yurukusa/cc-safe-setup --install-example block-database-wipe</code></li>
 <li><strong>Manual:</strong> Save script to <code>~/.claude/hooks/</code>, <code>chmod +x</code>, add to <code>settings.json</code></li>
 </ol>
 </div>
@@ -222,7 +222,7 @@ echo "Exit: $?"</code></pre>
 <details>
 <summary>How do I uninstall hooks?</summary>
 <div class="answer">
-<pre><code>npx cc-safe-setup --uninstall</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --uninstall</code></pre>
 <p>Or manually: remove the hook entries from <code>~/.claude/settings.json</code> and delete the script files.</p>
 </div>
 </details>

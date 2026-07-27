@@ -67,7 +67,7 @@ a { color:var(--blue); }
 <tr><th>Repositories covered</th><td>8 repos (entire GitHub organization)</td></tr>
 <tr><th>Developers covered</th><td>23 (ran Claude Code in the last 30 days)</td></tr>
 <tr><th>Intended for</th><td>Security owner / SOC2 evidence / customer security questionnaires</td></tr>
-<tr><th>Method</th><td>Aggregated from <code>npx cc-safe-setup --audit --json</code> per repo plus hook-log analysis (no manual entry)</td></tr>
+<tr><th>Method</th><td>Aggregated from <code>npx github:yurukusa/cc-safe-setup --audit --json</code> per repo plus hook-log analysis (no manual entry)</td></tr>
 </table>
 
 <h2>2. Org-wide safety score</h2>
@@ -129,7 +129,7 @@ a { color:var(--blue); }
 <h2>6. Remediation roadmap (recommended by next month)</h2>
 <table>
 <tr><th>Priority</th><th>Target</th><th>Recommended action</th></tr>
-<tr><td><span class="sev sev-crit">Critical</span></td><td><code>legacy-billing</code></td><td>Re-apply the baseline (<code>npx cc-safe-setup --team</code>). This is production billing code; a missing destructive-guard is the top thing to close.</td></tr>
+<tr><td><span class="sev sev-crit">Critical</span></td><td><code>legacy-billing</code></td><td>Re-apply the baseline (<code>npx github:yurukusa/cc-safe-setup --team</code>). This is production billing code; a missing destructive-guard is the top thing to close.</td></tr>
 <tr><td><span class="sev sev-high">High</span></td><td><code>data-pipeline</code></td><td>Apply secret-guard and roll in the <code>--accept-data-loss</code> block (RULE-2605-03).</td></tr>
 <tr><td><span class="sev sev-med">Medium</span></td><td><code>legacy-billing</code> · 7× <code>--no-verify</code></td><td>Review the practice of skipping the CI gate. If a bypass is ever needed, document an exception process.</td></tr>
 <tr><td><span class="sev sev-low">Low</span></td><td><code>infra-terraform</code></td><td>Add terraform <code>destroy</code> protection to the baseline (currently warn-only).</td></tr>

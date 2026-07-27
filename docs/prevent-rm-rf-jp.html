@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code の rm -rf 事故を防ぐ——ファイルが消える前に — cc-safe-setup</title>
-<meta name="description" content="Claude Code は端末をフルに操作でき、rm -rf でファイルシステムごと消すことが実際に起きています。GitHub の実際の事故と、それを止める1コマンド npx cc-safe-setup。">
+<meta name="description" content="Claude Code は端末をフルに操作でき、rm -rf でファイルシステムごと消すことが実際に起きています。GitHub の実際の事故と、それを止める1コマンド npx github:yurukusa/cc-safe-setup。">
 <meta name="keywords" content="Claude Code ファイル 消えた, Claude Code 削除 事故, Claude Code rm -rf, Claude Code 安全, 破壊的コマンド 防止, PreToolUse hook, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-rm-rf-jp.html">
 <meta property="og:title" content="Claude Code の rm -rf 事故を防ぐ">
 <meta property="og:description" content="Claude Code がファイルシステムを消した実際の事故と、それを止める1コマンド。">
 <meta property="og:type" content="article">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の rm -rf 事故を防ぐ","description":"安全 hook を入れて Claude Code の破壊的な rm -rf を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx cc-safe-setup を実行し、破壊的コマンドを止める hook を含む安全 hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code の rm -rf 事故を防ぐ","description":"安全 hook を入れて Claude Code の破壊的な rm -rf を止める。","step":[{"@type":"HowToStep","name":"cc-safe-setup を入れる","text":"npx github:yurukusa/cc-safe-setup を実行し、破壊的コマンドを止める hook を含む安全 hook を導入する。"}],"tool":{"@type":"SoftwareApplication","name":"cc-safe-setup","url":"https://github.com/yurukusa/cc-safe-setup","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows"}}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -101,13 +101,13 @@ exit 0</code></pre>
 
 <div class="cta">
 <h2>8つの安全 hook を10秒で入れる</h2>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p style="margin-top:.8rem">rm -rf を止め、main への force push を防ぎ、秘密の漏洩を捕まえ、編集のたびに構文を検証します。<span class="badge">9,200以上のテスト</span> <span class="badge">892の hook</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">はじめにの手引き</a></p>
 </div>
 
 <h2>設定を検証する</h2>
-<pre><code>npx cc-safe-setup --verify</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --verify</code></pre>
 <p>各 hook にテストの入力を送り、正しく止まることを確認します:</p>
 <pre><code>destructive-guard:
   &#10004; rm -rf / → BLOCKED

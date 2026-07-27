@@ -120,15 +120,15 @@ function showResult() {
 
   // Base command
   if (usage === 'auto') {
-    cmds.push('npx cc-safe-setup --profile strict');
+    cmds.push('npx github:yurukusa/cc-safe-setup --profile strict');
     extras.push('Strict profile: 33 hooks for autonomous sessions');
   } else if (usage === 'team') {
-    cmds.push('npx cc-safe-setup --shield');
-    cmds.push('npx cc-safe-setup --team');
+    cmds.push('npx github:yurukusa/cc-safe-setup --shield');
+    cmds.push('npx github:yurukusa/cc-safe-setup --team');
     cmds.push('git add .claude/ && git commit -m "chore: add safety hooks"');
     extras.push('--team copies hooks with relative paths for git sharing');
   } else {
-    cmds.push('npx cc-safe-setup --shield');
+    cmds.push('npx github:yurukusa/cc-safe-setup --shield');
   }
 
   // Stack-specific
@@ -140,21 +140,21 @@ function showResult() {
     java: 'auto-approve-gradle',
   };
   if (stackMap[stack]) {
-    cmds.push(`npx cc-safe-setup --install-example ${stackMap[stack]}`);
+    cmds.push(`npx github:yurukusa/cc-safe-setup --install-example ${stackMap[stack]}`);
   }
 
   // Concern-specific
   if (concern === 'prompts' || concern === 'all') {
-    cmds.push('npx cc-safe-setup --install-example auto-approve-readonly');
+    cmds.push('npx github:yurukusa/cc-safe-setup --install-example auto-approve-readonly');
     extras.push('auto-approve-readonly eliminates ~80% of permission prompts');
   }
   if (concern === 'cost' || concern === 'all') {
-    cmds.push('npx cc-safe-setup --install-example token-budget-guard');
+    cmds.push('npx github:yurukusa/cc-safe-setup --install-example token-budget-guard');
     extras.push('token-budget-guard warns at $10, blocks at $50');
   }
 
   // Always
-  cmds.push('npx cc-safe-setup --verify');
+  cmds.push('npx github:yurukusa/cc-safe-setup --verify');
 
   document.getElementById('r-title').textContent =
     usage === 'auto' ? 'Autonomous Safety Setup' :

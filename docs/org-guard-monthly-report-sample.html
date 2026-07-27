@@ -69,7 +69,7 @@ a { color:var(--blue); }
 <tr><th>対象のリポジトリ</th><td>8 リポジトリ（GitHub Organization 全体）</td></tr>
 <tr><th>対象の開発者</th><td>23 名（過去30日に Claude Code を実行した人数）</td></tr>
 <tr><th>提出の想定先</th><td>セキュリティ責任者 / SOC2 の証跡 / 顧客のセキュリティ調査票への回答</td></tr>
-<tr><th>集計の方法</th><td><code>npx cc-safe-setup --audit --json</code> を各リポで実行した結果の集計と、hook の実行ログの解析（手作業の入力なし）</td></tr>
+<tr><th>集計の方法</th><td><code>npx github:yurukusa/cc-safe-setup --audit --json</code> を各リポで実行した結果の集計と、hook の実行ログの解析（手作業の入力なし）</td></tr>
 </table>
 
 <h2>2. 組織全体の安全スコア</h2>
@@ -131,7 +131,7 @@ a { color:var(--blue); }
 <h2>6. 是正のロードマップ（来月までの推奨）</h2>
 <table>
 <tr><th>優先</th><th>対象</th><th>推奨する対応</th></tr>
-<tr><td><span class="sev sev-crit">重大</span></td><td><code>legacy-billing</code></td><td>baseline を再適用（<code>npx cc-safe-setup --team</code>）。本番の課金のコードであり、destructive-guard の欠落は最優先で塞ぐ</td></tr>
+<tr><td><span class="sev sev-crit">重大</span></td><td><code>legacy-billing</code></td><td>baseline を再適用（<code>npx github:yurukusa/cc-safe-setup --team</code>）。本番の課金のコードであり、destructive-guard の欠落は最優先で塞ぐ</td></tr>
 <tr><td><span class="sev sev-high">高</span></td><td><code>data-pipeline</code></td><td>secret-guard を適用し、<code>--accept-data-loss</code> の遮断（RULE-2605-03）を反映</td></tr>
 <tr><td><span class="sev sev-med">中</span></td><td><code>legacy-billing</code> の <code>--no-verify</code> 7回</td><td>CI ゲートの回避の運用を確認。回避が必要なら例外の手順を明文化</td></tr>
 <tr><td><span class="sev sev-low">低</span></td><td><code>infra-terraform</code></td><td>terraform の <code>destroy</code> の保護を baseline に追加（現状は警告のみ）</td></tr>

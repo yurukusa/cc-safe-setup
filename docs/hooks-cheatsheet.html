@@ -47,7 +47,7 @@ th{background:#161b22;color:#f0f6fc}
 <h1>Claude Code Hooks Cheat Sheet</h1>
 <p class="sub">Copy-paste patterns. Zero fluff. <a href="https://code.claude.com/docs/en/hooks">Official docs</a></p>
 
-<button class="quick" onclick="navigator.clipboard.writeText('npx cc-safe-setup');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup — install 8 safety hooks instantly',1500)">npx cc-safe-setup — install 8 safety hooks instantly</button>
+<button class="quick" onclick="navigator.clipboard.writeText('npx github:yurukusa/cc-safe-setup');this.textContent='Copied!';setTimeout(()=>this.textContent='npx github:yurukusa/cc-safe-setup — install 8 safety hooks instantly',1500)">npx github:yurukusa/cc-safe-setup — install 8 safety hooks instantly</button>
 
 <div class="toc">
   <a href="#basics">Basics</a>
@@ -249,45 +249,45 @@ echo "Exit code: $?"</code><button class="copy" onclick="copyBlock(this)">Copy</
 <pre><code>python3 -c "import json; json.load(open('$HOME/.claude/settings.json')); print('Valid')"</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
 
 <h3>Quick health check</h3>
-<pre><code>npx cc-safe-setup --quickfix   # Auto-detect and fix problems
-npx cc-safe-setup --doctor     # Detailed diagnosis
-npx cc-safe-setup --verify     # Test each hook</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --quickfix   # Auto-detect and fix problems
+npx github:yurukusa/cc-safe-setup --doctor     # Detailed diagnosis
+npx github:yurukusa/cc-safe-setup --verify     # Test each hook</code><button class="copy" onclick="copyBlock(this)">Copy</button></pre>
 
 <h2 id="recipes">Quick Recipes</h2>
 
 <div class="pattern">
 <div class="pattern-title">I want to block all sudo commands</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --install-example no-sudo-guard</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --install-example no-sudo-guard</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to block database drops</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --install-example block-database-wipe</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --install-example block-database-wipe</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to auto-approve Python tools</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --install-example auto-approve-python</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --install-example auto-approve-python</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to prevent deploys on Fridays</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --install-example no-deploy-friday</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --install-example no-deploy-friday</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to track session cost</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --install-example token-budget-guard</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --install-example token-budget-guard</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to generate a custom hook</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --create "block npm publish without tests"</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --create "block npm publish without tests"</code></div>
 </div>
 
 <div class="pattern">
 <div class="pattern-title">I want to detect what my stack needs</div>
-<div class="pattern-desc"><code>npx cc-safe-setup --scan</code></div>
+<div class="pattern-desc"><code>npx github:yurukusa/cc-safe-setup --scan</code></div>
 </div>
 
 <h2 id="exit-codes">Exit Code Reference</h2>

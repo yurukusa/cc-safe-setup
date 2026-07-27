@@ -108,7 +108,7 @@ function scan() {
   result.style.display = 'block';
 
   if (!input) {
-    result.innerHTML = '<div class="score score-bad">⚠️ No settings.json — You have ZERO protection</div><div class="fix"><h3>Fix it now:</h3><pre><code>npx cc-safe-setup --opus47</code></pre></div>';
+    result.innerHTML = '<div class="score score-bad">⚠️ No settings.json — You have ZERO protection</div><div class="fix"><h3>Fix it now:</h3><pre><code>npx github:yurukusa/cc-safe-setup --opus47</code></pre></div>';
     return;
   }
 
@@ -232,7 +232,7 @@ function scan() {
   }
 
   if (score < maxScore) {
-    html += `<div class="fix"><h3>Fix all issues in one command:</h3><pre><code>npx cc-safe-setup --opus47</code></pre><p style="font-size:.85rem;color:#8b949e;">Installs ${maxScore - score} missing protection${maxScore - score > 1 ? 's' : ''}. <a href="opus-47-survival-guide.html">Learn what each hook does →</a></p></div>`;
+    html += `<div class="fix"><h3>Fix all issues in one command:</h3><pre><code>npx github:yurukusa/cc-safe-setup --opus47</code></pre><p style="font-size:.85rem;color:#8b949e;">Installs ${maxScore - score} missing protection${maxScore - score > 1 ? 's' : ''}. <a href="opus-47-survival-guide.html">Learn what each hook does →</a></p></div>`;
   } else {
     html += '<div class="check pass" style="margin-top:1rem;font-size:1rem;font-weight:600;">🛡️ Your setup is fully protected against known Opus 4.7 issues.</div>';
   }

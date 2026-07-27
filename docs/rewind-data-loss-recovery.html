@@ -110,7 +110,7 @@ git stash list                # anything you (or a hook) stashed</code></pre>
 <h2>Prevent it permanently (one free hook)</h2>
 <p>The durable protection is to make sure every edit also reaches git — the layer <code>/rewind</code> cannot rewrite. cc-safe-setup ships <code>auto-checkpoint.sh</code> for exactly this: a <code>PostToolUse</code> hook that creates a lightweight commit after every <code>Edit</code>/<code>Write</code>. After that, any accidental rewind is fully recoverable with <code>git log</code> and <code>git cherry-pick</code>.</p>
 <pre><code># clone &amp; install the free hooks (MIT, runs locally, nothing leaves your machine)
-npx cc-safe-setup@latest</code></pre>
+npx github:yurukusa/cc-safe-setup@latest</code></pre>
 <p>Three hooks in the kit cover the data-loss family that <code>/rewind</code> sits inside:</p>
 <ul>
 <li><strong><code>auto-checkpoint.sh</code></strong> — auto-commit after every edit, so a rewind is always recoverable from git (<a href="https://github.com/anthropics/claude-code/issues/34674">#34674</a>).</li>

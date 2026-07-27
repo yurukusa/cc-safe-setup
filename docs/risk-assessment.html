@@ -59,7 +59,7 @@ h1{color:#f0f6fc;font-size:1.4rem;margin-bottom:.5rem;text-align:center}
 <div class="recs" id="recs"></div>
 <div class="cta">
 <p style="font-size:.9rem;margin-bottom:.5rem">Reduce your risk to near-zero:</p>
-<pre style="background:#0d1117;padding:.5rem;border-radius:4px;display:inline-block;font-size:.85rem;color:#f0f6fc">npx cc-safe-setup</pre>
+<pre style="background:#0d1117;padding:.5rem;border-radius:4px;display:inline-block;font-size:.85rem;color:#f0f6fc">npx github:yurukusa/cc-safe-setup</pre>
 <p style="margin-top:.5rem;font-size:.8rem"><a href="incidents.html">Browse 90 real incidents</a> · <a href="demo.html">See hooks in action</a> · <a href="token-book.html">Token Book ($17)</a></p>
 </div>
 <button class="btn" onclick="shareResult()" style="background:#1da1f2;margin-right:.5rem">Share on X</button>
@@ -172,7 +172,7 @@ function showResult() {
   }
 
   let recs = [];
-  if (tags.includes('no-hooks')) recs.push({t:'Install safety hooks',d:'<code>npx cc-safe-setup</code> — 8 hooks in 30 seconds. Blocks rm -rf, force-push, credential leaks.'});
+  if (tags.includes('no-hooks')) recs.push({t:'Install safety hooks',d:'<code>npx github:yurukusa/cc-safe-setup</code> — 8 hooks in 30 seconds. Blocks rm -rf, force-push, credential leaks.'});
   if (tags.includes('auto') || tags.includes('overnight')) recs.push({t:'Add overnight protection',d:'Install compact-circuit-breaker and session-time-limit hooks. <a href="opus-47-survival-guide.html#compact-death-spiral">See §57</a>'});
   if (tags.includes('creds')) recs.push({t:'Protect credentials',d:'The secret-guard hook blocks git add .env. Add dotfile-guard for ~/.ssh protection.'});
   if (tags.includes('tokens')) recs.push({t:'Monitor token consumption',d:'Use <a href="token-checkup.html">Token Checkup</a> to diagnose waste patterns. The <a href="token-book.html">Token Book</a> covers 48 symptoms.'});

@@ -52,9 +52,9 @@
 <div class="risk">
 <h3>MCP01: Token Mismanagement &amp; Secret Exposure</h3>
 <p>Hardcoded credentials, long-lived tokens, secrets exposed in model memory or logs.</p>
-<pre><code>npx cc-safe-setup --install-example credential-file-cat-guard
-npx cc-safe-setup --install-example credential-exfil-guard
-npx cc-safe-setup --install-example hardcoded-secret-detector</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example credential-file-cat-guard
+npx github:yurukusa/cc-safe-setup --install-example credential-exfil-guard
+npx github:yurukusa/cc-safe-setup --install-example hardcoded-secret-detector</code></pre>
 <p>Also: <code>write-secret-guard</code>, <code>no-secrets-in-logs</code>, <code>output-secret-mask</code>, <code>no-default-credentials</code>, <code>staged-secret-scan</code></p>
 <p><a href="prevent-credential-leak.html">→ Credential Protection Guide</a></p>
 </div>
@@ -62,30 +62,30 @@ npx cc-safe-setup --install-example hardcoded-secret-detector</code></pre>
 <div class="risk">
 <h3>MCP04: Software Supply Chain Attacks</h3>
 <p>Compromised dependencies, unreviewed packages, dependency tampering.</p>
-<pre><code>npx cc-safe-setup --install-example dependency-install-guard
-npx cc-safe-setup --install-example dependency-audit
-npx cc-safe-setup --install-example npm-script-injection</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example dependency-install-guard
+npx github:yurukusa/cc-safe-setup --install-example dependency-audit
+npx github:yurukusa/cc-safe-setup --install-example npm-script-injection</code></pre>
 <p>Also: <code>dependency-version-pin</code>, <code>check-dependency-age</code>, <code>check-dependency-license</code>, <code>no-force-install</code></p>
 </div>
 
 <div class="risk">
 <h3>MCP05: Command Injection &amp; Execution</h3>
 <p>Unvalidated inputs leading to destructive system commands.</p>
-<pre><code>npx cc-safe-setup --install-example destructive-guard
-npx cc-safe-setup --install-example no-eval
-npx cc-safe-setup --install-example prompt-injection-guard</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example destructive-guard
+npx github:yurukusa/cc-safe-setup --install-example no-eval
+npx github:yurukusa/cc-safe-setup --install-example prompt-injection-guard</code></pre>
 <p>Also: <code>rm-safety-net</code>, <code>sql-injection-detect</code>, <code>terraform-guard</code>, <code>no-exec-user-input</code></p>
 </div>
 
 <div class="risk">
 <h3>MCP09: Shadow MCP Servers</h3>
 <p>Unauthorized MCP servers bypassing security governance.</p>
-<pre><code>npx cc-safe-setup --install-example mcp-server-guard</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup --install-example mcp-server-guard</code></pre>
 <p>Blocks modification of <code>.mcp.json</code> and unauthorized MCP server launches. Allowlist-based.</p>
 </div>
 
 <h2>Install All OWASP Defenses</h2>
-<button class="install" onclick="navigator.clipboard.writeText('npx cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx cc-safe-setup --shield',1500)">npx cc-safe-setup --shield</button>
+<button class="install" onclick="navigator.clipboard.writeText('npx github:yurukusa/cc-safe-setup --shield');this.textContent='Copied!';setTimeout(()=>this.textContent='npx github:yurukusa/cc-safe-setup --shield',1500)">npx github:yurukusa/cc-safe-setup --shield</button>
 <p style="color:#8b949e;font-size:.85rem">892 example hooks · 213 test files · Covers all 10 OWASP MCP risk categories</p>
 <p style="margin-top:.5rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> · <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> · <a href="hub.html">All Tools</a></p>
 

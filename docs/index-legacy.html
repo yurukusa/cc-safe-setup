@@ -240,22 +240,22 @@ function analyzeSettings(settings) {
   const stopCmds = JSON.stringify(stopHooks).toLowerCase();
 
   if (preHooks.length === 0) {
-    risks.push({ severity: 'CRITICAL', issue: 'No PreToolUse hooks — rm -rf, git reset --hard run unchecked', fix: 'npx cc-safe-setup' });
+    risks.push({ severity: 'CRITICAL', issue: 'No PreToolUse hooks — rm -rf, git reset --hard run unchecked', fix: 'npx github:yurukusa/cc-safe-setup' });
     missing.push('destructive-guard', 'branch-guard', 'secret-guard', 'comment-strip', 'cd-git-allow');
   } else {
     good.push('PreToolUse hooks (' + preHooks.length + ')');
     if (!allCmds.match(/destructive|guard|block|rm.*rf|reset.*hard/)) {
-      risks.push({ severity: 'HIGH', issue: 'No destructive command blocker', fix: 'npx cc-safe-setup' });
+      risks.push({ severity: 'HIGH', issue: 'No destructive command blocker', fix: 'npx github:yurukusa/cc-safe-setup' });
       missing.push('destructive-guard');
     } else good.push('Destructive command protection');
 
     if (!allCmds.match(/branch|push|main|master/)) {
-      risks.push({ severity: 'HIGH', issue: 'No branch push protection', fix: 'npx cc-safe-setup' });
+      risks.push({ severity: 'HIGH', issue: 'No branch push protection', fix: 'npx github:yurukusa/cc-safe-setup' });
       missing.push('branch-guard');
     } else good.push('Branch push protection');
 
     if (!allCmds.match(/secret|env|credential/)) {
-      risks.push({ severity: 'HIGH', issue: 'No secret leak protection (.env commits)', fix: 'npx cc-safe-setup' });
+      risks.push({ severity: 'HIGH', issue: 'No secret leak protection (.env commits)', fix: 'npx github:yurukusa/cc-safe-setup' });
       missing.push('secret-guard');
     } else good.push('Secret leak protection');
 
@@ -264,11 +264,11 @@ function analyzeSettings(settings) {
   }
 
   if (!allCmds.match(/database|wipe|migrate|prisma/)) {
-    risks.push({ severity: 'MEDIUM', issue: 'No database wipe protection', fix: 'npx cc-safe-setup --install-example block-database-wipe' });
+    risks.push({ severity: 'MEDIUM', issue: 'No database wipe protection', fix: 'npx github:yurukusa/cc-safe-setup --install-example block-database-wipe' });
   } else good.push('Database wipe protection');
 
   if (postHooks.length === 0) {
-    risks.push({ severity: 'MEDIUM', issue: 'No PostToolUse hooks (no syntax checking)', fix: 'npx cc-safe-setup' });
+    risks.push({ severity: 'MEDIUM', issue: 'No PostToolUse hooks (no syntax checking)', fix: 'npx github:yurukusa/cc-safe-setup' });
     missing.push('syntax-check', 'context-monitor');
   } else {
     good.push('PostToolUse hooks (' + postHooks.length + ')');
@@ -350,7 +350,7 @@ function renderFixTab(settings, risks, missing) {
 
   // Option 1: npx
   html += '<h3>Option 1: One command (recommended)</h3>';
-  html += '<div class="code-block"><button class="copy-btn" onclick="copyText(\'npx-cmd\')">Copy</button><pre id="npx-cmd">npx cc-safe-setup</pre></div>';
+  html += '<div class="code-block"><button class="copy-btn" onclick="copyText(\'npx-cmd\')">Copy</button><pre id="npx-cmd">npx github:yurukusa/cc-safe-setup</pre></div>';
 
   // Option 2: Generated settings.json
   html += '<h3>Option 2: Copy settings.json patch</h3>';
@@ -380,11 +380,11 @@ function renderManualTab() {
 
   html += '<ol class="setup-steps">';
   html += '<li><strong>Create the hooks directory</strong><div class="code-block"><pre>mkdir -p ~/.claude/hooks</pre></div></li>';
-  html += '<li><strong>Create hook scripts</strong><br><span style="color:#8b949e;font-size:0.85rem">Use the "Fix & Generate" tab to get the script content, or run <code>npx cc-safe-setup --dry-run</code> to preview.</span></li>';
+  html += '<li><strong>Create hook scripts</strong><br><span style="color:#8b949e;font-size:0.85rem">Use the "Fix & Generate" tab to get the script content, or run <code>npx github:yurukusa/cc-safe-setup --dry-run</code> to preview.</span></li>';
   html += '<li><strong>Make scripts executable</strong><div class="code-block"><pre>chmod +x ~/.claude/hooks/*.sh</pre></div></li>';
   html += '<li><strong>Update settings.json</strong><br><span style="color:#8b949e;font-size:0.85rem">Add the hook entries from "Fix & Generate" tab to <code>~/.claude/settings.json</code>.</span></li>';
   html += '<li><strong>Restart Claude Code</strong><br><span style="color:#8b949e;font-size:0.85rem">Close and reopen Claude Code. Hooks activate on restart.</span></li>';
-  html += '<li><strong>Verify</strong><div class="code-block"><pre>npx cc-safe-setup --verify</pre></div><span style="color:#8b949e;font-size:0.85rem">Or test manually: try <code>rm -rf /</code> in Claude Code — the hook should block it.</span></li>';
+  html += '<li><strong>Verify</strong><div class="code-block"><pre>npx github:yurukusa/cc-safe-setup --verify</pre></div><span style="color:#8b949e;font-size:0.85rem">Or test manually: try <code>rm -rf /</code> in Claude Code — the hook should block it.</span></li>';
   html += '</ol>';
 
   html += '<h3 style="margin-top:1.5rem">Requirements</h3>';

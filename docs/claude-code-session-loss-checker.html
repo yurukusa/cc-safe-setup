@@ -105,8 +105,8 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.8rem;
   <h3>Catch the next silent loss automatically</h3>
   <p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> is a free set of Claude Code safety hooks. Two of them target exactly this failure. They are example hooks (not in the default install), so add each one explicitly:</p>
   <ul>
-    <li><b>Back up before it can be emptied</b> (the real fix) — <code>npx cc-safe-setup --install-example session-backup-on-start</code>. Copies your <code>.jsonl</code> transcripts on every session start, and skips the copy when the source is smaller than the existing backup, so an emptied stub never overwrites a good one.</li>
-    <li><b>Catch the moment it happens</b> — <code>npx cc-safe-setup --install-example session-persistence-verifier</code>. Warns you the moment a turn finishes with zero persisted records, before you lose the thread.</li>
+    <li><b>Back up before it can be emptied</b> (the real fix) — <code>npx github:yurukusa/cc-safe-setup --install-example session-backup-on-start</code>. Copies your <code>.jsonl</code> transcripts on every session start, and skips the copy when the source is smaller than the existing backup, so an emptied stub never overwrites a good one.</li>
+    <li><b>Catch the moment it happens</b> — <code>npx github:yurukusa/cc-safe-setup --install-example session-persistence-verifier</code>. Warns you the moment a turn finishes with zero persisted records, before you lose the thread.</li>
   </ul>
 </div>
 

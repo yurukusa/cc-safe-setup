@@ -39,7 +39,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.4rem 
 if [ -z "$INPUT" ]
 fi
 # bash exits with code 2 → Claude blocks the tool</code></pre>
-<div class="fix"><strong>Fix:</strong> Always run <code>bash -n hook.sh</code> before deploying. Or: <code>npx cc-safe-setup --validate</code></div>
+<div class="fix"><strong>Fix:</strong> Always run <code>bash -n hook.sh</code> before deploying. Or: <code>npx github:yurukusa/cc-safe-setup --validate</code></div>
 </div>
 </div>
 
@@ -62,7 +62,7 @@ fi
 <p>Most hooks use <code>jq</code> to parse JSON stdin. If jq isn't installed, the hook silently fails and does nothing.</p>
 <pre><code># This silently fails without jq:
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')</code></pre>
-<div class="fix"><strong>Fix:</strong> Run <code>npx cc-safe-setup --doctor</code> — it checks jq installation first.</div>
+<div class="fix"><strong>Fix:</strong> Run <code>npx github:yurukusa/cc-safe-setup --doctor</code> — it checks jq installation first.</div>
 </div>
 </div>
 
@@ -106,7 +106,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 <div class="mistake-header"><div class="mistake-num">7</div><div class="mistake-title">Hook takes too long</div></div>
 <div class="mistake-body">
 <p>Hooks have a timeout. If your hook does network calls or heavy processing, it may time out and silently fail. On Windows, Python hooks take 200-500ms to start.</p>
-<div class="fix"><strong>Fix:</strong> Keep hooks fast. Use bash instead of Python. Avoid network calls. Run <code>npx cc-safe-setup --benchmark</code> to measure.</div>
+<div class="fix"><strong>Fix:</strong> Keep hooks fast. Use bash instead of Python. Avoid network calls. Run <code>npx github:yurukusa/cc-safe-setup --benchmark</code> to measure.</div>
 </div>
 </div>
 

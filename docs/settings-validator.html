@@ -58,7 +58,7 @@ footer a { color: #64748b; }
 <div id="results" class="results"></div>
 
 <div class="cta">
-  <strong>Want 700+ tested safety hooks?</strong> Run <code>npx cc-safe-setup</code> to auto-configure your settings.json.
+  <strong>Want 700+ tested safety hooks?</strong> Run <code>npx github:yurukusa/cc-safe-setup</code> to auto-configure your settings.json.
   <br><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ·
   <a href="token-book.html#en">Token Book (¥2,500)</a> ·
   <a href="https://yurukusa.github.io/cc-safe-setup/">All Tools</a>
@@ -92,7 +92,7 @@ function validate() {
 
   // Check hooks section
   if (!data.hooks) {
-    addResult('warning', 'No hooks configured', 'Your settings.json has no hooks. Consider adding safety hooks with npx cc-safe-setup');
+    addResult('warning', 'No hooks configured', 'Your settings.json has no hooks. Consider adding safety hooks with npx github:yurukusa/cc-safe-setup');
     showStats(0, 0, 0);
     return;
   }
@@ -175,7 +175,7 @@ function validate() {
 
   // Safety checks
   if (hookCount === 0) {
-    addResult('warning', 'No hooks defined', 'Your Claude Code has no safety hooks. Run npx cc-safe-setup for 892 example hooks');
+    addResult('warning', 'No hooks defined', 'Your Claude Code has no safety hooks. Run npx github:yurukusa/cc-safe-setup for 892 example hooks');
   } else if (hookCount < 3) {
     addResult('info', `Only ${hookCount} hook(s)`, 'Consider adding more safety hooks: rm-rf guard, credential guard, force-push guard');
   }

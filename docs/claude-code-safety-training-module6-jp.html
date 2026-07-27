@@ -88,7 +88,7 @@ a { color:var(--blue); }
 <div class="step">
 <h3>手順 1. 復旧の備えの hook を入れる</h3>
 <p>cc-safe-setup（無料・MIT）が、編集の前の backup と編集ごとの checkpoint の hook を入れます。</p>
-<pre><code>npx cc-safe-setup</code></pre>
+<pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
 <p>これで <code>file-edit-backup</code>（編集の前にファイルを <code>~/.claude/file-backups/</code> へ退避）と <code>auto-checkpoint</code>（編集ごとに軽量の checkpoint の commit）を含む hook が入ります。</p>
 </div>
 
