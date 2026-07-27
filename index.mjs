@@ -121,6 +121,11 @@ const GENERATE_CI = process.argv.includes('--generate-ci');
 const REPORT = process.argv.includes('--report');
 const QUICKFIX = process.argv.includes('--quickfix');
 const SHIELD = process.argv.includes('--shield');
+// --shield は以前、~/.claude/hooks/ にある *すべて* の .sh を settings.json へ登録していた。
+// 出所を問わないので、他のツールが置いたフックも、利用者が意図して登録を外したフックも、
+// 走らせるたびに黙って復活した。実害3回(2026-06-10 / 2026-07-27 に2回)。
+// 既定を「今回このコマンドが設置したものだけ」に変え、以前の挙動はこの旗で選ぶ。
+const ADOPT_EXISTING = process.argv.includes('--adopt-existing');
 const OPUS47 = process.argv.includes('--opus47');
 const ANALYZE = process.argv.includes('--analyze');
 const TEAM = process.argv.includes('--team');
@@ -3140,9 +3145,15 @@ async function shield() {
   // Run the default install
   mkdirSync(HOOKS_DIR, { recursive: true });
   let installed = 0;
+  // 今回このコマンドが *新しくディスクへ置いた* フックだけを集める。
+  // 「自分が配ったフックか」ではなく「今回置いたか」で判定するのが肝。
+  // 既に置いてあるファイルは、利用者が一度見て、登録するかどうかを決めた後のもので、
+  // 登録を外してあるなら、それは決定である。決定を黙って覆さない。
+  const freshlyInstalled = new Set();
   for (const [hookId, hookMeta] of Object.entries(HOOKS)) {
     const hookPath = join(HOOKS_DIR, `${hookId}.sh`);
     if (!existsSync(hookPath)) {
+      freshlyInstalled.add(`${hookId}.sh`);
       writeFileSync(hookPath, SCRIPTS[hookId]);
       chmodSync(hookPath, 0o755);
       installed++;
@@ -3182,6 +3193,7 @@ async function shield() {
     const exPath = join(__dirname, 'examples', `${ex}.sh`);
     const hookPath = join(HOOKS_DIR, `${ex}.sh`);
     if (existsSync(exPath) && !existsSync(hookPath)) {
+      freshlyInstalled.add(`${ex}.sh`);
       copyFileSync(exPath, hookPath);
       chmodSync(hookPath, 0o755);
       console.log(c.green + '  +' + c.reset + ` ${ex}`);
@@ -3194,16 +3206,39 @@ async function shield() {
   // Step 4: Update settings.json
   console.log();
   console.log(c.bold + '  Step 4: Configure settings.json' + c.reset);
+  const hadConfigFile = existsSync(SETTINGS_PATH);
   let settings = {};
   if (existsSync(SETTINGS_PATH)) {
     try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
   }
   if (!settings.hooks) settings.hooks = {};
+  const configBefore = JSON.stringify(settings, null, 2);
+  // 初回の導入(設定ファイルがまだ無い)では、まだ何の決定も下されていないので、
+  // 途中で失敗した前回の実行を拾い直せるように、置いてあるものを全部登録してよい。
+  const firstTimeSetup = !hadConfigFile;
 
-  // Collect all installed hooks
-  const hookFiles = existsSync(HOOKS_DIR)
+  // Collect the hooks this run is responsible for.
+  //
+  // Until 2026-07-27 this adopted every .sh in HOOKS_DIR regardless of origin.
+  // Two ways that hurt the operator, both observed in the field:
+  //   - a hook another tool dropped in ~/.claude/hooks/ got registered here,
+  //     with its trigger *guessed* from the filename
+  //   - a hook the operator had deliberately unregistered came back on the next run
+  // The second is the worse of the two: removing a registration is a decision, and
+  // silently reversing a decision is the failure class this project exists to stop.
+  // Default is now "only what this run newly wrote to disk", plus the first-time
+  // setup case where no config file existed yet. --adopt-existing restores the old
+  // sweep for anyone relying on it.
+  const allHookFiles = existsSync(HOOKS_DIR)
     ? readdirSync(HOOKS_DIR).filter(f => f.endsWith('.sh'))
     : [];
+  const adoptAll = ADOPT_EXISTING || firstTimeSetup;
+  const hookFiles = adoptAll ? allHookFiles : allHookFiles.filter(f => freshlyInstalled.has(f));
+  const foreign = allHookFiles.filter(f => !freshlyInstalled.has(f));
+  if (foreign.length > 0 && !adoptAll) {
+    console.log(c.dim + `  ${foreign.length} hook(s) already on disk were left as they are` + c.reset);
+    console.log(c.dim + '    (their registration is yours to decide \u2014 --adopt-existing registers them all)' + c.reset);
+  }
 
   // Build hook entries by trigger type
   const preToolHooks = [];
@@ -3285,8 +3320,15 @@ async function shield() {
     }
   }
 
-  writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
-  console.log(c.green + '  ✓' + c.reset + ' settings.json updated');
+  // Write only when something actually changed. Rewriting an identical file still
+  // bumps the mtime and still risks clobbering a concurrent edit, for no gain.
+  const configNext = JSON.stringify(settings, null, 2);
+  if (configNext === configBefore) {
+    console.log(c.dim + '  ✓' + c.reset + ' settings.json already up to date (not rewritten)');
+  } else {
+    writeFileSync(SETTINGS_PATH, configNext);
+    console.log(c.green + '  ✓' + c.reset + ' settings.json updated');
+  }
 
   // Step 5: Generate CLAUDE.md template if none exists
   console.log();
