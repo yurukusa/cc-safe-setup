@@ -41,7 +41,10 @@ jobs:
         run: |
           mkdir -p "$HOME/test-homes"
           PASS=0; FAIL=0; FAILED=""
-          for f in tests/*.sh; do
+          # 絶対パスで渡す。いくつかの試験は一時ディレクトリへ移ってから
+          # "$(dirname "$0")/../examples/…" でフックを呼ぶので、相対パスで
+          # 起動すると移った先から解決できず「ファイルが無い」で落ちる。
+          for f in "$PWD"/tests/*.sh; do
             TH=$(mktemp -d -p "$HOME/test-homes")
             cp "$HOME/.gitconfig" "$TH/.gitconfig" 2>/dev/null || true
             if HOME="$TH" timeout 180 bash "$f" > "/tmp/$(basename "$f").log" 2>&1 < /dev/null; then

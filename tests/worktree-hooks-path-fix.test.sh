@@ -1,6 +1,8 @@
 #!/bin/bash
 # Tests for worktree-hooks-path-fix.sh
-HOOK="$(dirname "$0")/../examples/worktree-hooks-path-fix.sh"
+# This suite cds into temp repos before invoking the hook, so a relative path
+# here only resolves when the suite itself was launched with an absolute path.
+HOOK="$(cd "$(dirname "$0")/../examples" && pwd)/worktree-hooks-path-fix.sh"
 PASS=0; FAIL=0
 
 TEST_BASE=$(mktemp -d)
