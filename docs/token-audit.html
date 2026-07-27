@@ -164,11 +164,11 @@ function parseNumber(s) {
 // Expand suffixed numbers like "3.2k", "662.4k", "1.2m".
 // Claude Code's /cost prints the per-model breakdown in this form.
 function parseScaled(s) {
-  var m = String(s).trim().match(/^([0-9,.]+)\s*([km])?$/i);
+  var m = String(s).trim().match(/^([0-9,.]+)\s*([kmbt])?$/i);
   if (!m) return 0;
   var n = parseFloat(m[1].replace(/,/g, '')) || 0;
   var unit = (m[2] || '').toLowerCase();
-  return Math.round(n * (unit === 'k' ? 1e3 : unit === 'm' ? 1e6 : 1));
+  return Math.round(n * ({k: 1e3, m: 1e6, b: 1e9, t: 1e12}[unit] || 1));
 }
 
 // Read the per-model breakdown that Claude Code's /cost actually prints:
@@ -182,7 +182,7 @@ function parseUsageByModel(text) {
   if (at < 0) return null;
   var body = text.slice(at);
   var sum = { input: 0, output: 0, cacheRead: 0, cacheCreate: 0, models: [] };
-  var re = /([0-9][0-9,.]*\s*[km]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
+  var re = /([0-9][0-9,.]*\s*[kmbt]?)\s+(cache\s+read|cache\s+write|input|output)\b/gi;
   var m, found = false;
   while ((m = re.exec(body)) !== null) {
     var n = parseScaled(m[1]);
