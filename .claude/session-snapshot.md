@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-27T12:36:39+09:00
+Updated: 2026-07-27T12:36:58+09:00
 
 ## Git
 - Branch: `fix/plugin-hooks-silent-without-jq-2026-07-27`
@@ -7,13 +7,13 @@ Updated: 2026-07-27T12:36:39+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d7bbc4bc recovery: pre-compact checkpoint (1 files, 20260727-033639)
+- Last commit: 7a4cbaf8 recovery: pre-compact checkpoint (1 files, 20260727-033658)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-07-27.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./README.md
 ./examples/agents-md-sync-checker.sh
