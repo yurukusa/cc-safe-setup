@@ -111,6 +111,20 @@ If a hook does not fire, check that it is executable, that its path in `settings
 
 Contributions are welcome. Each hook should be a single dependency-free script with a test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the layout and the test harness.
 
+## Where these hooks came from
+
+Every hook here exists because something broke first. The incident records behind
+them — what failed, what the logs actually looked like, and what finally stopped it —
+are written up at length in these:
+
+- [Claude Code Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)
+  ($19) — the April–June 2026 regressions in sequence, and a stay / switch / hybridize
+  decision framework built from them
+- [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($5) — the same measurements
+  applied to token cost
+
+Both are optional. Every hook in this repository works without them.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
