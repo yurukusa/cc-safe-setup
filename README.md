@@ -1,4 +1,5 @@
 # cc-safe-setup
+**[日本語の README はこちら / Japanese README](docs/README.ja.md)**
 
 One command to add safety hooks to [Claude Code](https://docs.claude.com/en/docs/claude-code). It installs a set of `PreToolUse`, `PostToolUse`, `SessionStart`, `Stop`, and `SubagentStop` hooks that stop destructive or irreversible operations *before* they run, and that surface silent failures.
 
