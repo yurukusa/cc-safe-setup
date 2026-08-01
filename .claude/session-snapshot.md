@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-02T02:17:26+09:00
+Updated: 2026-08-02T02:17:43+09:00
 
 ## Git
 - Branch: `main`
@@ -7,7 +7,7 @@ Updated: 2026-08-02T02:17:26+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f22bae0 入れ子の背景エージェントを遮断するフックを追加(#73829・2.1.219で既定が深さ3へ) (#920)
+- Last commit: 95051cf checkpoint: auto-save 02:17:39
 
 ## Recent Files
 ```
