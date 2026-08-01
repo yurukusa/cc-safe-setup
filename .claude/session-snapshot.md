@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-02T02:17:43+09:00
+Updated: 2026-08-02T02:17:51+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,13 @@ Updated: 2026-08-02T02:17:43+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 95051cf checkpoint: auto-save 02:17:39
+- Last commit: e26528d checkpoint: auto-save 02:17:50
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-02.md
+./.claude/pre-compact-checkpoint.md
 ./examples/worktree-edit-boundary-guard.sh
 ./examples/worktree-escape-write-guard.sh
 ./examples/worktree-parent-write-guard.sh
@@ -19,8 +21,6 @@ Updated: 2026-08-02T02:17:43+09:00
 ./examples/write-empty-content-guard.sh
 ./examples/write-nul-corruption-detector.sh
 ./examples/write-secret-guard.sh
-./examples/write-shrink-guard.sh
-./examples/yaml-syntax-check.sh
 ```
 
 ## Active TODOs: 1 file(s)
