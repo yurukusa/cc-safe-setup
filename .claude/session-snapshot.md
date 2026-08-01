@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-28T00:46:08+09:00
+Updated: 2026-08-02T02:17:26+09:00
 
 ## Git
 - Branch: `main`
@@ -7,20 +7,20 @@ Updated: 2026-07-28T00:46:08+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: facfcc7d recovery: pre-compact checkpoint (1 files, 20260727-154608)
+- Last commit: f22bae0 入れ子の背景エージェントを遮断するフックを追加(#73829・2.1.219で既定が深さ3へ) (#920)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-28.md
-./.claude/pre-compact-checkpoint.md
-./tests/doctor-misspelled-settings-keys.test.sh
-./tests/test-marketplace-plugins.sh
-./tests/test-memory-orphan-detector.sh
-./tests/test-parallel-batch-size-limiter.sh
-./tests/worktree-hooks-path-fix.test.sh
-./examples/session-summary.sh
-./examples/settings-hooks-key-restorer.sh
+./examples/worktree-edit-boundary-guard.sh
+./examples/worktree-escape-write-guard.sh
+./examples/worktree-parent-write-guard.sh
+./examples/worktree-remove-uncommitted-guard.sh
+./examples/write-empty-content-guard.sh
+./examples/write-nul-corruption-detector.sh
+./examples/write-secret-guard.sh
+./examples/write-shrink-guard.sh
+./examples/yaml-syntax-check.sh
 ```
 
 ## Active TODOs: 1 file(s)
