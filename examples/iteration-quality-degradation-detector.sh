@@ -47,6 +47,18 @@
 #   CC_ITERATION_DETECTOR_MODE=strict — exit 2 on UserPromptSubmit (default advisory exits 0)
 
 # Read stdin first to avoid EPIPE on disable
+# Without jq, the parse below silently yields empty and this hook stops
+# guarding - with no error anywhere. Say so. We deliberately do not exit
+# here: blocking would halt every tool call, and exiting 0 would change
+# the behaviour of guards that do not depend on the parsed value.
+if ! command -v jq >/dev/null 2>&1; then
+  _nojq_warned="/tmp/cc-nojq-warned-iteration-quality-degradation-detector-$PPID"
+  [ -f "$_nojq_warned" ] || {
+    echo "WARNING [iteration-quality-degradation-detector]: jq not found - this hook cannot inspect tool calls and is NOT protecting you. Install jq." >&2
+    : > "$_nojq_warned"
+  }
+fi
+
 INPUT=$(cat 2>/dev/null || true)
 
 [ "${CC_ITERATION_DETECTOR_DISABLE:-0}" = "1" ] && exit 0
