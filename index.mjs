@@ -169,9 +169,11 @@ if (HELP) {
   cc-safe-setup — Make Claude Code safe for autonomous operation
 
   Quick Start:
-    npx cc-safe-setup              Install 8 safety hooks (30 sec)
-    npx cc-safe-setup --shield     Maximum safety — one command
-    npx cc-safe-setup --doctor     Diagnose hook problems
+    npx github:yurukusa/cc-safe-setup             Install 8 safety hooks (30 sec)
+    npx github:yurukusa/cc-safe-setup --shield    Maximum safety — one command
+    npx github:yurukusa/cc-safe-setup --doctor    Diagnose hook problems
+    (the npm entry is frozen at 29.8.0 / 2026-04-20 and lets three destructive
+     commands through that the current code blocks — install from GitHub)
 
   Protect:
     --protect .env                 Block edits to a specific file
@@ -206,11 +208,11 @@ if (HELP) {
 
   More: --create, --why, --replay, --score, --changelog, --analyze,
         --benchmark, --dashboard, --migrate-from, --init-project
-    npx cc-safe-setup --quickfix   Auto-detect and fix common Claude Code problems
-    npx cc-safe-setup --stats      Block statistics and patterns report
-    npx cc-safe-setup --export     Export hooks config for team sharing
-    npx cc-safe-setup --import <file>  Import hooks from exported config
-    npx cc-safe-setup --help       Show this help
+    --quickfix                     Auto-detect and fix common Claude Code problems
+    --stats                        Block statistics and patterns report
+    --export                       Export hooks config for team sharing
+    --import <file>                Import hooks from exported config
+    --help                         Show this help
 
   Hooks installed:
     destructive-guard    Blocks rm -rf, git reset --hard, NFS mount detection
@@ -1147,13 +1149,13 @@ function examples() {
   if (filter && allFiltered.length > 0 && allFiltered.length <= 20) {
     console.log(c.dim + '  Install all filtered hooks:' + c.reset);
     for (const h of allFiltered) {
-      console.log(c.dim + `    npx cc-safe-setup --install-example ${h}` + c.reset);
+      console.log(c.dim + `    npx github:yurukusa/cc-safe-setup --install-example ${h}` + c.reset);
     }
     console.log();
   }
 
   console.log(c.dim + '  Or install any single hook:' + c.reset);
-  console.log(c.dim + '    npx cc-safe-setup --install-example <name>' + c.reset);
+  console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --install-example <name>' + c.reset);
   console.log(c.dim + '  Source: ' + c.blue + 'https://github.com/yurukusa/cc-safe-setup/tree/main/examples' + c.reset);
   console.log();
 }
@@ -1287,7 +1289,7 @@ async function audit() {
     risks.push({
       severity: 'CRITICAL',
       issue: 'No PreToolUse hooks — destructive commands (rm -rf, git reset --hard) can run unchecked',
-      fix: 'npx cc-safe-setup'
+      fix: 'npx github:yurukusa/cc-safe-setup'
     });
   } else {
     good.push('PreToolUse hooks installed (' + preHooks.length + ')');
@@ -1299,7 +1301,7 @@ async function audit() {
     risks.push({
       severity: 'HIGH',
       issue: 'No destructive command blocker detected — rm -rf /, git reset --hard could execute',
-      fix: 'npx cc-safe-setup (installs destructive-guard)'
+      fix: 'npx github:yurukusa/cc-safe-setup (installs destructive-guard)'
     });
   } else {
     good.push('Destructive command protection detected');
@@ -1310,7 +1312,7 @@ async function audit() {
     risks.push({
       severity: 'HIGH',
       issue: 'No branch push protection — code could be pushed directly to main/master',
-      fix: 'npx cc-safe-setup (installs branch-guard)'
+      fix: 'npx github:yurukusa/cc-safe-setup (installs branch-guard)'
     });
   } else {
     good.push('Branch push protection detected');
@@ -1321,7 +1323,7 @@ async function audit() {
     risks.push({
       severity: 'HIGH',
       issue: 'No secret leak protection — .env files could be committed via git add .',
-      fix: 'npx cc-safe-setup (installs secret-guard)'
+      fix: 'npx github:yurukusa/cc-safe-setup (installs secret-guard)'
     });
   } else {
     good.push('Secret leak protection detected');
@@ -1332,7 +1334,7 @@ async function audit() {
     risks.push({
       severity: 'MEDIUM',
       issue: 'No database wipe protection — migrate:fresh, prisma migrate reset could wipe data',
-      fix: 'npx cc-safe-setup --install-example block-database-wipe'
+      fix: 'npx github:yurukusa/cc-safe-setup --install-example block-database-wipe'
     });
   } else {
     good.push('Database wipe protection detected');
@@ -1343,7 +1345,7 @@ async function audit() {
     risks.push({
       severity: 'MEDIUM',
       issue: 'No PostToolUse hooks — no automatic syntax checking after edits',
-      fix: 'npx cc-safe-setup (installs syntax-check)'
+      fix: 'npx github:yurukusa/cc-safe-setup (installs syntax-check)'
     });
   } else {
     good.push('PostToolUse hooks installed (' + postHooks.length + ')');
@@ -1368,7 +1370,7 @@ async function audit() {
     risks.push({
       severity: 'LOW',
       issue: 'No dotfile protection — ~/.bashrc, ~/.aws/ could be modified',
-      fix: 'npx cc-safe-setup --install-example protect-dotfiles'
+      fix: 'npx github:yurukusa/cc-safe-setup --install-example protect-dotfiles'
     });
   }
 
@@ -1377,7 +1379,7 @@ async function audit() {
     risks.push({
       severity: 'LOW',
       issue: 'No scope guard — files outside project directory could be modified',
-      fix: 'npx cc-safe-setup --install-example scope-guard'
+      fix: 'npx github:yurukusa/cc-safe-setup --install-example scope-guard'
     });
   }
 
@@ -1389,7 +1391,7 @@ async function audit() {
     risks.push({
       severity: 'CRITICAL',
       issue: `${backslashCmds.length} hook command(s) have Windows backslash paths — hooks will fail with "No such file"`,
-      fix: 'npx cc-safe-setup --uninstall && npx cc-safe-setup@latest'
+      fix: 'npx github:yurukusa/cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup'
     });
   }
 
@@ -1423,13 +1425,13 @@ async function audit() {
       risks.push({
         severity: 'HIGH',
         issue: `${nonExecCount} hook script(s) in ~/.claude/hooks lack the execute bit — Claude Code will fail them with "Permission denied" (anthropics/claude-code #39378)`,
-        fix: 'npx cc-safe-setup --validate   (one-shot fix) or --install-example hook-permission-fixer (persistent)'
+        fix: 'npx github:yurukusa/cc-safe-setup --validate   (one-shot fix) or --install-example hook-permission-fixer (persistent)'
       });
     } else if (pluginsPresent || process.platform === 'win32') {
       risks.push({
         severity: 'LOW',
         issue: 'No SessionStart permission fixer — plugin installs/updates can strip hook execute bits, causing "Permission denied"',
-        fix: 'npx cc-safe-setup --install-example hook-permission-fixer'
+        fix: 'npx github:yurukusa/cc-safe-setup --install-example hook-permission-fixer'
       });
     }
   }
@@ -1470,9 +1472,9 @@ async function audit() {
     console.log(c.bold + '  Applying fixes...' + c.reset);
     const { execSync } = await import('child_process');
     for (const r of risks) {
-      if (r.fix.startsWith('npx cc-safe-setup')) {
+      if (r.fix.startsWith('npx github:yurukusa/cc-safe-setup')) {
         try {
-          const cmd = r.fix.replace('npx cc-safe-setup', 'node ' + process.argv[1]);
+          const cmd = r.fix.replace('npx github:yurukusa/cc-safe-setup', 'node ' + process.argv[1]);
           console.log('  ' + c.dim + '→ ' + r.fix + c.reset);
           execSync(cmd, { stdio: 'inherit' });
         } catch(e) {
@@ -1484,7 +1486,7 @@ async function audit() {
     console.log(c.green + '  Re-run --audit to verify fixes.' + c.reset);
   } else if (risks.length > 0) {
     console.log();
-    console.log(c.dim + '  Run with --fix to auto-apply: npx cc-safe-setup --audit --fix' + c.reset);
+    console.log(c.dim + '  Run with --fix to auto-apply: npx github:yurukusa/cc-safe-setup --audit --fix' + c.reset);
   }
 
   // Badge output
@@ -1634,7 +1636,7 @@ exit 0`;
 
     if (!process.argv.includes('--apply')) {
       console.log();
-      console.log(c.dim + '  Run with --apply to auto-create hooks: npx cc-safe-setup --learn --apply' + c.reset);
+      console.log(c.dim + '  Run with --apply to auto-create hooks: npx github:yurukusa/cc-safe-setup --learn --apply' + c.reset);
     }
   }
 
@@ -1689,7 +1691,7 @@ async function testHook(hookName) {
     console.log(c.bold + '  cc-safe-setup --test-hook <name>' + c.reset);
     console.log(c.dim + '  Test any hook with sample inputs.' + c.reset);
     console.log();
-    console.log('  Example: npx cc-safe-setup --test-hook destructive-guard');
+    console.log('  Example: npx github:yurukusa/cc-safe-setup --test-hook destructive-guard');
     return;
   }
 
@@ -1769,13 +1771,13 @@ async function saveProfile(name) {
     const files = existsSync(profilesDir) ? readdirSync(profilesDir).filter(f => f.endsWith('.json')) : [];
     if (files.length === 0) {
       console.log(c.dim + '  No saved profiles yet.' + c.reset);
-      console.log(c.dim + '  Save: npx cc-safe-setup --save-profile my-setup' + c.reset);
+      console.log(c.dim + '  Save: npx github:yurukusa/cc-safe-setup --save-profile my-setup' + c.reset);
     } else {
       for (const f of files) {
         const pName = f.replace('.json', '');
         const data = JSON.parse(readFileSync(join(profilesDir, f), 'utf-8'));
         console.log(`  ${c.bold}${pName}${c.reset} (${data.hooks?.length || 0} hooks, saved ${data.savedAt?.split('T')[0] || '?'})`);
-        console.log(c.dim + `    Load: npx cc-safe-setup --profile ${pName}` + c.reset);
+        console.log(c.dim + `    Load: npx github:yurukusa/cc-safe-setup --profile ${pName}` + c.reset);
       }
     }
     console.log();
@@ -1799,7 +1801,7 @@ async function saveProfile(name) {
   console.log();
   console.log(c.green + `  ✓ Profile "${name}" saved (${hooks.length} hooks)` + c.reset);
   console.log(c.dim + `  File: ${profilePath}` + c.reset);
-  console.log(c.dim + `  Load: npx cc-safe-setup --profile ${name}` + c.reset);
+  console.log(c.dim + `  Load: npx github:yurukusa/cc-safe-setup --profile ${name}` + c.reset);
   console.log();
 }
 
@@ -2047,7 +2049,7 @@ async function suggest() {
       if (isInstalled) {
         console.log(c.green + `     ✓ ${r.hook} (installed)` + c.reset);
       } else {
-        console.log(c.yellow + `     → Install: npx cc-safe-setup --install-example ${r.hook}` + c.reset);
+        console.log(c.yellow + `     → Install: npx github:yurukusa/cc-safe-setup --install-example ${r.hook}` + c.reset);
       }
     } else {
       console.log(c.dim + `     → ${r.reason}` + c.reset);
@@ -2058,7 +2060,7 @@ async function suggest() {
   const unprotected = risks.filter(r => r.hook && !installed.has(r.hook));
   if (unprotected.length > 0) {
     console.log(c.bold + `  ${unprotected.length} unprotected risk(s). Fix all:` + c.reset);
-    console.log(c.yellow + '  npx cc-safe-setup --shield' + c.reset);
+    console.log(c.yellow + '  npx github:yurukusa/cc-safe-setup --shield' + c.reset);
   } else {
     console.log(c.green + '  All detected risks are covered by installed hooks!' + c.reset);
   }
@@ -2095,8 +2097,8 @@ async function why(hookName) {
     console.log(c.dim + '  Show why a hook exists — the real incident that inspired it.' + c.reset);
     console.log();
     console.log('  Examples:');
-    console.log(c.dim + '    npx cc-safe-setup --why destructive-guard' + c.reset);
-    console.log(c.dim + '    npx cc-safe-setup --why token-budget-guard' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --why destructive-guard' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --why token-budget-guard' + c.reset);
     console.log();
     console.log(`  ${Object.keys(WHY_DATA).length} hooks have documented incidents.`);
     return;
@@ -2125,7 +2127,7 @@ async function why(hookName) {
     console.log(c.dim + `  GitHub Issue: ${data.issue}` + c.reset);
   }
   console.log();
-  console.log(c.dim + '  Install: npx cc-safe-setup --install-example ' + name + c.reset);
+  console.log(c.dim + '  Install: npx github:yurukusa/cc-safe-setup --install-example ' + name + c.reset);
   console.log();
 }
 
@@ -2213,10 +2215,10 @@ async function guard(description) {
     console.log(c.dim + '  Instantly enforce a rule — generates, installs, and activates a hook.' + c.reset);
     console.log();
     console.log('  Examples:');
-    console.log(c.dim + '    npx cc-safe-setup --guard "never touch the database"' + c.reset);
-    console.log(c.dim + '    npx cc-safe-setup --guard "block all sudo commands"' + c.reset);
-    console.log(c.dim + '    npx cc-safe-setup --guard "no force push"' + c.reset);
-    console.log(c.dim + '    npx cc-safe-setup --guard "warn before deleting files"' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --guard "never touch the database"' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --guard "block all sudo commands"' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --guard "no force push"' + c.reset);
+    console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --guard "warn before deleting files"' + c.reset);
     console.log();
     return;
   }
@@ -2289,7 +2291,7 @@ async function guard(description) {
   console.log();
   console.log(c.dim + `  Rule: "${description}"` + c.reset);
   console.log(c.dim + `  Hook: ${hookName}.sh` + c.reset);
-  console.log(c.dim + '  Remove: npx cc-safe-setup --uninstall' + c.reset);
+  console.log(c.dim + '  Remove: npx github:yurukusa/cc-safe-setup --uninstall' + c.reset);
   console.log();
 }
 
@@ -2359,7 +2361,7 @@ async function diffHooks(otherPath) {
       }
     } else {
       console.log(c.dim + '  No project-level settings found.' + c.reset);
-      console.log(c.dim + '  Create with: npx cc-safe-setup --team' + c.reset);
+      console.log(c.dim + '  Create with: npx github:yurukusa/cc-safe-setup --team' + c.reset);
       console.log();
       console.log(c.bold + '  Global hooks (' + myHooks.size + '):' + c.reset);
       [...myHooks].sort().forEach(h => console.log(`    ${h}`));
@@ -2397,7 +2399,7 @@ async function fromClaudeMd() {
 
   if (!claudeMdPath) {
     console.log(c.yellow + '  No CLAUDE.md found in project.' + c.reset);
-    console.log(c.dim + '  Run: npx cc-safe-setup --shield (creates one)' + c.reset);
+    console.log(c.dim + '  Run: npx github:yurukusa/cc-safe-setup --shield (creates one)' + c.reset);
     return;
   }
 
@@ -2435,7 +2437,7 @@ async function fromClaudeMd() {
   if (matched.length === 0) {
     console.log(c.yellow + '  No enforceable rules detected in CLAUDE.md.' + c.reset);
     console.log(c.dim + '  CLAUDE.md may contain guidelines that can\'t be converted to hooks.' + c.reset);
-    console.log(c.dim + '  For custom hooks: npx cc-safe-setup --create "your rule"' + c.reset);
+    console.log(c.dim + '  For custom hooks: npx github:yurukusa/cc-safe-setup --create "your rule"' + c.reset);
     return;
   }
 
@@ -2449,7 +2451,7 @@ async function fromClaudeMd() {
     const status = installed ? c.dim + '(installed)' + c.reset : '';
     console.log(`  ${icon} ${m.desc} ${status}`);
     if (!installed) {
-      console.log(c.dim + `    npx cc-safe-setup --install-example ${m.hook}` + c.reset);
+      console.log(c.dim + `    npx github:yurukusa/cc-safe-setup --install-example ${m.hook}` + c.reset);
     }
   }
 
@@ -2457,7 +2459,7 @@ async function fromClaudeMd() {
   if (notInstalled.length > 0) {
     console.log();
     console.log(c.bold + `  Install all ${notInstalled.length} missing hooks:` + c.reset);
-    console.log(c.dim + '  npx cc-safe-setup --shield' + c.reset);
+    console.log(c.dim + '  npx github:yurukusa/cc-safe-setup --shield' + c.reset);
   } else {
     console.log();
     console.log(c.green + '  All detected rules are already enforced by hooks!' + c.reset);
@@ -2473,7 +2475,7 @@ async function health() {
 
   if (!existsSync(HOOKS_DIR)) {
     console.log(c.red + '  No hooks directory found.' + c.reset);
-    console.log(c.dim + '  Run: npx cc-safe-setup --shield' + c.reset);
+    console.log(c.dim + '  Run: npx github:yurukusa/cc-safe-setup --shield' + c.reset);
     return;
   }
 
@@ -2525,7 +2527,7 @@ async function health() {
 
   if (issues > 0) {
     console.log();
-    console.log(c.yellow + '  Fix issues: npx cc-safe-setup --quickfix' + c.reset);
+    console.log(c.yellow + '  Fix issues: npx github:yurukusa/cc-safe-setup --quickfix' + c.reset);
   }
 
   // Settings.json hook count
@@ -2608,7 +2610,7 @@ async function migrateFrom(tool) {
       const icon = detected ? c.green + '●' + c.reset : c.dim + '○' + c.reset;
       console.log(`  ${icon} ${c.bold}${id}${c.reset} — ${info.desc}`);
       if (detected) console.log(`    ${c.green}Detected in your settings${c.reset}`);
-      console.log(`    ${c.dim}npx cc-safe-setup --migrate-from ${id}${c.reset}`);
+      console.log(`    ${c.dim}npx github:yurukusa/cc-safe-setup --migrate-from ${id}${c.reset}`);
       console.log();
     }
     return;
@@ -2680,7 +2682,7 @@ async function migrateFrom(tool) {
   console.log(`  ${c.green}${replacements.length}${c.reset} hooks can be replaced with cc-safe-setup equivalents`);
   console.log(`  ${c.dim}${existingHooks.length - replacements.length}${c.reset} hooks will be kept as-is`);
   console.log();
-  console.log(c.dim + '  To apply: npx cc-safe-setup --shield' + c.reset);
+  console.log(c.dim + '  To apply: npx github:yurukusa/cc-safe-setup --shield' + c.reset);
   console.log(c.dim + '  This installs cc-safe-setup hooks alongside existing ones.' + c.reset);
   console.log(c.dim + '  Remove old hooks manually after verifying the new ones work.' + c.reset);
   console.log();
@@ -2851,7 +2853,7 @@ async function profile(level) {
     for (const [name, prof] of Object.entries(PROFILES)) {
       console.log(`  ${c.bold}${name}${c.reset} (${prof.hooks.length} hooks)`);
       console.log(`  ${c.dim}${prof.desc}${c.reset}`);
-      console.log(`  ${c.dim}npx cc-safe-setup --profile ${name}${c.reset}`);
+      console.log(`  ${c.dim}npx github:yurukusa/cc-safe-setup --profile ${name}${c.reset}`);
       console.log();
     }
 
@@ -2867,7 +2869,7 @@ async function profile(level) {
             const data = JSON.parse(readFileSync(join(profilesDir, f), 'utf-8'));
             console.log(`  ${c.bold}${sName}${c.reset} (${data.hooks?.length || 0} hooks)`);
             console.log(`  ${c.dim}Saved ${data.savedAt?.split('T')[0] || '?'}${c.reset}`);
-            console.log(`  ${c.dim}npx cc-safe-setup --profile ${sName}${c.reset}`);
+            console.log(`  ${c.dim}npx github:yurukusa/cc-safe-setup --profile ${sName}${c.reset}`);
             console.log();
           } catch {}
         }
@@ -3366,8 +3368,8 @@ async function shield() {
   console.log(c.dim + `  ${totalHooks} hooks installed and configured.` + c.reset);
   console.log(c.dim + '  Your Claude Code sessions are now protected.' + c.reset);
   console.log();
-  console.log(c.dim + '  Verify: npx cc-safe-setup --verify' + c.reset);
-  console.log(c.dim + '  Status: npx cc-safe-setup --status' + c.reset);
+  console.log(c.dim + '  Verify: npx github:yurukusa/cc-safe-setup --verify' + c.reset);
+  console.log(c.dim + '  Status: npx github:yurukusa/cc-safe-setup --status' + c.reset);
   console.log();
   console.log(c.dim + '  Burning tokens too fast? Free diagnosis:' + c.reset);
   console.log(c.blue + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html' + c.reset);
@@ -3563,7 +3565,7 @@ async function quickfix() {
   if (warnings > 0) {
     console.log();
     console.log(c.yellow + '  Run npx github:yurukusa/cc-safe-setup to install missing safety hooks' + c.reset);
-    console.log(c.yellow + '  Run npx cc-safe-setup --doctor for detailed diagnosis' + c.reset);
+    console.log(c.yellow + '  Run npx github:yurukusa/cc-safe-setup --doctor for detailed diagnosis' + c.reset);
   }
   console.log();
 }
@@ -3619,8 +3621,8 @@ async function report() {
 | Generated | ${new Date().toISOString().split('T')[0]} |
 
 ### Quick Actions
-- Audit: \`npx cc-safe-setup --audit\`
-- Dashboard: \`npx cc-safe-setup --dashboard\`
+- Audit: \`npx github:yurukusa/cc-safe-setup --audit\`
+- Dashboard: \`npx github:yurukusa/cc-safe-setup --dashboard\`
 - Find hooks: \`npx cc-hook-registry recommend\`
 `;
 
@@ -3637,7 +3639,7 @@ function generateCI() {
   const workflowPath = join(workflowDir, 'claude-code-safety.yml');
 
   const workflow = `# Claude Code Safety Audit
-# Generated by: npx cc-safe-setup --generate-ci
+# Generated by: npx github:yurukusa/cc-safe-setup --generate-ci
 # Runs safety checks on every PR and push to main
 
 name: Claude Code Safety
@@ -3663,7 +3665,7 @@ jobs:
       - name: Run safety audit
         id: audit
         run: |
-          npx cc-safe-setup --audit --json > /tmp/audit.json 2>&1 || true
+          npx github:yurukusa/cc-safe-setup --audit --json > /tmp/audit.json 2>&1 || true
           SCORE=\$(cat /tmp/audit.json | jq -r '.score // 0' 2>/dev/null || echo 0)
           echo "score=\$SCORE" >> \$GITHUB_OUTPUT
           echo "Safety score: \$SCORE/100"
@@ -3745,10 +3747,10 @@ async function migrate() {
 
   // Detection patterns for other projects
   const detections = [
-    { pattern: /safety-net|cc-safety-net|SAFETY_LEVEL/i, project: 'claude-code-safety-net', replacement: 'npx cc-safe-setup (destructive-guard, branch-guard)' },
-    { pattern: /karanb192|block-dangerous-commands\.js/i, project: 'karanb192/claude-code-hooks', replacement: 'npx cc-safe-setup (destructive-guard)' },
-    { pattern: /hooks-mastery|disler|pre_tool_use\.py/i, project: 'disler/claude-code-hooks-mastery', replacement: 'npx cc-safe-setup (multiple hooks)' },
-    { pattern: /cchooks|from cchooks/i, project: 'GowayLee/cchooks', replacement: 'npx cc-safe-setup (bash equivalents)' },
+    { pattern: /safety-net|cc-safety-net|SAFETY_LEVEL/i, project: 'claude-code-safety-net', replacement: 'npx github:yurukusa/cc-safe-setup (destructive-guard, branch-guard)' },
+    { pattern: /karanb192|block-dangerous-commands\.js/i, project: 'karanb192/claude-code-hooks', replacement: 'npx github:yurukusa/cc-safe-setup (destructive-guard)' },
+    { pattern: /hooks-mastery|disler|pre_tool_use\.py/i, project: 'disler/claude-code-hooks-mastery', replacement: 'npx github:yurukusa/cc-safe-setup (multiple hooks)' },
+    { pattern: /cchooks|from cchooks/i, project: 'GowayLee/cchooks', replacement: 'npx github:yurukusa/cc-safe-setup (bash equivalents)' },
     { pattern: /lasso.*security|prompt.*injection.*pattern/i, project: 'lasso-security/claude-hooks', replacement: 'No direct equivalent (unique functionality)' },
   ];
 
@@ -3806,7 +3808,7 @@ async function compare(hookA, hookB) {
   console.log();
 
   if (!hookA || !hookB) {
-    console.log(c.red + '  Usage: npx cc-safe-setup --compare <hook-a.sh> <hook-b.sh>' + c.reset);
+    console.log(c.red + '  Usage: npx github:yurukusa/cc-safe-setup --compare <hook-a.sh> <hook-b.sh>' + c.reset);
     process.exit(1);
   }
 
@@ -4973,7 +4975,7 @@ async function exportConfig() {
   console.log(c.dim + '  Contains: ' + Object.keys(exportData.hooks).length + ' trigger types, ' + scriptPaths.size + ' hook scripts' + c.reset);
   console.log();
   console.log(c.dim + '  Share this file with your team. They can import with:' + c.reset);
-  console.log(c.bold + '  npx cc-safe-setup --import ' + outputFile + c.reset);
+  console.log(c.bold + '  npx github:yurukusa/cc-safe-setup --import ' + outputFile + c.reset);
   console.log();
 }
 
@@ -5284,7 +5286,7 @@ async function compileRules(rulesFile) {
     const exampleDir = rulesFile.includes('/') ? rulesFile.substring(0, rulesFile.lastIndexOf('/')) : '.';
     mkdirSync(exampleDir, { recursive: true });
     writeFileSync(rulesFile, `# Claude Code Safety Rules
-# Run: npx cc-safe-setup --rules ${rulesFile}
+# Run: npx github:yurukusa/cc-safe-setup --rules ${rulesFile}
 
 # Block dangerous commands
 - block: "rm -rf on root or home"
@@ -5353,7 +5355,7 @@ async function compileRules(rulesFile) {
 # Auto-generated from: ${rulesFile}
 # Generated: $(date -Iseconds)
 # Rules: ${rules.length}
-# Regenerate: npx cc-safe-setup --rules ${rulesFile}
+# Regenerate: npx github:yurukusa/cc-safe-setup --rules ${rulesFile}
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
@@ -5504,7 +5506,7 @@ async function protect(targetPath) {
   const pattern = isDir ? `*${normalized}*` : normalized;
 
   const script = `#!/bin/bash
-# Auto-generated by: npx cc-safe-setup --protect ${targetPath}
+# Auto-generated by: npx github:yurukusa/cc-safe-setup --protect ${targetPath}
 # Blocks Edit/Write to: ${normalized}
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
@@ -5788,7 +5790,7 @@ async function doctor() {
       pass('settings.json is valid JSON');
     } catch (e) {
       fail('settings.json has invalid JSON: ' + e.message);
-      console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup' + c.reset);
+      console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup' + c.reset);
     }
 
     if (settings) {
@@ -5816,7 +5818,7 @@ async function doctor() {
                 if (cmd.includes('\\')) {
                   fail('Windows backslash in hook command: ' + cmd);
                   const fixed = cmd.replace(/\\/g, '/');
-                  console.log(c.dim + '    Fix: npx cc-safe-setup --uninstall && npx cc-safe-setup@latest' + c.reset);
+                  console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup --uninstall && npx github:yurukusa/cc-safe-setup' + c.reset);
                   console.log(c.dim + '    Or manually change to: ' + fixed + c.reset);
                   continue;
                 }
@@ -5960,7 +5962,7 @@ async function doctor() {
           ' matcher ' + JSON.stringify(m.registered ?? null) +
           ', declares ' + m.decl.trigger + ' matcher ' + JSON.stringify(m.decl.matcher) + c.reset);
       }
-      console.log(c.dim + '    Fix: npx cc-safe-setup --install-example <name> rewrites the entry from the header,' + c.reset);
+      console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup --install-example <name> rewrites the entry from the header,' + c.reset);
       console.log(c.dim + '    or correct the event and matcher in ~/.claude/settings.json by hand.' + c.reset);
     }
   } catch (e) {
@@ -6219,7 +6221,7 @@ function scan() {
   console.log(c.bold + '  Recommended hooks:' + c.reset);
   console.log('  ' + c.dim + 'npx github:yurukusa/cc-safe-setup' + c.reset + ' (8 built-in hooks)');
   for (const ex of examples) {
-    console.log('  ' + c.dim + 'npx cc-safe-setup --install-example ' + ex + c.reset);
+    console.log('  ' + c.dim + 'npx github:yurukusa/cc-safe-setup --install-example ' + ex + c.reset);
   }
 
   // Generate CLAUDE.md
@@ -6243,7 +6245,7 @@ function scan() {
         console.log('  ' + c.dim + rule + c.reset);
       }
       console.log();
-      console.log(c.dim + '  Run with --apply to create: npx cc-safe-setup --scan --apply' + c.reset);
+      console.log(c.dim + '  Run with --apply to create: npx github:yurukusa/cc-safe-setup --scan --apply' + c.reset);
     }
   }
 
@@ -6402,8 +6404,8 @@ async function main() {
   console.log('  ' + c.green + '  ✓' + c.reset + ' Syntax errors cascading through files');
   console.log('  ' + c.green + '  ✓' + c.reset + ' PowerShell Remove-Item -Recurse -Force');
   console.log();
-  console.log('  ' + c.dim + 'Verify:' + c.reset + '  npx cc-safe-setup --verify');
-  console.log('  ' + c.dim + 'More:' + c.reset + '    npx cc-safe-setup --shield  (maximum safety)');
+  console.log('  ' + c.dim + 'Verify:' + c.reset + '  npx github:yurukusa/cc-safe-setup --verify');
+  console.log('  ' + c.dim + 'More:' + c.reset + '    npx github:yurukusa/cc-safe-setup --shield  (maximum safety)');
   console.log('  ' + c.dim + 'Diagnose:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/token-checkup.html');
   console.log('  ' + c.dim + 'Risk:' + c.reset + '     https://yurukusa.github.io/cc-safe-setup/risk-assessment.html');
   console.log('  ' + c.dim + 'Clusters:' + c.reset + ' https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html  (7 open clusters, ~11,500 user reactions across 60+ issues)');
