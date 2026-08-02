@@ -68,7 +68,7 @@ Hooks are small, dependency-free shell scripts. Each is one file, does one thing
 - **Session and config protection** — backups of `settings.json`, drift detection, and recovery helpers.
 - **Code-quality checks** (opt-in) — syntax checks, test-before-commit, and language-specific linters that run after edits.
 
-Run `npx cc-safe-setup --list` to see every available hook with its description.
+Run `npx github:yurukusa/cc-safe-setup --list` to see every available hook with its description.
 
 ## How it works
 
@@ -93,11 +93,11 @@ A hook is any executable that reads the tool-call JSON on stdin and returns `0` 
 
 ## Safety audit and CI
 
-`npx cc-safe-setup --audit` scans your current `settings.json` and reports which classes of danger are and are not guarded. You can run the same audit in CI to keep a project's safety posture from regressing:
+`npx github:yurukusa/cc-safe-setup --audit` scans your current `settings.json` and reports which classes of danger are and are not guarded. You can run the same audit in CI to keep a project's safety posture from regressing:
 
 ```yaml
 # .github/workflows/safety.yml
-- run: npx cc-safe-setup --audit --ci
+- run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
 ## Windows
@@ -106,7 +106,7 @@ The hooks run under WSL2 and Git Bash. A few guards are Windows-specific (path h
 
 ## Troubleshooting
 
-If a hook does not fire, check that it is executable, that its path in `settings.json` is correct, and that the `matcher` names the right tool. `npx cc-safe-setup --doctor` checks these and reports what is misconfigured.
+If a hook does not fire, check that it is executable, that its path in `settings.json` is correct, and that the `matcher` names the right tool. `npx github:yurukusa/cc-safe-setup --doctor` checks these and reports what is misconfigured.
 
 ## Contributing
 
