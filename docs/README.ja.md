@@ -35,17 +35,17 @@ npx github:yurukusa/cc-safe-setup
 
 | あなたの状況 | まず無料で | さらに深く |
 |---|---|---|
-| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
-| 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
-| 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
-| 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | トークンの費用が暴走する (`/cost` ショック) | [費用爆発を防ぐ](prevent-cost-explosion-jp.html) | [Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=readme-ja&utm_medium=routing-table) |
 | 急に遅い・固まる・落ちる | [遅い/クラッシュの原因と直し方](claude-code-slow-crash-jp.html) | 無料の道具で対処 |
 | どのモデルが実際に動いているか分からない | [提供モデルの監査](claude-code-which-model-served-jp.html) | 無料の道具で確認 |
 | サブエージェントが嘘の「完了」を返す（派遣の捏造・沈黙の停止・観察の不在・範囲の逸脱） | [集積の露出診断](cluster-exposure-diagnostic.html) | [副の作業者の沈黙の失敗 (¥1,500)](https://zenn.dev/yurukusa/books/sub-agent-observability?utm_source=readme-ja&utm_medium=routing-table) ——4つの型を一冊で深掘り・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
-| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx github:yurukusa/cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
-| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx github:yurukusa/cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose) |
 | 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership) |
 
 ## 何ができるか
@@ -98,7 +98,7 @@ Claude Codeを再起動。完了。
 
 > 🔁 月次の追跡が欲しい？ [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership)で、毎月その月に実際に起きた事故 4-8 件（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次の安全チェックリスト、 商品更新案内を届ける。 note のメンバーシップで、各号は無料の試し読みから中身を確かめてから加入できる。
 
-> 📕 Kindle 派の人へ：[事故防止本は Amazon Kindle でも出している（B0H69B7SVZ）](https://www.amazon.co.jp/dp/B0H69B7SVZ)。**Kindle Unlimited に入っていれば追加の費用なしで全部読める**。Zenn 版と同じ本で、データが消えた夜・本番DBを消す一歩手前・トークンが想定の20倍に膨らんだ月といった、起きた順の事故とコピーして使える復旧の手順をまとめている。新刊の通知を受け取りたい人は Amazon の著者ページから「著者をフォロー」もできる。
+> 📕 Kindle 派の人へ：[事故防止本は Amazon Kindle でも出している（B0H69B7SVZ）](https://www.amazon.co.jp/dp/B0H69B7SVZ)。ただし**Kindle 版は 2026年6月22日に出したきりで、その時点の全44章のまま更新していない**。Zenn 版はいま全100章・約61万字で、新しい事故が見つかるたびに章が増え、既に買った人には追加の費用なしで届く。Kindle Unlimited では 6月22日時点の44章ぶんが読める、と思ってほしい。中身は、データが消えた夜・本番DBを消す一歩手前・トークンが想定の20倍に膨らんだ月といった、起きた順の事故とコピーして使える復旧の手順をまとめたもの。新刊の通知を受け取りたい人は Amazon の著者ページから「著者をフォロー」もできる。
 
 **既知の制限:**
 
