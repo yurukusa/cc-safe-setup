@@ -6,7 +6,10 @@ echo "$COUNT" > "$COUNTER_FILE"
 if [ $((COUNT % 50)) -ne 0 ]; then
     exit 0
 fi
-SESSION_FILE=$(ls -t ~/.claude/projects/*/session.jsonl 2>/dev/null | head -1)
+# 記録の場所を推測しない（旧: projects/*/session.jsonl は実在せず、
+# glob が空のまま黙って一度も警告しなかった）。
+SESSION_FILE=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+[ -f "$SESSION_FILE" ] || SESSION_FILE=$(ls -t "$HOME"/.claude/projects/*/*.jsonl 2>/dev/null | head -1)
 if [ -n "$SESSION_FILE" ]; then
     MODEL=$(grep -o '"model":"[^"]*"' "$SESSION_FILE" 2>/dev/null | tail -1 | cut -d'"' -f4)
     if echo "$MODEL" | grep -qi "opus-4-7\|opus-4.7"; then

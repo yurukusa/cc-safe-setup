@@ -1,5 +1,10 @@
 INPUT=$(cat)
-TRANSCRIPT=$(ls -t ~/.claude/projects/*/sessions/*/transcript.jsonl 2>/dev/null | head -1)
+# 記録の場所を推測しない。フックに渡される transcript_path を使う。
+# 以前は ~/.claude/projects/*/sessions/*/transcript.jsonl を見ていたが、
+# その場所は実在せず、glob が空 → [ -f "" ] が偽 → exit 0 で、
+# このフックは起動して何もせずに終わっていた（記録も警告も一度も出ない）。
+TRANSCRIPT=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+[ -f "$TRANSCRIPT" ] || TRANSCRIPT=$(ls -t "$HOME"/.claude/projects/*/*.jsonl 2>/dev/null | head -1)
 [ -f "$TRANSCRIPT" ] || exit 0
 USAGE=$(tail -20 "$TRANSCRIPT" | grep -o '"usage":{[^}]*}' | tail -1)
 if [ -n "$USAGE" ]; then
