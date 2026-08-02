@@ -12,7 +12,9 @@
 # of whether grep understands -P. A stub grep that rejects -P stands in for BSD
 # grep so the check runs on Linux CI too.
 
-HOOKS="$(dirname "$0")/../examples"
+# Absolute, because some cases below run from a temporary working directory and a
+# relative path would resolve against that instead of the repository.
+HOOKS="$(cd "$(dirname "$0")/../examples" && pwd)"
 PASS=0; FAIL=0
 
 STUB=$(mktemp -d)
@@ -104,6 +106,49 @@ mkdir -p "$SYMDIR/target" && ln -s /etc "$SYMDIR/target/outside"
 run_test "symlink-guard blocks rm on a tree holding a link outside the project" \
     symlink-guard.sh "$(C "rm -rf $SYMDIR/target")" block fire
 rm -rf "$SYMDIR"
+
+# -- Remaining guards that extracted an operand with grep -oP ... \K --
+# worktree-unmerged-guard was the third one measured going 2 -> 0: without PCRE the
+# path came back empty and the "no path, nothing to check" exit let the removal through.
+WTREPO=$(mktemp -d)
+(
+  cd "$WTREPO" || exit
+  git init -q -b main && git config user.email t@example.com && git config user.name t
+  echo x > a.txt && git add . && git commit -qm init
+  git worktree add -q -b side "$WTREPO/wt"
+  cd "$WTREPO/wt" && echo y > b.txt && git add . && git commit -qm unmerged
+) >/dev/null 2>&1
+# Not a subshell: run_test increments PASS/FAIL, and a subshell would drop the counts.
+HERE=$PWD
+cd "$WTREPO" || exit 1
+run_test "worktree-unmerged-guard blocks removing a worktree with unmerged commits" \
+    worktree-unmerged-guard.sh "$(C "git worktree remove $WTREPO/wt")" block fire
+cd "$HERE" || exit 1
+rm -rf "$WTREPO"
+
+# These two only disabled one branch each; another exit 2 still fired, so the verdict
+# never changed. Pinned anyway so the branch cannot go quiet again unnoticed.
+DBPROJ=$(mktemp -d)
+echo 'DATABASE_URL=postgres://prod' > "$DBPROJ/.env"
+cd "$DBPROJ" || exit 1
+run_test "block-database-wipe blocks a reset pointing at a missing env file" \
+    block-database-wipe.sh "$(C 'npx prisma migrate reset --env=staging')" block fire
+cd "$HERE" || exit 1
+rm -rf "$DBPROJ"
+
+run_test "home-critical-bash-guard blocks truncating a critical dotfile" \
+    home-critical-bash-guard.sh "$(C "echo x > $HOME/.bash""rc")" block fire
+
+# case-sensitive-guard and case-insensitive-path-guard only fire on a case-insensitive
+# filesystem, which is exactly where grep has no -P. They cannot be made to fire on a
+# case-sensitive CI runner, so all this pins is that both grep builds agree.
+CASEDIR=$(mktemp -d)
+mkdir -p "$CASEDIR/foo"
+run_test "case-sensitive-guard agrees across grep builds on a case-sensitive fs" \
+    case-sensitive-guard.sh "$(C "mkdir -p $CASEDIR/Foo")" block quiet
+run_test "case-insensitive-path-guard agrees across grep builds on a case-sensitive fs" \
+    case-insensitive-path-guard.sh "$(C "rm -rf $CASEDIR/Foo")" block quiet
+rm -rf "$CASEDIR"
 
 echo
 echo "PASS: $PASS  FAIL: $FAIL"

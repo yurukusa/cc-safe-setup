@@ -49,12 +49,19 @@ TARGETS=""
 
 # rm: all non-flag arguments
 if echo "$COMMAND" | grep -qE '\brm\s'; then
-    TARGETS=$(echo "$COMMAND" | grep -oP '\brm\s+(-[a-zA-Z]+\s+)*\K[^\s;&|]+(\s+[^\s;&|]+)*' 2>/dev/null || true)
+    # -P は GNU 拡張。BSD grep では TARGETS が空になり検査が消える。
+    # このフックも case-insensitive なファイルシステム向けなので、発火する環境が
+    # まさに -P の無い環境。手元では発火させられないため構造の是正として直す。
+    TARGETS=$(echo "$COMMAND" \
+        | grep -oE '(^|[^A-Za-z0-9_])rm[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*[^[:space:];&|]+([[:space:]]+[^[:space:];&|]+)*' 2>/dev/null \
+        | sed -E 's/^[^A-Za-z0-9_]?rm[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*//' || true)
 fi
 
 # mv: first non-flag argument (source)
 if echo "$COMMAND" | grep -qE '\bmv\s'; then
-    MV_TARGET=$(echo "$COMMAND" | grep -oP '\bmv\s+(-[a-zA-Z]+\s+)*\K\S+' 2>/dev/null || true)
+    MV_TARGET=$(echo "$COMMAND" \
+        | grep -oE '(^|[^A-Za-z0-9_])mv[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*[^[:space:]]+' 2>/dev/null \
+        | sed -E 's/^[^A-Za-z0-9_]?mv[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*//' || true)
     TARGETS="$TARGETS $MV_TARGET"
 fi
 

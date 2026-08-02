@@ -36,7 +36,13 @@ if ! echo "$COMMAND" | grep -qE 'git\s+worktree\s+(remove|prune)|rm\s+.*worktree
 fi
 
 # Extract worktree path
-WORKTREE_PATH=$(echo "$COMMAND" | grep -oP 'git\s+worktree\s+remove\s+\K[^\s]+')
+# -P は GNU 拡張で、macOS の BSD grep では grep がエラーになり WORKTREE_PATH が空になる。
+# すぐ下の「空なら exit 0」で、未マージのコミットを持つ worktree でも素通しになる。
+# 実測: 未マージのコミットを持つ worktree への git worktree remove で、-P ありは 2、無しは 0。
+# \K に POSIX の等価物は無いので、コマンド語から一致させて前置きを sed で落とす。
+WORKTREE_PATH=$(echo "$COMMAND" \
+    | grep -oE 'git[[:space:]]+worktree[[:space:]]+remove[[:space:]]+[^[:space:]]+' \
+    | sed -E 's/^git[[:space:]]+worktree[[:space:]]+remove[[:space:]]+//')
 
 if [ -z "$WORKTREE_PATH" ]; then
     # Maybe it's rm -rf on a worktree directory
