@@ -22,8 +22,12 @@ case "$FILE" in
   *) exit 0 ;;
 esac
 
-HAS_TABS=$(grep -cP '^\t' "$FILE" 2>/dev/null || echo 0)
-HAS_SPACES=$(grep -cP '^ {2,}' "$FILE" 2>/dev/null || echo 0)
+# grep -c は0件でも "0" を出して終了コード1を返す。`|| echo 0` を付けると
+# "0" が二重に出て以降の数値比較が毎回壊れる（origin/main で実際に起きていた）
+HAS_TABS=$(grep -cE "^$(printf '\t')" "$FILE" 2>/dev/null)
+HAS_SPACES=$(grep -cE '^  +' "$FILE" 2>/dev/null)
+[ -z "$HAS_TABS" ] && HAS_TABS=0
+[ -z "$HAS_SPACES" ] && HAS_SPACES=0
 
 if [ "$HAS_TABS" -gt 0 ] && [ "$HAS_SPACES" -gt 0 ]; then
   echo "WARNING: Mixed tabs and spaces in $FILE ($HAS_TABS tab-lines, $HAS_SPACES space-lines)." >&2

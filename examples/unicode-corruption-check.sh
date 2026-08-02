@@ -22,7 +22,7 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 file "$FILE" 2>/dev/null | grep -q "text" || exit 0
 
 # Check for Unicode replacement character (U+FFFD) — sign of broken encoding
-if grep -Pq '\xef\xbf\xbd' "$FILE" 2>/dev/null; then
+if grep -q '�' "$FILE" 2>/dev/null; then
     echo "⚠ Unicode corruption detected in $FILE" >&2
     echo "  Found U+FFFD replacement characters (broken encoding)." >&2
     echo "  Review the edit — non-ASCII characters may have been corrupted." >&2

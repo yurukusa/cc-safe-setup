@@ -150,6 +150,69 @@ run_test "case-insensitive-path-guard agrees across grep builds on a case-sensit
     case-insensitive-path-guard.sh "$(C "rm -rf $CASEDIR/Foo")" block quiet
 rm -rf "$CASEDIR"
 
+# -- File-scanning advisories that lost their message entirely without -P --
+# These nine only warn (no exit 2), so what disappears on macOS is not the block
+# but the chance to notice. Each fixture is paired with a clean file so the test
+# can fail in both directions: a hook that never fires and a hook that always
+# fires would both be wrong here.
+ADV=$(mktemp -d)
+printf 'function f(x: any) {\n  return x;\n}\n' > "$ADV/any.ts"
+printf 'const x: string = "ok";\n' > "$ADV/clean.ts"
+printf "import x from '../../../deep';\n" > "$ADV/deep.ts"
+printf 'FROM node:latest\n' > "$ADV/Dockerfile"
+printf 'FROM node:20.11.0\n' > "$ADV/CleanDockerfile"
+printf 'a\n\tb\n  c\n' > "$ADV/mixed.py"
+printf 'a\nb\n' > "$ADV/clean.py"
+printf 'const host = "192.168.11.42";\n' > "$ADV/ip.js"
+printf 'function g() {\n  api.call().then(r => r);\n}\n' > "$ADV/float.js"
+printf 'app.listen(3001)\n' > "$ADV/port.js"
+printf 'console.log("user password=" + password);\n' > "$ADV/leak.js"
+printf 'const p = process.env.PORT;\nconsole.log("hello");\n' > "$ADV/clean.js"
+printf 'broken \357\277\275 char\n' > "$ADV/corrupt.py"
+
+run_test "no-any-typescript notes an explicit any" \
+    no-any-typescript.sh "$(F "$ADV/any.ts")" warn fire
+run_test "no-any-typescript stays quiet on a typed file" \
+    no-any-typescript.sh "$(F "$ADV/clean.ts")" warn quiet
+run_test "no-deep-relative-import notes a ../../../ import" \
+    no-deep-relative-import.sh "$(F "$ADV/deep.ts")" warn fire
+run_test "no-deep-relative-import stays quiet on a near import" \
+    no-deep-relative-import.sh "$(F "$ADV/clean.ts")" warn quiet
+run_test "dockerfile-latest-guard notes a :latest base image" \
+    dockerfile-latest-guard.sh "$(F "$ADV/Dockerfile")" warn fire
+run_test "dockerfile-latest-guard stays quiet on a pinned tag" \
+    dockerfile-latest-guard.sh "$(F "$ADV/CleanDockerfile")" warn quiet
+run_test "detect-mixed-indentation notes tabs mixed with spaces" \
+    detect-mixed-indentation.sh "$(F "$ADV/mixed.py")" warn fire
+run_test "detect-mixed-indentation stays quiet on one style" \
+    detect-mixed-indentation.sh "$(F "$ADV/clean.py")" warn quiet
+run_test "hardcoded-ip-guard notes a literal address" \
+    hardcoded-ip-guard.sh "$(F "$ADV/ip.js")" warn fire
+run_test "hardcoded-ip-guard stays quiet without one" \
+    hardcoded-ip-guard.sh "$(F "$ADV/clean.js")" warn quiet
+run_test "no-dangling-await notes an unawaited then()" \
+    no-dangling-await.sh "$(F "$ADV/float.js")" warn fire
+run_test "no-dangling-await stays quiet without one" \
+    no-dangling-await.sh "$(F "$ADV/clean.js")" warn quiet
+run_test "no-hardcoded-port notes a literal port" \
+    no-hardcoded-port.sh "$(F "$ADV/port.js")" warn fire
+run_test "no-hardcoded-port stays quiet when the port comes from the environment" \
+    no-hardcoded-port.sh "$(F "$ADV/clean.js")" warn quiet
+run_test "sensitive-log-guard notes a password written to the log" \
+    sensitive-log-guard.sh "$(F "$ADV/leak.js")" warn fire
+run_test "sensitive-log-guard stays quiet on an ordinary log line" \
+    sensitive-log-guard.sh "$(F "$ADV/clean.js")" warn quiet
+
+# unicode-corruption-check was worse than non-portable: `grep -Pq '\xef\xbf\xbd'`
+# never matched even on GNU grep, because in a UTF-8 locale PCRE reads \xef as the
+# character U+00EF rather than the byte. Matching the replacement character itself
+# is both portable and the only form that has ever worked.
+run_test "unicode-corruption-check notes a replacement character" \
+    unicode-corruption-check.sh "$(F "$ADV/corrupt.py")" warn fire
+run_test "unicode-corruption-check stays quiet on clean text" \
+    unicode-corruption-check.sh "$(F "$ADV/clean.py")" warn quiet
+rm -rf "$ADV"
+
 echo
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
