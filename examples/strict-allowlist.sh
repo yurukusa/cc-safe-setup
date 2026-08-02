@@ -77,24 +77,54 @@ DEFAULT
     echo "Edit it to customize permitted commands." >&2
 fi
 
-# Check command against allowlist
-ALLOWED=0
-while IFS= read -r pattern; do
-    # Skip comments and empty lines
-    [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "$pattern" ]] && continue
+# One line can chain several commands. The shipped patterns are anchored with
+# "^", so matching them against the whole line only ever inspects the first
+# word: an approved command followed by "&&" and anything at all was approved.
+# For a denylist that is a gap; for an allowlist it means the list stops
+# enforcing after the first segment, which is the whole feature. Claude Code
+# closed the same class of hole in its own permission checking (2.1.216,
+# "Fixed Bash permission checking for compound statements").
+#
+# So: split on the operators that begin a new command and require EVERY segment
+# to match a pattern. One unapproved segment blocks the line.
+SEGMENTS=$(printf '%s' "$COMMAND" | sed -E 's/(\|\||&&|[;|&])/\n/g')
 
-    if echo "$COMMAND" | grep -qE "$pattern"; then
-        ALLOWED=1
-        break
-    fi
-done < "$ALLOWLIST"
-
-if [ "$ALLOWED" -eq 0 ]; then
-    echo "BLOCKED: Command not in allowlist." >&2
+# Command substitution executes text that never appears as a segment, so
+# splitting cannot vet it. Refuse rather than guess.
+if printf '%s' "$COMMAND" | grep -qE '\$\(|`'; then
+    echo "BLOCKED: command substitution is not allowed by the allowlist." >&2
     echo "Command: $COMMAND" >&2
-    echo "Add a matching pattern to $ALLOWLIST to permit." >&2
     exit 2
 fi
+
+while IFS= read -r SEGMENT; do
+    # sed leaves an empty field where a two-character operator was split
+    [[ -z "${SEGMENT//[[:space:]]/}" ]] && continue
+
+    # "ls; pwd" splits into "ls" and " pwd". The shipped patterns are anchored
+    # with "^" and no leading \s*, so the space would make the second segment
+    # fail to match and block a perfectly approved chain. Trim before matching.
+    SEGMENT=$(printf '%s' "$SEGMENT" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+
+    ALLOWED=0
+    while IFS= read -r pattern; do
+        # Skip comments and empty lines
+        [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "$pattern" ]] && continue
+
+        if printf '%s' "$SEGMENT" | grep -qE "$pattern"; then
+            ALLOWED=1
+            break
+        fi
+    done < "$ALLOWLIST"
+
+    if [ "$ALLOWED" -eq 0 ]; then
+        echo "BLOCKED: Command not in allowlist." >&2
+        echo "Command: $COMMAND" >&2
+        echo "Unapproved segment: $SEGMENT" >&2
+        echo "Add a matching pattern to $ALLOWLIST to permit." >&2
+        exit 2
+    fi
+done <<< "$SEGMENTS"
 
 exit 0

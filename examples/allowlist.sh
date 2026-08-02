@@ -32,7 +32,14 @@
 #   }
 # }
 #
-# TRIGGER: PermissionRequest  MATCHER: ""
+# TRIGGER: PreToolUse  MATCHER: "Bash"
+#
+# This line used to say PermissionRequest, contradicting the settings.json
+# example above. PreToolUse is the correct one: the reference states it fires
+# "Before a tool call executes", while PermissionRequest fires only "When a
+# tool call needs a permission decision" — which never happens under auto mode
+# or bypassed permissions. A guard registered on PermissionRequest would sit
+# silent in exactly the sessions that need it most.
 
 # Without jq, the parse below silently yields empty and this hook stops
 # guarding - with no error anywhere. Say so. We deliberately do not exit
