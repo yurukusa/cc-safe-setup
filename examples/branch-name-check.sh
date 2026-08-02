@@ -28,11 +28,16 @@ if ! echo "$COMMAND" | grep -qE 'git\s+(checkout\s+-b|branch|switch\s+-c)\s'; th
 fi
 
 # Extract branch name
-BRANCH=$(echo "$COMMAND" | grep -oP '(?:checkout\s+-b|branch|switch\s+-c)\s+\K\S+')
+# -P は GNU 拡張で、BSD grep では BRANCH が空になり、下の「空なら exit 0」で
+# 検査そのものが消える。\K に POSIX の等価物は無いので、コマンド語から一致させて
+# 前置きを sed で落とす。
+BRANCH=$(echo "$COMMAND" \
+    | grep -oE '(checkout[[:space:]]+-b|branch|switch[[:space:]]+-c)[[:space:]]+[^[:space:]]+' \
+    | sed -E 's/^(checkout[[:space:]]+-b|branch|switch[[:space:]]+-c)[[:space:]]+//')
 [[ -z "$BRANCH" ]] && exit 0
 
 # Check for spaces or special characters
-if echo "$BRANCH" | grep -qP '[^a-zA-Z0-9/_.-]'; then
+if echo "$BRANCH" | grep -qE '[^a-zA-Z0-9/_.-]'; then
     echo "" >&2
     echo "WARNING: Branch name contains special characters: $BRANCH" >&2
     echo "Use only: a-z, 0-9, /, -, ., _" >&2
