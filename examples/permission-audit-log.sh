@@ -26,7 +26,7 @@
 #   # Top commands:
 #   cat ~/.claude/tool-usage.jsonl | jq -s '[.[] | select(.tool=="Bash")] | group_by(.command | split(" ")[0]) | map({cmd: .[0].command | split(" ")[0], count: length}) | sort_by(-.count) | .[:20]'
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PostToolUse  MATCHER: ""
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

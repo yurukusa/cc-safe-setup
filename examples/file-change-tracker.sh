@@ -24,7 +24,7 @@
 #
 # View changes: cat ~/.claude/session-changes.log
 #
-# TRIGGER: PreToolUse  MATCHER: "Edit|Write"
+# TRIGGER: PostToolUse  MATCHER: "Write"
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
