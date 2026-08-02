@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, copyFileSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, copyFileSync, unlinkSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
@@ -1110,7 +1110,14 @@ function examples() {
 
   console.log();
   console.log(c.bold + '  cc-safe-setup --examples' + c.reset + (filter ? ' ' + filter : ''));
-  const totalExamples = Object.values(CATEGORIES).reduce((sum, cat) => sum + Object.keys(cat).length, 0);
+  // The catalogue below is hand-maintained; examples/ is the source of truth.
+  // Count the directory so the header never understates what ships.
+  const catalogued = new Set(Object.values(CATEGORIES).flatMap((cat) => Object.keys(cat)));
+  let onDisk = [];
+  try {
+    onDisk = readdirSync(join(__dirname, 'examples')).filter((f) => f.endsWith('.sh'));
+  } catch { /* running from a package without examples/: fall back to the catalogue */ }
+  const totalExamples = onDisk.length || catalogued.size;
   console.log(c.dim + `  ${totalExamples} hooks beyond the 8 built-in ones` + c.reset);
   if (filter) console.log(c.dim + '  Filter: ' + filter + c.reset);
   console.log();
@@ -1132,6 +1139,27 @@ function examples() {
       console.log('    ' + c.dim + desc + c.reset);
     }
     console.log();
+  }
+
+  // examples/ に在るのに目録へ登録されていないものを、実体から拾って並べる。
+  // 目録は手で維持しているので放っておくと置き去りが増える（2026-08-02の実測で258本が
+  // 「--install-example では入るのに一覧に出ない」状態だった）。実体を正として漏れを拾う。
+  const uncatalogued = onDisk.filter((f) => !catalogued.has(f)).sort();
+  if (uncatalogued.length > 0) {
+    const described = uncatalogued.map((f) => [f, describeExample(f)]);
+    const shown = filter
+      ? described.filter(([f, d]) =>
+          f.toLowerCase().includes(filter) || d.toLowerCase().includes(filter))
+      : described;
+    if (shown.length > 0) {
+      console.log('  ' + c.bold + c.blue + 'Not yet categorized' + c.reset +
+        c.dim + ` (${uncatalogued.length}, listed straight from examples/)` + c.reset);
+      for (const [file, desc] of shown) {
+        console.log('  ' + c.green + '*' + c.reset + ' ' + c.bold + file + c.reset);
+        console.log('    ' + c.dim + desc + c.reset);
+      }
+      console.log();
+    }
   }
 
   // Show batch install command if filtered
@@ -1158,6 +1186,38 @@ function examples() {
   console.log(c.dim + '    npx github:yurukusa/cc-safe-setup --install-example <name>' + c.reset);
   console.log(c.dim + '  Source: ' + c.blue + 'https://github.com/yurukusa/cc-safe-setup/tree/main/examples' + c.reset);
   console.log();
+}
+
+// Pull a one-line description out of an example hook's header comment.
+// Skips the shebang, rule-off lines and machine headings (Trigger:, Matcher: ...),
+// and joins wrapped lines until the sentence ends. Used for hooks that are not in
+// the hand-maintained catalogue, so the listing can still say what they do.
+function describeExample(filename) {
+  try {
+    const lines = readFileSync(join(__dirname, 'examples', filename), 'utf8').split('\n').slice(1, 25);
+    const isRule = (l) => /^[#\s]*[-=*_]{5,}\s*$/.test(l);
+    const isHeading = (t) => /^(Trigger|Matcher|Usage|Exit|Event|Hook|Install|Requires|Note|See|Env|Author|License|Version|SPDX|PURPOSE)\b/i.test(t);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.startsWith('#')) { if (line.trim() === '') continue; break; }
+      let t = line.replace(/^#+/, '').trim();
+      if (!t || isRule(line) || isHeading(t)) continue;
+      const named = t.match(new RegExp('^' + filename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[\u2014\u2013-]\\s*(.+)$'));
+      if (named) t = named[1].trim();
+      if (t.length < 10) continue;
+      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+        if (/[.。]$/.test(t.trim())) break;
+        const nxt = lines[j];
+        if (!nxt.startsWith('#')) break;
+        const cont = nxt.replace(/^#+/, '').trim();
+        if (!cont || isRule(nxt) || isHeading(cont)) break;
+        if (cont === cont.toUpperCase() && cont.length > 3) break;
+        t += ' ' + cont;
+      }
+      return t.replace(/\s+/g, ' ').trim();
+    }
+  } catch { /* unreadable: fall through */ }
+  return 'no description in the hook header';
 }
 
 async function installExample(name) {
