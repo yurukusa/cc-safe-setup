@@ -52,7 +52,10 @@ fi
 
 # Laravel --env flag without corresponding .env file
 if echo "$COMMAND" | grep -qE 'artisan.*--env='; then
-    ENV_NAME=$(echo "$COMMAND" | grep -oP '(?<=--env=)\w+')
+    # -P は GNU 拡張。BSD grep では ENV_NAME が空になり、下の「.env.<名前> が無い」検査だけが
+    # 静かに消える（この入力では別の exit 2 が先に止めるので結果は変わらないが、検査は消えている）。
+    # 後読み (?<=…) の代わりに、-- 以降を切り出して前置きを落とす。
+    ENV_NAME=$(echo "$COMMAND" | grep -oE '\-\-env=[A-Za-z0-9_]+' | sed -E 's/^--env=//')
     if [ -n "$ENV_NAME" ] && [ ! -f ".env.$ENV_NAME" ]; then
         echo "BLOCKED: .env.$ENV_NAME does not exist. Command would fall back to .env (possibly production)" >&2
         exit 2

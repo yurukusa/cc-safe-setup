@@ -50,7 +50,11 @@ fi
 
 # Check for truncation via redirect (> ~/.bashrc or : > ~/.bashrc)
 if echo "$COMMAND" | grep -qE ">\s*(${HOME_DIR}|\~)/\."; then
-    TARGET=$(echo "$COMMAND" | grep -oP ">\s*\K(${HOME_DIR}|~)/\.[^\s;|&]+")
+    # -P は GNU 拡張。BSD grep では TARGET が空になり、下の「重要な設定ファイルを切り詰める」
+    # 検査だけが静かに消える。\K の代わりに > から一致させて前置きを落とす。
+    TARGET=$(echo "$COMMAND" \
+        | grep -oE ">[[:space:]]*(${HOME_DIR}|~)/\.[^[:space:];|&]+" \
+        | sed -E 's/^>[[:space:]]*//')
     if echo "$TARGET" | grep -qE "$CRITICAL"; then
         echo "BLOCKED: Truncating critical home directory file" >&2
         echo "Command: $COMMAND" >&2

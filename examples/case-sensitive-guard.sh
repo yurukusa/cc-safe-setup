@@ -61,9 +61,18 @@ fi
 # Extract the target path
 TARGET=""
 if echo "$COMMAND" | grep -qE '^\s*mkdir'; then
-    TARGET=$(echo "$COMMAND" | grep -oP 'mkdir\s+(-p\s+)?\K\S+' | tail -1)
+    # -P は GNU 拡張。BSD grep では TARGET が空になり、下の「空なら exit 0」で検査が消える。
+    # このフックは case-insensitive なファイルシステムでしか発火しない設計なので、
+    # 発火する環境（macOS / Windows）がまさに -P の無い環境にあたる。
+    # 手元の case-sensitive な Linux では発火させて確かめられないため、
+    # 実測ではなく構造の是正として直している。
+    TARGET=$(echo "$COMMAND" \
+        | grep -oE 'mkdir[[:space:]]+(-p[[:space:]]+)?[^[:space:]]+' \
+        | sed -E 's/^mkdir[[:space:]]+(-p[[:space:]]+)?//' | tail -1)
 elif echo "$COMMAND" | grep -qE '^\s*rm\s'; then
-    TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(-[rf]+\s+)*\K\S+' | tail -1)
+    TARGET=$(echo "$COMMAND" \
+        | grep -oE 'rm[[:space:]]+(-[rf]+[[:space:]]+)*[^[:space:]]+' \
+        | sed -E 's/^rm[[:space:]]+(-[rf]+[[:space:]]+)*//' | tail -1)
 fi
 
 if [[ -z "$TARGET" ]]; then
