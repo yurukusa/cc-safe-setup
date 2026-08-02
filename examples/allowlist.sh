@@ -9,6 +9,16 @@
 # Use case: Highly sensitive environments where you want to
 # enumerate exactly what Claude Code can do.
 #
+# Known limits — read these before trusting it as your only layer:
+#   * Redirection is not inspected. An approved command word can still write
+#     anywhere ("echo evil > ~/.bashrc"). Enumerating safe write targets is a
+#     different job than enumerating command names; pair this with a hook that
+#     judges the destination.
+#   * Approval is per command name, not per argument. "git commit" is approved
+#     regardless of its flags.
+#   * Patterns are yours to own. Everything not listed is blocked, so an
+#     incomplete list fails closed (annoying) rather than open (dangerous).
+#
 # Born from GitHub Issue #37471 (Immutable session manifest)
 #
 # Usage: Add to settings.json as a PreToolUse hook
@@ -65,14 +75,45 @@ ALLOWED=(
     "^\s*(cd|mkdir|touch)"
 )
 
-for pattern in "${ALLOWED[@]}"; do
-    if echo "$COMMAND" | grep -qE "$pattern"; then
-        exit 0  # Approved
-    fi
-done
+# A single line can chain several commands. Every pattern above is anchored with
+# "^", so matching them against the whole string only ever inspects the first
+# word: "echo hi && rm -rf /" matched "^\s*echo" and was approved. For a hook
+# whose stated purpose is to enumerate exactly what Claude Code may do, that is
+# not a gap — it is the allowlist enforcing nothing past the first segment.
+# Claude Code closed the same class of hole in its own permission checking
+# (2.1.216, "Fixed Bash permission checking for compound statements").
+#
+# So: split on the operators that begin a new command, and require EVERY segment
+# to be approved. One unapproved segment blocks the line.
+SEGMENTS=$(printf '%s' "$COMMAND" | sed -E 's/(\|\||&&|[;|&])/\n/g')
 
-# Not in allowlist — block
-echo "BLOCKED: Command not in allowlist" >&2
-echo "Command: $COMMAND" >&2
-echo "To approve, add a pattern to ~/.claude/hooks/allowlist.sh" >&2
-exit 2
+# Command substitution executes text that never shows up as a segment, so no
+# amount of splitting can vet it. Refuse instead of guessing.
+if printf '%s' "$COMMAND" | grep -qE '\$\(|`'; then
+    echo "BLOCKED: command substitution is not allowed by the allowlist" >&2
+    echo "Command: $COMMAND" >&2
+    exit 2
+fi
+
+while IFS= read -r SEGMENT; do
+    # sed leaves an empty field where a two-character operator was split
+    [[ -z "${SEGMENT//[[:space:]]/}" ]] && continue
+
+    APPROVED=0
+    for pattern in "${ALLOWED[@]}"; do
+        if printf '%s' "$SEGMENT" | grep -qE "$pattern"; then
+            APPROVED=1
+            break
+        fi
+    done
+
+    if [[ $APPROVED -eq 0 ]]; then
+        echo "BLOCKED: Command not in allowlist" >&2
+        echo "Command: $COMMAND" >&2
+        echo "Unapproved segment: $SEGMENT" >&2
+        echo "To approve, add a pattern to ~/.claude/hooks/allowlist.sh" >&2
+        exit 2
+    fi
+done <<< "$SEGMENTS"
+
+exit 0
