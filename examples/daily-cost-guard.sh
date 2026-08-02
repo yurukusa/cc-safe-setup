@@ -65,6 +65,18 @@
 
 set -u
 
+# Without jq, the parse below silently yields empty and this hook stops
+# guarding - with no error anywhere. Say so. We deliberately do not exit
+# here: blocking would halt every tool call, and exiting 0 would change
+# the behaviour of guards that do not depend on the parsed value.
+if ! command -v jq >/dev/null 2>&1; then
+  _nojq_warned="/tmp/cc-nojq-warned-daily-cost-guard-$PPID"
+  [ -f "$_nojq_warned" ] || {
+    echo "WARNING [daily-cost-guard]: jq not found - this hook cannot inspect tool calls and is NOT protecting you. Install jq." >&2
+    : > "$_nojq_warned"
+  }
+fi
+
 DAILY_LIMIT_USD="${CC_DAILY_LIMIT_USD:-5.00}"
 WARN_THRESHOLD_USD="${CC_DAILY_WARN_USD:-3.50}"
 LOG_DIR="${CC_DAILY_COST_LOG_DIR:-${HOME}/.claude/cost-log}"
