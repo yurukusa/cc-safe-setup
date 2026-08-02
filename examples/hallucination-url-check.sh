@@ -22,7 +22,7 @@
 # }
 # ================================================================
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PostToolUse  MATCHER: "Write|Edit"
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

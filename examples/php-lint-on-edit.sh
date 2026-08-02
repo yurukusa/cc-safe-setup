@@ -17,7 +17,7 @@
 # }
 # ================================================================
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PostToolUse  MATCHER: "Edit|Write"
 
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
