@@ -3,8 +3,10 @@
 **Claude Codeを安全にするワンコマンドツール。** 897個のexample hook · 71件超のAnthropic公式Issueに対応 · 218個のテストファイル · 30K+ 累計npmダウンロード
 
 ```bash
-npx cc-safe-setup
+npx github:yurukusa/cc-safe-setup
 ```
+
+> **なぜ `npx cc-safe-setup` ではないのか。** npm で配っている版は **2026年4月20日公開の 29.8.0 で止まっています**（このリポジトリは 30.0.4）。npm の資格情報の更新待ちで、それが済むまで npm は 29.8.0 を配り続けます。差は見た目だけではありません。同じ入力を与えると、29.8.0 のガードは 30.0.4 が拒否する3つの操作を通します——シェル変数越しのホームへの再帰削除（`rm -rf $HOME/x`）、`&` を区切りに使った `git reset --hard`、連結コマンドでの `git add .env`。上の GitHub を直接指す形なら、常に現行のコードが入ります。中身は同じもので、置き場所が違うだけです。
 
 10秒で8個の安全フックをインストール。`rm -rf /`のブロック、mainへのpush防止、シークレット漏洩検出、構文エラー自動検知。依存関係ゼロ。
 
@@ -33,7 +35,7 @@ npx cc-safe-setup
 
 | あなたの状況 | まず無料で | さらに深く |
 |---|---|---|
-| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料で全部読める](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
@@ -42,15 +44,15 @@ npx cc-safe-setup
 | どのモデルが実際に動いているか分からない | [提供モデルの監査](claude-code-which-model-served-jp.html) | 無料の道具で確認 |
 | サブエージェントが嘘の「完了」を返す（派遣の捏造・沈黙の停止・観察の不在・範囲の逸脱） | [集積の露出診断](cluster-exposure-diagnostic.html) | [副の作業者の沈黙の失敗 (¥1,500)](https://zenn.dev/yurukusa/books/sub-agent-observability?utm_source=readme-ja&utm_medium=routing-table) ——4つの型を一冊で深掘り・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
-| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
-| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx github:yurukusa/cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
+| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose)・[Kindle Unlimited なら無料](https://www.amazon.co.jp/dp/B0H69B7SVZ) |
 | 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership) |
 
 ## 何ができるか
 
 | コマンド | 機能 |
 |---|---|
-| `npx cc-safe-setup` | 8個の安全フックをインストール |
+| `npx github:yurukusa/cc-safe-setup` | 8個の安全フックをインストール |
 | `--shield` | 最大安全（スタック検出+推奨hook自動選択） |
 | `--install-example <name>` | 897個のexampleから個別インストール |
 | `--examples` | 全exampleを一覧表示 |
@@ -67,12 +69,12 @@ npx cc-safe-setup
 | `--export / --import` | チームで設定を共有 |
 | `--team` | プロジェクトにコミットして共有 |
 
-56個のCLIコマンドの全リスト: `npx cc-safe-setup --help`
+56個のCLIコマンドの全リスト: `npx github:yurukusa/cc-safe-setup --help`
 
 ## インストール
 
 ```bash
-npx cc-safe-setup
+npx github:yurukusa/cc-safe-setup
 ```
 
 Claude Codeを再起動。完了。
@@ -128,7 +130,7 @@ Claude Codeを再起動。完了。
 | `mcp-startup-bloat-detector` | Pro / Claude.ai-OAuth の login で `claude.ai ` 前置きの connector が大量に同期されて System tools の context が膨れる現象を SessionStart で検知し、 `ENABLE_CLAUDEAI_MCP_SERVERS=false` の回避策を提示する（v2.1.14 で塞いだはずの経路が v2.1.133 で 29 倍に再発） | [#50062](https://github.com/anthropics/claude-code/issues/50062) / [#57235](https://github.com/anthropics/claude-code/issues/57235) |
 | `stale-temp-settings-detector` | 同じ機械の他の利用者が `/tmp/claude-settings-*.json` を残している場合、机上版の `--settings '{}'` 起動が EACCES で衝突する現象を SessionStart で検知し、所有者の名前を表示して削除の判断を支援する | [#57224](https://github.com/anthropics/claude-code/issues/57224) |
 
-インストール: `npx cc-safe-setup --install-example <名前>`
+インストール: `npx github:yurukusa/cc-safe-setup --install-example <名前>`
 
 ## 🚨 2026年6月15日の課金の崖
 > **訂正（2026年6月22日）: Anthropic は施行の当日にこれを一時停止した。** 課金の分離は2026年6月15日に予定されていたが、Anthropic はその日に一時停止し「当面は何も変わらない」と通知した。`claude -p`・Agent SDK・GitHub Actions の利用は、今も通常の購読の枠から引かれる（[the-decoder](https://the-decoder.com/anthropic-backs-off-unpopular-billing-overhaul-as-price-war-with-openai-looms/)、[digitalapplied](https://www.digitalapplied.com/blog/anthropic-claude-credit-overhaul-june-15-2026)）。ただし公式には告知されたままで再来し得るので、自分の露出を知っておく価値はある。下の道具は「いま起きている緊急事態」ではなく「再来に備える準備」として使うこと。
