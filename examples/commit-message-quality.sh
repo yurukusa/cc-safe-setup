@@ -17,7 +17,12 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 echo "$COMMAND" | grep -qE '^\s*git\s+commit' || exit 0
 
 # Extract commit message
-MSG=$(echo "$COMMAND" | grep -oP '(-m\s+["\x27])(.+?)(["\x27])' | sed "s/^-m\s*[\"']//" | sed "s/[\"']$//")
+# -P は GNU 拡張で、BSD grep では MSG が空になり、この検査が丸ごと消える。
+# \x27 と非貪欲(.+?)も PCRE 固有なので、引用符の中身を文字クラスで表す形にする。
+MSG=$(echo "$COMMAND" \
+    | grep -oE -- '-m[[:space:]]+"[^"]*"|-m[[:space:]]+'"'"'[^'"'"']*'"'"'' \
+    | sed -E 's/^-m[[:space:]]*//' \
+    | sed -E 's/^["'"'"']//; s/["'"'"']$//')
 [ -z "$MSG" ] && exit 0
 
 # Check message quality

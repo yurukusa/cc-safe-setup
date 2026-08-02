@@ -39,7 +39,8 @@ if echo "$OUTPUT" | grep -qiE '(new|updated|override)\s+system\s+prompt'; then
 fi
 
 # Hidden instructions in HTML comments or zero-width chars
-if echo "$OUTPUT" | grep -qP '<!--.*(?:execute|run|delete|remove).*-->'; then
+# -P は GNU 拡張。BSD grep では警告が黙って消える。(?:…) を () にすれば -E で足りる。
+if echo "$OUTPUT" | grep -qE '<!--.*(execute|run|delete|remove).*-->'; then
     echo "WARNING: Possible prompt injection in HTML comment" >&2
     SUSPICIOUS=1
 fi

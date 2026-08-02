@@ -39,7 +39,11 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 echo "$COMMAND" | grep -qE '\b(curl|wget|http|fetch)\b' || exit 0
 
 # Check for API key patterns in URLs
-if echo "$COMMAND" | grep -qiP '[?&](api[_-]?key|token|secret|password|auth|access[_-]?key|client[_-]?secret)=[^$\s&"'\'']{8,}'; then
+# -P は GNU 拡張で、macOS の BSD grep では grep 自体がエラーになる。
+# この条件は遮断（exit 2）の唯一の入口なので、偽になると鍵つきURLが素通しになる。
+# 実測: `curl "https://example.com/v1?api_key=…"` を渡すと -P ありは 2、無しは 0 だった。
+# \s を [:space:] に置き換えれば POSIX の拡張正規表現で同じことができる。
+if echo "$COMMAND" | grep -qiE '[?&](api[_-]?key|token|secret|password|auth|access[_-]?key|client[_-]?secret)=[^$[:space:]&"'\'']{8,}'; then
     echo "BLOCKED: API key detected in URL query parameter." >&2
     echo "" >&2
     echo "Command: $(echo "$COMMAND" | head -1)" >&2
