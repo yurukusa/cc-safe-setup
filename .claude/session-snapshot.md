@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-02T02:19:31+09:00
+Updated: 2026-08-02T20:20:01+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `fix/pcre-portability-warnings`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 12ddce6 recovery: pre-compact checkpoint (1 files, 20260801-171931)
+- Last commit: cbb69f84 grep -P に頼って macOS で黙っていた助言系9本を直し、うち1本は元から動いていなかった
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-02.md
-./.claude/pre-compact-checkpoint.md
-./examples/worktree-edit-boundary-guard.sh
-./examples/worktree-escape-write-guard.sh
-./examples/worktree-parent-write-guard.sh
-./examples/worktree-remove-uncommitted-guard.sh
-./examples/write-empty-content-guard.sh
-./examples/write-nul-corruption-detector.sh
-./examples/write-secret-guard.sh
+./tests/grep-pcre-portability.test.sh
+./examples/detect-mixed-indentation.sh
+./examples/dockerfile-latest-guard.sh
+./examples/hardcoded-ip-guard.sh
+./examples/no-any-typescript.sh
+./examples/no-dangling-await.sh
+./examples/no-deep-relative-import.sh
+./examples/no-hardcoded-port.sh
+./examples/sensitive-log-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
