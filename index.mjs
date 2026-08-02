@@ -792,6 +792,7 @@ function examples() {
       'webfetch-domain-allow.sh': 'Auto-approve WebFetch for allowed domains',
     },
     'Quality': {
+      'grep-nul-false-negative-guard.sh': 'Warn when Grep reports "no matches" but files under the searched path contain NUL bytes, which Grep skips silently',
       'bash-secret-output-detector.sh': 'Warn when Bash output contains secrets',
       'bashrc-safety-check.sh': 'Warn about .bashrc lines that hang in non-interactive shells',
       'branch-name-check.sh': 'Warn when creating branches with non-standard names',
@@ -967,6 +968,8 @@ function examples() {
       'yaml-syntax-check.sh': 'Validate YAML after editing',
     },
     'Monitoring': {
+      'model-version-alert.sh': 'Every 50th hook run, read the newest session log and alert when the active model is an older Opus 4.7 build',
+      'worktree-create-log.sh': 'Append branch and path to ~/.claude/worktree-audit.log whenever a worktree is created',
       'api-rate-limit-tracker.sh': 'Track API call frequency and warn on burst',
       'cost-tracker.sh': 'Estimate session token cost',
       'cross-session-error-log.sh': 'Persist error patterns across sessions',
@@ -995,6 +998,7 @@ function examples() {
       'subagent-error-detector.sh': 'Detect failed subagent results',
     },
     'Recovery': {
+      'auto-push-session-branch.sh': 'Push the current branch to its upstream after each turn, skipping main/master/develop/release and detached HEAD; never fails the turn if the push is rejected',
       'auto-checkpoint.sh': 'Auto-commit after every edit for rollback protection',
       'auto-git-checkpoint.sh': 'Auto Git Checkpoint',
       'auto-snapshot.sh': 'Automatic file snapshots before every edit',
