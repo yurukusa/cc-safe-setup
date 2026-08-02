@@ -145,6 +145,15 @@ BLOCKED: ${INFLIGHT_COUNT} subagent(s) already in flight (budget: ${BUDGET}).
   To disable the guard entirely:
     CC_NESTED_SPAWN_DISABLE=1
 
+  Root cause, if you never wanted nesting: subagents spawning subagents is
+  opt-out at the source.
+    CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1
+  Set it explicitly rather than relying on the default. Verified in 2.1.220 by
+  reading the shipped binary: the depth default is fetched from a remote config
+  and only falls back to the built-in 3 when that fetch yields nothing, so the
+  changelog's "default is 3" is a fallback, not a guarantee. The two sibling
+  caps are plain constants by contrast (concurrent 20, per-session 200).
+
   Why this guard exists: Issue #62193 (3,079 bash subprocesses in 17s, hard
   reboot) and the 2026-05-29 Windows follow-up (ultracode subagents spawning
   PowerShell until two other Claude Code windows crashed). Cluster 1
