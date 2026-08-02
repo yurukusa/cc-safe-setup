@@ -91,16 +91,86 @@ Commands that are always blocked.
 
 ### Hook Events
 
-| Event | When | Use Case |
-|-------|------|----------|
-| `PreToolUse` | Before tool executes | Block/modify commands |
-| `PostToolUse` | After tool executes | Validate output, check syntax |
-| `Stop` | Session ends | Log data, notify |
-| `UserPromptSubmit` | User presses Enter | Validate prompts |
-| `Notification` | Claude shows notification | Custom alerts |
-| `PreCompact` | Before context compaction | Save state |
-| `SessionStart` | Session begins | Initialize |
-| `SessionEnd` | Session ends | Cleanup |
+There are **31** hook events. This table used to list 8 of them, and described `Stop` as
+"Session ends" — which is wrong, and wrong in a direction that costs you: `Stop` fires
+**after every turn**, not once at the end. A cleanup or notification hook registered there
+runs dozens of times per session.
+
+**A wrong event name is not an error.** Claude Code drops the hook and says
+`Unknown hook event "..." was ignored` — but only where you have to go looking for it.
+Check yours:
+
+```bash
+claude doctor    # any "Unknown hook event" line means that hook never runs
+```
+
+The same output prints the authoritative list of valid names, which is where the table below
+comes from. Descriptions are quoted from the official hooks reference.
+
+**Session lifecycle**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `SessionStart` | "Claude Code starts a new session or resumes an existing session" | Initialize, restore state |
+| `Setup` | Start with `--init-only`, or `--init`/`--maintenance` in `-p` mode | One-time prep in CI |
+| `SessionEnd` | "When a session terminates" | Cleanup, final report |
+
+**Prompt and turn**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `UserPromptSubmit` | "When you submit a prompt, before Claude processes it" | Validate or annotate prompts |
+| `UserPromptExpansion` | "When a user-typed command expands into a prompt" | Gate your own slash commands |
+| `Stop` | **"When Claude finishes responding"** — every turn, not once | Per-turn checks, commitments |
+| `StopFailure` | "When the turn ends due to an API error" | Catch `rate_limit`, `billing_error`, `overloaded` |
+| `MessageDisplay` | "While assistant message text is displayed" | Redact or annotate on screen only |
+
+**Tools and permissions**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `PreToolUse` | "Before a tool call executes. Can block it" | **Where guards belong.** Fires in every permission mode |
+| `PermissionRequest` | "When a tool call needs a permission decision" | Custom approval logic — **does not fire under auto mode or bypassed permissions** |
+| `PermissionDenied` | "When a tool call is denied by the auto mode classifier" | Audit what is actually being blocked |
+| `PostToolUse` | "After a tool call succeeds" | Validate output, syntax-check writes |
+| `PostToolUseFailure` | "After a tool call fails" | Feed the failure reason back to Claude |
+| `PostToolBatch` | "After a full batch of parallel tool calls resolves" | Check a whole batch before the next model call |
+
+**Subagents and tasks**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `SubagentStart` | "When a subagent is spawned" | Count and constrain fan-out |
+| `SubagentStop` | "When a subagent finishes" | Collect subagent results |
+| `TaskCreated` | "When a task is being created via `TaskCreate`" | Enforce task hygiene (exit 2 blocks) |
+| `TaskCompleted` | "When a task is being marked as completed" | Require evidence before "done" (exit 2 blocks) |
+| `TeammateIdle` | "When an agent team teammate is about to go idle" | Keep a teammate working (exit 2 blocks) |
+
+**Environment and config**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `ConfigChange` | "When a configuration file changes during a session" | **exit 2 blocks the change** (except `policy_settings`) |
+| `InstructionsLoaded` | "When a CLAUDE.md or `.claude/rules/*.md` file is loaded into context" | Verify your instructions actually loaded |
+| `CwdChanged` | "When the working directory changes, for example when Claude executes a `cd` command" | Reactive environment management (direnv) |
+| `DirectoryAdded` | "When a working directory is added mid-session via `/add-dir`" | Audit scope expansion |
+| `FileChanged` | "When a watched file changes on disk" | React to edits; `matcher` selects filenames |
+| `WorktreeCreate` | "When a worktree is being created" | **Hook returns the path; non-zero aborts creation** |
+| `WorktreeRemove` | "When a worktree is being removed" | Salvage work before removal |
+
+**Context and MCP**
+
+| Event | When it fires | Use case |
+|-------|---------------|----------|
+| `PreCompact` | "Before context compaction" | Save state, or block compaction |
+| `PostCompact` | "After context compaction completes" | Re-inject what compaction dropped |
+| `Notification` | "When Claude Code sends a notification" | Custom alerts |
+| `Elicitation` | "When an MCP server requests user input during a tool call" | Auto-answer or refuse MCP prompts |
+| `ElicitationResult` | "After a user responds to an MCP elicitation" | Vet the response before it leaves |
+
+Not every event supports a `matcher`, and the decision control differs per event (some can
+block with exit code 2, some ignore the exit code entirely). Check the official reference
+before relying on one to *stop* something.
 
 ### Matcher Values
 
