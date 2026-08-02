@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-02T20:23:12+09:00
+Updated: 2026-08-02T20:23:43+09:00
 
 ## Git
 - Branch: `fix/pcre-portability-warnings`
@@ -7,13 +7,13 @@ Updated: 2026-08-02T20:23:12+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e8c1ba9b recovery: pre-compact checkpoint (1 files, 20260802-112312)
+- Last commit: 72d93d23 recovery: pre-compact checkpoint (1 files, 20260802-112342)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-02.md
+./.claude/pre-compact-checkpoint.md
 ./tests/grep-pcre-portability.test.sh
 ./examples/detect-mixed-indentation.sh
 ./examples/dockerfile-latest-guard.sh
