@@ -44,8 +44,21 @@ if ! echo "$COMMAND" | grep -qE '^\s*rm\s+.*-[rf]'; then
     exit 0
 fi
 
-# Extract target path
-TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(-[rf]+\s+)*\K\S+' | tail -1)
+# Extract target path.
+# grep -P is GNU-only; macOS ships BSD grep, which rejects -P and returns nothing.
+# TARGET would then be empty and the "[[ -z ]] && exit 0" below would let every
+# rm through — the guard would stop guarding without saying anything. Measured:
+# with -P the hook exits 2 on a symlink pointing outside the project, without it
+# it exits 0 on the same input. \K has no POSIX equivalent, so the fallback
+# matches from the command word and strips that prefix afterwards.
+if echo x | grep -qP x 2>/dev/null; then
+    TARGET=$(echo "$COMMAND" | grep -oP 'rm\s+(-[rf]+\s+)*\K\S+' | tail -1)
+else
+    TARGET=$(echo "$COMMAND" \
+        | grep -oE 'rm[[:space:]]+(-[rf]+[[:space:]]+)*[^[:space:]]+' \
+        | tail -1 \
+        | sed -E 's/^rm[[:space:]]+(-[rf]+[[:space:]]+)*//')
+fi
 
 if [[ -z "$TARGET" ]] || [[ ! -e "$TARGET" ]]; then
     exit 0
