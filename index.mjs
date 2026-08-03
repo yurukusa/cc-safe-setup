@@ -385,6 +385,7 @@ async function verify() {
     { hook: 'branch-guard', input: '{"tool_input":{"command":"git push --force origin feature"}}', expect: 2, desc: 'blocks force-push' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"git reset --hard HEAD~5"}}', expect: 2, desc: 'blocks git reset --hard' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"sudo rm -rf /var"}}', expect: 2, desc: 'blocks sudo + destructive' },
+    { hook: 'destructive-guard', input: '{"tool_input":{"command":"cd /tmp && sudo rm -rf myproject"}}', expect: 2, desc: 'blocks sudo after a separator' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"Remove-Item -Recurse -Force *"}}', expect: 2, desc: 'blocks PowerShell Remove-Item' },
     { hook: 'destructive-guard', input: '{"tool_input":{"command":"Remove-Item ./file.txt"}}', expect: 0, desc: 'allows single file Remove-Item' },
     { hook: 'branch-guard', input: '{"tool_input":{"command":"npm test && git push --force origin main"}}', expect: 2, desc: 'blocks chained force-push (compound)' },
