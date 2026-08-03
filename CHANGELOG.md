@@ -1,6 +1,28 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: the marketplace plugins carried the same word-order assumptions, in a second
+  implementation** — the four bundles under `plugins/` keep their shell **inline in
+  `plugin.json`**. They are not copies of the core hooks, so every fix landed in the core
+  today did nothing for anyone who installed a plugin.
+  Measured 2026-08-03 with all four installed together, over the 24 probe forms these
+  bundles claim to cover: **10 of 24 walked through → 3 of 24** (`find`, `dd`, `chmod` — none
+  of the four claims those). Controls: **0 false positives of 9** ordinary commands, before
+  and after, including `git push --force-with-lease`.
+  What walked through was the familiar shape — a rule describing how a command is usually
+  typed rather than what it does: `rm -r -f`, `rm --recursive --force`, `rm target -rf`,
+  `git reset HEAD~1 --hard`, `git clean -x -f -d`, `git clean --force -d`,
+  `git branch --delete --force`.
+  **One description promised something that was never built.** `git-protection` said it
+  *"guards interactive rebase"* and **no hook in the bundle mentions rebase at all**
+  (checked by plain substring, after a first regex-based check produced two false alarms).
+  The claim is removed rather than newly implemented: an interactive rebase is ordinary
+  work, and blocking it would trade a false promise for a false positive.
+  **A regression was introduced and fixed in the same pass, and both directions are now
+  asserted.** Widening the `git clean` pattern also caught `git clean -nd` and `-ndx`, which
+  remove nothing. Dry runs are the half that keeps a guard installed.
+  New `tests/plugins-word-order.test.sh`: 32 cases, all passing, **8 of them failing**
+  against `origin/main`'s copies.
 - **`destructive-guard`: block `rm -rf *`** — found by measuring all three channels this
   project ships through, against the same 27 destructive forms:
 
