@@ -35,6 +35,12 @@
   `origin/main` exits 1 with a stack trace; this change exits 0 and completes registration.
   The usual trigger for all three is a snippet copied from docs whose first line is
   `// path/to/file` — not legal JSON. **This repo shipped four such examples** (fixed in #951).
+  **`--protect` had no test at all**, which is why it could stay broken. New
+  `tests/settings-unreadable-refuses-to-write.test.sh`: 6 cases — refuse-to-write for
+  `--guard` and `--protect` on a broken file, the same two on a valid file as controls
+  (without them, "refuses to write" and "cannot write at all" look identical), and
+  `--protect` registering under the `Edit|Write` matcher without throwing.
+  **5 of the 6 fail against `origin/main`.**
 - **Fix: the marketplace plugins carried the same word-order assumptions, in a second
   implementation** — the four bundles under `plugins/` keep their shell **inline in
   `plugin.json`**. They are not copies of the core hooks, so every fix landed in the core
