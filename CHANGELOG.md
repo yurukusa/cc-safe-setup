@@ -1,6 +1,24 @@
 # Changelog
 
 ## [Unreleased]
+- **New check: every `# TRIGGER:` header has to name an event Claude Code accepts** — an
+  unknown key under `hooks` in settings.json is not an error. Claude Code does not warn
+  about it and the hook simply never runs, so one mistyped event name turns a shipped guard
+  into a file that sits in the config looking installed and protects nothing. That is the
+  exact silent-failure shape this repo exists to catch, and nothing was checking it.
+  Users register hooks by copying the `# TRIGGER:` line out of the example, so a wrong name
+  in a header propagates straight into somebody's settings.
+  Swept all 909 examples: **829 carry a TRIGGER header**, they use **12 of the 31 event
+  names that exist**, and **two named an event that does not exist** — `hook-debug-wrapper`
+  and `hook-stdout-sanitizer` both said `Any`, written as prose meaning "any event". A
+  reader copying that gets a key Claude Code ignores. Those two wrap another hook rather
+  than being registered on their own, so their headers now say `none` and point at the
+  wrapped hook's event, with the reason spelled out. A third header
+  (`commitment-carry-forward-arrest`) had an unclosed parenthesis that swallowed the second
+  event name; it now reads `Stop, UserPromptSubmit`.
+  `scripts/check-hook-event-names.py` carries the roster as documented on 2026-08-03 and is
+  wired into CI. Verified the way a check has to be verified: introducing `PreToolUsee` in
+  one header makes it exit 1, and restoring the file makes it exit 0.
 - **Fix: `destructive-guard` assumed the dangerous flag would be in a fixed slot** — three
   of its checks encoded a habit of typing rather than what the command does:
 

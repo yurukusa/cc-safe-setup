@@ -59,6 +59,14 @@ jobs:
           done
           echo "tests/: $PASS passed, $FAIL failed"
           [ "$FAIL" -eq 0 ] || { echo "failing suites:$FAILED"; exit 1; }
+      # An unknown key under `hooks` in settings.json is not an error. Claude Code
+      # does not warn about it and the hook simply never runs, so one mistyped
+      # event name turns a shipped guard into a file that looks installed and
+      # protects nothing. Users copy the `# TRIGGER:` line out of the example
+      # straight into their settings, and until 2026-08-03 nothing checked those
+      # headers: two of them named an event that does not exist.
+      - name: Hook TRIGGER headers name real events
+        run: python3 scripts/check-hook-event-names.py
       # docs/search-index.json is generated from docs/*.html by
       # scripts/build-search-index.py, and the script has to be run by hand. On
       # 2026-08-03 the checked-in index held 140 entries while docs/ had 208

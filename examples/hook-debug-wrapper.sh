@@ -26,8 +26,12 @@
 #
 # LOG LOCATION: ~/.claude/hook-debug.log
 #
-# TRIGGER: Any (wraps any hook)
-# MATCHER: Any
+# TRIGGER: none
+# MATCHER: none
+#   This wraps another hook rather than being registered on its own. Register it
+#   under whatever event and matcher that hook already uses. There is no `Any`
+#   event: an unknown key under `hooks` is ignored without a warning, so a hook
+#   registered under one sits in the config looking installed and never runs.
 # ================================================================
 
 HOOK_SCRIPT="$1"
