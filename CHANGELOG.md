@@ -3,7 +3,7 @@
 ## [Unreleased]
 - **Fix (data loss): a `settings.json` that exists but does not parse was treated as `{}`
   and then written over** — the installer read the file with a bare `JSON.parse` in
-  **34 places**, swallowed the failure outright in **9**, and in **5 of those 9** wrote the
+  **34 places**, swallowed the failure outright in **9**, and in **6 of those 9** wrote the
   resulting object straight back with `writeFileSync(SETTINGS_PATH, …)`. Every hook,
   permission and env var the user had was replaced by a fresh object containing only the
   hook just added — **and the command exited 0, printing "Registered in settings.json".**
@@ -16,8 +16,13 @@
   | this change | 1 | intact | kept | kept |
 
   New `readSettingsForWrite()` refuses to write when the file exists but does not parse,
-  and names the cause plus `python3 -m json.tool` to confirm it. The three read-only
-  swallow sites are deliberately untouched — the damage there is different.
+  and names the cause plus `python3 -m json.tool` to confirm it. The two remaining
+  swallow sites (`migrateFrom`, `simulate`) never write settings back and are left alone —
+  the damage there is different.
+  **The count was wrong once, in the direction of "less broken".** The first pass looked
+  only 60 lines past each swallow and classified `shield()` as read-only; its write is
+  117 lines away, at `writeFileSync(SETTINGS_PATH, configNext)`. Counting by function
+  scope instead of by distance turned 5 sites into 6.
 - **Fix: `--audit` hid the cause** — the same swallowed parse made a corrupt settings file
   look empty, so the audit reported CRITICAL *"No PreToolUse hooks"* and pointed the user at
   a reinstall. The user has hooks; Claude Code is ignoring the whole file. Before the fix a
