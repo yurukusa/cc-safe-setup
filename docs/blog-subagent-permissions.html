@@ -74,8 +74,8 @@ code{font-family:'SF Mono',Monaco,monospace;font-size:.85rem;background:#161b22;
 
 <h3>2. Use hooks instead of permission grants</h3>
 <p>Hooks execute for every tool call regardless of the session. A <code>PreToolUse</code> hook that auto-approves safe patterns works identically for parent and child:</p>
-<pre>// In settings.json
-{
+<p><strong>~/.claude/settings.json</strong></p>
+<pre>{
   "hooks": {
     "PreToolUse": [
       {
