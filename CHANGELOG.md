@@ -1,6 +1,28 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: four `settings.json` examples in the docs were not valid JSON** — each began with a
+  `// path/to/file` comment inside the code block. A reader copies the block, saves it, and
+  ends up with a settings file that will not parse. **A settings file that will not parse
+  takes every hook down with it**, which is the silent failure this whole project exists to
+  prevent.
+  This is not hypothetical for anyone who then runs the installer: `index.mjs` reads
+  `settings.json` with a plain `JSON.parse` in **10 places**, and one of them
+  (`try { … } catch(e) {}`) swallows the error entirely, so the file is treated as empty.
+  Our own tool cannot read a settings file written the way our own docs show it.
+  The fix is not to delete the label but to move it out of the block, where it reads better
+  anyway: `matchers.html`, `blog-subagent-permissions.html`, `settings-reference.html`,
+  `team-rollout-guide.html`. `matchers.html` also carried an inline
+  `"matcher": "Bash",        // Only Bash commands` — a comment in the middle of the JSON,
+  which survives even if the reader drops the first line. That one is gone too.
+  `docs/sub-agent-failure-modes-hook-map.md` uses a `jsonc` fence deliberately and keeps it,
+  with a sentence added saying `settings.json` is strict JSON and the `//` line has to go.
+  **Left alone on purpose**: `common-mistakes.html` (`// DON'T:` / `// DO:` fragments that
+  are not a file) and two blocks in `settings-reference.html` that are shell, not JSON.
+  Safety check: the HTML tag count changes by exactly +4 per file — the one `<p><strong>`
+  label added — and by nothing else.
+  Found by running every code block in the repo's docs and in the sister handbook through a
+  parser. That sweep also turned up 5 broken samples in the paid books, fixed separately.
 - **New check: every `# TRIGGER:` header has to name an event Claude Code accepts** — an
   unknown key under `hooks` in settings.json is not an error. Claude Code does not warn
   about it and the hook simply never runs, so one mistyped event name turns a shipped guard

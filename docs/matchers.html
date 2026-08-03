@@ -54,12 +54,12 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem;
 <h2>How Matching Works</h2>
 <p style="font-size:.85rem;color:#8b949e">Matchers are <strong>regex patterns</strong> tested against the tool name. <code>"Edit|Write"</code> means "matches Edit OR Write".</p>
 
-<pre><code>// settings.json
-{
+<p style="font-size:.85rem;color:#8b949e"><strong>~/.claude/settings.json</strong> — the matcher below fires on Bash only.</p>
+<pre><code>{
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",        // Only Bash commands
+        "matcher": "Bash",
         "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/guard.sh"}]
       },
       {

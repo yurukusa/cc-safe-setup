@@ -41,6 +41,10 @@ Each mode below is independent. Most fleets exhibit two or three of the four. In
 
 ### Recommended install (minimum coverage)
 
+The block below is `jsonc` for readability. **`settings.json` itself is strict JSON — drop
+the `//` line before saving.** A comment left in the file makes it unparseable, and a
+settings file that will not parse takes every hook down with it, silently.
+
 ```jsonc
 // .claude/settings.json (excerpt)
 {

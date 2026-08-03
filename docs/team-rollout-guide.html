@@ -65,8 +65,8 @@ th{color:#f0f6fc}
 
 <h3><span class="step">1.</span> Put one shared safety baseline in the repo</h3>
 <p>Don't ask each developer to configure hooks by hand — versions drift and new hires forget. Commit the configuration to the repo so everyone who clones it inherits the same baseline.</p>
-<pre><code>// .claude/settings.json  (committed to the repo)
-{
+<p><strong>.claude/settings.json</strong> — committed to the repo.</p>
+<pre><code>{
   "hooks": {
     "PreToolUse": [
       { "matcher": "Bash",
