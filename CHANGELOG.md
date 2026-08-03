@@ -1,6 +1,36 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: two core hooks matched only the first command position** — the same defect
+  PR #937 fixed in `allowlist.sh`, found in the hooks that `cc-safe-setup` installs for
+  every user. `destructive-guard.sh` Check 6 anchored its sudo pattern with `^\s*sudo`,
+  so nothing after a separator was examined: `cd /tmp && sudo rm -rf app` ran unguarded.
+  It stayed hidden because Check 1 independently blocks `rm` on a sensitive path, so the
+  obvious probe (`cd /tmp && sudo rm -rf /var`) still came back blocked. Measured against
+  the shipped `scripts.json` on 2026-08-03, on the eight forms Check 6 alone covers
+  (a relative path, `dd`, `mkfs`): 8/8 blocked bare, **7/8 exited 0 behind `cd X &&`, `;`,
+  `&&` and `||`**. `cd-git-allow.sh` had the mirror image on the approving side: it pulled
+  out the first `&& git <sub>` and, if that subcommand was read-only, returned
+  `permissionDecision: "allow"` for the whole line — so
+  `cd /repo && git log && sudo rm -rf app` was **explicitly approved**, tail unread. Both
+  now split on `&&`, `||`, `;`, `|` and `&` and judge every segment. `cd-git-allow` returns
+  no decision when any segment is not a read-only git call, which drops the command into
+  the normal permission flow rather than blocking it; it also no longer depends on
+  `grep -oP`, which is GNU-only and silently returned nothing on macOS.
+  The same anchor was over-tightening in `destructive-guard.sh` Check 7: the skip that
+  keeps `echo "Remove-Item -Recurse -Force"` from reading as a deletion only applied at the
+  start of the line, so `cd repo && git commit -m "... Remove-Item -Recurse -Force ..."`
+  was blocked for writing a commit message. Check 7 now asks whether the deleting command
+  sits at a command position (optionally behind a `powershell`/`pwsh` wrapper) instead of
+  whether the words appear anywhere, which drops the skip list entirely. `del /s /q` and
+  `rd /s /q` keep their own branch. Over-tightening was measured the same way as the hole:
+  55 ordinary commands run against both versions, **no command newly blocked**, and the two
+  that stopped being blocked are exactly the false positives above.
+  New tests: 27 cases added to `tests/destructive-guard-separators.test.sh` (41 pass;
+  9 of them fail against the pre-fix copy) and `tests/cd-git-allow-compound-tail.test.sh`
+  (13 pass; 3 fail against the pre-fix copy). `--verify` gains a compound-sudo case.
+  Not addressed: sudo's own options (`sudo -u www rm -rf app`) still slip past Check 6,
+  which is a coverage question rather than an anchor one.
 - **`reroute-after-block-guard.sh`: stop a reroute toward a just-blocked target (#70112)** —
   PreToolUse hooks are stateless, so the trajectory in #70112 (a gate fires; the agent
   substitutes an equivalent path toward the SAME target; the next hook evaluates a fresh,
