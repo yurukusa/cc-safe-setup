@@ -29,6 +29,29 @@ const c = {
   blue: '\x1b[36m',
 };
 
+// settings.json が存在するのに JSON として壊れている時、それを {} として扱ってはいけない。
+// 呼び出し側は直後に settings を書き戻すので、利用者のフック・権限・環境変数が
+// まるごと新しいオブジェクトで上書きされて消える。壊れているなら書かずに止める。
+// いちばん多い引き金は、記事や README から写した設定例の先頭にある
+// `// path/to/file` というコメント行で、これは JSON として不正になる。
+function readSettingsForWrite() {
+  if (!existsSync(SETTINGS_PATH)) return {};
+  try {
+    return JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+  } catch (e) {
+    console.error('');
+    console.error(c.red + '  ✗' + c.reset + ' ' + SETTINGS_PATH + ' is not valid JSON (' + e.message + ')');
+    console.error('    Refusing to write: doing so would replace every hook, permission');
+    console.error('    and env var you already have with a fresh file.');
+    console.error('');
+    console.error('    Check it with:  python3 -m json.tool ' + SETTINGS_PATH);
+    console.error('    A leading "// path/to/file" comment line is the usual cause.');
+    console.error('');
+    process.exit(1);
+  }
+}
+
+
 // Days remaining until Anthropic's 2026-06-15 programmatic-billing split.
 // Computed at run time so the CLI banner stays accurate without daily edits —
 // hardcoded counts drifted (lines once read "23 days" and "20 days" on the same
@@ -1343,8 +1366,22 @@ async function audit() {
 
   // 1. Check if any PreToolUse hooks exist
   let settings = {};
+  // A settings.json that exists but does not parse is the worst case, not a neutral
+  // one: Claude Code ignores the whole file, so every hook declared in it is inert.
+  // Swallowing the parse error here made the checks below report "no PreToolUse
+  // hooks" and send the user to reinstall — a true symptom with the cause hidden.
+  // The usual trigger is a copied snippet that starts with a `// path/to/file`
+  // comment line, which is not legal JSON.
   if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch(e) {}
+    try {
+      settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+    } catch (e) {
+      risks.push({
+        severity: 'CRITICAL',
+        issue: 'settings.json is not valid JSON (' + e.message + ') — Claude Code ignores the entire file, so every hook declared in it is silently inert',
+        fix: 'python3 -m json.tool ' + SETTINGS_PATH + '   # then delete the offending line; a leading "// path" comment is the usual cause'
+      });
+    }
   }
   const preHooks = (settings.hooks?.PreToolUse || []);
   const postHooks = (settings.hooks?.PostToolUse || []);
@@ -2332,10 +2369,7 @@ async function guard(description) {
   console.log(c.green + '  ✓' + c.reset + ` Hook created: ${hookPath}`);
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
 
@@ -2981,10 +3015,7 @@ async function profile(level) {
   }
 
   // Update settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
 
   // Register all hooks in settings
@@ -3274,10 +3305,10 @@ async function shield() {
   console.log();
   console.log(c.bold + '  Step 4: Configure settings.json' + c.reset);
   const hadConfigFile = existsSync(SETTINGS_PATH);
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  // 書き戻しは 100行以上あとの writeFileSync(SETTINGS_PATH, configNext) で起きる。
+  // 最初にこの経路を数えたとき 60行だけ先を見て「読むだけ」と分類してしまった。
+  // 距離が離れているだけで、壊れた設定を {} として上書きする形は他の5か所と同じ。
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   const configBefore = JSON.stringify(settings, null, 2);
   // 初回の導入(設定ファイルがまだ無い)では、まだ何の決定も下されていないので、
@@ -4829,10 +4860,7 @@ exit 0`,
   console.log(c.dim + '  Trigger: ' + matched.trigger + ', Matcher: ' + matched.matcher + c.reset);
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[matched.trigger]) settings.hooks[matched.trigger] = [];
 
@@ -5508,10 +5536,7 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
   }
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
@@ -5629,41 +5654,25 @@ exit 0
 
   // Register in settings.json — use "Bash" matcher ONLY (never "")
   // "" matcher affects ALL tools and a broken hook would lock out the session
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
-  // Register under specific matchers based on rule types (NEVER use "" matcher)
+  // Register under a specific matcher (NEVER use "" matcher).
+  // --protect installs exactly one rule: block Edit/Write on `targetPath`, so the
+  // only matcher it needs is Edit|Write. The block/approve branches that used to
+  // stand here were copied from guard(), which parses a user-supplied rule list;
+  // `rules` never existed in this function. The result was a ReferenceError right
+  // after the hook file had been written — the hook was left on disk and never
+  // registered, and --protect failed every single time it was run.
   const hookCmd = `bash ${toBashPath(hookPath)}`;
-  const hasBlocks = rules.some(r => r.type === 'block');
-  const hasApproves = rules.some(r => r.type === 'approve');
-  const hasProtects = rules.some(r => r.type === 'protect');
-
-  // Block and approve rules need Bash matcher
-  if (hasBlocks || hasApproves) {
-    let bashMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Bash');
-    if (!bashMatcher) {
-      bashMatcher = { matcher: 'Bash', hooks: [] };
-      settings.hooks.PreToolUse.push(bashMatcher);
-    }
-    if (!bashMatcher.hooks.some(h => h.command === hookCmd)) {
-      bashMatcher.hooks.push({ type: 'command', command: hookCmd });
-    }
+  let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
+  if (!editMatcher) {
+    editMatcher = { matcher: 'Edit|Write', hooks: [] };
+    settings.hooks.PreToolUse.push(editMatcher);
   }
-
-  // Protect rules need Edit|Write matcher
-  if (hasProtects) {
-    let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
-    if (!editMatcher) {
-      editMatcher = { matcher: 'Edit|Write', hooks: [] };
-      settings.hooks.PreToolUse.push(editMatcher);
-    }
-    if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
-      editMatcher.hooks.push({ type: 'command', command: hookCmd });
-    }
+  if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
+    editMatcher.hooks.push({ type: 'command', command: hookCmd });
   }
 
   writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
