@@ -19,6 +19,46 @@
   `scripts/check-hook-event-names.py` carries the roster as documented on 2026-08-03 and is
   wired into CI. Verified the way a check has to be verified: introducing `PreToolUsee` in
   one header makes it exit 1, and restoring the file makes it exit 0.
+- **Fix: `destructive-guard` assumed the dangerous flag would be in a fixed slot** — three
+  of its checks encoded a habit of typing rather than what the command does:
+
+  | check | pattern | what it assumed |
+  |---|---|---|
+  | 2 | `git\s+reset\s+--hard` | `--hard` follows `reset` |
+  | 3 | `git\s+clean\s+-[a-z]*[fd]` | the flags are one bundle, and come first |
+  | 4 | `chmod\s+(-R\s+)?777\s+(/\|~\|\.)` | `-R` sits before `777`, the path right after |
+
+  A shell does not care. `git reset HEAD~1 --hard` discards exactly the same work,
+  `git clean -x -f -d` deletes *more* than `git clean -fd`, and `chmod 777 -R /etc` is
+  `chmod -R 777 /etc`. All of them walked past the guard that every
+  `npx github:yurukusa/cc-safe-setup` user gets first.
+  Measured 2026-08-03 against the shipped copy, denominator restricted to the pairs this
+  guard blocks in their canonical form: **5 of 19 reorderings were not blocked**. After the
+  fix, **0 of 19**, and **0 of 28** everyday commands became newly blocked.
+  Every scan is bounded by `[^;&|]`, so a later command's words are never borrowed to make
+  a match (`git reset HEAD~1 ; echo --hard` stays allowed, and is tested).
+  **Two false positives came out of the same measurement, and they were the ones this hook
+  tells people to run.** `git clean -nd` and `git clean -ndx` are dry runs — they list what
+  would be deleted and remove nothing — and both were blocked. The block message says
+  *"Consider: git clean -n (dry run) first"*, so following the advice hit the wall. Dry runs
+  now pass.
+  This is the same shape as the approving-hook defect fixed the same day in #937 / #940 /
+  #941 / #942 / #943 / #947 / #948, one level up: there the rule assumed the dangerous part
+  came *after* the first command position, here it assumes a fixed slot. Both are patterns
+  that describe how a command is usually typed instead of what it does.
+  **Check 5 had the same shape one layer down, found while judging the July `find` work.**
+  The prefix stripper dropped leading `VAR=value` once and *then* dropped wrappers in a
+  loop, so `env LC_ALL=C find . -delete` survived: the assignment sits after the wrapper and
+  the command word was read as `LC_ALL=C`. Assignments are now dropped inside the same loop.
+  Evasion coverage measured against the shipped copy: **19/20 → 20/20**, with false
+  positives on real cleanup at **0/12** both before and after.
+  **CI caught a regression in this PR and it is worth recording.** The first attempt let dry
+  runs through by putting a word boundary after the flag bundle — which also released
+  `git clean -fdx`, a command that removes *more* than `-fd`. `-fdx` matches `[a-z]*[fd]`
+  only when nothing follows the `[fd]`. The dry-run exclusion alone does the job; the
+  boundary is gone and both forms are tested.
+  New per-hook suite for flag order: 39 cases, all passing, **12 of them failing** against
+  `origin/main`'s copy.
 - **Fix: three approving hooks whose safe list was too coarse to mean anything** — a
   different defect from #937 / #940 / #941 / #942 / #943 / #947, and deliberately counted
   separately. Those all fixed hooks that read the first command position and handed the
