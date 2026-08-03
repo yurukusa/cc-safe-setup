@@ -29,6 +29,29 @@ const c = {
   blue: '\x1b[36m',
 };
 
+// settings.json が存在するのに JSON として壊れている時、それを {} として扱ってはいけない。
+// 呼び出し側は直後に settings を書き戻すので、利用者のフック・権限・環境変数が
+// まるごと新しいオブジェクトで上書きされて消える。壊れているなら書かずに止める。
+// いちばん多い引き金は、記事や README から写した設定例の先頭にある
+// `// path/to/file` というコメント行で、これは JSON として不正になる。
+function readSettingsForWrite() {
+  if (!existsSync(SETTINGS_PATH)) return {};
+  try {
+    return JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+  } catch (e) {
+    console.error('');
+    console.error(c.red + '  ✗' + c.reset + ' ' + SETTINGS_PATH + ' is not valid JSON (' + e.message + ')');
+    console.error('    Refusing to write: doing so would replace every hook, permission');
+    console.error('    and env var you already have with a fresh file.');
+    console.error('');
+    console.error('    Check it with:  python3 -m json.tool ' + SETTINGS_PATH);
+    console.error('    A leading "// path/to/file" comment line is the usual cause.');
+    console.error('');
+    process.exit(1);
+  }
+}
+
+
 // Days remaining until Anthropic's 2026-06-15 programmatic-billing split.
 // Computed at run time so the CLI banner stays accurate without daily edits —
 // hardcoded counts drifted (lines once read "23 days" and "20 days" on the same
@@ -2346,10 +2369,7 @@ async function guard(description) {
   console.log(c.green + '  ✓' + c.reset + ` Hook created: ${hookPath}`);
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[trigger]) settings.hooks[trigger] = [];
 
@@ -2995,10 +3015,7 @@ async function profile(level) {
   }
 
   // Update settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
 
   // Register all hooks in settings
@@ -4843,10 +4860,7 @@ exit 0`,
   console.log(c.dim + '  Trigger: ' + matched.trigger + ', Matcher: ' + matched.matcher + c.reset);
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks[matched.trigger]) settings.hooks[matched.trigger] = [];
 
@@ -5522,10 +5536,7 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
   }
 
   // Register in settings.json
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
@@ -5643,10 +5654,7 @@ exit 0
 
   // Register in settings.json — use "Bash" matcher ONLY (never "")
   // "" matcher affects ALL tools and a broken hook would lock out the session
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
