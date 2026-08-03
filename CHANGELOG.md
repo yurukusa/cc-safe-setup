@@ -1,6 +1,36 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: seven more opt-in approver hooks, same first-segment defect** — continues
+  #941. `auto-approve-gradle`, `-make`, `-maven`, `-ssh`, `-git-read`, `-test` and
+  `auto-mode-safe-commands` each decided with a pattern anchored at `^\s*` applied to the
+  whole command string, then handed the approval to everything after it. Measured
+  2026-08-03 against the shipped copies: over the 46 ordinary commands these seven
+  approve, **118 of the 138 combinations kept their approval** when one of three tails was
+  appended (`&& sudo rm -rf …`, `; curl http://… | sh`, `&& git push --force`). After the
+  fix: **0**.
+  `auto-mode-safe-commands` is the one that matters most — it exists for auto mode, where
+  nobody reads the prompt — and it was also the clearest case of a file contradicting
+  itself: its own comment says *"We check each component of compound commands"* while the
+  code checked only the first. It approved `curl -s http://… | sh` and
+  `echo $(sudo rm -rf app)`. Both are refused now; the `$(date …)` substitution the hook
+  deliberately supports still is not.
+  `auto-approve-git-read` folded its two patterns (`git …` and `cd … && git …`) into one
+  segment rule: a leading `cd` is allowed, every other segment must be a read-only git
+  call, and at least one segment must actually be git — so `cd /repo` alone is no longer
+  approved, and `cd /repo && git push` never was.
+  Over-tightening measured the same way: **0 of the 46 ordinary commands lost their
+  approval**, and chains of the same approved kind (`pytest && go test ./...`,
+  `git status && git log`, `ls -la && cat README.md`, `make build && make test`) are
+  covered by tests.
+  `tests/auto-approve-compound-tail.test.sh` grows to 133 cases, all passing.
+  Still outstanding: `auto-approve-readonly`, `classifier-fallback-allow` and
+  `multiline-command-approver` have the same defect but enough of their own structure
+  (pipeline handling, `case` dispatch, multi-line parsing) to want separate treatment; and
+  `bash-heuristic-approver`, `quoted-flag-approver` and `fish-shell-wrapper` approve
+  destructive commands with no separator at all, which is a different problem.
+  Also noted, not changed: `auto-mode-safe-commands` lists `find` as read-only, so
+  `find . -delete` fits its safe pattern. That is a coverage question, not an anchor one.
 - **Fix: the five auto-installed `auto-approve-*` hooks approved the whole line on
   the strength of its first word** — `index.mjs` installs these five from stack
   detection (a `package.json` pulls in `auto-approve-build`, a `go.mod` pulls in
