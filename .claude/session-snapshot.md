@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-03T14:01:12+09:00
+Updated: 2026-08-03T14:01:35+09:00
 
 ## Git
 - Branch: `fix/approve-side-remaining-two-2026-08-03`
@@ -7,11 +7,12 @@ Updated: 2026-08-03T14:01:12+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 5aa62fb1 checkpoint: auto-save 14:01:06
+- Last commit: 92d5df70 checkpoint: auto-save 14:01:34
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-03.md
 ./.claude/pre-compact-checkpoint.md
 ./CHANGELOG.md
 ./tests/approve-side-remaining-two.test.sh
@@ -20,7 +21,6 @@ Updated: 2026-08-03T14:01:12+09:00
 ./examples/classifier-fallback-allow.sh
 ./CONTRIBUTING.md
 ./README.md
-./examples/auto-approve-readonly.sh
 ```
 
 ## Active TODOs: 1 file(s)
