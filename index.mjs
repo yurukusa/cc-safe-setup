@@ -1343,8 +1343,22 @@ async function audit() {
 
   // 1. Check if any PreToolUse hooks exist
   let settings = {};
+  // A settings.json that exists but does not parse is the worst case, not a neutral
+  // one: Claude Code ignores the whole file, so every hook declared in it is inert.
+  // Swallowing the parse error here made the checks below report "no PreToolUse
+  // hooks" and send the user to reinstall — a true symptom with the cause hidden.
+  // The usual trigger is a copied snippet that starts with a `// path/to/file`
+  // comment line, which is not legal JSON.
   if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch(e) {}
+    try {
+      settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8'));
+    } catch (e) {
+      risks.push({
+        severity: 'CRITICAL',
+        issue: 'settings.json is not valid JSON (' + e.message + ') — Claude Code ignores the entire file, so every hook declared in it is silently inert',
+        fix: 'python3 -m json.tool ' + SETTINGS_PATH + '   # then delete the offending line; a leading "// path" comment is the usual cause'
+      });
+    }
   }
   const preHooks = (settings.hooks?.PreToolUse || []);
   const postHooks = (settings.hooks?.PostToolUse || []);
