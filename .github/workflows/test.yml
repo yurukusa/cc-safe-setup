@@ -59,3 +59,22 @@ jobs:
           done
           echo "tests/: $PASS passed, $FAIL failed"
           [ "$FAIL" -eq 0 ] || { echo "failing suites:$FAILED"; exit 1; }
+      # docs/search-index.json is generated from docs/*.html by
+      # scripts/build-search-index.py, and the script has to be run by hand. On
+      # 2026-08-03 the checked-in index held 140 entries while docs/ had 208
+      # pages: 68 pages — most of the Japanese ones and the diagnostics — were
+      # missing from the site's own search, and had been for as long as nobody
+      # remembered to run it. Nothing failed, so nothing surfaced. This step
+      # regenerates and diffs, so the omission cannot come back silently.
+      - name: Generated search index is current
+        run: |
+          python3 scripts/build-search-index.py
+          if ! git diff --quiet -- docs/search-index.json; then
+            echo "::error::docs/search-index.json is out of date."
+            echo "Run: python3 scripts/build-search-index.py  and commit the result."
+            git diff --stat -- docs/search-index.json
+            exit 1
+          fi
+          echo "docs/search-index.json matches docs/*.html ($(python3 -c '
+          import json; print(len(json.load(open("docs/search-index.json"))))
+          ') entries)"
