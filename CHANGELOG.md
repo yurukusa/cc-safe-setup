@@ -1,6 +1,29 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: `auto-approve-readonly` approved writes and deletions as reads** — this is the
+  hook the sister handbook recommends by name, in its free first chapter and again in two
+  later ones, so a defect here reaches people who read the book and followed it. Two
+  problems compounded. The base command came from the **first word of the whole line**, so
+  `cat README.md && sudo rm -rf app` produced the base `cat` and the approval went to the
+  entire line — the same defect as #937 / #940 / #941 / #942. And `find` sat in the
+  read-only list with no look at its predicates, so `find . -name '*.log' -delete` was
+  approved as a read. Redirections had the same shape: `cat template.txt > config.json`
+  writes a file and was approved for reading one.
+  Measured 2026-08-03 against the shipped copy, with controls: **10 of 12 writing or
+  destructive forms were approved**; after the fix, **0**. Over-tightening measured the
+  same way: of the 35 ordinary read commands, **0 lost their approval**.
+  Every command position now has to read on its own. `find` reads only while it carries no
+  `-delete`/`-exec`/`-ok`/`-fprint`; `sed -i` rewrites in place and is not a read; a `>`
+  anywhere in the line disqualifies it; command substitution and backticks disqualify it,
+  since they hide a command from any string-level read. Filters (`sort`, `awk`, `sed`, …)
+  are accepted downstream of something else but not in the first position, so `sed …` on
+  its own is still not read as a read.
+  **One deliberate widening, stated plainly**: `cd /repo && ls -la` and
+  `cd /repo && git status` are now approved. They were not before — the old code tried to
+  strip a leading `cd` but the strip did not survive `&&`. Both segments read, so this
+  matches what the hook set out to do.
+  Tests: `tests/auto-approve-compound-tail.test.sh` grows to 158 cases, all passing.
 - **Fix: seven more opt-in approver hooks, same first-segment defect** — continues
   #941. `auto-approve-gradle`, `-make`, `-maven`, `-ssh`, `-git-read`, `-test` and
   `auto-mode-safe-commands` each decided with a pattern anchored at `^\s*` applied to the
