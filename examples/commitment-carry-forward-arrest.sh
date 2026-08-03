@@ -21,8 +21,9 @@
 #     commitment, optionally inserts a re-anchor reminder into
 #     the prompt (advisory default) or blocks (strict mode).
 #
-# TRIGGER: Stop (commitment write) AND UserPromptSubmit (task-shift
-#          detection). Same script, branches on event name.
+# TRIGGER: Stop, UserPromptSubmit
+#          Stop writes the commitment; UserPromptSubmit detects the task shift.
+#          Same script, branches on the event name.
 #
 # WHY THIS MATTERS:
 #   Row 7 in the lifecycle-event × MAST-mode matrix at
