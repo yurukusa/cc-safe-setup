@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-03T14:05:17+09:00
+Updated: 2026-08-03T14:05:24+09:00
 
 ## Git
 - Branch: `fix/approve-side-remaining-two-2026-08-03`
@@ -7,7 +7,7 @@ Updated: 2026-08-03T14:05:17+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f6d31d73 checkpoint: auto-save 14:05:10
+- Last commit: b7cf3717 recovery: pre-compact checkpoint (1 files, 20260803-050524)
 
 ## Recent Files
 ```
