@@ -1,6 +1,50 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: three approving hooks whose safe list was too coarse to mean anything** — a
+  different defect from #937 / #940 / #941 / #942 / #943 / #947, and deliberately counted
+  separately. Those all fixed hooks that read the first command position and handed the
+  approval to the whole line. These three approve destructive commands **with no separator
+  in them at all**, because their safe lists held bare command *words*: `git`, `curl`,
+  `chmod`, `sed`, `node`, `python3`, `npx`. `git commit -m "fix"` and
+  `git push --force origin main` have the same first word. Folding these into the earlier
+  count would have produced "18 hooks defective" instead of 15 — a number that looks right
+  and is not.
+  Measured against the shipped copies, over 20 destructive or credential-reading single
+  commands:
+
+  | hook | before | after | everyday commands still approved |
+  |---|---|---|---|
+  | `bash-heuristic-approver` | **15 / 20** | **1 / 20** | 30 / 30 |
+  | `quoted-flag-approver` | **15 / 20** | **1 / 20** | 30 / 30 |
+  | `fish-shell-wrapper` | **18 / 20** | **0 / 20** | 21 / 21 |
+
+  Among what was approved: `git push --force`, `git reset --hard`, `git clean -fdx`,
+  `git branch -D main`, `chmod -R 777 /`, `curl … | sh`, `node -e '…rmSync…'` and
+  `cat ~/.aws/credentials`. `fish-shell-wrapper` added `sudo rm -rf`,
+  `dd if=/dev/zero of=/dev/sda` and `mkfs.ext4`.
+  **`fish-shell-wrapper` is the one worth reading twice.** It is not an approver by intent
+  — it rewrites commands into `fish -c '…'` so fish users keep their PATH and aliases. It
+  returned `permissionDecision: "allow"` on everything it wrapped because the approval was
+  the *carrier* for `updatedInput`. The signature was a side effect of the rewrite.
+  Rewrite and approval are now separate: every command is still wrapped (21/21 everyday,
+  10/10 destructive), and only qualifying ones are approved. Whether `updatedInput` alone
+  is honoured is undocumented and deliberately not relied on — if it is, an unqualified
+  command is wrapped and still prompts; if it is not, it is unwrapped and still prompts.
+  Both branches end at the prompt.
+  `bash-heuristic-approver` could not simply refuse `$(…)` the way the others do, because
+  substitution is its subject. Instead the substitution's contents became command positions
+  of their own: `echo $(git status)` is approved, `echo $(sudo rm -rf app)` is not.
+  **The one survivor is named on purpose**: `cat ~/.aws/credentials` is still approved by
+  the first two. It is a read, reads are what those hooks are for, and keeping credentials
+  out of a transcript is a blocking hook's job here — a block beats an approval.
+  **★ Measuring these needed the prompt text.** Two of the three only act when `.message`
+  carries the permission prompt's own wording. The first pass of this sweep put the command
+  in `.message`, got **0/20** back from both, and read it as "no defect". Every block in the
+  new suite opens with a control — does a plainly safe command get approved at all? — because
+  without it "clean" and "not running" look identical.
+  New `tests/approver-list-granularity.test.sh`: 86 cases, all passing, 43 of them failing
+  against the pre-fix copies.
 - **Fix: the last two approving hooks that read only the first command position** — closes
   the 2026-08-03 sweep started in #941. Thirty hooks in this repo return an approval;
   fifteen decided from the first command position and handed that approval to the whole
