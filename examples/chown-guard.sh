@@ -54,6 +54,18 @@ if echo "$ACTUAL_CMD" | grep -qE 'chown\s+(-R\s+)?root[: ]'; then
     exit 2
 fi
 
+# Block a recursive chown aimed at the filesystem root itself.
+# The system-directory check below names subdirectories of / and never matched a
+# bare `/`, so `chown -R nobody /` -- the worst form of all, since it rewrites
+# ownership of every file on the machine -- walked straight through. Measured
+# 2026-08-03. `/` on its own, or `/` followed by a glob, both count.
+if echo "$ACTUAL_CMD" | grep -qE 'chown\s+(-[A-Za-z-]+\s+)*[^ ]+\s+/(\*)?(\s|$)'; then
+    echo "BLOCKED: chown aimed at the filesystem root (/)." >&2
+    echo "Command: $COMMAND" >&2
+    echo "This rewrites ownership of every file on the machine." >&2
+    exit 2
+fi
+
 # Block recursive chown on system directories
 if echo "$ACTUAL_CMD" | grep -qE 'chown\s+-R.*\s+/(etc|var|usr|bin|sbin|lib|boot|sys|proc|dev)\b'; then
     echo "BLOCKED: Recursive chown on system directory." >&2
