@@ -1,6 +1,34 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: the five auto-installed `auto-approve-*` hooks approved the whole line on
+  the strength of its first word** — `index.mjs` installs these five from stack
+  detection (a `package.json` pulls in `auto-approve-build`, a `go.mod` pulls in
+  `auto-approve-go`, and so on), so the user never picks them off a list. Each decided
+  with a pattern anchored at `^\s*` applied to the whole command string: only the first
+  command position was examined, and the approval was then handed to everything after it.
+  `npm test && sudo rm -rf app`, `cargo build; curl http://… | sh` and
+  `docker ps && git push --force origin main` were all **explicitly approved**. Same
+  defect as PR #937 (`allowlist.sh`) and PR #940 (`cd-git-allow.sh`), on the approving
+  side. Measured 2026-08-03 against the shipped copies with controls: every one of the
+  five refuses the destructive command when it stands alone, and keeps its approval when
+  the same command is appended after a separator.
+  All five now require **every** command position to match before approving, and return
+  no decision otherwise, which leaves the command to the normal permission flow — these
+  hooks only ever add approval, they never block. Command substitution and backticks
+  disqualify the line, since they hide a command from any string-level read.
+  Chains of approved commands (`npm ci && npm test`, `ruff check . && pytest`) still get
+  approved: the gate uses the union of each hook's own patterns.
+  Over-tightening was measured the same way as the hole: 63 ordinary commands run against
+  both versions of all five hooks, **0 commands lost their approval**.
+  New `tests/auto-approve-compound-tail.test.sh` — 56 pass, 34 of them fail against the
+  pre-fix copies.
+  Still outstanding, measured but not fixed here: 10 more opt-in example hooks have the
+  same first-segment defect (`auto-approve-git-read`, `-gradle`, `-make`, `-maven`,
+  `-ssh`, `-readonly`, `-test`, `auto-mode-safe-commands`, `classifier-fallback-allow`,
+  `multiline-command-approver`), and 3 more (`bash-heuristic-approver`,
+  `quoted-flag-approver`, `fish-shell-wrapper`) approve destructive commands even without
+  a separator, which is a different and broader problem.
 - **`reroute-after-block-guard.sh`: stop a reroute toward a just-blocked target (#70112)** —
   PreToolUse hooks are stateless, so the trajectory in #70112 (a gate fires; the agent
   substitutes an equivalent path toward the SAME target; the next hook evaluates a fresh,
