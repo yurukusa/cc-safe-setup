@@ -35,8 +35,13 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 # Check if a path is a protected system directory
 is_system_dir() {
     local path="$1"
-    # Remove trailing slash
-    path="${path%/}"
+    # Remove a trailing slash -- but never on the root itself.
+    # `${path%/}` turns "/" into "", so the `/` branch in the case below (which
+    # the author did write) could never be reached, and `rm -rf /`, `mv / …`
+    # and `chmod -R 777 /` all walked through while `/etc` was blocked.
+    # Measured 2026-08-03: the root was the one directory this guard named and
+    # then erased one line before checking it.
+    [ "$path" != "/" ] && path="${path%/}"
 
     # Expand ~ to $HOME
     if [[ "$path" == "~"* ]]; then
