@@ -99,6 +99,58 @@ if echo "$COMMAND" | grep -qE '^\s*(node|python3?)\s+-e\s'; then
     fi
 fi
 
+# --- Every command position has to qualify, not just the first one ---
+#
+# The comment at the top of this file says "We check each component of compound
+# commands". It did not. Every pattern above is anchored at `^\s*` and matched
+# against the whole command string, so only the first command position was ever
+# examined, and the approval below was then handed to the entire line.
+# `cat README.md && sudo rm -rf app` and `curl -s http://… | sh` were both
+# approved. Measured 2026-08-03. Same defect as PR #937 / #940 / #941, on the
+# approving side, where the decision is an explicit approval rather than a
+# missed block. This hook matters more than most because it exists for auto
+# mode, where nobody is watching the prompt.
+#
+# Splitting on the separator characters is approximate — quotes are not parsed —
+# so a line that does not qualify gets no decision and lands in the normal
+# permission flow. This hook only ever adds approval; it never blocks.
+cc_every_segment_matches() {
+    local pat="$1" cmd="$2" seg
+    while IFS= read -r seg; do
+        seg="${seg#"${seg%%[![:space:]]*}"}"
+        seg="${seg%"${seg##*[![:space:]]}"}"
+        [ -z "$seg" ] && continue
+        printf '%s' "$seg" | grep -qE "$pat" || return 1
+    done <<EOF
+$(printf '%s' "$cmd" | tr ';&|' '\n\n\n')
+EOF
+    return 0
+}
+
+SAFE_RE='^\s*(cat|head|tail|less|more|wc|file|stat|du|df|ls|tree|find|which|whereis|type|realpath|readlink)\s'
+SAFE_RE="$SAFE_RE"'|^\s*(grep|rg|ag|ack|sed\s+-n|awk)\s'
+SAFE_RE="$SAFE_RE"'|^\s*git\s+(status|log|diff|show|branch|tag|remote|stash\s+list|ls-files|ls-tree|rev-parse|describe|shortlog|blame|config\s+--get)'
+SAFE_RE="$SAFE_RE"'|^\s*(npm\s+(ls|list|info|view|outdated|audit)|pip\s+(list|show|freeze)|yarn\s+(list|info|why)|pnpm\s+(ls|list))\s*'
+SAFE_RE="$SAFE_RE"'|^\s*(echo|printf|date|env|printenv|uname|hostname|whoami|id|pwd|tput)\s*'
+SAFE_RE="$SAFE_RE"'|^\s*(jq|yq|python3?\s+-c\s|python3?\s+-m\s+json)\s'
+SAFE_RE="$SAFE_RE"'|^\s*curl\s+-s'
+SAFE_RE="$SAFE_RE"'|^\s*(node|python3?)\s+-e\s'
+SAFE_RE="$SAFE_RE"'|^\s*(mkdir|touch|cp|mv)\s'
+
+if [ "$APPROVE" = true ]; then
+    # A substitution can carry a command that no string-level read sees. The
+    # `$(date …)` branch above is the one this hook deliberately supports, so
+    # strip those and refuse if any other substitution is left.
+    if printf '%s' "$COMMAND" | grep -q '`'; then
+        exit 0
+    fi
+    SUBST_REST=$(printf '%s' "$COMMAND" | sed -E 's/\$\(date[^)]*\)//g')
+    if printf '%s' "$SUBST_REST" | grep -q '\$('; then
+        exit 0
+    fi
+    cc_every_segment_matches "$SAFE_RE" "$COMMAND" || exit 0
+fi
+
 # --- Output the decision ---
 if [ "$APPROVE" = true ]; then
     jq -n --arg reason "$REASON" \
