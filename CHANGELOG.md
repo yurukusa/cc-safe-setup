@@ -1,6 +1,27 @@
 # Changelog
 
 ## [Unreleased]
+- **`destructive-guard`: block `rm -rf *`** — found by measuring all three channels this
+  project ships through, against the same 27 destructive forms:
+
+  | channel | walked through |
+  |---|---|
+  | the itch.io kit, as downloaded from the store | **15 / 27** |
+  | npm `29.8.0` (2026-04-20) | **10 / 27** |
+  | this tree | **7 / 27** |
+
+  `rm -rf *` was on all three lists. Check 1 asks whether the target begins with `/`, `~`,
+  `$HOME` and so on; a glob begins with none of them, so it never matched.
+  `*` expands to everything in the current directory, which makes `rm -rf *` a rename of
+  `rm -rf .` — and `rm -rf .` has been blocked for months. Blocking one and not the other
+  does not hold together.
+  **Narrow on purpose**: only a bare `*` or `./*` standing as the whole target.
+  `rm -rf *.log`, `rm -rf build/*`, `rm -rf node_modules/*` and `rm -rf tmp*` stay allowed —
+  stopping the ordinary cleanup is its own kind of broken, and a guard that cries wolf gets
+  removed. Measured: 7 dangerous forms blocked (including behind `sudo` and after a
+  separator), 14 named-target and non-`rm` forms untouched.
+  New `tests/destructive-guard-bare-glob.test.sh`: 21 cases, all passing, **9 of them
+  failing** against `origin/main`'s copy.
 - **Fix: four `settings.json` examples in the docs were not valid JSON** — each began with a
   `// path/to/file` comment inside the code block. A reader copies the block, saves it, and
   ends up with a settings file that will not parse. **A settings file that will not parse
