@@ -5658,34 +5658,21 @@ exit 0
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 
-  // Register under specific matchers based on rule types (NEVER use "" matcher)
+  // Register under a specific matcher (NEVER use "" matcher).
+  // --protect installs exactly one rule: block Edit/Write on `targetPath`, so the
+  // only matcher it needs is Edit|Write. The block/approve branches that used to
+  // stand here were copied from guard(), which parses a user-supplied rule list;
+  // `rules` never existed in this function. The result was a ReferenceError right
+  // after the hook file had been written — the hook was left on disk and never
+  // registered, and --protect failed every single time it was run.
   const hookCmd = `bash ${toBashPath(hookPath)}`;
-  const hasBlocks = rules.some(r => r.type === 'block');
-  const hasApproves = rules.some(r => r.type === 'approve');
-  const hasProtects = rules.some(r => r.type === 'protect');
-
-  // Block and approve rules need Bash matcher
-  if (hasBlocks || hasApproves) {
-    let bashMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Bash');
-    if (!bashMatcher) {
-      bashMatcher = { matcher: 'Bash', hooks: [] };
-      settings.hooks.PreToolUse.push(bashMatcher);
-    }
-    if (!bashMatcher.hooks.some(h => h.command === hookCmd)) {
-      bashMatcher.hooks.push({ type: 'command', command: hookCmd });
-    }
+  let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
+  if (!editMatcher) {
+    editMatcher = { matcher: 'Edit|Write', hooks: [] };
+    settings.hooks.PreToolUse.push(editMatcher);
   }
-
-  // Protect rules need Edit|Write matcher
-  if (hasProtects) {
-    let editMatcher = settings.hooks.PreToolUse.find(e => e.matcher === 'Edit|Write');
-    if (!editMatcher) {
-      editMatcher = { matcher: 'Edit|Write', hooks: [] };
-      settings.hooks.PreToolUse.push(editMatcher);
-    }
-    if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
-      editMatcher.hooks.push({ type: 'command', command: hookCmd });
-    }
+  if (!editMatcher.hooks.some(h => h.command === hookCmd)) {
+    editMatcher.hooks.push({ type: 'command', command: hookCmd });
   }
 
   writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
