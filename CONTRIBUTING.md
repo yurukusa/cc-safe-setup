@@ -67,7 +67,12 @@ npx cc-hook-test examples/your-hook.sh
 
 ## Code Style
 
-- Bash hooks (not Python/Node) for zero dependencies
-- `jq` for JSON parsing
+- Bash hooks (not Python/Node), so nothing is pulled from npm
+- A hook still needs a JSON reader for its stdin. These two lines used to read "zero
+  dependencies" and "`jq` for JSON parsing" — which contradict each other, since `jq` is a
+  dependency. Prefer the core hooks' chain: try `jq`, then `python3`, then `node`, and if none
+  is present, **warn that the hook is not protecting the user** and exit 0. Silently reading an
+  empty command is the failure mode to avoid: the hook stays listed in `settings.json` and
+  guards nothing. `tests/core-scripts-parser-fallback.test.sh` covers this.
 - Short variable names are fine (`CMD`, `FILE`, `INPUT`)
 - Comments explain *why*, not *what*

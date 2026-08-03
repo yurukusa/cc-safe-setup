@@ -57,9 +57,32 @@ Claude Code can run shell commands, edit files, and call tools on your behalf. M
 
 Claude Code's built-in safety checks match shell-level danger patterns. Many destructive operations do not look like those patterns: a framework verb, a tool-call, or a config file poisoned from outside the tool boundary all slip past. These hooks add a second layer that inspects the operation at the tool boundary and refuses the dangerous ones, while letting normal work through.
 
+## What you need installed
+
+**Nothing from npm** — this package has no dependencies and installs none.
+
+**One JSON reader, though.** A hook is handed its tool call as JSON on stdin, so it needs
+something that can read JSON. The eight core hooks try `jq`, then `python3`, then `node`, and
+if none of the three is present they print a warning that says they are **not** protecting you,
+then allow the command (blocking every call would make Claude Code unusable, which is a
+failure, not safety).
+
+The example hooks are stricter about this than the core ones: **772 of the 909 use `jq` with no
+fallback**. Without `jq` they read an empty command and quietly do nothing — no error, no log
+line, and they still appear in your `settings.json`. If you take examples from `examples/`,
+install `jq` first.
+
+```sh
+jq --version || sudo apt-get install -y jq   # or: brew install jq
+```
+
+This used to be described as "dependency-free", which was wrong in the direction that matters:
+it let someone on a minimal container believe they were protected when the hooks were reading
+nothing. Corrected 2026-08-03 after counting the actual tool calls in the shipped scripts.
+
 ## What gets installed
 
-Hooks are small, dependency-free shell scripts. Each is one file, does one thing, and exits with code `2` to block or `0` to allow. They fall into a few groups:
+Hooks are small shell scripts. Each is one file, does one thing, and exits with code `2` to block or `0` to allow. They fall into a few groups:
 
 - **Destructive-operation guards** — refuse `rm -rf` on protected paths, force-push, `git reset --hard`, whole-tree `git rm`, framework database resets (`migrate:fresh`, `db:reset`, `prisma migrate reset`), cloud teardown verbs (`terraform destroy`, `aws … terminate`, `kubectl delete namespace`), and move-then-delete sequences.
 - **Data-loss prevention** — a recycle bin for deleted files, backups before refactors, detection of NUL-corrupted writes, and guards for the `mv`/glob/`rm` and worktree failure modes.
@@ -110,7 +133,7 @@ If a hook does not fire, check that it is executable, that its path in `settings
 
 ## Contributing
 
-Contributions are welcome. Each hook should be a single dependency-free script with a test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the layout and the test harness.
+Contributions are welcome. Each hook should be a single shell script with a test, and should not pull anything from npm. See [CONTRIBUTING.md](CONTRIBUTING.md) for the layout, the test harness, and how to handle the JSON reader.
 
 ## Where these hooks came from
 
