@@ -3305,10 +3305,10 @@ async function shield() {
   console.log();
   console.log(c.bold + '  Step 4: Configure settings.json' + c.reset);
   const hadConfigFile = existsSync(SETTINGS_PATH);
-  let settings = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
-  }
+  // 書き戻しは 100行以上あとの writeFileSync(SETTINGS_PATH, configNext) で起きる。
+  // 最初にこの経路を数えたとき 60行だけ先を見て「読むだけ」と分類してしまった。
+  // 距離が離れているだけで、壊れた設定を {} として上書きする形は他の5か所と同じ。
+  let settings = readSettingsForWrite();
   if (!settings.hooks) settings.hooks = {};
   const configBefore = JSON.stringify(settings, null, 2);
   // 初回の導入(設定ファイルがまだ無い)では、まだ何の決定も下されていないので、
