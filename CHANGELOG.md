@@ -28,7 +28,18 @@
   #941 / #942 / #943 / #947 / #948, one level up: there the rule assumed the dangerous part
   came *after* the first command position, here it assumes a fixed slot. Both are patterns
   that describe how a command is usually typed instead of what it does.
-  New per-hook suite for flag order: 31 cases, all passing, **10 of them failing** against
+  **Check 5 had the same shape one layer down, found while judging the July `find` work.**
+  The prefix stripper dropped leading `VAR=value` once and *then* dropped wrappers in a
+  loop, so `env LC_ALL=C find . -delete` survived: the assignment sits after the wrapper and
+  the command word was read as `LC_ALL=C`. Assignments are now dropped inside the same loop.
+  Evasion coverage measured against the shipped copy: **19/20 → 20/20**, with false
+  positives on real cleanup at **0/12** both before and after.
+  **CI caught a regression in this PR and it is worth recording.** The first attempt let dry
+  runs through by putting a word boundary after the flag bundle — which also released
+  `git clean -fdx`, a command that removes *more* than `-fd`. `-fdx` matches `[a-z]*[fd]`
+  only when nothing follows the `[fd]`. The dry-run exclusion alone does the job; the
+  boundary is gone and both forms are tested.
+  New per-hook suite for flag order: 39 cases, all passing, **12 of them failing** against
   `origin/main`'s copy.
 - **Fix: three approving hooks whose safe list was too coarse to mean anything** — a
   different defect from #937 / #940 / #941 / #942 / #943 / #947, and deliberately counted

@@ -62,6 +62,8 @@ check "clean: canonical bundle"           'git clean -fd'                  2
 check "clean: split flags"                'git clean -f -d'                2
 check "clean: reversed"                   'git clean -d -f'                2
 check "clean: another flag first"         'git clean -x -f -d'             2
+check "clean: bundle with a trailing x"   'git clean -fdx'                 2
+check "clean: bundle with two extras"     'git clean -fdxq'                2
 check "clean: long form"                  'git clean --force -d'           2
 check "clean: dry run stays allowed"      'git clean -n'                   0
 check "clean: dry run with -d"            'git clean -nd'                  0
@@ -85,6 +87,19 @@ check "chmod: 777 on a plain filename"    'chmod 777 file.txt'             0
 # --- the scans must not cross into the next command ---
 check "no borrowing across ;"             'echo 777 ; chmod 644 ./x'       0
 check "no borrowing across &&"            'git clean -n && echo -fd'       0
+
+# --- Check 5: a wrapper may carry assignments of its own ---
+# Found while judging the 2026-07-27 find hypothesis: the prefix stripper dropped
+# leading VAR=value once, then dropped wrappers in a loop. `env LC_ALL=C find` puts
+# the assignment *after* the wrapper, so it survived and the command word was read
+# as `LC_ALL=C`. Same shape as the rest of this file: a rule that assumed which
+# order the pieces arrive in. Assignments are now dropped inside the same loop.
+check "find: bare wrapper"                'env find . -delete'             2
+check "find: wrapper with an assignment"  'env LC_ALL=C find . -delete'    2
+check "find: two assignments"             'env LC_ALL=C TZ=UTC find . -delete' 2
+check "find: assignment with no wrapper"  'LC_ALL=C find . -delete'        2
+check "find: narrowed cleanup still runs" "find . -name '*.pyc' -delete"   0
+check "find: narrowed with a wrapper"     "env LC_ALL=C find . -name '*.pyc' -delete" 0
 
 echo
 echo "destructive-guard-flag-order: $PASS passed, $FAIL failed"
