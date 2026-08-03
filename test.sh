@@ -9152,7 +9152,12 @@ test_ex multiline-command-approver.sh '{"tool_input":{"command":"git commit -m \
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"cat <<EOF\ncontent\nEOF"}}' 0 "multiline-approver: cat heredoc (approve)"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"npm test\n# comment"}}' 0 "multiline-approver: npm test multiline (approve)"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"grep pattern file\necho done"}}' 0 "multiline-approver: grep multiline (approve)"
-test_ex multiline-command-approver.sh '{"tool_input":{"command":"ls -la /tmp\nrm something"}}' 0 "multiline-approver: ls multiline (approve first line)"
+# 2026-08-03: the description used to read "approve first line", which stated the
+# defect as if it were the contract — line 2 runs, and it was never examined.
+# test_ex only compares exit codes and this hook always exits 0, so the
+# assertion could not fail either way. The behaviour is asserted for real in
+# tests/approve-side-remaining-two.test.sh.
+test_ex multiline-command-approver.sh '{"tool_input":{"command":"ls -la /tmp\nrm something"}}' 0 "multiline-approver: second line is examined, not approved"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"rm -rf /"}}' 0 "multiline-approver: dangerous (passthrough)"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":"sudo reboot"}}' 0 "multiline-approver: sudo (passthrough)"
 test_ex multiline-command-approver.sh '{"tool_input":{"command":""}}' 0 "multiline-approver: empty (passthrough)"

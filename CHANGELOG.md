@@ -1,6 +1,42 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: the last two approving hooks that read only the first command position** — closes
+  the 2026-08-03 sweep started in #941. Thirty hooks in this repo return an approval;
+  fifteen decided from the first command position and handed that approval to the whole
+  line. Thirteen were repaired in #941 / #942 / #943. `classifier-fallback-allow` and
+  `multiline-command-approver` were held back because each has its own shape — a `case`
+  ladder in one, `head -1` in the other — and pasting the same patch over them would have
+  been guesswork.
+  Measured against the shipped copies, over the commands each approves in bare form (33 and
+  32 of a 49-command probe set), with three tails appended (`&& sudo rm -rf /var/app`,
+  `; curl http://… | sh`, `&& git push --force`): **297/297 approvals kept** for
+  `classifier-fallback-allow` and **288/288** for `multiline-command-approver`. After the
+  fix: **0 and 0**.
+  **The newline row is the one that stings.** `multiline-command-approver` exists because
+  commands span lines — heredocs, commit messages — and it took `head -1` of them. A safe
+  first line with a destructive command on the second kept its approval **18/18 times**;
+  now **0/18**. Reading further is not just splitting on separators here, because the forms
+  this hook rescues put separators and newlines *inside data*: the command is now scanned
+  with quoting state carried across lines, and heredoc bodies are skipped between opener and
+  terminator. All 8 legitimate multiline forms stay approved.
+  **Controls named the defect**: the same dangerous commands on their own were approved
+  0/5 and 0/3 both before and after. Neither hook ever approved indiscriminately — both
+  stopped reading after the first command position. Repairing the wrong one of those two
+  would have looked like progress.
+  `classifier-fallback-allow` also gets the `find` predicate check (`-delete` was matched
+  anywhere in the line, which both missed `-exec` and fired on unrelated segments) and
+  refuses redirections and substitutions, matching `auto-approve-readonly`.
+  Over-tightening, measured the same way: of 10 everyday compound commands, the only one to
+  lose its approval is `echo start && date` under `multiline-command-approver` — `date` was
+  never on that hook's safe list, and the old approval came purely from not reading past the
+  first position.
+  **An existing test stated the defect as the contract.** `test.sh` asserted
+  `ls -la /tmp\nrm something` with the description *"approve first line"*, and since
+  `test_ex` compares exit codes only while this hook always exits 0, that assertion could
+  not fail in either direction. New suite `tests/approve-side-remaining-two.test.sh`
+  asserts on the decision itself: 62 cases, all passing, and 32 of them fail against the
+  pre-fix copies.
 - **Fix: `auto-approve-readonly` approved writes and deletions as reads** — this is the
   hook the sister handbook recommends by name, in its free first chapter and again in two
   later ones, so a defect here reaches people who read the book and followed it. Two
