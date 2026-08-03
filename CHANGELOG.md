@@ -1,6 +1,35 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix (data loss): a `settings.json` that exists but does not parse was treated as `{}`
+  and then written over** — the installer read the file with a bare `JSON.parse` in
+  **34 places**, swallowed the failure outright in **9**, and in **5 of those 9** wrote the
+  resulting object straight back with `writeFileSync(SETTINGS_PATH, …)`. Every hook,
+  permission and env var the user had was replaced by a fresh object containing only the
+  hook just added — **and the command exited 0, printing "Registered in settings.json".**
+  Measured against `origin/main` in an isolated `HOME`, with a broken settings file holding
+  one existing PreToolUse hook, `permissions.allow` and `env`:
+
+  | | exit | file intact | existing hook | env var |
+  |---|---|---|---|---|
+  | `origin/main` | **0 (reported success)** | overwritten | **gone** | **gone** |
+  | this change | 1 | intact | kept | kept |
+
+  New `readSettingsForWrite()` refuses to write when the file exists but does not parse,
+  and names the cause plus `python3 -m json.tool` to confirm it. The three read-only
+  swallow sites are deliberately untouched — the damage there is different.
+- **Fix: `--audit` hid the cause** — the same swallowed parse made a corrupt settings file
+  look empty, so the audit reported CRITICAL *"No PreToolUse hooks"* and pointed the user at
+  a reinstall. The user has hooks; Claude Code is ignoring the whole file. Before the fix a
+  broken file and a valid-but-empty one produced **identical** reports.
+- **Fix: `--protect` failed every single time** — `protect()` called `rules.some(...)` three
+  times and `rules` never existed in that function (pasted from `guard()`, which parses a
+  user-supplied rule list). It threw `ReferenceError` immediately after writing the hook
+  file, leaving the hook on disk and never registered. `--protect` installs exactly one
+  rule, so only the `Edit|Write` matcher is needed; the block/approve branches are removed.
+  `origin/main` exits 1 with a stack trace; this change exits 0 and completes registration.
+  The usual trigger for all three is a snippet copied from docs whose first line is
+  `// path/to/file` — not legal JSON. **This repo shipped four such examples** (fixed in #951).
 - **Fix: the marketplace plugins carried the same word-order assumptions, in a second
   implementation** — the four bundles under `plugins/` keep their shell **inline in
   `plugin.json`**. They are not copies of the core hooks, so every fix landed in the core
