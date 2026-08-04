@@ -53,6 +53,35 @@ fi
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
+# --- Look inside wrappers -----------------------------------------------------
+# The rm analysis below opens only when the command *starts* with rm, and every
+# other boundary in this file is a separator. A command inside a substitution,
+# a subshell, or after a shell keyword is at neither, so it was never examined.
+# Measured 2026-08-04: this hook blocked the bare deletion and passed all six
+# wrappings of it. Claude Code 2.1.221 fixed the same shape in its own
+# permission check ("hidden commands in [[ ]] regex conditionals").
+#
+# Replace the wrapping tokens with separators and run this same script once more
+# against that text. Detection only: the rewritten text is never executed, and
+# the message below keeps the command the user actually sent.
+if [ -n "${CC_RMNET_UNWRAPPED:-}" ]; then
+    COMMAND="$CC_RMNET_UNWRAPPED"
+elif [ -n "$COMMAND" ]; then
+    _rmnet_unwrapped=$(printf '%s' "$COMMAND" | sed -E \
+        -e 's/\$\(/ ; /g' -e 's/`/ ; /g' \
+        -e 's/(^|[[:space:]])\(/\1 ; /g' -e 's/\)([[:space:]]|$)/ ; \1/g' \
+        -e 's/(^|[[:space:]])(then|do|else|elif)([[:space:]])/\1 ; \3/g')
+    if [ "$_rmnet_unwrapped" != "$COMMAND" ]; then
+        CC_RMNET_UNWRAPPED="$_rmnet_unwrapped" bash "$0" </dev/null >/dev/null 2>&1
+        if [ "$?" = "2" ]; then
+            echo "BLOCKED: an rm on a critical path is hidden inside a wrapper." >&2
+            echo "Command: $COMMAND" >&2
+            echo "A substitution, a subshell or a shell keyword does not make it safe." >&2
+            exit 2
+        fi
+    fi
+fi
+
 [ -z "$COMMAND" ] && exit 0
 
 # The extractions in this hook used grep -oP, which is GNU-only. BSD grep
@@ -73,7 +102,10 @@ extract_operand() {
 }
 
 # --- rm command analysis ---
-if echo "$COMMAND" | grep -qE '^\s*(sudo\s+)?rm\s'; then
+# The gate used to be '^\s*(sudo\s+)?rm\s': the analysis opened only when the
+# whole command began with rm, so `cd /tmp && rm -rf ~` never entered it.
+# A separator in front is just as much a command start as the line start is.
+if echo "$COMMAND" | grep -qE '(^|[;&|])[[:space:]]*(sudo[[:space:]]+)?rm[[:space:]]'; then
     # Safe targets that can be deleted freely
     SAFE_TARGETS="node_modules|dist|build|__pycache__|\.cache|\.pytest_cache|coverage|\.nyc_output|\.next|\.nuxt|tmp|temp"
     CRITICAL="^/\$|^/home|^/Users|^/etc|^/usr|^/var|^/opt|^/root|^~|^\.\.|^\.git$|(^|/)\.env"

@@ -35,12 +35,45 @@ fi
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+
+# --- Look inside wrappers -----------------------------------------------------
+# The target patterns below require whitespace or end-of-line after the
+# dangerous path, so a deletion wrapped in a substitution or a subshell ends
+# with `)` and never matches. Measured 2026-08-04: the bare deletion was
+# blocked and five of six wrappings passed. Claude Code 2.1.221 fixed the same
+# shape in its own permission check.
+#
+# Replace the wrapping tokens with separators and run this same script once more
+# against that text. Detection only: never executed; the message keeps the
+# command the user actually sent.
+if [ -n "${CC_AUTOMODE_UNWRAPPED:-}" ]; then
+    COMMAND="$CC_AUTOMODE_UNWRAPPED"
+elif [ -n "$COMMAND" ]; then
+    _am_unwrapped=$(printf '%s' "$COMMAND" | sed -E \
+        -e 's/\$\(/ ; /g' -e 's/`/ ; /g' \
+        -e 's/(^|[[:space:]])\(/\1 ; /g' -e 's/\)([[:space:]]|$)/ ; \1/g' \
+        -e 's/\)$/ ; /g' \
+        -e 's/(^|[[:space:]])(then|do|else|elif)([[:space:]])/\1 ; \3/g')
+    if [ "$_am_unwrapped" != "$COMMAND" ]; then
+        CC_AUTOMODE_UNWRAPPED="$_am_unwrapped" bash "$0" </dev/null >/dev/null 2>&1
+        if [ "$?" = "2" ]; then
+            echo "BLOCKED: a destructive command is hidden inside a wrapper." >&2
+            echo "Command: $COMMAND" >&2
+            echo "A substitution, a subshell or a shell keyword does not make it safe." >&2
+            exit 2
+        fi
+    fi
+fi
 [ -z "$COMMAND" ] && exit 0
 
 # --- Critical rm operations ---
 if echo "$COMMAND" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
     # Always block rm on root-level and home-level critical paths
-    if echo "$COMMAND" | grep -qE 'rm\s.*(/\s|/;|/$|~\/?\s|~\/?$|~\/\.|/home\b|/etc\b|/usr\b|/var\b|/opt\b|/root\b)'; then
+    # The home terminators used to be whitespace or end-of-line only, so
+    # `rm -rf ~; echo done` passed while `rm -rf ~ ; echo done` was blocked --
+    # one space apart, opposite verdicts. Separators end a command just as much
+    # as a space does. Measured 2026-08-04.
+    if echo "$COMMAND" | grep -qE 'rm\s.*(/[[:space:];&|]|/$|~\/?[[:space:];&|]|~\/?$|~\/\.|/home\b|/etc\b|/usr\b|/var\b|/opt\b|/root\b)'; then
         echo "BLOCKED: rm targeting critical system/home path" >&2
         echo "This operation would cause irreversible data loss." >&2
         echo "Command: $COMMAND" >&2
