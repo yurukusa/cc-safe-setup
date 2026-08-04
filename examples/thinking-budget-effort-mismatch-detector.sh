@@ -43,6 +43,14 @@
 #   CC_THINKING_BUDGET_SILENT        Set to "1" to suppress stderr
 #   CC_THINKING_BUDGET_DISABLE       Set to "1" to disable entirely
 #   CC_THINKING_BUDGET_LOG           Log path (default: ~/.cache/cc-safe-setup/thinking-budget-mismatch.jsonl)
+#
+# The registration was missing from this header. The installer reads TRIGGER
+# and MATCHER from here and falls back to PreToolUse / Bash when both are
+# absent, so this hook was being registered at a moment where the field it
+# reads is always empty: it installed, it appeared in the settings, and it
+# did nothing. Measured 2026-08-04 across examples/: 14 files were like this.
+# TRIGGER: PostToolUse
+# MATCHER: ""
 
 set -u
 

@@ -23,6 +23,14 @@
 #   TOKENIZER_RATIO_ENDPOINT       override API base URL (for tests)
 #   TOKENIZER_RATIO_MODEL_OLD      (default claude-opus-4-6)
 #   TOKENIZER_RATIO_MODEL_NEW      (default claude-opus-4-7)
+#
+# The registration was missing from this header. The installer reads TRIGGER
+# and MATCHER from here and falls back to PreToolUse / Bash when both are
+# absent, so this hook was being registered at a moment where the field it
+# reads is always empty: it installed, it appeared in the settings, and it
+# did nothing. Measured 2026-08-04 across examples/: 14 files were like this.
+# TRIGGER: UserPromptSubmit
+# MATCHER: ""
 
 set -u
 
