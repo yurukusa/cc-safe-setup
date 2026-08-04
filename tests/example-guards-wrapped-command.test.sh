@@ -110,6 +110,60 @@ want_allow $H "du -sh ~/"
 want_allow $H "$RM -rf node_modules"
 want_allow $H "jq '{a: .b}' package.json"
 
+# --- bash-project-fence -------------------------------------------------------
+# Different concern: this one fences *paths outside the project root*, not
+# destructive verbs. Its word split does not break on ( ) or a backtick, so a
+# path inside a substitution arrived as the token "~)" — matching neither the
+# "~/" case nor the absolute-path case, and the reference passed unnoticed.
+# The fix strips the wrapping punctuation from the token edges.
+fence_run() {
+  local cmd="$1" P rc
+  P="$(mktemp -d)"
+  mkdir -p "$P/src"
+  python3 -c '
+import json,sys
+print(json.dumps({"tool_name":"Bash","tool_input":{"command":sys.argv[1]},
+                  "cwd":sys.argv[2],"session_id":"t"}))' "$cmd" "$P" \
+    | (cd "$P" && CLAUDE_PROJECT_DIR="$P" HOME=/nonexistent-home-for-test \
+         bash "$ROOT/examples/bash-project-fence.sh") >/dev/null 2>&1
+  # HOME must not sit under /tmp here. /tmp is on this hook's default allow
+  # list, and mktemp -d hands out /tmp paths, so a temp HOME makes every `~`
+  # case allowed and the four assertions below pass no matter what the code
+  # does. The path does not need to exist; only its prefix is compared.
+  rc=$?
+  find "$P" -mindepth 1 -delete 2>/dev/null; rmdir "$P" 2>/dev/null
+  return $rc
+}
+fence_block() {
+  if fence_run "$1"; then FAIL=$((FAIL+1)); echo "  FAIL blocked [fence]: $1"
+  else PASS=$((PASS+1)); echo "  ok   blocked [fence]: $1"; fi
+}
+fence_allow() {
+  if fence_run "$1"; then PASS=$((PASS+1)); echo "  ok   allowed [fence]: $1"
+  else FAIL=$((FAIL+1)); echo "  FAIL allowed [fence]: $1"; fi
+}
+
+fence_block "cat /home/someone/secrets.txt"
+fence_block "[[ -n \$(cat /home/someone/secrets.txt) ]]"
+fence_block "x=\$(cat /home/someone/secrets.txt)"
+fence_block "echo \`cat /home/someone/secrets.txt\`"
+# The home directory reached the tokenizer as "~)" and "~`", which match
+# neither branch. These are the four that actually failed before the fix; the
+# absolute-path forms above were already caught, so they alone would have
+# recorded the defect as the spec.
+fence_block "[[ -n \$(ls ~) ]]"
+fence_block "[[ -n \`ls ~\` ]]"
+fence_block "x=\$(ls ~)"
+fence_block "( ls ~ )"
+fence_allow "ls -la"
+fence_allow "git status"
+fence_allow "echo hello > /tmp/out.txt"
+fence_allow "cat /tmp/scratch"
+fence_allow "npm ci && npm run build"
+fence_allow "curl -s https://example.com/api"
+fence_allow "echo \$(basename \$(pwd))"
+fence_allow "for i in \$(seq 1 3); do echo \$i; done"
+
 echo
 echo "example-guards-wrapped-command: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

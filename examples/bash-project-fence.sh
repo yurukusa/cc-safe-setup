@@ -105,6 +105,15 @@ for tok in $COMMAND; do
     tok="${tok#\"}"; tok="${tok%\"}"
     tok="${tok#\'}"; tok="${tok%\'}"
 
+    # Strip the punctuation that wraps a command, so a path inside a
+    # substitution or a subshell is still seen as a path. The word split above
+    # does not break on ( ) or a backtick, so `[[ -n $(ls ~/secrets) ]]` used to
+    # produce the token "~/secrets)", which matches neither the ~/ case nor the
+    # absolute-path case below, and the reference left the fence unnoticed.
+    # Measured 2026-08-04: the bare form was blocked and the wrapped form passed.
+    tok="${tok#\$(}"; tok="${tok#(}"; tok="${tok#\`}"
+    tok="${tok%)}"; tok="${tok%\`}"
+
     # Expand ~/ to $HOME
     case "$tok" in
         '~'/*) tok="${HOME}${tok#\~}" ;;
