@@ -13,6 +13,14 @@
 # Main-conversation turns should skew toward large cache_read_input_tokens
 # relative to cache_creation_input_tokens. A session where cache_creation
 # dominates every turn is the silent-downgrade signal.
+#
+# The registration was missing from this header. The installer reads TRIGGER
+# and MATCHER from here and falls back to PreToolUse / Bash when both are
+# absent, so this hook was being registered at a moment where the field it
+# reads is always empty: it installed, it appeared in the settings, and it
+# did nothing. Measured 2026-08-04 across examples/: 14 files were like this.
+# TRIGGER: PostToolUse
+# MATCHER: ""
 
 set -u
 

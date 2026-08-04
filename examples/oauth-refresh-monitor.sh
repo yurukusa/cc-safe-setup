@@ -79,6 +79,14 @@
 #   - Never blocks. Exit always 0. The corruption pattern is server-side; a
 #     blocking hook would only add operator pain without preventing the
 #     corruption.
+#
+# The registration was missing from this header. The installer reads TRIGGER
+# and MATCHER from here and falls back to PreToolUse / Bash when both are
+# absent, so this hook was being registered at a moment where the field it
+# reads is always empty: it installed, it appeared in the settings, and it
+# did nothing. Measured 2026-08-04 across examples/: 14 files were like this.
+# TRIGGER: PostToolUse
+# MATCHER: ""
 
 set -u
 

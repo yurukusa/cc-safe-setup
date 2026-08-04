@@ -7,6 +7,14 @@
 #      Migration Playbook Chapter 4 (Path A Stay-and-Fortify) Hook 6 specification 実装。
 # Event: PostToolUse  MATCHER: ""
 # Action: 各 turn の input_tokens を log、baseline drift 検知時に stderr alert (non-blocking)
+#
+# The registration was missing from this header. The installer reads TRIGGER
+# and MATCHER from here and falls back to PreToolUse / Bash when both are
+# absent, so this hook was being registered at a moment where the field it
+# reads is always empty: it installed, it appeared in the settings, and it
+# did nothing. Measured 2026-08-04 across examples/: 14 files were like this.
+# TRIGGER: PostToolUse
+# MATCHER: ""
 
 HISTORY="/tmp/cc-tokenizer-ratio-history"
 SESSION_FLAG="/tmp/cc-tokenizer-ratio-session"
