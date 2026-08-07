@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-08T03:41:23+09:00
+Updated: 2026-08-08T03:43:06+09:00
 
 ## Git
 - Branch: `fix/auto-approve-readonly-tail-2026-08-08`
@@ -7,13 +7,13 @@ Updated: 2026-08-08T03:41:23+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 8d2d069d checkpoint: auto-save 03:41:22
+- Last commit: 336d706c checkpoint: auto-save 03:41:33
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-08.md
 ./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-08-08.md
 ./tests/auto-approve-readonly-tail-and-redirect.test.sh
 ./examples/auto-approve-readonly.sh
 ./test.sh
