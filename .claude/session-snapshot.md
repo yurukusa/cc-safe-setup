@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-08T03:36:06+09:00
+Updated: 2026-08-08T03:36:35+09:00
 
 ## Git
 - Branch: `fix/auto-approve-readonly-tail-2026-08-08`
@@ -7,7 +7,7 @@ Updated: 2026-08-08T03:36:06+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: a35871ae auto-approve-readonly: 読み取りの名前で始まる破壊的コマンドへの明示の承認を止める
+- Last commit: ebfa7aa1 checkpoint: auto-save 03:36:29
 
 ## Recent Files
 ```
