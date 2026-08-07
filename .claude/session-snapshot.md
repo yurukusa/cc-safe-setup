@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-07-28T00:46:08+09:00
+Updated: 2026-08-08T03:36:06+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `fix/auto-approve-readonly-tail-2026-08-08`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: facfcc7d recovery: pre-compact checkpoint (1 files, 20260727-154608)
+- Last commit: a35871ae auto-approve-readonly: 読み取りの名前で始まる破壊的コマンドへの明示の承認を止める
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-07-28.md
 ./.claude/pre-compact-checkpoint.md
-./tests/doctor-misspelled-settings-keys.test.sh
-./tests/test-marketplace-plugins.sh
-./tests/test-memory-orphan-detector.sh
-./tests/test-parallel-batch-size-limiter.sh
-./tests/worktree-hooks-path-fix.test.sh
-./examples/session-summary.sh
-./examples/settings-hooks-key-restorer.sh
+./tests/auto-approve-readonly-tail-and-redirect.test.sh
+./examples/auto-approve-readonly.sh
+./test.sh
+./tests/auto-approve-compound-tail.test.sh
+./tests/destructive-guard-separators.test.sh
+./examples/worktree-parent-write-guard.sh
+./examples/worktree-remove-uncommitted-guard.sh
+./examples/worktree-unmerged-guard.sh
 ```
 
 ## Active TODOs: 1 file(s)
