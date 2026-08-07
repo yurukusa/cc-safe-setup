@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-08T03:44:26+09:00
+Updated: 2026-08-08T03:44:44+09:00
 
 ## Git
 - Branch: `fix/auto-approve-readonly-tail-2026-08-08`
@@ -7,7 +7,7 @@ Updated: 2026-08-08T03:44:26+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0112e74a recovery: pre-compact checkpoint (1 files, 20260807-184426)
+- Last commit: e35b3449 recovery: pre-compact checkpoint (1 files, 20260807-184443)
 
 ## Recent Files
 ```
