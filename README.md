@@ -123,6 +123,22 @@ A hook is any executable that reads the tool-call JSON on stdin and returns `0` 
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
+## Rolling this out to a team
+
+If you are the person who has to justify Claude Code to the rest of your organization, these are written for that job. All free, all usable as-is — no sign-up, no inquiry.
+
+| | What it answers |
+|---|---|
+| [Team adoption safety checklist](https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html) | The 7 things to settle before you hand this to developers, plus a shared policy template and a CI gate you can paste (JP) |
+| [Settings reference](https://yurukusa.github.io/cc-safe-setup/settings-reference.html) | What each `settings.json` key actually does, and the ones that silently do nothing when written in the wrong place |
+| [Cost governance for teams](https://yurukusa.github.io/cc-safe-setup/team-cost-governance-jp.html) | The three gaps the official usage limits don't cover, and how to close them with free hooks — cited to the official docs (JP) · [EN](https://yurukusa.github.io/cc-safe-setup/team-cost-governance.html) |
+| [Monthly compliance report sample](https://yurukusa.github.io/cc-safe-setup/org-guard-monthly-report-sample.html) | What a monthly "is it actually working" report looks like, for SOC2 or a customer audit answer (fictional company, marked as such) |
+| [Safety audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) | Which classes of danger your current setup does and does not guard |
+
+One paid thing exists, and it needs no inquiry either: the [Team Safety Rollout Pack](https://yurukusa.booth.pm/items/8230188) (¥3,000, one-off) bundles the shared policy template, the CI gate with defaults already chosen, and a written walkthrough of real reported incidents.
+
+Audits, training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html). The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
+
 ## Windows
 
 The hooks run under WSL2 and Git Bash. A few guards are Windows-specific (path handling, CJK-write corruption, the `ext4.vhdx` growth case). See `docs/windows.md`.

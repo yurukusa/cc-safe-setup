@@ -1,70 +1,47 @@
-name: 法人向けサービスのご相談
-description: 安全監査・チーム研修・導入支援・月額の保守・コンサルのご相談。費用と内容は法人向けサービスのページをご覧ください。
-title: "[法人] 導入のご相談: "
-labels: ["service"]
-assignees:
-  - yurukusa
+name: 【受付を終了しました】法人向けサービスのご相談
+description: 安全監査・チーム研修・導入支援・月額の保守・コンサルの受付は終了しました。いま使えるものをご案内します。
+title: "[受付終了] このフォームは閉じています"
+labels: ["service", "closed-intake"]
 body:
   - type: markdown
     attributes:
       value: |
-        Claude Code の運用の安全について、法人・チーム向けのご相談を承ります。
+        ## このフォームの受付は終了しました
 
-        **このフォームは公開の issue として作成されます。** 社名や機密にかかわる詳細は、ここには書かず、最初のやりとりのあとに非公開のチャネルへ切り替えてご相談ください。下のフォームは、こちらで適切にご案内するための、最小限の項目だけを伺うものです。
+        安全監査・チーム研修・導入支援・月額の運用保守・スポットのコンサルは、
+        いずれも人が継続して手を動かす形の提供です。その体制を責任を持って用意できないため、
+        **2026年8月をもって受け付けを終了しました。**
 
-        サービスの内容と費用の目安は、[法人向けサービスのページ](https://yurukusa.github.io/cc-safe-setup/services-jp.html)に記載しています。
-  - type: dropdown
-    id: service_type
-    attributes:
-      label: ご相談の種類
-      description: 複数にまたがる場合は、最も近いものを選び、詳細は本文にお書きください。
-      options:
-        - 安全監査（CLAUDE.md・設定・hook の点検）
-        - チーム研修（安全運用の研修コース）
-        - 導入の初期設定（hook・権限・運用ルールの構築）
-        - 月額の保守（事故ルールの継続配信・点検）
-        - コンサル（運用方針・体制の相談）
-        - open-core の Team 機能について
-        - まだ決めていない／全体の相談
-    validations:
-      required: true
-  - type: dropdown
-    id: team_size
-    attributes:
-      label: 対象の人数の規模
-      description: おおよそで結構です。
-      options:
-        - 1〜5 名
-        - 6〜20 名
-        - 21〜50 名
-        - 51〜200 名
-        - 200 名以上
-    validations:
-      required: false
-  - type: input
-    id: timeline
-    attributes:
-      label: 検討の時期
-      placeholder: 例）今四半期中、来月から、未定 など
-    validations:
-      required: false
-  - type: textarea
-    id: context
-    attributes:
-      label: 状況・お困りごと
-      description: どんな運用で、何を心配されているか。事故の経験や、社内の体制づくりの段階など、差し支えない範囲で。機密は書かないでください。
-      placeholder: 例）チームで Claude Code を使い始めたが、誤って本番のファイルやデータを壊さないか不安。組織で共通の安全のルールを配りたい。
-    validations:
-      required: false
+        以前このフォームを見て検討されていた方には、お詫びします。
+        フォームを開けたままにして、お応えできないご相談をいただくのは失礼だと考え、閉じました。
+
+        ### いま使えるもの（いずれも問い合わせは要りません）
+
+        - **チーム安全導入パック ¥3,000**（買い切り・即ダウンロード）
+          → https://yurukusa.booth.pm/items/8230188
+          組織で共有する安全ポリシーの雛形、CI の安全ゲート、実際に報告された事故をもとにした解説
+        - **無料のチェックリストと診断**
+          → https://yurukusa.github.io/cc-safe-setup/services-jp.html （ページ下部の「無料で、今すぐ始められること」）
+        - **hook 本体（MIT・これからも無料）**
+          → https://github.com/yurukusa/cc-safe-setup
+
+        ### 不具合の報告・質問は続けて受け付けています
+
+        cc-safe-setup そのものについてのバグ報告、誤検知の報告、使い方の質問は、
+        通常の issue と Discussions でこれまでどおり歓迎します。
+        このフォームではなく、そちらへお願いします。
+
+        - バグ報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md
+        - 誤検知の報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md
+        - Discussions: https://github.com/yurukusa/cc-safe-setup/discussions
   - type: checkboxes
-    id: subsidy
+    id: acknowledged
     attributes:
-      label: 人材開発支援助成金
-      description: チーム研修は、助成金の申請に必要な書類（カリキュラム・受講の記録・修了の証明など）を整えてご提供できます。支給の可否は貴社の計画と所轄の労働局の審査で決まります。
+      label: 確認
+      description: |
+        GitHub の issue のフォームは、入力の項目が1つも無いと有効な形式として扱われません
+        （案内だけの形にすると、フォームの一覧から消えてしまいます）。
+        そのため、この確認の項目だけを残しています。ここから issue を作る必要はありません。
       options:
-        - label: 助成金の活用に関心がある
+        - label: 上記の受付終了の案内を読みました（この項目に用はありません。閉じてかまいません）
           required: false
-  - type: markdown
-    attributes:
-      value: |
-        ご記入ありがとうございます。内容を拝見し、こちらから返信します。詳細・お見積り・機密にかかわるご相談は、最初の返信のあとに非公開のやりとりへ切り替えて対応します。

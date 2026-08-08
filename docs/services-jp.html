@@ -79,8 +79,15 @@ a { color:var(--blue); }
 <p>裏付けは、実際に報告された事故と、それを止める hook の実機での検証です。たとえば、無断の送金 <a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a>（$1,446）、データベースの大量のテーブルの消失 <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>、CLAUDE.md の指示を素通りした機密の漏洩 <a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>。一般論ではなく、番号で辿れる事故と、それに対応する hook を配ります。</p>
 
 <h2>サービスと費用の目安</h2>
-<p>下記はいずれも<strong>目安</strong>です。チームの規模・対象のリポジトリ数・既存の運用によって変わるため、まずはご相談ください。
-実際の作業の範囲と費用は、お見積もりでご提示します。</p>
+
+<div style="border:2px solid #b45309;background:#fffbeb;padding:1rem 1.2rem;border-radius:8px;margin:1.2rem 0">
+<p style="margin:0 0 0.6rem;font-weight:600;color:#b45309">2026年8月のお知らせ: 下記の 1〜5 は受け付けていません</p>
+<p style="margin:0 0 0.6rem">監査・研修・初期設定・月額の運用保守・スポットのコンサルは、いずれも人が継続して手を動かす形の提供です。その体制を責任を持って用意できないため、<strong>現在は受け付けていません</strong>。以前このページを見て検討された方には、お詫びします。</p>
+<p style="margin:0 0 0.6rem">金額を含めて掲載を消さずに残しているのは、以前ご覧になった内容を黙って無かったことにしないためです。受けられないものは、受けられないと書いておきます。</p>
+<p style="margin:0">いま使えるのは次の2つです。<strong>チーム安全導入パック ¥3,000</strong>（買い切り・問い合わせ不要・即ダウンロード）と、このページの下にある<strong>無料の資料</strong>（そのまま社内で使えます）。hook 本体はこれからも無料（MIT）です。</p>
+</div>
+
+<p>下記の金額はいずれも、掲載していた当時の<strong>目安</strong>です。</p>
 <div class="service" style="border:2px solid #059669;background:#f0fdf4">
 <h3>まず ¥3,000 で始める: チーム安全導入パック（買い切り）<span class="tag" style="background:#dcfce7;color:#059669;">問い合わせ不要</span></h3>
 <p>監査やご相談に進む前に、<strong>¥3,000 の買い切りパックで導入の足場を今すぐ手に入れて試せます</strong>。組織で共有する安全ポリシーの雛形、CI の安全ゲート（既定の閾値つき）、実際に報告された事故をもとにした運用の深掘り解説をまとめています。<strong>問い合わせ不要・即ダウンロード・経費で精算しやすい金額</strong>です。本格的な監査や継続の保守へ進む前の、低リスクな最初の一歩としてお使いください。</p>
@@ -89,33 +96,33 @@ a { color:var(--blue); }
 <p style="margin-top:0.6rem;font-size:0.92rem"><a href="https://yurukusa.booth.pm/items/8230188">BOOTH でチーム安全導入パックを見る →</a></p>
 </div>
 <div class="service">
-<h3>1. 導入の安全監査（スポット）</h3>
+<h3>1. 導入の安全監査（スポット）<span class="tag" style="background:#fee2e2;color:#b45309;">受付を停止しています</span></h3>
 <p>組織の <code>settings.json</code>・<code>CLAUDE.md</code>・hook の設定を点検し、事故につながる穴（権限の抜け、機密の漏洩経路、削除や課金のリスク）を洗い出します。是正のための設定一式と、配布できる安全 baseline をお渡しします。</p>
 <span class="price">目安 ¥150,000〜（スポット）</span>
 <span class="tag">成果物: 脆弱性レポート + 推奨 hook + 配布用テンプレート</span>
 <p style="margin-top:0.6rem;font-size:0.92rem"><a href="services-jp-sample-audit.html">脆弱性レポートのサンプルを見る →</a>（架空の企業での例示）</p>
 </div>
 <div class="service">
-<h3>2. チーム研修（オンライン／録画）</h3>
+<h3>2. チーム研修（オンライン／録画）<span class="tag" style="background:#fee2e2;color:#b45309;">受付を停止しています</span></h3>
 <p>技術リードと開発者向けに、Claude Code の安全な運用を実例で学ぶ研修です。実際に報告された事故と、その防ぎ方を、自社の運用に落とし込みます。録画での提供も可能です。</p>
 <span class="price">目安 1人 ¥50,000〜（人数・形式により変動）</span>
 <span class="tag">人材開発支援助成金の申請書類の提供に対応（下記の注記）</span>
 <p style="margin-top:0.6rem;font-size:0.92rem"><a href="claude-code-safety-training-jp.html">研修のカリキュラム（約12時間・7モジュール）を見る →</a></p>
 </div>
 <div class="service">
-<h3>3. 導入・初期設定（組織 baseline の設計と配布）</h3>
+<h3>3. 導入・初期設定（組織 baseline の設計と配布）<span class="tag" style="background:#fee2e2;color:#b45309;">受付を停止しています</span></h3>
 <p>組織で共有する安全ポリシーを設計し、全リポジトリと全開発者へ配布する仕組み、CI の安全ゲート、必須 baseline の強制までを構築します。手作業の配布で起こる「設定のズレ」「付け忘れ」をなくします。</p>
 <span class="price">目安 ¥300,000〜（スポットのプロジェクト）</span>
 <span class="tag">成果物: 共有ポリシー + CI ワークフロー + 配布手順</span>
 </div>
 <div class="service">
-<h3>4. 月額の運用保守・相談対応<span class="tag" style="background:#dcfce7;color:#059669;">中核</span></h3>
+<h3>4. 月額の運用保守・相談対応<span class="tag" style="background:#fee2e2;color:#b45309;">受付を停止しています</span></h3>
 <p>当方の中核のサービスです。hook の更新、新しく報告された事故への対応、設定レビュー、運用の相談を継続して支援します。Claude Code は更新が速く、安全の前提も変わります。研修や初期設定は一度きりですが、事故のリスクは使い続ける限り残ります。人数あたりではなく、組織の運用を継続して守る形で費用をいただきます。</p>
 <span class="price">目安 月額 ¥100,000〜（規模により変動）</span>
 <span class="tag">継続的な安全の更新 + 相談 + レビュー + 監査</span>
 </div>
 <div class="service">
-<h3>5. スポットのコンサル（設計レビュー・事故の原因調査）</h3>
+<h3>5. スポットのコンサル（設計レビュー・事故の原因調査）<span class="tag" style="background:#fee2e2;color:#b45309;">受付を停止しています</span></h3>
 <p>AI コーディングの導入方針の策定、安全設計のレビュー、起きてしまった事故の原因調査と再発防止まで、単発でご相談に応じます。</p>
 <span class="price">目安 1日 ¥300,000〜</span>
 <span class="tag">方針策定 / 設計レビュー / 原因調査</span>
@@ -148,20 +155,22 @@ a { color:var(--blue); }
 <tr><td><a href="team-cost-governance-jp.html">チームの費用ガバナンスの解説</a></td><td>公式の利用上限が覆えない3つの隙間（購読の枠・Bedrock/Vertex・暴走の予防）と、無料の hook での塞ぎ方を公式ドキュメントの根拠付きで解説</td></tr>
 <tr><td><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup（無料・MIT）</a></td><td>1コマンドで入る安全 hook 一式。個人向けは無料のままです</td></tr>
 </table>
-<h2>お問い合わせ</h2>
-<p>導入のご相談・お見積りは、GitHub の issue のフォームからお願いします。相談の種類と規模を選ぶだけの短いフォームです。社名や機密にかかわる詳細は書かず、最初のご連絡のあとに非公開のやりとりへ切り替えて対応します。</p>
-<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/issues/new?template=service_inquiry.yml">GitHub のフォームから相談する</a>
+<h2>いま受け付けているもの</h2>
+<p>上に書いたとおり、監査・研修・初期設定・月額の運用保守・スポットのコンサルは受け付けていません。導入のご相談とお見積りのフォームも閉じました。開けたままにして、お応えできないご連絡をいただくのは失礼だと考えたためです。</p>
+<p>受け付けているのは、問い合わせの要らない次の2つです。</p>
+<a class="cta" href="https://yurukusa.booth.pm/items/8230188">チーム安全導入パック ¥3,000 を見る（BOOTH・買い切り）</a>
 <a class="cta sub" href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/75a565d9582fd31860f7c1a2e4cc938e/raw/team-adoption-checklist-jp.html">まず無料のチェックリストを見る</a>
+<p style="margin-top:0.8rem;font-size:0.92rem">hook 本体（<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>・MIT）はこれからも無料です。不具合の報告や質問は、通常の issue と discussions でこれまでどおり受け付けています。</p>
 <h2>担当について</h2>
 <p>
 <span class="tag">cc-safe-setup の作者（790+ の安全 hook・MIT）</span>
-<span class="tag">npm 累計 約3万 取り込み</span>
-<span class="tag">GitHub の重複なし clone が直近14日で約1,900件（CI 等の自動取得を含む実測）</span>
-<span class="tag">GitHub 42★</span>
-<span class="tag">Claude Code の安全と運用について Qiita 累計閲覧 8万超</span>
+<span class="tag">GitHub の重複なし clone が直近14日で 2,534件 / 628（CI・ミラー等の自動取得を含む実測。人数ではありません）</span>
+<span class="tag">GitHub のページ表示が直近14日で 96人（uniques・実測）</span>
+<span class="tag">GitHub 4★</span>
+<span class="tag">Claude Code の安全と運用について Qiita 累計閲覧 17万超</span>
 <span class="tag">実際に報告された事故（GitHub の起票）に基づく設計</span>
 </p>
-<p class="honest">数値は公開時点の実測です。サービスの実施の範囲・日程は個別のご相談で決めます。誇張した約束はしません。</p>
+<p class="honest">数値は 2026-08-09 の実測に更新しました。あわせて、これまで載せていた数字のうち2つを訂正しています。ひとつは「GitHub 42★」で、実際は <strong>4★</strong> でした（10倍の誇張を掲載していました）。もうひとつは「npm 累計 約3万 取り込み」で、この数はボットとミラーによる取得を含むと自分で判定していたため、実ユーザー数の裏付けとして使えるものではありません。削除しました。clone の数も、人数ではないことが分かる書き方に変えています。誇張した約束はしません。</p>
 <footer>
 <p>
 <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ｜
