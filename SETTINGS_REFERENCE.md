@@ -10,6 +10,39 @@ Everything you can put in `~/.claude/settings.json`, documented from real usage 
 | `.claude/settings.json` | Current project | Overrides user |
 | `.claude/settings.local.json` | Current project (gitignored) | Highest |
 
+> **Project-scoped files resolve against the launch directory, not the git root — and the two do not behave the same.**
+> Launching Claude Code from a subdirectory of a repo (e.g. `packages/api/` in a monorepo) silently drops
+> `.claude/settings.json` from the repo root, while `.claude/settings.local.json` from that same root still applies.
+> Measured on 2.1.220 (Linux/WSL2) with hooks registered only at the repo root, launching from a nested subdirectory,
+> with a root launch as the control on every run:
+>
+> | At repo root | Launched from subdirectory | Launched from root (control) |
+> |---|---|---|
+> | `settings.json` only | hook does **not** fire | fires |
+> | `settings.local.json` only | hook fires | fires |
+> | both present | **only** the `.local` hook fires | both fire |
+>
+> The direction matters for safety: `settings.local.json` is the personal, gitignored file, so the copy that survives
+> is the one only you have, and the copy that disappears is the committed one your whole team relies on. A `PreToolUse`
+> guard shipped in `settings.json`, verified from the repo root, can be inert for every developer who runs Claude from
+> a package subdirectory — with nothing in the output saying so.
+>
+> **Until this is fixed upstream** ([#74023](https://github.com/anthropics/claude-code/issues/74023)), launch from the
+> repo root so the shared config loads:
+>
+> ```sh
+> # ccroot: launch from the repo root so project config loads
+> root="$(git rev-parse --show-toplevel 2>/dev/null)" && cd "$root"; exec claude "$@"
+> ```
+>
+> Copying `settings.json` to `settings.local.json` also makes the hooks fire from a subdirectory, but that file is not
+> the one you commit, so it is a diagnostic rather than a team fix: if your hooks start working after that copy, you
+> have confirmed you are hitting this bug and not a malformed config.
+>
+> This installer writes to `$CLAUDE_PROJECT_DIR/.claude/settings.json` when `CLAUDE_PROJECT_DIR` is set, and to
+> `~/.claude/settings.json` otherwise. The default (user-level) path is unaffected by this bug; the
+> `CLAUDE_PROJECT_DIR` path is affected.
+
 ## Permissions
 
 ### allow
