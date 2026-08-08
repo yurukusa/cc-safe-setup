@@ -123,19 +123,23 @@ every backtick is the only thing that closes this class. That pass is what you a
 
 ### 3b. Cross-layer duplication
 
-24 rules appear in more than one layer. **2 are byte-identical. 2 more are identical after
-normalizing bullet markers, spaces and trailing punctuation:**
+24 rules appear in more than one layer. Checking all 24 by exact string, then again after
+normalizing bullet markers, spaces and trailing punctuation: **2 are byte-identical, 1 more
+is identical after normalization, and the remaining 21 overlap only partially.**
 
 | Match | Layer A | Layer B |
 |---|---|---|
 | byte-identical | global:8 | project:60 |
 | byte-identical | global:11 | project:64 |
-| after normalization | global:16 — "Only technical proper nouns, filenames, command names, product names and API names may stay in English." | project:143 — same sentence as a bullet, no trailing period, no space in "API名" |
-| after normalization | global:17 — "Otherwise explain it in Japanese, and do not compress meaning just to be shorter." | project:145 — the second clause only, as a bullet |
+| identical after normalization | global:16 — "Only technical proper nouns, filenames, command names, product names and API names may stay in English." | project:143 — same sentence as a bullet: no trailing period, no space in "API名" |
+| **partial only** | global:17 — "Otherwise explain it in Japanese, and do not compress meaning just to be shorter." | project:145 — the second clause only, as a bullet |
 
-The last pair is the interesting one: the project layer carries *half* the global rule. Read
-alone it means something narrower than the original. That is what layer drift looks like
-before it becomes a contradiction.
+The last row is the interesting one, and it is why "how many are duplicated" is the wrong
+question to stop at. The project layer carries *half* the global rule. Read alone it means
+something narrower than the original — the "explain it in Japanese" half is simply gone. That
+is what layer drift looks like before it becomes a contradiction, and a similarity score
+alone will not tell you which of the 21 partial overlaps are harmless restatements and which
+are silent narrowings. That separation is done by reading.
 
 Duplication is not a cost problem (§1). It is an **ownership** problem: with the same rule in
 two layers, editing one leaves the other in force, and neither file says the other exists.
