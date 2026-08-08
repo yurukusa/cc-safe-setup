@@ -77,35 +77,43 @@ These are blocked with hooks, the same baseline is enforced across every repo in
 <p>The basis is real, documented incidents and on-machine verification of the hooks that stop them — for example an unauthorized transfer <a href="https://github.com/anthropics/claude-code/issues/46828">#46828</a> ($1,446), mass deletion of database tables <a href="https://github.com/anthropics/claude-code/issues/27063">#27063</a>, and a secret leak that walked straight past CLAUDE.md instructions <a href="https://github.com/anthropics/claude-code/issues/2142">#2142</a>. Not generalities — incidents you can trace by number, with the matching hook.</p>
 
 <h2>Services & indicative pricing</h2>
-<p>The figures below are <strong>estimates</strong>. They move with team size, number of repos and your existing setup, so start with a conversation — the actual scope and price come back in a quote. These engagements are <strong>async / remote-friendly</strong> (the audit and baseline work are delivered as artifacts and reports; training is available recorded).</p>
+
+<div style="border:2px solid #b45309;background:#fffbeb;padding:1rem 1.2rem;border-radius:8px;margin:1.2rem 0">
+<p style="margin:0 0 0.6rem;font-weight:600;color:#b45309">August 2026 notice: items 1–5 below are not being accepted</p>
+<p style="margin:0 0 0.6rem">The audit, training, rollout, monthly retainer and spot consulting all require a person to keep doing the work. That capacity isn't something I can responsibly commit to, so <strong>none of them are currently accepted</strong>. If you looked at this page earlier and were considering it, I'm sorry.</p>
+<p style="margin:0 0 0.6rem">The prices are left visible on purpose rather than quietly deleted — what was published shouldn't silently disappear. What can't be delivered is stated as not delivered.</p>
+<p style="margin:0">Two things are available, both without any inquiry: the <strong>Team Safety Rollout Pack (¥3,000)</strong>, a one-off download, and the <strong>free material</strong> further down this page. The hooks themselves stay free (MIT).</p>
+</div>
+
+<p>The figures below are the <strong>estimates as they were published</strong>.</p>
 <div class="service">
-<h3>1. Safety audit (one-off)</h3>
+<h3>1. Safety audit (one-off)<span class="tag" style="background:#fee2e2;color:#b45309;">not accepted</span></h3>
 <p>Review the org's <code>settings.json</code>, <code>CLAUDE.md</code> and hook setup, and surface the gaps that lead to accidents (permission holes, secret-leak paths, deletion and billing risk). You get the remediation config and a distributable safety baseline. Delivered as a written report — no live session required.</p>
 <span class="price">from ~$1,000 (one-off)</span>
 <span class="tag">Deliverable: vulnerability report + recommended hooks + distributable template</span>
 <p style="margin-top:0.6rem;font-size:0.92rem"><a href="services-jp-sample-audit.html">See a sample vulnerability report →</a> (fictional company, for illustration)</p>
 </div>
 <div class="service">
-<h3>2. Team training (online / recorded)</h3>
+<h3>2. Team training (online / recorded)<span class="tag" style="background:#fee2e2;color:#b45309;">not accepted</span></h3>
 <p>For tech leads and developers: how to operate Claude Code safely, taught through real incidents and how to prevent them, mapped onto your own workflow. Available recorded so it scales across time zones.</p>
 <span class="price">from ~$350 / person (varies by size & format)</span>
 <span class="tag">Recorded option · 7-module curriculum</span>
 <p style="margin-top:0.6rem;font-size:0.92rem"><a href="claude-code-safety-training-jp.html">See the curriculum (7 modules) →</a></p>
 </div>
 <div class="service">
-<h3>3. Rollout & setup (org baseline design + distribution)</h3>
+<h3>3. Rollout & setup (org baseline design + distribution)<span class="tag" style="background:#fee2e2;color:#b45309;">not accepted</span></h3>
 <p>Design the shared safety policy, the mechanism to distribute it to every repo and developer, the CI safety gate, and enforcement of the required baseline. Eliminates the drift and "forgot to add it" failures of manual distribution.</p>
 <span class="price">from ~$2,000 (one-off project)</span>
 <span class="tag">Deliverable: shared policy + CI workflow + rollout runbook</span>
 </div>
 <div class="service">
-<h3>4. Monthly review & support<span class="tag" style="background:#dcfce7;color:#059669;">core</span></h3>
+<h3>4. Monthly review & support<span class="tag" style="background:#fee2e2;color:#b45309;">not accepted</span></h3>
 <p>The core service. Ongoing hook updates, responses to newly reported incident classes, config review, and operational Q&amp;A. Claude Code ships fast and the safety assumptions shift; training and initial setup are one-time, but the risk stays for as long as you keep using it. Priced per org's operation, not per seat.</p>
 <span class="price">from ~$700 / month (varies by scale)</span>
 <span class="tag">Continuous safety updates + review + audit</span>
 </div>
 <div class="service">
-<h3>5. Spot consulting (design review / incident post-mortem)</h3>
+<h3>5. Spot consulting (design review / incident post-mortem)<span class="tag" style="background:#fee2e2;color:#b45309;">not accepted</span></h3>
 <p>One-off: AI-coding adoption strategy, safety-design review, or root-cause analysis and prevention after an incident has already happened.</p>
 <span class="price">from ~$2,000 / day</span>
 <span class="tag">Strategy / design review / post-mortem</span>
@@ -128,21 +136,23 @@ These are blocked with hooks, the same baseline is enforced across every repo in
 <tr><td><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup (free · MIT)</a></td><td>One command installs the core safety hooks. The individual tier stays free.</td></tr>
 </table>
 
-<h2>Get in touch</h2>
-<p>For an inquiry or a quote, use the GitHub issue form — a short form where you pick the type and size of engagement. Don't include your company name or anything confidential; after the first contact we move to a private channel.</p>
-<a class="cta" href="https://github.com/yurukusa/cc-safe-setup/issues/new?template=service_inquiry.yml">Inquire via the GitHub form</a>
-<a class="cta sub" href="team-governance-scorecard.html">First, score your team</a>
+<h2>What is available</h2>
+<p>As stated above, the audit, training, rollout, monthly retainer and spot consulting are not being accepted, and the inquiry form has been closed. Leaving it open would mean collecting requests I can't answer.</p>
+<p>These two need no inquiry:</p>
+<a class="cta" href="https://yurukusa.booth.pm/items/8230188">Team Safety Rollout Pack ¥3,000 (BOOTH, one-off)</a>
+<a class="cta sub" href="team-governance-scorecard.html">First, score your team (free)</a>
+<p style="margin-top:0.8rem;font-size:0.92rem">The hooks themselves (<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>, MIT) stay free. Bug reports and questions are still welcome through the normal issues and discussions.</p>
 
 <h2>About</h2>
 <p>
 <span class="tag">Author of cc-safe-setup (900+ example hooks · MIT)</span>
-<span class="tag">900+ example hooks (MIT)</span>
-<span class="tag">~1,900 de-duplicated GitHub clones in the last 14 days (measured, includes automated traffic such as CI)</span>
-<span class="tag">GitHub 42★</span>
-<span class="tag">80k+ cumulative Qiita views on Claude Code safety &amp; operations</span>
+<span class="tag">2,534 clones / 628 de-duplicated in the last 14 days (measured; includes CI and mirrors — not a people count)</span>
+<span class="tag">96 unique page viewers in the last 14 days (measured)</span>
+<span class="tag">GitHub 4★</span>
+<span class="tag">170k+ cumulative Qiita views on Claude Code safety &amp; operations</span>
 <span class="tag">Designed from real, documented incidents (GitHub issues)</span>
 </p>
-<p class="honest">Figures are measured as of publication. Scope and schedule are agreed per engagement. No exaggerated promises.</p>
+<p class="honest">Figures were re-measured on 2026-08-09. Two of them were corrected in the process. "GitHub 42★" was wrong — the actual count is <strong>4★</strong>, so the page had been overstating it by 10×. And "~30k npm installs", which used to appear here, has been removed: that number includes bot and mirror traffic, as I had already concluded elsewhere, so it can't stand as evidence of real users. The clone figure is now written so it's clear it isn't a count of people. No exaggerated promises.</p>
 <footer>
 <p>
 <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> ｜
