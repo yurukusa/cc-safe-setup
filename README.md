@@ -157,13 +157,27 @@ Every hook here exists because something broke first. The incident records behin
 them — what failed, what the logs actually looked like, and what finally stopped it —
 are written up at length in these:
 
+**In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
+
+- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800) — 100 chapters
+  of incidents, each traced to the setting or hook that stops it. The first 5 sections,
+  including the symptom→chapter lookup table you'd reach for mid-incident, are free to read
+- [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
+  the tokens actually go, measured across 800+ hours rather than reasoned about. 34 chapters,
+  2 free
+
+**In English:**
+
 - [Claude Code Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)
   ($19) — the April–June 2026 regressions in sequence, and a stay / switch / hybridize
   decision framework built from them
 - [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($5) — the same measurements
   applied to token cost
 
-Both are optional. Every hook in this repository works without them.
+All of them are optional, and every hook in this repository works without them. The reason they are
+listed at all is that Zenn books do not surface in search or in Zenn's own topic listings for this
+account (measured across 19 topics on 2026-08-09: zero appearances), so this README is the only
+place they can be found from.
 
 ## License
 
