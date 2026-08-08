@@ -74,12 +74,22 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 
 ## 3. CC Safety Lab — Founder Membership, ¥500/month
 
-Monthly recurring, delivered on the 1st of each month. Covers:
+Monthly recurring. Each issue covers:
 
 - 3–5 new incident reports from the prior month, each with a concrete workaround.
 - 1 new safety hook, released to Founder members one month before it ships to `cc-safe-setup` main.
 - 1 measured token-saving technique, with the data behind it.
 - 1 week of early access to Token Book updates.
+
+**The delivery record, since I would rather you saw it than found it.** This page used to say
+"delivered on the 1st of each month." It has never worked out that way, so the claim is gone.
+Issues went out on 2026-04-23, 04-24, 05-08, 05-15, 05-22 — and then **nothing until 08-08**.
+June and July have no issue at all; I found the August one sitting unpublished as a draft and
+shipped it late. No issue has ever gone out on the 1st.
+
+What I will commit to instead: **one issue per calendar month, no fixed date.** If a month is
+missed, the next issue says so at the top rather than quietly skipping it. If that is not good
+enough for ¥500/month — and it may well not be — do not join yet.
 
 Founder rate is grandfathered — you keep the ¥500 price even if the tier is later raised.
 
