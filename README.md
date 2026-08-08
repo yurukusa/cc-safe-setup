@@ -41,7 +41,7 @@ The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.
 | `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
 | `true && git add .env` — a secret staged through a chained command | allowed | blocked |
 
-29.8.0 ships 698 example hooks against this repository's 909 — among the 210 missing is `agents-md-sync-checker`.
+29.8.0 ships 698 example hooks against this repository's 910 — among the 212 missing is `agents-md-sync-checker`.
 
 To install the current code directly from this repository:
 
@@ -67,7 +67,7 @@ if none of the three is present they print a warning that says they are **not** 
 then allow the command (blocking every call would make Claude Code unusable, which is a
 failure, not safety).
 
-The example hooks are stricter about this than the core ones: **772 of the 909 use `jq` with no
+The example hooks are stricter about this than the core ones: **772 of the 910 use `jq` with no
 fallback**. Without `jq` they read an empty command and quietly do nothing — no error, no log
 line, and they still appear in your `settings.json`. If you take examples from `examples/`,
 install `jq` first.
@@ -137,7 +137,11 @@ If you are the person who has to justify Claude Code to the rest of your organiz
 
 One paid thing exists, and it needs no inquiry either: the [Team Safety Rollout Pack](https://yurukusa.booth.pm/items/8230188) (¥3,000, one-off) bundles the shared policy template, the CI gate with defaults already chosen, and a written walkthrough of real reported incidents.
 
-Audits, training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html). The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
+Corporate audits (¥150,000+), training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html).
+
+The [$29 CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) is a separate, asynchronous thing and is offered: a written Markdown report returned in your issue thread, no call and no meeting. [Read the full sample report first](docs/claude-md-audit-sample.md) — it is that audit run against my own setup.
+
+The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
 
 ## Windows
 

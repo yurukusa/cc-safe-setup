@@ -1240,29 +1240,29 @@
   },
   {
     "url": "services-en.html",
-    "title": "Roll out Claude Code safely across your team — audit, training, baseline & ongoing review｜cc-safe-setup",
-    "description": "Org-level safety services for teams adopting Claude Code: a one-off safety audit, recorded team training, org baseline rollout with a CI gate, and ongoing review. Built by the author of cc-safe-setup (900+ example hooks), based on real documented incidents. Async / remote-friendly.",
+    "title": "Org safety services are no longer accepted — the free material stays｜cc-safe-setup",
+    "description": "NOT ACCEPTED: the org-level services on this page (safety audit, team training, baseline rollout, ongoing review) are no longer offered. Prices stay visible so the record is clear. Still available: the Team Safety Rollout Pack, the free written material, and 910 example hooks (MIT).",
     "keywords": "",
-    "snippet": "Org-level safety services — audit, training, baseline rollout and ongoing review, by the author of cc-safe-setup."
+    "snippet": "NOT ACCEPTED — a record of the org-level services that used to be offered here. The free material and the hooks continue."
   },
   {
     "url": "services-jp-sample-audit.html",
     "title": "Claude Code 安全監査レポート（サンプル）— cc-safe-setup",
-    "description": "法人向けの導入の安全監査で、実際にお渡しする脆弱性レポートのサンプルです。架空の企業を対象に、検出する所見の様式、重大度、関連する実際の事故、推奨 hook、是正の手順を例示します。cc-safe-setup の作者による法人向けサービスの成果物の見本。",
+    "description": "【受付停止】法人向けの安全監査（¥150,000〜）でお渡ししていた脆弱性レポートの見本です。この監査は現在お受けしていませんが、様式の記録として残しています。架空の企業を対象に、所見の様式・重大度・関連する実際の事故・推奨 hook・是正の手順を例示します。",
     "keywords": "",
     "snippet": "下記を、全開発者と全リポジトリに統一して配布・強制することを推奨します。手作業の配布で起こる「設定のズレ」「付け忘れ」をなくすのが目的です。"
   },
   {
     "url": "services-jp.html",
-    "title": "Claude Code をチームに安全に導入する｜法人向けの研修・導入・保守 — cc-safe-setup",
-    "description": "Claude Code をチーム・組織に安全に導入するための法人向けサービス。安全監査、チーム研修（人材開発支援助成金の対象になりうる）、導入の初期設定、月額の運用保守。790+ の安全 hook を作る cc-safe-setup の作者が、実際に報告された事故に基づいて支援します。",
+    "title": "法人向けの研修・導入・保守は受付を停止しました｜無料の資料は続けています — cc-safe-setup",
+    "description": "【受付停止】このページに載っている法人向けサービス（安全監査・チーム研修・導入の初期設定・月額の運用保守）は現在お受けしていません。経緯が分かるよう金額は残しています。代わりに、チーム安全導入パック（¥3,000・買い切り）と無料の資料、910本の安全 hook（MIT）をご利用ください。",
     "keywords": "",
     "snippet": "研修を受けた後でも、現場では事故が起こります。当方は研修事業者と競合するのではなく、その後に残るリスクを技術的に塞ぐ後工程として組み合わせて使えます。"
   },
   {
     "url": "services.html",
-    "title": "Claude Code Safety Setup Service | cc-safe-setup",
-    "description": "Professional Claude Code safety configuration. Hooks, CLAUDE.md optimization, and token reduction by the team behind cc-safe-setup (900+ example hooks, 57,000+ Qiita views).",
+    "title": "Safety setup service — no longer accepted (the hooks stay free) | cc-safe-setup",
+    "description": "NOT ACCEPTED: the paid setup and configuration work listed on this page is no longer offered. Prices stay visible so the record is clear. The 910 example hooks in cc-safe-setup remain free (MIT), and the written material stays up.",
     "keywords": "",
     "snippet": "Professional safety configuration by the cc-safe-setup team"
   },
