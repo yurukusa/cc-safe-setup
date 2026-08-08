@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code Safety Audit — Professional Review of Your AI Development Setup</title>
-<meta name="description" content="Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (900+ example hooks, 240+ test files).">
+<meta name="description" content="Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (910 example hooks, 261 files under tests/).">
 <meta name="keywords" content="claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/safety-audit.html">
 <meta property="og:title" content="Claude Code Safety Audit — Professional Setup Review">
-<meta property="og:description" content="Free initial assessment. Detailed review by the creator of cc-safe-setup (900+ example hooks). Prevent file deletion, token waste, and production accidents.">
+<meta property="og:description" content="Free initial assessment. Detailed review by the creator of cc-safe-setup (910 example hooks). Prevent file deletion, token waste, and production accidents.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/safety-audit.html">
 <style>
@@ -63,12 +63,11 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem 
 
 <div class="hero">
 <h2>Is Your Claude Code Setup Safe?</h2>
-<p>800+ hours of autonomous Claude Code operation. Every mistake documented. Every fix tested.</p>
+<p>800+ hours of autonomous Claude Code operation. Every mistake documented.</p>
 <div style="margin-top:.6rem">
-<span class="stat">900+ example hooks built</span>
-<span class="stat">240+ test files written</span>
+<span class="stat">910 example hooks</span>
+<span class="stat">261 files under tests/</span>
 <span class="stat">800+ hours operated</span>
-<span class="stat">0 incidents after setup</span>
 </div>
 </div>
 
@@ -100,9 +99,10 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem 
 </div>
 
 <div class="card premium">
-<h3>Paid: Professional Audit</h3>
-<p class="price">From $50</p>
-<ul>
+<h3>Paid: Professional Audit <span style="font-size:.72rem;background:#3d2b14;color:#e0a458;padding:.15rem .5rem;border-radius:4px;vertical-align:middle">not accepted</span></h3>
+<p class="price" style="text-decoration:line-through;opacity:.55">From $50</p>
+<p style="margin-bottom:.5rem"><strong>This is no longer offered.</strong> A per-order audit means a person has to take on each one, and that capacity isn't something I can responsibly commit to. Rather than delete the listing, here is what it used to include and what replaced it.</p>
+<ul style="opacity:.6">
 <li>Full review of your settings.json, CLAUDE.md, and hook configuration</li>
 <li>Custom hook recommendations for your specific workflow</li>
 <li>Token optimization analysis (what's wasting your tokens)</li>
@@ -110,24 +110,25 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem 
 <li>Written report with prioritized action items</li>
 <li>Hook code provided — copy-paste ready</li>
 </ul>
-<p style="margin-top:.5rem;font-size:.78rem;color:#8b949e">Turnaround: 2-3 business days</p>
+<p style="margin-top:.6rem;font-size:.86rem">Instead, the free self-audit above covers the same ground mechanically: <code>npx github:yurukusa/cc-safe-setup --audit</code> reports which classes of danger your current setup does and doesn't guard, and <code>--doctor</code> tells you which hooks are misconfigured. For a shared team baseline there is the <a href="https://yurukusa.booth.pm/items/8230188">Team Safety Rollout Pack</a> (¥3,000, one-off, no inquiry needed).</p>
 </div>
 </div>
 
 <h2>Why This Audit</h2>
 
 <div class="card">
-<p>Claude Code ships with <strong>zero safety hooks</strong>. The official docs tell you how to write hooks, but not which ones you need. With 900+ example hooks tested across 800+ hours of real autonomous operation, we know which 8-15 hooks actually matter for your workflow — and which are noise.</p>
+<p>Claude Code ships with <strong>zero safety hooks</strong>. The official docs tell you how to write hooks, but not which ones you need. With 910 example hooks tested across 800+ hours of real autonomous operation, we know which 8-15 hooks actually matter for your workflow — and which are noise.</p>
 <p style="margin-top:.5rem">This isn't theory. Every recommendation comes from a real incident. Every hook has been tested in production.</p>
 </div>
 
 <div class="proof">
-<div class="badge"><strong>700+</strong>hooks built</div>
-<div class="badge"><strong>9,200+</strong>tests</div>
-<div class="badge"><strong>8</strong>GitHub stars</div>
-<div class="badge"><strong>57</strong>articles published</div>
-<div class="badge"><strong>3</strong>Zenn Books</div>
+<div class="badge"><strong>910</strong>example hooks</div>
+<div class="badge"><strong>261</strong>files under tests/</div>
+<div class="badge"><strong>4</strong>GitHub stars</div>
+<div class="badge"><strong>239</strong>articles published</div>
+<div class="badge"><strong>12</strong>Zenn books</div>
 </div>
+<p style="font-size:.78rem;color:#8b949e;margin-top:.4rem">Re-counted on 2026-08-09 against the repository and the platform APIs. Four of these were wrong before: the page said "700+ hooks" in one place and "900+" in another (the actual count of <code>examples/*.sh</code> on <code>main</code> is 910), "9,200+ tests" is not a number I can reproduce — what I can count is 261 files under <code>tests/</code> — and "8 GitHub stars" was overstated (it is 4). Two were understated and are now current: 57 → 239 articles, 3 → 12 Zenn books. A "0 incidents after setup" badge also used to sit here; it has been removed, because I can't substantiate it and this year I have found several of my own guards silently failing.</p>
 
 <h2>How It Works</h2>
 
@@ -182,7 +183,7 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem 
 </div>
 
 <div class="footer">
-<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · 900+ example hooks · 240+ test files · MIT License<br>
+<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> · 910 example hooks · 261 files under tests/ · MIT License<br>
 Built from 800+ hours of real autonomous Claude Code operation
 
 <br><a href="token-book.html#en">📘 Token Book (¥2,500)</a> · <a href="token-checkup.html">Token Checkup</a>
