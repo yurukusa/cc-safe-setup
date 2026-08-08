@@ -34,3 +34,14 @@ body:
         - バグ報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md
         - 誤検知の報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md
         - Discussions: https://github.com/yurukusa/cc-safe-setup/discussions
+  - type: checkboxes
+    id: acknowledged
+    attributes:
+      label: 確認
+      description: |
+        GitHub の issue のフォームは、入力の項目が1つも無いと有効な形式として扱われません
+        （案内だけの形にすると、フォームの一覧から消えてしまいます）。
+        そのため、この確認の項目だけを残しています。ここから issue を作る必要はありません。
+      options:
+        - label: 上記の受付終了の案内を読みました（この項目に用はありません。閉じてかまいません）
+          required: false
