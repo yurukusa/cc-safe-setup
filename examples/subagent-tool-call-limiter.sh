@@ -11,21 +11,52 @@
 # TRIGGER: PreToolUse
 # MATCHER: ""
 
+__CC_HOOK_INPUT=$(cat 2>/dev/null)
+# --- セッション識別子でファイルを分ける (2026-08-09 修正) ---
+# 旧実装は "$$" を使っていたが、$$ はこのスクリプト自身のPIDで呼び出しごとに変わるため、
+# 状態が一度も持続しなかった(実測: 200回呼ぶとファイルが200個でき、中身は全部 1)。
+__CC_SID=""
+if [ -n "${__CC_HOOK_INPUT:-}" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    __CC_SID=$(printf '%s' "$__CC_HOOK_INPUT" | jq -r '.session_id // .sessionId // empty' 2>/dev/null)
+  fi
+  if [ -z "$__CC_SID" ] && command -v python3 >/dev/null 2>&1; then
+    __CC_SID=$(printf '%s' "$__CC_HOOK_INPUT" | python3 -c 'import sys,json
+try:
+    d=json.load(sys.stdin); print(d.get("session_id") or d.get("sessionId") or "")
+except Exception: print("")' 2>/dev/null)
+  fi
+fi
+if [ -n "$__CC_SID" ]; then
+  __CC_KEY=$(printf '%s' "$__CC_SID" | tr -c 'A-Za-z0-9_-' '_' | cut -c1-64)
+else
+  __CC_KEY="nosession-$(date +%Y%m%d)"
+fi
+# --- ここまで ---
+
 set -euo pipefail
 
 MAX_CALLS="${CC_MAX_TOOL_CALLS:-200}"
-COUNTER_FILE="/tmp/claude-tool-call-counter-$$"
+COUNTER_FILE="/tmp/claude-tool-call-counter-$__CC_KEY"
 
-# Use session-based counter (PID of parent process)
-PPID_FILE="/tmp/claude-tool-call-counter-${PPID:-0}"
-[ -f "$PPID_FILE" ] && COUNTER_FILE="$PPID_FILE"
+# 2026-08-09: $PPID を使う旧機構を削除した。
+# 旧実装は $PPID(親プロセスのID)をセッションの識別子として使っていた。
+# ★訂正: 最初これを「一度も遮断しない」と書いたが、それは計測の誤りだった。
+#   親が安定していれば $PPID は持続するので、上限10で15回叩くと11回目から5回遮断する(実測)。
+#   「200回で遮断0回」という最初の測定は、こちらが $( ) の中で呼んだせいで
+#   呼び出しごとに別のサブシェルが親になっていたためで、仕掛けが作った結果だった。
+# 実際に残る欠陥はこちら: $PPID はセッションの識別子ではない。
+#   同じ親から複数のセッションが走ると**カウンターが混ざる**。
+#   実測: 同じ親から session_id が sX と sY の呼び出しを6回ずつ交互に流すと、
+#   カウンターファイルは1個だけで値は12(=6+6)。片方のセッションが上限を使い切ると、
+#   もう片方が何もしていなくても遮断される。
+# 修正: hookの入力JSONの session_id で分ける。
 
 # Initialize or read counter
+COUNT=0
 if [ -f "$COUNTER_FILE" ]; then
   COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
-else
-  COUNT=0
-  COUNTER_FILE="$PPID_FILE"
+  case "$COUNT" in ''|*[!0-9]*) COUNT=0 ;; esac
 fi
 
 COUNT=$((COUNT + 1))

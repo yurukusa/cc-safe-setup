@@ -18,7 +18,30 @@
 #   CC_SESSION_CRITICAL_HOURS=4  (critical after 4 hours, default)
 # ================================================================
 
-MARKER="/tmp/cc-session-start-$$"
+__CC_HOOK_INPUT=$(cat 2>/dev/null)
+# --- セッション識別子でファイルを分ける (2026-08-09 修正) ---
+# 旧実装は "$$" を使っていたが、$$ はこのスクリプト自身のPIDで呼び出しごとに変わるため、
+# 状態が一度も持続しなかった(実測: 200回呼ぶとファイルが200個でき、中身は全部 1)。
+__CC_SID=""
+if [ -n "${__CC_HOOK_INPUT:-}" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    __CC_SID=$(printf '%s' "$__CC_HOOK_INPUT" | jq -r '.session_id // .sessionId // empty' 2>/dev/null)
+  fi
+  if [ -z "$__CC_SID" ] && command -v python3 >/dev/null 2>&1; then
+    __CC_SID=$(printf '%s' "$__CC_HOOK_INPUT" | python3 -c 'import sys,json
+try:
+    d=json.load(sys.stdin); print(d.get("session_id") or d.get("sessionId") or "")
+except Exception: print("")' 2>/dev/null)
+  fi
+fi
+if [ -n "$__CC_SID" ]; then
+  __CC_KEY=$(printf '%s' "$__CC_SID" | tr -c 'A-Za-z0-9_-' '_' | cut -c1-64)
+else
+  __CC_KEY="nosession-$(date +%Y%m%d)"
+fi
+# --- ここまで ---
+
+MARKER="/tmp/cc-session-start-$__CC_KEY"
 WARN_HOURS="${CC_SESSION_WARN_HOURS:-2}"
 CRITICAL_HOURS="${CC_SESSION_CRITICAL_HOURS:-4}"
 
@@ -29,7 +52,7 @@ if [ ! -f "$MARKER" ]; then
 fi
 
 # Check every 50 tool calls (not every call)
-COUNTER="/tmp/cc-duration-counter-$$"
+COUNTER="/tmp/cc-duration-counter-$__CC_KEY"
 COUNT=$(cat "$COUNTER" 2>/dev/null || echo 0)
 COUNT=$((COUNT + 1))
 echo "$COUNT" > "$COUNTER"
