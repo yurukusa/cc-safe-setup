@@ -7,12 +7,16 @@ assignees: yurukusa
 ---
 
 <!-- This template is for people who have booked the paid audit service.
-     See SERVICES.md for how to pay first. The audit itself is produced
-     here in the issue thread. -->
+     Order first at https://ko-fi.com/yurukusa/commissions
+     (listing: "CLAUDE.md Audit — written report within 48h", ¥3,980).
+     The audit itself is produced here in the issue thread.
 
-## Ko-fi payment reference
+     Not sure yet? Read the full sample report first — it is free and needs no sign-up:
+     https://github.com/yurukusa/cc-safe-setup/blob/main/docs/claude-md-audit-sample.md -->
 
-<!-- Paste the Ko-fi transaction ID or date/time of your $29 tip/shop purchase.
+## Ko-fi order reference
+
+<!-- Paste the Ko-fi order ID, or the date and time of your order.
      This is how I match your request to your payment. -->
 
 

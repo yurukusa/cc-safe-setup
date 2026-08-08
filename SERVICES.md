@@ -1,6 +1,6 @@
 # Services
 
-If you want more than what the free tools give you, there are three paid options. All are fulfilled using the same methodology I use to run Claude Code autonomously (800+ hours logged), applied to your specific setup.
+If you want more than what the free tools give you, there are three paid options. All are fulfilled using the same methodology I use to run Claude Code autonomously, applied to your specific setup.
 
 ---
 
@@ -10,21 +10,27 @@ If you want more than what the free tools give you, there are three paid options
 
 A written audit of your `CLAUDE.md` (and optionally `settings.json` + your 5 most-invoked hooks), delivered as a Markdown report within 48 hours.
 
+**See exactly what you get: [a full sample report](./docs/claude-md-audit-sample.md).** It is this audit run against my own 608-line, three-layer setup — real findings, including two rules that could not be followed at all.
+
 The report covers:
 
-1. Token weight analysis — how much your instructions cost per turn, vs. a tuned baseline.
-2. Vague-rule detection — the specific lines the model is most likely to ignore, with concrete rewrites.
-3. Redundancy and stale-reference scan — rules that contradict, duplicate, or point at paths that no longer exist.
-4. Testable-assertion ratio — how much of your CLAUDE.md is aspirational (and therefore silently drops out under pressure) vs. checkable.
-5. Top-3 fixes, ranked by expected impact, with before/after diffs ready to paste.
+1. **Reference resolution** — every path your rules depend on, checked against the scope the rule actually runs in. The failure this catches is not a missing file: it is a file that *exists somewhere else*, so it passes existence checks while the rule stays silently unfollowable.
+2. **Testable-assertion ratio** — how much of your CLAUDE.md is aspirational (and therefore silently drops out under pressure) vs. checkable, as a measured ratio per layer.
+3. **Cross-layer redundancy** — rules duplicated between your global, home and project files. This is an ownership problem, not a cost problem: editing one copy leaves the other in force and neither file says so.
+4. **Vague-rule detection** — the specific lines the model is most likely to ignore, with concrete rewrites that attach a checkable condition without changing your intent.
+5. **Top-3 fixes**, ranked by expected impact, with before/after diffs ready to paste.
 
-**Not included:** a live 1:1 call, hook implementation, or code review beyond the files you submit. This is an audit, not consulting.
+**On token weight:** earlier versions of this page led with "how much your instructions cost per turn." Having measured it, I think that was the wrong headline. `CLAUDE.md` sits in the cached prefix, so on my own setup, deleting *every* duplicated rule works out to roughly $0.24–$1.19/month. The report still includes the token arithmetic for your files — as a bound, and usually as a reason **not** to spend your time there. If your bill is the problem, the Token Burn Audit below reads session logs, which is where the money actually goes.
+
+**Not included:** a live 1:1 call, hook implementation, or code review beyond the files you submit. This is an audit, not consulting. The diffs are proposals; you apply them.
 
 **How to book:**
 
-1. Pay $29 via Ko-fi Shop → https://ko-fi.com/yurukusa/shop (item: *CLAUDE.md Audit*). _If the item is not yet listed, use a $29 tip with the note "CLAUDE.md audit" and it will be honored._
-2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/audit_request.md). Paste your CLAUDE.md there (or attach, if you prefer not to make it public).
+1. Order at https://ko-fi.com/yurukusa/commissions — listing: *CLAUDE.md Audit — written report within 48h*, ¥3,980 (≈$29). _If that listing is ever missing, a ¥3,980 tip at https://ko-fi.com/yurukusa with the note "CLAUDE.md audit" is honored at the same price._
+2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/audit_request.md). Paste your CLAUDE.md there (or attach, if you prefer not to make it public). Mention your Ko-fi order so the two can be matched.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
+
+If you cannot post anything publicly, say so in the Ko-fi order message and I'll arrange another route.
 
 **Refund:** if I cannot produce a useful audit (for example because the file is effectively empty, or is entirely in a language I cannot parse), full refund via Ko-fi.
 
@@ -56,7 +62,7 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 
 **How to book:**
 
-1. Pay $29 via Ko-fi Shop → https://ko-fi.com/yurukusa/shop (item: *Token Burn Audit*). _If the item is not yet listed, use a $29 tip with the note "Token Burn audit" and it will be honored._
+1. There is **no Ko-fi listing for this one yet** — unlike the audit above, I have not yet run this end to end on my own logs, so I am not putting up a one-click button for it. To order, send a $29 tip at https://ko-fi.com/yurukusa with the note "Token Burn audit". It will be honored at that price.
 2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
@@ -68,12 +74,22 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 
 ## 3. CC Safety Lab — Founder Membership, ¥500/month
 
-Monthly recurring, delivered on the 1st of each month. Covers:
+Monthly recurring. Each issue covers:
 
 - 3–5 new incident reports from the prior month, each with a concrete workaround.
 - 1 new safety hook, released to Founder members one month before it ships to `cc-safe-setup` main.
 - 1 measured token-saving technique, with the data behind it.
 - 1 week of early access to Token Book updates.
+
+**The delivery record, since I would rather you saw it than found it.** This page used to say
+"delivered on the 1st of each month." It has never worked out that way, so the claim is gone.
+Issues went out on 2026-04-23, 04-24, 05-08, 05-15, 05-22 — and then **nothing until 08-08**.
+June and July have no issue at all; I found the August one sitting unpublished as a draft and
+shipped it late. No issue has ever gone out on the 1st.
+
+What I will commit to instead: **one issue per calendar month, no fixed date.** If a month is
+missed, the next issue says so at the top rather than quietly skipping it. If that is not good
+enough for ¥500/month — and it may well not be — do not join yet.
 
 Founder rate is grandfathered — you keep the ¥500 price even if the tier is later raised.
 
@@ -83,7 +99,7 @@ Founder rate is grandfathered — you keep the ¥500 price even if the tier is l
 
 ## Why these prices
 
-Comparable AI-audit consulting runs $150–$300/hour and $999+ per productized report, based on Q1 2026 market data. This offering is deliberately priced at the bottom of that range because it is AI-assisted: I apply the same 7-check framework documented in the [free self-audit Gist](https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c), plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that — but it is an honest $29 of value.
+Comparable AI-audit consulting, in the listings I have seen, runs $150–$300/hour and $999+ per productized report. This offering is deliberately priced far below that because it is AI-assisted: I apply the same 7-check framework documented in the [free self-audit Gist](https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c), plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that. Read the sample and decide.
 
 ---
 
