@@ -78,7 +78,7 @@ What none of them answer is *"which of my habits is producing that number, and w
 
 **Not a good fit:** if you have not yet run Claude Code for at least one week on your actual project. There has to be real usage to audit.
 
-**Japanese is welcome / 日本語でも受け付けます:** this page and the sample report are in English, but you can place the Ko-fi order and file the request issue in Japanese, and the report comes back in Japanese. 説明のページも見本も英語ですが、注文と issue を日本語で書いていただければ、報告書は日本語でお返しします。
+**Japanese is welcome / 日本語でも受け付けます:** there is a full Japanese description of this audit — price, turnaround, refund terms, what is not included, and what you send me — at **[トークンが何に消えたかを、あなたのログから読む監査（¥3,980・48時間）](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)**. The sample report itself is still in English, but you can place the Ko-fi order and file the request issue in Japanese, and the report comes back in Japanese. この監査の日本語の説明（価格・納期・返金の条件・含まないもの・送っていただくもの）は上のページにあります。見本の報告書は英語ですが、注文と issue を日本語で書いていただければ、報告書は日本語でお返しします。
 
 ---
 
