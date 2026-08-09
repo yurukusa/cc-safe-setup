@@ -2,6 +2,8 @@
 
 If you want more than what the free tools give you, there are three paid options. All are fulfilled using the same methodology I use to run Claude Code autonomously, applied to your specific setup.
 
+This page is in English, but Japanese orders are welcome for all three: order and write your request in Japanese and the report comes back in Japanese. 日本語でも受け付けます（注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします）。
+
 ---
 
 ## 1. CLAUDE.md Audit — $29 (¥3,980)
@@ -71,6 +73,8 @@ This audit tells you which of the 56 cataloged token-waste symptoms (Token Book 
 **Good fit:** Max plan users watching their quota vanish faster than it used to. Teams where one session burned an unexpected $50–$500. Anyone who read a "7 tips" article and tried them but nothing changed.
 
 **Not a good fit:** if you have not yet run Claude Code for at least one week on your actual project. There has to be real usage to audit.
+
+**Japanese is welcome / 日本語でも受け付けます:** this page and the sample report are in English, but you can place the Ko-fi order and file the request issue in Japanese, and the report comes back in Japanese. 説明のページも見本も英語ですが、注文と issue を日本語で書いていただければ、報告書は日本語でお返しします。
 
 ---
 
