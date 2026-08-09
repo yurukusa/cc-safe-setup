@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-09T11:57:17+09:00
+Updated: 2026-08-09T11:57:35+09:00
 
 ## Git
 - Branch: `work/from-origin-main`
@@ -7,11 +7,12 @@ Updated: 2026-08-09T11:57:17+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4aa6e621 checkpoint: auto-save 11:57:13
+- Last commit: fdf231b4 checkpoint: auto-save 11:57:34
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-09.md
 ./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./tests/approve-side-remaining-two.test.sh
@@ -20,7 +21,6 @@ Updated: 2026-08-09T11:57:17+09:00
 ./tests/cd-git-allow-compound-tail.test.sh
 ./tests/chown-guard-filesystem-root.test.sh
 ./tests/destructive-guard-bare-glob.test.sh
-./tests/destructive-guard-every-operand.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
