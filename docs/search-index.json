@@ -525,6 +525,13 @@
     "snippet": "Paste the contents of an untrusted repo's .claude/settings.json (or .claude/settings.local.json / .mcp.json). You can paste several at once."
   },
   {
+    "url": "claude-md-audit-jp.html",
+    "title": "あなたのCLAUDE.mdの中に「守りようがない規則」が無いかを読む監査（¥3,980・48時間）— cc-safe-setup",
+    "description": "CLAUDE.md に書いたのに守られない、という状態を「書き方が悪い」で片付けずに、規則ごとに読み分ける書面の監査です。参照先が本当に辿れるか、機械で確かめられる書き方か、層をまたいで重複していないかを見て、Markdown の報告書1本で48時間以内にお返しします。¥3,980。費用が目的ならこの監査ではない、と先に書いてあります。",
+    "keywords": "",
+    "snippet": "書いたのに守られない、という状態を「書き方が悪い」で片付けずに、規則ごとに読み分けます。¥3,980（約 $29）・48時間以内・Markdown 1本"
+  },
+  {
     "url": "claude-update-fix.html",
     "title": "Fix `claude update` downloading 226 MB every time (Issue #51243)",
     "description": "Claude Code downloads the full release tarball (226 MB, ~30 s) on every `claude update` — even when already up-to-date. Open Issue, no upstream fix. Drop-in bash wrapper that checks the npm registry first.",
