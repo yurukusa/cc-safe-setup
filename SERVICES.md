@@ -27,7 +27,7 @@ The report covers:
 **How to book:**
 
 1. Order at https://ko-fi.com/yurukusa/commissions — listing: *CLAUDE.md Audit — written report within 48h*, ¥3,980 (≈$29). _If that listing is ever missing, a ¥3,980 tip at https://ko-fi.com/yurukusa with the note "CLAUDE.md audit" is honored at the same price._
-2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/audit_request.md). Paste your CLAUDE.md there (or attach, if you prefer not to make it public). Mention your Ko-fi order so the two can be matched.
+2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/3-audit_request.md). Paste your CLAUDE.md there (or attach, if you prefer not to make it public). Mention your Ko-fi order so the two can be matched.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
 If you cannot post anything publicly, say so in the Ko-fi order message and I'll arrange another route.
@@ -63,7 +63,7 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 **How to book:**
 
 1. There is **no Ko-fi listing for this one yet** — unlike the audit above, I have not yet run this end to end on my own logs, so I am not putting up a one-click button for it. To order, send a $29 tip at https://ko-fi.com/yurukusa with the note "Token Burn audit". It will be honored at that price.
-2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
+2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
 **Good fit:** Max plan users watching their quota vanish faster than it used to. Teams where one session burned an unexpected $50–$500. Anyone who read a "7 tips" article and tried them but nothing changed.

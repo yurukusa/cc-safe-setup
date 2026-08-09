@@ -31,8 +31,8 @@ body:
         通常の issue と Discussions でこれまでどおり歓迎します。
         このフォームではなく、そちらへお願いします。
 
-        - バグ報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=bug_report.md
-        - 誤検知の報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=false_positive.md
+        - バグ報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=1-bug_report.md
+        - 誤検知の報告: https://github.com/yurukusa/cc-safe-setup/issues/new?template=2-false_positive.md
         - Discussions: https://github.com/yurukusa/cc-safe-setup/discussions
   - type: checkboxes
     id: acknowledged
