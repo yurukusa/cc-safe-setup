@@ -1372,6 +1372,13 @@
     "snippet": "Max/Proの利用枠が想定よりはるかに速く枯れる問題は、GitHub Issueで今も続いている——#16157（722件の反応「Instantly hitting usage limits with Max subscription」）、#38335（529件「3月以降セッション枠が異常に速く消費される」）。痛いのは「節約できない」ことではなく、定額を払っているのに作業の途中で締め出されることだ。容量の問題そのものはAnthropic側にしか直せない。だが同じ作業をより少ないトークンで終わらせれば、枠が枯れて締め出されるまでの猶予は自分で伸ばせる。この本はその実践テクニックを800時間の運"
   },
   {
+    "url": "token-burn-audit-jp.html",
+    "title": "トークンが何に消えたかを、あなたのログから読む監査（¥3,980・48時間）— cc-safe-setup",
+    "description": "Claude Code の請求と枠は見えるのに「何にこれだけ使ったのか」が分からない人向けの、書面の監査です。あなたの /cost の出力とセッションの記録を読み、浪費の上位3件と、それぞれの直し方を Markdown の報告書1本で48時間以内にお返しします。¥3,980。まず無料で足りる範囲を先に書いてあります。",
+    "keywords": "",
+    "snippet": "Claude Code の /cost の出力とセッションの記録を読んで、浪費の上位3件と直し方を書いた報告書を1本お返しします。¥3,980（約 $29）・48時間以内・Markdown 1本"
+  },
+  {
     "url": "token-checkup.html",
     "title": "Token Checkup — Is Your Claude Code Burning Tokens?",
     "description": "Quick 5-question diagnostic to find where your Claude Code tokens are going. Get personalized optimization tips based on 800+ hours of operation data.",
