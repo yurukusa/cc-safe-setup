@@ -203,8 +203,11 @@ I got this wrong in my own first pass and had to correct it.
 
 ## How this report was produced
 
-Three of my own numbers were wrong before this was finished, and all three erred toward
-making the finding look bigger:
+Four of my own numbers were wrong before this was finished. The first two erred toward making
+the finding look bigger; the other two were overclaims of scope and of detail. (An earlier
+version of this section said "three… and all three erred toward making the finding look
+bigger" while listing four items. In a report about miscounting, that is the one error I
+least wanted to leave standing.)
 
 1. **I summed usage per JSONL line, overcounting every token by 2.36×.** Collapsing on
    `requestId` cut the round-trip count from 51,484 to 21,770. Notably the correction did not

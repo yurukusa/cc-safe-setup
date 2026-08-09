@@ -64,7 +64,7 @@ This audit tells you which of the 56 cataloged token-waste symptoms (Token Book 
 
 **How to book:**
 
-1. **There is no one-click listing for this one yet** — unlike the audit above. To order, send a ¥3,980 (≈$29) tip at https://ko-fi.com/yurukusa with the note "Token Burn audit". It is honored at that price, and I will confirm in your issue thread before starting.
+1. Order at https://ko-fi.com/yurukusa/commissions — listing: *Token Burn Audit — written report within 48h*, ¥3,980 (≈$29). _If that listing is ever missing, a ¥3,980 tip at https://ko-fi.com/yurukusa with the note "Token Burn audit" is honored at the same price._
 2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
