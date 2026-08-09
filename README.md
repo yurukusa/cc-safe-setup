@@ -139,7 +139,11 @@ One paid thing exists, and it needs no inquiry either: the [Team Safety Rollout 
 
 Corporate audits (¥150,000+), training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html).
 
-The [$29 CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) is a separate, asynchronous thing and is offered: a written Markdown report returned in your issue thread, no call and no meeting. [Read the full sample report first](docs/claude-md-audit-sample.md) — it is that audit run against my own setup.
+Two $29 audits are separate, asynchronous things and are offered: a written Markdown report returned in your issue thread, no call and no meeting. The [CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) reads your instruction files. The [Token Burn Audit](SERVICES.md#2-token-burn-audit--29-3980) reads your session logs and `/cost` output, which is where the money actually goes.
+
+An audit is a thing you cannot see before buying, so both publish their deliverable in full: [CLAUDE.md sample](docs/claude-md-audit-sample.md), [Token Burn sample](docs/token-burn-audit-sample.md). Each is that audit run against my own setup — including the parts where it found my own numbers and my own hooks to be wrong. Read one before deciding.
+
+Before either: [cc-token-diet](https://github.com/yurukusa/cc-token-diet) is free, runs locally, and uploads nothing. If it answers your question, you do not need me.
 
 The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
 
