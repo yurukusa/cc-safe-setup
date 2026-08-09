@@ -49,11 +49,13 @@ If you cannot post anything publicly, say so in the Ko-fi order message and I'll
 - Root cause partially identified: `cache_read` tokens may count at full rate against rate limits (negating caching benefits)
 - April 21 pricing whiplash: Claude Code removed from $20 Pro plan, reverted hours later — every hour on $100 Max matters more now
 
-This audit tells you which of the 48 cataloged token-waste symptoms (Token Book Ch.8) are actually firing in *your* logs — not "in general."
+This audit tells you which of the 56 cataloged token-waste symptoms (Token Book Ch.8) are actually firing in *your* logs — not "in general."
+
+**See exactly what you get: [a full sample report](./docs/token-burn-audit-sample.md).** It is this audit run against my own 156 session logs (21,770 API round-trips), including the part where the largest waste pattern turned out to match *none* of the 56 symptoms, and the part where my own hooks were failing to catch it.
 
 **What you get (delivered in 48 hours as a Markdown report in your issue thread):**
 
-1. **Top 3 waste patterns** found in your logs, ranked by estimated cost. Each tied to a specific Ch.8 symptom number.
+1. **Top 3 waste patterns** found in your logs, ranked by estimated cost. Each mapped to a Ch.8 symptom where one applies — and flagged explicitly when none does. In the sample, the single largest pattern matched *none* of the 56.
 2. **Per-pattern fix**: the exact hook, CLAUDE.md change, or workflow adjustment that addresses it. Example hooks from `cc-safe-setup/examples/` that you can install in one command.
 3. **Estimated savings range** (stated as a range, not a single number — the actual savings depend on your next month's usage pattern).
 4. **`cc-token-diet` walkthrough**: if you haven't run [cc-token-diet](https://github.com/yurukusa/cc-token-diet) yet, I include the command line and help interpret the output.
@@ -62,7 +64,7 @@ This audit tells you which of the 48 cataloged token-waste symptoms (Token Book 
 
 **How to book:**
 
-1. There is **no Ko-fi listing for this one yet** — unlike the audit above, I have not yet run this end to end on my own logs, so I am not putting up a one-click button for it. To order, send a $29 tip at https://ko-fi.com/yurukusa with the note "Token Burn audit". It will be honored at that price.
+1. **There is no one-click listing for this one yet** — unlike the audit above. To order, send a ¥3,980 (≈$29) tip at https://ko-fi.com/yurukusa with the note "Token Burn audit". It is honored at that price, and I will confirm in your issue thread before starting.
 2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
