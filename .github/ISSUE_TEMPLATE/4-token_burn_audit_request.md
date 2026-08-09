@@ -12,15 +12,20 @@ assignees: yurukusa
 
 ## Ko-fi payment reference
 
-<!-- Paste the Ko-fi transaction ID or date/time of your $29 tip/shop purchase.
-     Use note "Token Burn audit" on the tip. -->
+<!-- Paste the Ko-fi transaction ID or date/time of your order.
+     Order here: https://ko-fi.com/yurukusa/commissions
+     ("Token Burn Audit — written report within 48h", ¥3,980 / ≈$29)
+     If that listing is ever missing, a ¥3,980 tip with the note
+     "Token Burn audit" is honored at the same price.
+     Not sure yet? The full sample report is public — read it first:
+     https://github.com/yurukusa/cc-safe-setup/blob/main/docs/token-burn-audit-sample.md -->
 
 
 
 ## What I will analyze
 
 - [ ] 7 days of your `/cost` output
-- [ ] Your last 10 session transcripts (redacted as you wish)
+- [ ] 2–3 session transcripts (redacted as you wish) — this is what SERVICES.md asks for; more is welcome but not required
 - [ ] Your current `CLAUDE.md` (for cross-reference — not a separate audit)
 - [ ] Output of `npx github:yurukusa/cc-token-diet` run on your logs (I can walk you through this if needed)
 
