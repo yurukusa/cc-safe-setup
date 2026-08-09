@@ -123,12 +123,13 @@ pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.5rem 
 
 <div class="proof">
 <div class="badge"><strong>910</strong>example hooks</div>
+<div class="badge"><strong>15,795</strong>test cases passing</div>
 <div class="badge"><strong>261</strong>files under tests/</div>
 <div class="badge"><strong>4</strong>GitHub stars</div>
 <div class="badge"><strong>239</strong>articles published</div>
 <div class="badge"><strong>12</strong>Zenn books</div>
 </div>
-<p style="font-size:.78rem;color:#8b949e;margin-top:.4rem">Re-counted on 2026-08-09 against the repository and the platform APIs. Four of these were wrong before: the page said "700+ hooks" in one place and "900+" in another (the actual count of <code>examples/*.sh</code> on <code>main</code> is 910), "9,200+ tests" is not a number I can reproduce — what I can count is 261 files under <code>tests/</code> — and "8 GitHub stars" was overstated (it is 4). Two were understated and are now current: 57 → 239 articles, 3 → 12 Zenn books. A "0 incidents after setup" badge also used to sit here; it has been removed, because I can't substantiate it and this year I have found several of my own guards silently failing.</p>
+<p style="font-size:.78rem;color:#8b949e;margin-top:.4rem">Re-counted on 2026-08-09 against the repository and the platform APIs. Four of these were wrong before: the page said "700+ hooks" in one place and "900+" in another (the actual count of <code>examples/*.sh</code> on <code>main</code> is 910), "9,200+ tests" was corrected badly earlier on this same day: I replaced it with a file count (261 files under <code>tests/</code>) without ever running the suite. Run it and it reports <strong>15,795 test cases, all passing</strong> — so the original claim was understated, and my correction of it was wrong. Counting files is not counting tests — and "8 GitHub stars" was overstated (it is 4). Two were understated and are now current: 57 → 239 articles, 3 → 12 Zenn books. A "0 incidents after setup" badge also used to sit here; it has been removed, because I can't substantiate it and this year I have found several of my own guards silently failing.</p>
 
 <h2>How It Works</h2>
 
