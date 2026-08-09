@@ -24,7 +24,7 @@ assignees: yurukusa
 - [ ] Your current `CLAUDE.md` (for cross-reference — not a separate audit)
 - [ ] Output of `npx github:yurukusa/cc-token-diet` run on your logs (I can walk you through this if needed)
 
-The deliverable: top 3 waste patterns in your actual usage, with concrete fixes per pattern. Patterns drawn from the Token Book Ch.8 symptom catalog (48 symptoms as of 2026-04-24).
+The deliverable: top 3 waste patterns in your actual usage, with concrete fixes per pattern. Patterns drawn from the Token Book Ch.8 symptom catalog (56 symptoms as of 2026-04-24).
 
 ## Your /cost output
 
