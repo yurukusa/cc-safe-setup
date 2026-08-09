@@ -70,6 +70,10 @@ This audit tells you which of the 56 cataloged token-waste symptoms (Token Book 
 2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
+**What the free tools already give you — run them first:** `/cost` (or `/usage`) inside Claude Code shows the current session. [`ccusage`](https://github.com/ccusage/ccusage) gives you daily and monthly totals from the same local logs, and it folds duplicate `usage` rows correctly (keyed on `message.id` + `requestId`) — a detail my own `cc-token-diet` got wrong until 2026-08-09. If your question is *"how much?"*, those answer it for free and you do not need me.
+
+What none of them answer is *"which of my habits is producing that number, and what do I change on Monday."* Counting is solved; attribution is not. That gap is what this audit is for.
+
 **Good fit:** Max plan users watching their quota vanish faster than it used to. Teams where one session burned an unexpected $50–$500. Anyone who read a "7 tips" article and tried them but nothing changed.
 
 **Not a good fit:** if you have not yet run Claude Code for at least one week on your actual project. There has to be real usage to audit.
