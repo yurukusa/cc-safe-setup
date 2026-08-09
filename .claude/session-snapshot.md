@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-03T14:06:16+09:00
+Updated: 2026-08-09T11:56:51+09:00
 
 ## Git
-- Branch: `fix/approve-side-remaining-two-2026-08-03`
+- Branch: `work/from-origin-main`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 4872ce74 recovery: pre-compact checkpoint (1 files, 20260803-050616)
+- Last commit: 02df208e Token Burn Audit の注文口を実在させ、見本の数え違いを直す (#975)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-03.md
 ./.claude/pre-compact-checkpoint.md
-./CHANGELOG.md
-./tests/approve-side-remaining-two.test.sh
 ./test.sh
-./examples/multiline-command-approver.sh
-./examples/classifier-fallback-allow.sh
-./CONTRIBUTING.md
-./README.md
+./tests/approve-side-remaining-two.test.sh
+./tests/approver-list-granularity.test.sh
+./tests/auto-approve-compound-tail.test.sh
+./tests/cd-git-allow-compound-tail.test.sh
+./tests/chown-guard-filesystem-root.test.sh
+./tests/destructive-guard-bare-glob.test.sh
+./tests/destructive-guard-every-operand.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
