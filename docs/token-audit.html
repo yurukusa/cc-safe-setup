@@ -263,7 +263,8 @@ function analyze() {
 
     if (metrics.costPerMin > 0.15) { score -= 20; recs.push({type:'bad', text:'Cost rate is high ($' + metrics.costPerMin.toFixed(2) + '/min). Typical efficient sessions are $0.03-0.08/min.', fix:'Consider lowering effort level to "high" or "medium" via /config.'}); }
 
-    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 detected. This model has known 35% token inflation and safety classifier issues.', fix:'Consider pinning to Opus 4.6: /model claude-opus-4-6'}); }
+    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 detected. This model has known 35% token inflation and safety classifier issues.', fix:'If you are pinned to 4.7, drop the pin and try a newer version. Note: this tool only has measured per-version data up to Opus 4.7 (as of 2026-08-10); it does not claim anything about newer versions. This used to read "pin to Opus 4.6" — that advice is withdrawn, since moving to 4.6 now means going back two generations.'}); }
+    else if (metrics.model) { recs.push({type:'warn', text:'This tool has no measured per-version data for the model you are on (' + metrics.model + '). Measurements stop at Opus 4.7 (as of 2026-08-10).', fix:'Version-to-version cost differences cannot be judged here. Use the cache hit rate and cost-per-minute above instead.'}); }
 
     if (metrics.outputTokens > metrics.inputTokens * 0.5) { score -= 10; recs.push({type:'warn', text:'High output-to-input ratio (' + (metrics.outputTokens/metrics.inputTokens*100).toFixed(0) + '%). Claude may be generating verbose responses.', fix:'Add to CLAUDE.md: "Be concise. Skip explanations unless asked."'}); }
   }

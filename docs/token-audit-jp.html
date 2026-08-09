@@ -282,7 +282,8 @@ function analyze() {
 
     if (metrics.costPerMin > 0.15) { score -= 20; recs.push({type:'bad', text:'1分あたりの費用が高めです（$' + metrics.costPerMin.toFixed(2) + '/分）。無駄の少ないセッションはおおむね $0.03〜0.08/分です。', fix:'/config で思考の深さ（effort）を high か medium へ下げることを検討する。'}); }
 
-    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 が使われています。この版はトークンが約35%増えることと、安全の判定が過剰に働くことが報告されています。', fix:'Opus 4.6 に固定することを検討する： /model claude-opus-4-6'}); }
+    if (metrics.model && metrics.model.includes('4-7')) { score -= 10; recs.push({type:'warn', text:'Opus 4.7 が使われています。この版はトークンが約35%増えることと、安全の判定が過剰に働くことが報告されています。', fix:'4.7 に固定しているなら、その固定を外してより新しい版を試す。★この道具が版ごとの実測を持っているのは 4.7 までで、それより新しい版の増え方は測っていないので断定しない（2026-08-10 時点）。以前ここは「Opus 4.6 に固定する」と書いていたが、いま 4.6 へ下げるのは2世代前へ戻すことになるので取り下げた。'}); }
+    else if (metrics.model) { recs.push({type:'warn', text:'使っている版（' + metrics.model + '）について、この道具は版ごとの実測を持っていません。実測があるのは Opus 4.7 までです（2026-08-10 時点）。', fix:'版そのものの費用の差は、この道具では判定できません。上のキャッシュの効きと1分あたりの費用のほうを見てください。'}); }
 
     if (metrics.outputTokens > metrics.inputTokens * 0.5) { score -= 10; recs.push({type:'warn', text:'入力に対して出力が多めです（' + (metrics.outputTokens/metrics.inputTokens*100).toFixed(0) + '%）。返答が冗長になっている可能性があります。', fix:'CLAUDE.md に「簡潔に。聞かれない限り説明を足さない」と書く。'}); }
   }
