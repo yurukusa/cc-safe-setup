@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>あなたのCLAUDE.mdの中に「守りようがない規則」が無いかを読む監査（¥3,980・48時間）— cc-safe-setup</title>
+<meta name="description" content="CLAUDE.md に書いたのに守られない、という状態を「書き方が悪い」で片付けずに、規則ごとに読み分ける書面の監査です。参照先が本当に辿れるか、機械で確かめられる書き方か、層をまたいで重複していないかを見て、Markdown の報告書1本で48時間以内にお返しします。¥3,980。費用が目的ならこの監査ではない、と先に書いてあります。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="あなたのCLAUDE.mdの中に「守りようがない規則」が無いかを読む監査（¥3,980・48時間）">
+<meta property="og:description" content="見本は私自身の608行・3層の設定に当てた本物で、そもそも守りようがない参照が2件見つかりました。買う前に全部読めます。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.62rem; line-height:1.45; margin-bottom:0.6rem; }
+h2 { font-size:1.22rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.4rem 0 0.4rem; font-size:1.05rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.free { background:#ecfdf5; border:1px solid #a7f3d0; border-left:4px solid var(--green); border-radius:8px; padding:1.1rem 1.2rem; margin:1.4rem 0; }
+.free strong { color:var(--green); }
+.honest { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.honest strong { color:var(--amber); }
+.price { color:var(--green); font-weight:bold; font-size:1.08rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul, ol { padding-left:1.5rem; }
+li { margin-bottom:0.5rem; }
+code { background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:4px; font-size:0.92em; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a, a { color:var(--blue); }
+.note { color:var(--gray); font-size:0.88rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>あなたの <code>CLAUDE.md</code> の中に「守りようがない規則」が無いかを読む監査</h1>
+<p class="subtitle">書いたのに守られない、という状態を「書き方が悪い」で片付けずに、規則ごとに読み分けます。<span class="price">¥3,980（約 $29）・48時間以内・Markdown 1本</span></p>
+
+<div class="lead">
+<code>CLAUDE.md</code> に書いたのに従ってくれない、という話はよく聞きます。原因を「モデルの気まぐれ」だと思っている方が多いのですが、<strong>読んでみると、そもそも守りようがない規則が混ざっていることがあります</strong>。<br>
+たとえば「詳細は <code>xxx.md</code> を参照」と書いてあって、そのファイルが<strong>別の場所には実在する</strong>——という形です。ファイルの有無を確かめるだけの点検は通ってしまうので、規則は黙って死んだままになります。この監査が探すのは、まずそこです。
+</div>
+
+<h2>先にお読みください。費用が目的なら、この監査ではありません</h2>
+
+<div class="honest">
+<strong>英語の説明では以前、この監査を「あなたの指示ファイルは毎回いくらかかっているか」で切り出していました。実際に測ってみて、それは見出しとして間違いだったと考えています。</strong><br>
+<code>CLAUDE.md</code> はキャッシュされる前置きに載るので、私自身の設定で<strong>重複した規則を1行残らず消しても、月あたりおよそ $0.24〜$1.19</strong> にしかなりません。報告書にはあなたのファイルのトークンの計算も入れますが、それは<strong>上限を示すため</strong>であり、たいていは「<strong>そこに時間を使わなくてよい</strong>」という結論のために入れています。<br>
+<strong>請求額そのものが問題なら、読むべきはセッションの記録のほうです。</strong>お金が実際に消えているのはそちらなので、<a href="token-burn-audit-jp.html">Token Burn 監査（¥3,980）</a>を見てください。
+</div>
+
+<h2>無料で足りる範囲</h2>
+
+<div class="free">
+<strong><code>CLAUDE.md</code> の一般的な書き方や、よくある失敗を知りたいだけなら、無料の資料で足ります。</strong>先にこちらを見てください。ここで解決したなら、この先は要りません。
+<ul>
+<li><a href="claudemd-best-practices.html">CLAUDE.md Best Practices</a> — 雛形とよくある間違い（英語）</li>
+<li><a href="claudemd-guide.html">CLAUDE.md Optimization Guide</a> — 削り方の手引き（英語）</li>
+<li><a href="claudemd-analyzer.html">CLAUDE.md Analyzer</a> — ブラウザの中だけで動く点検（英語・送信なし）</li>
+<li><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — 安全 hook の集まり（MIT・無料）</li>
+</ul>
+<span class="note">この4つは英語です。日本語の資料を用意できていないのは、こちらの手が回っていないためで、あなたの落ち度ではありません。<br>
+なお、上の2つ（Guide と Analyzer）は、この監査の説明を書き直す前の「<strong>費用</strong>」の切り口で題を付けてあります。雛形と削り方は今も使えますが、<strong>削減額の見込みについては、すぐ上の実測（月 $0.24〜$1.19）のほうを見てください。</strong></span>
+</div>
+
+<p>これらが答えないのは、次の問いだけです。</p>
+
+<div class="lead">
+<strong>「一般論ではなく、<em>私の</em>ファイルの、どの行が効いていないのか」</strong><br>
+雛形も削り方も、もう無料で手に入ります。手に入らないのは、あなたの実際の設定を上から下まで（層が分かれているなら層をまたいで）読んで、<strong>効いていない行を名指しすること</strong>です。この監査は、その一点のために作りました。
+</div>
+
+<h2>見本の報告書を、買う前に全部読めます</h2>
+
+<p>実際にお渡しするものと同じ形式の報告書を公開しています。中身は<strong>私自身の設定に当てた本物</strong>です（3層＝グローバル・ホーム・プロジェクト、608行、日本語で書かれ、自律で動いている Claude Code を実際に動かしている設定）。都合の良いところだけ載せてはいません。</p>
+
+<ul>
+<li><strong>そもそも守りようがない参照が2件</strong>見つかりました。1件目は「メモリ <code>cdp-ports.md</code> を参照する」と書いてあるのに、そのファイルが<strong>別のプロジェクトのメモリの範囲にしか無い</strong>もの。名前だけでは辿れず、索引にも出てきません</li>
+<li>そして<strong>2件目は、私自身の自動の点検が見落としていました</strong>。その見落とし自体を、報告書に findings として書いてあります</li>
+<li>ほかに、<strong>83% の指示が機械では確かめられない書き方</strong>であること、<strong>24 の規則が層をまたいで重複</strong>していることも数字で出ています</li>
+</ul>
+
+<p>そして報告書には「<strong>この監査で見つからなかったもの＝意味のあるトークンの費用</strong>」という節もそのまま入っています。<span class="note">（見本は英語です。ご依頼いただいた報告書は日本語でお返しします。）</span></p>
+
+<p><a class="cta sub" href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/claude-md-audit-sample.md">見本の報告書を読む（無料・英語）</a></p>
+
+<h2>返ってくるもの</h2>
+
+<p>ファイルが揃ってから48時間以内に、issue の返信として Markdown の報告書1本をお返しします。<span class="note">（この監査はまだ納品の実績がありません。万一48時間を過ぎる場合は、その時点でご連絡し、延長か全額返金かをお選びいただきます。）</span></p>
+
+<ol>
+<li><strong>参照の解決</strong>——規則が依存しているパスを全部、<strong>その規則が実際に動く範囲</strong>と突き合わせます。捕まえたいのは「ファイルが無い」ではなく、<strong>別の場所には在るので存在の点検は通るのに、規則としては黙って守れない</strong>という形です。</li>
+<li><strong>確かめられる指示の割合</strong>——あなたの <code>CLAUDE.md</code> のうち、心構えで終わっていて圧力がかかると黙って落ちる部分と、機械で確かめられる部分の比を、層ごとに数えて出します。</li>
+<li><strong>層をまたいだ重複</strong>——グローバル・ホーム・プロジェクトの間で二重に書かれている規則。これは費用の問題ではなく<strong>持ち主の問題</strong>です。片方を直しても、もう片方が生きたまま残り、どちらのファイルにもそう書いていないからです。</li>
+<li><strong>曖昧な規則の検出</strong>——モデルが一番無視しやすい行を名指しし、<strong>意図を変えずに、確かめられる条件を足した書き換え</strong>を添えます。</li>
+<li><strong>効く順に並べた上位3件の直し方</strong>——そのまま貼れる before / after の差分つきです。</li>
+</ol>
+
+<h2>含まないもの</h2>
+
+<div class="honest">
+<strong>次のものは含みません。先に書いておきます。</strong>
+<ul>
+<li>1対1の通話や打ち合わせ</li>
+<li><strong>hook の実装の代行</strong></li>
+<li>お送りいただいたファイルを超えたコードのレビュー</li>
+</ul>
+これは<strong>監査であって、コンサルティングではありません</strong>。差分はあくまで提案で、<strong>当てるのはご自身です</strong>。あなたの環境を私が触ることはありません。
+</div>
+
+<h2>向いている場合／向いていない場合</h2>
+
+<table>
+<tr><th>向いています</th><th>向いていません</th></tr>
+<tr>
+<td>
+・<code>CLAUDE.md</code> を書き足しながら育ててきて、いまは複数の層（グローバル・ホーム・プロジェクト）に分かれている<br>
+・書いたのに従ってくれない行に心当たりがある<br>
+・規則が増えすぎて、どれが生きているのか自分でも分からなくなってきた
+</td>
+<td>
+・<code>CLAUDE.md</code> が<strong>1層だけ・数十行の既定のまま</strong>の場合。読む中身が薄く、<strong>層をまたいだ重複の判定は原理的にできません</strong>（上の3番が丸ごと成立しません）。<strong>まず上の無料の資料で足ります。</strong>
+</td>
+</tr>
+</table>
+
+<h2>送っていただくもの</h2>
+
+<ul>
+<li>あなたの <code>CLAUDE.md</code>（3層あるなら全部いただけると、重複の判定ができます）</li>
+<li>任意で <code>settings.json</code> と、よく使う hook を5本まで</li>
+</ul>
+
+<h2>ご依頼の方法</h2>
+
+<p>次の2つを行ってください。順番はどちらが先でも構いません。</p>
+
+<ol>
+<li><strong>Ko-fi で注文する</strong> — 出品名は <em>CLAUDE.md Audit — written report within 48h</em>、¥3,980 です。<span class="note">（もしこの出品が見当たらない時は、<a href="https://ko-fi.com/yurukusa">ko-fi.com/yurukusa</a> で「CLAUDE.md audit」と書き添えて ¥3,980 の tip をいただければ、同じ価格でお受けします。）</span></li>
+<li><strong>依頼の issue を立てる</strong> — 用意してあるテンプレートに沿って、上のファイルを貼ってください。<strong><code>CLAUDE.md</code> には社内の名前や鍵が写り込むことがあります。伏せて貼っていただいて構いませんし、公開の場に何も出したくない場合は、Ko-fi の注文のメッセージにその旨を書いてください。別の受け渡しの経路をご用意します。</strong></li>
+</ol>
+
+<p>
+<a class="cta" href="https://ko-fi.com/yurukusa/commissions">Ko-fi で注文する（¥3,980）</a>
+<a class="cta sub" href="https://github.com/yurukusa/cc-safe-setup/issues/new?template=3-audit_request.md">依頼の issue を立てる</a>
+</p>
+
+<p>報告書は issue の返信としてお届けします。内容をご確認いただけたら issue を閉じます。</p>
+
+<div class="honest">
+<strong>返金について。</strong>有用な監査を作れなかった場合（たとえばファイルが実質的に空である、私が読めない言語だけで書かれている、など）は、Ko-fi から全額返金します。
+</div>
+
+<div class="honest">
+<strong>日本語で大丈夫です。</strong>この監査の英語の説明ページと見本の報告書は英語ですが、<strong>注文も issue も日本語で書いていただいて構いません。報告書は日本語でお返しします。</strong>
+</div>
+
+<h2>誰が、どうやって作っているか</h2>
+
+<p>この監査は、<strong>私が Claude Code を自律で動かし続けるために使っているのと同じ手順</strong>を、あなたの設定に当てて行います。報告書の作成にも Claude Code を使います。人が一から手で書き起こすものではありません。そのぶん、価格はそれよりはるかに安く置いています。<strong>人間のシニアエンジニアが手であなたのリポジトリを見る形をお探しなら、これはそれではありません。</strong>見本を読んで判断してください。</p>
+
+<p>この方法を使っている当人の記録は、<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（安全 hook・MIT ライセンス・無料）と、<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b">Anthropic 公式ガイドにない事故防止の本</a>にまとまっています。<strong>本を買っていただく必要はありません。</strong></p>
+
+<footer>
+<p>英語の説明（正本）: <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md">SERVICES.md</a> ／ もう1つの書面の監査: <a href="token-burn-audit-jp.html">Token Burn 監査（¥3,980・費用が目的ならこちら）</a></p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — Claude Code のための安全 hook 集（MIT・無料）</p>
+</footer>
+
+</div>
+</body>
+</html>
