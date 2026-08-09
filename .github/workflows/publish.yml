@@ -1,0 +1,92 @@
+name: Publish to npm
+
+# Trusted publishing (OIDC). There is no NPM_TOKEN anywhere in this workflow:
+# the job proves its identity to the registry with a short-lived GitHub OIDC
+# token, so there is no secret to store, rotate, or leak.
+#
+# Why this exists. The registry has been serving 29.8.0 (2026-04-20) while main
+# is at 30.x, because the granular access token in the release machine's .npmrc
+# ("cc-tools-publish") expired on 2026-05-29 and the account's only second
+# factor is a hardware security key -- nothing automated can touch it. A stored
+# token was never a durable fix anyway: npm is removing sensitive account
+# operations from 2FA-bypass tokens in early August 2026 and direct publishing
+# from them around January 2027
+# (https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/).
+# Trusted publishing is the replacement npm names, and it needs the security key
+# exactly once, to register this repository.
+#
+# One-time setup, on npmjs.com -> the package -> Settings -> Trusted Publisher:
+#     Organization or user:  yurukusa
+#     Repository:            cc-safe-setup
+#     Workflow filename:     publish.yml
+#     Environment name:      (leave empty)
+#     Allowed actions:       npm publish
+# After that every release is `gh workflow run publish.yml` and no human is in
+# the loop again.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build and verify the tarball, but do not publish'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write # OIDC. Without this the registry has nothing to verify and rejects the publish.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm >= 11.5.1. The npm bundled with the Node 22
+      # runner image lags, so upgrade explicitly instead of hoping the image is
+      # current -- an old npm fails here with a plain 401, which reads exactly
+      # like the expired-token problem this workflow exists to end.
+      - name: Use an npm that supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          echo "npm $(npm --version) / node $(node --version)"
+
+      # Republishing an existing version fails with a 403 that looks like an auth
+      # failure. Whoever runs this next should not be sent back down the 2FA
+      # rabbit hole by a version number.
+      - name: Refuse to republish an existing version
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          REMOTE=$(npm view cc-safe-setup version 2>/dev/null || echo "unknown")
+          echo "local: $LOCAL / registry: $REMOTE"
+          if [ "$LOCAL" = "$REMOTE" ]; then
+            echo "::error::cc-safe-setup@$LOCAL is already published. Bump the version first."
+            exit 1
+          fi
+
+      # Test what actually ships, not what is in the repo. package.json has no
+      # "files" field, so the tarball is whatever npm decides to include; a
+      # missing entry point would only surface on a reader's machine.
+      - name: Install the tarball and run it
+        run: |
+          TARBALL=$(npm pack --silent)
+          echo "packed: $TARBALL ($(du -h "$TARBALL" | cut -f1))"
+          WORK=$(mktemp -d)
+          npm install --prefix "$WORK" "$PWD/$TARBALL" --no-audit --no-fund
+          "$WORK/node_modules/.bin/cc-safe-setup" --help > /dev/null
+          echo "the packaged CLI starts"
+
+      - name: Publish
+        if: ${{ !inputs.dry_run }}
+        run: npm publish
+
+      - name: Confirm the registry moved
+        if: ${{ !inputs.dry_run }}
+        run: |
+          sleep 10
+          echo "registry now serves: $(npm view cc-safe-setup version)"
