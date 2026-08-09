@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLAUDE.md Optimization Guide — Cut Token Costs by 40%</title>
-<meta name="description" content="Optimize your CLAUDE.md to reduce Claude Code token consumption by 40%. Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.">
+<title>CLAUDE.md Optimization Guide — Cut Your Instruction Tokens by 40%</title>
+<meta name="description" content="Optimize your CLAUDE.md to cut its token count by 40%. (Measured: CLAUDE.md sits in the cached prefix, so the bill impact is small — this is for clarity and rule-following.) Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:1.5rem;line-height:1.6}
@@ -29,10 +29,18 @@ th{color:#f0f6fc;background:#161b22}
 <body>
 <div class="c">
 <h1>CLAUDE.md Optimization Guide</h1>
-<p class="sub">3 rules that cut token costs by 40%. Based on 800+ hours of Claude Code operation.</p>
+<p class="sub">3 rules that cut your CLAUDE.md's token count by 40%. Based on 800+ hours of Claude Code operation.</p>
 
 <h2>The Problem</h2>
 <p>Your CLAUDE.md is included in <strong>every single API turn</strong>. A 100-line CLAUDE.md costs ~2,000 tokens per turn. At 20 turns/session × 5 sessions/day, that's 200,000 tokens/day just for instructions.</p>
+
+<!-- 2026-08-10: この頁は「指示が毎ターンいくらかかるか」で読者を引きつけていたが、
+     自分で測った結果それは請求への影響を大きく見せすぎる書き方だった。本文は当時のまま残し、
+     測った事実を注記として足す（消すと、何を主張していたかが分からなくなるため）。 -->
+<div class="card" style="border-left:4px solid #d29922">
+<p><strong>Measured update (2026-08-10).</strong> The framing above overstates the <em>bill</em>. CLAUDE.md sits in the <strong>cached prefix</strong>, so those tokens are charged at the cache-read rate, not the full input rate. On my own three-layer, 608-line setup, deleting <em>every</em> duplicated rule works out to roughly <strong>$0.24–$1.19 per month</strong>.</p>
+<p>The 40% below is real, but it is <strong>40% off your CLAUDE.md's token count — not 40% off your bill</strong>. Shrinking CLAUDE.md is still worth doing, for <strong>clarity and rule-following</strong>: shorter, checkable instructions get followed more often. It is just not where the money goes. If your bill is the problem, session transcripts are — see the <a href="token-audit-jp.html">token diagnostic</a> (Japanese) or <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md">SERVICES.md</a>.</p>
+</div>
 
 <h2>The 3-Rule Framework</h2>
 
@@ -80,11 +88,12 @@ th{color:#f0f6fc;background:#161b22}
 
 <h2>Results</h2>
 <table>
-<tr><th>CLAUDE.md</th><th>Tokens/turn</th><th>Cache hit rate</th><th>Monthly cost (Max)</th></tr>
+<tr><th>CLAUDE.md</th><th>Tokens/turn</th><th>Cache hit rate</th><th>Instruction tokens</th></tr>
 <tr><td>100 lines (typical)</td><td>~2,000</td><td>89%</td><td>Baseline</td></tr>
 <tr><td>50 lines (trimmed)</td><td>~1,200</td><td>92%</td><td>-20%</td></tr>
 <tr><td>35 lines (optimized)</td><td>~800</td><td>95%</td><td>-40%</td></tr>
 </table>
+<p style="color:#8b949e;font-size:.75rem"><strong>Corrected 2026-08-10.</strong> The last column used to read <em>"Monthly cost (Max)"</em>, which implied a 40% smaller bill. That was wrong. CLAUDE.md rides in the <strong>cached prefix</strong>, so on my own three-layer, 608-line setup, removing <em>every</em> duplicated rule came to about <strong>$0.24–$1.19 per month</strong>. The percentages are real as a reduction in <strong>instruction tokens</strong> — treat the bill impact as small, and shrink CLAUDE.md for clarity and rule-following instead.</p>
 
 <h2>Check Your CLAUDE.md Now</h2>
 <div class="card">

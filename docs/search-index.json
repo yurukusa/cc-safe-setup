@@ -540,8 +540,8 @@
   },
   {
     "url": "claudemd-analyzer.html",
-    "title": "CLAUDE.md Analyzer — How Much Are Your Instructions Costing?",
-    "description": "Paste your CLAUDE.md and see how many tokens it costs per turn. Find waste patterns and get optimization tips from 800+ hours of Claude Code operation.",
+    "title": "CLAUDE.md Analyzer — How Many Tokens Are Your Instructions Using?",
+    "description": "Paste your CLAUDE.md and see how many tokens it uses per turn. Find waste patterns and get optimization tips from 800+ hours of Claude Code operation.",
     "keywords": "",
     "snippet": "Paste your CLAUDE.md below. Everything stays in your browser — nothing is sent anywhere."
   },
@@ -554,10 +554,10 @@
   },
   {
     "url": "claudemd-guide.html",
-    "title": "CLAUDE.md Optimization Guide — Cut Token Costs by 40%",
-    "description": "Optimize your CLAUDE.md to reduce Claude Code token consumption by 40%. Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.",
+    "title": "CLAUDE.md Optimization Guide — Cut Your Instruction Tokens by 40%",
+    "description": "Optimize your CLAUDE.md to cut its token count by 40%. (Measured: CLAUDE.md sits in the cached prefix, so the bill impact is small — this is for clarity and rule-following.) Before/after examples, templates, and the 3-rule framework from 800+ hours of operation.",
     "keywords": "",
-    "snippet": "3 rules that cut token costs by 40%. Based on 800+ hours of Claude Code operation."
+    "snippet": "3 rules that cut your CLAUDE.md's token count by 40%. Based on 800+ hours of Claude Code operation."
   },
   {
     "url": "cluster-12-tool-call-parsing-diagnostic.html",
