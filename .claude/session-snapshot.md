@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-09T12:01:30+09:00
+Updated: 2026-08-10T09:57:05+09:00
 
 ## Git
-- Branch: `work/from-origin-main`
+- Branch: `fix/block-log-count-continuation-lines-2026-08-10`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: a6e07500 recovery: pre-compact checkpoint (1 files, 20260809-030130)
+- Last commit: 564eb2e6 recovery: pre-compact checkpoint (1 files, 20260810-005705)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-09.md
+./.claude/session-logs/2026-08-10.md
 ./.claude/pre-compact-checkpoint.md
-./test.sh
-./tests/approve-side-remaining-two.test.sh
-./tests/approver-list-granularity.test.sh
-./tests/auto-approve-compound-tail.test.sh
-./tests/cd-git-allow-compound-tail.test.sh
-./tests/chown-guard-filesystem-root.test.sh
-./tests/destructive-guard-bare-glob.test.sh
+./SERVICES.md
+./tests/destructive-guard-separators.test.sh
+./tests/destructive-guard-variable-target.test.sh
+./tests/destructive-guard-wrapped-command.test.sh
+./tests/example-guards-wrapped-command.test.sh
+./tests/grep-pcre-portability.test.sh
+./tests/hook-registration-matches-input.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
