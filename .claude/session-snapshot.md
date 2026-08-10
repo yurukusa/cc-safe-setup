@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-10T09:56:11+09:00
+Updated: 2026-08-10T09:56:28+09:00
 
 ## Git
 - Branch: `fix/block-log-count-continuation-lines-2026-08-10`
@@ -7,13 +7,13 @@ Updated: 2026-08-10T09:56:11+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2fdf2ad8 recovery: pre-compact checkpoint (1 files, 20260810-005610)
+- Last commit: faef6bea recovery: pre-compact checkpoint (1 files, 20260810-005628)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-10.md
+./.claude/pre-compact-checkpoint.md
 ./SERVICES.md
 ./tests/destructive-guard-separators.test.sh
 ./tests/destructive-guard-variable-target.test.sh
