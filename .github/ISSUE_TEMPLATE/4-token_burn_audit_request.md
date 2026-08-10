@@ -10,6 +10,18 @@ assignees: yurukusa
      See SERVICES.md for how to pay first. The audit itself is produced
      here in the issue thread. -->
 
+> **日本語で書いていただいて大丈夫です。報告書も日本語でお返しします。**
+> 見出しは英語ですが、中身は日本語で構いません。日本語の説明は
+> [こちら](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)。
+> **貼っていただくものは、伏せたいところを伏せて構いません。**
+> 公開の場に何も出したくない場合は、Ko-fi の注文のメッセージにその旨を書いてください。
+> 別の受け渡しの経路をご用意します。
+>
+> *Japanese is welcome — headings are in English, but you can write the contents
+> in Japanese and the report will come back in Japanese. Redact anything you want.
+> If you would rather not post anything publicly, say so in your Ko-fi order message
+> and I will arrange a private channel.*
+
 ## Ko-fi payment reference
 
 <!-- Paste the Ko-fi transaction ID or date/time of your order.
@@ -43,7 +55,10 @@ The deliverable: top 3 waste patterns in your actual usage, with concrete fixes 
 ## Sample session transcripts (optional)
 
 <!-- Paste or attach 2-3 session transcripts where you noticed unexpected token burn.
-     ~/.claude/transcripts/ contains these (JSONL). Redact content as you prefer. -->
+     Where to find them: Claude Code writes one JSONL file per session under
+     ~/.claude/projects/<encoded-project-path>/ — one JSON object per line.
+       ls -lt ~/.claude/projects/*/*.jsonl | head
+     Redact content as you prefer. -->
 
 ## Your CLAUDE.md (for context, not audit)
 
