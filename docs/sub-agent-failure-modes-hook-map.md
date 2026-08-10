@@ -1,6 +1,6 @@
 # Sub-Agent Failure Modes → Hook Map
 
-**Audience.** Operators running Claude Code with sub-agents (Task / Agent), team leads designing multi-agent workflows, anyone landing here after reading the *Sub-Agent Observability Handbook* (ships 2026-05-27) or one of the cluster issues (#19077, #46424, #59523, #60763, #61993).
+**Audience.** Operators running Claude Code with sub-agents (Task / Agent), team leads designing multi-agent workflows, anyone landing here after reading the [*Sub-Agent Observability Handbook*](https://zenn.dev/yurukusa/books/sub-agent-observability) (published in Japanese on Zenn, ¥1,500; the English edition announced here was never released) or one of the cluster issues (#19077, #46424, #59523, #60763, #61993).
 
 **Purpose.** Map the four documented sub-agent failure modes to the specific cc-safe-setup hooks that defend against each one. Each section lists the symptoms, the defending hooks (with one-line summaries), the cluster issues that motivated them, and a copy-paste install snippet.
 
@@ -274,7 +274,7 @@ Over-installing all 25+ hooks at once tends to produce alert fatigue. Pick the m
 - [#61547](https://github.com/anthropics/claude-code/issues/61547) (May 2026, 7th independent case in 5 days)
 - [#61993](https://github.com/anthropics/claude-code/issues/61993) (May 2026, contract-vs-runtime articulation)
 
-**The handbook.** *Sub-Agent Observability Handbook* — operator-side architectural framework for the four modes, ~80 pages, ships 2026-05-27. Includes the dispatch-fabrication, silent-stall, supervision-absence, and scope-expansion chapters; appendix C documents the May-June 2026 operator wave.
+**The handbook.** *Sub-Agent Observability Handbook* — operator-side architectural framework for the four modes. Published in Japanese on Zenn (¥1,500): https://zenn.dev/yurukusa/books/sub-agent-observability . The English edition announced here was never released. Includes the dispatch-fabrication, silent-stall, supervision-absence, and scope-expansion chapters; appendix C documents the May-June 2026 operator wave.
 
 **The pair pull requests in cc-safe-setup.**
 - [PR #282](https://github.com/yurukusa/cc-safe-setup/pull/282): Mode 3 (scope expansion drift) — receipt-publish persistence layer.
