@@ -12,7 +12,7 @@ This page is in English, but Japanese orders are welcome for all three: order an
 
 A written audit of your `CLAUDE.md` (and optionally `settings.json` + your 5 most-invoked hooks), delivered as a Markdown report within 48 hours.
 
-**See exactly what you get: [a full sample report](./docs/claude-md-audit-sample.md).** It is this audit run against my own 608-line, three-layer setup — real findings, including two rules that could not be followed at all.
+**See exactly what you get: [a full sample report](./docs/claude-md-audit-sample.md).** It is this audit run against my own 608-line, three-layer setup — real findings, including two rules that could not be followed at all. Also available in Japanese: **[見本の報告書（日本語）](./docs/claude-md-audit-sample-jp.md)** — same content, same figures. 日本語の説明ページは **[CLAUDE.md の監査（¥3,980・48時間）](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html)** にあります。
 
 The report covers:
 
