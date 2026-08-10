@@ -1,5 +1,14 @@
 name: Tests
-on: [push, pull_request]
+# `on: [push, pull_request]` fired twice for the same commit on any branch with
+# an open PR: 110 of the 311 runs in the fortnight to 2026-08-10 were a second
+# copy of a run that already existed. Identical work, and — because a failure
+# notification is sent per run — two or three mails for a single red commit.
+# Restricting push to main leaves exactly one run per commit: the PR event while
+# a branch is under review, the push event once it lands.
+on:
+  push:
+    branches: [main]
+  pull_request:
 jobs:
   test:
     runs-on: ubuntu-latest
