@@ -23,6 +23,18 @@ const SETTINGS_PATH = join(CLAUDE_BASE, '.claude', 'settings.json');
 // Convert Windows backslash paths to bash-compatible forward slashes
 const toBashPath = (p) => p.replace(/\\/g, '/');
 
+// One block record is "[timestamp] BLOCKED: reason | cmd: command".
+// A blocked command may itself span several lines (heredocs, multi-line scripts),
+// and those continuation lines land in the log without a timestamp. Counting raw
+// non-empty lines therefore reports more blocks than actually happened — measured
+// at +7,480 on 100,897 real records (+7.4%) in a 5-month log. Anchor on the record
+// shape instead of the line count so the numbers we show users are the real ones.
+const BLOCK_RECORD_RE = /^\[([^\]]+)\]\s*BLOCKED:\s*(.+?)\s*\|\s*cmd:\s*(.+)$/;
+const readBlockRecords = (path) => {
+  if (!existsSync(path)) return [];
+  return readFileSync(path, 'utf-8').split('\n').filter(l => BLOCK_RECORD_RE.test(l));
+};
+
 const c = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
   red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m',
@@ -1650,8 +1662,7 @@ function learn() {
     return;
   }
 
-  const log = readFileSync(logPath, 'utf-8');
-  const lines = log.split('\n').filter(l => l.trim());
+  const lines = readBlockRecords(logPath);
 
   if (lines.length === 0) {
     console.log(c.green + '  No blocked commands in history. Your setup is catching nothing (or everything is safe).' + c.reset);
@@ -3054,8 +3065,7 @@ async function analyze() {
   const blockLog = join(HOME, '.claude', 'blocked-commands.log');
   let blocks = [];
   if (existsSync(blockLog)) {
-    const content = readFileSync(blockLog, 'utf-8');
-    blocks = content.split('\n').filter(l => l.trim());
+    blocks = readBlockRecords(blockLog);
     const recent = blocks.slice(-20);
     console.log(c.bold + '  Blocked Commands' + c.reset + c.dim + ` (${blocks.length} total)` + c.reset);
     if (recent.length > 0) {
@@ -3701,10 +3711,7 @@ async function report() {
   const emoji = auditScore >= 80 ? '🟢' : auditScore >= 50 ? '🟡' : '🔴';
 
   const blockLog = join(HOME, '.claude', 'blocked-commands.log');
-  let totalBlocks = 0;
-  if (existsSync(blockLog)) {
-    totalBlocks = readFileSync(blockLog, 'utf-8').split('\n').filter(l => l.trim()).length;
-  }
+  const totalBlocks = readBlockRecords(blockLog).length;
 
   const md = `## ${emoji} Claude Code Safety Report
 
