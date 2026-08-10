@@ -1280,6 +1280,36 @@ async function installExample(name) {
 
   // Parse hook header for matcher and trigger
   const content = readFileSync(srcPath, 'utf8');
+
+  // Three examples are standalone tools that say so in their own header
+  // ("Event: standalone CLI, not a Claude Code hook", "This is NOT a hook").
+  // They carry no TRIGGER line, so the defaults below used to register them
+  // on PreToolUse/Bash anyway. mcp-stdio-compatibility-test exits 2 when it
+  // cannot read settings.json, and exit 2 on PreToolUse denies the call — so
+  // installing that "test harness" turned every Bash call into a hard denial,
+  // with nothing in the output explaining why. Copy the file (the user asked
+  // for it) but do not wire it into settings.
+  //
+  // The check is anchored to comment lines in the first 25 lines so that prose
+  // mentioning "the standalone Anthropic CLI" does not trip it: measured over
+  // all 910 examples it matches exactly these 3, and none of the 716 files
+  // that declare a TRIGGER.
+  const header = content.split('\n').slice(0, 25).join('\n');
+  if (/^#.*\bnot a (?:claude code )?hook\b/im.test(header)) {
+    const usage = (header.match(/^#\s*Usage:\s*(.+)$/mi) || [])[1];
+    console.log();
+    console.log(c.yellow + '  Copied, but NOT registered as a hook.' + c.reset);
+    console.log(c.dim + '  ' + filename + ' declares in its own header that it is not a' + c.reset);
+    console.log(c.dim + '  Claude Code hook — it is a tool you run by hand. Registering it' + c.reset);
+    console.log(c.dim + '  would run it before every tool call, and a non-zero exit would' + c.reset);
+    console.log(c.dim + '  block that call.' + c.reset);
+    console.log();
+    console.log('  File:  ' + destPath);
+    console.log('  Run:   ' + (usage ? usage.trim() : 'bash ' + destPath));
+    console.log();
+    return;
+  }
+
   let trigger = 'PreToolUse';
   let matcher = 'Bash';
 
