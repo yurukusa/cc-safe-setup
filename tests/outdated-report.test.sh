@@ -115,13 +115,37 @@ contains "foreign hook counted separately" "$OUT" "not shipped by this project"
 not_contains "foreign hook is not named as differing" "$OUT" "my-own-thing.sh differ"
 
 # --- 7. the control that matters: --outdated must not write anything ---------
+# This control was defeated twice while it was being written, in two different
+# ways, and both are worth stating because both are easy to reproduce:
+#
+#   1. The snapshot used `for f in *`. A glob does not match dotfiles, so a
+#      planted `writeFileSync(HOOKS_DIR + '/.outdated-marker')` was invisible.
+#      Fixed by walking the directory with find.
+#   2. Even after that, the run in section 6 had already created the marker, so
+#      the file existed in BOTH the before and the after snapshot and the
+#      comparison still showed no change. A "did it write?" check cannot share
+#      state with an earlier run of the thing under test.
+#
+# So this section builds its own directory and takes the first snapshot before
+# --outdated has ever run against it.
+snapshot() { # dir -> "relpath:cksum" lines, dotfiles included
+  find "$1" -type f | sort | while IFS= read -r f; do
+    printf '%s:%s\n' "${f#"$1"}" "$(cksum < "$f")"
+  done
+}
+TESTHOME="$(mktemp -d)"          # fresh: nothing here has been looked at yet
+trap 'rm -rf "$TESTHOME"' EXIT
+mkdir -p "$TESTHOME/.claude/hooks"
+# A hook that differs, so --outdated has something to report and therefore takes
+# the branch that prints. A run that finds nothing would not exercise the code
+# where a stray write would live.
 cp "$REPO/examples/protect-claudemd.sh" "$TESTHOME/.claude/hooks/protect-claudemd.sh"
 echo "# local edit" >> "$TESTHOME/.claude/hooks/protect-claudemd.sh"
 printf '{"hooks":{}}' > "$TESTHOME/.claude/settings.json"
-BEFORE_HOOKS=$(cd "$TESTHOME/.claude/hooks" && for f in *; do printf '%s:%s\n' "$f" "$(cksum < "$f")"; done | sort)
+BEFORE_HOOKS=$(snapshot "$TESTHOME/.claude/hooks")
 BEFORE_SETTINGS=$(cksum < "$TESTHOME/.claude/settings.json")
 run_outdated
-AFTER_HOOKS=$(cd "$TESTHOME/.claude/hooks" && for f in *; do printf '%s:%s\n' "$f" "$(cksum < "$f")"; done | sort)
+AFTER_HOOKS=$(snapshot "$TESTHOME/.claude/hooks")
 AFTER_SETTINGS=$(cksum < "$TESTHOME/.claude/settings.json")
 check "hooks are untouched by --outdated" "$BEFORE_HOOKS" "$AFTER_HOOKS"
 check "settings.json is untouched by --outdated" "$BEFORE_SETTINGS" "$AFTER_SETTINGS"
