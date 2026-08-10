@@ -384,6 +384,43 @@ These `settings.json` keys are not in the official docs but are real and read at
 
 Raising the two skill-listing caps opts you into higher per-turn context cost (the listing is sent every turn). Prefer trimming descriptions and pruning skills first.
 
+## Recently added settings (2.1.220 – 2.1.226)
+
+> **Source: the official changelog, not my own machine.** Every other entry in this file was written
+> from usage I ran here. These eleven were introduced in the last seven releases and are listed so the
+> file keeps its promise of covering everything you can put in `settings.json`. Descriptions follow the
+> changelog wording; I have not reproduced each one locally yet, and I say so rather than implying I have.
+>
+> Measured 2026-08-11 against Claude Code 2.1.226: all eleven were missing from this file.
+
+| Setting | Since | What the changelog says |
+|---|---|---|
+| `crossSessionInbound` | 2.1.224 | Cross-session messages sent to a session **running with bypassed permissions are held for your approval**; messages to other sessions auto-deliver. |
+| `dialogExpiry` | 2.1.224 | Paired with `crossSessionInbound`; controls how long the held approval dialog stays valid. |
+| `network.tlsTerminate` | 2.1.224 | Required for the sandbox credential-masking options below to take effect. |
+| `onExtractNoMatch` | 2.1.224 | Sandbox credential masking: what to do when `extract` finds no match in a structured env value. |
+| `maskClaims` | 2.1.224 | Sandbox credential masking with `decode: "jwt"` — masks named JWT claims. |
+| `awsPairs` | 2.1.224 | Sandbox credential masking for AWS SigV4 re-signing (with `sigv4`). |
+| `strictKnownMarketplaces` | 2.1.223 | Managed setting: allow-list for plugin marketplaces. Supports `hostPattern`, `pathPattern`, and owner wildcards (`"owner/*"`). Enforced on install, update, refresh and autoupdate. |
+| `blockedMarketplaces` | 2.1.223 | Managed setting: block-list for plugin marketplaces, same matching options. |
+| `modelOverrides` | 2.1.223 | Maps model-picker entries to custom provider model IDs (e.g. Bedrock inference profile ARNs). Keys that are not Anthropic model IDs are ignored. |
+| `sandbox.filesystem.denyWrite` | 2.1.223 | Sandbox write deny-list. A 2.1.223 fix covers the case where it includes the working directory. |
+| `remoteControlAtStartup` | 2.1.224 | Whether Remote Control starts with the session. |
+
+**Why three of these belong in a safety file, not just a completeness list**
+
+- `crossSessionInbound` is a permission gate. If you run with `--dangerously-skip-permissions`, this is the
+  one place a message from another session still stops for a human. Leaving it at its default is a decision,
+  not an absence of one.
+- `strictKnownMarketplaces` / `blockedMarketplaces` are supply-chain controls. They decide which plugin
+  sources can install code on your machine, and as of 2.1.223 they are enforced on **autoupdate** too —
+  so a source you allowed once keeps its access without a further prompt.
+- The sandbox credential-masking options only take effect with `network.tlsTerminate`. A masking rule
+  written without it is inert, and nothing in the output says so.
+
+**None of these are covered by the example hooks in this repo yet.** If you rely on the hooks for a
+control that one of these settings now provides natively, check both — they are separate layers.
+
 ## Troubleshooting
 
 | Problem | Cause | Fix |
