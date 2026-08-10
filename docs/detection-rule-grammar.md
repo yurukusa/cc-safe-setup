@@ -1,6 +1,6 @@
 # Writing your own hook: the detection-rule grammar
 
-This repo ships 700+ deployable safety hooks. If one of them matches your problem, install it and move on — start from the [symptom search](https://yurukusa.github.io/cc-safe-setup/search.html), the [routing table in the README](../README.md), or the [starter pack](https://gist.github.com/yurukusa/825489b6bf73524e1df93facb4236351).
+This repo ships 900+ deployable safety hooks. If one of them matches your problem, install it and move on — start from the [symptom search](https://yurukusa.github.io/cc-safe-setup/search.html), the [routing table in the README](../README.md), or the [starter pack](https://gist.github.com/yurukusa/825489b6bf73524e1df93facb4236351).
 
 This page is for the *other* case: you hit a failure mode that **no existing hook covers**, and you want to write your own. The detection grammar is otherwise implicit in the hook sources — this is the documented path from "I see this dark pattern" to "here is a hook that detects it."
 
