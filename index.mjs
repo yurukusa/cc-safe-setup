@@ -5,6 +5,7 @@ import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
@@ -137,6 +138,10 @@ const LEARN = process.argv.includes('--learn');
 const SCAN = process.argv.includes('--scan');
 const FULL = process.argv.includes('--full');
 const DOCTOR = process.argv.includes('--doctor');
+// Installing a hook copies the file. Nothing ever copies it back, so a hook
+// installed in March keeps running its March logic forever — including bugs
+// fixed here months ago. Nothing in the CLI could tell you that until now.
+const OUTDATED = process.argv.includes('--outdated');
 const WATCH = process.argv.includes('--watch');
 const EXPORT = process.argv.includes('--export');
 const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
@@ -228,6 +233,7 @@ if (HELP) {
 
   Diagnose & Monitor:
     --status / --verify            Check installed hooks / test them
+    --outdated                     Which installed hooks differ from current ones
     --doctor                       13-point diagnostic
     --audit [--fix] [--json]       Safety score 0-100
     --scorecard [--json]           Shareable safety scorecard (screenshot it)
@@ -6363,6 +6369,108 @@ function scan() {
   console.log();
 }
 
+// Installing a hook copies the file. Nothing ever copies it back, so a hook
+// installed in March keeps running its March logic forever — including bugs that
+// were fixed here months later. Measured on a real four-month-old install:
+// 27 of the 31 hooks that came from this project no longer matched the shipped
+// version, and the oldest were 4.5 months behind. Three of those were missing the
+// `jq` guard that was added after they were installed, which is the difference
+// between "blocks the dangerous command" and "silently approves it".
+//
+// This command only reports. It never overwrites, because a file that differs may
+// be the user's own edit, and replacing that silently would be worse than stale.
+function outdated() {
+  const examplesDir = join(__dirname, 'examples');
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --outdated' + c.reset);
+  console.log(c.dim + '  Comparing your installed hooks against the versions shipped today.' + c.reset);
+  console.log();
+
+  if (!existsSync(HOOKS_DIR)) {
+    console.log('  ' + c.dim + 'No hooks directory at ' + HOOKS_DIR + c.reset);
+    console.log();
+    return;
+  }
+
+  const sha = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
+  const hasJqGuard = (s) => /command -v jq|which jq|hash jq/.test(s);
+  const shipped = new Set(
+    existsSync(examplesDir) ? readdirSync(examplesDir).filter((f) => f.endsWith('.sh')) : []
+  );
+  const installed = readdirSync(HOOKS_DIR).filter((f) => f.endsWith('.sh')).sort();
+
+  const same = [];
+  const differs = [];
+  const foreign = [];
+
+  for (const f of installed) {
+    if (!shipped.has(f)) { foreign.push(f); continue; }
+    const instPath = join(HOOKS_DIR, f);
+    const shipPath = join(examplesDir, f);
+    let instText, shipText;
+    try {
+      instText = readFileSync(instPath, 'utf8');
+      shipText = readFileSync(shipPath, 'utf8');
+    } catch {
+      foreign.push(f);
+      continue;
+    }
+    if (sha(instPath) === sha(shipPath)) { same.push(f); continue; }
+    differs.push({
+      name: f,
+      // Only flag this when the installed copy actually parses with jq. A hook
+      // that never touches jq is not made unsafe by lacking the guard.
+      missingJqGuard: /\bjq\b/.test(instText) && hasJqGuard(shipText) && !hasJqGuard(instText),
+    });
+  }
+
+  if (installed.length === 0) {
+    console.log('  ' + c.dim + 'No .sh hooks installed.' + c.reset);
+    console.log();
+    return;
+  }
+
+  if (differs.length === 0) {
+    console.log('  ' + c.green + '✓' + c.reset + ' All ' + same.length +
+      ' hook(s) from this project match the shipped version.');
+  } else {
+    console.log('  ' + c.yellow + '!' + c.reset + ' ' + differs.length +
+      ' of ' + (same.length + differs.length) +
+      ' hook(s) from this project differ from what ships today.');
+    console.log();
+    for (const d of differs) {
+      const flag = d.missingJqGuard
+        ? ' ' + c.red + '← reads input with jq but has no jq guard' + c.reset
+        : '';
+      console.log('    ' + c.yellow + '•' + c.reset + ' ' + d.name + flag);
+    }
+    console.log();
+    console.log('  ' + c.dim + 'A difference means one of two things, and this command cannot tell them apart:' + c.reset);
+    console.log('  ' + c.dim + '  1. the shipped hook was fixed after you installed it, or' + c.reset);
+    console.log('  ' + c.dim + '  2. you edited your copy on purpose.' + c.reset);
+    console.log('  ' + c.dim + 'Look at the difference before replacing anything:' + c.reset);
+    console.log('  ' + c.dim + '  diff ' + join(HOOKS_DIR, differs[0].name) +
+      ' ' + join(examplesDir, differs[0].name) + c.reset);
+    console.log('  ' + c.dim + 'Take the shipped version of one hook:' + c.reset);
+    console.log('  ' + c.dim + '  npx github:yurukusa/cc-safe-setup --install-example ' +
+      differs[0].name.replace(/\.sh$/, '') + c.reset);
+  }
+
+  if (same.length > 0 && differs.length > 0) {
+    console.log();
+    console.log('  ' + c.green + '✓' + c.reset + c.dim + ' ' + same.length +
+      ' other hook(s) already match.' + c.reset);
+  }
+  if (foreign.length > 0) {
+    console.log();
+    console.log('  ' + c.dim + foreign.length +
+      ' hook(s) are not shipped by this project — not checked.' + c.reset);
+  }
+  console.log();
+  // Exit code for CI: 0 = nothing differs, 1 = something differs.
+  if (differs.length > 0) process.exit(1);
+}
+
 async function main() {
   if (UNINSTALL) return uninstall();
   if (VERIFY) return verify();
@@ -6376,6 +6484,7 @@ async function main() {
   if (VALIDATE) return validateHooks();
   if (SAFE_MODE) return safeMode(!SAFE_MODE_OFF);
   if (DOCTOR) return doctor();
+  if (OUTDATED) return outdated();
   if (SIMULATE_CMD) return simulate(SIMULATE_CMD);
   if (PROTECT_PATH) return protect(PROTECT_PATH);
   if (RULES_FILE) return compileRules(RULES_FILE);
