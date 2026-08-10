@@ -77,6 +77,42 @@ DEFAULT_DENY=(
     '>[[:space:]]*/dev/sd[a-z]'
 )
 
+# The rm rule above matches `rm -rf <anything>`, so it also denied the most
+# ordinary cleanup a developer types: `rm -rf node_modules`, `rm -rf dist`,
+# `rm -rf build`, `rm -rf .next`. Measured 2026-08-10: all four exited 2 here,
+# while rm-safety-net and auto-mode-safety-enforcer let the same commands
+# through. A guard that blocks `rm -rf node_modules` does not get tightened by
+# the user — it gets removed, and the cd-prefixed bypass this hook exists for
+# comes back with it.
+#
+# The safe-target list and the match form are taken verbatim from
+# rm-safety-net.sh rather than invented here, so the two hooks cannot drift
+# into disagreeing about what "safe" means.
+SAFE_RM_TARGETS="node_modules|dist|build|__pycache__|\.cache|\.pytest_cache|coverage|\.nyc_output|\.next|\.nuxt|tmp|temp"
+
+# Returns 0 only when the component is an rm whose operands are ALL safe.
+# Every operand is inspected, not just the last one: rm-safety-net documents
+# that checking only `awk '{print $NF}'` lets `rm -rf /home/user/data node_modules`
+# pass on its safe last argument. Path traversal disqualifies the whole
+# component, and an rm with no operand at all is never treated as safe.
+rm_targets_all_safe() {
+    local comp="$1" arg seen=0
+    case "$comp" in *'..'*) return 1 ;; esac
+    set -f
+    for arg in $(echo "$comp" | sed -E 's/^[[:space:]]*(sudo[[:space:]]+)?rm[[:space:]]+//'); do
+        case "$arg" in
+            -*) continue ;;                       # flags
+        esac
+        seen=1
+        if ! echo "$arg" | grep -qE "^(\./)?(${SAFE_RM_TARGETS})/?$"; then
+            set +f
+            return 1
+        fi
+    done
+    set +f
+    [ "$seen" -eq 1 ]
+}
+
 # Split on &&, ||, ;
 SPLIT=$(echo "$COMMAND" | sed -E 's/(&&|\|\||;)/\n/g')
 
@@ -96,6 +132,12 @@ while IFS= read -r component; do
 
     for pattern in "${DEFAULT_DENY[@]}"; do
         if echo "$stripped" | grep -qE "$pattern"; then
+            # Only the rm rule has a safe-target exemption. The other rules
+            # (git push, reset --hard, dd, mkfs, …) have no benign form that
+            # this hook should silently allow.
+            if [ "$pattern" = 'rm[[:space:]]+-[a-z]*r[a-z]*f' ] && rm_targets_all_safe "$stripped"; then
+                continue
+            fi
             cat >&2 <<EOF
 BLOCKED: Compound-command deny enforcer matched a denied operation.
 
