@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-10T09:41:22+09:00
+Updated: 2026-08-10T09:41:39+09:00
 
 ## Git
 - Branch: `fix/block-log-count-continuation-lines-2026-08-10`
@@ -7,11 +7,12 @@ Updated: 2026-08-10T09:41:22+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 1fef6b76 checkpoint: auto-save 09:41:17
+- Last commit: ce9a91d7 checkpoint: auto-save 09:41:38
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-10.md
 ./.claude/pre-compact-checkpoint.md
 ./SERVICES.md
 ./tests/destructive-guard-separators.test.sh
@@ -20,7 +21,6 @@ Updated: 2026-08-10T09:41:22+09:00
 ./tests/example-guards-wrapped-command.test.sh
 ./tests/grep-pcre-portability.test.sh
 ./tests/hook-registration-matches-input.test.sh
-./tests/nested-background-agent-guard.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
