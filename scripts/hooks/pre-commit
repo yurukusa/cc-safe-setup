@@ -1,0 +1,64 @@
+#!/bin/bash
+# ================================================================
+# scripts/hooks/pre-commit — keep docs/search-index.json with its sources
+# ================================================================
+# WHY THIS EXISTS
+#   docs/search-index.json is generated from docs/*.html, and until now the
+#   generator had to be remembered. It was not: over the fortnight to
+#   2026-08-10, 17 of the 25 red Tests runs were the one line
+#   "docs/search-index.json is out of date", each one mailing the repository
+#   owner about a file a script could have written.
+#
+#   Remembering is not a control. This hook is: if a docs page is going into
+#   the commit, the index goes in with it.
+#
+# ENABLE IT (once per clone — git hooks are not cloned, so this is opt-in):
+#   git config core.hooksPath scripts/hooks
+#
+# LIMITS, stated so nobody mistakes this for the whole answer:
+#   - `git commit --no-verify` skips it, as does any tool that passes -n.
+#   - A partial commit (`git commit -- some/path`) runs against a temporary
+#     index, and git discards what a hook stages there.
+#   In both cases CI is still the backstop; this hook only removes the routine
+#   case, which is the one that was actually failing.
+# ================================================================
+set -u
+
+ROOT=$(git rev-parse --show-toplevel) || exit 1
+cd "$ROOT" || exit 1
+
+# Nothing staged under docs/*.html means the index cannot have gone stale from
+# this commit. Covers deletions and renames too, which move the index as surely
+# as an edit does. :(glob) keeps * from reaching into docs/ subdirectories,
+# which the generator does not read.
+if git diff --cached --quiet -- ':(glob)docs/*.html'; then
+    exit 0
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "pre-commit: python3 not found, so docs/search-index.json cannot be" >&2
+    echo "  regenerated. Refusing to let the commit through silently — this is" >&2
+    echo "  exactly the failure CI catches. Install python3, or bypass once with" >&2
+    echo "  --no-verify and expect a red build." >&2
+    exit 1
+fi
+
+if [ ! -f scripts/build-search-index.py ]; then
+    echo "pre-commit: scripts/build-search-index.py is missing; leaving the" >&2
+    echo "  index alone." >&2
+    exit 0
+fi
+
+if ! python3 scripts/build-search-index.py; then
+    echo "pre-commit: build-search-index.py failed; not committing a docs page" >&2
+    echo "  whose index could not be rebuilt." >&2
+    exit 1
+fi
+
+git add docs/search-index.json || exit 1
+
+if ! git diff --cached --quiet -- docs/search-index.json; then
+    echo "pre-commit: docs/search-index.json regenerated and added to this commit."
+fi
+
+exit 0

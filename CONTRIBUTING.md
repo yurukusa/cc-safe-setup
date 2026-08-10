@@ -2,6 +2,21 @@
 
 Thanks for considering a contribution. Here's how to add a new hook.
 
+## Setting Up Your Clone
+
+Run this once, right after cloning:
+
+```bash
+git config core.hooksPath scripts/hooks
+```
+
+`docs/search-index.json` is generated from `docs/*.html`, and CI fails the build
+when the two disagree. That one check accounted for 17 of the 25 red runs in the
+fortnight to 2026-08-10, every one of them a file a script could have written.
+The tracked `scripts/hooks/pre-commit` rebuilds the index and adds it to your
+commit whenever a docs page is staged. Git does not clone hooks, so the line
+above is what turns it on.
+
 ## Adding an Example Hook
 
 1. Create `examples/your-hook-name.sh`
@@ -33,7 +48,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 5. Add to `index.mjs` categories (search for `CATEGORIES`)
 6. Add to `README.md` examples list
-7. Run tests: `bash test.sh`
+7. Run `bash scripts/ci-local.sh`, then `bash test.sh`
 
 ## Testing Your Hook
 
@@ -59,7 +74,8 @@ npx cc-hook-test examples/your-hook.sh
 
 1. Fork and create a branch
 2. Add your hook + update README + update categories
-3. Run `bash test.sh` (all must pass)
+3. Run `bash scripts/ci-local.sh` (the four cheap CI steps, ~2s) and
+   `bash test.sh` (the main suite) — all must pass
 4. Submit PR with:
    - What the hook does
    - Which GitHub Issue inspired it (if any)
