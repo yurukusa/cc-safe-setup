@@ -22,8 +22,13 @@
 #   then saw the whole line. It also had no mention-vs-invocation pass at all,
 #   which is why naming a command inside echo was blocked.
 #
-# Both now drop quote characters before judging a target, and the compound guard
-# received the same gate auto-mode got in PR #1009.
+# Both now drop quote characters before judging a target. The compound guard did
+# NOT receive the gate auto-mode got in PR #1009: it was tried and taken out,
+# because that hook's deny patterns cover more than a list of destructive verbs
+# can express, and a gate built from such a list let two real things through
+# (a git subcommand not on the list, and a redirect writing to a device -- CI
+# caught both). So a mention is still blocked there, and this file asserts that
+# rather than pretending otherwise.
 #
 # --- known limit, asserted on purpose ----------------------------------------
 # A name containing spaces is still blocked by both. That is word splitting, not
@@ -82,14 +87,25 @@ for h in rm-safety-net compound-command-deny-enforcer auto-mode-safety-enforcer;
   expect "$h" "cleanup after another command still passes" \
     "npm ci && $RM ${DQ}node_modules${DQ}"                        0
 
-  # --- mentions must pass ----------------------------------------------------
-
-  expect "$h" "a mention in echo is not a run" \
-    "echo ${DQ}${RM} ${SLASH}${DQ}"                               0
-  expect "$h" "a mention in a commit message is not a run" \
-    "git commit -m ${DQ}guard against ${RM} ${SLASH}${DQ}"        0
-  expect "$h" "a mention of the home variable is not a run" \
-    "echo ${DQ}never write ${RM} ${HOME_VAR}${DQ}"                0
+  # --- mentions ---------------------------------------------------------------
+  # auto-mode-safety-enforcer carries the gate from PR #1009 and lets a mention
+  # through. rm-safety-net never blocked one (it only looks at the target of an
+  # rm). compound-command-deny-enforcer still blocks them, and that is recorded
+  # here rather than wished away: a gate was tried there and taken out, because
+  # this hook's deny patterns cover more than a verb list can express and the
+  # gate let two real things through (CI caught a git subcommand missing from the
+  # list and a redirect to a device). Fixing it means driving the gate off the
+  # deny patterns themselves. Until then this line is the honest state.
+  case "$h" in
+    compound-command-deny-enforcer) MENTION=2 ;;
+    *)                              MENTION=0 ;;
+  esac
+  expect "$h" "a mention in echo" \
+    "echo ${DQ}${RM} ${SLASH}${DQ}"                               "$MENTION"
+  expect "$h" "a mention in a commit message" \
+    "git commit -m ${DQ}guard against ${RM} ${SLASH}${DQ}"        "$MENTION"
+  expect "$h" "a mention of the home variable" \
+    "echo ${DQ}never write ${RM} ${HOME_VAR}${DQ}"                "$MENTION"
 
   # --- quoted dangerous targets must still be blocked -----------------------
 

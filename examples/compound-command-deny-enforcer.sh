@@ -85,49 +85,19 @@ DEFAULT_DENY=(
 # the user — it gets removed, and the cd-prefixed bypass this hook exists for
 # comes back with it.
 #
-# --- Mention vs invocation ----------------------------------------------------
-# The deny patterns below scan the command text, so a dangerous string written
-# inside quotes reaches them exactly as an executed command would. Measured
-# 2026-08-11: `echo "<a dangerous command>"` was blocked by this hook -- naming
-# a command in a message, a note or a commit is not running it, and a guard that
-# blocks that is switched off the same day it is installed.
+# --- why there is no mention-vs-invocation gate here --------------------------
+# auto-mode-safety-enforcer got one in PR #1009 and it works there. It was tried
+# here too and had to be taken out: this hook's deny patterns cover far more than
+# a list of destructive verbs can express, so a gate built from such a list let
+# real things through. CI caught two on 2026-08-11 -- a git subcommand that was
+# not on the list, and a redirect writing to a device. A gate that cannot name
+# everything the hook judges does not narrow the guard, it loosens it.
 #
-# Same gate as auto-mode-safety-enforcer (PR #1009), which took it from
-# destructive-guard (PR #960). Blank out everything inside quotes, then ask
-# whether a destructive verb still starts a command in what is left.
-if [ -n "$COMMAND" ]; then
-    _cc_outside=$(printf '%s' "$COMMAND" | awk -v SQ="'" -v DQ='"' '
-      { line = $0; out = ""; q = 0
-        for (i = 1; i <= length(line); i++) {
-          c = substr(line, i, 1)
-          if (q == 0 && c == SQ) { q = 1; out = out " "; continue }
-          if (q == 1) { if (c == SQ) q = 0; out = out " "; continue }
-          if (q == 0 && c == DQ) { q = 2; out = out " "; continue }
-          if (q == 2) { if (c == DQ) q = 0; out = out " "; continue }
-          out = out c
-        }
-        print out }')
-    # Wrapping tokens become separators so a verb inside a substitution or a
-    # subshell still reads as the start of a command.
-    _cc_gate=$(printf '%s' "$_cc_outside" | sed -E \
-        -e 's/\$\(/ ; /g' -e 's/`/ ; /g' \
-        -e 's/(^|[[:space:]])\(/\1 ; /g' -e 's/\)([[:space:]]|$)/ ; \1/g' \
-        -e 's/\)$/ ; /g' \
-        -e 's/(^|[[:space:]])(then|do|else|elif)([[:space:]])/\1 ; \3/g')
-    # A quoted string is only inert while nothing executes it. `sh -c`, `eval`
-    # and a pipe into a shell all run that text, so there it is a command.
-    if printf '%s' "$_cc_outside" | grep -qE '(^|[;&|`(){}]|[[:space:]])((sh|bash|zsh|dash|ksh)[[:space:]]+(-[a-z]*[[:space:]]+)*-c([[:space:]]|$)|eval([[:space:]]|$))|\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash|zsh|dash|ksh|python3?|perl|ruby|node)([[:space:]]|$)' 2>/dev/null; then
-        :
-    elif printf '%s' "$_cc_gate" | grep -qE '(^|[;&|`(){}]|[[:space:]])git[[:space:]]+(reset|clean|checkout|switch|restore|branch|push|rm|submodule|stash|filter-branch|update-ref|gc|prune)([[:space:]]|$)' 2>/dev/null; then
-        # git is judged by this hook, but only for the subcommands above. Counting
-        # git itself as a destructive verb made every `git commit -m "...rm..."`
-        # reach the deny patterns, which then matched the text inside the quotes.
-        # Measured 2026-08-11: a commit message naming a deletion was blocked.
-        :
-    elif ! printf '%s' "$_cc_gate" | grep -qE '(^|[;&|`(){}]|\$\(|[[:space:]](then|do|else|elif)[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(env|nice|ionice|timeout|exec|command|builtin|stdbuf|nohup|sudo|time|xargs)([[:space:]]+-[^[:space:]]+)*([[:space:]]+[0-9]+)?([[:space:]]+-[^[:space:]]+)*[[:space:]]+)*([./]*[A-Za-z0-9_./-]*/)?(rm|rmdir|unlink|shred|dd|mkfs[.a-z0-9]*|fdisk|parted|chmod|chown|mv|find|xargs|truncate|kill|killall|docker|kubectl|terraform|npm|npx|yarn|pnpm|pip|pip3|curl|wget|eval|source)([[:space:]]|$)' 2>/dev/null; then
-        exit 0
-    fi
-fi
+# The cost of not having one is a false positive: naming a dangerous command
+# inside quotes (a commit message, an echo into a note) is blocked here. That is
+# recorded in tests/quoted-safe-targets-and-mentions.test.sh as current
+# behaviour. Fixing it means driving the gate off the deny patterns themselves,
+# not off a verb list.
 
 # The safe-target list and the match form are taken verbatim from
 # rm-safety-net.sh rather than invented here, so the two hooks cannot drift
