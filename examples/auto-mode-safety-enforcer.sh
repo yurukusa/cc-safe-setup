@@ -36,6 +36,48 @@ fi
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
+# --- Mention vs invocation ----------------------------------------------------
+# Every pattern below scans the command text, so a dangerous string written
+# inside quotes reaches them exactly as an executed command would. Until now
+# this hook lived with that by leaving quotes out of the terminator sets: the
+# five quoted targets the header claims passed, and the mention controls in
+# tests/auto-mode-unquoted-targets.test.sh passed for the same reason -- the
+# target was invisible, not recognised.
+#
+# This is the quote-aware extraction destructive-guard grew in PR #960, ported
+# here as the comment further down said it would have to be. Blank out
+# everything inside quotes, then ask whether a destructive verb still starts a
+# command in what is left. If none does, nothing destructive is being invoked
+# and there is nothing for the rest of this file to judge.
+if [ -z "${CC_AUTOMODE_UNWRAPPED:-}" ] && [ -n "$COMMAND" ]; then
+    _am_outside=$(printf '%s' "$COMMAND" | awk -v SQ="'" -v DQ='"' '
+      { line = $0; out = ""; q = 0
+        for (i = 1; i <= length(line); i++) {
+          c = substr(line, i, 1)
+          if (q == 0 && c == SQ) { q = 1; out = out " "; continue }
+          if (q == 1) { if (c == SQ) q = 0; out = out " "; continue }
+          if (q == 0 && c == DQ) { q = 2; out = out " "; continue }
+          if (q == 2) { if (c == DQ) q = 0; out = out " "; continue }
+          out = out c
+        }
+        print out }')
+    # A quoted string is only inert while nothing executes it. `sh -c` with a
+    # quoted argument, `eval`, and a pipe into a shell all run that text, so
+    # there the quoted string is a command and not a mention. Never let the
+    # gate pass those through.
+    if printf '%s' "$_am_outside" | grep -qE '(^|[;&|`(){}]|[[:space:]])((sh|bash|zsh|dash|ksh)[[:space:]]+(-[a-z]*[[:space:]]+)*-c([[:space:]]|$)|eval([[:space:]]|$))|\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash|zsh|dash|ksh|python3?|perl|ruby|node)([[:space:]]|$)' 2>/dev/null; then
+        :
+    elif ! printf '%s' "$_am_outside" | grep -qE '(^|[;&|`(){}]|\$\(|[[:space:]](then|do|else|elif)[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(env|nice|ionice|timeout|exec|command|builtin|stdbuf|nohup|sudo|time|xargs)([[:space:]]+-[^[:space:]]+)*([[:space:]]+[0-9]+)?([[:space:]]+-[^[:space:]]+)*[[:space:]]+)*([./]*[A-Za-z0-9_./-]*/)?(rm|rmdir|unlink|shred|dd|mkfs[.a-z0-9]*|fdisk|parted|chmod|kill|killall)([[:space:]]|$)' 2>/dev/null; then
+        exit 0
+    fi
+fi
+
+# Quote characters are dropped for matching only. The gate above has already
+# ruled out text that merely names a command, so a quote here is an ordinary
+# way to write an argument and the target behind it has to be judged. Every
+# message below still shows the command the user actually sent.
+CMD_UNQ=$(printf '%s' "$COMMAND" | tr -d "\"'")
+
 # --- Look inside wrappers -----------------------------------------------------
 # The target patterns below require whitespace or end-of-line after the
 # dangerous path, so a deletion wrapped in a substitution or a subshell ends
@@ -67,13 +109,13 @@ fi
 [ -z "$COMMAND" ] && exit 0
 
 # --- Critical rm operations ---
-if echo "$COMMAND" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
+if echo "$CMD_UNQ" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
     # Always block rm on root-level and home-level critical paths
     # The home terminators used to be whitespace or end-of-line only, so
     # `rm -rf ~; echo done` passed while `rm -rf ~ ; echo done` was blocked --
     # one space apart, opposite verdicts. Separators end a command just as much
     # as a space does. Measured 2026-08-04.
-    if echo "$COMMAND" | grep -qE 'rm\s.*(/[[:space:];&|]|/$|~\/?[[:space:];&|]|~\/?$|~\/\.|/home\b|/etc\b|/usr\b|/var\b|/opt\b|/root\b)'; then
+    if echo "$CMD_UNQ" | grep -qE 'rm\s.*(/[[:space:];&|]|/$|~\/?[[:space:];&|]|~\/?$|~\/\.|/home\b|/etc\b|/usr\b|/var\b|/opt\b|/root\b)'; then
         echo "BLOCKED: rm targeting critical system/home path" >&2
         echo "This operation would cause irreversible data loss." >&2
         echo "Command: $COMMAND" >&2
@@ -102,14 +144,14 @@ if echo "$COMMAND" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
     # Terminators are deliberate: `..` and `.git` must be a whole path
     # component, so `my..cache`, `backup..`, `.gitignore` and `.github` are
     # untouched, and `$HOMEBREW_PREFIX` does not look like `$HOME`.
-    if echo "$COMMAND" | grep -qE 'rm\s.*(\$\{?HOME\}?([[:space:];&|/]|$)|(^|[[:space:]/])\.\.([[:space:];&|/]|$)|(^|[[:space:]/])\.git([[:space:];&|/]|$))'; then
+    if echo "$CMD_UNQ" | grep -qE 'rm\s.*(\$\{?HOME\}?([[:space:];&|/]|$)|(^|[[:space:]/])\.\.([[:space:];&|/]|$)|(^|[[:space:]/])\.git([[:space:];&|/]|$))'; then
         echo "BLOCKED: rm targeting the home directory, a parent directory, or the git directory" >&2
         echo "This operation would cause irreversible data loss." >&2
         echo "Command: $COMMAND" >&2
         exit 2
     fi
     # Block rm on dotfiles in home directory
-    if echo "$COMMAND" | grep -qE "rm\s.*(${HOME}|\~)/\."; then
+    if echo "$CMD_UNQ" | grep -qE "rm\s.*(${HOME}|\~)/\."; then
         echo "BLOCKED: rm targeting home dotfile" >&2
         echo "Command: $COMMAND" >&2
         exit 2
@@ -117,7 +159,7 @@ if echo "$COMMAND" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
 fi
 
 # --- Disk-level operations ---
-if echo "$COMMAND" | grep -qE '(^|\s)(sudo\s+)?(dd\s+.*of=/dev|mkfs\.|fdisk\s|parted\s)'; then
+if echo "$CMD_UNQ" | grep -qE '(^|\s)(sudo\s+)?(dd\s+.*of=/dev|mkfs\.|fdisk\s|parted\s)'; then
     echo "BLOCKED: Disk-level operation (dd/mkfs/fdisk/parted)" >&2
     exit 2
 fi
