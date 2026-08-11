@@ -21,7 +21,7 @@ npx cc-safe-setup --shield                    # install recommended set
 | Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |
 | Security | 10 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard` |
 | Deploy | 4 | `deploy-guard`, `no-deploy-friday`, `work-hours-guard` |
-| Monitoring & Cost | 14 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter`, `dotenv-watch` |
+| Monitoring & Cost | 15 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter`, `dotenv-watch`, `warn-cron-cost-trap` |
 | Utility | 20 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard`, `direnv-auto-reload`, `pre-compact-checkpoint` |
 
 ## Popular Hooks
