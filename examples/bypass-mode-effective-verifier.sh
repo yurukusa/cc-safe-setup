@@ -30,6 +30,16 @@
 #   Meta-issue #39523 tracks the regression with 12+ duplicates
 #   over 9 months.
 #
+#   The reverse case, added 2026-08-11 from a first-hand test on
+#   2.1.226: crossSessionInbound. The changelog says inbound peer
+#   messages are held for approval when permissions are bypassed.
+#   Measured here, with the setting unset they were delivered and
+#   acted on with no dialog; setting it to "refuse" blocked them.
+#   So this is a gate operators believe the default gives them and
+#   it did not. The hook flags it when bypass is active and the
+#   setting is absent. See SETTINGS_REFERENCE.md for the four-row
+#   measurement table.
+#
 #   Operators run with --dangerously-skip-permissions expecting
 #   "no prompts at all" and only discover the partial coverage
 #   when something they assumed was bypassed surfaces a prompt
@@ -115,6 +125,29 @@ if [ -f "$SETTINGS_FILE" ]; then
     case "$SKIP_PROMPT" in 1|true|TRUE|True|yes|YES) SKIP_PROMPT_PERSISTED=1 ;; esac
 fi
 
+# Cross-session inbound messages (2.1.224+). This is the reverse of the cases above: not a
+# gate that survives bypass unexpectedly, but a gate operators believe they have and do not.
+#
+# Measured 2026-08-11 on 2.1.226 (Linux/WSL2), receiver under --dangerously-skip-permissions
+# with `crossSessionInbound` absent from every settings file: SendMessage from another session
+# was DELIVERED with no approval dialog and no hold — from a bypass-class sender and from a
+# prompting-class sender alike — and the receiver acted on the content unattended. Setting
+# `crossSessionInbound: "refuse"` on the receiver blocked delivery under the identical
+# procedure, so the gate itself works; the default is what does not gate. The changelog
+# wording ("held for your approval" when permissions are bypassed) did not reproduce here.
+#
+# An explicit value is resolved before any mode-based default, so setting it always wins.
+# Only the user settings file is inspected: a value in settings.local.json or a project file
+# would also count, so this is a prompt to check, not a verdict.
+CSI_UNSET=0
+if [ "$BYPASS_ACTIVE" = "1" ]; then
+    CSI_VALUE=""
+    if [ -f "$SETTINGS_FILE" ]; then
+        CSI_VALUE=$(jq -r '.crossSessionInbound // empty' "$SETTINGS_FILE" 2>/dev/null)
+    fi
+    [ -z "$CSI_VALUE" ] && CSI_UNSET=1
+fi
+
 # Nothing to warn about if bypass isn't active AND the dangerous-mode prompt
 # has not been silently suppressed.
 [ "$BYPASS_ACTIVE" = "0" ] && [ "$SKIP_PROMPT_PERSISTED" = "0" ] && exit 0
@@ -129,6 +162,13 @@ if [ "$SKIP_PROMPT_PERSISTED" = "1" ]; then
 - skipDangerousModePermissionPrompt=true is set in settings.json: the upstream dangerous-mode warning is silently suppressed on this machine (#65848). Claude Code will not re-warn you when entering bypass mode. Remove that key to restore the prompt, or keep this hook as the standing warning."
 fi
 
+# Cross-session inbound is unset while bypass is active: peer messages arrive ungated.
+CSI_NOTE=""
+if [ "$CSI_UNSET" = "1" ]; then
+    CSI_NOTE="
+- crossSessionInbound is not set in settings.json. Measured on 2.1.226: under bypass, SendMessage from your other sessions was delivered with no approval dialog and acted on, and \"refuse\" blocked it under the identical test. If nobody is watching this session, set \"refuse\" (opt out) or \"hold\" (park for review; note held messages expire on overflow and at shutdown). Check settings.local.json and project settings too — a value there also counts."
+fi
+
 # Build the warning message. Kept compact to minimize cache_creation
 # token growth at session start.
 if [ "$BYPASS_ACTIVE" = "1" ]; then
@@ -137,7 +177,7 @@ if [ "$BYPASS_ACTIVE" = "1" ]; then
 - Edit tool still prompts (#36192)
 - Cowork scheduled tasks re-prompt every run (#47180)
 - Mobile Remote Control shows prompts (#29214)
-- Bypass flag itself broken after v2.1.77 (#36168, regression open)${SKIP_NOTE}
+- Bypass flag itself broken after v2.1.77 (#36168, regression open)${SKIP_NOTE}${CSI_NOTE}
 
 If you depend on bypass for unattended runs (cron, watchdog, automation), test the specific tool surfaces you use BEFORE the run, not during. Tracking meta-issue: #39523 (12+ duplicates over 9 months)."
 else
