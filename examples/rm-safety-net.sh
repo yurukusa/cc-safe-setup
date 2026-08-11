@@ -117,6 +117,19 @@ if echo "$COMMAND" | grep -qE '(^|[;&|])[[:space:]]*(sudo[[:space:]]+)?rm[[:spac
         TARGET=$(echo "$COMMAND" | grep -oE 'rm[[:space:]]+[^;|&]*' | awk '{print $NF}')
     fi
 
+    # Judge the target with its quotes removed. This hook blocks anything that
+    # is not on the safe list, so a quoted target used to be blocked whatever it
+    # was: `rm -rf "node_modules"` and `rm -rf "/"` failed the same test for the
+    # same reason -- the quote, not the path. Dropping the quote characters lets
+    # the safe list recognise the first and the critical list catch the second.
+    # Measured 2026-08-11: four ordinary quoted cleanups were blocked here.
+    # Messages keep $TARGET so the user sees what they actually typed.
+    #
+    # A name containing spaces (`rm -rf "my build dir"`) is still blocked. That
+    # is word splitting, not quoting, and fixing it means rewriting how operands
+    # are cut apart. Out of scope here; the tests record it as a known limit.
+    TARGET_UNQ=$(printf '%s' "$TARGET" | tr -d "\"'")
+
     # Block path traversal early
     if echo "$TARGET" | grep -qF '..'; then
         echo "BLOCKED: path traversal detected in rm target" >&2
@@ -131,7 +144,7 @@ if echo "$COMMAND" | grep -qE '(^|[;&|])[[:space:]]*(sudo[[:space:]]+)?rm[[:spac
     set -f
     for arg in $(echo "$COMMAND" | extract_operand 'rm' '[^;|&]*'); do
         case "$arg" in -*) continue ;; esac   # skip flags
-        if echo "$arg" | grep -qE "$CRITICAL"; then
+        if printf '%s' "$arg" | tr -d "\"'" | grep -qE "$CRITICAL"; then
             set +f
             echo "BLOCKED: rm targeting critical path: $arg" >&2
             exit 2
@@ -171,7 +184,7 @@ if echo "$COMMAND" | grep -qE '(^|[;&|])[[:space:]]*(sudo[[:space:]]+)?rm[[:spac
     # .env living in a subdirectory, which the start-anchored pattern missed).
     # CRITICAL is defined once near the top of this block (also used by the
     # multi-argument loop above). This single-TARGET check stays as a backstop.
-    if echo "$TARGET" | grep -qE "$CRITICAL"; then
+    if echo "$TARGET_UNQ" | grep -qE "$CRITICAL"; then
         echo "BLOCKED: rm targeting critical path: $TARGET" >&2
         exit 2
     fi
@@ -179,7 +192,7 @@ if echo "$COMMAND" | grep -qE '(^|[;&|])[[:space:]]*(sudo[[:space:]]+)?rm[[:spac
     # Block rm -rf on any non-safe path (extra safety)
     if echo "$COMMAND" | grep -qE 'rm\s+.*-[rRf]*[rR][rRf]*'; then
         # rm -rf on non-safe, non-tmp target — block unless it's a known safe directory
-        if ! echo "$TARGET" | grep -qE "^(\./)?(${SAFE_TARGETS})(/|$)|^/tmp/"; then
+        if ! echo "$TARGET_UNQ" | grep -qE "^(\./)?(${SAFE_TARGETS})(/|$)|^/tmp/"; then
             echo "BLOCKED: rm -rf on non-safe target: $TARGET" >&2
             exit 2
         fi
