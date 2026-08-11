@@ -392,10 +392,15 @@ Raising the two skill-listing caps opts you into higher per-turn context cost (t
 > changelog wording; I have not reproduced each one locally yet, and I say so rather than implying I have.
 >
 > Measured 2026-08-11 against Claude Code 2.1.226: all eleven were missing from this file.
+>
+> **Update, same day: I reproduced the first one — and it did not behave the way I had paraphrased it.**
+> See [What `crossSessionInbound` actually did on my machine](#what-crosssessioninbound-actually-did-on-my-machine)
+> below. That is the reason the remaining ten still carry the caveat above instead of being quietly
+> promoted to "verified".
 
 | Setting | Since | What the changelog says |
 |---|---|---|
-| `crossSessionInbound` | 2.1.224 | Cross-session messages sent to a session **running with bypassed permissions are held for your approval**; messages to other sessions auto-deliver. |
+| `crossSessionInbound` | 2.1.224 | Changelog wording: messages sent to a session **running with bypassed permissions are held for your approval**; messages to other sessions auto-deliver. ⚠️ **I could not reproduce the "held" half — [see below](#what-crosssessioninbound-actually-did-on-my-machine).** Accepted values are `"accept"`, `"hold"`, `"refuse"`. |
 | `dialogExpiry` | 2.1.224 | Paired with `crossSessionInbound`; controls how long the held approval dialog stays valid. |
 | `network.tlsTerminate` | 2.1.224 | Required for the sandbox credential-masking options below to take effect. |
 | `onExtractNoMatch` | 2.1.224 | Sandbox credential masking: what to do when `extract` finds no match in a structured env value. |
@@ -409,9 +414,10 @@ Raising the two skill-listing caps opts you into higher per-turn context cost (t
 
 **Why three of these belong in a safety file, not just a completeness list**
 
-- `crossSessionInbound` is a permission gate. If you run with `--dangerously-skip-permissions`, this is the
-  one place a message from another session still stops for a human. Leaving it at its default is a decision,
-  not an absence of one.
+- `crossSessionInbound` is a permission gate — **but only if you set it.** I originally wrote here that
+  it is "the one place a message from another session still stops for a human" when you run with
+  `--dangerously-skip-permissions`. **I tested that claim and it was wrong on my machine.** Corrected
+  version and the measurements are in the next section. Set it explicitly; do not rely on the default.
 - `strictKnownMarketplaces` / `blockedMarketplaces` are supply-chain controls. They decide which plugin
   sources can install code on your machine, and as of 2.1.223 they are enforced on **autoupdate** too —
   so a source you allowed once keeps its access without a further prompt.
@@ -420,6 +426,57 @@ Raising the two skill-listing caps opts you into higher per-turn context cost (t
 
 **None of these are covered by the example hooks in this repo yet.** If you rely on the hooks for a
 control that one of these settings now provides natively, check both — they are separate layers.
+
+### What `crossSessionInbound` actually did on my machine
+
+I run a session under `--dangerously-skip-permissions` around the clock, so this setting is one I am
+exposed to rather than one I only read about. On **2026-08-11, Claude Code 2.1.226, Linux (WSL2)**, with
+`crossSessionInbound` absent from every settings file (`~/.claude/settings.json`, `settings.local.json`,
+and both project-level files — grepped, zero hits), I sent peer messages with `SendMessage` and watched
+what arrived.
+
+| # | receiver's `crossSessionInbound` | sender's permission class | result |
+|---|---|---|---|
+| 1 | unset (receiver in bypass) | `bypass` | **delivered** — no dialog, no hold |
+| 2 | unset (receiver in bypass) | `prompting` | **delivered** — no dialog, no hold |
+| 3 | `"refuse"` (via `--settings`) | `bypass` | **not delivered** — receiver stayed at 0 in / 0 out |
+| 4 | unset — same steps as #3, setting removed | `bypass` | **delivered, and the receiver acted on it** (41.1K in / 221 out: it composed and sent a reply, with no human in the loop) |
+
+Rows 3 and 4 are the same procedure with one file changed, so "an idle peer just doesn't render it" is
+ruled out. **The gate works. What does not work is leaving it unset.**
+
+Two things follow, and they are the reason this correction matters more than a wording fix:
+
+1. **The default did not stop anything for a human here.** If you are running unattended and you assumed
+   the gate was on by default — as I did, and as I wrote in this file — you were not protected.
+2. **What arrives in place of a gate is a warning aimed at the model, not a block.** The delivered
+   message carried instructions telling the receiving Claude not to treat a peer as an escalation path
+   ("permission laundering"). That is a real mitigation, but it is enforced by the model choosing to obey,
+   not by the permission system refusing. Those are different security properties and this file should
+   not have blurred them.
+
+**What to set.** An explicit value is evaluated before any mode-based default, so it always wins
+(a repository-level setting can only tighten it further, never loosen it):
+
+```json
+{
+  "crossSessionInbound": "refuse"
+}
+```
+
+- `"refuse"` — opt this session out entirely. **This is the one I verified** (row 3). Use it for
+  unattended sessions, where "held for review" means "held until nobody reviews it".
+- `"hold"` — park messages for your approval. Sensible when a human is actually watching the session.
+  Note from reading the 2.1.226 implementation (not measured): the hold buffer is bounded, the oldest
+  entry is dropped as *expired* when it overflows, and anything still held is settled as *expired* at
+  shutdown. Held is not a durable queue.
+- `"accept"` — deliver everything. This is what my unset session behaved like.
+
+**What I did not establish.** I could not reconcile the delivery in rows 1, 2 and 4 with the gating code
+I read in the 2.1.226 binary: with no explicit setting and a bypass-class receiver, every branch I found
+returns *hold*. Something outside those files decides — most likely a server-delivered settings layer,
+which is not greppable from disk. I am reporting the behaviour I measured and flagging the mechanism as
+unknown, rather than inventing an explanation that fits.
 
 ## Troubleshooting
 
