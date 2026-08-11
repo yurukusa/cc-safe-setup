@@ -1132,12 +1132,8 @@ EI_PASS=0
 EI_FAIL=0
 for f in "$EXAMPLES_DIR"/*.sh; do
     # Skip hooks that depend on session state (call counters, etc.)
-    # claude-update-smart.sh is a SessionStart auto-updater: it checks the
-    # installed vs latest claude version and execs `claude update` regardless
-    # of stdin, so it exits non-zero when the update itself fails (e.g. no
-    # network in CI). The "exit 0 on empty input" invariant does not apply.
     case "$(basename "$f")" in
-        response-budget-guard.sh|session-budget-alert.sh|usage-warn.sh|compact-blocker.sh|compact-circuit-breaker.sh|claude-update-smart.sh) continue ;;
+        response-budget-guard.sh|session-budget-alert.sh|usage-warn.sh|compact-blocker.sh|compact-circuit-breaker.sh) continue ;;
     esac
     EXIT=0
     echo '{}' | bash "$f" > /dev/null 2>/dev/null || EXIT=$?
