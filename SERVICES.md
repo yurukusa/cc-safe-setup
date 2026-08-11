@@ -34,6 +34,8 @@ The report covers:
 
 If you cannot post anything publicly, say so in the Ko-fi order message and I'll arrange another route.
 
+**A `CLAUDE.md` is not always harmless.** Mine names internal paths; other people's name customers, hostnames and occasionally a key. Strip anything you would not put on a public page before you attach it — the issue is public. And as above: your file is deleted within 30 days of delivery, is not published, and is not used to train anything.
+
 **Refund:** if I cannot produce a useful audit (for example because the file is effectively empty, or is entirely in a language I cannot parse), full refund via Ko-fi.
 
 ---
@@ -67,8 +69,12 @@ This audit tells you which of the 56 cataloged token-waste symptoms (Token Book 
 **How to book:**
 
 1. Order at https://ko-fi.com/yurukusa/commissions — listing: *Token Burn Audit — written report within 48h*, ¥3,980 (≈$29). _If that listing is ever missing, a ¥3,980 tip at https://ko-fi.com/yurukusa with the note "Token Burn audit" is honored at the same price._
-2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md). Paste 7 days of `/cost` output, 2–3 session transcripts (redact as you wish), and your current `CLAUDE.md`.
+2. Open a Token Burn Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md) — and post **only** the `/cost` summary and a couple of lines about your setup there. **Do not paste raw session transcripts into the issue.** Issues on this repository are public and stay public. Say in the issue that the logs are coming separately; I reply with a private route (the Ko-fi order message thread, or an address you name) and you send them there.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
+
+**Strip your logs before you send them.** Session transcripts routinely carry API keys, customer names, internal paths and source code. Remove those first. I cannot un-see what arrives, and a public issue cannot be un-published — if a secret does reach me, tell me and rotate it, because deleting the message does not undo the exposure.
+
+**What happens to the files you send:** they stay on my machine for the audit, are not published anywhere, are not used to train anything, and are deleted within 30 days of delivery — sooner if you ask. I keep the report I wrote; I do not keep your logs.
 
 **What the free tools already give you — run them first:** `/cost` (or `/usage`) inside Claude Code shows the current session. [`ccusage`](https://github.com/ccusage/ccusage) gives you daily and monthly totals from the same local logs, and it folds duplicate `usage` rows correctly (keyed on `message.id` + `requestId`) — a detail my own `cc-token-diet` got wrong until 2026-08-09. If your question is *"how much?"*, those answer it for free and you do not need me.
 
