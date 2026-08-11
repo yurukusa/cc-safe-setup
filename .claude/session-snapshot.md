@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-10T09:57:05+09:00
+Updated: 2026-08-12T07:07:03+09:00
 
 ## Git
-- Branch: `fix/block-log-count-continuation-lines-2026-08-10`
+- Branch: `fix/jp-audit-intake-private-route-2026-08-12`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 564eb2e6 recovery: pre-compact checkpoint (1 files, 20260810-005705)
+- Last commit: 283b28bf checkpoint: auto-save 07:07:02
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-10.md
+./.claude/session-logs/2026-08-12.md
 ./.claude/pre-compact-checkpoint.md
 ./SERVICES.md
-./tests/destructive-guard-separators.test.sh
-./tests/destructive-guard-variable-target.test.sh
-./tests/destructive-guard-wrapped-command.test.sh
-./tests/example-guards-wrapped-command.test.sh
-./tests/grep-pcre-portability.test.sh
-./tests/hook-registration-matches-input.test.sh
+./.github/ISSUE_TEMPLATE/3-audit_request.md
+./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md
+./examples/compound-command-deny-enforcer.sh
+./examples/rm-safety-net.sh
+./tests/quoted-safe-targets-and-mentions.test.sh
+./examples/auto-mode-safety-enforcer.sh
 ```
 
 ## Active TODOs: 1 file(s)

@@ -41,8 +41,10 @@ assignees: yurukusa
 
 ## Your CLAUDE.md
 
-<!-- Paste the contents below, OR attach as a file if you prefer not to publish it.
-     If attaching, please also give me permission to keep a local copy until the audit is delivered. -->
+<!-- Paste the contents below. Strip anything you would not put on a public page first.
+     Attaching the file instead does NOT make it private: this repository is public and
+     attachment URLs can be opened by anyone with the link. If the file should not be
+     public at all, write "private route please" here and I will reply with one. -->
 
 ```markdown
 <paste here>
