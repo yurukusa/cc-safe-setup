@@ -29,12 +29,14 @@ The report covers:
 **How to book:**
 
 1. Order at https://ko-fi.com/yurukusa/commissions — listing: *CLAUDE.md Audit — written report within 48h*, ¥3,980 (≈$29). _If that listing is ever missing, a ¥3,980 tip at https://ko-fi.com/yurukusa with the note "CLAUDE.md audit" is honored at the same price._
-2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/3-audit_request.md). Paste your CLAUDE.md there (or attach, if you prefer not to make it public). Mention your Ko-fi order so the two can be matched.
+2. Open an Audit Request issue on this repo using [the template](./.github/ISSUE_TEMPLATE/3-audit_request.md). Paste your CLAUDE.md there, or — if you would rather not publish it — say so in the issue and I reply with a private route. Mention your Ko-fi order so the two can be matched.
 3. You receive the report as an issue reply, and the issue is closed when you confirm it.
 
-If you cannot post anything publicly, say so in the Ko-fi order message and I'll arrange another route.
+If you cannot post anything publicly at all, say so in the Ko-fi order message instead and I'll arrange another route without an issue.
 
-**A `CLAUDE.md` is not always harmless.** Mine names internal paths; other people's name customers, hostnames and occasionally a key. Strip anything you would not put on a public page before you attach it — the issue is public. And as above: your file is deleted within 30 days of delivery, is not published, and is not used to train anything.
+**Attaching a file to an issue does not make it private.** This repository is public, and attachment URLs on a public repository can be opened by anyone who has the link. If your `CLAUDE.md` should not be public, do not attach it — ask for the private route instead. (This page said the opposite until 2026-08-12; it was wrong.)
+
+**A `CLAUDE.md` is not always harmless.** Mine names internal paths; other people's name customers, hostnames and occasionally a key. Strip anything you would not put on a public page before you post it — the issue is public. And as above: your file is deleted within 30 days of delivery, is not published, and is not used to train anything.
 
 **Refund:** if I cannot produce a useful audit (for example because the file is effectively empty, or is entirely in a language I cannot parse), full refund via Ko-fi.
 
