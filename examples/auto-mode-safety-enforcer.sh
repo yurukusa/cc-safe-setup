@@ -79,6 +79,35 @@ if echo "$COMMAND" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
         echo "Command: $COMMAND" >&2
         exit 2
     fi
+    # The header above lists $HOME, a parent traversal and the git directory
+    # among the paths this hook blocks, but the pattern before this one has no
+    # case for any of them. Measured 2026-08-11 against the 19 targets the
+    # header claims: 11 passed, including
+    #
+    #     rm -rf $HOME     rm -rf ${HOME}     rm -rf ..
+    #     rm -rf ../..     rm -rf a/../..     rm -rf .git
+    #
+    # scripts.json grew the $HOME case in PR #962 and the quoted case in #961.
+    # Neither fix reached this example, so the same defect stayed here.
+    #
+    # Quoted forms ("/", "$HOME", ".git") are deliberately still not matched.
+    # This hook has no mention-vs-invocation pass, so putting a quote in a
+    # terminator set would also block `echo "rm -rf /"` and a commit message
+    # that names the command. Those pass today only because the target is
+    # invisible behind the quote. Telling a mention from a run needs the
+    # quote-aware extraction destructive-guard grew in PR #960; until that is
+    # ported here, rm-safety-net and compound-command-deny-enforcer are the
+    # layer that catches the quoted forms (measured: both deny them).
+    #
+    # Terminators are deliberate: `..` and `.git` must be a whole path
+    # component, so `my..cache`, `backup..`, `.gitignore` and `.github` are
+    # untouched, and `$HOMEBREW_PREFIX` does not look like `$HOME`.
+    if echo "$COMMAND" | grep -qE 'rm\s.*(\$\{?HOME\}?([[:space:];&|/]|$)|(^|[[:space:]/])\.\.([[:space:];&|/]|$)|(^|[[:space:]/])\.git([[:space:];&|/]|$))'; then
+        echo "BLOCKED: rm targeting the home directory, a parent directory, or the git directory" >&2
+        echo "This operation would cause irreversible data loss." >&2
+        echo "Command: $COMMAND" >&2
+        exit 2
+    fi
     # Block rm on dotfiles in home directory
     if echo "$COMMAND" | grep -qE "rm\s.*(${HOME}|\~)/\."; then
         echo "BLOCKED: rm targeting home dotfile" >&2
