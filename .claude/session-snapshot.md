@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T07:04:30+09:00
+Updated: 2026-08-12T07:04:48+09:00
 
 ## Git
 - Branch: `fix/jp-audit-intake-private-route-2026-08-12`
@@ -7,11 +7,12 @@ Updated: 2026-08-12T07:04:30+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f8180b01 checkpoint: auto-save 07:04:25
+- Last commit: 1fd3cef7 checkpoint: auto-save 07:04:47
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-12.md
 ./.claude/pre-compact-checkpoint.md
 ./SERVICES.md
 ./.github/ISSUE_TEMPLATE/3-audit_request.md
@@ -20,7 +21,6 @@ Updated: 2026-08-12T07:04:30+09:00
 ./examples/rm-safety-net.sh
 ./tests/quoted-safe-targets-and-mentions.test.sh
 ./examples/auto-mode-safety-enforcer.sh
-./tests/auto-mode-quoted-targets.test.sh
 ```
 
 ## Active TODOs: 1 file(s)
