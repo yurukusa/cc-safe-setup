@@ -61,22 +61,27 @@ if [ -z "${CC_AUTOMODE_UNWRAPPED:-}" ] && [ -n "$COMMAND" ]; then
           out = out c
         }
         print out }')
+    # The wrapper unwrapping further down only runs if this gate lets the call
+    # through, so the gate has to see a verb that sits inside a substitution or
+    # a subshell too. Replace the wrapping tokens with separators first -- the
+    # same substitution the unwrapping step uses. Measured 2026-08-11: without
+    # this, a deletion inside a substitution and one on the right of an
+    # assignment both exited 0 here and never reached the unwrapping.
+    _am_gate=$(printf '%s' "$_am_outside" | sed -E \
+        -e 's/\$\(/ ; /g' -e 's/`/ ; /g' \
+        -e 's/(^|[[:space:]])\(/\1 ; /g' -e 's/\)([[:space:]]|$)/ ; \1/g' \
+        -e 's/\)$/ ; /g' \
+        -e 's/(^|[[:space:]])(then|do|else|elif)([[:space:]])/\1 ; \3/g')
     # A quoted string is only inert while nothing executes it. `sh -c` with a
     # quoted argument, `eval`, and a pipe into a shell all run that text, so
     # there the quoted string is a command and not a mention. Never let the
     # gate pass those through.
     if printf '%s' "$_am_outside" | grep -qE '(^|[;&|`(){}]|[[:space:]])((sh|bash|zsh|dash|ksh)[[:space:]]+(-[a-z]*[[:space:]]+)*-c([[:space:]]|$)|eval([[:space:]]|$))|\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash|zsh|dash|ksh|python3?|perl|ruby|node)([[:space:]]|$)' 2>/dev/null; then
         :
-    elif ! printf '%s' "$_am_outside" | grep -qE '(^|[;&|`(){}]|\$\(|[[:space:]](then|do|else|elif)[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(env|nice|ionice|timeout|exec|command|builtin|stdbuf|nohup|sudo|time|xargs)([[:space:]]+-[^[:space:]]+)*([[:space:]]+[0-9]+)?([[:space:]]+-[^[:space:]]+)*[[:space:]]+)*([./]*[A-Za-z0-9_./-]*/)?(rm|rmdir|unlink|shred|dd|mkfs[.a-z0-9]*|fdisk|parted|chmod|kill|killall)([[:space:]]|$)' 2>/dev/null; then
+    elif ! printf '%s' "$_am_gate" | grep -qE '(^|[;&|`(){}]|\$\(|[[:space:]](then|do|else|elif)[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(env|nice|ionice|timeout|exec|command|builtin|stdbuf|nohup|sudo|time|xargs)([[:space:]]+-[^[:space:]]+)*([[:space:]]+[0-9]+)?([[:space:]]+-[^[:space:]]+)*[[:space:]]+)*([./]*[A-Za-z0-9_./-]*/)?(rm|rmdir|unlink|shred|dd|mkfs[.a-z0-9]*|fdisk|parted|chmod|kill|killall)([[:space:]]|$)' 2>/dev/null; then
         exit 0
     fi
 fi
-
-# Quote characters are dropped for matching only. The gate above has already
-# ruled out text that merely names a command, so a quote here is an ordinary
-# way to write an argument and the target behind it has to be judged. Every
-# message below still shows the command the user actually sent.
-CMD_UNQ=$(printf '%s' "$COMMAND" | tr -d "\"'")
 
 # --- Look inside wrappers -----------------------------------------------------
 # The target patterns below require whitespace or end-of-line after the
@@ -107,6 +112,17 @@ elif [ -n "$COMMAND" ]; then
     fi
 fi
 [ -z "$COMMAND" ] && exit 0
+
+# Quote characters are dropped for matching only. The gate above has already
+# ruled out text that merely names a command, so a quote here is an ordinary
+# way to write an argument and the target behind it has to be judged. Every
+# message below still shows the command the user actually sent.
+#
+# This has to come after the unwrapping above, not before it: that step
+# re-reads COMMAND from CC_AUTOMODE_UNWRAPPED in the recursive call, so a
+# CMD_UNQ computed earlier would still hold the value from before the rewrite
+# (empty, in the child) and every pattern below would match nothing.
+CMD_UNQ=$(printf '%s' "$COMMAND" | tr -d "\"'")
 
 # --- Critical rm operations ---
 if echo "$CMD_UNQ" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
