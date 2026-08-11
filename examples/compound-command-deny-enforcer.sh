@@ -85,6 +85,20 @@ DEFAULT_DENY=(
 # the user — it gets removed, and the cd-prefixed bypass this hook exists for
 # comes back with it.
 #
+# --- why there is no mention-vs-invocation gate here --------------------------
+# auto-mode-safety-enforcer got one in PR #1009 and it works there. It was tried
+# here too and had to be taken out: this hook's deny patterns cover far more than
+# a list of destructive verbs can express, so a gate built from such a list let
+# real things through. CI caught two on 2026-08-11 -- a git subcommand that was
+# not on the list, and a redirect writing to a device. A gate that cannot name
+# everything the hook judges does not narrow the guard, it loosens it.
+#
+# The cost of not having one is a false positive: naming a dangerous command
+# inside quotes (a commit message, an echo into a note) is blocked here. That is
+# recorded in tests/quoted-safe-targets-and-mentions.test.sh as current
+# behaviour. Fixing it means driving the gate off the deny patterns themselves,
+# not off a verb list.
+
 # The safe-target list and the match form are taken verbatim from
 # rm-safety-net.sh rather than invented here, so the two hooks cannot drift
 # into disagreeing about what "safe" means.
@@ -104,7 +118,11 @@ rm_targets_all_safe() {
             -*) continue ;;                       # flags
         esac
         seen=1
-        if ! echo "$arg" | grep -qE "^(\./)?(${SAFE_RM_TARGETS})/?$"; then
+        # Quotes are dropped before the comparison. The safe list is a list of
+        # names, and a name written as "node_modules" is the same name. Without
+        # this, every quoted cleanup fell through to the deny patterns.
+        # Measured 2026-08-11: four ordinary quoted cleanups were blocked.
+        if ! printf '%s' "$arg" | tr -d "\"'" | grep -qE "^(\./)?(${SAFE_RM_TARGETS})/?$"; then
             set +f
             return 1
         fi
