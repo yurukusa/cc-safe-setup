@@ -213,5 +213,9 @@
 
 ---
 
+同じ検査を自分の `CLAUDE.md` に当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[日本語の説明ページ](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html)にまとめてある。なお、この監査で削れるトークンの費用は月に $0.24〜$1.19 ほどでしかない（`CLAUDE.md` はキャッシュに乗る）。効くのは費用ではなく、守られていないルールのほうだ。
+
+*この監査はAIの補助で作っている。その意味は [SERVICES.md](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md) に書いた。*
+
 *質問は* [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general) *へ。*
 *このリポジトリのフックは無料（MIT）で、これからもずっと無料だ。*

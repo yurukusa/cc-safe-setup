@@ -159,6 +159,8 @@ npx github:yurukusa/cc-token-diet --days 30
 
 ---
 
+同じ読み方を自分のログに当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[日本語の説明ページ](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)にまとめてある。ただし「合計いくら使ったか」を知りたいだけなら、`/cost` と [ccusage](https://github.com/ccusage/ccusage) で無料で分かる。先にそちらを試してからで十分だ。
+
 *この監査はAIの補助で作っている。その意味は [SERVICES.md](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md) に書いた。*
 
 *質問は* [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general) *へ。*
