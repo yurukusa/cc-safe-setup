@@ -15,7 +15,24 @@ body:
         以前このフォームを見て検討されていた方には、お詫びします。
         フォームを開けたままにして、お応えできないご相談をいただくのは失礼だと考え、閉じました。
 
-        ### いま使えるもの（いずれも問い合わせは要りません）
+        ### 書面の監査3件は、いまも受け付けています
+
+        止めたのは「人が継続して手を動かす形」です。書面の監査はその形ではないので続けています。
+        いずれも非同期で、通話も打ち合わせもなく、こちらがあなたの環境で何かを実行することもありません。
+        注文と依頼を日本語で書いていただければ、報告書も日本語でお返しします。
+
+        - **CLAUDE.md 監査**（¥3,980・48時間）— 指示ファイルを読む
+          → https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html
+        - **Token Burn 監査**（¥3,980・48時間）— セッションの記録と `/cost` の出力を読む
+          → https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html
+        - **Full-Surface 監査**（¥29,800・72時間）— `CLAUDE.md`・`settings.json`・hook・セッションの記録・
+          CI の設定の5層を互いに突き合わせて、層と層の「あいだ」にしか現れない矛盾だけを報告する
+          → 見本（自分の設定に実際に走らせた実物）https://github.com/yurukusa/cc-safe-setup/blob/main/docs/full-surface-audit-sample-jp.md
+
+        注文は https://ko-fi.com/yurukusa/commissions から。
+        **セッションの記録や設定を、公開される場所へ貼らないでください。** 非公開の受け渡しの経路をこちらから返します。
+
+        ### いま使えるもの（いずれも問い合わせも注文も要りません）
 
         - **チーム安全導入パック ¥3,000**（買い切り・即ダウンロード）
           → https://yurukusa.booth.pm/items/8230188
