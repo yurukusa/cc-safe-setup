@@ -123,6 +123,41 @@ A hook is any executable that reads the tool-call JSON on stdin and returns `0` 
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
+## Your installed hooks do not update themselves
+
+Installing a hook copies the file. **Nothing ever copies it back.** A hook installed in March
+keeps running its March logic forever, including bugs fixed here months later.
+
+```bash
+npx github:yurukusa/cc-safe-setup --outdated
+```
+
+This reports which of your installed hooks no longer match what ships today, and exits `1`
+if any do, so it can run in CI. It only reports — it never overwrites, because a file that
+differs may be your own edit.
+
+**If you ran this before 2026-08-12, run it again.** Until then it compared your hooks
+directory against `examples/` only, and the core guards — the ones `--install` writes by
+default — are not files under `examples/`; they live in `scripts.json`. So every core guard
+was reported as *"not shipped by this project — not checked"*, whatever its state.
+
+That mattered. On the machine where this was found, three core guards were two and a half
+months behind, and feeding the same input to the installed and shipped copies showed **six
+dangerous command shapes that the shipped version blocks and the installed one let
+through** — among them `cd /tmp && git push --force origin main` and `cd /tmp && git add
+.env`. Each of those commands *on its own* was blocked by both copies, which is what makes
+it a real gap rather than a bad measurement.
+
+Core guards are not in `examples/`, so `--install-example` cannot fetch one. To see what
+ships today and compare it yourself:
+
+```bash
+npx github:yurukusa/cc-safe-setup --show-core branch-guard > /tmp/shipped.sh
+diff ~/.claude/hooks/branch-guard.sh /tmp/shipped.sh
+```
+
+`--show-core` prints to stdout and writes nothing.
+
 ## Rolling this out to a team
 
 If you are the person who has to justify Claude Code to the rest of your organization, these are written for that job. All free, all usable as-is — no sign-up, no inquiry.

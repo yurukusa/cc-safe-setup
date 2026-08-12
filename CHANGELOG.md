@@ -1,6 +1,50 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: `--outdated` could not see the core guards it installs by default.** `--install`
+  writes the core guards from `scripts.json`. `--outdated` compared your hooks directory
+  against `examples/` only, and the core guards are not files under `examples/` — they are
+  strings inside `scripts.json`. Every one of them fell into the *"not shipped by this
+  project — not checked"* bucket. **If you ran `--outdated` before this change and it did
+  not name your core guards, it was not answering that question about them.**
+
+  Measured on one real machine on 2026-08-12, before the fix:
+
+  | hook | installed | shipped |
+  |---|---|---|
+  | `destructive-guard.sh` | 8,319 B (2026-05-27) | 33,895 B |
+  | `branch-guard.sh` | 2,616 B (2026-05-27) | 4,447 B |
+  | `secret-guard.sh` | 2,964 B (2026-05-27) | 4,795 B |
+
+  Feeding the same input to both copies, **six dangerous shapes were blocked by the shipped
+  body and passed by the installed one**: a long-spelled `rm --recursive --force`, a
+  base64-obfuscated command piped to `sh`, deletion via `xargs`, `cd /tmp && git push
+  --force origin main`, `npm test && git push origin main` (protected branch), and
+  `cd /tmp && git add .env`. The controls — each of those commands on its own — were
+  blocked by both, which is what makes it a gap in coverage rather than a mistake in how
+  the probe was fed. `--outdated` now checks the core guards too and tags them
+  `[core guard]`.
+
+- **New: `--show-core <name>`** prints the shipped body of a core guard to stdout and
+  nothing else, so it can be piped into `diff`. It exists because `--outdated` can now name
+  a stale core guard, but `--install-example` cannot fetch one — core guards are not files
+  under `examples/` — so naming the problem without a way to read the shipped body would
+  report something the reader cannot act on. It never writes to the hooks directory.
+
+- **Fix: the syntax errors `syntax-check` found were never reaching the model.** The hook
+  wrote them to stdout and exited `0`. Output on stdout with exit `0` reaches the
+  transcript, not the model's context — so a hook whose entire purpose is "tell me now"
+  was telling nobody. It now exits `2` on a syntax error. **Exit `2` in `PostToolUse` does
+  not block the edit** (the tool has already run); it puts stderr in front of the model.
+  Verified on 2026-08-12 by writing a file with a deliberate shell syntax error: the hook
+  fired with exit 2 and the file was still on disk (244 bytes). Also passes `--no-install`
+  to `npx`, which could otherwise stop at an interactive prompt when `tsc` is absent.
+
+  Two of the existing tests for this hook were vacuous and this change is what exposed
+  them: `echo '#!/bin/bash\nif then'` writes **one** line beginning with `#`, so `bash -n`
+  sees a comment and reports nothing. The "invalid shell" case was checking a valid file.
+  Both cases now use `printf`.
+
 - **Fix (data loss): a `settings.json` that exists but does not parse was treated as `{}`
   and then written over** — the installer read the file with a bare `JSON.parse` in
   **34 places**, swallowed the failure outright in **9**, and in **6 of those 9** wrote the
