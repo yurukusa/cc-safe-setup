@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T18:31:46+09:00
+Updated: 2026-08-13T06:05:44+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `fix/secret-guard-false-positive-on-ordinary-names-2026-08-13`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ec219327 recovery: pre-compact checkpoint (1 files, 20260812-093146)
+- Last commit: 50e926b3 recovery: pre-compact checkpoint (1 files, 20260812-210544)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-12.md
+./.claude/session-logs/2026-08-13.md
 ./.claude/pre-compact-checkpoint.md
+./test.sh
+./examples/write-secret-guard.sh
+./examples/powershell-remove-item-guard.sh
+./examples/mcp-tool-guard.sh
+./examples/memory-write-guard.sh
 ./README.md
 ./docs/README.ja.md
-./examples/extended-thinking-loop-guard.sh
-./scripts/claim-verify-audit.sh
-./CHANGELOG.md
-./examples/extended-thinking-resume-warning.sh
-./examples/opus48-thinking-wedge-advisor.sh
 ```
 
 ## Active TODOs: 1 file(s)

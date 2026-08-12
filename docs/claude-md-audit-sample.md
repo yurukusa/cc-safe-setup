@@ -262,5 +262,23 @@ written down. The scanning is the cheap half.
 
 ---
 
+## If you want this run against your own setup
+
+Price, turnaround, refund terms and what you send me are all in
+[SERVICES.md §1](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#1-claudemd-audit--29-3980):
+**$29 (¥3,980), written report within 48 hours, full refund if I cannot produce a useful audit.**
+Order at [Ko-fi](https://ko-fi.com/yurukusa/commissions) — listing *CLAUDE.md Audit — written report
+within 48h*. Japanese is welcome; the report comes back in Japanese if you write in Japanese, and
+there is a [Japanese version of this sample](https://github.com/yurukusa/cc-safe-setup/blob/main/docs/claude-md-audit-sample-jp.md).
+
+**Do not paste `CLAUDE.md` or settings into a public place if they should stay private.** Issues on
+this repository are public, and attaching a file does not make it private — attachment URLs can be
+opened by anyone with the link. Say so in the Ko-fi order message and I reply with a private route.
+
+The honest limit: this audit saves roughly $0.24–$1.19 a month in tokens (`CLAUDE.md` is cached).
+What it is worth is not the tokens. It is the rules that were never followed.
+
+---
+
 *Questions:* [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general).
 *The hooks in this repository are free (MIT) and always will be.*

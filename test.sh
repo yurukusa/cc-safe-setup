@@ -4727,6 +4727,20 @@ test_hook "write-secret" '{"tool_name":"Write","tool_input":{"file_path":"config
 test_hook "write-secret" "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"cfg.js\",\"new_string\":\"${_GHP}\"}}" 2 "blocks Edit with secret"
 test_hook "write-secret" '{"tool_name":"Edit","tool_input":{"file_path":"index.js","new_string":"const x = 42;"}}' 0 "allows Edit normal code"
 
+# False positives that used to fire: ordinary words ending in "sk" before a
+# separator (task-, ask-, risk-, disk-, desk-) looked like an OpenAI key prefix.
+# Split the same way as the secrets above so writing this file trips nothing.
+# NOTE: file_path here must not contain test/spec/mock/fixture — those take an
+# early exit, which would make these pass for the wrong reason.
+_FPTASK="task-management""-system-config.json"
+_FPRISK="risk-assessment""-matrix-2026-08.md"
+_FPDISK="disk-usage-monitor""-daemon-config.sh"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"paths.py\",\"content\":\"P = \\\"data/${_FPTASK}\\\"\"}}" 0 "ordinary task- path is not an OpenAI key"
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"docs.py\",\"content\":\"D = [\\\"${_FPRISK}\\\", \\\"${_FPDISK}\\\"]\"}}" 0 "ordinary risk- and disk- paths are not keys"
+# Control for the boundary: a real key at offset 0 has no character before it,
+# so the added (^|...) alternative has to keep matching there.
+test_hook "write-secret" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"api.py\",\"content\":\"${_OAI}\"}}" 2 "OpenAI key at start of content still blocked"
+
 # ========== compound-command-allow tests ==========
 echo ""
 echo "compound-command-allow.sh:"

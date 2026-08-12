@@ -87,13 +87,23 @@ if echo "$CONTENT" | grep -qE '(ghp_|gho_|ghs_|ghr_|github_pat_)[A-Za-z0-9_]{20,
 fi
 
 # OpenAI API key (sk-... or sk-proj-...)
-if echo "$CONTENT" | grep -qE 'sk-[A-Za-z0-9_-]{20,}' && ! echo "$CONTENT" | grep -qE 'sk-ant-'; then
+# The prefix has to START a token. Without the left boundary this pattern also
+# fired on ordinary English words that end in "sk" before a separator — task-,
+# ask-, risk-, disk-, desk- — so writing a file named
+# task-management-system-config.json was refused as a leaked OpenAI key.
+# (Found 2026-08-13 the hard way: this hook blocked a write here over the
+# filename ask-under-permissive-modes-firsthand-2026-08-13.json.)
+# A guard that refuses ordinary work is a guard people switch off, so the
+# false positive costs more than it looks. A real key never has a word
+# character immediately before its prefix, so the boundary loses no detection.
+if echo "$CONTENT" | grep -qE '(^|[^A-Za-z0-9_-])sk-[A-Za-z0-9_-]{20,}' \
+   && ! echo "$CONTENT" | grep -qE '(^|[^A-Za-z0-9_-])sk-ant-'; then
     # Exclude Anthropic keys (handled separately)
     BLOCKED="OpenAI API key (sk-...)"
 fi
 
-# Anthropic API key
-if echo "$CONTENT" | grep -qE 'sk-ant-[A-Za-z0-9-]{20,}'; then
+# Anthropic API key — same boundary, same reason as above
+if echo "$CONTENT" | grep -qE '(^|[^A-Za-z0-9_-])sk-ant-[A-Za-z0-9-]{20,}'; then
     BLOCKED="Anthropic API key (sk-ant-...)"
 fi
 
@@ -102,8 +112,8 @@ if echo "$CONTENT" | grep -qE '(xoxb-|xoxp-|xoxs-|xoxa-)[0-9A-Za-z-]{20,}'; then
     BLOCKED="Slack token"
 fi
 
-# Stripe keys
-if echo "$CONTENT" | grep -qE '(sk_live_|pk_live_|rk_live_)[A-Za-z0-9]{20,}'; then
+# Stripe keys — same boundary: task_live_/risk_live_ end in the same two letters
+if echo "$CONTENT" | grep -qE '(^|[^A-Za-z0-9_-])(sk_live_|pk_live_|rk_live_)[A-Za-z0-9]{20,}'; then
     BLOCKED="Stripe API key"
 fi
 
