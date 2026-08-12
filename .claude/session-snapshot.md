@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T06:04:40+09:00
+Updated: 2026-08-13T06:04:45+09:00
 
 ## Git
 - Branch: `fix/secret-guard-false-positive-on-ordinary-names-2026-08-13`
@@ -7,7 +7,7 @@ Updated: 2026-08-13T06:04:40+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: d3e1e22e checkpoint: auto-save 06:04:33
+- Last commit: 7c55c8f9 recovery: pre-compact checkpoint (1 files, 20260812-210445)
 
 ## Recent Files
 ```
