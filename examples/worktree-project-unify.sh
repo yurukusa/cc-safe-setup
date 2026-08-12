@@ -3,7 +3,7 @@ MAIN_TREE=$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/worktre
 CUR_DIR=$(pwd)
 [ "$CUR_DIR" = "$MAIN_TREE" ] && exit 0
 to_project_dir() {
-    echo "$HOME/.claude/projects/$(echo "$1" | sed 's|/|-|g; s|^-||')"
+    echo "$HOME/.claude/projects/$(echo "$1" | sed 's|/|-|g')"
 }
 MAIN_PROJECT=$(to_project_dir "$MAIN_TREE")
 CUR_PROJECT=$(to_project_dir "$CUR_DIR")

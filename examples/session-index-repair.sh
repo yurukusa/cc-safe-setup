@@ -37,7 +37,7 @@ fi
 # Claude Code uses the cwd path (with slashes replaced by dashes) as the project dir name
 CWD=$(pwd)
 # Convert path to Claude's project directory naming scheme
-PROJECT_NAME=$(printf '%s' "$CWD" | sed 's|/|-|g; s|^-||')
+PROJECT_NAME=$(printf '%s' "$CWD" | sed 's|/|-|g')
 SESSION_DIR="${PROJECT_DIR}/${PROJECT_NAME}"
 
 if [ ! -d "$SESSION_DIR" ]; then

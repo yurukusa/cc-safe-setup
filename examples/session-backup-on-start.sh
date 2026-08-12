@@ -36,7 +36,7 @@ KEEP="${CC_SESSION_BACKUP_KEEP:-5}"
 
 # Find the current project's session directory
 CWD=$(pwd)
-PROJECT_NAME=$(printf '%s' "$CWD" | sed 's|/|-|g; s|^-||')
+PROJECT_NAME=$(printf '%s' "$CWD" | sed 's|/|-|g')
 SESSION_DIR="${HOME}/.claude/projects/${PROJECT_NAME}"
 
 if [ ! -d "$SESSION_DIR" ]; then

@@ -1,6 +1,32 @@
 # Changelog
 
 ## [Unreleased]
+- **Fix: three hooks that read `~/.claude/projects/` looked in a directory that never existed.**
+  Claude Code names a project directory by replacing every `/` in the absolute working
+  directory with `-`, and the leading slash becomes a leading dash that stays:
+  `/home/u/projects/app` -> `-home-u-projects-app`. Three hooks derived it with
+  `sed 's|/|-|g; s|^-||'`, stripping that dash. Each one then hits an early
+  `[ ! -d "$SESSION_DIR" ] && exit 0`, so **all three ran, exited 0, and did nothing.**
+
+  | hook | what it was supposed to do |
+  |---|---|
+  | `session-backup-on-start.sh` | back up session JSONL files at session start |
+  | `session-index-repair.sh` | repair the session index |
+  | `worktree-project-unify.sh` | unify worktree project directories |
+
+  Measured on 2026-08-12 on a real install: the old form built
+  `~/.claude/projects/home-namakusa-projects-cc-loop` (absent); the fixed form builds
+  `-home-namakusa-projects-cc-loop` (present).
+
+  **If you installed `session-backup-on-start.sh`, it has not been making backups.**
+  There is nothing to recover — it never wrote anything — but you have been running without
+  the protection you installed. Re-install it and confirm that `~/.claude/session-backups/`
+  starts filling up.
+
+  Added a naming check under `tests/`, which asserts the rule **and** carries a control that
+  the old stripping form must fail. Against the pre-fix files it reports 6 failures; against
+  the fixed files, 11 passed / 0 failed.
+
 - **Fix: `--outdated` could not see the core guards it installs by default.** `--install`
   writes the core guards from `scripts.json`. `--outdated` compared your hooks directory
   against `examples/` only, and the core guards are not files under `examples/` — they are
