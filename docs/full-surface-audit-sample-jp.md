@@ -1,6 +1,6 @@
 # 見本：Full-Surface Audit（運用の全面の監査）
 
-これは実際の報告書だ。機微な行だけ伏せてあり、それ以外は手を入れていない。
+これは実際の報告書だ。[¥29,800 の Full-Surface Audit](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800) の納品物そのものを、見本として公開している。機微な行だけ伏せてあり、それ以外は手を入れていない。
 
 対象は私自身の環境。自律で動く Claude Code のセッションを、毎日、並列で回している設定一式である。お客さんの環境にかけるのと同じ検査を、自分にかけた。
 
@@ -315,3 +315,16 @@ if [ -z "$MATCHED" ] && [ -n "${CC_BUYER_PRIVACY_NAMES:-}" ] && [ -r "$CC_BUYER_
 **この報告書で一番高くついた事実はそこだ。**穴は知識の不足ではなく、**同じものが2箇所にあり、片方だけ直したこと**から来ていた。そして**片方だけ直したことに気づく道具は在ったのに、その道具の視界の外に、直すべき物が置かれていた。**
 
 順位を1にしたのは、2と3が「今日の穴」なのに対し、1だけが「次の穴」に効くからである。**同じ報告書を来月もう一度書かなくて済むのは、1だけだ。**
+
+---
+
+同じ検査を自分の運用に当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[SERVICES.md の第3節](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800)にまとめてある（¥29,800・72時間・層をまたぐ矛盾がひとつも出なければ全額返金）。注文は [Ko-fi](https://ko-fi.com/yurukusa/commissions) から。
+
+**セッションの記録や設定を、公開される場所（issue など）へ貼らないでください。** 非公開の受け渡しの経路をこちらから返す。
+
+ただし、この監査が効くのは**層が複数ある環境**だけだ。`CLAUDE.md` が1枚しかなく、hook も CI も無いなら、層と層のあいだに矛盾は生じようがない。その場合は [¥3,980 の CLAUDE.md 監査](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html)のほうが正しい大きさで、こちらを勧める。
+
+*この監査はAIの補助で作っている。その意味は [SERVICES.md](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md) に書いた。*
+
+*質問は* [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general) *へ。*
+*このリポジトリのフックは無料（MIT）で、これからもずっと無料だ。*
