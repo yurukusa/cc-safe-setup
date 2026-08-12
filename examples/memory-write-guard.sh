@@ -25,11 +25,21 @@
 #
 # WHY OPT-IN: existing installs and headless/CI runs must keep working
 #   unchanged, so the prompt is never on unless the operator asks for it.
-#   CAUTION: under bypassPermissions (or --dangerously-skip-permissions)
-#   an "ask" decision is silently auto-approved and does NOT gate the
-#   write (#77212, open at the time of writing). Only a hard refusal is
-#   always honored — use CC_MEMORY_WRITE_APPROVAL=block (exit 2) to
-#   enforce in unattended runs.
+#
+# VERSION NOTE (measured 2026-08-13 on 2.1.228, corrects an earlier note here):
+#   #77212 reported that under bypassPermissions an "ask" decision is silently
+#   auto-approved and does not gate the write. This comment used to repeat that
+#   as current behaviour. It does not reproduce on 2.1.228: run interactively in
+#   an isolated HOME, the confirmation appears both under
+#   --dangerously-skip-permissions and under --permission-mode auto, carrying
+#   this hook's permissionDecisionReason. Control: with the hook removed, both
+#   modes ran the same command with no prompt at all, so the permissive mode was
+#   genuinely in effect. Non-interactively (claude -p) the call is refused
+#   rather than approved. Older builds may still match the report — verify on
+#   your own version with `--version` before relying on either behaviour.
+#   Independent of all this: an "ask" needs somebody present to answer, so for
+#   fully unattended runs use CC_MEMORY_WRITE_APPROVAL=block (exit 2), which is
+#   enforced regardless of permission mode.
 #
 # TRIGGER: PreToolUse  MATCHER: "Write|Edit|MultiEdit"
 #
@@ -79,9 +89,10 @@ MODE="${CC_MEMORY_WRITE_APPROVAL:-off}"
 case "$MODE" in
     ask)
         # Emit a PreToolUse permission decision. In an interactive session
-        # this surfaces an approve/deny prompt. CAUTION: under
-        # bypassPermissions the "ask" is silently auto-approved and the
-        # write proceeds (#77212) — use =block to enforce unattended.
+        # this surfaces an approve/deny prompt — including under
+        # bypassPermissions and auto mode, measured on 2.1.228 (see the
+        # VERSION NOTE at the top; #77212 reported otherwise on older builds).
+        # Use =block when nobody is present to answer the prompt.
         jq -n --arg f "$FILE" '{
             hookSpecificOutput: {
                 hookEventName: "PreToolUse",
