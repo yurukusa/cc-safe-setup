@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T10:39:57+09:00
+Updated: 2026-08-12T10:40:16+09:00
 
 ## Git
 - Branch: `feat/full-surface-audit-and-core-drift-2026-08-12`
@@ -7,13 +7,13 @@ Updated: 2026-08-12T10:39:57+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ea6a8ea2 recovery: pre-compact checkpoint (1 files, 20260812-013957)
+- Last commit: 95d78a18 recovery: pre-compact checkpoint (1 files, 20260812-014016)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-12.md
+./.claude/pre-compact-checkpoint.md
 ./tests/outdated-core-guards.test.sh
 ./docs/full-surface-audit-sample-jp.md
 ./CHANGELOG.md
