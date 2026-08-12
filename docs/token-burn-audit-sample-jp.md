@@ -159,7 +159,11 @@ npx github:yurukusa/cc-token-diet --days 30
 
 ---
 
-同じ読み方を自分のログに当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[日本語の説明ページ](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)にまとめてある。ただし「合計いくら使ったか」を知りたいだけなら、`/cost` と [ccusage](https://github.com/ccusage/ccusage) で無料で分かる。先にそちらを試してからで十分だ。
+同じ読み方を自分のログに当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[日本語の説明ページ](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)にまとめてある（¥3,980・48時間・手を打てる無駄を1つも挙げられなければ全額返金）。注文は [Ko-fi](https://ko-fi.com/yurukusa/commissions) の「Token Burn Audit — written report within 48h」から。日本語で書いていただいて構わない。報告書も日本語でお返しする。
+
+**セッションの記録そのものを、公開される場所（issue など）へ貼らないでください。** ログにはAPIキーや取引先の名前が混ざる。issue には `/cost` の要約と環境の数行だけを書いていただき、ログは非公開の受け渡しの経路（こちらから返す）へ送っていただく。
+
+ただし「合計いくら使ったか」を知りたいだけなら、`/cost` と [ccusage](https://github.com/ccusage/ccusage) で無料で分かる。先にそちらを試してからで十分だ。上の [cc-token-diet](https://github.com/yurukusa/cc-token-diet) も同じで、無料で手元だけで動く。この監査が足すのは、**どちらも答えない「なぜその配分になっているか」**のほうだ。
 
 *この監査はAIの補助で作っている。その意味は [SERVICES.md](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md) に書いた。*
 

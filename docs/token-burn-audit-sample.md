@@ -225,6 +225,28 @@ That re-derivation is what you are buying. The aggregation is the cheap half.
 
 ---
 
+## If you want this run against your own logs
+
+Price, turnaround, refund terms and what you send me are all in
+[SERVICES.md §2](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#2-token-burn-audit--29-3980):
+**$29 (¥3,980), written report within 48 hours, full refund if the report does not identify at least
+one addressable waste pattern.** Order at [Ko-fi](https://ko-fi.com/yurukusa/commissions) — listing
+*Token Burn Audit — written report within 48h*. Japanese is welcome; the report comes back in
+Japanese if you write in Japanese, and there is a
+[Japanese version of this sample](https://github.com/yurukusa/cc-safe-setup/blob/main/docs/token-burn-audit-sample-jp.md).
+
+**Do not paste raw session transcripts into a public issue.** They routinely carry API keys, customer
+names and internal paths. Post only the `/cost` summary and a few lines about your setup; say the
+logs are coming separately and I reply with a private route to send them to.
+
+Try the free things first. `/cost`, [ccusage](https://github.com/ccusage/ccusage) and
+[cc-token-diet](https://github.com/yurukusa/cc-token-diet) all answer *how much* went out, locally
+and for nothing. If that is your question, stop here. What this audit adds is the question none of
+them answer: **why the split looks the way it does** — and, as above, whether the numbers you are
+reading were derived correctly in the first place.
+
+---
+
 *These audits are AI-assisted; see SERVICES.md for what that means.*
 
 *Questions:* [General Discussion](https://github.com/yurukusa/cc-safe-setup/discussions/categories/general).
