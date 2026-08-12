@@ -15,8 +15,7 @@
 # License: MIT. Author: yurukusa (@yurukusa_dev).
 #
 # Companion to:
-# - Claude Code Claim-Verify Handbook (Edition 1, ships 2026-05-22)
-# - cc-safe-setup (MIT, ~730 PreToolUse/PostToolUse hooks)
+# - cc-safe-setup (MIT, 911 example hooks as of 2026-08-12)
 #   https://github.com/yurukusa/cc-safe-setup
 #
 # Usage: bash claim-verify-audit.sh
@@ -441,9 +440,12 @@ else
 
 ────────────────────────────────────────────────────────────────
 Structural prevention reference:
-• Claude Code Claim-Verify Handbook — 58 cases (15 body + 43 appendix D)
-  with 14 prevention defenses mapped per case. Ships 2026-05-22, USD 19.
-  Free preview: https://gist.github.com/yurukusa/6dd608049064ed66c54f1a545a7b47a8
+• Claim-Verify case collection — 58 cases (15 body + 43 appendix D) with
+  14 prevention defenses mapped per case. The write-up is free to read:
+  https://gist.github.com/yurukusa/6dd608049064ed66c54f1a545a7b47a8
+  (Corrected 2026-08-12: this footer used to say "Ships 2026-05-22, USD 19".
+  That book is not on sale anywhere, so the line pointed everyone who ran this
+  tool at something they could not buy. The free preview above is what exists.)
 
 Runtime prevention (hooks):
 • cc-safe-setup — MIT-licensed PreToolUse/PostToolUse hook collection.
