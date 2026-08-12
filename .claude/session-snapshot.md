@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T11:05:17+09:00
+Updated: 2026-08-12T18:31:46+09:00
 
 ## Git
-- Branch: `fix/syntax-check-backport-2026-08-12`
+- Branch: `main`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: af1da6ea recovery: pre-compact checkpoint (1 files, 20260812-020517)
+- Last commit: ec219327 recovery: pre-compact checkpoint (1 files, 20260812-093146)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./.claude/session-logs/2026-08-12.md
 ./.claude/pre-compact-checkpoint.md
-./test.sh
-./tests/outdated-core-guards.test.sh
-./docs/full-surface-audit-sample-jp.md
+./README.md
+./docs/README.ja.md
+./examples/extended-thinking-loop-guard.sh
+./scripts/claim-verify-audit.sh
 ./CHANGELOG.md
-./examples/README.md
-./examples/warn-cron-cost-trap.sh
-./tests/test-warn-cron-cost-trap.sh
+./examples/extended-thinking-resume-warning.sh
+./examples/opus48-thinking-wedge-advisor.sh
 ```
 
 ## Active TODOs: 1 file(s)
