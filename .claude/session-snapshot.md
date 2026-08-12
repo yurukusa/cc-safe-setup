@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T05:48:03+09:00
+Updated: 2026-08-13T05:48:07+09:00
 
 ## Git
 - Branch: `fix/ask-under-bypass-note-is-wrong-2026-08-13`
@@ -7,7 +7,7 @@ Updated: 2026-08-13T05:48:03+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: b6a9cede checkpoint: auto-save 05:47:55
+- Last commit: b36efec1 recovery: pre-compact checkpoint (1 files, 20260812-204807)
 
 ## Recent Files
 ```
