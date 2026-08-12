@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T03:16:47+09:00
+Updated: 2026-08-13T03:17:07+09:00
 
 ## Git
 - Branch: `fix/safety-lab-issue-list-honesty-2026-08-13`
@@ -7,13 +7,13 @@ Updated: 2026-08-13T03:16:47+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 5a530233 recovery: pre-compact checkpoint (1 files, 20260812-181647)
+- Last commit: 12e01959 recovery: pre-compact checkpoint (1 files, 20260812-181707)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-13.md
+./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-12.md
 ./README.md
 ./docs/README.ja.md
