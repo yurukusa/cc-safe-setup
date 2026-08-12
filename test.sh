@@ -248,22 +248,34 @@ extract_hook "syntax-check"
 # Create a valid and invalid Python file for testing
 echo "x = 1" > /tmp/test-valid.py
 echo "x = (" > /tmp/test-invalid.py
-# syntax-check always exits 0 (reports errors but doesn't block)
+# syntax-check exits 2 when it finds a syntax error, and 0 otherwise.
+# Exit 2 in PostToolUse does NOT block the edit — the tool has already run.
+# What it does is put stderr into the model's context. Exit 0 with output on
+# stdout only reaches the transcript, so the previous design reported errors
+# the model never saw: the hook's whole purpose is "tell me now", and it was
+# telling nobody. Measured on 2026-08-12 by writing a file with a deliberate
+# shell syntax error: the hook fired with exit 2 and the file was still
+# written (244 bytes on disk), so the report reaches the model without
+# costing the edit.
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.py"}}' 0 "valid Python passes silently"
-test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.py"}}' 0 "invalid Python reports but exits 0"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.py"}}' 2 "invalid Python reports and exits 2"
 test_hook "syntax-check" '{"tool_input":{"file_path":"/nonexistent/file.py"}}' 0 "nonexistent file exits 0"
 rm -f /tmp/test-valid.py /tmp/test-invalid.py
 # JSON files
 echo '{"valid": true}' > /tmp/test-valid.json
 echo '{"invalid":' > /tmp/test-invalid.json
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.json"}}' 0 "valid JSON passes"
-test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.json"}}' 0 "invalid JSON reports but exits 0"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.json"}}' 2 "invalid JSON reports and exits 2"
 rm -f /tmp/test-valid.json /tmp/test-invalid.json
-# Shell files
-echo '#!/bin/bash\necho ok' > /tmp/test-valid.sh
-echo '#!/bin/bash\nif then' > /tmp/test-invalid.sh
+# Shell files.
+# printf, not echo: `echo '#!/bin/bash\nif then'` writes ONE line beginning with
+# `#`, so bash -n sees a single comment and reports no error. Both shell cases
+# were vacuous until 2026-08-12 — the "invalid" file was syntactically fine, and
+# the test only passed because it expected exit 0 either way.
+printf '#!/bin/bash\necho ok\n' > /tmp/test-valid.sh
+printf '#!/bin/bash\nif then\n' > /tmp/test-invalid.sh
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-valid.sh"}}' 0 "valid shell passes"
-test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.sh"}}' 0 "invalid shell reports but exits 0"
+test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/test-invalid.sh"}}' 2 "invalid shell reports and exits 2"
 rm -f /tmp/test-valid.sh /tmp/test-invalid.sh
 # Non-checkable files
 test_hook "syntax-check" '{"tool_input":{"file_path":"/tmp/image.png"}}' 0 "non-checkable file passes"
