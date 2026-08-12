@@ -155,9 +155,25 @@ Anthropic は[2026年6月15日に programmatic の課金を分離](https://docs.
 - [COOKBOOK](../COOKBOOK.md) — レシピ集
 - [トラブルシューティング](../TROUBLESHOOTING.md) — 動かない時の対処法
 - [Web版ツール](https://yurukusa.github.io/cc-safe-setup/hub.html) — 全ツール一覧
-- [Safety Audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) — プロによる安全設定レビュー（$50〜）
+- [Safety Audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) — いまの設定がどの種類の危険を防げていて、どれを防げていないかを判定する（無料・登録不要）
 
 hookの仕組みと設定方法は[Claude Code公式ドキュメント](https://code.claude.com/docs/en/hooks)を参照。
+
+## 書面の監査（有償・3件）
+
+hook 本体はこれからも無料（MIT）です。そのうえで、自分の設定を誰かに読ませたい場合のために、書面の監査を3件だけ用意しています。いずれも非同期で、通話も打ち合わせもなく、こちらがあなたの環境で何かを実行することもありません。注文と依頼を日本語で書いていただければ、報告書も日本語でお返しします。
+
+法人向けの安全監査（¥150,000〜）・研修・導入支援・月額の運用保守・スポットのコンサルは[受け付けていません](https://yurukusa.github.io/cc-safe-setup/services-jp.html)。止めたのは「人が継続して手を動かす形」で、書面の監査はその形ではないので続けています。
+
+| 監査 | 何を読むか | 価格・納期 |
+|---|---|---|
+| [CLAUDE.md 監査](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html) | 指示ファイル（`CLAUDE.md`、任意で `settings.json` と使用頻度の高い hook 5本） | ¥3,980・48時間 |
+| [Token Burn 監査](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html) | セッションの記録と `/cost` の出力。費用が実際に消えている場所 | ¥3,980・48時間 |
+| [Full-Surface 監査](../SERVICES.md#3-full-surface-audit--219-29800) | 上の2件がそれぞれ1種類のファイルを読むのに対し、こちらは `CLAUDE.md`・`settings.json`・hook・セッションの記録・CI の設定の**5層を互いに突き合わせて**、層と層の**あいだ**にしか現れない矛盾だけを報告する | ¥29,800・72時間 |
+
+買う前に中身が見えないものなので、成果物はすべて公開しています。[CLAUDE.md 監査の見本](claude-md-audit-sample-jp.md)／[Token Burn 監査の見本](token-burn-audit-sample-jp.md)／[Full-Surface 監査の見本](full-surface-audit-sample-jp.md)。いずれも自分の設定に対して実際に走らせた実物で、自分の数字と自分の hook が間違っていた箇所もそのまま載せています。Full-Surface の見本で出てきたいちばん重い1件は、自分の機械で動いていた安全 hook が、同じ名前で配布しているものとは別のプログラムだった、というものでした。
+
+注文は [Ko-fi](https://ko-fi.com/yurukusa/commissions) から。送っていただいたファイルの扱い（公開しない・学習に使わない・納品から30日以内に削除）と返金の条件は [SERVICES.md](../SERVICES.md) に書いてあります。**セッションの記録や設定を、公開される場所（issue など）へ貼らないでください。** 非公開の受け渡しの経路をこちらから返します。
 
 ## 必要なもの
 

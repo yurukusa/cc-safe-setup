@@ -172,13 +172,15 @@ If you are the person who has to justify Claude Code to the rest of your organiz
 
 One paid thing exists, and it needs no inquiry either: the [Team Safety Rollout Pack](https://yurukusa.booth.pm/items/8230188) (¥3,000, one-off) bundles the shared policy template, the CI gate with defaults already chosen, and a written walkthrough of real reported incidents.
 
-Corporate audits (¥150,000+), training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html).
+Corporate audits (¥150,000+), training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html). What that rules out is the *engagement* shape, the kind where someone has to keep showing up. Written audits are a different shape, and three of them are offered: asynchronous, no call, no meeting, and nothing is ever run in your environment.
 
-Two $29 audits are separate, asynchronous things and are offered: a written Markdown report returned in your issue thread, no call and no meeting. The [CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) reads your instruction files. The [Token Burn Audit](SERVICES.md#2-token-burn-audit--29-3980) reads your session logs and `/cost` output, which is where the money actually goes.
+Two of them read one kind of file each, $29 (¥3,980), returned as a Markdown report in your issue thread. The [CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) reads your instruction files. The [Token Burn Audit](SERVICES.md#2-token-burn-audit--29-3980) reads your session logs and `/cost` output, which is where the money actually goes.
 
-An audit is a thing you cannot see before buying, so both publish their deliverable in full: [CLAUDE.md sample](docs/claude-md-audit-sample.md), [Token Burn sample](docs/token-burn-audit-sample.md). Each is that audit run against my own setup — including the parts where it found my own numbers and my own hooks to be wrong. Read one before deciding.
+The third reads them *against each other*. The [Full-Surface Audit](SERVICES.md#3-full-surface-audit--219-29800), $219 (¥29,800), crosses `CLAUDE.md`, `settings.json`, your hooks, your session logs and your CI config, and reports only the contradictions that fall between the layers — the class of failure that passes every check you can run on any one of those files alone. Ordered through Ko-fi, with a private route for the files and nothing in a public issue; report within 72 hours.
 
-Before either: [cc-token-diet](https://github.com/yurukusa/cc-token-diet) is free, runs locally, and uploads nothing. If it answers your question, you do not need me.
+An audit is a thing you cannot see before buying, so all three publish their deliverable in full: [CLAUDE.md sample](docs/claude-md-audit-sample.md), [Token Burn sample](docs/token-burn-audit-sample.md), [Full-Surface sample](docs/full-surface-audit-sample-jp.md) (Japanese). Each is that audit run against my own setup — including the parts where it found my own numbers and my own hooks to be wrong. The Full-Surface one is where it found that the guards running on my own machine were a different program from the ones I ship under the same names.
+
+Before any of them: [cc-token-diet](https://github.com/yurukusa/cc-token-diet) is free, runs locally, and uploads nothing. If it answers your question, you do not need me.
 
 The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
 
