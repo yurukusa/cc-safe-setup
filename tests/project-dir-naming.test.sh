@@ -8,10 +8,16 @@
 #
 #   /home/u/projects/app   ->   -home-u-projects-app
 #
-# Three shipped hooks derived it with `sed 's|/|-|g; s|^-||'`, which strips that
-# leading dash. The path they built therefore never existed, and each hook has an
-# early `[ ! -d "$SESSION_DIR" ] && exit 0` guard — so all three ran, exited 0,
-# and did nothing. One of them is the session backup. It had never made a backup.
+# Six shipped hooks stripped that leading dash, in two different spellings:
+# `sed 's|/|-|g; s|^-||'` removes it after the conversion, `sed 's|^/||; s|/|-|g'`
+# removes the slash before it. The path they built therefore never existed, and each
+# hook has an early `[ ! -d "$SESSION_DIR" ] && exit 0` guard — so all six ran,
+# exited 0, and did nothing. One of them is the session backup. It had never made
+# a backup.
+#
+# The first sweep grepped for one spelling and found three. The other three were
+# structurally invisible to that search — the same shape of mistake the hooks
+# themselves had. That is why both spellings are controls below.
 #
 # Measured on 2026-08-12 against a real install:
 #   built by the old form:  ~/.claude/projects/home-namakusa-projects-cc-loop   (absent)
@@ -56,13 +62,29 @@ for abs in /home/u/projects/app /tmp/x; do
     fi
 done
 
-# The shipped hooks must not carry the stripping form any more.
+# The stripping shows up in two spellings. Searching for one of them is how the
+# first sweep found three of the six: `s|^-||` removes the dash after the
+# conversion, `s|^/||` removes the slash before it. Same result, different grep.
+old_form_b() { printf '%s' "$1" | sed 's|^/||; s|/|-|g'; }
+for abs in /home/u/projects/app /tmp/x; do
+    if [ "$(old_form_b "$abs")" = "$(name_of "$abs")" ]; then
+        FAIL=$((FAIL + 1))
+        echo "FAIL: control B did not discriminate for $abs"
+    else
+        PASS=$((PASS + 1))
+    fi
+done
+
+# The shipped hooks must not carry either spelling any more.
 for f in examples/session-backup-on-start.sh \
          examples/session-index-repair.sh \
-         examples/worktree-project-unify.sh; do
-    if grep -qF 's|^-||' "$ROOT/$f"; then
+         examples/worktree-project-unify.sh \
+         examples/extended-thinking-loop-guard.sh \
+         examples/extended-thinking-resume-warning.sh \
+         examples/opus48-thinking-wedge-advisor.sh; do
+    if grep -qF 's|^-||' "$ROOT/$f" || grep -qF 's|^/||; s|/|-|g' "$ROOT/$f"; then
         FAIL=$((FAIL + 1))
-        echo "FAIL: $f still strips the leading dash"
+        echo "FAIL: $f still strips the leading separator"
     else
         PASS=$((PASS + 1))
     fi

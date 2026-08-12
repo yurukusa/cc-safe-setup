@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-- **Fix: three hooks that read `~/.claude/projects/` looked in a directory that never existed.**
+- **Fix: six hooks that read `~/.claude/projects/` looked in a directory that never existed.**
   Claude Code names a project directory by replacing every `/` in the absolute working
   directory with `-`, and the leading slash becomes a leading dash that stays:
   `/home/u/projects/app` -> `-home-u-projects-app`. Three hooks derived it with
@@ -13,6 +13,16 @@
   | `session-backup-on-start.sh` | back up session JSONL files at session start |
   | `session-index-repair.sh` | repair the session index |
   | `worktree-project-unify.sh` | unify worktree project directories |
+  | `extended-thinking-loop-guard.sh` | detect an extended-thinking loop from the transcript |
+  | `extended-thinking-resume-warning.sh` | warn on resume after a thinking wedge |
+  | `opus48-thinking-wedge-advisor.sh` | advise on the Opus 4.8 effort-budget wedge |
+
+  **The stripping had two spellings**, and the first sweep only found one of them.
+  `sed 's|/|-|g; s|^-||'` removes the dash after the conversion; `sed 's|^/||; s|/|-|g'`
+  removes the slash before it. Grepping for the first found three hooks; the other three
+  were structurally invisible to that search. Both spellings are now controls in the test.
+  `tests/test-extended-thinking-loop-guard.sh` built its fixture path the second way, so it
+  had been asserting against a directory layout that does not occur in practice.
 
   Measured on 2026-08-12 on a real install: the old form built
   `~/.claude/projects/home-namakusa-projects-cc-loop` (absent); the fixed form builds
@@ -22,6 +32,10 @@
   There is nothing to recover — it never wrote anything — but you have been running without
   the protection you installed. Re-install it and confirm that `~/.claude/session-backups/`
   starts filling up.
+
+  The fixed hook was run end to end in an isolated HOME before this note was written:
+  seven consecutive runs each copied 3 JSONL files, the retention prune held at exactly
+  5 generations, and the subagent subdirectory was correctly left out (0 entries).
 
   Added a naming check under `tests/`, which asserts the rule **and** carries a control that
   the old stripping form must fail. Against the pre-fix files it reports 6 failures; against

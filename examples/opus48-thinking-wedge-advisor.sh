@@ -92,7 +92,7 @@ fi
 LATEST="${CC_CLUSTER_13G_TRANSCRIPT:-}"
 if [ -z "$LATEST" ]; then
     PROJ_DIR="${CC_PROJECT_DIR:-$PWD}"
-    SLUG=$(printf '%s' "$PROJ_DIR" | sed 's|^/||; s|/|-|g')
+    SLUG=$(printf '%s' "$PROJ_DIR" | sed 's|/|-|g')
     TRANSCRIPT_DIR="${HOME}/.claude/projects/${SLUG}"
     [ -d "$TRANSCRIPT_DIR" ] || exit 0
     LATEST=$(ls -t "$TRANSCRIPT_DIR"/*.jsonl 2>/dev/null | head -1)

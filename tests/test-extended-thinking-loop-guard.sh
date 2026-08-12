@@ -239,7 +239,7 @@ assert_exit "missing project transcript dir exit 0" "$RC" "0"
 # Test 35: project slug computed → finds latest .jsonl
 PROJ="$TEST_HOME/some/project"
 mkdir -p "$PROJ"
-SLUG_DIR="$TEST_HOME/.claude/projects/$(echo "$PROJ" | sed 's|^/||; s|/|-|g')"
+SLUG_DIR="$TEST_HOME/.claude/projects/$(echo "$PROJ" | sed 's|/|-|g')"
 mkdir -p "$SLUG_DIR"
 # write older then newer file; hook should pick newer
 echo "$normal_thinking_line" > "$SLUG_DIR/old.jsonl"
