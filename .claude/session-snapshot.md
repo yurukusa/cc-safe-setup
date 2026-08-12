@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T05:44:16+09:00
+Updated: 2026-08-13T05:44:39+09:00
 
 ## Git
 - Branch: `fix/ask-under-bypass-note-is-wrong-2026-08-13`
@@ -7,7 +7,7 @@ Updated: 2026-08-13T05:44:16+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 1c5a670d 自分のフックが3本とも、効いている安全機構を『効かない』と読者に教えていた
+- Last commit: 8b22e262 checkpoint: auto-save 05:44:34
 
 ## Recent Files
 ```
