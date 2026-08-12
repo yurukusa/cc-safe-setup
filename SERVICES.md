@@ -46,14 +46,27 @@ If you cannot post anything publicly at all, say so in the Ko-fi order message i
 
 **What it is:** a diagnosis of where your Claude Code tokens are actually going, based on *your* `/cost` output and session transcripts. Not a generic "7 tips" article — a specific read of your real usage.
 
-**Why this exists now (April 2026 context):**
+**Why this still matters — counted 2026-08-13, not in April:**
 
 > *"I used up Max 5 in 1 hour of working, before I could work 8 hours"* — user report via [DevOps.com, April 2026](https://devops.com/claude-code-quota-limits-usage-problems/)
 
-- Since March 23, 2026: Max plan users reporting 5-hour windows draining in as little as 19 minutes ([#38335](https://github.com/anthropics/claude-code/issues/38335), [#41788](https://github.com/anthropics/claude-code/issues/41788))
-- Anthropic confirmed investigation: "top priority for the team" — but the fix window is unclear
+The reports did not stop when that quote was written. Both of these are still open:
+
+| Issue | Reactions | Comments | State |
+|---|---|---|---|
+| [#16157](https://github.com/anthropics/claude-code/issues/16157) — hitting usage limits immediately on Max | 724 | 1,486 | open |
+| [#38335](https://github.com/anthropics/claude-code/issues/38335) — Max session limits draining in as little as 19 minutes | 543 | 831 | open |
+
+I counted the same way across the issues about hooks and settings silently not applying — which is the subject of the more expensive audit in §3. That cluster comes to **371** reactions and comments in total. This one comes to **9,643**.
+
+That is not a claim that this audit fixes the platform's limits. It is why the cheaper audit sits on this subject: it is where people are actually stuck.
+
+Context from April 2026, kept because the causes have not changed:
+
+- March 23, 2026 is where this cluster starts ([#38335](https://github.com/anthropics/claude-code/issues/38335), [#41788](https://github.com/anthropics/claude-code/issues/41788))
+- Anthropic confirmed investigation: "top priority for the team"
 - Root cause partially identified: `cache_read` tokens may count at full rate against rate limits (negating caching benefits)
-- April 21 pricing whiplash: Claude Code removed from $20 Pro plan, reverted hours later — every hour on $100 Max matters more now
+- April 21 pricing whiplash: Claude Code removed from $20 Pro plan, reverted hours later
 
 This audit tells you which of the 56 cataloged token-waste symptoms (Token Book Ch.8) are actually firing in *your* logs — not "in general."
 
