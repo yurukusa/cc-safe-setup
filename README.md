@@ -41,7 +41,7 @@ The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.
 | `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
 | `true && git add .env` — a secret staged through a chained command | allowed | blocked |
 
-29.8.0 ships 698 example hooks against this repository's 911 — among the 213 missing is `agents-md-sync-checker`.
+29.8.0 ships 698 example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
 
 To install the current code directly from this repository:
 
@@ -67,8 +67,8 @@ if none of the three is present they print a warning that says they are **not** 
 then allow the command (blocking every call would make Claude Code unusable, which is a
 failure, not safety).
 
-The example hooks are stricter about this than the core ones: **795 of the 911 use `jq` with no
-fallback** — of the 806 that touch `jq` at all, only 11 fall back to `python3` or `node`. Without `jq` they read an empty command and quietly do nothing — no error, no log
+The example hooks are stricter about this than the core ones: **798 of the 914 use `jq` with no
+fallback** — of the 809 that touch `jq` at all, only 11 fall back to `python3` or `node`. Without `jq` they read an empty command and quietly do nothing — no error, no log
 line, and they still appear in your `settings.json`. If you take examples from `examples/`,
 install `jq` first.
 
