@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T10:36:47+09:00
+Updated: 2026-08-12T07:07:03+09:00
 
 ## Git
-- Branch: `feat/full-surface-audit-and-core-drift-2026-08-12`
+- Branch: `fix/jp-audit-intake-private-route-2026-08-12`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 95d11931 checkpoint: auto-save 10:36:45
+- Last commit: 283b28bf checkpoint: auto-save 07:07:02
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
 ./.claude/session-logs/2026-08-12.md
 ./.claude/pre-compact-checkpoint.md
-./docs/full-surface-audit-sample-jp.md
-./tests/outdated-core-guards.test.sh
-./CHANGELOG.md
-./examples/README.md
-./examples/warn-cron-cost-trap.sh
-./tests/test-warn-cron-cost-trap.sh
-./test.sh
+./SERVICES.md
+./.github/ISSUE_TEMPLATE/3-audit_request.md
+./.github/ISSUE_TEMPLATE/4-token_burn_audit_request.md
+./examples/compound-command-deny-enforcer.sh
+./examples/rm-safety-net.sh
+./tests/quoted-safe-targets-and-mentions.test.sh
+./examples/auto-mode-safety-enforcer.sh
 ```
 
 ## Active TODOs: 1 file(s)
