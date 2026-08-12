@@ -1,17 +1,19 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T05:49:05+09:00
+Updated: 2026-08-13T06:01:16+09:00
 
 ## Git
-- Branch: `fix/ask-under-bypass-note-is-wrong-2026-08-13`
+- Branch: `fix/secret-guard-false-positive-on-ordinary-names-2026-08-13`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 6d4ccea5 recovery: pre-compact checkpoint (1 files, 20260812-204905)
+- Last commit: afdb39d4 普通のファイル名を鍵と誤認して書き込みを止めていた
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./test.sh
+./examples/write-secret-guard.sh
 ./.claude/session-logs/2026-08-13.md
 ./.claude/pre-compact-checkpoint.md
 ./examples/powershell-remove-item-guard.sh
@@ -19,8 +21,6 @@ Updated: 2026-08-13T05:49:05+09:00
 ./examples/memory-write-guard.sh
 ./README.md
 ./docs/README.ja.md
-./docs/claude-md-audit-sample-jp.md
-./docs/full-surface-audit-sample-jp.md
 ```
 
 ## Active TODOs: 1 file(s)
