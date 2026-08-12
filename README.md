@@ -212,7 +212,7 @@ are written up at length in these:
   of incidents, each traced to the setting or hook that stops it. The first 5 sections,
   including the symptom→chapter lookup table you'd reach for mid-incident, are free to read
 - [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
-  the tokens actually go, measured across 800+ hours rather than reasoned about. 34 chapters,
+  the tokens actually go, measured across 800+ hours rather than reasoned about. 36 chapters,
   2 free
 
 **In English:**
