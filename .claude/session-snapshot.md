@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T11:04:15+09:00
+Updated: 2026-08-12T11:04:20+09:00
 
 ## Git
 - Branch: `fix/syntax-check-backport-2026-08-12`
@@ -7,7 +7,7 @@ Updated: 2026-08-12T11:04:15+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 493790dd checkpoint: auto-save 11:04:07
+- Last commit: ee85be2f recovery: pre-compact checkpoint (1 files, 20260812-020419)
 
 ## Recent Files
 ```
