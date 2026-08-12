@@ -1,8 +1,8 @@
 # Services
 
-If you want more than what the free tools give you, there are three paid options. All are fulfilled using the same methodology I use to run Claude Code autonomously, applied to your specific setup.
+If you want more than what the free tools give you, there are four paid options. All are fulfilled using the same methodology I use to run Claude Code autonomously, applied to your specific setup.
 
-This page is in English, but Japanese orders are welcome for all three: order and write your request in Japanese and the report comes back in Japanese. 日本語でも受け付けます（注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします）。
+This page is in English, but Japanese orders are welcome for all four: order and write your request in Japanese and the report comes back in Japanese. 日本語でも受け付けます（注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします）。
 
 ---
 
@@ -90,7 +90,44 @@ What none of them answer is *"which of my habits is producing that number, and w
 
 ---
 
-## 3. CC Safety Lab — Founder Membership, ¥500/month
+## 3. Full-Surface Audit — $219 (¥29,800)
+
+**What it is:** the two audits above each read one kind of file. This one crosses five layers of your setup — `CLAUDE.md`, `settings.json`, your hooks, your session logs, and your CI config — and reports only the contradictions that fall *between* them.
+
+**Why a separate offering rather than a bigger version of the ones above:** because the failures it finds are not larger versions of single-file failures. They are a different kind. A rule that names a safety net which exists but is never registered passes every check you can run on the rule, and every check you can run on the config. It only shows up when the two are read against each other.
+
+**See exactly what you get: [a full sample report](./docs/full-surface-audit-sample-jp.md).** It is this audit run against my own setup — three layers of `CLAUDE.md`, 27 registered hooks, 649 session log files holding 34,026 shell calls, and three CI workflows. On the day I wrote it, it found five things I did not know, and the largest was about this project:
+
+> The guards protecting my machine were a different program from the ones I ship under the same names. Six dangerous command shapes that the shipped version blocks were passing on my own machine. And `--outdated`, the command in this repo whose only job is to notice exactly that drift, was structurally unable to see those files — the core guards live in `scripts.json`, and it compared against `examples/`. I fixed that the same day; the fix is in this repo.
+
+The report also measured how much it mattered, against my own logs rather than in principle. Of 515 recorded calls containing `git push`, **502 (97.5%)** sat outside the position the installed guard was reading — and reading those 502 line by line turned up **two real force-pushes that ran and were never stopped**, on a guard whose own header says it blocks force-push on *all* branches.
+
+It also records the two times my own scan was wrong about that number, in both directions, and how I found out.
+
+**What you get, as a Markdown report within 72 hours:**
+
+1. **Cross-layer contradictions.** Each one names the layers it spans and why a single-file audit cannot surface it.
+2. **A control for every finding** — the same probe on a case that should *not* trigger. Without that, "everything passed" and "my probe was wrong" look identical. The sample includes the three cases where my own scan was wrong and I threw the finding out.
+3. **Coverage measured against your own logs.** Not "this rule looks weak" but "this rule sits outside N% of the commands you actually ran."
+4. **Diffs you can paste**, and the 30-second command that shows each one working.
+5. **What the audit did not find**, and what it could not measure.
+
+**Not included:** a call, implementation, or running anything in your environment. I read what you send and write the report. The diffs are proposals; you apply them. If you want a senior human engineer manually reviewing your repo, this is not that.
+
+**How to book:**
+
+1. Order at https://ko-fi.com/yurukusa/commissions — listing: *Full-Surface Audit — all 5 layers, written report within 72h*, ¥29,800 (≈$219).
+2. Reply to the order with a message saying which of the five layers you can send. **You do not need all five; three is enough to start.** I reply within 24 hours with a private route for the files.
+3. **Do not post logs or settings publicly.** Session transcripts routinely carry API keys, customer names, internal paths and source code. Strip what you can before you send them. I cannot un-see what arrives.
+
+**What happens to the files you send:** they stay on my machine for the audit, are not published anywhere, are not used to train anything, and are deleted within 30 days of delivery — sooner if you ask. I keep the report I wrote; I do not keep your files.
+
+**Refund:** if the audit surfaces no cross-layer contradiction at all, full refund via Ko-fi.
+
+**Japanese is welcome / 日本語でも受け付けます:** 注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします。見本の報告書も日本語です。
+---
+
+## 4. CC Safety Lab — Founder Membership, ¥500/month
 
 Monthly recurring. Each issue covers:
 
@@ -117,7 +154,9 @@ Founder rate is grandfathered — you keep the ¥500 price even if the tier is l
 
 ## Why these prices
 
-Comparable AI-audit consulting, in the listings I have seen, runs $150–$300/hour and $999+ per productized report. This offering is deliberately priced far below that because it is AI-assisted: I apply the same 7-check framework documented in the [free self-audit Gist](https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c), plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that. Read the sample and decide.
+Comparable AI-audit consulting, in the listings I have seen, runs $150–$300/hour and $999+ per productized report. These are deliberately priced below that because they are AI-assisted: I apply the same 7-check framework documented in the [free self-audit Gist](https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c), plus judgment from having read hundreds of public Claude Code incident reports. If you want a senior human engineer manually reviewing your repo, this is not that. Read the sample and decide.
+
+**On the gap between $29 and $219:** it is not a bigger version of the same work. The $29 audits read one kind of file each, and a single-file audit cannot produce a contradiction that lives *between* files — the gap is in what the work can find, not in how much of it there is. The sample report for each tier shows the difference; read both before deciding which one you want. If the $29 audits answer your question, buy those.
 
 ---
 
