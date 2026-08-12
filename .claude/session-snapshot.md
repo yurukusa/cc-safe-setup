@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T10:39:52+09:00
+Updated: 2026-08-12T10:39:57+09:00
 
 ## Git
 - Branch: `feat/full-surface-audit-and-core-drift-2026-08-12`
@@ -7,7 +7,7 @@ Updated: 2026-08-12T10:39:52+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: f55288c4 checkpoint: auto-save 10:39:45
+- Last commit: ea6a8ea2 recovery: pre-compact checkpoint (1 files, 20260812-013957)
 
 ## Recent Files
 ```
