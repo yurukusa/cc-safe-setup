@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T10:36:28+09:00
+Updated: 2026-08-12T10:36:47+09:00
 
 ## Git
 - Branch: `feat/full-surface-audit-and-core-drift-2026-08-12`
@@ -7,15 +7,15 @@ Updated: 2026-08-12T10:36:28+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 2caee07f --outdated が、既定で入れる中核11本を一本も見られなかった
+- Last commit: 95d11931 checkpoint: auto-save 10:36:45
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./docs/full-surface-audit-sample-jp.md
-./tests/outdated-core-guards.test.sh
 ./.claude/session-logs/2026-08-12.md
 ./.claude/pre-compact-checkpoint.md
+./docs/full-surface-audit-sample-jp.md
+./tests/outdated-core-guards.test.sh
 ./CHANGELOG.md
 ./examples/README.md
 ./examples/warn-cron-cost-trap.sh

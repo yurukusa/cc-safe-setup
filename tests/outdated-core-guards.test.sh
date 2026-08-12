@@ -10,9 +10,9 @@
 #
 # Measured on one real machine on 2026-08-12, before this fix:
 #
-#   destructive-guard.sh   installed  8,307 B (2026-05-27)   shipped 32,857 B
-#   branch-guard.sh        installed  2,607 B (2026-05-27)   shipped  4,436 B
-#   secret-guard.sh        installed  2,957 B (2026-05-27)   shipped  4,786 B
+#   destructive-guard.sh   installed  8,319 B (2026-05-27)   shipped 33,895 B
+#   branch-guard.sh        installed  2,616 B (2026-05-27)   shipped  4,447 B
+#   secret-guard.sh        installed  2,964 B (2026-05-27)   shipped  4,795 B
 #
 # Feeding the same input to both copies, six dangerous shapes were blocked by
 # the shipped body and passed by the installed one, including `cd /tmp &&
