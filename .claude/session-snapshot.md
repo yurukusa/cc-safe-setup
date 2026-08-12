@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T11:04:20+09:00
+Updated: 2026-08-12T11:04:39+09:00
 
 ## Git
 - Branch: `fix/syntax-check-backport-2026-08-12`
@@ -7,13 +7,13 @@ Updated: 2026-08-12T11:04:20+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ee85be2f recovery: pre-compact checkpoint (1 files, 20260812-020419)
+- Last commit: 102fe81f recovery: pre-compact checkpoint (1 files, 20260812-020439)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-12.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./tests/outdated-core-guards.test.sh
 ./docs/full-surface-audit-sample-jp.md
