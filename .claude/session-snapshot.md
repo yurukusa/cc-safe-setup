@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-12T11:03:10+09:00
+Updated: 2026-08-12T11:04:15+09:00
 
 ## Git
 - Branch: `fix/syntax-check-backport-2026-08-12`
@@ -7,16 +7,16 @@ Updated: 2026-08-12T11:03:10+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 1d35c6e0 syntax-check が報告するエラーは、モデルに一度も届いていなかった
+- Last commit: 493790dd checkpoint: auto-save 11:04:07
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/pre-compact-checkpoint.md
+./.claude/session-logs/2026-08-12.md
 ./test.sh
 ./tests/outdated-core-guards.test.sh
 ./docs/full-surface-audit-sample-jp.md
-./.claude/session-logs/2026-08-12.md
-./.claude/pre-compact-checkpoint.md
 ./CHANGELOG.md
 ./examples/README.md
 ./examples/warn-cron-cost-trap.sh
