@@ -142,6 +142,12 @@ const DOCTOR = process.argv.includes('--doctor');
 // installed in March keeps running its March logic forever — including bugs
 // fixed here months ago. Nothing in the CLI could tell you that until now.
 const OUTDATED = process.argv.includes('--outdated');
+// --outdated can now name a stale core guard, but core guards are strings inside
+// scripts.json rather than files under examples/, so --install-example cannot
+// fetch one. Without a way to read the shipped body, the report would name a
+// problem the reader has no way to act on.
+const SHOW_CORE_IDX = process.argv.findIndex(a => a === '--show-core');
+const SHOW_CORE = SHOW_CORE_IDX !== -1 ? process.argv[SHOW_CORE_IDX + 1] : null;
 const WATCH = process.argv.includes('--watch');
 const EXPORT = process.argv.includes('--export');
 const IMPORT_IDX = process.argv.findIndex(a => a === '--import');
@@ -6379,6 +6385,20 @@ function scan() {
 //
 // This command only reports. It never overwrites, because a file that differs may
 // be the user's own edit, and replacing that silently would be worse than stale.
+// Prints the shipped body of a core guard to stdout and nothing else, so it can
+// be piped into diff. It never writes to the hooks directory: an installed copy
+// that differs may be the user's own edit, and replacing that silently would be
+// worse than leaving it stale.
+function showCore(id) {
+  const key = id && id.replace(/\.sh$/, '');
+  if (!key || !Object.prototype.hasOwnProperty.call(SCRIPTS, key)) {
+    console.error('Unknown core guard: ' + (id || '(none given)'));
+    console.error('Available: ' + Object.keys(SCRIPTS).sort().join(', '));
+    process.exit(1);
+  }
+  process.stdout.write(SCRIPTS[key]);
+}
+
 function outdated() {
   const examplesDir = join(__dirname, 'examples');
   console.log();
@@ -6393,10 +6413,19 @@ function outdated() {
   }
 
   const sha = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
+  const shaText = (s) => createHash('sha256').update(Buffer.from(s)).digest('hex');
   const hasJqGuard = (s) => /command -v jq|which jq|hash jq/.test(s);
   const shipped = new Set(
     existsSync(examplesDir) ? readdirSync(examplesDir).filter((f) => f.endsWith('.sh')) : []
   );
+  // The default install writes the core guards from scripts.json, NOT from
+  // examples/. Comparing only against examples/ made this command structurally
+  // blind to exactly the hooks it installs by default: every core guard landed in
+  // `foreign` and was reported as "not shipped by this project — not checked".
+  // Measured on 2026-08-12: three core guards on one machine were 2.5 months
+  // behind, and the largest was 8,307 bytes installed against 32,857 shipped —
+  // six dangerous command shapes that the shipped version blocks were passing.
+  const core = new Map(Object.keys(SCRIPTS).map((id) => [id + '.sh', SCRIPTS[id]]));
   const installed = readdirSync(HOOKS_DIR).filter((f) => f.endsWith('.sh')).sort();
 
   const same = [];
@@ -6404,25 +6433,35 @@ function outdated() {
   const foreign = [];
 
   for (const f of installed) {
-    if (!shipped.has(f)) { foreign.push(f); continue; }
+    const isCore = core.has(f);
+    if (!shipped.has(f) && !isCore) { foreign.push(f); continue; }
     const instPath = join(HOOKS_DIR, f);
-    const shipPath = join(examplesDir, f);
-    let instText, shipText;
+    let instText, shipText, shipSha;
     try {
       instText = readFileSync(instPath, 'utf8');
-      shipText = readFileSync(shipPath, 'utf8');
+      if (isCore) {
+        shipText = core.get(f);
+        shipSha = shaText(shipText);
+      } else {
+        shipText = readFileSync(join(examplesDir, f), 'utf8');
+        shipSha = sha(join(examplesDir, f));
+      }
     } catch {
       foreign.push(f);
       continue;
     }
-    if (sha(instPath) === sha(shipPath)) { same.push(f); continue; }
+    if (sha(instPath) === shipSha) { same.push(f); continue; }
     differs.push({
       name: f,
+      core: isCore,
       // Only flag this when the installed copy actually parses with jq. A hook
       // that never touches jq is not made unsafe by lacking the guard.
       missingJqGuard: /\bjq\b/.test(instText) && hasJqGuard(shipText) && !hasJqGuard(instText),
     });
   }
+  // Core guards first: they are installed by default, so a stale one is the
+  // difference between "blocks the dangerous command" and "silently approves it".
+  differs.sort((a, b) => (b.core === true) - (a.core === true));
 
   if (installed.length === 0) {
     console.log('  ' + c.dim + 'No .sh hooks installed.' + c.reset);
@@ -6442,18 +6481,37 @@ function outdated() {
       const flag = d.missingJqGuard
         ? ' ' + c.red + '← reads input with jq but has no jq guard' + c.reset
         : '';
-      console.log('    ' + c.yellow + '•' + c.reset + ' ' + d.name + flag);
+      const tag = d.core ? ' ' + c.red + '[core guard]' + c.reset : '';
+      console.log('    ' + c.yellow + '•' + c.reset + ' ' + d.name + tag + flag);
     }
     console.log();
     console.log('  ' + c.dim + 'A difference means one of two things, and this command cannot tell them apart:' + c.reset);
     console.log('  ' + c.dim + '  1. the shipped hook was fixed after you installed it, or' + c.reset);
     console.log('  ' + c.dim + '  2. you edited your copy on purpose.' + c.reset);
-    console.log('  ' + c.dim + 'Look at the difference before replacing anything:' + c.reset);
-    console.log('  ' + c.dim + '  diff ' + join(HOOKS_DIR, differs[0].name) +
-      ' ' + join(examplesDir, differs[0].name) + c.reset);
-    console.log('  ' + c.dim + 'Take the shipped version of one hook:' + c.reset);
-    console.log('  ' + c.dim + '  npx github:yurukusa/cc-safe-setup --install-example ' +
-      differs[0].name.replace(/\.sh$/, '') + c.reset);
+    const coreDiffs = differs.filter((d) => d.core);
+    if (coreDiffs.length > 0) {
+      console.log();
+      console.log('  ' + c.red + coreDiffs.length + ' of these are core guards' + c.reset +
+        c.dim + ' — installed by default, so a stale one is the difference between' + c.reset);
+      console.log('  ' + c.dim + 'blocking a dangerous command and silently approving it.' + c.reset);
+    }
+    const ex = differs.find((d) => !d.core);
+    if (ex) {
+      console.log();
+      console.log('  ' + c.dim + 'Look at the difference before replacing anything:' + c.reset);
+      console.log('  ' + c.dim + '  diff ' + join(HOOKS_DIR, ex.name) +
+        ' ' + join(examplesDir, ex.name) + c.reset);
+      console.log('  ' + c.dim + 'Take the shipped version of one hook:' + c.reset);
+      console.log('  ' + c.dim + '  npx github:yurukusa/cc-safe-setup --install-example ' +
+        ex.name.replace(/\.sh$/, '') + c.reset);
+    }
+    if (coreDiffs.length > 0) {
+      console.log();
+      console.log('  ' + c.dim + 'Core guards do not live in examples/, so --install-example cannot fetch' + c.reset);
+      console.log('  ' + c.dim + 'them. Print the shipped body and compare it yourself:' + c.reset);
+      console.log('  ' + c.dim + '  npx github:yurukusa/cc-safe-setup --show-core ' +
+        coreDiffs[0].name.replace(/\.sh$/, '') + c.reset);
+    }
   }
 
   if (same.length > 0 && differs.length > 0) {
@@ -6484,6 +6542,7 @@ async function main() {
   if (VALIDATE) return validateHooks();
   if (SAFE_MODE) return safeMode(!SAFE_MODE_OFF);
   if (DOCTOR) return doctor();
+  if (SHOW_CORE_IDX !== -1) return showCore(SHOW_CORE);
   if (OUTDATED) return outdated();
   if (SIMULATE_CMD) return simulate(SIMULATE_CMD);
   if (PROTECT_PATH) return protect(PROTECT_PATH);
