@@ -1,3 +1,39 @@
+> **English reader: the report below is in Japanese. Here is what it found, so you can
+> judge the deliverable before deciding whether the language is a problem for you.**
+>
+> This is a real, unedited Full-Surface Audit report ($219 / ¥29,800), run against my own
+> setup — autonomous Claude Code sessions, running daily, in parallel. Same checks a client
+> gets. Only sensitive lines are masked. Measured 2026-08-12.
+>
+> The finding: **the safety net I ship and the safety net protecting me were different
+> programs under the same names.** Six dangerous command shapes that the shipped version
+> blocks were passing on my own machine. Of 515 shell calls containing `git push` in my
+> logs, **502 (97.5%) sat in a position my installed guard never looked at** — and reading
+> those through, **two real force-pushes had gone through unblocked** (2026-08-09, identified
+> verbatim), while that hook's own description claims it stops force-push on every branch.
+> Of 27 registered hooks, 4 share a name with something I ship and **all 4 differ**; the
+> widest gap is 8,319 bytes running against 33,895 shipped. The leak runs both ways: one
+> hook is newer on my machine, meaning **customers are getting the older one**.
+>
+> None of that is visible from any single layer. `CLAUDE.md`, `settings.json`, the hooks,
+> the session logs and the CI config were each internally consistent. The contradiction
+> only exists *between* them, which is the whole reason this audit crosses five layers
+> instead of reading one file well.
+>
+> Section 8 lists what the audit looked for and did **not** find — instruction files,
+> settings and CI held no harmful contradiction. **What was searched for and came back
+> empty is part of the deliverable too.**
+>
+> **On language:** this report is the Japanese form. The two $29 samples linked from the
+> README ([CLAUDE.md](claude-md-audit-sample.md), [Token Burn](token-burn-audit-sample.md))
+> are the English form of a report, if you want to see the shape in English first.
+> SERVICES.md states the Japanese option explicitly: order and brief in Japanese, and the
+> report comes back in Japanese.
+>
+> Ordering, scope, refund terms and the private file-handover route are in
+> [SERVICES.md](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800)
+> — nothing is ever run in your environment, and nothing goes into a public issue.
+
 # 見本：Full-Surface Audit（運用の全面の監査）
 
 これは実際の報告書だ。[¥29,800 の Full-Surface Audit](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800) の納品物そのものを、見本として公開している。機微な行だけ伏せてあり、それ以外は手を入れていない。
