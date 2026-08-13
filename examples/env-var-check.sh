@@ -43,7 +43,7 @@ if echo "$COMMAND" | grep -qiE 'export\s+(API_KEY|SECRET|TOKEN|PASSWORD|CREDENTI
 fi
 
 # Check for hardcoded key patterns (sk-, pk-, ghp_, etc.)
-if echo "$COMMAND" | grep -qE 'export\s+\w+=.*(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20,})'; then
+if echo "$COMMAND" | grep -qE 'export\s+\w+=.*((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20,})'; then
     echo "BLOCKED: Hardcoded API key detected in export command" >&2
     echo "Use: export VAR=\$(cat ~/.credentials/key)" >&2
     exit 2

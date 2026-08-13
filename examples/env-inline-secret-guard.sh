@@ -32,7 +32,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 # Detect inline secrets: known API key prefixes (20+ chars)
 # sk- (OpenAI), ghp_/ghu_ (GitHub), AKIA (AWS)
-if echo "$COMMAND" | grep -qE '(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|ghu_[a-zA-Z0-9]{36}|AKIA[0-9A-Z]{16}|xoxb-[0-9]+-[0-9]+-[a-zA-Z0-9]+)'; then
+if echo "$COMMAND" | grep -qE '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|ghp_[a-zA-Z0-9]{36}|ghu_[a-zA-Z0-9]{36}|AKIA[0-9A-Z]{16}|xoxb-[0-9]+-[0-9]+-[a-zA-Z0-9]+)'; then
   echo "BLOCKED: Possible secret/credential detected in command." >&2
   echo "Use environment variables instead of inline secrets." >&2
   exit 2

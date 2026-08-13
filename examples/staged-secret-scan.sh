@@ -64,7 +64,7 @@ if echo "$DIFF" | grep -qE '^\+.*AKIA[0-9A-Z]{16}'; then
 fi
 
 # Common API key prefixes
-if echo "$DIFF" | grep -qE '^\+.*(sk-[a-zA-Z0-9]{20,}|pk_[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20}|xoxb-[0-9]{10,})'; then
+if echo "$DIFF" | grep -qE '^\+.*((.*[^A-Za-z0-9])?sk-[A-Za-z0-9_-]{20,}|pk_[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20}|xoxb-[0-9]{10,})'; then
     echo "BLOCKED: API key/token detected in staged changes" >&2
     FOUND=1
 fi
