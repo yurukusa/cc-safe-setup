@@ -1606,23 +1606,32 @@ async function audit() {
   // space-free, script-shaped tokens count; resolution is tried against every
   // plausible root; and "never registered" is decided against the raw text of
   // every settings file that could register it, not just the user one.
+  // CLAUDE_BASE and HOME are the same for a plain install and different for an
+  // isolated one, so both have to be read. Reading only CLAUDE_BASE drops the
+  // user's global layer the moment CLAUDE_PROJECT_DIR is set, and the check
+  // then goes silent on a real finding -- the same shape as the mis-report
+  // fixed in #1046, where the diagnosis did not follow the installer.
   const settingsTexts = [];
-  for (const sp of [
-    SETTINGS_PATH,
-    join(CLAUDE_BASE, '.claude', 'settings.local.json'),
-    join(process.cwd(), '.claude', 'settings.json'),
-    join(process.cwd(), '.claude', 'settings.local.json')
-  ]) {
-    try { if (existsSync(sp)) settingsTexts.push(readFileSync(sp, 'utf-8')); } catch {}
+  const seenPaths = new Set();
+  const readOnce = (p) => {
+    if (seenPaths.has(p)) return;
+    seenPaths.add(p);
+    try { if (existsSync(p)) settingsTexts.push(readFileSync(p, 'utf-8')); } catch {}
+  };
+  for (const base of [CLAUDE_BASE, HOME, process.cwd()]) {
+    readOnce(join(base, '.claude', 'settings.json'));
+    readOnce(join(base, '.claude', 'settings.local.json'));
   }
   const registrationText = settingsTexts.join('\n');
 
-  const layerFiles = [
+  const layerFiles = [...new Set([
     join(process.cwd(), 'CLAUDE.md'),
     join(process.cwd(), '.claude', 'CLAUDE.md'),
-    join(CLAUDE_BASE, '.claude', 'CLAUDE.md')
-  ].filter(p => { try { return existsSync(p); } catch { return false; } });
+    join(CLAUDE_BASE, '.claude', 'CLAUDE.md'),
+    join(HOME, '.claude', 'CLAUDE.md')
+  ])].filter(p => { try { return existsSync(p); } catch { return false; } });
 
+  const hookDirs = [...new Set([HOOKS_DIR, join(HOME, '.claude', 'hooks')])];
   const namedScripts = new Map();
   for (const layer of layerFiles) {
     let text = '';
@@ -1648,8 +1657,9 @@ async function audit() {
         roots.push(join(dirname(layer), tok));
         roots.push(join(process.cwd(), tok));
         roots.push(join(CLAUDE_BASE, '.claude', tok));
+        roots.push(join(HOME, '.claude', tok));
       }
-      roots.push(join(HOOKS_DIR, base));
+      for (const hd of hookDirs) roots.push(join(hd, base));
       const resolved = roots.find(p => { try { return existsSync(p); } catch { return false; } }) || null;
       namedScripts.set(tok, { base, resolved });
     }
@@ -1663,9 +1673,12 @@ async function audit() {
       // Only a file sitting in the hooks directory can be "registered". A helper
       // script your rules tell *you* to run has no business in settings.json,
       // and flagging it would be the false positive that kills the report.
-      let inHooksDir = false;
-      try { inHooksDir = existsSync(join(HOOKS_DIR, info.base)); } catch {}
-      if (!inHooksDir) continue;
+      let hooksHome = null;
+      for (const hd of hookDirs) {
+        try { if (existsSync(join(hd, info.base))) { hooksHome = hd; break; } } catch {}
+      }
+      if (!hooksHome) continue;
+      info.hooksHome = hooksHome;
       if (!registrationText.includes(info.base)) unregistered.push(tok);
     }
     const sample = (arr) => arr.slice(0, 4).join(', ') + (arr.length > 4 ? ', …' : '');
@@ -1680,7 +1693,7 @@ async function audit() {
     if (unregistered.length > 0) {
       risks.push({
         severity: 'HIGH',
-        issue: `${unregistered.length} hook script(s) named by CLAUDE.md sit in ${HOOKS_DIR} but appear in no settings file (${sample(unregistered)}) — they exist, so every existence check passes, and they never run`,
+        issue: `${unregistered.length} hook script(s) named by CLAUDE.md sit in ${namedScripts.get(unregistered[0]).hooksHome} but appear in no settings file (${sample(unregistered)}) — they exist, so every existence check passes, and they never run`,
         fix: 'npx github:yurukusa/cc-safe-setup --doctor   # then register the ones you meant to keep, or delete them so the rule stops promising a guard you do not have'
       });
     }
