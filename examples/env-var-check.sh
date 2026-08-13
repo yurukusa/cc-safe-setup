@@ -43,7 +43,18 @@ if echo "$COMMAND" | grep -qiE 'export\s+(API_KEY|SECRET|TOKEN|PASSWORD|CREDENTI
 fi
 
 # Check for hardcoded key patterns (sk-, pk-, ghp_, etc.)
-if echo "$COMMAND" | grep -qE 'export\s+\w+=.*((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20,})'; then
+if echo "$COMMAND" | grep -qE 'export\s+\w+=.*(ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20,})'; then
+    echo "BLOCKED: Hardcoded API key detected in export command" >&2
+    echo "Use: export VAR=\$(cat ~/.credentials/key)" >&2
+    exit 2
+fi
+
+# OpenAI keys. 2026-08: いまの鍵は `sk-proj-` の形で区切りを含むため文字集合に `-` `_` を入れる。
+# 入れると `disk-usage-…` `task-management-…` の中の `sk-` へ当たるので左の境界が要る。
+# ★ただし `export\s+\w+=` が境界にしたい `=` を先に食ってしまうので、
+#   同じ grep の中に書くと `export API_KEY=sk-…` に当たらなくなる（既存のテストで判明）。
+#   そこで規則を切り出し、「`=` の直後」と「途中」を分けて書く。
+if echo "$COMMAND" | grep -qE 'export\s+\w+=(sk-[A-Za-z0-9_-]{20,}|.*[^A-Za-z0-9]sk-[A-Za-z0-9_-]{20,})'; then
     echo "BLOCKED: Hardcoded API key detected in export command" >&2
     echo "Use: export VAR=\$(cat ~/.credentials/key)" >&2
     exit 2
