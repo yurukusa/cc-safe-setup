@@ -354,7 +354,7 @@ if [ -z "$MATCHED" ] && [ -n "${CC_BUYER_PRIVACY_NAMES:-}" ] && [ -r "$CC_BUYER_
 
 ---
 
-同じ検査を自分の運用に当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[SERVICES.md の第3節](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800)にまとめてある（¥29,800・72時間・層をまたぐ矛盾がひとつも出なければ全額返金）。注文は [Ko-fi](https://ko-fi.com/yurukusa/commissions) から。
+同じ検査を自分の運用に当ててほしい方へ。価格・納期・返金の条件・送っていただくものは、[日本語の説明ページ](https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html)にまとめてある（¥29,800・72時間・層をまたぐ矛盾がひとつも出なければ全額返金）。英語の正本は [SERVICES.md の第3節](https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800)。注文は [Ko-fi](https://ko-fi.com/yurukusa/commissions) から。
 
 **セッションの記録や設定を、公開される場所（issue など）へ貼らないでください。** 非公開の受け渡しの経路をこちらから返す。
 
