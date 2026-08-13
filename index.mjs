@@ -1508,9 +1508,33 @@ async function audit() {
   }
 
   // 7. Check for CLAUDE.md
+  //
+  // Claude Code walks up the directory tree to find CLAUDE.md, so the audit has
+  // to walk up too. Looking only at the working directory told anyone who ran
+  // this from a subdirectory of their own project "No CLAUDE.md found" while
+  // Claude Code was loading one the whole time. The walk stops at the first
+  // directory holding .git (that is the project root), at HOME, or at the
+  // filesystem root, whichever comes first.
   const CC_DIR = join(HOME, '.claude');
-  const claudeMdPaths = ['CLAUDE.md', '.claude/CLAUDE.md', join(CC_DIR, 'CLAUDE.md')];
-  const hasClaudeMd = claudeMdPaths.some(p => existsSync(p));
+  const ancestorDirs = [];
+  {
+    let d = process.cwd();
+    for (let i = 0; i < 24; i++) {
+      ancestorDirs.push(d);
+      let atRoot = false;
+      try { atRoot = existsSync(join(d, '.git')); } catch {}
+      if (atRoot || d === HOME) break;
+      const parent = dirname(d);
+      if (parent === d) break;
+      d = parent;
+    }
+  }
+  const claudeMdPaths = [...new Set([
+    ...ancestorDirs.flatMap(d => [join(d, 'CLAUDE.md'), join(d, '.claude', 'CLAUDE.md')]),
+    join(CC_DIR, 'CLAUDE.md'),
+    join(CLAUDE_BASE, '.claude', 'CLAUDE.md')
+  ])];
+  const hasClaudeMd = claudeMdPaths.some(p => { try { return existsSync(p); } catch { return false; } });
   if (!hasClaudeMd) {
     risks.push({
       severity: 'MEDIUM',
@@ -1606,23 +1630,30 @@ async function audit() {
   // space-free, script-shaped tokens count; resolution is tried against every
   // plausible root; and "never registered" is decided against the raw text of
   // every settings file that could register it, not just the user one.
+  // CLAUDE_BASE and HOME are the same for a plain install and different for an
+  // isolated one, so both have to be read. Reading only CLAUDE_BASE drops the
+  // user's global layer the moment CLAUDE_PROJECT_DIR is set, and the check
+  // then goes silent on a real finding -- the same shape as the mis-report
+  // fixed in #1046, where the diagnosis did not follow the installer.
   const settingsTexts = [];
-  for (const sp of [
-    SETTINGS_PATH,
-    join(CLAUDE_BASE, '.claude', 'settings.local.json'),
-    join(process.cwd(), '.claude', 'settings.json'),
-    join(process.cwd(), '.claude', 'settings.local.json')
-  ]) {
-    try { if (existsSync(sp)) settingsTexts.push(readFileSync(sp, 'utf-8')); } catch {}
+  const seenPaths = new Set();
+  const readOnce = (p) => {
+    if (seenPaths.has(p)) return;
+    seenPaths.add(p);
+    try { if (existsSync(p)) settingsTexts.push(readFileSync(p, 'utf-8')); } catch {}
+  };
+  for (const base of [CLAUDE_BASE, HOME, process.cwd()]) {
+    readOnce(join(base, '.claude', 'settings.json'));
+    readOnce(join(base, '.claude', 'settings.local.json'));
   }
   const registrationText = settingsTexts.join('\n');
 
-  const layerFiles = [
-    join(process.cwd(), 'CLAUDE.md'),
-    join(process.cwd(), '.claude', 'CLAUDE.md'),
-    join(CLAUDE_BASE, '.claude', 'CLAUDE.md')
-  ].filter(p => { try { return existsSync(p); } catch { return false; } });
+  // Same set the check above resolves: every ancestor up to the project root,
+  // plus the user layer. A rule two directories up is still a rule that binds.
+  const layerFiles = claudeMdPaths
+    .filter(p => { try { return existsSync(p); } catch { return false; } });
 
+  const hookDirs = [...new Set([HOOKS_DIR, join(HOME, '.claude', 'hooks')])];
   const namedScripts = new Map();
   for (const layer of layerFiles) {
     let text = '';
@@ -1633,6 +1664,12 @@ async function audit() {
       // an extension Claude Code can actually run as a hook.
       if (!/^[\w./~@+-]+\.(sh|mjs|py|js)$/.test(tok)) continue;
       if (tok.includes('*') || tok.startsWith('http')) continue;
+      // Build output is absent on a fresh checkout and present after `npm run
+      // build`, so its absence says nothing about the rule. Measured against 40
+      // public CLAUDE.md files on 2026-08-13: 13 named a script, and one of the
+      // two that named something missing was `dist/extension.js` — a compiled
+      // artifact, not a broken reference.
+      if (/(^|\/)(dist|build|out|target|coverage|node_modules|\.next|\.nuxt|__pycache__)\//.test(tok)) continue;
       if (namedScripts.has(tok)) continue;
       const base = tok.split('/').pop();
       const roots = [];
@@ -1642,8 +1679,9 @@ async function audit() {
         roots.push(join(dirname(layer), tok));
         roots.push(join(process.cwd(), tok));
         roots.push(join(CLAUDE_BASE, '.claude', tok));
+        roots.push(join(HOME, '.claude', tok));
       }
-      roots.push(join(HOOKS_DIR, base));
+      for (const hd of hookDirs) roots.push(join(hd, base));
       const resolved = roots.find(p => { try { return existsSync(p); } catch { return false; } }) || null;
       namedScripts.set(tok, { base, resolved });
     }
@@ -1657,9 +1695,12 @@ async function audit() {
       // Only a file sitting in the hooks directory can be "registered". A helper
       // script your rules tell *you* to run has no business in settings.json,
       // and flagging it would be the false positive that kills the report.
-      let inHooksDir = false;
-      try { inHooksDir = existsSync(join(HOOKS_DIR, info.base)); } catch {}
-      if (!inHooksDir) continue;
+      let hooksHome = null;
+      for (const hd of hookDirs) {
+        try { if (existsSync(join(hd, info.base))) { hooksHome = hd; break; } } catch {}
+      }
+      if (!hooksHome) continue;
+      info.hooksHome = hooksHome;
       if (!registrationText.includes(info.base)) unregistered.push(tok);
     }
     const sample = (arr) => arr.slice(0, 4).join(', ') + (arr.length > 4 ? ', …' : '');
@@ -1674,7 +1715,7 @@ async function audit() {
     if (unregistered.length > 0) {
       risks.push({
         severity: 'HIGH',
-        issue: `${unregistered.length} hook script(s) named by CLAUDE.md sit in ${HOOKS_DIR} but appear in no settings file (${sample(unregistered)}) — they exist, so every existence check passes, and they never run`,
+        issue: `${unregistered.length} hook script(s) named by CLAUDE.md sit in ${namedScripts.get(unregistered[0]).hooksHome} but appear in no settings file (${sample(unregistered)}) — they exist, so every existence check passes, and they never run`,
         fix: 'npx github:yurukusa/cc-safe-setup --doctor   # then register the ones you meant to keep, or delete them so the rule stops promising a guard you do not have'
       });
     }
