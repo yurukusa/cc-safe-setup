@@ -34,7 +34,7 @@ if echo "$OUTPUT" | grep -qiE "$SENSITIVE_PATHS"; then
 fi
 
 # Check for data that looks like secrets in output
-if echo "$OUTPUT" | grep -qE 'sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{30,}|-----BEGIN.*KEY|AKIA[A-Z0-9]{16}'; then
+if echo "$OUTPUT" | grep -qE '(^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|ghp_[a-zA-Z0-9]{30,}|-----BEGIN.*KEY|AKIA[A-Z0-9]{16}'; then
     echo "⚠ MCP DATA BOUNDARY: MCP tool output contains potential secrets" >&2
     echo "  Tool: $TOOL" >&2
     echo "  Review output for leaked credentials." >&2
