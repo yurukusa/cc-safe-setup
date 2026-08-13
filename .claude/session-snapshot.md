@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T15:27:19+09:00
+Updated: 2026-08-13T15:27:25+09:00
 
 ## Git
 - Branch: `feat/audit-cross-layer-build-artifacts`
@@ -7,7 +7,7 @@ Updated: 2026-08-13T15:27:19+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: ce0dff84 checkpoint: auto-save 15:27:11
+- Last commit: b21bf295 recovery: pre-compact checkpoint (1 files, 20260813-062725)
 
 ## Recent Files
 ```
