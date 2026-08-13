@@ -1592,6 +1592,97 @@ async function audit() {
     }
   }
 
+  // 12. Cross-layer check: a rule that names a safety net which is not there.
+  //
+  // Every check above reads one layer. This one reads two against each other:
+  // the instructions in CLAUDE.md, and the hooks actually registered in the
+  // settings files. A rule that names a guard by filename passes every check
+  // you can run on the rule (the sentence is fine) and every check you can run
+  // on the config (the hooks that *are* registered are valid) — the
+  // contradiction lives between them, so nothing that reads one file sees it.
+  //
+  // Precision is worth more than recall here: telling someone a working guard
+  // is inert would make them distrust the whole report. So only backticked,
+  // space-free, script-shaped tokens count; resolution is tried against every
+  // plausible root; and "never registered" is decided against the raw text of
+  // every settings file that could register it, not just the user one.
+  const settingsTexts = [];
+  for (const sp of [
+    SETTINGS_PATH,
+    join(CLAUDE_BASE, '.claude', 'settings.local.json'),
+    join(process.cwd(), '.claude', 'settings.json'),
+    join(process.cwd(), '.claude', 'settings.local.json')
+  ]) {
+    try { if (existsSync(sp)) settingsTexts.push(readFileSync(sp, 'utf-8')); } catch {}
+  }
+  const registrationText = settingsTexts.join('\n');
+
+  const layerFiles = [
+    join(process.cwd(), 'CLAUDE.md'),
+    join(process.cwd(), '.claude', 'CLAUDE.md'),
+    join(CLAUDE_BASE, '.claude', 'CLAUDE.md')
+  ].filter(p => { try { return existsSync(p); } catch { return false; } });
+
+  const namedScripts = new Map();
+  for (const layer of layerFiles) {
+    let text = '';
+    try { text = readFileSync(layer, 'utf-8'); } catch { continue; }
+    for (const m of text.matchAll(/`([^`\n]+)`/g)) {
+      const tok = m[1].trim();
+      // A script this check can reason about: one token, no glob, no URL, and
+      // an extension Claude Code can actually run as a hook.
+      if (!/^[\w./~@+-]+\.(sh|mjs|py|js)$/.test(tok)) continue;
+      if (tok.includes('*') || tok.startsWith('http')) continue;
+      if (namedScripts.has(tok)) continue;
+      const base = tok.split('/').pop();
+      const roots = [];
+      if (tok.startsWith('~/')) roots.push(join(HOME, tok.slice(2)));
+      else if (tok.startsWith('/')) roots.push(tok);
+      else {
+        roots.push(join(dirname(layer), tok));
+        roots.push(join(process.cwd(), tok));
+        roots.push(join(CLAUDE_BASE, '.claude', tok));
+      }
+      roots.push(join(HOOKS_DIR, base));
+      const resolved = roots.find(p => { try { return existsSync(p); } catch { return false; } }) || null;
+      namedScripts.set(tok, { base, resolved });
+    }
+  }
+
+  if (namedScripts.size > 0) {
+    const missing = [];
+    const unregistered = [];
+    for (const [tok, info] of namedScripts) {
+      if (!info.resolved) { missing.push(tok); continue; }
+      // Only a file sitting in the hooks directory can be "registered". A helper
+      // script your rules tell *you* to run has no business in settings.json,
+      // and flagging it would be the false positive that kills the report.
+      let inHooksDir = false;
+      try { inHooksDir = existsSync(join(HOOKS_DIR, info.base)); } catch {}
+      if (!inHooksDir) continue;
+      if (!registrationText.includes(info.base)) unregistered.push(tok);
+    }
+    const sample = (arr) => arr.slice(0, 4).join(', ') + (arr.length > 4 ? ', …' : '');
+
+    if (missing.length > 0) {
+      risks.push({
+        severity: 'HIGH',
+        issue: `${missing.length} rule(s) in CLAUDE.md name a script that exists nowhere I looked (${sample(missing)}) — the rule reads fine and the config is valid, so no single-file check can surface this`,
+        fix: 'Open each rule and either create the file or delete the rule. A rule naming a file Claude cannot find is not a weak rule, it is an unfollowable one.'
+      });
+    }
+    if (unregistered.length > 0) {
+      risks.push({
+        severity: 'HIGH',
+        issue: `${unregistered.length} hook script(s) named by CLAUDE.md sit in ${HOOKS_DIR} but appear in no settings file (${sample(unregistered)}) — they exist, so every existence check passes, and they never run`,
+        fix: 'npx github:yurukusa/cc-safe-setup --doctor   # then register the ones you meant to keep, or delete them so the rule stops promising a guard you do not have'
+      });
+    }
+    if (missing.length === 0 && unregistered.length === 0) {
+      good.push('Every script named in CLAUDE.md resolves, and the hook-directory ones are registered (' + namedScripts.size + ' checked)');
+    }
+  }
+
   // Display results
   if (good.length > 0) {
     console.log(c.bold + '  ✓ What\'s working:' + c.reset);
