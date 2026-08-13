@@ -64,7 +64,16 @@ if echo "$DIFF" | grep -qE '^\+.*AKIA[0-9A-Z]{16}'; then
 fi
 
 # Common API key prefixes
-if echo "$DIFF" | grep -qE '^\+.*((.*[^A-Za-z0-9])?sk-[A-Za-z0-9_-]{20,}|pk_[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20}|xoxb-[0-9]{10,})'; then
+if echo "$DIFF" | grep -qE '^\+.*(pk_[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20}|xoxb-[0-9]{10,})'; then
+    echo "BLOCKED: API key/token detected in staged changes" >&2
+    FOUND=1
+fi
+
+# OpenAI keys. 2026-08: いまの鍵は `sk-proj-` で始まり区切りの `-` `_` を含むので、
+# 文字集合に `-` `_` を入れる。ただし入れた途端に `disk-usage-…` `task-management-…`
+# の中の `sk-` へ当たるようになるため、左の境界を必ず一組で持たせる。
+# 差分の行は `^\+` を先に食うので、直後に来る場合と途中に来る場合を分けて書く。
+if echo "$DIFF" | grep -qE '^\+(sk-[A-Za-z0-9_-]{20,}|.*[^A-Za-z0-9]sk-[A-Za-z0-9_-]{20,})'; then
     echo "BLOCKED: API key/token detected in staged changes" >&2
     FOUND=1
 fi

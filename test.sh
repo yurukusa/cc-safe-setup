@@ -10182,6 +10182,20 @@ test_ex output-credential-scan.sh '{"tool_result":{"stdout":"KEY=sk-abc123456789
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123456789"}}' 0 "cred-scan: detects ghp_ token (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"AWS_KEY=AKIAIOSFODNN7EXAMPLE"}}' 0 "cred-scan: detects AWS key (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"slack_token=xoxb-1234-abcdef"}}' 0 "cred-scan: detects Slack xoxb token (exit 0 warn)"
+
+# 2026-08: いまの OpenAI の鍵は `sk-proj-` で始まり区切りを含む。
+# 文字集合に `-` `_` が無かったため、4本のフックがこの形を素通りさせていた。
+# 直したあとの退行を捕まえるため、3種類を一組で置く
+#   (a) いまの形を捕まえるか (b) 旧来の形も捕まえ続けるか (c) 普通の名前で誤検出しないか
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"KEY=sk-proj-abcdefghij0123456789-abcdefghij0123456789"}}' 0 "cred-scan: detects sk-proj- key (current OpenAI format)"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"path=reports/disk-usage-summary-20260813-full.txt"}}' 0 "cred-scan: ordinary disk- filename is not a key"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"path=data/task-management-system-configuration.json"}}' 0 "cred-scan: ordinary task- filename is not a key"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-proj-abcdefghij0123456789-abcdefghij0123456789"}}' 2 "env-inline: blocks sk-proj- key (current OpenAI format)"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-abc123456789012345678901234567890123"}}' 2 "env-inline: still blocks legacy sk- key"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo reports/disk-usage-summary-20260813-full.txt"}}' 0 "env-inline: ordinary disk- filename passes"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo data/task-management-system-configuration.json"}}' 0 "env-inline: ordinary task- filename passes"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__db__q","tool_output":"sk-proj-abcdefghij0123456789-abcdefghij0123456789"}' 2 "mcp-boundary: blocks sk-proj- key (current OpenAI format)"
+test_ex mcp-data-boundary.sh '{"tool_name":"mcp__db__q","tool_output":"reports/disk-usage-summary-20260813-full.txt"}' 0 "mcp-boundary: ordinary disk- filename passes"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0"}}' 0 "cred-scan: detects JWT token (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"PATH=/usr/bin:/usr/local/bin"}}' 0 "cred-scan: PATH variable no warning"
 echo ""
