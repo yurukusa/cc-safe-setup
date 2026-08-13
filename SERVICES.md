@@ -4,6 +4,21 @@ If you want more than what the free tools give you, there are four paid options.
 
 This page is in English, but Japanese orders are welcome for all four: order and write your request in Japanese and the report comes back in Japanese. 日本語でも受け付けます（注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします）。
 
+## Which one is for you
+
+Pick by what your setup actually looks like, not by what sounds most thorough. The most expensive one is the wrong choice for most people, and its own section says so.
+
+| What your setup looks like right now | Start here |
+|---|---|
+| You have not run the free audit yet | Run `--audit` from this repo first. It is free, it takes seconds, and it may answer your question. Come back only if it did not. |
+| One `CLAUDE.md`, no hooks of your own, no CI | **§1 CLAUDE.md Audit — $29.** One file, read closely. |
+| Your bill or your rate limit is the problem | **§2 Token Burn Audit — $29.** Reads your session logs, not your rules. |
+| `CLAUDE.md` in more than one layer, **and** hooks you wrote yourself, **and** CI | **§3 Full-Surface Audit — $219.** The only one that reads layers *against each other*. |
+| Only one layer — no hooks, no CI | **Not §3.** A contradiction between layers cannot exist when there is only one layer. §1 is the right size. |
+| You want to keep up with new failure patterns rather than audit anything | **§4 CC Safety Lab — ¥500/month.** |
+
+**日本語の説明ページ:** [CLAUDE.md 監査（¥3,980）](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html)／[Token Burn 監査（¥3,980）](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html)／[Full-Surface 監査（¥29,800）](https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html)。価格・納期・返金の条件・含まないもの・送っていただくものを日本語で書いてあります。
+
 ---
 
 ## 1. CLAUDE.md Audit — $29 (¥3,980)
