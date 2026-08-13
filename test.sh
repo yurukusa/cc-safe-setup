@@ -10194,8 +10194,20 @@ test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-proj-abcde
 test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-abc123456789012345678901234567890123"}}' 2 "env-inline: still blocks legacy sk- key"
 test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo reports/disk-usage-summary-20260813-full.txt"}}' 0 "env-inline: ordinary disk- filename passes"
 test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo data/task-management-system-configuration.json"}}' 0 "env-inline: ordinary task- filename passes"
-test_ex mcp-data-boundary.sh '{"tool_name":"mcp__db__q","tool_output":"sk-proj-abcdefghij0123456789-abcdefghij0123456789"}' 2 "mcp-boundary: blocks sk-proj- key (current OpenAI format)"
-test_ex mcp-data-boundary.sh '{"tool_name":"mcp__db__q","tool_output":"reports/disk-usage-summary-20260813-full.txt"}' 0 "mcp-boundary: ordinary disk- filename passes"
+# mcp-data-boundary は助言だけで常に exit 0 なので、終了コードでは判別できない。
+# 警告の文が実際に出るかを見る（exit 0 を期待するだけのテストは、出ても出なくても通る）
+MCPB_OUT=$(echo '{"tool_name":"mcp__db__q","tool_output":"sk-proj-abcdefghij0123456789-abcdefghij0123456789"}' | bash "$EXDIR/mcp-data-boundary.sh" 2>&1)
+if echo "$MCPB_OUT" | grep -q "MCP DATA BOUNDARY"; then
+    echo "  PASS: mcp-boundary: warns on sk-proj- key (current OpenAI format)"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: mcp-boundary: no warning for sk-proj- key"; FAIL=$((FAIL + 1))
+fi
+MCPB_OUT=$(echo '{"tool_name":"mcp__db__q","tool_output":"reports/disk-usage-summary-20260813-full.txt"}' | bash "$EXDIR/mcp-data-boundary.sh" 2>&1)
+if echo "$MCPB_OUT" | grep -q "MCP DATA BOUNDARY"; then
+    echo "  FAIL: mcp-boundary: ordinary disk- filename wrongly flagged"; FAIL=$((FAIL + 1))
+else
+    echo "  PASS: mcp-boundary: ordinary disk- filename is not flagged"; PASS=$((PASS + 1))
+fi
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0"}}' 0 "cred-scan: detects JWT token (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"PATH=/usr/bin:/usr/local/bin"}}' 0 "cred-scan: PATH variable no warning"
 echo ""
