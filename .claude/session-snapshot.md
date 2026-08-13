@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T19:38:04+09:00
+Updated: 2026-08-13T19:40:14+09:00
 
 ## Git
 - Branch: `feat/name-team-pack-on-post-install-2026-08-13`
@@ -7,14 +7,14 @@ Updated: 2026-08-13T19:38:04+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 6c40ad24 checkpoint: auto-save 19:38:03
+- Last commit: 14fe6c45 いちばん高い本が、いちばん到達のある面で名前を持っていなかった
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./docs/README.ja.md
 ./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-13.md
-./docs/README.ja.md
 ./CHANGELOG.md
 ./README.md
 ./tests/audit-cross-layer-claudemd.test.sh
