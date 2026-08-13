@@ -1633,6 +1633,12 @@ async function audit() {
       // an extension Claude Code can actually run as a hook.
       if (!/^[\w./~@+-]+\.(sh|mjs|py|js)$/.test(tok)) continue;
       if (tok.includes('*') || tok.startsWith('http')) continue;
+      // Build output is absent on a fresh checkout and present after `npm run
+      // build`, so its absence says nothing about the rule. Measured against 40
+      // public CLAUDE.md files on 2026-08-13: 13 named a script, and one of the
+      // two that named something missing was `dist/extension.js` — a compiled
+      // artifact, not a broken reference.
+      if (/(^|\/)(dist|build|out|target|coverage|node_modules|\.next|\.nuxt|__pycache__)\//.test(tok)) continue;
       if (namedScripts.has(tok)) continue;
       const base = tok.split('/').pop();
       const roots = [];
