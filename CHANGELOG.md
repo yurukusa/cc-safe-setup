@@ -1,6 +1,32 @@
 # Changelog
 
 ## [Unreleased]
+- **`--audit` now reads two layers against each other, not just one.**
+  Every check it ran before this looked inside a single file. The new one compares
+  the safety nets your `CLAUDE.md` *names* against the hooks your settings files
+  actually *register*, and reports two things a single-file check cannot see:
+
+  | finding | why nothing else catches it |
+  |---|---|
+  | a rule names a script that exists nowhere | the sentence is well-formed, and the config is valid JSON with valid hooks |
+  | a hook sits in `~/.claude/hooks` but appears in no settings file | it exists, so every existence check passes — and it never runs |
+
+  This is the failure that cost me the most on my own machine. On 2026-08-12 a
+  full sweep found six dangerous command shapes that the shipped guards block
+  passing locally, and two real force-pushes that ran and were never stopped.
+
+  **Precision was chosen over recall, deliberately.** Only backticked, space-free,
+  runnable-extension tokens are considered; "never registered" is decided against
+  the raw text of the user, local *and* project settings files; and a script that
+  exists outside the hooks directory is never called unregistered, because a
+  helper your rules tell *you* to run has no business in a settings file.
+  Telling somebody a working guard is inert would make them stop reading the
+  whole report, which costs more than the finding is worth.
+
+  Controls run in both directions (`tests/audit-cross-layer-claudemd.test.sh`):
+  3 cases that must fire, 8 that must stay silent. Measured against the 10 real
+  `CLAUDE.md` files on this machine: one true finding (a project whose rules
+  name a Live2D core file that is not in the repository), zero false positives.
 - **Fix: six hooks that read `~/.claude/projects/` looked in a directory that never existed.**
   Claude Code names a project directory by replacing every `/` in the absolute working
   directory with `-`, and the leading slash becomes a leading dash that stays:
