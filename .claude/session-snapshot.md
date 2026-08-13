@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T19:35:53+09:00
+Updated: 2026-08-13T19:36:28+09:00
 
 ## Git
 - Branch: `feat/name-team-pack-on-post-install-2026-08-13`
@@ -7,7 +7,7 @@ Updated: 2026-08-13T19:35:53+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 87005027 checkpoint: auto-save 19:35:52
+- Last commit: c461d958 checkpoint: auto-save 19:36:19
 
 ## Recent Files
 ```
