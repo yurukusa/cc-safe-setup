@@ -1508,9 +1508,33 @@ async function audit() {
   }
 
   // 7. Check for CLAUDE.md
+  //
+  // Claude Code walks up the directory tree to find CLAUDE.md, so the audit has
+  // to walk up too. Looking only at the working directory told anyone who ran
+  // this from a subdirectory of their own project "No CLAUDE.md found" while
+  // Claude Code was loading one the whole time. The walk stops at the first
+  // directory holding .git (that is the project root), at HOME, or at the
+  // filesystem root, whichever comes first.
   const CC_DIR = join(HOME, '.claude');
-  const claudeMdPaths = ['CLAUDE.md', '.claude/CLAUDE.md', join(CC_DIR, 'CLAUDE.md')];
-  const hasClaudeMd = claudeMdPaths.some(p => existsSync(p));
+  const ancestorDirs = [];
+  {
+    let d = process.cwd();
+    for (let i = 0; i < 24; i++) {
+      ancestorDirs.push(d);
+      let atRoot = false;
+      try { atRoot = existsSync(join(d, '.git')); } catch {}
+      if (atRoot || d === HOME) break;
+      const parent = dirname(d);
+      if (parent === d) break;
+      d = parent;
+    }
+  }
+  const claudeMdPaths = [...new Set([
+    ...ancestorDirs.flatMap(d => [join(d, 'CLAUDE.md'), join(d, '.claude', 'CLAUDE.md')]),
+    join(CC_DIR, 'CLAUDE.md'),
+    join(CLAUDE_BASE, '.claude', 'CLAUDE.md')
+  ])];
+  const hasClaudeMd = claudeMdPaths.some(p => { try { return existsSync(p); } catch { return false; } });
   if (!hasClaudeMd) {
     risks.push({
       severity: 'MEDIUM',
@@ -1624,12 +1648,10 @@ async function audit() {
   }
   const registrationText = settingsTexts.join('\n');
 
-  const layerFiles = [...new Set([
-    join(process.cwd(), 'CLAUDE.md'),
-    join(process.cwd(), '.claude', 'CLAUDE.md'),
-    join(CLAUDE_BASE, '.claude', 'CLAUDE.md'),
-    join(HOME, '.claude', 'CLAUDE.md')
-  ])].filter(p => { try { return existsSync(p); } catch { return false; } });
+  // Same set the check above resolves: every ancestor up to the project root,
+  // plus the user layer. A rule two directories up is still a rule that binds.
+  const layerFiles = claudeMdPaths
+    .filter(p => { try { return existsSync(p); } catch { return false; } });
 
   const hookDirs = [...new Set([HOOKS_DIR, join(HOME, '.claude', 'hooks')])];
   const namedScripts = new Map();
