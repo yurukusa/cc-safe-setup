@@ -700,6 +700,13 @@
     "snippet": "Claude Code frequently runs git show HEAD --no-stat, but --no-stat is not a valid git-show flag. This causes exit code 128 errors and wastes context on retries."
   },
   {
+    "url": "full-surface-audit-jp.html",
+    "title": "層と層のあいだにしか現れない矛盾を読む監査（¥29,800・72時間）— cc-safe-setup",
+    "description": "CLAUDE.md・settings.json・hook・セッションの記録・CI の設定。この5つを互いに突き合わせて、どれか1枚を丁寧に読んでも出てこない矛盾だけを報告する書面の監査です。¥29,800、72時間以内、Markdown の報告書1本。見本は私自身の環境に当てた実物を全文公開しています。",
+    "keywords": "",
+    "snippet": "CLAUDE.md・settings.json・hook・セッションの記録・CI の設定。この5つを互いに突き合わせて、どれか1枚を丁寧に読んでも出てこない矛盾だけを報告します。¥29,800（約 $219）・72時間以内・Markdown 1本"
+  },
+  {
     "url": "getting-started.html",
     "title": "Getting Started — Make Claude Code Safe in 5 Minutes",
     "description": "Install Claude Code safety hooks in 30 seconds. Prevents rm -rf disasters, production database destruction, force-push to main, secret leaks. Step-by-step for beginners. npx github:yurukusa/cc-safe-setup.",

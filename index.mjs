@@ -6698,18 +6698,31 @@ async function main() {
   console.log('  ' + c.dim + '  Free 90-sec diagnostic (refund template if needed):' + c.reset);
   console.log('  ' + c.dim + '    https://htmlpreview.github.io/?https://gist.githubusercontent.com/yurukusa/d3a0e2403cc4078aa0183400c137d824/raw/wrong-charge-diagnostic.html' + c.reset);
   console.log('  ' + c.dim + '  Decision framework (stay / switch / hybridize):' + c.reset);
-  console.log('  ' + c.dim + '    https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=june15-cliff' + c.reset);
+  console.log('  ' + c.dim + '    https://yurukusa.gumroad.com/l/claude-code-migration-playbook?utm_source=cc-safe-setup-cli&utm_medium=post-install&utm_campaign=migration-decision' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — ¥11,373 / 12 purchases / 3 months');
-  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, monthly cluster digest)' + c.reset);
+  // 2026-08-13: 導入直後は「自分の設定に何の守りが有って何が無いか」を見た直後で、
+  // 書面監査の意図がいちばん高い瞬間。それなのにこのブロックは監査3件に一度も触れていなかった。
+  // README には在るが深さ73〜96%の位置で、この面(全インストール者が見る)より読まれていない。
+  console.log('  ' + c.blue + 'Written audits:' + c.reset + ' the part a hook cannot check — whether your own files contradict each other');
+  console.log('  ' + c.dim + '  CLAUDE.md Audit / Token Burn Audit — $29 (¥3,980) each, one kind of file, report in 48h' + c.reset);
+  console.log('  ' + c.dim + '  Full-Surface Audit — $219 (¥29,800), CLAUDE.md x settings.json x hooks x session logs x CI, 72h' + c.reset);
+  console.log('  ' + c.dim + '  All three publish their full deliverable before you buy, each one run against my own setup' + c.reset);
+  console.log('  ' + c.dim + '  (including where it found my own numbers and my own hooks to be wrong):' + c.reset);
+  console.log('  ' + c.dim + '    https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md' + c.reset);
+  console.log();
+  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases, ¥15,600 at list price, since March 2026');
+  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, 100 chapters, buyers get new ones free)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
-  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide  (free Chapters 1-3)' + c.reset);
-  console.log('  ' + c.dim + '  3 more titles at https://zenn.dev/yurukusa  (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
+  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide  (free Chapter 1)' + c.reset);
+  console.log('  ' + c.dim + '  10 more titles at https://zenn.dev/yurukusa  (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Recurring track:' + c.reset + ' CC Safety Lab Founder (¥500/mo, Ko-fi, grandfathered)');
   console.log('  ' + c.dim + '  Monthly digest of new failure clusters + cc-safe-setup hooks shipped that month.' + c.reset);
-  console.log('  ' + c.dim + '  June 2026: multi-account cluster (1,178 reactions). July: AGENTS.md interop (5,270 reactions).' + c.reset);
+  // 2026-08-13: ここは以前「June 2026: … July: …」と、配信していない号を配信済みのように書いていた。
+  // Ko-fi の投稿一覧を実測すると号は6本(04-23/04-24/05-08/05-15/05-22/08-08)で、6月と7月は落としている。
+  // tier の説明側は 2026-08-12 にそう直したのに、いちばん読まれるこの面に古い主張が残っていた。
+  console.log('  ' + c.dim + '  6 issues so far: 2026-04-23 / 04-24 / 05-08 / 05-15 / 05-22 / 08-08. June and July were missed.' + c.reset);
   console.log('  ' + c.dim + '    https://yurukusa.github.io/cc-safe-setup/safety-lab.html#en' + c.reset);
   console.log();
   // 2026-07-27: Claim-Verify Handbook はいま未公開(商品ページの is_published が false)。

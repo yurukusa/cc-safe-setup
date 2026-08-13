@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>層と層のあいだにしか現れない矛盾を読む監査（¥29,800・72時間）— cc-safe-setup</title>
+<meta name="description" content="CLAUDE.md・settings.json・hook・セッションの記録・CI の設定。この5つを互いに突き合わせて、どれか1枚を丁寧に読んでも出てこない矛盾だけを報告する書面の監査です。¥29,800、72時間以内、Markdown の報告書1本。見本は私自身の環境に当てた実物を全文公開しています。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="層と層のあいだにしか現れない矛盾を読む監査（¥29,800・72時間）">
+<meta property="og:description" content="どの層も単独では正常なのに、突き合わせると矛盾している。見本では、私が配っている安全網と私を守っている安全網が別のプログラムだったことが出ました。買う前に全文読めます。">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html">
+<style>
+:root { --blue:#2563eb; --dark:#1e293b; --gray:#64748b; --light:#f8fafc; --green:#059669; --amber:#b45309; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif; color:var(--dark); line-height:1.85; }
+.container { max-width:760px; margin:0 auto; padding:2rem 1.4rem 3rem; }
+h1 { font-size:1.62rem; line-height:1.45; margin-bottom:0.6rem; }
+h2 { font-size:1.22rem; margin:2.4rem 0 1rem; border-bottom:2px solid var(--blue); padding-bottom:0.3rem; }
+h3 { margin:1.4rem 0 0.4rem; font-size:1.05rem; }
+.subtitle { color:var(--gray); font-size:1.0rem; margin-bottom:1.6rem; }
+.lead { background:var(--light); border-left:4px solid var(--blue); border-radius:8px; padding:1.1rem 1.2rem; margin:1.2rem 0; }
+.free { background:#ecfdf5; border:1px solid #a7f3d0; border-left:4px solid var(--green); border-radius:8px; padding:1.1rem 1.2rem; margin:1.4rem 0; }
+.free strong { color:var(--green); }
+.honest { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--amber); border-radius:8px; padding:1rem 1.1rem; margin:1.2rem 0; font-size:0.95rem; }
+.honest strong { color:var(--amber); }
+.price { color:var(--green); font-weight:bold; font-size:1.08rem; }
+.cta { display:inline-block; background:var(--blue); color:#fff; padding:0.85rem 1.6rem; border-radius:6px; text-decoration:none; font-weight:bold; margin:0.5rem 0.4rem 0.5rem 0; }
+.cta:hover { background:#1d4ed8; }
+.cta.sub { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+ul, ol { padding-left:1.5rem; }
+li { margin-bottom:0.5rem; }
+code { background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:4px; font-size:0.92em; }
+table { border-collapse:collapse; width:100%; margin:0.8rem 0; font-size:0.93rem; }
+th,td { border:1px solid #e2e8f0; padding:0.55rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:var(--light); }
+blockquote { border-left:4px solid #cbd5e1; margin:1rem 0; padding:0.4rem 0 0.4rem 1rem; color:#334155; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #e2e8f0; color:var(--gray); font-size:0.85rem; }
+footer a, a { color:var(--blue); }
+.note { color:var(--gray); font-size:0.88rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>層と層のあいだにしか現れない矛盾を、あなたの設定から読む監査</h1>
+<p class="subtitle"><code>CLAUDE.md</code>・<code>settings.json</code>・hook・セッションの記録・CI の設定。この5つを互いに突き合わせて、どれか1枚を丁寧に読んでも出てこない矛盾だけを報告します。<span class="price">¥29,800（約 $219）・72時間以内・Markdown 1本</span></p>
+
+<div class="lead">
+設定を点検する道具は、たいてい<strong>1種類のファイルの中</strong>を見ます。文法が正しいか、書式が揃っているか、危ない値が入っていないか。<br>
+そこでは絶対に見つからない壊れ方があります。<strong>ルールが名前を挙げている安全網が、実際には登録されていない</strong>——このとき、ルールを検査しても正常、設定を検査しても正常です。矛盾は<strong>2枚を突き合わせた時にしか存在しない</strong>からです。この監査が読むのはそこだけです。
+</div>
+
+<h2>先にお読みください。無料で足りるなら、私は要りません</h2>
+
+<div class="free">
+<strong>「自分の設定にどの守りが有って、どれが無いか」を知りたいだけなら、無料で足ります。</strong>先に下の2つを試してください。ここで疑問が解けたなら、この先を読む必要はありません。
+<ul>
+<li><code>npx github:yurukusa/cc-safe-setup --audit</code> — いまの <code>settings.json</code> を走査して、どの種類の危険が守られていて、どれが守られていないかを表にします。<code>--ci</code> を付ければ CI でも回せます。</li>
+<li><a href="https://gist.github.com/yurukusa/df29f506af33368b03b1c5aeae85f04c">無料の自己点検（7つの観点・Gist）</a> — この監査で使っているのと同じ枠組みです。自分で当てられる方はこれで足ります。</li>
+</ul>
+</div>
+
+<p>これらが答えられないのは、次の一点だけです。</p>
+
+<div class="lead">
+<strong>「そのファイル1枚ずつは正しいのに、組み合わせると嘘になっていないか」</strong><br>
+1種類のファイルを読む検査は、その中の誤りしか出せません。層をまたぐ矛盾は、<strong>どの層から見ても正常に見える</strong>という性質を持っています。この監査は、その一点のために作りました。
+</div>
+
+<h2>見本の報告書を、買う前に全部読めます</h2>
+
+<p>お渡しするものと同じ形式の報告書を、全文公開しています。中身は<strong>私自身の環境に当てた本物</strong>です。自律で動く Claude Code のセッションを毎日並列で回している設定一式に、お客さんへ当てるのと同じ検査を当てました（測定日 2026-08-12）。機微な行だけ伏せてあり、それ以外は手を入れていません。</p>
+
+<p>その日に出た中でいちばん大きかったのは、この監査を売っている私自身についてでした。</p>
+
+<blockquote>
+私が配っている安全網と、私の機械を守っていた安全網は、<strong>同じ名前のついた別のプログラムだった</strong>。配布版が止める危険なコマンドの形6つが、自分の機械では素通りしていた。しかも <code>--outdated</code>——この漂流に気づくためだけに書いたコマンド——は、構造上そのファイルを見られなかった。
+</blockquote>
+
+<p>さらに、それがどれくらい効いていたかも、原理ではなく自分のログで数えました。<code>git push</code> を含む記録 515 件のうち <strong>502 件（97.5%）</strong>が、入っている hook の見ていない位置にありました。その 502 件を1行ずつ読み直したところ、<strong>止められずに実行された本物の強制 push が2件</strong>出てきました。その hook の説明文には「すべてのブランチで強制 push を止める」と書いてあります。</p>
+
+<p><strong>自分の走査が2回、逆向きに誤っていたこと</strong>と、どうやってそれに気づいたかも、報告書にそのまま書いてあります。</p>
+
+<p><a class="cta sub" href="https://github.com/yurukusa/cc-safe-setup/blob/main/docs/full-surface-audit-sample-jp.md">見本の報告書を読む（無料・日本語・全文）</a></p>
+
+<h2>返ってくるもの</h2>
+
+<p>お送りいただいたものが揃ってから72時間以内に、Markdown の報告書1本をお返しします。<span class="note">（この監査はまだ納品の実績がありません。万一72時間を過ぎる場合は、その時点でご連絡し、延長か全額返金かをお選びいただきます。）</span></p>
+
+<ol>
+<li><strong>層をまたぐ矛盾</strong>。1件ごとに、それがどの層とどの層にまたがっているか、そしてなぜ1種類のファイルの検査では出てこないかを書きます。</li>
+<li><strong>発見1件につき、必ず対照を1つ</strong>。「発火しないはずの場合」に同じ検査を当てた結果を並べます。これが無いと、<strong>「守られていた」と「私の測り方が間違っていた」が同じ見た目になります</strong>。見本には、自分の走査が誤っていて発見を取り下げた3件もそのまま載せてあります。</li>
+<li><strong>あなた自身のログに対して測った被覆</strong>。「このルールは弱そうだ」ではなく「このルールは、あなたが実際に打ったコマンドの N% の外側にある」という形で出します。</li>
+<li><strong>貼れる差分</strong>と、それが効いていることを確かめる30秒のコマンド。</li>
+<li><strong>この監査が見つけられなかったもの</strong>と、測れなかったもの。<strong>探して空だったという事実も納品物のうちです。</strong></li>
+</ol>
+
+<h2>含まないもの</h2>
+
+<div class="honest">
+<strong>次のものは含みません。先に書いておきます。</strong>
+<ul>
+<li>通話・打ち合わせ</li>
+<li><strong>実装の代行</strong>。差分は提案で、当てるのはご自身です</li>
+<li><strong>あなたの環境で何かを実行すること</strong>。こちらは送っていただいたものを読んで、報告書を書くだけです</li>
+<li>常時の監視</li>
+</ul>
+人間のシニアエンジニアが手であなたのリポジトリを見る形をお探しなら、<strong>これはそれではありません。</strong><br>
+<strong>返金：</strong>層をまたぐ矛盾が<strong>1件も出なかった場合は、Ko-fi 経由で全額返金します。</strong>
+</div>
+
+<h2>向いている場合／向いていない場合</h2>
+
+<table>
+<tr><th>向いています</th><th>向いていません</th></tr>
+<tr>
+<td>
+・<code>CLAUDE.md</code> が複数階層にあり、hook も CI も動いている環境<br>
+・自作の hook を積み上げてきて、いまどれが実際に効いているか自信が持てない<br>
+・チームで設定を共有していて、配ったものと各自の手元がずれている疑いがある<br>
+・自律・並列でセッションを走らせている
+</td>
+<td>
+・<strong>層が1枚しかない場合。</strong><code>CLAUDE.md</code> が1枚だけで hook も CI も無いなら、層と層のあいだに矛盾は生じようがありません。この場合は <a href="claude-md-audit-jp.html">¥3,980 の CLAUDE.md 監査</a>のほうが正しい大きさです<br>
+・実際のプロジェクトで Claude Code をまだ1週間も動かしていない場合。<strong>監査する実使用がありません</strong>
+</td>
+</tr>
+</table>
+
+<h2>送っていただくもの</h2>
+
+<p><strong>5つ全部は要りません。3つあれば始められます。</strong>ご注文のメッセージに「どれを出せるか」を書いてください。24時間以内に、<strong>非公開の受け渡し先</strong>をお返しします。</p>
+
+<ul>
+<li><code>CLAUDE.md</code>（複数階層にあるなら全部）</li>
+<li><code>settings.json</code>（利用者・プロジェクト・ローカルの各段）</li>
+<li>登録している hook の中身</li>
+<li>セッションの記録（数本で構いません）</li>
+<li>CI の設定</li>
+</ul>
+
+<div class="honest">
+<strong>セッションの記録や設定を、公開される場所へ貼らないでください。</strong>セッションの記録には、API キー、取引先の名前、社内の経路、業務のコードが普通に写り込みます。伏せられるところは送る前に伏せてください。<strong>こちらは届いたものを見なかったことにはできません。</strong>
+</div>
+
+<p><strong>お預かりしたものの扱い：</strong>監査のあいだ私の機械にだけ置き、どこにも公開せず、何かの学習にも使いません。<strong>納品から30日以内に削除します</strong>（それより早く消してほしい場合はそう言ってください）。手元に残すのは私が書いた報告書だけで、あなたのファイルは残しません。</p>
+
+<h2>ご依頼の方法</h2>
+
+<ol>
+<li><strong>Ko-fi で注文する</strong> — 出品名は <em>Full-Surface Audit — all 5 layers, written report within 72h</em>、¥29,800 です。<span class="note">（もしこの出品が見当たらない時は、<a href="https://ko-fi.com/yurukusa">ko-fi.com/yurukusa</a> で「Full-Surface audit」と書き添えて ¥29,800 の tip をいただければ、同じ価格でお受けします。）</span></li>
+<li><strong>注文に返信して、出せる層を書く</strong> — 24時間以内に、非公開の受け渡し先をお返しします。ファイルはそちらへお送りください。</li>
+</ol>
+
+<p>
+<a class="cta" href="https://ko-fi.com/yurukusa/commissions">Ko-fi で注文する（¥29,800）</a>
+<a class="cta sub" href="https://github.com/yurukusa/cc-safe-setup/discussions/categories/general">先に質問する（無料）</a>
+</p>
+
+<div class="honest">
+<strong>日本語で大丈夫です。</strong>見本の報告書は日本語です。注文先の Ko-fi のページは説明が英語主体ですが、<strong>注文も依頼も日本語で書いていただいて構いません。報告書は日本語でお返しします。</strong>迷うところがあれば、注文の前に上の「先に質問する」から日本語でお尋ねください。
+</div>
+
+<h2>誰が、どうやって作っているか</h2>
+
+<p>この監査は、<strong>私が Claude Code を自律で動かし続けるために使っているのと同じ手順</strong>を、あなたの環境に当てて行います。報告書の作成にも Claude Code を使います。人が一から手で書き起こすものではありません。そのぶん、価格はそれよりはるかに安く置いています。<span class="note">（私が見た範囲の出品では、同種の AI 監査は時間 $150〜300、成果物としてのレポート1本 $999 からでした。）</span>見本を全文読んでから判断してください。</p>
+
+<p><strong>¥3,980 の2件との違いは、量ではありません。</strong>あちらは1種類のファイルを読みます。1種類のファイルを読む検査は、<strong>ファイルとファイルのあいだに住んでいる矛盾を原理的に出せません</strong>。違いは「どれだけ多く読むか」ではなく「何を見つけられるか」の側にあります。<a href="claude-md-audit-jp.html">CLAUDE.md 監査</a>や <a href="token-burn-audit-jp.html">Token Burn 監査</a>で疑問が解けるなら、そちらを買ってください。</p>
+
+<p>この方法を使っている当人の記録は、<a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a>（安全 hook・MIT ライセンス・無料）にまとまっています。</p>
+
+<footer>
+<p>英語の説明（正本）: <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md#3-full-surface-audit--219-29800">SERVICES.md 第3節</a> ／ ほかの書面の監査: <a href="claude-md-audit-jp.html">CLAUDE.md 監査（¥3,980）</a>・<a href="token-burn-audit-jp.html">Token Burn 監査（¥3,980）</a></p>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — Claude Code のための安全 hook 集（MIT・無料）</p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -137,7 +137,8 @@ It also records the two times my own scan was wrong about that number, in both d
 
 **Refund:** if the audit surfaces no cross-layer contradiction at all, full refund via Ko-fi.
 
-**Japanese is welcome / 日本語でも受け付けます:** 注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします。見本の報告書も日本語です。
+**Japanese is welcome / 日本語でも受け付けます:** there is a full Japanese description of this audit — price, turnaround, refund terms, what is not included, and what you send me — at **[層と層のあいだにしか現れない矛盾を読む監査（¥29,800・72時間）](https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html)**. The sample report linked above is already the Japanese one. 注文と依頼を日本語で書いていただければ、報告書は日本語でお返しします。この監査の日本語の説明（価格・納期・返金の条件・含まないもの・送っていただくもの）は上のページにあります。
+
 ---
 
 ## 4. CC Safety Lab — Founder Membership, ¥500/month

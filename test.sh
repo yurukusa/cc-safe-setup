@@ -5,6 +5,34 @@
 
 set -euo pipefail
 
+# --- 2026-08-13: 退避や自動コミットを本当に行うフックは、使い捨ての作業場所で走らせる ---
+# なぜ要るか: example hook のいくつかは、危ない操作の見本を渡されると、設計どおり
+# 本物の `git stash push` を実行する。このテストはまさにその見本を渡すので、
+# 素のまま走らせると「テストを走らせるたびに、このリポジトリの未コミットの作業が退避される」。
+#
+# 実測(2026-08-13): 素のクローンでこのテストを1回走らせると退避が4件増えた。
+# 積み上がった開発機では `git stash list` が 3,071件で、うち96%が
+# テストの見本のコマンド名(`git checkout feature` / `git pull --rebase` など)だった。
+#
+# 直し方の選択: テスト全体を空のリポジトリへ移す案は捨てた。この後に
+# `cp examples/...` の形の相対パスが127箇所あり、移すと3,900件のテストが走らなくなる
+# (実測で確認)。そこで、実際に手を打つフックの名前を並べて、そこだけ隔離する。
+CC_REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+CC_HOOK_SANDBOX="$(mktemp -d "${TMPDIR:-/tmp}/cc-safe-setup-hooksandbox-XXXXXX")"
+git -C "$CC_HOOK_SANDBOX" init -q >/dev/null 2>&1 || true
+# 名前は前後を空白で囲って持つ(部分一致で巻き込まないため)。
+# 入れる基準は2つ: (1)本当に作業ツリーを触るフック (2)「掃除された木」を前提にしたテストを持つフック。
+# (2)が要る理由は実測で分かった=deploy-guard の7件は、これまで(1)のフックが
+# 先に未コミットの変更を退避してくれていたから通っていた。退避を止めた途端、
+# 「未コミットの変更があるから deploy を止める」という正しい振る舞いで落ちるようになった。
+# つまりこのテストは、緑であること自体がフックの副作用に依存していた。
+CC_SANDBOXED_HOOKS=" git-stash-before-danger auto-stash-before-pull backup-before-refactor uncommitted-work-shield git-stash-before-checkout git-stash-d auto-stash deploy-guard "
+
+_cc_needs_sandbox() {
+    case "$CC_SANDBOXED_HOOKS" in *" $1 "*) return 0 ;; *) return 1 ;; esac
+}
+# --------------------------------------------------------------------------
+
 PASS=0
 FAIL=0
 SCRIPTS_JSON="$(dirname "$0")/scripts.json"
@@ -18,7 +46,12 @@ extract_hook() {
 test_hook() {
     local name="$1" input="$2" expected_exit="$3" desc="$4"
     local actual_exit=0
-    echo "$input" | bash "/tmp/test-$name.sh" > /dev/null 2>/dev/null || actual_exit=$?
+    if _cc_needs_sandbox "$name"; then
+        # 手を打つフックは使い捨ての作業場所で(このリポジトリを触らせない)
+        ( cd "$CC_HOOK_SANDBOX" && echo "$input" | bash "/tmp/test-$name.sh" ) > /dev/null 2>/dev/null || actual_exit=$?
+    else
+        echo "$input" | bash "/tmp/test-$name.sh" > /dev/null 2>/dev/null || actual_exit=$?
+    fi
     if [ "$actual_exit" -eq "$expected_exit" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -2063,7 +2096,12 @@ EXDIR="$(dirname "$0")/examples"
 test_ex() {
     local script="$1" input="$2" expected_exit="$3" desc="$4"
     local actual_exit=0
-    echo "$input" | bash "$EXDIR/$script" > /dev/null 2>/dev/null || actual_exit=$?
+    if _cc_needs_sandbox "${script%.sh}"; then
+        # 手を打つフックは使い捨ての作業場所で(このリポジトリを触らせない)
+        ( cd "$CC_HOOK_SANDBOX" && echo "$input" | bash "$CC_REPO_ROOT/examples/$script" ) > /dev/null 2>/dev/null || actual_exit=$?
+    else
+        echo "$input" | bash "$EXDIR/$script" > /dev/null 2>/dev/null || actual_exit=$?
+    fi
     if [ "$actual_exit" -eq "$expected_exit" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -10144,6 +10182,32 @@ test_ex output-credential-scan.sh '{"tool_result":{"stdout":"KEY=sk-abc123456789
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123456789"}}' 0 "cred-scan: detects ghp_ token (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"AWS_KEY=AKIAIOSFODNN7EXAMPLE"}}' 0 "cred-scan: detects AWS key (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"slack_token=xoxb-1234-abcdef"}}' 0 "cred-scan: detects Slack xoxb token (exit 0 warn)"
+
+# 2026-08: いまの OpenAI の鍵は `sk-proj-` で始まり区切りを含む。
+# 文字集合に `-` `_` が無かったため、4本のフックがこの形を素通りさせていた。
+# 直したあとの退行を捕まえるため、3種類を一組で置く
+#   (a) いまの形を捕まえるか (b) 旧来の形も捕まえ続けるか (c) 普通の名前で誤検出しないか
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"KEY=sk-proj-abcdefghij0123456789-abcdefghij0123456789"}}' 0 "cred-scan: detects sk-proj- key (current OpenAI format)"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"path=reports/disk-usage-summary-20260813-full.txt"}}' 0 "cred-scan: ordinary disk- filename is not a key"
+test_ex output-credential-scan.sh '{"tool_result":{"stdout":"path=data/task-management-system-configuration.json"}}' 0 "cred-scan: ordinary task- filename is not a key"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-proj-abcdefghij0123456789-abcdefghij0123456789"}}' 2 "env-inline: blocks sk-proj- key (current OpenAI format)"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo sk-abc123456789012345678901234567890123"}}' 2 "env-inline: still blocks legacy sk- key"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo reports/disk-usage-summary-20260813-full.txt"}}' 0 "env-inline: ordinary disk- filename passes"
+test_ex env-inline-secret-guard.sh '{"tool_input":{"command":"echo data/task-management-system-configuration.json"}}' 0 "env-inline: ordinary task- filename passes"
+# mcp-data-boundary は助言だけで常に exit 0 なので、終了コードでは判別できない。
+# 警告の文が実際に出るかを見る（exit 0 を期待するだけのテストは、出ても出なくても通る）
+MCPB_OUT=$(echo '{"tool_name":"mcp__db__q","tool_output":"sk-proj-abcdefghij0123456789-abcdefghij0123456789"}' | bash "$EXDIR/mcp-data-boundary.sh" 2>&1)
+if echo "$MCPB_OUT" | grep -q "MCP DATA BOUNDARY"; then
+    echo "  PASS: mcp-boundary: warns on sk-proj- key (current OpenAI format)"; PASS=$((PASS + 1))
+else
+    echo "  FAIL: mcp-boundary: no warning for sk-proj- key"; FAIL=$((FAIL + 1))
+fi
+MCPB_OUT=$(echo '{"tool_name":"mcp__db__q","tool_output":"reports/disk-usage-summary-20260813-full.txt"}' | bash "$EXDIR/mcp-data-boundary.sh" 2>&1)
+if echo "$MCPB_OUT" | grep -q "MCP DATA BOUNDARY"; then
+    echo "  FAIL: mcp-boundary: ordinary disk- filename wrongly flagged"; FAIL=$((FAIL + 1))
+else
+    echo "  PASS: mcp-boundary: ordinary disk- filename is not flagged"; PASS=$((PASS + 1))
+fi
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0"}}' 0 "cred-scan: detects JWT token (exit 0 warn)"
 test_ex output-credential-scan.sh '{"tool_result":{"stdout":"PATH=/usr/bin:/usr/local/bin"}}' 0 "cred-scan: PATH variable no warning"
 echo ""
