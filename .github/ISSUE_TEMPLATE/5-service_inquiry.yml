@@ -27,6 +27,7 @@ body:
           → https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html
         - **Full-Surface 監査**（¥29,800・72時間）— `CLAUDE.md`・`settings.json`・hook・セッションの記録・
           CI の設定の5層を互いに突き合わせて、層と層の「あいだ」にしか現れない矛盾だけを報告する
+          → https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html
           → 見本（自分の設定に実際に走らせた実物）https://github.com/yurukusa/cc-safe-setup/blob/main/docs/full-surface-audit-sample-jp.md
 
         注文は https://ko-fi.com/yurukusa/commissions から。
