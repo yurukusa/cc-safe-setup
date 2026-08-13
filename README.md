@@ -116,7 +116,11 @@ A hook is any executable that reads the tool-call JSON on stdin and returns `0` 
 
 ## Safety audit and CI
 
-`npx github:yurukusa/cc-safe-setup --audit` scans your current `settings.json` and reports which classes of danger are and are not guarded. You can run the same audit in CI to keep a project's safety posture from regressing:
+`npx github:yurukusa/cc-safe-setup --audit` reports which classes of danger are and are not guarded.
+
+Most of what it checks lives inside `settings.json`. One check does not: it reads the safety nets your `CLAUDE.md` **names** against the hooks your settings files actually **register**, and reports the two mismatches that no single-file check can see — a rule naming a script that exists nowhere, and a hook sitting in your hooks directory that appears in no settings file at all. Both files are individually valid in that second case; the guard simply never runs.
+
+You can run the same audit in CI to keep a project's safety posture from regressing:
 
 ```yaml
 # .github/workflows/safety.yml

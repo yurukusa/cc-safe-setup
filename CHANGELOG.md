@@ -24,9 +24,30 @@
   whole report, which costs more than the finding is worth.
 
   Controls run in both directions (`tests/audit-cross-layer-claudemd.test.sh`):
-  3 cases that must fire, 8 that must stay silent. Measured against the 10 real
-  `CLAUDE.md` files on this machine: one true finding (a project whose rules
-  name a Live2D core file that is not in the repository), zero false positives.
+  **14 cases**, 5 that must fire and 9 that must not. Measured against
+  the 10 real `CLAUDE.md` files on this machine: one true finding (a project
+  whose rules name a Live2D core file that is not in the repository), zero
+  false positives.
+
+  Then measured again against **120 public `CLAUDE.md` files**, because ten
+  files by one author is not a sample. 37 of them (31%) name a script; 8 of
+  those 37 name something absent from their own repository. Reading the eight
+  by hand turned up a false-positive class my own files did not have —
+  **compiled output** (`dist/extension.js`, `dist/index.js`), which is absent
+  on a fresh checkout and present after a build. Build directories are now
+  skipped. (That 22% is an upper bound, not a false-positive rate: the sample
+  can only see repository trees, never a user's `~/.claude/hooks/`.)
+
+- **Fix: `--audit` now looks for `CLAUDE.md` where Claude Code looks.**
+  Two defects of the same shape, both measured rather than reasoned:
+
+  | before | after |
+  |---|---|
+  | Run from a subdirectory of your own project → *"No CLAUDE.md found — Claude has no project-specific instructions"*, minus 10 points, and every cross-layer finding dropped with it | Walks up to the first directory holding `.git`, to `HOME`, or to the filesystem root |
+  | With `CLAUDE_PROJECT_DIR` set, `~/.claude/CLAUDE.md`, `~/.claude/settings.json` and `~/.claude/hooks/` all stopped being read | Both bases are read, each path once |
+
+  Both are the shape fixed in #1046 — the installer and the diagnosis
+  disagreeing about where the truth lives.
 - **Fix: six hooks that read `~/.claude/projects/` looked in a directory that never existed.**
   Claude Code names a project directory by replacing every `/` in the absolute working
   directory with `-`, and the leading slash becomes a leading dash that stays:
