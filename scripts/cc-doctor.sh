@@ -91,19 +91,31 @@ note ""
 
 # --- Section 4: settings.json hooks ---
 note "${BOLD}Hooks${NC}"
-SETTINGS="$HOME/.claude/settings.json"
-if [ -f "$SETTINGS" ]; then
+# The installer writes to CLAUDE_PROJECT_DIR when that variable is set, and only
+# falls back to HOME otherwise (index.mjs, CLAUDE_BASE — added for issue #145, where
+# a reader running multiple Claude profiles reported that hard-coded .claude breaks).
+# This diagnostic did not follow. On a per-profile install it looked only at HOME,
+# found nothing, and told a correctly configured user "hooks won't run" — verified by
+# running it against an isolated per-profile install with 8 hooks registered.
+# Check the same place the installer wrote to, then the project-relative path, then HOME.
+SETTINGS=""
+for cand in "${CLAUDE_PROJECT_DIR:+$CLAUDE_PROJECT_DIR/.claude/settings.json}" \
+            ".claude/settings.json" \
+            "$HOME/.claude/settings.json"; do
+    [ -n "$cand" ] && [ -f "$cand" ] && SETTINGS="$cand" && break
+done
+if [ -n "$SETTINGS" ]; then
     if command -v jq >/dev/null 2>&1; then
         HOOK_COUNT=$(jq -r '[.hooks // {} | to_entries[] | .value[]?] | length' "$SETTINGS" 2>/dev/null || echo "0")
-        ok "$HOOK_COUNT hook entries in ~/.claude/settings.json"
+        ok "$HOOK_COUNT hook entries in $SETTINGS"
         if [ "$HOOK_COUNT" -lt 3 ]; then
             warn "Few or no hooks installed. Run 'npx cc-safe-setup --shield' to add the recommended baseline."
         fi
     else
-        note "  ${DIM}settings.json present (jq not installed; cannot count hooks)${NC}"
+        note "  ${DIM}$SETTINGS present (jq not installed; cannot count hooks)${NC}"
     fi
 else
-    bad "no ~/.claude/settings.json - hooks won't run. Run 'npx cc-safe-setup' to bootstrap."
+    bad "no settings.json found - hooks won't run. Looked in \${CLAUDE_PROJECT_DIR:-<unset>}/.claude/, ./.claude/ and ~/.claude/. Run 'npx cc-safe-setup' to bootstrap."
 fi
 note ""
 
