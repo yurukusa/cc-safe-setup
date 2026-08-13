@@ -5,6 +5,34 @@
 
 set -euo pipefail
 
+# --- 2026-08-13: 退避や自動コミットを本当に行うフックは、使い捨ての作業場所で走らせる ---
+# なぜ要るか: example hook のいくつかは、危ない操作の見本を渡されると、設計どおり
+# 本物の `git stash push` を実行する。このテストはまさにその見本を渡すので、
+# 素のまま走らせると「テストを走らせるたびに、このリポジトリの未コミットの作業が退避される」。
+#
+# 実測(2026-08-13): 素のクローンでこのテストを1回走らせると退避が4件増えた。
+# 積み上がった開発機では `git stash list` が 3,071件で、うち96%が
+# テストの見本のコマンド名(`git checkout feature` / `git pull --rebase` など)だった。
+#
+# 直し方の選択: テスト全体を空のリポジトリへ移す案は捨てた。この後に
+# `cp examples/...` の形の相対パスが127箇所あり、移すと3,900件のテストが走らなくなる
+# (実測で確認)。そこで、実際に手を打つフックの名前を並べて、そこだけ隔離する。
+CC_REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+CC_HOOK_SANDBOX="$(mktemp -d "${TMPDIR:-/tmp}/cc-safe-setup-hooksandbox-XXXXXX")"
+git -C "$CC_HOOK_SANDBOX" init -q >/dev/null 2>&1 || true
+# 名前は前後を空白で囲って持つ(部分一致で巻き込まないため)。
+# 入れる基準は2つ: (1)本当に作業ツリーを触るフック (2)「掃除された木」を前提にしたテストを持つフック。
+# (2)が要る理由は実測で分かった=deploy-guard の7件は、これまで(1)のフックが
+# 先に未コミットの変更を退避してくれていたから通っていた。退避を止めた途端、
+# 「未コミットの変更があるから deploy を止める」という正しい振る舞いで落ちるようになった。
+# つまりこのテストは、緑であること自体がフックの副作用に依存していた。
+CC_SANDBOXED_HOOKS=" git-stash-before-danger auto-stash-before-pull backup-before-refactor uncommitted-work-shield git-stash-before-checkout git-stash-d auto-stash deploy-guard "
+
+_cc_needs_sandbox() {
+    case "$CC_SANDBOXED_HOOKS" in *" $1 "*) return 0 ;; *) return 1 ;; esac
+}
+# --------------------------------------------------------------------------
+
 PASS=0
 FAIL=0
 SCRIPTS_JSON="$(dirname "$0")/scripts.json"
@@ -18,7 +46,12 @@ extract_hook() {
 test_hook() {
     local name="$1" input="$2" expected_exit="$3" desc="$4"
     local actual_exit=0
-    echo "$input" | bash "/tmp/test-$name.sh" > /dev/null 2>/dev/null || actual_exit=$?
+    if _cc_needs_sandbox "$name"; then
+        # 手を打つフックは使い捨ての作業場所で(このリポジトリを触らせない)
+        ( cd "$CC_HOOK_SANDBOX" && echo "$input" | bash "/tmp/test-$name.sh" ) > /dev/null 2>/dev/null || actual_exit=$?
+    else
+        echo "$input" | bash "/tmp/test-$name.sh" > /dev/null 2>/dev/null || actual_exit=$?
+    fi
     if [ "$actual_exit" -eq "$expected_exit" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
@@ -2063,7 +2096,12 @@ EXDIR="$(dirname "$0")/examples"
 test_ex() {
     local script="$1" input="$2" expected_exit="$3" desc="$4"
     local actual_exit=0
-    echo "$input" | bash "$EXDIR/$script" > /dev/null 2>/dev/null || actual_exit=$?
+    if _cc_needs_sandbox "${script%.sh}"; then
+        # 手を打つフックは使い捨ての作業場所で(このリポジトリを触らせない)
+        ( cd "$CC_HOOK_SANDBOX" && echo "$input" | bash "$CC_REPO_ROOT/examples/$script" ) > /dev/null 2>/dev/null || actual_exit=$?
+    else
+        echo "$input" | bash "$EXDIR/$script" > /dev/null 2>/dev/null || actual_exit=$?
+    fi
     if [ "$actual_exit" -eq "$expected_exit" ]; then
         echo "  PASS: $desc"
         PASS=$((PASS + 1))
