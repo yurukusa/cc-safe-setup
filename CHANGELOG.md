@@ -24,7 +24,7 @@
   whole report, which costs more than the finding is worth.
 
   Controls run in both directions (`tests/audit-cross-layer-claudemd.test.sh`):
-  **14 cases**, 4 that must fire and 10 that must stay silent. Measured against
+  **14 cases**, 5 that must fire and 9 that must not. Measured against
   the 10 real `CLAUDE.md` files on this machine: one true finding (a project
   whose rules name a Live2D core file that is not in the repository), zero
   false positives.
