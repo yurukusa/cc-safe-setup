@@ -169,7 +169,7 @@ hook 本体はこれからも無料（MIT）です。そのうえで、自分の
 |---|---|---|
 | [CLAUDE.md 監査](https://yurukusa.github.io/cc-safe-setup/claude-md-audit-jp.html) | 指示ファイル（`CLAUDE.md`、任意で `settings.json` と使用頻度の高い hook 5本） | ¥3,980・48時間 |
 | [Token Burn 監査](https://yurukusa.github.io/cc-safe-setup/token-burn-audit-jp.html) | セッションの記録と `/cost` の出力。費用が実際に消えている場所 | ¥3,980・48時間 |
-| [Full-Surface 監査](../SERVICES.md#3-full-surface-audit--219-29800) | 上の2件がそれぞれ1種類のファイルを読むのに対し、こちらは `CLAUDE.md`・`settings.json`・hook・セッションの記録・CI の設定の**5層を互いに突き合わせて**、層と層の**あいだ**にしか現れない矛盾だけを報告する | ¥29,800・72時間 |
+| [Full-Surface 監査](https://yurukusa.github.io/cc-safe-setup/full-surface-audit-jp.html) | 上の2件がそれぞれ1種類のファイルを読むのに対し、こちらは `CLAUDE.md`・`settings.json`・hook・セッションの記録・CI の設定の**5層を互いに突き合わせて**、層と層の**あいだ**にしか現れない矛盾だけを報告する | ¥29,800・72時間 |
 
 買う前に中身が見えないものなので、成果物はすべて公開しています。[CLAUDE.md 監査の見本](claude-md-audit-sample-jp.md)／[Token Burn 監査の見本](token-burn-audit-sample-jp.md)／[Full-Surface 監査の見本](full-surface-audit-sample-jp.md)。いずれも自分の設定に対して実際に走らせた実物で、自分の数字と自分の hook が間違っていた箇所もそのまま載せています。Full-Surface の見本で出てきたいちばん重い1件は、自分の機械で動いていた安全 hook が、同じ名前で配布しているものとは別のプログラムだった、というものでした。
 
