@@ -1185,7 +1185,7 @@
   {
     "url": "safety-audit.html",
     "title": "Claude Code Safety Audit — Professional Review of Your AI Development Setup",
-    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (910 example hooks, 261 files under tests/).",
+    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (910 example hooks, 276 files under tests/).",
     "keywords": "claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant",
     "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
   },
