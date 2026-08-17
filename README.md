@@ -41,7 +41,7 @@ The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.
 | `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
 | `true && git add .env` — a secret staged through a chained command | allowed | blocked |
 
-29.8.0 ships 698 example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
+29.8.0 ships 900+ example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
 
 To install the current code directly from this repository:
 
@@ -212,7 +212,7 @@ are written up at length in these:
 
 **In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
 
-- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) (¥800) — 100 chapters
+- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 100 chapters
   of incidents, each traced to the setting or hook that stops it. The first 5 sections,
   including the symptom→chapter lookup table you'd reach for mid-incident, are free to read
 - [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where

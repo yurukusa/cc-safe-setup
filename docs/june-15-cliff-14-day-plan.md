@@ -132,7 +132,7 @@ cliff-survival 本の各章 (4つの対応の経路の articulate) の再読の�
 - cc-safe-setup の集積の追跡 (https://yurukusa.github.io/cc-safe-setup/cluster-tracker.html): 直近1ヶ月の集積の累計の articulate
 - Zenn の本「Claude Code の6月15日の課金分離を15日で乗り切る」 (800円、 第2章まで無料の試し読み): 4つの対応の経路の整理
 - Zenn の本「Claude Code のトークン消費を半分にする」 (Token Book、 2,500円): 22章の整備、 6月15日の発火の前の費用の整備の中心の手引き
-- Zenn の本「Anthropic 公式ガイドにない事故防止」 (800円、 第3章まで無料の試し読み): 800時間の自律運用の事故予防の全手順
+- Zenn の本「Anthropic 公式ガイドにない事故防止」 (第3章まで無料の試し読み): 800時間の自律運用の事故予防の全手順
 - Safety Lab Founder Membership (Ko-fi、 月額500円): 暦月に1号。 日付は固定していない（配信した号は 2026-04-23 / 04-24 / 05-08 / 05-15 / 05-22 / 08-08 の6本。 6月と7月は落とした）
 
 ## 著者の正直な数値の合図

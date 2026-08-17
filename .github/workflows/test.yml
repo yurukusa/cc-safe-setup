@@ -86,3 +86,21 @@ jobs:
           echo "docs/search-index.json matches docs/*.html ($(python3 -c '
           import json; print(len(json.load(open("docs/search-index.json"))))
           ') entries)"
+
+      # docs/sitemap.xml had the same problem as search-index.json, found on
+      # 2026-08-17: it listed 189 URLs while docs/ held 213 pages. The 24 missing
+      # ones included the Japanese landing pages for all three paid audits and the
+      # six free preview chapters for the monthly. A Google site: query returned
+      # results for pages that were in the sitemap and "no results" for the ones
+      # that were not, with the same query shape as control — so a page left out
+      # of the sitemap was, in practice, a page search could not find.
+      - name: Generated sitemap is current
+        run: |
+          python3 scripts/build-sitemap.py
+          if ! git diff --quiet -- docs/sitemap.xml; then
+            echo "::error::docs/sitemap.xml is out of date."
+            echo "Run: python3 scripts/build-sitemap.py  and commit the result."
+            git diff --stat -- docs/sitemap.xml
+            exit 1
+          fi
+          echo "docs/sitemap.xml matches docs/**/*.html ($(grep -c '<loc>' docs/sitemap.xml) URLs)"
