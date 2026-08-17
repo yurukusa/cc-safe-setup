@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T19:42:43+09:00
+Updated: 2026-08-17T11:15:58+09:00
 
 ## Git
-- Branch: `feat/name-team-pack-on-post-install-2026-08-13`
+- Branch: `main`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 70f0e09f recovery: pre-compact checkpoint (1 files, 20260813-104243)
+- Last commit: 552060d 露出が完全に0だった2冊に、初めて経路を作った (#1050)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-13.md
-./.claude/pre-compact-checkpoint.md
-./docs/README.ja.md
-./CHANGELOG.md
 ./README.md
-./tests/audit-cross-layer-claudemd.test.sh
-./scripts/cc-doctor.sh
-./SERVICES.md
-./test.sh
+./docs/README.ja.md
+./docs/june-15-cliff-14-day-plan.md
+./docs/june-15-cliff-post-fire-30-day-plan.md
+./.claude/pre-compact-checkpoint.md
+./tests/test-rhetorical-verification-prompt-detector.sh
+./tests/test-rm-safety-net.sh
+./tests/test-route-handler-emptiness-gate.sh
+./tests/test-runtime-binary-change-detector.sh
 ```
 
 ## Active TODOs: 1 file(s)
