@@ -41,7 +41,7 @@ The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.
 | `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
 | `true && git add .env` — a secret staged through a chained command | allowed | blocked |
 
-29.8.0 ships 698 example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
+29.8.0 ships 900+ example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
 
 To install the current code directly from this repository:
 
