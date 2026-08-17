@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法</title>
+<meta name="description" content="Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約70万字にまとめた実践書。第3章まで無料。¥1,500・追補は無償。">
+<meta name="keywords" content="Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金">
+<link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html">
+
+<!-- OGP -->
+<meta property="og:title" content="Anthropic公式ガイドにない事故防止 — Claude Code 800+時間の全記録">
+<meta property="og:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全100章・約70万字。第3章まで無料で読めます。">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Anthropic公式ガイドにない事故防止 — Claude Code 800+時間の全記録">
+<meta name="twitter:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全100章・約70万字。第3章まで無料。¥1,500">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Book",
+  "name": "Anthropic公式ガイドにない事故防止——Claude Code 800+時間で19点→85点にした全記録",
+  "author": {"@type": "Person", "name": "yurukusa"},
+  "description": "Claude Code に任せた作業で実際に起きた事故を、GitHub の起票で実在を確認したうえで扱い、そのどれもが設定で先回りできることを手順つきでまとめた実践書。全100章・約70万字。第3章までと巻頭の早見表、最終章が無料。",
+  "url": "https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html",
+  "offers": {
+    "@type": "Offer",
+    "price": "1500",
+    "priceCurrency": "JPY",
+    "availability": "https://schema.org/InStock",
+    "url": "https://zenn.dev/yurukusa/books/6076c23b1cb18b"
+  },
+  "numberOfPages": 100,
+  "inLanguage": "ja",
+  "publisher": {"@type": "Person", "name": "yurukusa"},
+  "keywords": "Claude Code, 事故防止, hook, settings.json, データ消失, サブエージェント"
+}
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; color: #1a1a2e; background: #fafbfc; }
+.container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; line-height: 1.35; }
+h2 { font-size: 1.3rem; margin: 2.2rem 0 1rem; border-bottom: 2px solid #e8e8e8; padding-bottom: 0.5rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.5rem; }
+p { margin-bottom: 0.9rem; }
+.subtitle { color: #666; font-size: 1.05rem; margin-bottom: 1.5rem; }
+.price-badge { display: inline-block; background: #2563eb; color: white; padding: 0.3rem 1rem; border-radius: 999px; font-weight: bold; font-size: 1.1rem; margin-bottom: 1rem; }
+.pain-point { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.pain-point strong { color: #dc2626; }
+.data-point { background: #f0fdf4; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
+.data-point strong { color: #166534; }
+.note-box { background: #f8fafc; border-radius: 8px; padding: 1rem 1.5rem; margin: 1.2rem 0; font-size: 0.95rem; color: #444; }
+.cta-section { text-align: center; margin: 2.5rem 0 2rem; }
+.btn-primary { display: inline-block; background: #2563eb; color: white; padding: 1rem 2.2rem; border-radius: 8px; text-decoration: none; font-size: 1.05rem; font-weight: bold; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-free { display: inline-block; color: #16a34a; padding: 0.8rem 1.6rem; border: 2px solid #16a34a; border-radius: 8px; text-decoration: none; font-size: 1rem; margin-top: 0.8rem; font-weight: bold; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid #eee; vertical-align: top; }
+th { color: #555; font-weight: 600; }
+ul { margin: 0 0 1rem 1.2rem; }
+li { margin-bottom: 0.4rem; }
+a { color: #2563eb; }
+footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="price-badge">¥1,500</span>
+<h1>Anthropic公式ガイドにない事故防止</h1>
+<p class="subtitle">Claude Code 800+時間で、環境診断スコアを19点から85点にした全記録 — 全100章・約70万字・第3章まで無料</p>
+
+<div class="cta-section" style="margin:1.5rem 0;">
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn-primary">Zennで読む — ¥1,500</a>
+<p style="margin-top:0.8rem;font-size:0.9rem;color:#444;">買う前に、<strong>「はじめに」「事故対応の早見表」「第1〜3章」「最終章」の6項目（合わせて約9万字）が無料で読めます。</strong></p>
+</div>
+
+<div class="pain-point">
+<p style="margin:0 0 0.6rem;"><strong>「任せた作業で、取り返しの付かないことが起きる」</strong></p>
+<p style="margin:0;font-size:0.95rem;color:#444;">
+データベースの24,472行が5分で消えた（<a href="https://github.com/anthropics/claude-code/issues/56738">#56738</a>）。
+読み取り専用のはずのサブエージェントが「保存しました」と報告したのに、ファイルは無かった（<a href="https://github.com/anthropics/claude-code/issues/55653">#55653</a>）。
+切ったはずの自動圧縮が警告なく発火して、37万トークンの履歴が消えた（<a href="https://github.com/anthropics/claude-code/issues/57490">#57490</a>）。
+移行を任せたら、本来は非公開のサイトが誰でも見られる状態で全世界に公開されていた（<a href="https://github.com/anthropics/claude-code/issues/71882">#71882</a>）。
+鍵を一度表示しただけで、生のトークンが会話の記録ファイルに永久保存された（<a href="https://github.com/anthropics/claude-code/issues/71654">#71654</a>）。
+<strong>どれも GitHub の起票で実在を確認した事故で、利用者の不注意ではありません。</strong>
+</p>
+</div>
+
+<p>共通しているのは、仕組みの側が「取り返しの付かない操作を、確定の前に止める」設計を持っていないことです。<strong>消えることも、隠すべきものが露出することも、同じ構造から出てきます。</strong>そして、そのほとんどは設定で先回りできます。</p>
+
+<h2>この本が扱っていること</h2>
+
+<div class="data-point">
+<p style="margin-bottom:0.5rem;"><strong>実際に起きた事故から逆算した、設定と hook の手順です。</strong></p>
+<p style="margin:0;color:#444;font-size:0.95rem;">著者は非エンジニアで、最初は月に3〜5回つまずいていました（ファイルの消失、トークンの20倍の膨張、サブエージェントの嘘の完了報告）。それを設定で先回りして月0回にするまでの全工程が、この本の中身です。同じ手順で作った hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に900本以上、無料・MIT で公開しています。</p>
+</div>
+
+<h3>扱う事故の範囲</h3>
+<ul>
+<li>ファイルやコードの消失（<code>rm -rf</code>、<code>git reset --hard</code>、<code>/rewind</code>、worktree、<code>git stash</code>、Windows 固有の経路）</li>
+<li>本番データベースの削除（フレームワークの一語が、シェルの危険な形をすり抜ける型）</li>
+<li>トークン費用の暴走と、無断の従量課金</li>
+<li>サブエージェントの嘘の完了報告と、道具の呼び出しの偽造</li>
+<li>設定ファイルの汚染と、複数セッションの後勝ちで許可が黙って元に戻る事故</li>
+<li>本来は非公開のものが公開される事故、鍵や秘密の露出</li>
+</ul>
+<p style="font-size:0.95rem;color:#555;">いずれも実機で検証したうえで書いています。他の人の報告を素材にした章は、<strong>どこまでが伝聞で、どこからが手元の検証かを本文で分けて</strong>います。</p>
+
+<h2>買う前に読める6項目（約9万字）</h2>
+
+<table>
+<tr><th style="width:11rem;">項目</th><th>中身</th></tr>
+<tr><td>はじめに</td><td>何が起きているのか、なぜ設定で防げるのか</td></tr>
+<tr><td><strong>事故対応の早見表</strong></td><td>事故が起きた瞬間に「症状」から該当章へ直接飛べる索引。<strong>緊急時にはここだけで足りることがあります</strong></td></tr>
+<tr><td>第1章</td><td>いまの環境の健康診断（どこが穴かを先に知る）</td></tr>
+<tr><td>第2章</td><td>安全の柵の作り方</td></tr>
+<tr><td>第3章</td><td>コードの品質を落とさない設定</td></tr>
+<tr><td>最終章（章100）</td><td>2026年7月に実際に踏んだ事故の追補。<strong>1件の事故をどこまで掘るのかを、買う前に確かめられます</strong></td></tr>
+</table>
+
+<p>無料の部分を「入口だけ」にしていないのは、<strong>買う判断に必要なのは冒頭ではなく、深さの見本だから</strong>です。最終章を無料にしてあるのはそのためです。</p>
+
+<div class="cta-section">
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn-primary">Zennで読む — ¥1,500</a><br>
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b/viewer/0a-triage" class="btn-free">まず無料の早見表を見る →</a>
+</div>
+
+<h2>更新と、購入後の扱い</h2>
+<ul>
+<li>新しい事故が見つかるたびに、<strong>該当する章へ追補として書き足しています</strong>。直近の追補は2026年8月です</li>
+<li><strong>購入後に増えた内容も、追加の課金なしで読めます</strong>（買い切りで、更新は無償）</li>
+</ul>
+
+<div class="note-box">
+<p style="margin:0;"><strong>Kindle 版（¥800）について。</strong>同じ本の Kindle 版がありますが、そちらは<strong>買った時点の版で、以後の更新は届きません</strong>（2026年6月時点の内容・全42章）。更新を受け取りたい場合は Zenn 版を選んでください。安いほうを選ぶ判断もあると思うので、違いを明記しておきます。</p>
+</div>
+
+<h2>向いている人・向いていない人</h2>
+<table>
+<tr><th style="width:8rem;">向いている</th><td>Claude Code に実際の作業を任せていて、一度でも「消えた」「勝手に走った」「請求が跳ねた」を経験した人。非エンジニアで、何を設定すればいいのかの全体像が欲しい人</td></tr>
+<tr><th>向いていない</th><td>まだ触り始めたばかりで、事故に心当たりが無い人（先に無料の <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> の hook を入れるだけで足ります）。コードの読み書きが本業で、<code>settings.json</code> の仕様を自分で読んで組める人</td></tr>
+</table>
+
+<h2>無料で配っているものとの違い</h2>
+<p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> は hook そのものを900本以上、無料で配っています。<strong>hook を入れるだけで足りるなら、この本は要りません。</strong>本のほうにあるのは、<strong>それぞれの事故がどう起きて、なぜその設定で止まるのか</strong>という因果と、<strong>自分の環境で同じ判断をするための手順</strong>です。設定を配ることと、判断できるようになることは別だと考えています。</p>
+
+<h2>よくある質問</h2>
+<h3>全100章もあると、どこから読めばいいか分かりません</h3>
+<p>巻頭の「事故対応の早見表」から引いてください。症状から該当章へ直接飛べます。頭から読む本ではなく、<strong>起きた時に引く本</strong>として作ってあります。</p>
+
+<h3>Claude Code の版が上がったら、内容は古くなりませんか</h3>
+<p>古くなります。だから毎月、新しく見つかった事故を該当章へ追補として足しています。追補は購入者に無償で届きます。</p>
+
+<h3>著者は誰ですか</h3>
+<p>非エンジニアで、Claude Code を800時間以上「ほぼ無人」で運用してきた個人です。書いてあるのは、その運用で実際に踏んだ事故と、踏まないようにした設定です。<strong>専門家の解説ではなく、当事者の記録</strong>だと思って読んでください。</p>
+
+<div class="cta-section">
+<a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn-primary">Zennで読む — ¥1,500</a>
+<p style="margin-top:0.8rem;font-size:0.9rem;color:#666;">第3章まで無料 ｜ 追補は無償で届く ｜ 全100章・約70万字</p>
+</div>
+
+<hr style="border:none;border-top:1px solid #e8e8e8;margin:2.5rem 0 1.5rem;">
+
+<h2 id="en" style="font-size:1.15rem;">In English</h2>
+<p style="font-size:0.95rem;color:#444;">This book is written in Japanese. It reconstructs, chapter by chapter, the real incidents behind every hook in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — what failed, what the logs looked like, and which setting finally stopped it. 100 chapters, ~700,000 characters, free through chapter 3. If you read English only, the hooks themselves are free and MIT-licensed, and the <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SAFETY_CHECKLIST.md">safety checklist</a> covers the same ground in short form.</p>
+
+<footer>
+<p><a href="https://yurukusa.github.io/cc-safe-setup/">cc-safe-setup</a> ｜ <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ｜ <a href="https://zenn.dev/yurukusa">Zenn</a></p>
+</footer>
+
+</div>
+</body>
+</html>
