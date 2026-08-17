@@ -1185,7 +1185,7 @@
   {
     "url": "safety-audit.html",
     "title": "Claude Code Safety Audit — Professional Review of Your AI Development Setup",
-    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (910 example hooks, 261 files under tests/).",
+    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (914 example hooks, 261 files under tests/).",
     "keywords": "claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant",
     "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
   },
@@ -1262,7 +1262,7 @@
   {
     "url": "services-en.html",
     "title": "Org safety services are no longer accepted — the free material stays｜cc-safe-setup",
-    "description": "NOT ACCEPTED: the org-level services on this page (safety audit, team training, baseline rollout, ongoing review) are no longer offered. Prices stay visible so the record is clear. Still available: the Team Safety Rollout Pack, the free written material, and 910 example hooks (MIT).",
+    "description": "NOT ACCEPTED: the org-level services on this page (safety audit, team training, baseline rollout, ongoing review) are no longer offered. Prices stay visible so the record is clear. Still available: the Team Safety Rollout Pack, the free written material, and 914 example hooks (MIT).",
     "keywords": "",
     "snippet": "NOT ACCEPTED — a record of the org-level services that used to be offered here. The free material and the hooks continue."
   },
@@ -1276,14 +1276,14 @@
   {
     "url": "services-jp.html",
     "title": "法人向けの研修・導入・保守は受付を停止しました｜無料の資料は続けています — cc-safe-setup",
-    "description": "【受付停止】このページに載っている法人向けサービス（安全監査・チーム研修・導入の初期設定・月額の運用保守）は現在お受けしていません。経緯が分かるよう金額は残しています。代わりに、チーム安全導入パック（¥3,000・買い切り）と無料の資料、910本の安全 hook（MIT）をご利用ください。",
+    "description": "【受付停止】このページに載っている法人向けサービス（安全監査・チーム研修・導入の初期設定・月額の運用保守）は現在お受けしていません。経緯が分かるよう金額は残しています。代わりに、チーム安全導入パック（¥3,000・買い切り）と無料の資料、914本の安全 hook（MIT）をご利用ください。",
     "keywords": "",
     "snippet": "研修を受けた後でも、現場では事故が起こります。当方は研修事業者と競合するのではなく、その後に残るリスクを技術的に塞ぐ後工程として組み合わせて使えます。"
   },
   {
     "url": "services.html",
     "title": "Safety setup service — no longer accepted (the hooks stay free) | cc-safe-setup",
-    "description": "NOT ACCEPTED: the paid setup and configuration work listed on this page is no longer offered. Prices stay visible so the record is clear. The 910 example hooks in cc-safe-setup remain free (MIT), and the written material stays up.",
+    "description": "NOT ACCEPTED: the paid setup and configuration work listed on this page is no longer offered. Prices stay visible so the record is clear. The 914 example hooks in cc-safe-setup remain free (MIT), and the written material stays up.",
     "keywords": "",
     "snippet": "Professional safety configuration by the cc-safe-setup team"
   },
