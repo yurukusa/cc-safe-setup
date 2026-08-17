@@ -6843,7 +6843,7 @@ async function main() {
   console.log('  ' + c.dim + '    https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases, ¥15,600 at list price, since March 2026');
-  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, 100 chapters, buyers get new ones free)' + c.reset);
+  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (best-seller, 100 chapters, buyers get every later revision free)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide  (free Chapter 1)' + c.reset);
