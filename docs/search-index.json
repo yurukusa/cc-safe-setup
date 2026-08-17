@@ -1388,7 +1388,7 @@
   {
     "url": "token-book.html",
     "title": "Token Book — Cut Claude Code Token Usage in Half",
-    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. 10 chapters with copy-paste templates. $17 / ¥2,500.",
+    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. Two PDFs in one download: a 36-chapter Japanese edition (248 pages) and a 10-chapter English edition (94 pages). $17 / ¥2,500.",
     "keywords": "Claude Code, token consumption, reduce tokens, save tokens, CLAUDE.md optimization, hooks, cost reduction, Claude Code token saving, Claude Code expensive, Max plan quota, token usage half, Opus 4.7 tokens, Claude Code settings, Claude Code cost, token drain, quota exhausted",
     "snippet": "Max/Proの利用枠が想定よりはるかに速く枯れる問題は、GitHub Issueで今も続いている——#16157（722件の反応「Instantly hitting usage limits with Max subscription」）、#38335（529件「3月以降セッション枠が異常に速く消費される」）。痛いのは「節約できない」ことではなく、定額を払っているのに作業の途中で締め出されることだ。容量の問題そのものはAnthropic側にしか直せない。だが同じ作業をより少ないトークンで終わらせれば、枠が枯れて締め出されるまでの猶予は自分で伸ばせる。この本はその実践テクニックを800時間の運"
   },
