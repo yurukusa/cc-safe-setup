@@ -127,6 +127,11 @@ You can run the same audit in CI to keep a project's safety posture from regress
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
+`--audit` is what a script can decide on its own. For the contradictions that need your
+session logs and CI read alongside your config, there are
+[written audits](#written-audits-29-and-219) below — asynchronous, and nothing is ever
+run in your environment.
+
 ## Your installed hooks do not update themselves
 
 Installing a hook copies the file. **Nothing ever copies it back.** A hook installed in March
