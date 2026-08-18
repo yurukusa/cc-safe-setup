@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-13T15:28:30+09:00
+Updated: 2026-08-17T11:17:42+09:00
 
 ## Git
-- Branch: `feat/audit-cross-layer-build-artifacts`
+- Branch: `main`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: be9d1866 recovery: pre-compact checkpoint (1 files, 20260813-062830)
+- Last commit: e5a472a checkpoint: auto-save 11:17:14
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-08-13.md
 ./.claude/pre-compact-checkpoint.md
-./tests/audit-cross-layer-claudemd.test.sh
+./.claude/session-logs/2026-08-17.md
 ./README.md
-./CHANGELOG.md
-./scripts/cc-doctor.sh
-./SERVICES.md
 ./docs/README.ja.md
-./test.sh
+./docs/june-15-cliff-14-day-plan.md
+./docs/june-15-cliff-post-fire-30-day-plan.md
+./tests/test-rhetorical-verification-prompt-detector.sh
+./tests/test-rm-safety-net.sh
+./tests/test-route-handler-emptiness-gate.sh
 ```
 
 ## Active TODOs: 1 file(s)

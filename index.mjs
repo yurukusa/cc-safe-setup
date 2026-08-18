@@ -6843,11 +6843,19 @@ async function main() {
   console.log('  ' + c.dim + '    https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases, ¥15,600 at list price, since March 2026');
-  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (¥800, best-seller, 100 chapters, buyers get new ones free)' + c.reset);
+  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (best-seller, 100 chapters, buyers get every later revision free)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide  (free Chapter 1)' + c.reset);
-  console.log('  ' + c.dim + '  10 more titles at https://zenn.dev/yurukusa  (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
+  // 2026-08-13: 12冊の露出と実売を突き合わせたら、いちばん高い ¥3,000 の企業パックは
+  // Qiita 234本のうち0本からしか指されておらず、この面でも名前が出ず「10 more titles」に埋もれていた。
+  // 生涯0件は市場の答えではなく、一度も機会を与えていないだけ。
+  // しかもこの画面は「自分の設定に何の守りが有るか」を見た直後＝チームへ配ってよいかを
+  // 判断している人がいる瞬間で、宛先が一致している。
+  // 実測＝~/ops/economics/exposure-vs-sales-2026-08-13.md
+  console.log('  ' + c.dim + '  Claude Code チーム/企業導入 安全パック (¥3,000, 9 chapters — for whoever has to sign off on team use)' + c.reset);
+  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/cc-team-safety-pack' + c.reset);
+  console.log('  ' + c.dim + '  9 more titles at https://zenn.dev/yurukusa  (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Recurring track:' + c.reset + ' CC Safety Lab Founder (¥500/mo, Ko-fi, grandfathered)');
   console.log('  ' + c.dim + '  Monthly digest of new failure clusters + cc-safe-setup hooks shipped that month.' + c.reset);

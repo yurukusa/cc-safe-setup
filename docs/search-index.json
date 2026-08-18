@@ -763,6 +763,13 @@
     "snippet": "&larr; cc-safe-setup hub FREE PREVIEW — INCIDENT 1 OF 10"
   },
   {
+    "url": "incident-prevention-book.html",
+    "title": "Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法",
+    "description": "Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。",
+    "keywords": "Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金",
+    "snippet": "Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全100章・約69万字・第3章まで無料"
+  },
+  {
     "url": "incidents.html",
     "title": "Claude Code Incident Tracker — Real Safety Issues from GitHub",
     "description": "80+ real Claude Code safety incidents tracked from GitHub Issues. File deletion, credential leaks, token drain, production outages. See why hooks matter.",
@@ -1178,7 +1185,7 @@
   {
     "url": "safety-audit.html",
     "title": "Claude Code Safety Audit — Professional Review of Your AI Development Setup",
-    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (910 example hooks, 261 files under tests/).",
+    "description": "Get a professional safety audit of your Claude Code setup. Free initial assessment with cc-health-check. Detailed review of hooks, permissions, token optimization, and autonomous operation safety. By the creator of cc-safe-setup (914 example hooks, 276 files under tests/).",
     "keywords": "claude code safety audit, claude code review, claude code hooks setup, ai development safety, cc-safe-setup, autonomous ai safety, token optimization, claude code consultant",
     "snippet": "Professional review of your Claude Code setup — by the creator of cc-safe-setup"
   },
@@ -1255,7 +1262,7 @@
   {
     "url": "services-en.html",
     "title": "Org safety services are no longer accepted — the free material stays｜cc-safe-setup",
-    "description": "NOT ACCEPTED: the org-level services on this page (safety audit, team training, baseline rollout, ongoing review) are no longer offered. Prices stay visible so the record is clear. Still available: the Team Safety Rollout Pack, the free written material, and 910 example hooks (MIT).",
+    "description": "NOT ACCEPTED: the org-level services on this page (safety audit, team training, baseline rollout, ongoing review) are no longer offered. Prices stay visible so the record is clear. Still available: the Team Safety Rollout Pack, the free written material, and 914 example hooks (MIT).",
     "keywords": "",
     "snippet": "NOT ACCEPTED — a record of the org-level services that used to be offered here. The free material and the hooks continue."
   },
@@ -1269,14 +1276,14 @@
   {
     "url": "services-jp.html",
     "title": "法人向けの研修・導入・保守は受付を停止しました｜無料の資料は続けています — cc-safe-setup",
-    "description": "【受付停止】このページに載っている法人向けサービス（安全監査・チーム研修・導入の初期設定・月額の運用保守）は現在お受けしていません。経緯が分かるよう金額は残しています。代わりに、チーム安全導入パック（¥3,000・買い切り）と無料の資料、910本の安全 hook（MIT）をご利用ください。",
+    "description": "【受付停止】このページに載っている法人向けサービス（安全監査・チーム研修・導入の初期設定・月額の運用保守）は現在お受けしていません。経緯が分かるよう金額は残しています。代わりに、チーム安全導入パック（¥3,000・買い切り）と無料の資料、914本の安全 hook（MIT）をご利用ください。",
     "keywords": "",
     "snippet": "研修を受けた後でも、現場では事故が起こります。当方は研修事業者と競合するのではなく、その後に残るリスクを技術的に塞ぐ後工程として組み合わせて使えます。"
   },
   {
     "url": "services.html",
     "title": "Safety setup service — no longer accepted (the hooks stay free) | cc-safe-setup",
-    "description": "NOT ACCEPTED: the paid setup and configuration work listed on this page is no longer offered. Prices stay visible so the record is clear. The 910 example hooks in cc-safe-setup remain free (MIT), and the written material stays up.",
+    "description": "NOT ACCEPTED: the paid setup and configuration work listed on this page is no longer offered. Prices stay visible so the record is clear. The 914 example hooks in cc-safe-setup remain free (MIT), and the written material stays up.",
     "keywords": "",
     "snippet": "Professional safety configuration by the cc-safe-setup team"
   },
@@ -1381,7 +1388,7 @@
   {
     "url": "token-book.html",
     "title": "Token Book — Cut Claude Code Token Usage in Half",
-    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. 10 chapters with copy-paste templates. $17 / ¥2,500.",
+    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. Two PDFs in one download: a 36-chapter Japanese edition (237 pages) and a 9-chapter English edition (94 pages). $17 / ¥2,500.",
     "keywords": "Claude Code, token consumption, reduce tokens, save tokens, CLAUDE.md optimization, hooks, cost reduction, Claude Code token saving, Claude Code expensive, Max plan quota, token usage half, Opus 4.7 tokens, Claude Code settings, Claude Code cost, token drain, quota exhausted",
     "snippet": "Max/Proの利用枠が想定よりはるかに速く枯れる問題は、GitHub Issueで今も続いている——#16157（722件の反応「Instantly hitting usage limits with Max subscription」）、#38335（529件「3月以降セッション枠が異常に速く消費される」）。痛いのは「節約できない」ことではなく、定額を払っているのに作業の途中で締め出されることだ。容量の問題そのものはAnthropic側にしか直せない。だが同じ作業をより少ないトークンで終わらせれば、枠が枯れて締め出されるまでの猶予は自分で伸ばせる。この本はその実践テクニックを800時間の運"
   },

@@ -35,17 +35,19 @@ npx github:yurukusa/cc-safe-setup
 
 | あなたの状況 | まず無料で | さらに深く |
 |---|---|---|
-| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
-| 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
-| 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
-| 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 破壊的操作 (`rm -rf` / force push / 本番のコマンド) を止めたい | [rm -rf 事故を防ぐ](prevent-rm-rf-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 本番データベースを消されたくない | [本番DB全消しを防ぐ](prevent-database-wipe-jp.html) | [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 未コミットの作業が `git reset` で消える | [git reset --hard 事故を防ぐ](prevent-git-reset-hard-jp.html) | [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 認証情報の漏洩・乗っ取りが怖い | [認証情報の漏洩を防ぐ](prevent-credential-leak-jp.html) | [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | トークンの費用が暴走する (`/cost` ショック) | [費用爆発を防ぐ](prevent-cost-explosion-jp.html) | [Token Book (¥2,500)](https://zenn.dev/yurukusa/books/token-savings-guide?utm_source=readme-ja&utm_medium=routing-table) |
+| チームや組織に配ってよいか判断したい（稟議・権限・監査の説明が要る） | [チームの費用ガバナンス](team-cost-governance-jp.html)・[導入の手引き](team-rollout-guide.html)・[統制のスコアカード](team-governance-scorecard.html) | [チーム/企業導入 安全パック (¥3,000)](https://zenn.dev/yurukusa/books/cc-team-safety-pack?utm_source=readme-ja&utm_medium=routing-table) ——稟議・ポリシー・権限設計・月次レビューを1冊で |
 | 急に遅い・固まる・落ちる | [遅い/クラッシュの原因と直し方](claude-code-slow-crash-jp.html) | 無料の道具で対処 |
 | どのモデルが実際に動いているか分からない | [提供モデルの監査](claude-code-which-model-served-jp.html) | 無料の道具で確認 |
-| サブエージェントが嘘の「完了」を返す（派遣の捏造・沈黙の停止・観察の不在・範囲の逸脱） | [集積の露出診断](cluster-exposure-diagnostic.html) | [副の作業者の沈黙の失敗 (¥1,500)](https://zenn.dev/yurukusa/books/sub-agent-observability?utm_source=readme-ja&utm_medium=routing-table) ——4つの型を一冊で深掘り・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| サブエージェントが嘘の「完了」を返す（派遣の捏造・沈黙の停止・観察の不在・範囲の逸脱） | [集積の露出診断](cluster-exposure-diagnostic.html) | [副の作業者の沈黙の失敗 (¥1,500)](https://zenn.dev/yurukusa/books/sub-agent-observability?utm_source=readme-ja&utm_medium=routing-table) ——4つの型を一冊で深掘り・[事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
 | `AGENTS.md` と `CLAUDE.md` の同期 | [相互運用スコアカード](agents-md-interop-scorecard.html) | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table) |
-| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx github:yurukusa/cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
-| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本 (¥800)](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose) |
+| MCP のプラグインを入れたいが、費用と安全性が読めない | [OWASP MCP 対応表](owasp-mcp-hooks.html) | [MCPプラグインの信頼性 (¥800)](https://zenn.dev/yurukusa/books/mcp-plugin-reliability?utm_source=readme-ja&utm_medium=routing-table) ——5つの脆弱性と利用者の側の防衛 |
+| サブエージェントの worktree 隔離が黙って無効になり、コミットが別ブランチへ静かに着地する | [worktree 隔離リスク自己診断](multi-agent-worktree-isolation-risk-jp.html) → `npx github:yurukusa/cc-safe-setup` | [AGENTS.md 相互運用本 (¥1,500)](https://zenn.dev/yurukusa/books/agents-md-interop?utm_source=readme-ja&utm_medium=routing-table)・[事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table) |
+| 「調べて」と頼んだだけなのに、勝手にコマンドを実行・状態を変更された (docker restart / ALTER SYSTEM / マイグレーション) | [「調べて」が勝手な変更に化けるとき](claude-code-diagnose-became-mutation-jp.html) → `npx github:yurukusa/cc-safe-setup` | [事故防止本](https://zenn.dev/yurukusa/books/6076c23b1cb18b?utm_source=readme-ja&utm_medium=routing-table-diagnose) |
 | 来月の新しい事故に備えたい | [Safety Lab 5月号の無料試し読み](safety-lab-may-preview.html) | [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership) |
 
 ## 何ができるか
@@ -94,7 +96,7 @@ Claude Codeを再起動。完了。
 | サブエージェントの指示無視 | v2.1.84以降CLAUDE.md除外 ([#40459](https://github.com/anthropics/claude-code/issues/40459)) | hookで制約 |
 | 読まずに編集 | 6%→34%に増加 ([#42796](https://github.com/anthropics/claude-code/issues/42796)) | 警告 |
 
-> 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（¥800・第3章まで無料）。
+> 📘 トークン消費が多すぎる？ [Token Book](token-book.html)（¥2,500・[Zennで購入](https://zenn.dev/yurukusa/books/token-savings-guide)）でCLAUDE.md最適化・hookによるトークン制御・コンテキスト管理・ワークフロー設計を解説。800+時間の実測データ付き。第1章無料。hookの設計パターンは[Safety Guide](https://zenn.dev/yurukusa/books/6076c23b1cb18b)（第3章まで無料）。
 
 > 🔁 月次の追跡が欲しい？ [CC Safety Lab（月刊・¥500/月）](https://note.com/yurukusa/membership)で、毎月その月に実際に起きた事故 4-8 件（対処法付き）、 1-2 個の安全 hook、 1 件の深掘り、 月次の安全チェックリスト、 商品更新案内を届ける。 note のメンバーシップで、各号は無料の試し読みから中身を確かめてから加入できる。
 
