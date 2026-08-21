@@ -3,17 +3,33 @@
 # and surface its contents to Claude Code as a system-reminder, so the agent
 # reads it alongside (or in place of) CLAUDE.md.
 #
-# Addresses: anthropics/claude-code#6235 (Feature Request: Support AGENTS.md).
-# That issue is the highest-engagement feature request on the tracker
-# (3,922 +1 reactions, 296 comments at the time this hook was written).
+# Addresses: anthropics/claude-code#6235 (Feature Request: Support AGENTS.md),
+# the highest-engagement feature request on the tracker (6,358 reactions),
+# closed as completed on 2026-08-17.
+#
+# STATUS AFTER NATIVE SUPPORT (measured on v2.1.233, 2026-08-21):
+# Claude Code does now read AGENTS.md, but only in the narrowest case.
+# Measured with an isolated CLAUDE_CONFIG_DIR, a fresh project directory per
+# case, and a no-file control that returned NOT-FOUND every time:
+#
+#   AGENTS.md in cwd, no CLAUDE.md .................. read
+#   AGENTS.md + CLAUDE.md in cwd .................... only CLAUDE.md is read
+#   AGENTS.md in a parent, cwd is a subdirectory ..... not read (no upward walk)
+#   CLAUDE.md in a parent, cwd is a subdirectory ..... read (CLAUDE.md walks up)
+#   CLAUDE.md in a parent + AGENTS.md in cwd ......... only the parent CLAUDE.md
+#
+# So two gaps remain for operators: AGENTS.md is never picked up from a parent
+# directory, and any discoverable CLAUDE.md suppresses it entirely — including
+# a CLAUDE.md in an ancestor directory beating an AGENTS.md in cwd.
+# A user-level ~/.claude/CLAUDE.md does NOT suppress it; only one inside the
+# project tree does.
 #
 # AGENTS.md (https://agents.md) is the cross-vendor "README for agents"
 # convention adopted by 20+ coding agents including Codex, Cursor, Aider,
 # Zed, VS Code, Devin, JetBrains Junie, Amp, Gemini CLI, GitHub Copilot,
-# Windsurf, Augment Code, Phoenix, and others. Claude Code is the largest
-# coding-agent platform that does not natively support it.
+# Windsurf, Augment Code, Phoenix, and others.
 #
-# This hook is the operator-side workaround: a SessionStart hook that
+# This hook covers the two gaps above: a SessionStart hook that
 # detects AGENTS.md (in cwd or any parent up to git root), reads its
 # contents (subject to a size cap to protect the context budget), and
 # emits a <system-reminder> so the agent reads it the same way it reads
