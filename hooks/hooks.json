@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/move-delete-sequence-guard.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/examples/move-delete-sequence-guard.sh"
           }
         ]
       },
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/system-dir-protection-guard.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/examples/system-dir-protection-guard.sh"
           }
         ]
       }
