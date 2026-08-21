@@ -7,29 +7,26 @@
 # the highest-engagement feature request on the tracker (6,358 reactions),
 # closed as completed on 2026-08-17.
 #
-# STATUS AFTER NATIVE SUPPORT (measured on v2.1.233, 2026-08-21):
-# Claude Code does now read AGENTS.md, but only in the narrowest case.
-# Measured with an isolated CLAUDE_CONFIG_DIR, a fresh project directory per
-# case, and a no-file control that returned NOT-FOUND every time:
+# DOES CLAUDE CODE READ AGENTS.md NOW? Measured on v2.1.233, 2026-08-21: NO.
+# The issue is closed, but AGENTS.md is still not loaded into the model's
+# context the way CLAUDE.md is. The official CHANGELOG.md (5,693 lines, up
+# to 2.1.238) does not mention AGENTS.md anywhere.
 #
-#   AGENTS.md in cwd, no CLAUDE.md .................. read
-#   AGENTS.md + CLAUDE.md in cwd .................... only CLAUDE.md is read
-#   AGENTS.md in a parent, cwd is a subdirectory ..... not read (no upward walk)
-#   CLAUDE.md in a parent, cwd is a subdirectory ..... read (CLAUDE.md walks up)
-#   CLAUDE.md in a parent + AGENTS.md in cwd ......... only the parent CLAUDE.md
+# This is easy to get wrong, so here is the method. Asking `claude -p` for a
+# token planted in AGENTS.md is NOT a valid test: the agent will often find the
+# file on its own with ls/cat and answer correctly, which looks identical to
+# native loading. Stream the transcript instead and look at the tool calls:
 #
-# So two gaps remain for operators: AGENTS.md is never picked up from a parent
-# directory, and any discoverable CLAUDE.md suppresses it entirely — including
-# a CLAUDE.md in an ancestor directory beating an AGENTS.md in cwd.
-# A user-level ~/.claude/CLAUDE.md does NOT suppress it; only one inside the
-# project tree does.
+#   claude -p "<question>" --output-format stream-json --verbose
 #
-# AGENTS.md (https://agents.md) is the cross-vendor "README for agents"
-# convention adopted by 20+ coding agents including Codex, Cursor, Aider,
-# Zed, VS Code, Devin, JetBrains Junie, Amp, Gemini CLI, GitHub Copilot,
-# Windsurf, Augment Code, Phoenix, and others.
+#   CLAUDE.md planted ... answered with no file read  -> loaded into context
+#   AGENTS.md planted ... agent ran `ls` then `cat`   -> NOT loaded; it looked
 #
-# This hook covers the two gaps above: a SessionStart hook that
+# So whether the agent sees AGENTS.md depends on whether it happens to go
+# looking, which is not something you can rely on — and it costs tool calls
+# every session when it does.
+#
+# This hook makes it deterministic instead: a SessionStart hook that
 # detects AGENTS.md (in cwd or any parent up to git root), reads its
 # contents (subject to a size cap to protect the context budget), and
 # emits a <system-reminder> so the agent reads it the same way it reads
