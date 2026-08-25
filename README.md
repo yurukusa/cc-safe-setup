@@ -226,16 +226,31 @@ are written up at length in these:
 
 **In English:**
 
-- [Claude Code Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)
-  ($19) — the April–June 2026 regressions in sequence, and a stay / switch / hybridize
-  decision framework built from them
-- [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($5) — the same measurements
-  applied to token cost
+- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) ($19, 48 pages) —
+  the defensive hooks in this repository, grouped from the five to install first through Git
+  protection and credential guards, with the incident that produced each one
+- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) ($19, 105 pages) —
+  a reversible runbook for model and version upgrades: moving your `CLAUDE.md`, hooks, and
+  workflows across them without losing work, rolling back when an upgrade misbehaves, and drift guards
+- [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) ($19, 89 pages) —
+  where the tokens actually go, measured across 800+ hours rather than reasoned about:
+  overnight cost spikes, sub-agents, thinking tokens, and context-window bloat
+- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) ($9.99, 21 pages) —
+  which file each of nine tools reads, six ways to keep them in sync, and how to check what
+  your own setup actually loads rather than trusting a closed issue
+
+The first three are also sold together as
+[The Claude Code Operator's Library](https://leanpub.com/b/claude-code-operators-library) ($29).
+**All four have a free sample you can read before deciding.**
+
+Two of them are on Gumroad as well, if you prefer that store:
+[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19) and
+[the token book](https://yurukusa.gumroad.com/l/azrdt) (¥2,500).
 
 All of them are optional, and every hook in this repository works without them. The reason they are
-listed at all is that Zenn books do not surface in search or in Zenn's own topic listings for this
-account (measured across 19 topics on 2026-08-09: zero appearances), so this README is the only
-place they can be found from.
+listed at all is that the Japanese editions do not surface in search or in Zenn's own topic listings
+for this account (measured across 19 topics on 2026-08-09: zero appearances), so this README is one
+of the few places they can be found from.
 
 ## License
 
