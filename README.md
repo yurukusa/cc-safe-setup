@@ -217,7 +217,7 @@ are written up at length in these:
 
 **In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
 
-- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 100 chapters
+- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 97 chapters
   of incidents, each traced to the setting or hook that stops it. The introduction, the
   symptom→chapter lookup table you'd reach for mid-incident, Chapters 1-3 and Chapter 100
   are free to read
