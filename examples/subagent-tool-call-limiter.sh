@@ -51,29 +51,70 @@ COUNTER_FILE="/tmp/claude-tool-call-counter-$__CC_KEY"
 #   カウンターファイルは1個だけで値は12(=6+6)。片方のセッションが上限を使い切ると、
 #   もう片方が何もしていなくても遮断される。
 # 修正: hookの入力JSONの session_id で分ける。
+#
+# ★2026-08-27 追記: session_id だけでは、このhookの名前が約束していることができない。
+#   PreToolUse の入力を丸ごと落として実測したところ、サブエージェントの呼び出しでも
+#   session_id は親と1バイトも違わない(transcript_path も同じ)。増えるのは agent_id と
+#   agent_type の2つだけ。つまり session_id を鍵にしたカウンターは、親と全サブエージェントの
+#   合算になる。#36727 の「1体のサブエージェントが1.5時間で234回」を止めたくても、
+#   合算のカウンターでは「誰が使ったか」が分からず、暴走した子が枠を焼き切ると
+#   何もしていない親まで止まる。
+#   → セッション全体の上限はそのままに、agent_id ごとの上限を足した。
+#     どちらか先に達したほうで止める。合計の上限は変えていないので、緩くはならない。
 
-# Initialize or read counter
-COUNT=0
-if [ -f "$COUNTER_FILE" ]; then
-  COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
-  case "$COUNT" in ''|*[!0-9]*) COUNT=0 ;; esac
+MAX_SUBAGENT_CALLS="${CC_MAX_SUBAGENT_TOOL_CALLS:-100}"
+
+# agent_id はサブエージェントの呼び出しにだけ入る(実測)。上位エージェントでは空。
+__CC_AID=""
+if [ -n "${__CC_HOOK_INPUT:-}" ] && command -v jq >/dev/null 2>&1; then
+  __CC_AID=$(printf '%s' "$__CC_HOOK_INPUT" | jq -r '.agent_id // empty' 2>/dev/null)
 fi
+__CC_AKEY=$(printf '%s' "$__CC_AID" | tr -c 'A-Za-z0-9_-' '_' | cut -c1-64)
+AGENT_COUNTER_FILE="/tmp/claude-tool-call-counter-$__CC_KEY-agent-$__CC_AKEY"
 
-COUNT=$((COUNT + 1))
-echo "$COUNT" > "$COUNTER_FILE"
+read_counter() {
+  _v=0
+  if [ -f "$1" ]; then
+    _v=$(cat "$1" 2>/dev/null || echo 0)
+    case "$_v" in ''|*[!0-9]*) _v=0 ;; esac
+  fi
+  printf '%s' "$_v"
+}
 
-# Check limit
+COUNT=$(( $(read_counter "$COUNTER_FILE") + 1 ))
+AGENT_COUNT=0
+[ -n "$__CC_AID" ] && AGENT_COUNT=$(( $(read_counter "$AGENT_COUNTER_FILE") + 1 ))
+
+# ★記録は遮断を決めた後に置く。先に書くと、案内を読んで再試行するたびに
+#   カウンターが増えて待ち時間が自分の再試行で延びる(2026-07-28 に別のhookで実害)。
 if [ "$COUNT" -gt "$MAX_CALLS" ]; then
-  echo "BLOCKED: Tool call limit reached ($COUNT/$MAX_CALLS)." >&2
-  echo "This session has made $COUNT tool calls (limit: $MAX_CALLS)." >&2
+  echo "BLOCKED: Tool call limit reached ($COUNT/$MAX_CALLS) for this session." >&2
+  echo "This session (parent and all subagents share one session_id) has made" >&2
+  echo "$COUNT tool calls (limit: $MAX_CALLS)." >&2
   echo "Consider starting a new session or increasing CC_MAX_TOOL_CALLS." >&2
   exit 2
 fi
+
+if [ -n "$__CC_AID" ] && [ "$AGENT_COUNT" -gt "$MAX_SUBAGENT_CALLS" ]; then
+  echo "BLOCKED: Subagent tool call limit reached ($AGENT_COUNT/$MAX_SUBAGENT_CALLS)." >&2
+  echo "Subagent agent_id=$__CC_AID has made $AGENT_COUNT tool calls on its own." >&2
+  echo "The session as a whole is still at $COUNT/$MAX_CALLS, so the parent is not blocked." >&2
+  echo "Raise CC_MAX_SUBAGENT_TOOL_CALLS if this subagent legitimately needs more." >&2
+  exit 2
+fi
+
+echo "$COUNT" > "$COUNTER_FILE"
+[ -n "$__CC_AID" ] && echo "$AGENT_COUNT" > "$AGENT_COUNTER_FILE"
 
 # Warn at 80%
 WARN_AT=$((MAX_CALLS * 80 / 100))
 if [ "$COUNT" -eq "$WARN_AT" ]; then
   echo "WARNING: $COUNT/$MAX_CALLS tool calls used (80%). Consider wrapping up." >&2
+fi
+
+AGENT_WARN_AT=$((MAX_SUBAGENT_CALLS * 80 / 100))
+if [ -n "$__CC_AID" ] && [ "$AGENT_COUNT" -eq "$AGENT_WARN_AT" ]; then
+  echo "WARNING: subagent $__CC_AID is at $AGENT_COUNT/$MAX_SUBAGENT_CALLS of its own budget." >&2
 fi
 
 exit 0

@@ -12592,6 +12592,24 @@ test_ex subagent-tool-call-limiter.sh '{"tool_name":"Glob","tool_input":{"patter
 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Agent","tool_input":{"prompt":"research"}}' 0 "tool-limiter: agent counted"
 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Bash","tool_input":{"command":"echo 1"}}' 0 "tool-limiter: bash counted"
 test_ex subagent-tool-call-limiter.sh '{"tool_name":"Read","tool_input":{"file_path":"x.txt"}}' 0 "tool-limiter: read counted"
+# --- per-agent budget (2026-08-27) ---
+# Measured on 2.1.246: a subagent's PreToolUse payload carries the PARENT's session_id
+# and transcript_path byte for byte; only agent_id and agent_type are added. So a
+# session-keyed counter pools parent and every subagent together, and the hook cannot
+# do what its name says. Below: one subagent exhausting its own budget must be blocked
+# without blocking the parent or a sibling subagent.
+rm -f /tmp/claude-tool-call-counter-* 2>/dev/null
+CC_MAX_TOOL_CALLS=999 CC_MAX_SUBAGENT_TOOL_CALLS=2 test_ex subagent-tool-call-limiter.sh '{"session_id":"s1","agent_id":"aAAA","agent_type":"general-purpose","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: subagent 1st call allowed"
+CC_MAX_TOOL_CALLS=999 CC_MAX_SUBAGENT_TOOL_CALLS=2 test_ex subagent-tool-call-limiter.sh '{"session_id":"s1","agent_id":"aAAA","agent_type":"general-purpose","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: subagent 2nd call allowed"
+CC_MAX_TOOL_CALLS=999 CC_MAX_SUBAGENT_TOOL_CALLS=2 test_ex subagent-tool-call-limiter.sh '{"session_id":"s1","agent_id":"aAAA","agent_type":"general-purpose","tool_name":"Bash","tool_input":{"command":"ls"}}' 2 "tool-limiter: subagent over its own budget is blocked"
+CC_MAX_TOOL_CALLS=999 CC_MAX_SUBAGENT_TOOL_CALLS=2 test_ex subagent-tool-call-limiter.sh '{"session_id":"s1","agent_id":"aBBB","agent_type":"Explore","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: sibling subagent is not starved"
+CC_MAX_TOOL_CALLS=999 CC_MAX_SUBAGENT_TOOL_CALLS=2 test_ex subagent-tool-call-limiter.sh '{"session_id":"s1","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: parent is not starved by a runaway subagent"
+# The session-wide cap must still hold, so the aggregate limit is not loosened.
+rm -f /tmp/claude-tool-call-counter-* 2>/dev/null
+CC_MAX_TOOL_CALLS=2 CC_MAX_SUBAGENT_TOOL_CALLS=999 test_ex subagent-tool-call-limiter.sh '{"session_id":"s2","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: session cap 1st call"
+CC_MAX_TOOL_CALLS=2 CC_MAX_SUBAGENT_TOOL_CALLS=999 test_ex subagent-tool-call-limiter.sh '{"session_id":"s2","tool_name":"Bash","tool_input":{"command":"ls"}}' 0 "tool-limiter: session cap 2nd call"
+CC_MAX_TOOL_CALLS=2 CC_MAX_SUBAGENT_TOOL_CALLS=999 test_ex subagent-tool-call-limiter.sh '{"session_id":"s2","agent_id":"aCCC","agent_type":"general-purpose","tool_name":"Bash","tool_input":{"command":"ls"}}' 2 "tool-limiter: exhausted session still blocks subagents"
+rm -f /tmp/claude-tool-call-counter-* 2>/dev/null
 echo ""
 
 # ========== consecutive-failure-circuit-breaker (#31946) ==========

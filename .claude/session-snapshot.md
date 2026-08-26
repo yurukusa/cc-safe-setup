@@ -1,26 +1,26 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-17T11:17:42+09:00
+Updated: 2026-08-27T01:46:46+09:00
 
 ## Git
-- Branch: `main`
+- Branch: `fix/subagent-limiter-per-agent-key-2026-08-27`
 - Uncommitted changes: 1 file(s)
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e5a472a checkpoint: auto-save 11:17:14
+- Last commit: 7f7f5929 recovery: pre-compact checkpoint (1 files, 20260826-164646)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-08-27.md
 ./.claude/pre-compact-checkpoint.md
-./.claude/session-logs/2026-08-17.md
+./test.sh
+./examples/subagent-tool-call-limiter.sh
+./examples/agents-md-loader.sh
+./examples/commitment-carry-forward-arrest.sh
 ./README.md
 ./docs/README.ja.md
-./docs/june-15-cliff-14-day-plan.md
-./docs/june-15-cliff-post-fire-30-day-plan.md
-./tests/test-rhetorical-verification-prompt-detector.sh
-./tests/test-rm-safety-net.sh
-./tests/test-route-handler-emptiness-gate.sh
+./scripts/build-sitemap.py
 ```
 
 ## Active TODOs: 1 file(s)
