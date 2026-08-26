@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-27T01:45:51+09:00
+Updated: 2026-08-27T01:46:10+09:00
 
 ## Git
 - Branch: `fix/subagent-limiter-per-agent-key-2026-08-27`
@@ -7,13 +7,13 @@ Updated: 2026-08-27T01:45:51+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 115222cf recovery: pre-compact checkpoint (1 files, 20260826-164551)
+- Last commit: d7e98e48 recovery: pre-compact checkpoint (1 files, 20260826-164610)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-08-27.md
+./.claude/pre-compact-checkpoint.md
 ./test.sh
 ./examples/subagent-tool-call-limiter.sh
 ./examples/agents-md-loader.sh
