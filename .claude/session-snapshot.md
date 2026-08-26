@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-27T01:45:47+09:00
+Updated: 2026-08-27T01:45:51+09:00
 
 ## Git
 - Branch: `fix/subagent-limiter-per-agent-key-2026-08-27`
@@ -7,7 +7,7 @@ Updated: 2026-08-27T01:45:47+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: bcb61a1f checkpoint: auto-save 01:45:40
+- Last commit: 115222cf recovery: pre-compact checkpoint (1 files, 20260826-164551)
 
 ## Recent Files
 ```
