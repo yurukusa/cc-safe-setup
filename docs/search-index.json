@@ -765,7 +765,7 @@
   {
     "url": "incident-prevention-book.html",
     "title": "Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法",
-    "description": "Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。",
+    "description": "Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、5時間ぶんの利用枠が15分で溶ける。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。",
     "keywords": "Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金",
     "snippet": "Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全100章・約69万字・第3章まで無料"
   },
@@ -1009,10 +1009,10 @@
   },
   {
     "url": "prevent-cost-explosion-jp.html",
-    "title": "Claude Code の課金の暴走を防ぐ——利用枠を数分で使い切る前に — cc-safe-setup",
-    "description": "Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。",
-    "keywords": "Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 数分で枠, claude code cost explosion, cc-safe-setup",
-    "snippet": "Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。"
+    "title": "Claude Code の課金の暴走を防ぐ——利用枠を1〜2時間で使い切る前に — cc-safe-setup",
+    "description": "Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。",
+    "keywords": "Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 枠を早く使い切る, claude code cost explosion, cc-safe-setup",
+    "snippet": "Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。"
   },
   {
     "url": "prevent-cost-explosion.html",

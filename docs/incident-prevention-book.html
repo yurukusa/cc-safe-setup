@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法</title>
-<meta name="description" content="Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。">
+<meta name="description" content="Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、5時間ぶんの利用枠が15分で溶ける。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。">
 <meta name="keywords" content="Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html">
 
@@ -99,7 +99,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 
 <div class="data-point">
 <p style="margin-bottom:0.5rem;">実際に起きた事故から逆算した、設定と hook の手順です。</p>
-<p style="margin:0;color:#444;font-size:0.95rem;">著者は非エンジニアで、最初は月に3〜5回つまずいていました（ファイルの消失、トークンの20倍の膨張、サブエージェントの嘘の完了報告）。それを設定で先回りして、同じところで転ばなくなるまでの全工程が、この本の中身です。同じ手順で作った hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に900本以上、無料・MIT で公開しています。</p>
+<p style="margin:0;color:#444;font-size:0.95rem;">著者は非エンジニアで、最初は同じところで何度もつまずいていました（ファイルの消失、トークンの20倍の膨張、サブエージェントの嘘の完了報告）。それを設定で先回りして、同じところで転ばなくなるまでの全工程が、この本の中身です。同じ手順で作った hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に900本以上、無料・MIT で公開しています。</p>
 </div>
 
 <h3>扱う事故の範囲</h3>
@@ -169,7 +169,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <hr style="border:none;border-top:1px solid #e8e8e8;margin:2.5rem 0 1.5rem;">
 
 <h2 id="en" style="font-size:1.15rem;">In English</h2>
-<p style="font-size:0.95rem;color:#444;">This book is written in Japanese. It reconstructs, chapter by chapter, the real incidents behind every hook in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — what failed, what the logs looked like, and which setting finally stopped it. 100 chapters, ~700,000 characters, free through chapter 3. If you read English only, the hooks themselves are free and MIT-licensed, and the <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SAFETY_CHECKLIST.md">safety checklist</a> covers the same ground in short form.</p>
+<p style="font-size:0.95rem;color:#444;">This book is written in Japanese. It reconstructs, chapter by chapter, the real incidents behind every hook in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — what failed, what the logs looked like, and which setting finally stopped it. 100 chapters, ~690,000 characters, free through chapter 3. If you read English only, the hooks themselves are free and MIT-licensed, and the <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SAFETY_CHECKLIST.md">safety checklist</a> covers the same ground in short form.</p>
 
 <footer>
 <p><a href="https://yurukusa.github.io/cc-safe-setup/">cc-safe-setup</a> ｜ <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ｜ <a href="https://zenn.dev/yurukusa">Zenn</a></p>
