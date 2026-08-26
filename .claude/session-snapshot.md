@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-08-27T01:42:30+09:00
+Updated: 2026-08-27T01:42:48+09:00
 
 ## Git
 - Branch: `fix/subagent-limiter-per-agent-key-2026-08-27`
@@ -7,15 +7,15 @@ Updated: 2026-08-27T01:42:30+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: b24e9496 サブエージェントの上限が、名前どおりに働いていなかったのを直した
+- Last commit: 3ba6d4e4 checkpoint: auto-save 01:42:47
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./test.sh
-./examples/subagent-tool-call-limiter.sh
 ./.claude/session-logs/2026-08-27.md
 ./.claude/pre-compact-checkpoint.md
+./test.sh
+./examples/subagent-tool-call-limiter.sh
 ./examples/agents-md-loader.sh
 ./examples/commitment-carry-forward-arrest.sh
 ./README.md
