@@ -88,7 +88,7 @@
 #   Run examples/commitment-carry-forward-arrest.sh via the test
 #   suite in tests/test-commitment-carry-forward-arrest.sh
 #
-# AUTHOR: yurukusa <wakakusa.takei@gmail.com>
+# AUTHOR: yurukusa (https://github.com/yurukusa)
 # LICENSE: MIT
 # ================================================================
 
