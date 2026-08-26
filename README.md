@@ -218,11 +218,12 @@ are written up at length in these:
 **In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
 
 - [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 100 chapters
-  of incidents, each traced to the setting or hook that stops it. The first 5 sections,
-  including the symptom→chapter lookup table you'd reach for mid-incident, are free to read
+  of incidents, each traced to the setting or hook that stops it. The introduction, the
+  symptom→chapter lookup table you'd reach for mid-incident, Chapters 1-3 and Chapter 100
+  are free to read
 - [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
-  the tokens actually go, measured across 800+ hours rather than reasoned about. 36 chapters,
-  2 free
+  the tokens actually go, measured across 800+ hours rather than reasoned about. 35 chapters;
+  the introduction, the symptom→chapter cost table, and Chapter 1 are free to read
 
 **In English:**
 
