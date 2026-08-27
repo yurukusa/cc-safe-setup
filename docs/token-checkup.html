@@ -325,6 +325,19 @@ function showResults() {
     const firstCta = el.querySelector('.cta');
     if (firstCta) firstCta.parentNode.insertBefore(jp, firstCta);
     else el.appendChild(jp);
+
+    // The audit box only exists for low scores. When it does, point Japanese readers
+    // at the Japanese sales page: it carries what the English box has no room for --
+    // the report sample, who this is not for, what to redact before sending, and the
+    // "run the free tools first" section. Same product, more of the honest parts.
+    const auditBox = Array.from(el.querySelectorAll('.cta'))
+      .find(b => b.innerHTML.indexOf('Token Burn Audit') !== -1);
+    if (auditBox) {
+      const note = document.createElement('p');
+      note.style.cssText = 'color:#8b949e;font-size:.78rem;margin-top:.4rem';
+      note.innerHTML = '日本語の詳しい説明（価格・納期・返金の条件・含まないもの・送っていただくもの・報告書の見本）は<a href="token-burn-audit-jp.html">こちら</a>。注文も報告書も日本語で対応します。';
+      auditBox.appendChild(note);
+    }
   }
 
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
