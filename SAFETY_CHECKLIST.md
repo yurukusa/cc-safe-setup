@@ -4,8 +4,8 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 ## Before First Session
 
-- [ ] Install safety hooks: `npx cc-safe-setup`
-- [ ] Run safety audit: `npx cc-safe-setup --audit` (target: score ≥ 80)
+- [ ] Install safety hooks: `npx github:yurukusa/cc-safe-setup`
+- [ ] Run safety audit: `npx github:yurukusa/cc-safe-setup --audit` (target: score ≥ 80)
 - [ ] Create CLAUDE.md with project-specific rules
 - [ ] Verify .env files are in .gitignore
 - [ ] Ensure git remote is set (so work can be recovered)
@@ -14,7 +14,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 - [ ] Create backup branch: `git checkout -b backup/before-autonomous-$(date +%Y%m%d)`
 - [ ] Commit all current work
-- [ ] Verify destructive-guard is blocking: `npx cc-safe-setup --verify`
+- [ ] Verify destructive-guard is blocking: `npx github:yurukusa/cc-safe-setup --verify`
 - [ ] Check branch-guard protects main/master
 - [ ] If using database: install `block-database-wipe`
 - [ ] If sensitive configs: install `protect-dotfiles`
@@ -30,7 +30,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 - [ ] Review git log for unexpected changes
 - [ ] Run test suite to catch regressions
 - [ ] Check if any .env files were modified
-- [ ] Review blocked-commands.log for patterns: `npx cc-safe-setup --learn`
+- [ ] Review blocked-commands.log for patterns: `npx github:yurukusa/cc-safe-setup --learn`
 
 ## Team Setup
 
@@ -43,11 +43,17 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 | Risk | Prevention | Install |
 |------|-----------|---------|
-| `rm -rf /` | destructive-guard | `npx cc-safe-setup` |
-| Push to main | branch-guard | `npx cc-safe-setup` |
-| .env committed | secret-guard | `npx cc-safe-setup` |
+| `rm -rf /` | destructive-guard | `npx github:yurukusa/cc-safe-setup` |
+| Push to main | branch-guard | `npx github:yurukusa/cc-safe-setup` |
+| .env committed | secret-guard | `npx github:yurukusa/cc-safe-setup` |
 | Database wiped | block-database-wipe | `--install-example block-database-wipe` |
 | Dotfiles modified | protect-dotfiles | `--install-example protect-dotfiles` |
 | Deploy without commit | deploy-guard | `--install-example deploy-guard` |
 | Commit without tests | verify-before-commit | `--install-example verify-before-commit` |
 | Session crash data loss | session-checkpoint | `--install-example session-checkpoint` |
+
+## Why `github:` and not the bare package name
+
+The npm entry is frozen at 29.8.0 (2026-04-20) and lets three destructive commands through
+that the current code blocks. Install from GitHub so the guards you get are the guards this
+checklist describes. The tool's own `--help` says the same thing.
