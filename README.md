@@ -227,21 +227,21 @@ are written up at length in these:
 
 **In English:**
 
-- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) ($19, 48 pages) —
+- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $19, 56 pages) —
   the defensive hooks in this repository, grouped from the five to install first through Git
-  protection and credential guards, with the incident that produced each one
-- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) ($19, 105 pages) —
-  a reversible runbook for model and version upgrades: moving your `CLAUDE.md`, hooks, and
-  workflows across them without losing work, rolling back when an upgrade misbehaves, and drift guards
-- [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) ($19, 89 pages) —
+  protection and credential guards, and eight dated incidents where the guard itself failed silently
+- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $19, 105 pages) —
+  stay, switch, or build your own stack: five measurable triggers, a 30-day cost projection for
+  each path, a decision tree that returns one recommendation, and a 48-hour rollback if it was wrong
+- [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) (from $19, 89 pages) —
   where the tokens actually go, measured across 800+ hours rather than reasoned about:
   overnight cost spikes, sub-agents, thinking tokens, and context-window bloat
-- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) ($9.99, 21 pages) —
+- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 21 pages) —
   which file each of nine tools reads, six ways to keep them in sync, and how to check what
   your own setup actually loads rather than trusting a closed issue
 
-The first three are also sold together as
-[The Claude Code Operator's Library](https://leanpub.com/b/claude-code-operators-library) ($29).
+All four are also sold together as
+[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
 **All four have a free sample you can read before deciding.**
 
 Two of them are on Gumroad as well, if you prefer that store:
