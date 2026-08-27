@@ -26,7 +26,7 @@ Your first line of defense. Hooks intercept dangerous operations before they exe
 | 12 | **Long command warning** — commands over 500 characters are flagged for review | ☐ | |
 | 13 | **Hooks are tested** — you have verified each hook actually blocks by triggering it intentionally | ☐ | |
 | 14 | **Hooks survive updates** — hooks are in version control or backed up outside `~/.claude/` | ☐ | |
-| 15 | **Hook failure mode is safe** — if a hook script crashes, the command is blocked (exit 2), not allowed | ☐ | |
+| 15 | **Hook failure mode is visible** — if a hook cannot read its input (no `jq`/`python3`/`node`), it says so on stderr instead of exiting 0 in silence. Refusing every call is an outage, not a guard | ☐ | |
 
 ## Git Protection (10 points)
 
