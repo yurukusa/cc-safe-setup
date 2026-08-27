@@ -37,9 +37,9 @@ Git is both your safety net and your biggest risk vector.
 | 16 | **Work happens on feature branches** — CLAUDE.md explicitly requires branching | ☐ | |
 | 17 | **Commits have meaningful messages** — convention is documented (conventional commits, etc.) | ☐ | |
 | 18 | **Pre-commit tests** — tests run before or immediately after each commit | ☐ | |
-| 19 | **Backup branch before risky changes** — documented procedure for `git checkout -b backup/...` | ☐ | |
+| 19 | **Backup branch before risky changes** — documented procedure for `git checkout -b backup/...`, **and you have used it at least once** | ☐ | |
 | 20 | **No orphaned branches** — process exists to clean up merged/stale branches | ☐ | |
-| 21 | **`.gitignore` covers sensitive files** — `.env`, `*.pem`, `*.key`, `credentials.*` are listed | ☐ | |
+| 21 | **`.gitignore` covers sensitive files as a class** — `.env`, `*.pem`, `*.key`, `credentials.*` are all listed (check 28 covers `.env` alone) | ☐ | |
 | 22 | **`.gitignore` covers generated files** — `node_modules/`, `__pycache__/`, `dist/`, build artifacts are listed | ☐ | |
 | 23 | **Git hooks complement Claude hooks** — pre-commit and pre-push hooks exist at the repository level | ☐ | |
 | 24 | **Rebase/merge strategy is documented** — team knows whether to rebase or merge | ☐ | |

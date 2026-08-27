@@ -17,13 +17,14 @@
 #   0  the hook allowed the operation   <- if you expected a refusal, it is not working
 #   1  the hook itself errored          <- it is not protecting you either
 #
-# Two flags matter for the audit:
+# One flag matters for the audit:
 #   --bare   run with a PATH that has no jq, no python3 and no node.
 #            Many hooks parse the tool-call JSON with one of those. On a
 #            minimal container or a fresh CI image they are absent, and a hook
 #            that cannot parse its input often exits 0 (allow) instead of 2.
-#   --home   run with a throwaway HOME so the hook cannot touch your real
-#            ~/.claude while you are testing. On by default.
+#   A throwaway HOME is always used, so a hook that writes state into ~/.claude
+#   cannot touch yours while you are testing. There is no flag for that and no
+#   way to turn it off.
 #
 set -u
 

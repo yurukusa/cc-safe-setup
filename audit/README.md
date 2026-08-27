@@ -1,6 +1,6 @@
 # The Claude Code Safety Audit — course resources
 
-Three scripts and one sheet. Everything here runs against whatever Claude Code
+Four scripts and one sheet. Everything here runs against whatever Claude Code
 setup you already have. Nothing here requires my hooks or my repository.
 
 | File | What it does |
