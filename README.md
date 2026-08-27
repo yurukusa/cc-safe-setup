@@ -132,6 +132,34 @@ session logs and CI read alongside your config, there are
 [written audits](#written-audits-29-and-219) below — asynchronous, and nothing is ever
 run in your environment.
 
+### Proving a hook fires
+
+`--audit` reads configuration. It cannot tell you whether a registered hook actually
+refuses anything, and that is where most of the damage in `examples/` came from: a
+guard that is present, registered, and silent.
+
+`audit/` holds four small scripts for the other half.
+
+```bash
+# does this guard refuse the operation it was written to refuse?
+audit/fire.sh ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
+#   exit 2 = refused, exit 0 = Claude Code runs it
+
+# same hook, on a machine with no jq, no python3 and no node
+audit/fire.sh --bare ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
+```
+
+The `--bare` run is the one worth doing today. **798 of the 914 example hooks here parse
+their input with `jq` and have no fallback.** Without a JSON parser they print a warning
+to stderr and exit `0` — and Claude Code stops for exit code `2`, not for warnings.
+
+`audit/count-hooks.py` counts registrations across all three settings files;
+`audit/find-dead-hooks.sh` lists registrations whose script is not on disk (those fail to
+launch, which Claude Code treats as non-blocking, so nothing surfaces);
+`audit/selftest.sh` proves that detector really detects, because a detector that has never
+found anything is not yet evidence of anything. `audit/audit-checklist.md` is a 50-point
+sheet covering hooks, git, secrets, cost, autonomous operation and multi-agent work.
+
 ## Your installed hooks do not update themselves
 
 Installing a hook copies the file. **Nothing ever copies it back.** A hook installed in March
