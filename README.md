@@ -11,6 +11,8 @@ The command is interactive: it shows what each hook does and lets you choose whi
 
 > **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets three destructive commands through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
 
+Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. About 2,000 words, and the minimum price is zero.
+
 ## Install as a Claude Code plugin
 
 The core guard sets are also published as Claude Code plugins from this repository. They install from inside Claude Code and track the default branch, so they do not depend on the npm release at all.
