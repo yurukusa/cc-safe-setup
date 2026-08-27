@@ -2,8 +2,9 @@
 """count-hooks.py — how many hook groups are actually registered, per scope.
 
 Why this exists: the usual advice is to run `claude --print-settings`. That flag
-does not exist (checked against the CLI's own --help on 2026-08-27); it exits 1
-and prints usage. The settings that matter live in up to three files, and
+does not exist (checked on 2026-08-27 against 2.1.246); it exits 1 with a
+one-line "error: unknown option". The settings that matter live in up to three
+files, and Claude Code merges them. Counting only one under-reports. The settings that matter live in up to three files, and
 Claude Code merges them. Counting only one of them under-reports.
 
 Run it from your project directory.

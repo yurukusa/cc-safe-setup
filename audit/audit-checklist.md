@@ -26,7 +26,7 @@ Your first line of defense. Hooks intercept dangerous operations before they exe
 | 12 | **Long command warning** — commands over 500 characters are flagged for review | ☐ | |
 | 13 | **Hooks are tested** — you have verified each hook actually blocks by triggering it intentionally | ☐ | |
 | 14 | **Hooks survive updates** — hooks are in version control or backed up outside `~/.claude/` | ☐ | |
-| 15 | **Hook failure mode is safe** — if a hook script crashes, the command is blocked (exit 2), not allowed | ☐ | |
+| 15 | **Hook failure mode is visible** — if a hook cannot read its input (no `jq`/`python3`/`node`), it says so on stderr instead of exiting 0 in silence. Refusing every call is an outage, not a guard | ☐ | |
 
 ## Git Protection (10 points)
 
@@ -37,9 +37,9 @@ Git is both your safety net and your biggest risk vector.
 | 16 | **Work happens on feature branches** — CLAUDE.md explicitly requires branching | ☐ | |
 | 17 | **Commits have meaningful messages** — convention is documented (conventional commits, etc.) | ☐ | |
 | 18 | **Pre-commit tests** — tests run before or immediately after each commit | ☐ | |
-| 19 | **Backup branch before risky changes** — documented procedure for `git checkout -b backup/...` | ☐ | |
+| 19 | **Backup branch before risky changes** — documented procedure for `git checkout -b backup/...`, **and you have used it at least once** | ☐ | |
 | 20 | **No orphaned branches** — process exists to clean up merged/stale branches | ☐ | |
-| 21 | **`.gitignore` covers sensitive files** — `.env`, `*.pem`, `*.key`, `credentials.*` are listed | ☐ | |
+| 21 | **`.gitignore` covers sensitive files as a class** — `.env`, `*.pem`, `*.key`, `credentials.*` are all listed (check 28 covers `.env` alone) | ☐ | |
 | 22 | **`.gitignore` covers generated files** — `node_modules/`, `__pycache__/`, `dist/`, build artifacts are listed | ☐ | |
 | 23 | **Git hooks complement Claude hooks** — pre-commit and pre-push hooks exist at the repository level | ☐ | |
 | 24 | **Rebase/merge strategy is documented** — team knows whether to rebase or merge | ☐ | |
