@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法</title>
-<meta name="description" content="Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。">
+<meta name="description" content="Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、5時間ぶんの利用枠が15分で溶ける。実際に起きた事故から逆算して、設定で先回りする方法を全97章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。">
 <meta name="keywords" content="Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html">
 
 <!-- OGP -->
 <meta property="og:title" content="Anthropic公式ガイドにない事故防止 — Claude Code 800+時間の全記録">
-<meta property="og:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全100章・約69万字。買う前に約9万字が無料で読めます。">
+<meta property="og:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全97章・約69万字。買う前に約9万字が無料で読めます。">
 <meta property="og:type" content="product">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Anthropic公式ガイドにない事故防止 — Claude Code 800+時間の全記録">
-<meta name="twitter:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全100章・約69万字。第3章まで無料。¥1,500">
+<meta name="twitter:description" content="実際に起きた事故から逆算した、設定で先回りする方法。全97章・約69万字。第3章まで無料。¥1,500">
 
 <!-- JSON-LD -->
 <script type="application/ld+json">
@@ -26,7 +26,7 @@
   "@type": "Book",
   "name": "Anthropic公式ガイドにない事故防止——Claude Code 800+時間で19点→85点にした全記録",
   "author": {"@type": "Person", "name": "yurukusa"},
-  "description": "Claude Code に任せた作業で実際に起きた事故を、GitHub の起票で実在を確認したうえで扱い、そのどれもが設定で先回りできることを手順つきでまとめた実践書。全100章・約69万字。第3章までと巻頭の早見表、巻末の章100が無料。",
+  "description": "Claude Code に任せた作業で実際に起きた事故を、GitHub の起票で実在を確認したうえで扱い、そのどれもが設定で先回りできることを手順つきでまとめた実践書。全97章・約69万字。第3章までと巻頭の早見表、巻末の章100が無料。",
   "url": "https://yurukusa.github.io/cc-safe-setup/incident-prevention-book.html",
   "offers": {
     "@type": "Offer",
@@ -74,7 +74,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 
 <span class="price-badge">¥1,500</span>
 <h1>Anthropic公式ガイドにない事故防止</h1>
-<p class="subtitle">Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全100章・約69万字・第3章まで無料</p>
+<p class="subtitle">Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全97章・約69万字・第3章まで無料</p>
 
 <div class="cta-section" style="margin:1.5rem 0;">
 <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn-primary">Zennで読む — ¥1,500</a>
@@ -99,7 +99,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 
 <div class="data-point">
 <p style="margin-bottom:0.5rem;">実際に起きた事故から逆算した、設定と hook の手順です。</p>
-<p style="margin:0;color:#444;font-size:0.95rem;">著者は非エンジニアで、最初は月に3〜5回つまずいていました（ファイルの消失、トークンの20倍の膨張、サブエージェントの嘘の完了報告）。それを設定で先回りして、同じところで転ばなくなるまでの全工程が、この本の中身です。同じ手順で作った hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に900本以上、無料・MIT で公開しています。</p>
+<p style="margin:0;color:#444;font-size:0.95rem;">著者は非エンジニアで、最初は同じところで何度もつまずいていました（ファイルの消失、トークンの20倍の膨張、サブエージェントの嘘の完了報告）。それを設定で先回りして、同じところで転ばなくなるまでの全工程が、この本の中身です。同じ手順で作った hook は <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> に900本以上、無料・MIT で公開しています。</p>
 </div>
 
 <h3>扱う事故の範囲</h3>
@@ -152,7 +152,7 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 <p><a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> は hook そのものを900本以上、無料で配っています。<strong>hook を入れるだけで足りるなら、この本は要りません。</strong>本のほうにあるのは、それぞれの事故がどう起きて、なぜその設定で止まるのかという因果と、自分の環境で同じ判断をするための手順です。設定を配ることと、判断できるようになることは別だと考えています。</p>
 
 <h2>よくある質問</h2>
-<h3>全100章もあると、どこから読めばいいか分かりません</h3>
+<h3>全97章もあると、どこから読めばいいか分かりません</h3>
 <p>巻頭の「事故対応の早見表」から引いてください。症状から該当章へ直接飛べます。頭から読む本ではなく、起きた時に引く本として作ってあります。</p>
 
 <h3>Claude Code の版が上がったら、内容は古くなりませんか</h3>
@@ -163,13 +163,13 @@ footer { text-align: center; color: #888; font-size: 0.85rem; margin-top: 3rem; 
 
 <div class="cta-section">
 <a href="https://zenn.dev/yurukusa/books/6076c23b1cb18b" class="btn-primary">Zennで読む — ¥1,500</a>
-<p style="margin-top:0.8rem;font-size:0.9rem;color:#666;">第3章まで無料 ｜ 追補は無償で届く ｜ 全100章・約69万字</p>
+<p style="margin-top:0.8rem;font-size:0.9rem;color:#666;">第3章まで無料 ｜ 追補は無償で届く ｜ 全97章・約69万字</p>
 </div>
 
 <hr style="border:none;border-top:1px solid #e8e8e8;margin:2.5rem 0 1.5rem;">
 
 <h2 id="en" style="font-size:1.15rem;">In English</h2>
-<p style="font-size:0.95rem;color:#444;">This book is written in Japanese. It reconstructs, chapter by chapter, the real incidents behind every hook in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — what failed, what the logs looked like, and which setting finally stopped it. 100 chapters, ~700,000 characters, free through chapter 3. If you read English only, the hooks themselves are free and MIT-licensed, and the <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SAFETY_CHECKLIST.md">safety checklist</a> covers the same ground in short form.</p>
+<p style="font-size:0.95rem;color:#444;">This book is written in Japanese. It reconstructs, chapter by chapter, the real incidents behind every hook in <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — what failed, what the logs looked like, and which setting finally stopped it. 97 chapters, ~690,000 characters, free through chapter 3. If you read English only, the hooks themselves are free and MIT-licensed, and the <a href="https://github.com/yurukusa/cc-safe-setup/blob/main/SAFETY_CHECKLIST.md">safety checklist</a> covers the same ground in short form.</p>
 
 <footer>
 <p><a href="https://yurukusa.github.io/cc-safe-setup/">cc-safe-setup</a> ｜ <a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> ｜ <a href="https://zenn.dev/yurukusa">Zenn</a></p>

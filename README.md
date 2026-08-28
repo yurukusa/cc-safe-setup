@@ -11,6 +11,8 @@ The command is interactive: it shows what each hook does and lets you choose whi
 
 > **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets three destructive commands through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
 
+Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. About 2,000 words, and the minimum price is zero.
+
 ## Install as a Claude Code plugin
 
 The core guard sets are also published as Claude Code plugins from this repository. They install from inside Claude Code and track the default branch, so they do not depend on the npm release at all.
@@ -41,7 +43,7 @@ The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.
 | `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
 | `true && git add .env` — a secret staged through a chained command | allowed | blocked |
 
-29.8.0 ships 900+ example hooks against this repository's 914 — among the 216 missing is `agents-md-sync-checker`.
+29.8.0 on npm ships **698** example hooks; this repository has **914**. The 216 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree.)
 
 To install the current code directly from this repository:
 
@@ -126,6 +128,39 @@ You can run the same audit in CI to keep a project's safety posture from regress
 # .github/workflows/safety.yml
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
+
+`--audit` is what a script can decide on its own. For the contradictions that need your
+session logs and CI read alongside your config, there are
+[written audits](#written-audits-29-and-219) below — asynchronous, and nothing is ever
+run in your environment.
+
+### Proving a hook fires
+
+`--audit` reads configuration. It cannot tell you whether a registered hook actually
+refuses anything, and that is where most of the damage in `examples/` came from: a
+guard that is present, registered, and silent.
+
+`audit/` holds four small scripts for the other half.
+
+```bash
+# does this guard refuse the operation it was written to refuse?
+audit/fire.sh ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
+#   exit 2 = refused, exit 0 = Claude Code runs it
+
+# same hook, on a machine with no jq, no python3 and no node
+audit/fire.sh --bare ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
+```
+
+The `--bare` run is the one worth doing today. **798 of the 914 example hooks here parse
+their input with `jq` and have no fallback.** Without a JSON parser they print a warning
+to stderr and exit `0` — and Claude Code stops for exit code `2`, not for warnings.
+
+`audit/count-hooks.py` counts registrations across all three settings files;
+`audit/find-dead-hooks.sh` lists registrations whose script is not on disk (those fail to
+launch, which Claude Code treats as non-blocking, so nothing surfaces);
+`audit/selftest.sh` proves that detector really detects, because a detector that has never
+found anything is not yet evidence of anything. `audit/audit-checklist.md` is a 50-point
+sheet covering hooks, git, secrets, cost, autonomous operation and multi-agent work.
 
 ## Your installed hooks do not update themselves
 
@@ -212,25 +247,41 @@ are written up at length in these:
 
 **In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
 
-- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 100 chapters
-  of incidents, each traced to the setting or hook that stops it. The first 5 sections,
-  including the symptom→chapter lookup table you'd reach for mid-incident, are free to read
+- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 97 chapters
+  of incidents, each traced to the setting or hook that stops it. The introduction, the
+  symptom→chapter lookup table you'd reach for mid-incident, Chapters 1-3 and Chapter 100
+  are free to read
 - [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
-  the tokens actually go, measured across 800+ hours rather than reasoned about. 36 chapters,
-  2 free
+  the tokens actually go, measured across 800+ hours rather than reasoned about. 35 chapters;
+  the introduction, the symptom→chapter cost table, and Chapter 1 are free to read
 
 **In English:**
 
-- [Claude Code Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)
-  ($19) — the April–June 2026 regressions in sequence, and a stay / switch / hybridize
-  decision framework built from them
-- [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (¥2,500+, name your price) — the same measurements
-  applied to token cost
+- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 56 pages) —
+  the defensive hooks in this repository, grouped from the five to install first through Git
+  protection and credential guards, and eight dated incidents where the guard itself failed silently
+- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $19, 105 pages) —
+  stay, switch, or build your own stack: five measurable triggers, a 30-day cost projection for
+  each path, a decision tree that returns one recommendation, and a 48-hour rollback if it was wrong
+- [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) (from $9.99, 89 pages) —
+  where the tokens actually go, measured across 800+ hours rather than reasoned about:
+  overnight cost spikes, sub-agents, thinking tokens, and context-window bloat
+- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 27 pages) —
+  which file each of nine tools reads, six ways to keep them in sync, and how to check what
+  your own setup actually loads rather than trusting a closed issue
+
+All four are also sold together as
+[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
+**All four have a free sample you can read before deciding.**
+
+Two of them are on Gumroad as well, if you prefer that store:
+[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19) and
+[the token book](https://yurukusa.gumroad.com/l/azrdt) (¥2,500).
 
 All of them are optional, and every hook in this repository works without them. The reason they are
-listed at all is that Zenn books do not surface in search or in Zenn's own topic listings for this
-account (measured across 19 topics on 2026-08-09: zero appearances), so this README is the only
-place they can be found from.
+listed at all is that the Japanese editions do not surface in search or in Zenn's own topic listings
+for this account (measured across 19 topics on 2026-08-09: zero appearances), so this README is one
+of the few places they can be found from.
 
 ## License
 

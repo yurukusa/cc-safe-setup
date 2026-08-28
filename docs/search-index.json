@@ -4,7 +4,7 @@
     "title": "AGENTS.md ↔ CLAUDE.md Interop Scorecard — score your one-source-of-truth setup",
     "description": "Check whether your AGENTS.md is actually wired into every AI coding tool you use. Get an honest X/6 interop score you can screenshot and share. Based on the #6235 pain. Runs entirely in your browser — no npm, no upload.",
     "keywords": "",
-    "snippet": "You wrote one AGENTS.md — but does every tool actually read it? Check what's wired, get an honest X / 6 interop score you can screenshot and share.Built for the #6235 pain (5,200+ reactions). Nothing leaves your browser."
+    "snippet": "You wrote one AGENTS.md — but does every tool actually read it? Check what's wired, get an honest X / 6 interop score you can screenshot and share.Built for the #6235 pain (6,300+ reactions). Nothing leaves your browser."
   },
   {
     "url": "agents-md-setup-generator.html",
@@ -765,9 +765,9 @@
   {
     "url": "incident-prevention-book.html",
     "title": "Anthropic公式ガイドにない事故防止 — Claude Codeで実際に起きた事故と、設定で先回りする方法",
-    "description": "Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、起動しただけで利用枠が焼き切れる。実際に起きた事故から逆算して、設定で先回りする方法を全100章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。",
+    "description": "Claude Codeに任せた作業でファイルやデータベースが消える、サブエージェントが嘘の完了を報告する、5時間ぶんの利用枠が15分で溶ける。実際に起きた事故から逆算して、設定で先回りする方法を全97章・約69万字にまとめた実践書。第3章までと早見表と巻末の章、合わせて約9万字が無料。¥1,500・追補は無償。",
     "keywords": "Claude Code, 事故防止, データ消失, rm -rf, hook, settings.json, サブエージェント, 誤った完了報告, トークン費用, 安全設定, Claude Code 事故, Claude Code 危険, Claude Code ファイル消えた, Claude Code 課金",
-    "snippet": "Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全100章・約69万字・第3章まで無料"
+    "snippet": "Claude Code 800+時間で、筆者の環境の診断スコアが19点から85点になるまでの記録 — 全97章・約69万字・第3章まで無料"
   },
   {
     "url": "incidents.html",
@@ -1009,10 +1009,10 @@
   },
   {
     "url": "prevent-cost-explosion-jp.html",
-    "title": "Claude Code の課金の暴走を防ぐ——利用枠を数分で使い切る前に — cc-safe-setup",
-    "description": "Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。",
-    "keywords": "Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 数分で枠, claude code cost explosion, cc-safe-setup",
-    "snippet": "Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。"
+    "title": "Claude Code の課金の暴走を防ぐ——利用枠を1〜2時間で使い切る前に — cc-safe-setup",
+    "description": "Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。",
+    "keywords": "Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 枠を早く使い切る, claude code cost explosion, cc-safe-setup",
+    "snippet": "Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。"
   },
   {
     "url": "prevent-cost-explosion.html",
@@ -1388,7 +1388,7 @@
   {
     "url": "token-book.html",
     "title": "Token Book — Cut Claude Code Token Usage in Half",
-    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. Two PDFs in one download: a 36-chapter Japanese edition (237 pages) and a 9-chapter English edition (94 pages). $17 / ¥2,500.",
+    "description": "Cut Claude Code token consumption in half. Practical techniques from 800+ hours of autonomous operation. CLAUDE.md optimization, hook-based guards, workflow design. Two PDFs in one download: a 36-chapter Japanese edition (237 pages) and an 11-chapter English edition (89 pages). $17 / ¥2,500.",
     "keywords": "Claude Code, token consumption, reduce tokens, save tokens, CLAUDE.md optimization, hooks, cost reduction, Claude Code token saving, Claude Code expensive, Max plan quota, token usage half, Opus 4.7 tokens, Claude Code settings, Claude Code cost, token drain, quota exhausted",
     "snippet": "Max/Proの利用枠が想定よりはるかに速く枯れる問題は、GitHub Issueで今も続いている——#16157（722件の反応「Instantly hitting usage limits with Max subscription」）、#38335（529件「3月以降セッション枠が異常に速く消費される」）。痛いのは「節約できない」ことではなく、定額を払っているのに作業の途中で締め出されることだ。容量の問題そのものはAnthropic側にしか直せない。だが同じ作業をより少ないトークンで終わらせれば、枠が枯れて締め出されるまでの猶予は自分で伸ばせる。この本はその実践テクニックを800時間の運"
   },

@@ -3,17 +3,30 @@
 # and surface its contents to Claude Code as a system-reminder, so the agent
 # reads it alongside (or in place of) CLAUDE.md.
 #
-# Addresses: anthropics/claude-code#6235 (Feature Request: Support AGENTS.md).
-# That issue is the highest-engagement feature request on the tracker
-# (3,922 +1 reactions, 296 comments at the time this hook was written).
+# Addresses: anthropics/claude-code#6235 (Feature Request: Support AGENTS.md),
+# the highest-engagement feature request on the tracker (6,358 reactions),
+# closed as completed on 2026-08-17.
 #
-# AGENTS.md (https://agents.md) is the cross-vendor "README for agents"
-# convention adopted by 20+ coding agents including Codex, Cursor, Aider,
-# Zed, VS Code, Devin, JetBrains Junie, Amp, Gemini CLI, GitHub Copilot,
-# Windsurf, Augment Code, Phoenix, and others. Claude Code is the largest
-# coding-agent platform that does not natively support it.
+# DOES CLAUDE CODE READ AGENTS.md NOW? Measured on v2.1.233, 2026-08-21: NO.
+# The issue is closed, but AGENTS.md is still not loaded into the model's
+# context the way CLAUDE.md is. The official CHANGELOG.md (5,693 lines, up
+# to 2.1.238) does not mention AGENTS.md anywhere.
 #
-# This hook is the operator-side workaround: a SessionStart hook that
+# This is easy to get wrong, so here is the method. Asking `claude -p` for a
+# token planted in AGENTS.md is NOT a valid test: the agent will often find the
+# file on its own with ls/cat and answer correctly, which looks identical to
+# native loading. Stream the transcript instead and look at the tool calls:
+#
+#   claude -p "<question>" --output-format stream-json --verbose
+#
+#   CLAUDE.md planted ... answered with no file read  -> loaded into context
+#   AGENTS.md planted ... agent ran `ls` then `cat`   -> NOT loaded; it looked
+#
+# So whether the agent sees AGENTS.md depends on whether it happens to go
+# looking, which is not something you can rely on — and it costs tool calls
+# every session when it does.
+#
+# This hook makes it deterministic instead: a SessionStart hook that
 # detects AGENTS.md (in cwd or any parent up to git root), reads its
 # contents (subject to a size cap to protect the context budget), and
 # emits a <system-reminder> so the agent reads it the same way it reads

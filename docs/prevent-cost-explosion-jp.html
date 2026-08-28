@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code の課金の暴走を防ぐ——利用枠を数分で使い切る前に — cc-safe-setup</title>
-<meta name="description" content="Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。">
-<meta name="keywords" content="Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 数分で枠, claude code cost explosion, cc-safe-setup">
+<title>Claude Code の課金の暴走を防ぐ——利用枠を1〜2時間で使い切る前に — cc-safe-setup</title>
+<meta name="description" content="Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。GitHub の実際の事故と、それを止める hook(呼び出しの頻度の制限・連続エラーの遮断・1日の使用量の追跡)。">
+<meta name="keywords" content="Claude Code 課金 爆発, Claude Code トークン 使い切る, Claude Code 利用枠 一瞬, Claude Code 暴走 ループ 費用, Max プラン 枠を早く使い切る, claude code cost explosion, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-cost-explosion-jp.html">
 <meta property="og:title" content="Claude Code の課金の暴走を防ぐ">
 <meta property="og:description" content="暴走するループが利用枠を焼き尽くすのを止める。頻度の制限とエラーの検知の hook。">
@@ -38,13 +38,13 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #30363d;font-size:.
 <nav><a href="index.html">← cc-safe-setup</a> · <a href="hub.html">全ツール</a> · <a href="prevent-cost-explosion.html">English</a></nav>
 
 <h1>Claude Code の課金の暴走を防ぐ</h1>
-<p>Claude Code はループに陥ると、数分で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。</p>
+<p>Claude Code はループに陥ると、1〜2時間で利用枠を丸ごと使い切ることがあります。このページは、実際に起きている問題と、それを止める hook を示します。</p>
 
 <h2>問題: 暴走するループ</h2>
 
 <div class="incident">
-<p class="incident-title">実際の事故: 数分で利用枠の80%を消費</p>
-<p>GitHub の起票 <a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>(80以上の反応): Max プランのセッションの上限が異常に速く尽きるという報告。セッションの開始から数分で80%が消費されることもあった。</p>
+<p class="incident-title">実際の事故: 1回の指示で21%から100%へ跳ねた</p>
+<p>GitHub の起票 <a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a>(2026年8月26日の実測で反応543・コメント835): Max プランのセッションの上限が異常に速く尽きるという報告。起票の本文には「1〜2時間で上限に当たる」「1回の指示で21%から100%へ跳ねた」とある。</p>
 </div>
 
 <div class="incident">

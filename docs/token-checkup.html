@@ -288,6 +288,15 @@ function showResults() {
       <p style="color:#8b949e;font-size:.75rem;margin-top:.3rem">These hooks catch the most common token waste patterns. The Token Book explains <em>why</em> they work and covers 6 more optimization layers.</p>
     </div>
 
+    ${score < 40 ? `
+    <div class="cta" style="margin-top:.8rem">
+      <h3>Or have it read for you</h3>
+      <p>If working through that list is not how you want to spend the afternoon, you can send your own <code>/cost</code> output, a session log and your <code>CLAUDE.md</code>, and get a written report back within 48 hours of receiving them — the top waste patterns in <em>your</em> setup, and what to change first. (Strip keys, customer names and internal paths first; the order page says how.)</p>
+      <p style="color:#8b949e;font-size:.78rem;margin-top:.4rem"><strong>Run the free tools first.</strong> <code>ccusage</code> and <a href="https://github.com/yurukusa/cc-token-diet">cc-token-diet</a> cost nothing and run locally. If they answer your question, you do not need this. It also needs at least a week of real usage to read — if you started Claude Code this week, install the free hooks above instead.</p>
+      <p style="color:#8b949e;font-size:.78rem;margin-top:.4rem">Written with Claude Code, not hand-authored by a human engineer. Comparable AI-assisted audit reports start around $999 in the listings I have seen; this is &yen;3,980 (≈$29) because it is one scoped report. If you want a senior engineer reading your repo by hand, this is not that. It does not include monitoring, doing the fixes for you, or any promise of a specific saving. Full refund if the report cannot name a single fixable waste pattern. The book above is cheaper and covers more ground.</p>
+      <a href="https://ko-fi.com/yurukusa/commissions?commissionAlias=3c3e108fac&utm_source=token-checkup&utm_medium=tool&utm_campaign=token-burn-audit" class="btn btn-outline" style="display:inline-block;text-decoration:none;margin:.3rem">Token Burn Audit — &yen;3,980 (≈$29)</a>
+    </div>` : ''}
+
     <div class="cta" style="margin-top:.8rem;border-color:#da3633">
       <h3>⚠ Opus 4.7 users: token costs up to 4x higher</h3>
       <p>Since April 15, Opus 4.7 users report <strong>4x quota consumption</strong>, prompt cache destroyed every turn (<a href="https://github.com/anthropics/claude-code/issues/49585">#49585</a>), cache_read billed at full rate (<a href="https://github.com/anthropics/claude-code/issues/49302">#49302</a>), 50GB+ data loss, CLAUDE.md rules ignored → database destruction (<a href="https://github.com/anthropics/claude-code/issues/50027">#50027</a>), and classifier bypass (<a href="https://github.com/anthropics/claude-code/issues/49618">#49618</a>). <strong>80+ known issues</strong> documented with fixes.</p>
@@ -316,6 +325,19 @@ function showResults() {
     const firstCta = el.querySelector('.cta');
     if (firstCta) firstCta.parentNode.insertBefore(jp, firstCta);
     else el.appendChild(jp);
+
+    // The audit box only exists for low scores. When it does, point Japanese readers
+    // at the Japanese sales page: it carries what the English box has no room for --
+    // the report sample, who this is not for, what to redact before sending, and the
+    // "run the free tools first" section. Same product, more of the honest parts.
+    const auditBox = Array.from(el.querySelectorAll('.cta'))
+      .find(b => b.innerHTML.indexOf('Token Burn Audit') !== -1);
+    if (auditBox) {
+      const note = document.createElement('p');
+      note.style.cssText = 'color:#8b949e;font-size:.78rem;margin-top:.4rem';
+      note.innerHTML = '日本語の詳しい説明（価格・納期・返金の条件・含まないもの・送っていただくもの・報告書の見本）は<a href="token-burn-audit-jp.html">こちら</a>。注文も報告書も日本語で対応します。';
+      auditBox.appendChild(note);
+    }
   }
 
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));

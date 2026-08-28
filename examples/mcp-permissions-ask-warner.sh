@@ -56,6 +56,18 @@ if [ "${CC_MCP_ASK_DISABLE:-0}" = "1" ]; then
   exit 0
 fi
 
+# Without jq, the parse below silently yields empty and this hook stops
+# guarding - with no error anywhere. Say so. We deliberately do not exit
+# here: blocking would halt every tool call, and exiting 0 would change
+# the behaviour of guards that do not depend on the parsed value.
+if ! command -v jq >/dev/null 2>&1; then
+  _nojq_warned="/tmp/cc-nojq-warned-mcp-permissions-ask-warner-$PPID"
+  [ -f "$_nojq_warned" ] || {
+    echo "WARNING [mcp-permissions-ask-warner]: jq not found - this hook cannot read your settings files and is NOT protecting you. Install jq." >&2
+    : > "$_nojq_warned"
+  }
+fi
+
 ACTION="${CC_MCP_ASK_ACTION:-warn}"
 LOG_FILE="${CC_MCP_ASK_LOG:-/tmp/cc-mcp-ask.log}"
 
