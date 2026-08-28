@@ -6842,7 +6842,12 @@ async function main() {
   console.log('  ' + c.dim + '  (including where it found my own numbers and my own hooks to be wrong):' + c.reset);
   console.log('  ' + c.dim + '    https://github.com/yurukusa/cc-safe-setup/blob/main/SERVICES.md' + c.reset);
   console.log();
-  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases, ¥15,600 at list price, since March 2026');
+  // 2026-08-28: 「¥15,600 at list price」を数字ごと落とした。この額は
+  // 「いまの定価 × 累計の冊数」で、8/28 に事故防止本を ¥800 → ¥1,500 へ上げた時点で
+  // 旧価格の派生値として腐っていた（6冊 × ¥700 = ¥4,200 のずれ）。¥19,800 へ更新はしない。
+  // 次の値上げでも次の1冊でも同じように腐るうえ、この額は「売れた当時の値段の合計」ではないので、
+  // 社会的証明として掲げると買い手に実態より大きく見せることになる。冊数だけなら腐らない。
+  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases since March 2026');
   console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (best-seller, 97 chapters, buyers get every later revision free)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
   console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
