@@ -38,8 +38,12 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
 [ -z "$FILE" ] && exit 0
 
-# Block private key files
-if echo "$FILE" | grep -qiE '(id_rsa|id_ed25519|id_ecdsa|id_dsa)$'; then
+# Block private key files.
+# The optional suffix group matters: a backup of a private key is exactly as
+# sensitive as the key, and id_rsa.bak / id_rsa_old / id_rsa.orig slipped
+# through the bare "$" anchor - measured 2026-08-29 on CC 2.1.246.
+# ".pub" is deliberately NOT in the suffix list, so public keys still pass.
+if echo "$FILE" | grep -qiE '(id_rsa|id_ed25519|id_ecdsa|id_dsa)([._-](bak|old|orig|save|copy|backup|[0-9]+))?$'; then
     # Allow .pub files
     echo "$FILE" | grep -qiE '\.pub$' && exit 0
     echo "BLOCKED: Reading private key file: $FILE" >&2

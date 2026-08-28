@@ -39,7 +39,11 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
 # Known credential files that contain tokens/passwords
-CRED_FILES='\.netrc|\.npmrc|\.yarnrc\.yml|\.cargo/credentials|\.docker/config\.json|\.kube/config|\.config/gh/hosts\.yml|\.nuget/NuGet\.Config|\.m2/settings\.xml|\.gradle/gradle\.properties|\.pypirc|\.gem/credentials|\.config/pip/pip\.conf|\.bowerrc|\.composer/auth\.json'
+
+# .git-credentials holds "https://user:token@host" in plain text, which makes it
+# the highest-value file on most dev machines. It was missing from this list
+# while .pypirc and .npmrc were covered - measured 2026-08-29 on CC 2.1.246.
+CRED_FILES='\.git-credentials|\.netrc|\.npmrc|\.yarnrc\.yml|\.cargo/credentials|\.docker/config\.json|\.kube/config|\.config/gh/hosts\.yml|\.nuget/NuGet\.Config|\.m2/settings\.xml|\.gradle/gradle\.properties|\.pypirc|\.gem/credentials|\.config/pip/pip\.conf|\.bowerrc|\.composer/auth\.json'
 
 # Block cat/head/tail/less/more/grep reading credential files
 if echo "$COMMAND" | grep -qE "(cat|head|tail|less|more|bat)\s+[^\|;]*($CRED_FILES)"; then
