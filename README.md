@@ -224,7 +224,7 @@ are written up at length in these:
 - [Claude Code Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook)
   ($19) — the April–June 2026 regressions in sequence, and a stay / switch / hybridize
   decision framework built from them
-- [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) ($5) — the same measurements
+- [Token Book EN](https://yurukusa.gumroad.com/l/azrdt) (¥2,500+, name your price) — the same measurements
   applied to token cost
 
 All of them are optional, and every hook in this repository works without them. The reason they are
