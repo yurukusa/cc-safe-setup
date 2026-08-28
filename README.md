@@ -274,6 +274,13 @@ All four are also sold together as
 [The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
 **All four have a free sample you can read before deciding.**
 
+The 50-point checklist in `audit/` also exists as a scored course, if you would rather work
+through it as lessons with quizzes than run the checklist yourself:
+[The Claude Code Safety Audit](https://leanpub.com/c/claude-code-safety-audit) (from $49) —
+six sections, the one-command test that hands a hook the operation it should refuse and reads
+the exit code, and the eight incidents where the guard failed silently. It uses the same four
+scripts in `audit/`, which stay free and MIT-licensed here.
+
 Two of them are on Gumroad as well, if you prefer that store:
 [Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19) and
 [the token book](https://yurukusa.gumroad.com/l/azrdt) (¥2,500).
