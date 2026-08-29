@@ -260,7 +260,7 @@ are written up at length in these:
 - [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 57 pages) —
   the defensive hooks in this repository, grouped from the five to install first through Git
   protection and credential guards, and eight dated incidents where the guard itself failed silently
-- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $11.99, 105 pages) —
+- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $11.99, 251 pages) —
   stay, switch, or build your own stack: five measurable triggers, a 30-day cost projection for
   each path, a decision tree that returns one recommendation, and a 48-hour rollback if it was wrong
 - [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) (from $9.99, 89 pages) —
