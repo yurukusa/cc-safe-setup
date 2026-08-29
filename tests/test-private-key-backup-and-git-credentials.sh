@@ -53,6 +53,17 @@ run_read "id_rsa-copy blocks"           2 "/home/u/.ssh/id_rsa-copy"
 run_read "id_ed25519.backup blocks"     2 "/home/u/.ssh/id_ed25519.backup"
 run_read "id_ecdsa.2 blocks"            2 "/home/u/.ssh/id_ecdsa.2"
 
+# --- BLOCK: the three that survived the first widening ---
+# Found by audit/boundary.sh after the first fix looked complete. Each one is
+# the same file to whoever reads it and a different string to the matcher.
+run_read "id_rsa~ (editor backup) blocks" 2 "/home/u/.ssh/id_rsa~"
+run_read "id_rsa.old.2 (two suffixes) blocks" 2 "/home/u/.ssh/id_rsa.old.2"
+run_read "id_rsa with trailing space blocks"  2 "/home/u/.ssh/id_rsa "
+run_read "ID_RSA (uppercased) blocks"     2 "/home/u/.ssh/ID_RSA"
+run_read "id_ed25519~ blocks"             2 "/home/u/.ssh/id_ed25519~"
+# ...and the public key must survive all of that, trailing space included.
+run_read "id_rsa.pub with trailing space allows" 0 "/home/u/.ssh/id_rsa.pub "
+
 # --- BLOCK: the original cases must not regress ---
 run_read "id_rsa still blocks"          2 "/home/u/.ssh/id_rsa"
 run_read "id_ed25519 still blocks"      2 "/home/u/.ssh/id_ed25519"
