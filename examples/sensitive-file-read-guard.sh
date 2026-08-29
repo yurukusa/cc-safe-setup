@@ -39,13 +39,17 @@ FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$FILE" ] && exit 0
 
 # Block private key files.
-# The optional suffix group matters: a backup of a private key is exactly as
-# sensitive as the key, and id_rsa.bak / id_rsa_old / id_rsa.orig slipped
-# through the bare "$" anchor - measured 2026-08-29 on CC 2.1.246.
+# The suffix group matters: a backup of a private key is exactly as sensitive
+# as the key. Three rounds of measurement on CC 2.1.246 (2026-08-29) widened it:
+#   bare "$" anchor      -> id_rsa.bak, id_rsa_old, id_rsa.orig walked through
+#   single optional group -> id_rsa~ (editor backup), id_rsa.old.2 (two suffixes)
+#                            and a trailing space still walked through
+# The last one is why the repeat count is 0-3 and why [[:space:]]* is here:
+# "id_rsa " is a different string to a matcher and the same file to a reader.
 # ".pub" is deliberately NOT in the suffix list, so public keys still pass.
-if echo "$FILE" | grep -qiE '(id_rsa|id_ed25519|id_ecdsa|id_dsa)([._-](bak|old|orig|save|copy|backup|[0-9]+))?$'; then
+if echo "$FILE" | grep -qiE '(id_rsa|id_ed25519|id_ecdsa|id_dsa)(([._-](bak|old|orig|save|copy|backup|[0-9]+))|~){0,3}[[:space:]]*$'; then
     # Allow .pub files
-    echo "$FILE" | grep -qiE '\.pub$' && exit 0
+    echo "$FILE" | grep -qiE '\.pub[[:space:]]*$' && exit 0
     echo "BLOCKED: Reading private key file: $FILE" >&2
     echo "  Private keys should never be read into conversation context." >&2
     exit 2
