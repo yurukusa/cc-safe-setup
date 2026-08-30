@@ -65,7 +65,13 @@ if echo "$COMMAND" | grep -qiE 'find\s.*-name\s.*\*?(token|secret|credential|pas
 fi
 
 # Pattern 3: Direct access to known credential locations
-if echo "$COMMAND" | grep -qE 'cat\s+(~|/home|/root)/.ssh/(id_|authorized_keys|known_hosts|config)'; then
+# 2026-08-30: the home alternation used to be (~|/home|/root), which only matches
+#   when /.ssh follows /home directly. Real paths carry a username segment
+#   (/home/alice/.ssh/id_rsa), so the tilde form was blocked while the expanded
+#   form walked straight through - measured on this machine, rc=2 vs rc=0 for the
+#   same file. Whether an agent writes the tilde or the expanded path is arbitrary,
+#   so a guard that only sees one of them is a coin flip.
+if echo "$COMMAND" | grep -qE 'cat\s+(~|/home/[^/[:space:]]+|/Users/[^/[:space:]]+|/root|/home|/Users)/\.ssh/(id_|authorized_keys|known_hosts|config)'; then
     echo "BLOCKED: Direct SSH credential access" >&2
     exit 2
 fi
@@ -77,7 +83,7 @@ if echo "$COMMAND" | grep -qE 'cat\s+(/etc/shadow|/etc/gshadow|/etc/passwd)'; th
 fi
 
 # Pattern 5: AWS/cloud credential files
-if echo "$COMMAND" | grep -qE 'cat\s+(~|/home|/root)/\.(aws|gcloud|azure|kube)/(credentials|config|token)'; then
+if echo "$COMMAND" | grep -qE 'cat\s+(~|/home/[^/[:space:]]+|/Users/[^/[:space:]]+|/root|/home|/Users)/\.(aws|gcloud|azure|kube)/(credentials|config|token)'; then
     echo "BLOCKED: Cloud provider credential access" >&2
     exit 2
 fi
