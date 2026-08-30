@@ -39,7 +39,7 @@ nav a{margin-right:1rem}
 
 <div class="incident">
 <p class="incident-title">Known bug since v2.0.58 — still present in v2.1.87</p>
-<p>44 reactions on <a href="https://github.com/anthropics/claude-code/issues/13071">#13071</a>. Adding <code>--no-stat</code> to CLAUDE.md doesn't help — Claude ignores it.</p>
+<p>Widely reported in <a href="https://github.com/anthropics/claude-code/issues/13071">#13071</a>. Writing a rule about <code>--no-stat</code> into CLAUDE.md does not fix this, but not because the rule gets ignored: the flag is passed by Claude Code itself, not composed by the model, so an instruction has nothing to act on. That is what makes this one a hook's job rather than a rule's.</p>
 </div>
 
 <h2>The Error</h2>
