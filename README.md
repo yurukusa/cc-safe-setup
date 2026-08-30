@@ -269,10 +269,17 @@ are written up at length in these:
 - [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 27 pages) —
   which file each of nine tools reads, six ways to keep them in sync, and how to check what
   your own setup actually loads rather than trusting a closed issue
+- [CLAUDE.md Under Test](https://leanpub.com/claude-md-under-test) (from $9.99, 86 pages) —
+  thirty-nine trials on whether a rule written in `CLAUDE.md` is actually obeyed, what a hook
+  adds once it is, and the exit code that decides whether your guard fails open or closed.
+  The rule was obeyed in all twenty-two trials where it was written, which is the opposite of
+  what I had been telling people — the correction is posted free in
+  [Discussion #59](https://github.com/yurukusa/cc-safe-setup/discussions/59). Every trial's
+  data and the harness are in the appendices
 
-All four are also sold together as
+The first four are also sold together as
 [The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
-**All four have a free sample you can read before deciding.**
+**All five have a free sample you can read before deciding.**
 
 The 50-point checklist in `audit/` also exists as a scored course, if you would rather work
 through it as lessons with quizzes than run the checklist yourself:

@@ -550,7 +550,7 @@
     "title": "CLAUDE.md Best Practices — Templates, Tips, and Common Mistakes",
     "description": "How to write an effective CLAUDE.md for Claude Code. 5 templates for different use cases, common mistakes to avoid, and how hooks enforce your rules.",
     "keywords": "claude code CLAUDE.md, CLAUDE.md template, CLAUDE.md best practices, claude code configuration, claude code settings, cc-safe-setup",
-    "snippet": "CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. Get it right and Claude follows your rules. Get it wrong and Claude ignores everything."
+    "snippet": "CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. This page is what I would tell you after measuring it rather than guessing."
   },
   {
     "url": "claudemd-guide.html",
