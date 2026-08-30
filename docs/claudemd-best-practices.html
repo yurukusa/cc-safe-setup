@@ -37,17 +37,36 @@ th{background:#161b22;color:#f0f6fc}
 <nav><a href="index.html">← cc-safe-setup</a> · <a href="hub.html">All Guides</a></nav>
 
 <h1>CLAUDE.md Best Practices</h1>
-<p>CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. Get it right and Claude follows your rules. Get it wrong and Claude ignores everything.</p>
+<p>CLAUDE.md is the instruction file that tells Claude Code how to behave in your project. This page is what I would tell you after measuring it rather than guessing.</p>
 
-<h2>The Golden Rule: Keep It Short</h2>
+<h2>Does a rule in CLAUDE.md actually get followed?</h2>
+
+<p>This page used to say that files over 100 lines cause Claude to miss important rules, and that the longer the file, the more likely instructions are ignored. <strong>I measured it in August 2026 and could not reproduce that, so I have removed it.</strong></p>
+
+<p>39 trials on Claude Code 2.1.246. One task, one forbidden command, and a hook present in every condition that only <em>records</em> — so that the &ldquo;zero attempts&rdquo; rows have an instrument in the room.</p>
+
+<table>
+<tr><th>Condition</th><th>Trials</th><th>Attempted the forbidden command</th></tr>
+<tr><td>No prohibition written anywhere</td><td>17</td><td><strong>17 / 17</strong></td></tr>
+<tr><td>Prohibition in a 5-line CLAUDE.md</td><td>4</td><td><strong>0 / 4</strong></td></tr>
+<tr><td>Prohibition buried in a 128-line file, section 10 of 20</td><td>3</td><td><strong>0 / 3</strong></td></tr>
+<tr><td>Prohibition near the bottom, section 18 of 20</td><td>3</td><td><strong>0 / 3</strong></td></tr>
+<tr><td>Same, plus other sections telling it to do the opposite</td><td>6</td><td><strong>0 / 6</strong></td></tr>
+</table>
+
+<p>Length did not dilute the rule. Position did not. Neither did contradicting it elsewhere in the same file with the same command named. The same shape held when the forbidden move was an irreversible one (<code>rm</code> on a directory) instead of a text edit.</p>
 
 <div class="warn">
-<p><strong>Problem:</strong> CLAUDE.md files over 100 lines cause Claude to miss important rules. The longer the file, the more likely critical instructions are ignored.</p>
+<p><strong>Read the limits before you rely on this.</strong> Three to four trials per condition, one prohibition at a time, one version, short single-task runs. <code>0 / 22</code> is a rate observed in 22 attempts, not a law &mdash; do not read it as <em>cannot happen</em>. Long sessions where early context fades, and files carrying dozens of prohibitions that contradict <em>each other</em>, are exactly what I have not tested. <a href="https://github.com/yurukusa/cc-safe-setup/discussions/59">Full method and all five parts</a>.</p>
 </div>
 
+<h2>The Golden Rule: Keep It Short &mdash; for the cost, not for compliance</h2>
+
 <div class="tip">
-<p><strong>Solution:</strong> Keep CLAUDE.md under 50 lines. Move detailed instructions to <code>.claude/skills/</code> files (loaded on demand, saving tokens).</p>
+<p><strong>Keep CLAUDE.md under 50 lines,</strong> and move detailed instructions to <code>.claude/skills/</code> files, which load on demand.</p>
 </div>
+
+<p>The reason is money, not obedience. <strong>CLAUDE.md is read on every turn</strong> &mdash; not once per session. A 500-line file costs roughly 15&times; what a 35-line one does across a month of daily use, and you pay it on every single message whether or not the rule was relevant. That is a measurable, boring cost, and it is a better argument for brevity than a compliance claim I could not reproduce.</p>
 
 <h2>5 Templates by Use Case</h2>
 
@@ -88,11 +107,11 @@ th{background:#161b22;color:#f0f6fc}
 <h2>Common Mistakes</h2>
 
 <div class="warn">
-<p><strong>100+ line CLAUDE.md:</strong> Claude Code struggles with long instruction files. Split into CLAUDE.md (principles) + Skills (procedures).</p>
+<p><strong>100+ line CLAUDE.md:</strong> costs tokens on every turn, for every message, whether or not the rule was relevant. Split into CLAUDE.md (principles) + Skills (procedures, loaded on demand). <em>Note: I used to write here that Claude struggles with long instruction files. In 39 trials I could not reproduce that &mdash; see the measurement above. The cost is the reason to split; the struggling is not established.</em></p>
 </div>
 
 <div class="warn">
-<p><strong>Contradictory rules:</strong> "Write tests for everything" + "Move fast" without priority. Always state which wins.</p>
+<p><strong>Contradictory rules:</strong> "Write tests for everything" + "Move fast" without priority. State which wins &mdash; it costs one line and removes the guesswork. <em>Worth knowing what I measured, though: when I put two sections saying "apply the change in one pass with <code>sed -i</code>" against one section saying "never edit files with <code>sed</code>", the prohibition won 3 times out of 3. A direct contradiction did not break the rule in that test.</em></p>
 </div>
 
 <div class="warn">
