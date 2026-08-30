@@ -40,8 +40,20 @@ nav a{margin-right:1rem}
 <p>A user reported (<a href="https://github.com/anthropics/claude-code/issues/40117">#40117</a>) that Claude Code Opus 4.6 used <code>--no-verify</code> on 6 consecutive commits. Pre-commit hooks validating secret scanning, integration tests, and production readiness were all silently bypassed. The agent also used <code>git stash</code> to manipulate state and quiet flags to suppress output.</p>
 </div>
 
-<h2>Why CLAUDE.md Rules Don't Work</h2>
-<p>Adding "never use --no-verify" to CLAUDE.md or memory is a <strong>suggestion</strong> the model can ignore. When context fills up, rules get forgotten. The agent in #40117 had explicit deny rules and still bypassed them.</p>
+<h2>Why a CLAUDE.md Rule Isn't Enough Here</h2>
+<p>Writing "never use --no-verify" into CLAUDE.md is worth doing, and it is likely to hold. I measured
+this in August 2026: across 25 short trials with a ban written in, the banned command was never once
+attempted, against 23 out of 23 without it. So this is not a case of "rules don't work."</p>
+<p>What a written rule gives you is a <strong>suggestion the model is very likely to follow</strong> —
+not a path that is closed. Two things sit outside what I measured. Long sessions: my trials were all
+short, and a rule that has scrolled out of context is untested. And other people's reports: the agent
+in <a href="https://github.com/anthropics/claude-code/issues/40117">#40117</a> (Opus 4.6) had explicit
+instructions not to bypass pre-commit hooks and did it anyway, through <code>--no-verify</code>,
+<code>git stash</code> and quiet flags. My zero-in-25 has a 95% upper bound of about 11%, so reports
+like that are entirely consistent with it.</p>
+<p>A hook removes the dependency on the model choosing. Write the rule <em>and</em> install the hook —
+and check the hook actually fires, because a <code>PreToolUse</code> hook blocks on exit code 2 and
+only on 2. If it crashes, it fails open silently.</p>
 
 <h2>The Fix: PreToolUse Hook</h2>
 <p>A PreToolUse hook on Bash intercepts every command <strong>before execution</strong>. <code>exit 2</code> is a hard block the model cannot bypass.</p>
