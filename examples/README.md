@@ -15,27 +15,45 @@ npx github:yurukusa/cc-safe-setup --shield                    # install recommen
 
 | Category | Hooks | Of which can refuse a call |
 |----------|------:|---------------------------:|
-| Safety Guards | 318 | 140 |
+| Safety Guards | 318 | 132 |
 | Auto-Approve | 35 | 18 |
-| Quality | 174 | 13 |
+| Quality | 174 | 12 |
 | Agent Controls | 15 | 9 |
-| Monitoring | 28 | 3 |
+| Monitoring | 28 | 2 |
 | Recovery | 32 | 2 |
-| UX | 51 | 16 |
+| UX | 51 | 13 |
 | Other | 2 | 0 |
-| (uncategorised) | 259 | 118 |
-| **total** | **914** | **319** |
+| (uncategorised) | 259 | 113 |
+| **total** | **914** | **301** |
 
 "Can refuse" means the script contains `exit 2`, a permission decision,
-`"decision": "block"` or `"deny"` on some path. The other 595 warn, count or log — useful,
-but they cannot stop a tool call, whatever the filename suggests. (Of those 595, 591 have
-no refusal at all; 4 end with a computed exit code such as `exit "$RC"` and have to be
-opened to tell.) To check the hooks you already rely on, list the ones with no literal
-refusal in them:
+`"decision": "block"` or `"deny"` **outside a comment**. The other 613 warn, count or log —
+useful, but they cannot stop a tool call, whatever the filename suggests. (Of those 613, 608
+have no refusal at all; 5 end with a computed exit code such as `exit "$RC"` and have to be
+opened to tell.)
+
+**The word "outside a comment" is doing real work here.** A plain `grep` over the file counts
+matches inside comments, and 18 scripts here match only there — including three whose comment
+says, in so many words, that they are not blockers:
+
+```
+network-guard.sh:5         # This is a warning hook (exit 0), not a blocker (exit 2),
+plan-mode-edit-guard.sh:74 # Warning only (exit 0). Change to exit 2 to block.
+no-push-without-tests.sh:41 # Warning only. Change exit 0 to exit 2 to enforce.
+```
+
+So strip comments before you trust the match. To check the hooks you already rely on:
 
 ```bash
-grep -L -E 'exit 2|permissionDecision|"decision": *"block"|"deny"' "$HOME"/.claude/hooks/*.sh
+for f in "$HOME"/.claude/hooks/*.sh; do
+  sed 's/#.*//' "$f" | grep -qE 'exit 2|permissionDecision|"decision": *"block"|"deny"' \
+    || echo "WITNESS $f"
+done
 ```
+
+This is still a floor, not a census: at least one script matches only inside a *message string*
+(`broad-prefix-session-trap-warner.sh`, whose only exit is `exit 0`), and `sed` cannot tell that
+from a real refusal. Adjust the extension too — a hooks directory can hold `.py` and `.js`.
 
 ## Popular Hooks
 
