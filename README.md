@@ -131,7 +131,7 @@ You can run the same audit in CI to keep a project's safety posture from regress
 
 `--audit` is what a script can decide on its own. For the contradictions that need your
 session logs and CI read alongside your config, there are
-[written audits](#written-audits-29-and-219) below — asynchronous, and nothing is ever
+[written audits](#written-audits) below — asynchronous, and nothing is ever
 run in your environment.
 
 ### Proving a hook fires
@@ -209,23 +209,14 @@ If you are the person who has to justify Claude Code to the rest of your organiz
 | [Monthly compliance report sample](https://yurukusa.github.io/cc-safe-setup/org-guard-monthly-report-sample.html) | What a monthly "is it actually working" report looks like, for SOC2 or a customer audit answer (fictional company, marked as such) |
 | [Safety audit](https://yurukusa.github.io/cc-safe-setup/safety-audit.html) | Which classes of danger your current setup does and does not guard |
 
-One paid thing exists, and it needs no inquiry either: the [Team Safety Rollout Pack](https://yurukusa.booth.pm/items/8230188) (¥3,000, one-off) bundles the shared policy template, the CI gate with defaults already chosen, and a written walkthrough of real reported incidents.
-
 The hooks themselves stay free (MIT), always, and bug reports and questions are always welcome in issues and discussions.
 
-## Written audits ($29 and $219)
+## Written audits
 
-These are not a team-only thing — they were under the section above until 2026-08-12, which was the wrong place. If you have a `CLAUDE.md`, a `settings.json` and a few hooks, you are the case they were written for.
-
-Corporate audits (¥150,000+), training, rollout consulting and monthly retainers **are not offered** — see the [note on the services page](https://yurukusa.github.io/cc-safe-setup/services-jp.html). What that rules out is the *engagement* shape, the kind where someone has to keep showing up. Written audits are a different shape, and three of them are offered: asynchronous, no call, no meeting, and nothing is ever run in your environment.
-
-Two of them read one kind of file each, $29 (¥3,980), returned as a Markdown report in your issue thread. The [CLAUDE.md Audit](SERVICES.md#1-claudemd-audit--29-3980) reads your instruction files. The [Token Burn Audit](SERVICES.md#2-token-burn-audit--29-3980) reads your session logs and `/cost` output, which is where the money actually goes.
-
-The third reads them *against each other*. The [Full-Surface Audit](SERVICES.md#3-full-surface-audit--219-29800), $219 (¥29,800), crosses `CLAUDE.md`, `settings.json`, your hooks, your session logs and your CI config, and reports only the contradictions that fall between the layers — the class of failure that passes every check you can run on any one of those files alone. Ordered through Ko-fi, with a private route for the files and nothing in a public issue; report within 72 hours.
-
-An audit is a thing you cannot see before buying, so all three publish their deliverable in full: [CLAUDE.md sample](docs/claude-md-audit-sample.md), [Token Burn sample](docs/token-burn-audit-sample.md), [Full-Surface sample](docs/full-surface-audit-sample-jp.md) (Japanese). Each is that audit run against my own setup — including the parts where it found my own numbers and my own hooks to be wrong. The Full-Surface one is where it found that the guards running on my own machine were a different program from the ones I ship under the same names.
-
-Before any of them: [cc-token-diet](https://github.com/yurukusa/cc-token-diet) is free, runs locally, and uploads nothing. If it answers your question, you do not need me.
+Three asynchronous written audits exist ($29 and $219): no call, no meeting, and nothing is ever
+run in your environment. Each publishes its full deliverable before you buy, run against my own
+setup. Scope, prices and the samples are in [SERVICES.md](SERVICES.md). Corporate audits,
+training, rollout consulting and monthly retainers are **not** offered.
 
 ## Windows
 
@@ -241,61 +232,10 @@ Contributions are welcome. Each hook should be a single shell script with a test
 
 ## Where these hooks came from
 
-Every hook here exists because something broke first. The incident records behind
-them — what failed, what the logs actually looked like, and what finally stopped it —
-are written up at length in these:
-
-**In Japanese** — these two are the ones the hooks here were actually written against, and they are the deepest:
-
-- [事故防止の全記録](https://zenn.dev/yurukusa/books/6076c23b1cb18b) — 97 chapters
-  of incidents, each traced to the setting or hook that stops it. The introduction, the
-  symptom→chapter lookup table you'd reach for mid-incident, Chapters 1-3 and Chapter 100
-  are free to read
-- [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
-  the tokens actually go, measured across 800+ hours rather than reasoned about. 35 chapters;
-  the introduction, the symptom→chapter cost table, and Chapter 1 are free to read
-
-**In English:**
-
-- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 57 pages) —
-  the defensive hooks in this repository, grouped from the five to install first through Git
-  protection and credential guards, and eight dated incidents where the guard itself failed silently
-- [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $11.99, 251 pages) —
-  stay, switch, or build your own stack: five measurable triggers, a 30-day cost projection for
-  each path, a decision tree that returns one recommendation, and a 48-hour rollback if it was wrong
-- [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) (from $9.99, 89 pages) —
-  where the tokens actually go, measured across 800+ hours rather than reasoned about:
-  overnight cost spikes, sub-agents, thinking tokens, and context-window bloat
-- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 27 pages) —
-  which file each of nine tools reads, six ways to keep them in sync, and how to check what
-  your own setup actually loads rather than trusting a closed issue
-- [CLAUDE.md Under Test](https://leanpub.com/claude-md-under-test) (from $9.99, 86 pages) —
-  thirty-nine trials on whether a rule written in `CLAUDE.md` is actually obeyed, what a hook
-  adds once it is, and the exit code that decides whether your guard fails open or closed.
-  The rule was obeyed in all twenty-two trials where it was written, which is the opposite of
-  what I had been telling people — the correction is posted free in
-  [Discussion #59](https://github.com/yurukusa/cc-safe-setup/discussions/59). Every trial's
-  data and the harness are in the appendices
-
-The first four are also sold together as
-[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
-**All five have a free sample you can read before deciding.**
-
-The 50-point checklist in `audit/` also exists as a scored course, if you would rather work
-through it as lessons with quizzes than run the checklist yourself:
-[The Claude Code Safety Audit](https://leanpub.com/c/claude-code-safety-audit) (from $49) —
-six sections, the one-command test that hands a hook the operation it should refuse and reads
-the exit code, and the eight incidents where the guard failed silently. It uses the same four
-scripts in `audit/`, which stay free and MIT-licensed here.
-
-Two of them are on Gumroad as well, if you prefer that store:
-[Migration Playbook](https://yurukusa.gumroad.com/l/claude-code-migration-playbook) ($19) and
-[the token book](https://yurukusa.gumroad.com/l/azrdt) (¥2,500).
-
-All of them are optional, and every hook in this repository works without them. The reason they are
-listed at all is that the Japanese editions do not surface in search or in Zenn's own topic listings
-for this account (measured across 19 topics on 2026-08-09: zero appearances), so this README is one
-of the few places they can be found from.
+Every hook here exists because something broke first — a destroyed working tree, a credential
+read that should not have happened, an overnight cost spike. The incident behind each one, what
+the logs actually looked like, and what finally stopped it, are written up at length. Those
+write-ups are books, and they are listed in [docs/books.md](docs/books.md).
 
 ## License
 
