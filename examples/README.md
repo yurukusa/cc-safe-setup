@@ -1,7 +1,8 @@
 # Example Hooks
 
 914 installable hooks. Each solves a real problem from GitHub Issues or autonomous
-operation. Covered by the 277 test files in [`tests/`](../tests). (Counted 2026-08-31.)
+operation. Covered by the 278 test files in [`tests/`](../tests) — 277 shell, one Python.
+(Counted 2026-08-31.)
 
 ```bash
 npx github:yurukusa/cc-safe-setup --install-example <name>   # install one
