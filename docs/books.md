@@ -21,6 +21,17 @@ are written up at length in these:
 - [トークン費用の実測](https://zenn.dev/yurukusa/books/token-savings-guide) (¥2,500) — where
   the tokens actually go, measured across 800+ hours rather than reasoned about. 35 chapters;
   the introduction, the symptom→chapter cost table, and Chapter 1 are free to read
+- [副の作業者の沈黙の失敗](https://zenn.dev/yurukusa/books/sub-agent-observability) (¥1,500) —
+  eight incidents where a sub-agent reported success and had run nothing, sorted into four
+  failure shapes: fabricated dispatch, silent stop, no observability, scope drift
+- [MCP プラグインの隠れたコストと信頼性](https://zenn.dev/yurukusa/books/mcp-plugin-reliability) (¥800) —
+  five vulnerability classes in third-party MCP plugins and what a user (not the author) can
+  do about each
+- [AGENTS.md × Claude Code を両立する5つの方法](https://zenn.dev/yurukusa/books/agents-md-interop) (¥1,500) —
+  the Japanese edition of the AGENTS.md Interop Handbook below
+- [チーム/企業導入 安全パック](https://zenn.dev/yurukusa/books/cc-team-safety-pack) (¥3,000) —
+  the approval write-up, the policy, the permission design and the monthly review, for the
+  person who has to get Claude Code past their own organisation
 
 **In English:**
 
