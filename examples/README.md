@@ -23,17 +23,17 @@ npx github:yurukusa/cc-safe-setup --shield                    # install recommen
 | Recovery | 32 | 2 |
 | UX | 51 | 13 |
 | Other | 2 | 0 |
-| (uncategorised) | 259 | 113 |
-| **total** | **914** | **301** |
+| (uncategorised) | 259 | 112 |
+| **total** | **914** | **300** |
 
 "Can refuse" means the script contains `exit 2`, a permission decision,
-`"decision": "block"` or `"deny"` **outside a comment**. The other 613 warn, count or log —
-useful, but they cannot stop a tool call, whatever the filename suggests. (Of those 613, 608
+`"decision": "block"` or `"deny"` **outside a comment**. The other 614 warn, count or log —
+useful, but they cannot stop a tool call, whatever the filename suggests. (Of those 614, 609
 have no refusal at all; 5 end with a computed exit code such as `exit "$RC"` and have to be
 opened to tell.)
 
 **The word "outside a comment" is doing real work here.** A plain `grep` over the file counts
-matches inside comments, and 18 scripts here match only there — including three whose comment
+matches inside comments, and 19 scripts here match only there — including three whose comment
 says, in so many words, that they are not blockers:
 
 ```
@@ -51,9 +51,13 @@ for f in "$HOME"/.claude/hooks/*.sh; do
 done
 ```
 
-This is still a floor, not a census: at least one script matches only inside a *message string*
-(`broad-prefix-session-trap-warner.sh`, whose only exit is `exit 0`), and `sed` cannot tell that
-from a real refusal. Adjust the extension too — a hooks directory can hold `.py` and `.js`.
+This is still a floor, not a census. `broad-prefix-session-trap-warner.sh` carries
+`permissionDecision: deny` inside a *message string* and its only exit is `exit 0`. The `sed`
+above does drop that line — but only because an issue number, `(#62437)`, appears earlier on the
+same line and takes the rest of it with it. Right answer, wrong reason: write the same warning
+without an issue number and the file counts as a refuser. Telling code from string needs a shell
+parser, which one line of `sed` is not. Adjust the extension too — a hooks directory can hold
+`.py` and `.js`.
 
 ## Popular Hooks
 
