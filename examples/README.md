@@ -1,7 +1,8 @@
 # Example Hooks
 
 914 installable hooks. Each solves a real problem from GitHub Issues or autonomous
-operation. Covered by the 277 test files in [`tests/`](../tests). (Counted 2026-08-31.)
+operation. Covered by the 278 test files in [`tests/`](../tests) — 277 shell, one Python.
+(Counted 2026-08-31.)
 
 ```bash
 npx github:yurukusa/cc-safe-setup --install-example <name>   # install one
@@ -22,12 +23,12 @@ npx github:yurukusa/cc-safe-setup --shield                    # install recommen
 | Recovery | 32 | 2 |
 | UX | 51 | 16 |
 | Other | 2 | 0 |
-| (uncategorised) | 259 | 119 |
-| **total** | **914** | **320** |
+| (uncategorised) | 259 | 118 |
+| **total** | **914** | **319** |
 
 "Can refuse" means the script contains `exit 2`, a permission decision,
-`"decision": "block"` or `"deny"` on some path. The other 594 warn, count or log — useful,
-but they cannot stop a tool call, whatever the filename suggests. (Of those 594, 590 have
+`"decision": "block"` or `"deny"` on some path. The other 595 warn, count or log — useful,
+but they cannot stop a tool call, whatever the filename suggests. (Of those 595, 591 have
 no refusal at all; 4 end with a computed exit code such as `exit "$RC"` and have to be
 opened to tell.) To check the hooks you already rely on, list the ones with no literal
 refusal in them:
