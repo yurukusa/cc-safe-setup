@@ -1,6 +1,6 @@
 ---
 name: cc-safe-setup
-description: Safety hooks for Claude Code — 700 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 9,200+ tests. Install with npx cc-safe-setup.
+description: Safety hooks for Claude Code — 914 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 277 test files. Install with npx github:yurukusa/cc-safe-setup.
 ---
 
 # cc-safe-setup
@@ -21,7 +21,7 @@ Installs pre-built safety hooks into your Claude Code environment. These hooks r
 ## Quick start
 
 ```bash
-npx cc-safe-setup
+npx github:yurukusa/cc-safe-setup
 ```
 
 This runs an interactive wizard that configures hooks based on your risk profile.
@@ -29,9 +29,9 @@ This runs an interactive wizard that configures hooks based on your risk profile
 ## Install individual hooks
 
 ```bash
-npx cc-safe-setup --install-example large-read-guard
-npx cc-safe-setup --install-example prevent-rm-rf
-npx cc-safe-setup --install-example git-force-push-block
+npx github:yurukusa/cc-safe-setup --install-example large-read-guard
+npx github:yurukusa/cc-safe-setup --install-example prevent-rm-rf
+npx github:yurukusa/cc-safe-setup --install-example git-force-push-block
 ```
 
 ## Why hooks instead of CLAUDE.md rules

@@ -53,7 +53,7 @@ cliff-survival 本の4つの対応の経路の articulate を、 自分の運用
 cc-safe-setup の最新の合図 (5月31日の段で800件以上の hook、 直近14日で1,580名以上の独立利用者) を取り込む経路。
 
 ```bash
-npx cc-safe-setup
+npx github:yurukusa/cc-safe-setup
 ```
 
 加えて、 SessionStart の hook の整備で、 6月15日の発火の前の準備の合図の整備。

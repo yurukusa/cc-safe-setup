@@ -155,7 +155,7 @@ exit 0</pre>
 
 <h3>Quick Commands</h3>
 <table>
-<tr><td><code>npx cc-safe-setup</code></td><td>Install 8 hooks</td></tr>
+<tr><td><code>npx github:yurukusa/cc-safe-setup</code></td><td>Install 8 hooks</td></tr>
 <tr><td><code>--create "desc"</code></td><td>Generate hook</td></tr>
 <tr><td><code>--audit</code></td><td>Score 0-100</td></tr>
 <tr><td><code>--dashboard</code></td><td>Live status</td></tr>
@@ -194,16 +194,16 @@ function analyze(s) {
   const risks=[], good=[];
   const pre=s.hooks?.PreToolUse||[], post=s.hooks?.PostToolUse||[];
   const all=JSON.stringify(pre).toLowerCase();
-  if(!pre.length) risks.push({s:'CRITICAL',i:'No PreToolUse hooks',f:'npx cc-safe-setup'});
+  if(!pre.length) risks.push({s:'CRITICAL',i:'No PreToolUse hooks',f:'npx github:yurukusa/cc-safe-setup'});
   else { good.push('PreToolUse ('+pre.length+')');
-    if(!all.match(/destructive|guard|rm.*rf/)) risks.push({s:'HIGH',i:'No destructive guard',f:'npx cc-safe-setup'});
+    if(!all.match(/destructive|guard|rm.*rf/)) risks.push({s:'HIGH',i:'No destructive guard',f:'npx github:yurukusa/cc-safe-setup'});
     else good.push('Destructive protection');
-    if(!all.match(/branch|push|main/)) risks.push({s:'HIGH',i:'No branch guard',f:'npx cc-safe-setup'});
+    if(!all.match(/branch|push|main/)) risks.push({s:'HIGH',i:'No branch guard',f:'npx github:yurukusa/cc-safe-setup'});
     else good.push('Branch protection');
-    if(!all.match(/secret|env|credential/)) risks.push({s:'HIGH',i:'No secret guard',f:'npx cc-safe-setup'});
+    if(!all.match(/secret|env|credential/)) risks.push({s:'HIGH',i:'No secret guard',f:'npx github:yurukusa/cc-safe-setup'});
     else good.push('Secret protection');
   }
-  if(!post.length) risks.push({s:'MEDIUM',i:'No PostToolUse hooks',f:'npx cc-safe-setup'});
+  if(!post.length) risks.push({s:'MEDIUM',i:'No PostToolUse hooks',f:'npx github:yurukusa/cc-safe-setup'});
   else good.push('PostToolUse ('+post.length+')');
   const score=Math.max(0,100-risks.reduce((n,r)=>n+(r.s==='CRITICAL'?30:r.s==='HIGH'?20:10),0));
   return {risks,good,score};
@@ -239,10 +239,10 @@ const RECIPES=[
   {cat:'block',t:'Block .env staging',d:'Secret leak prevention (#6527)',code:'CMD=$(cat|jq -r \'.tool_input.command // empty\')\n[ -z "$CMD" ] && exit 0\necho "$CMD"|grep -qiE \'git\\s+add.*\\.env\' && echo "BLOCKED" >&2 && exit 2\nexit 0',trigger:'PreToolUse'},
   {cat:'block',t:'Block database wipe',d:'migrate:fresh, DROP DATABASE (#37405)',code:'CMD=$(cat|jq -r \'.tool_input.command // empty\')\n[ -z "$CMD" ] && exit 0\necho "$CMD"|grep -qiE \'migrate:fresh|DROP\\s+DATABASE|prisma\\s+migrate\\s+reset\' && echo "BLOCKED" >&2 && exit 2\nexit 0',trigger:'PreToolUse'},
   {cat:'approve',t:'Auto-approve git read',d:'git status/log/diff with -C flag (#36900)',code:'CMD=$(cat|jq -r \'.tool_input.command // empty\')\n[ -z "$CMD" ] && exit 0\necho "$CMD"|grep -qE \'^\\s*git\\s+(-C\\s+\\S+\\s+)?(status|log|diff|branch|show)\' && jq -n \'{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}\'\nexit 0',trigger:'PreToolUse'},
-  {cat:'approve',t:'Compound commands',d:'cd && git log auto-approve (#30519)',code:'# Full: npx cc-safe-setup --install-example compound-command-approver',trigger:'PreToolUse'},
+  {cat:'approve',t:'Compound commands',d:'cd && git log auto-approve (#30519)',code:'# Full: npx github:yurukusa/cc-safe-setup --install-example compound-command-approver',trigger:'PreToolUse'},
   {cat:'detect',t:'Loop detector',d:'Break command repetition (5+ times)',code:'CMD=$(cat|jq -r \'.tool_input.command // empty\')\n[ -z "$CMD" ] && exit 0\nSTATE=/tmp/cc-loop\necho "$CMD">>$STATE\ntail -n 10 $STATE>${STATE}.tmp&&mv ${STATE}.tmp $STATE\nCOUNT=$(grep -cF "$CMD" $STATE||echo 0)\n[ "$COUNT" -ge 5 ]&&echo "BLOCKED: repeated $COUNT times" >&2&&exit 2\nexit 0',trigger:'PreToolUse'},
-  {cat:'utility',t:'Session handoff',d:'Save state for next session',code:'# npx cc-safe-setup --install-example session-handoff',trigger:'Stop'},
-  {cat:'utility',t:'Cost tracker',d:'Estimate session token cost',code:'# npx cc-safe-setup --install-example cost-tracker',trigger:'PostToolUse'},
+  {cat:'utility',t:'Session handoff',d:'Save state for next session',code:'# npx github:yurukusa/cc-safe-setup --install-example session-handoff',trigger:'Stop'},
+  {cat:'utility',t:'Cost tracker',d:'Estimate session token cost',code:'# npx github:yurukusa/cc-safe-setup --install-example cost-tracker',trigger:'PostToolUse'},
   {cat:'utility',t:'tmp cleanup',d:'/tmp/claude-*-cwd files (#8856)',code:'find /tmp -maxdepth 1 -name \'claude-*-cwd\' -type f -mmin +60 -delete 2>/dev/null\nexit 0',trigger:'Stop'},
 ];
 

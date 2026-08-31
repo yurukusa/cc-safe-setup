@@ -5,7 +5,7 @@ Your hook isn't working. Here's how to fix it, starting with the most common cau
 ## Quick Diagnosis
 
 ```bash
-npx cc-safe-setup --doctor
+npx github:yurukusa/cc-safe-setup --doctor
 ```
 
 This checks jq, settings.json, file permissions, shebangs, and common misconfigurations. If it says "All checks passed" but hooks still don't fire, read on.
@@ -46,7 +46,7 @@ cat ~/.claude/settings.json | jq '.hooks'
 You should see your hook's path under the correct trigger. If not:
 
 ```bash
-npx cc-safe-setup  # Re-registers all hooks
+npx github:yurukusa/cc-safe-setup  # Re-registers all hooks
 ```
 
 ### 3. Is the hook file executable?
@@ -201,7 +201,7 @@ This is a known Claude Code limitation, not a hook issue. `Bash(git:*)` doesn't 
 Fix:
 
 ```bash
-npx cc-safe-setup --install-example compound-command-approver
+npx github:yurukusa/cc-safe-setup --install-example compound-command-approver
 ```
 
 ## "Hooks slow down Claude Code"
@@ -209,7 +209,7 @@ npx cc-safe-setup --install-example compound-command-approver
 ### 1. Check execution time
 
 ```bash
-npx cc-safe-setup --install-example hook-debug-wrapper
+npx github:yurukusa/cc-safe-setup --install-example hook-debug-wrapper
 # Then wrap your slow hook to see timing
 ```
 
@@ -227,7 +227,7 @@ Hooks with `"matcher": ""` run on every single tool call. Move heavy checks to s
 ### 3. Use --lint to find issues
 
 ```bash
-npx cc-safe-setup --lint
+npx github:yurukusa/cc-safe-setup --lint
 ```
 
 Reports performance warnings and configuration issues.
@@ -237,7 +237,7 @@ Reports performance warnings and configuration issues.
 ### 1. Compare settings
 
 ```bash
-npx cc-safe-setup --diff teammate-settings.json
+npx github:yurukusa/cc-safe-setup --diff teammate-settings.json
 ```
 
 Shows exactly what's different between your setups.
@@ -245,9 +245,9 @@ Shows exactly what's different between your setups.
 ### 2. Export and share
 
 ```bash
-npx cc-safe-setup --export   # Creates cc-safe-setup-export.json
+npx github:yurukusa/cc-safe-setup --export   # Creates cc-safe-setup-export.json
 # Send to teammate
-npx cc-safe-setup --import cc-safe-setup-export.json
+npx github:yurukusa/cc-safe-setup --import cc-safe-setup-export.json
 ```
 
 ### 3. Different jq versions
@@ -264,7 +264,7 @@ LOG="$HOME/.claude/blocked-commands.log"
 echo "[$(date -Iseconds)] BLOCKED: reason | cmd: $COMMAND" >> "$LOG"
 ```
 
-Then view with: `npx cc-safe-setup --watch` or `npx cc-safe-setup --stats`
+Then view with: `npx github:yurukusa/cc-safe-setup --watch` or `npx github:yurukusa/cc-safe-setup --stats`
 
 ## "claude -p returns empty output when Stop hook is configured"
 
@@ -274,7 +274,7 @@ This is a known Claude Code v2.1.83 bug ([#38651](https://github.com/anthropics/
 
 ```bash
 # Quick toggle: comment out Stop hooks before -p commands
-npx cc-safe-setup --status  # See which hooks are active
+npx github:yurukusa/cc-safe-setup --status  # See which hooks are active
 # Manually comment out Stop hooks in ~/.claude/settings.json
 # Run your -p command
 # Uncomment Stop hooks after
@@ -320,8 +320,8 @@ The hook has a strict whitelist. If a command isn't on the list, it passes throu
 
 ```bash
 # Install token tracking hooks
-npx cc-safe-setup --install-example prompt-usage-logger
-npx cc-safe-setup --install-example compact-alert-notification
+npx github:yurukusa/cc-safe-setup --install-example prompt-usage-logger
+npx github:yurukusa/cc-safe-setup --install-example compact-alert-notification
 ```
 
 After a session, check:
@@ -384,8 +384,8 @@ If you see `input length = 0`, that hook is not receiving stdin.
 
 ## Still Stuck?
 
-1. Wrap the hook with debug wrapper: `npx cc-safe-setup --install-example hook-debug-wrapper`
+1. Wrap the hook with debug wrapper: `npx github:yurukusa/cc-safe-setup --install-example hook-debug-wrapper`
 2. Check `~/.claude/hook-debug.log` for detailed I/O traces
-3. Run `npx cc-safe-setup --doctor` for automated checks
+3. Run `npx github:yurukusa/cc-safe-setup --doctor` for automated checks
 4. Open an issue: [cc-safe-setup issues](https://github.com/yurukusa/cc-safe-setup/issues)
 5. Read the full guide: **[Hook Design Guide (Zenn Book)](https://zenn.dev/yurukusa/books/6076c23b1cb18b)** — 14 chapters, Chapter 3 free

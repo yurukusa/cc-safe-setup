@@ -16,5 +16,5 @@ labels: bug
 - jq installed: yes/no
 
 **Steps to reproduce:**
-1. `npx cc-safe-setup`
+1. `npx github:yurukusa/cc-safe-setup`
 2. ...
