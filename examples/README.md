@@ -1,28 +1,40 @@
 # Example Hooks
 
-677 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 9,200+ tests.
+914 installable hooks. Each solves a real problem from GitHub Issues or autonomous
+operation. Covered by the 277 test files in [`tests/`](../tests). (Counted 2026-08-31.)
 
 ```bash
-npx cc-safe-setup --install-example <name>   # install one
-npx cc-safe-setup --examples                  # list all
-npx cc-safe-setup --examples safety           # filter by category
-npx cc-safe-setup --shield                    # install recommended set
+npx github:yurukusa/cc-safe-setup --install-example <name>   # install one
+npx github:yurukusa/cc-safe-setup --examples                  # list all
+npx github:yurukusa/cc-safe-setup --examples safety           # filter by category
+npx github:yurukusa/cc-safe-setup --shield                    # install recommended set
 ```
 
 ## Categories
 
-| Category | Count | Examples |
-|----------|-------|---------|
-| Destructive Command Prevention | 14 | `destructive-guard`, `branch-guard`, `no-sudo-guard`, `symlink-guard`, `shell-wrapper-guard`, `compound-inject-guard` |
-| Data Protection | 5 | `block-database-wipe`, `secret-guard`, `hardcoded-secret-detector` |
-| Git Safety | 11 | `git-config-guard`, `no-verify-blocker`, `push-requires-test-pass` |
-| Auto-Approve (PreToolUse) | 11 | `auto-approve-readonly`, `auto-approve-build`, `auto-approve-docker` |
-| Auto-Approve (PermissionRequest) | 7 | `allow-git-hooks-dir`, `allow-protected-dirs`, `edit-always-allow` |
-| Code Quality | 10 | `syntax-check`, `diff-size-guard`, `test-deletion-guard` |
-| Security | 10 | `credential-file-cat-guard`, `credential-exfil-guard`, `prompt-injection-guard` |
-| Deploy | 4 | `deploy-guard`, `no-deploy-friday`, `work-hours-guard` |
-| Monitoring & Cost | 15 | `context-monitor`, `cost-tracker`, `loop-detector`, `edit-error-counter`, `dotenv-watch`, `warn-cron-cost-trap` |
-| Utility | 20 | `comment-strip`, `session-handoff`, `auto-checkpoint`, `edit-retry-loop-guard`, `direnv-auto-reload`, `pre-compact-checkpoint` |
+| Category | Hooks | Of which can refuse a call |
+|----------|------:|---------------------------:|
+| Safety Guards | 318 | 140 |
+| Auto-Approve | 35 | 18 |
+| Quality | 174 | 13 |
+| Agent Controls | 15 | 9 |
+| Monitoring | 28 | 3 |
+| Recovery | 32 | 2 |
+| UX | 51 | 16 |
+| Other | 2 | 0 |
+| (uncategorised) | 259 | 119 |
+| **total** | **914** | **320** |
+
+"Can refuse" means the script contains `exit 2`, a permission decision,
+`"decision": "block"` or `"deny"` on some path. The other 594 warn, count or log — useful,
+but they cannot stop a tool call, whatever the filename suggests. (Of those 594, 590 have
+no refusal at all; 4 end with a computed exit code such as `exit "$RC"` and have to be
+opened to tell.) To check the hooks you already rely on, list the ones with no literal
+refusal in them:
+
+```bash
+grep -L -E 'exit 2|permissionDecision|"decision": *"block"|"deny"' "$HOME"/.claude/hooks/*.sh
+```
 
 ## Popular Hooks
 
