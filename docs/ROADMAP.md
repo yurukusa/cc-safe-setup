@@ -50,8 +50,8 @@ A single screen showing everything about your Claude Code safety:
 Community-contributed hooks discoverable from CLI:
 
 ```bash
-npx cc-safe-setup --search "database"
-npx cc-safe-setup --install-remote user/hook-name
+npx github:yurukusa/cc-safe-setup --search "database"
+npx github:yurukusa/cc-safe-setup --install-remote user/hook-name
 ```
 
 Would require a registry (GitHub-based, no server). Defer to v5.0.

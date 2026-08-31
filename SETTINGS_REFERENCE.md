@@ -80,7 +80,7 @@ Commands that auto-execute without prompting.
 - Compound commands don't match: `Bash(git:*)` won't match `cd /path && git log` ([#30519](https://github.com/anthropics/claude-code/issues/30519), [#16561](https://github.com/anthropics/claude-code/issues/16561))
 - "Always Allow" saves exact strings, not patterns ([#6850](https://github.com/anthropics/claude-code/issues/6850))
 - User-level settings may not apply at project level ([#5140](https://github.com/anthropics/claude-code/issues/5140))
-- **Workaround:** Use `compound-command-approver` hook: `npx cc-safe-setup --install-example compound-command-approver`
+- **Workaround:** Use `compound-command-approver` hook: `npx github:yurukusa/cc-safe-setup --install-example compound-command-approver`
 
 ### deny
 
@@ -359,9 +359,9 @@ before relying on one to *stop* something.
 ### Generate This Automatically
 
 ```bash
-npx cc-safe-setup        # Install hooks
-npx cc-safe-setup --audit  # Check your score
-npx cc-safe-setup --doctor # Diagnose issues
+npx github:yurukusa/cc-safe-setup        # Install hooks
+npx github:yurukusa/cc-safe-setup --audit  # Check your score
+npx github:yurukusa/cc-safe-setup --doctor # Diagnose issues
 ```
 
 ## Undocumented settings (verified from the bundled binary)
@@ -484,14 +484,14 @@ unknown, rather than inventing an explanation that fits.
 |---------|-------|-----|
 | Skill won't auto-trigger | `description` truncated past `skillListingMaxDescChars` (default 1536), or too many skills under the 1% listing budget | Put trigger words first, shorten descriptions, prune unused skills (see Undocumented settings above) |
 | Model changed mid-session | `switchModelsOnFlag` is `true` by default; a safety flag auto-switched the model | Set `"switchModelsOnFlag": false` to pause instead |
-| Hooks don't fire | Not registered in settings.json | `npx cc-safe-setup` |
+| Hooks don't fire | Not registered in settings.json | `npx github:yurukusa/cc-safe-setup` |
 | Hooks don't block | Wrong exit code (not 2) | Check `echo $?` after test |
 | "jq: command not found" | jq not installed | `brew install jq` / `apt install jq` |
 | Hook permission denied | Not executable | `chmod +x ~/.claude/hooks/*.sh` |
 | Compound commands prompt | Permission system limitation | Install `compound-command-approver` |
 | "Always Allow" doesn't stick | Saves exact string, not pattern | Use hooks instead |
 
-Run `npx cc-safe-setup --doctor` for automated diagnosis.
+Run `npx github:yurukusa/cc-safe-setup --doctor` for automated diagnosis.
 
 ## Resources
 
