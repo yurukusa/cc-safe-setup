@@ -188,6 +188,7 @@ const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const REPLAY = process.argv.includes('--replay');
+const BLINDSPOTS = process.argv.includes('--blindspots');
 const SAVE_PROFILE_IDX = process.argv.findIndex(a => a === '--save-profile');
 const SAVE_PROFILE = SAVE_PROFILE_IDX !== -1 ? process.argv[SAVE_PROFILE_IDX + 1] : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -246,6 +247,7 @@ if (HELP) {
     --watch                        Live blocked command feed
     --health                       Hook health dashboard
     --suggest                      Predict risks from project analysis
+    --blindspots                   What your guards never see, vs. your own sessions
 
   Manage:
     --dry-run / --uninstall        Preview / remove hooks
@@ -3333,6 +3335,292 @@ async function analyze() {
   console.log();
   console.log(c.dim + '  Tip: Use --stats for block history analytics' + c.reset);
   console.log(c.dim + '  Tip: Use --dashboard for real-time monitoring' + c.reset);
+  console.log();
+}
+
+// --blindspots (2026-09-03): 層をまたぐ診断。単層の点検では構造的に出ない欠陥を出す。
+//
+// このツールの他の命令は、どれも1つの層しか見ていない——ディスクの上のフック(--status)、
+// 設定ファイル(--lint)、阻止の記録(--stats)、配布版との差(--outdated)。
+// フックは在って、実行権があって、登録されていて、最新であっても、
+// この環境で実際に打たれるコマンドの形がその位置に届かなければ、一度も走らない。
+// その差は、セッションのログ(層4)をフックの正規表現(層1)の隣に置いて初めて見える。
+//
+// 読むのは全部ローカル。ネットワークへは何も送らない。
+async function blindspots() {
+  const { createReadStream, statSync } = await import('fs');
+  const { createInterface: makeLines } = await import('readline');
+  const PROJECTS_DIR = join(HOME, '.claude', 'projects');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --blindspots' + c.reset);
+  console.log(c.dim + '  What your guards never see — measured against your own sessions' + c.reset);
+  console.log();
+
+  if (!existsSync(PROJECTS_DIR)) {
+    console.log(c.yellow + '  No session transcripts found at ' + PROJECTS_DIR + c.reset);
+    console.log(c.dim + '  This check needs your own Claude Code history to say anything.' + c.reset);
+    console.log();
+    return;
+  }
+
+  // ---- 層4: 実際に打たれたコマンドを集める --------------------------------
+  const files = [];
+  for (const proj of readdirSync(PROJECTS_DIR)) {
+    const dir = join(PROJECTS_DIR, proj);
+    let entries;
+    try { entries = readdirSync(dir); } catch { continue; }
+    for (const f of entries) {
+      if (!f.endsWith('.jsonl')) continue;
+      const p = join(dir, f);
+      try { files.push({ path: p, size: statSync(p).size }); } catch {}
+    }
+  }
+  const totalBytes = files.reduce((a, f) => a + f.size, 0);
+  if (files.length === 0) {
+    console.log(c.yellow + '  No .jsonl transcripts under ' + PROJECTS_DIR + c.reset);
+    console.log();
+    return;
+  }
+
+  console.log(c.dim + `  reading ${files.length} transcripts (${(totalBytes / 1048576).toFixed(0)} MB) — local only, nothing is sent` + c.reset);
+
+  const commands = [];
+  let firstTs = null, lastTs = null;
+  for (const f of files) {
+    await new Promise((resolve) => {
+      const rl = makeLines({ input: createReadStream(f.path, { encoding: 'utf-8' }), crlfDelay: Infinity });
+      rl.on('line', (line) => {
+        if (line.indexOf('"tool_use"') === -1) return;   // 大半の行はここで落ちる（速さのため）
+        let d;
+        try { d = JSON.parse(line); } catch { return; }
+        if (d.type !== 'assistant') return;
+        const content = (d.message || {}).content;
+        if (!Array.isArray(content)) return;
+        for (const blk of content) {
+          if (!blk || blk.type !== 'tool_use' || blk.name !== 'Bash') continue;
+          const cmd = (blk.input || {}).command;
+          if (typeof cmd !== 'string' || !cmd.trim()) continue;
+          commands.push(cmd);
+          const ts = d.timestamp;
+          if (ts) {
+            if (!firstTs || ts < firstTs) firstTs = ts;
+            if (!lastTs || ts > lastTs) lastTs = ts;
+          }
+        }
+      });
+      rl.on('close', resolve);
+      rl.on('error', resolve);
+    });
+  }
+
+  const N = commands.length;
+  if (N === 0) {
+    console.log(c.yellow + '  Transcripts found, but no Bash calls in them. Nothing to compare against.' + c.reset);
+    console.log();
+    return;
+  }
+
+  const compound = commands.filter(x => /(&&|\|\||;|\|)/.test(x)).length;
+  const startsCd = commands.filter(x => /^\s*cd\s/.test(x)).length;
+  const pct = (n) => ((n / N) * 100).toFixed(1) + '%';
+
+  console.log();
+  console.log(c.bold + '  Layer 4 · what you actually run' + c.reset);
+  console.log(`    ${c.bold}${N.toLocaleString()}${c.reset} Bash calls` +
+    (firstTs && lastTs ? c.dim + `  (${firstTs.slice(0, 10)} → ${lastTs.slice(0, 10)})` + c.reset : ''));
+  console.log(`    ${pct(compound).padStart(6)}  contain a separator (${c.dim}&& ; || |${c.reset}) — the command a guard sees first is not the whole command`);
+  console.log(`    ${pct(startsCd).padStart(6)}  begin with ${c.dim}cd ${c.reset}— anything anchored to the start of the string sees ${c.dim}cd${c.reset}, not the verb`);
+  console.log();
+
+  // ---- 層2+3: 登録されているのに実体が無いフック ---------------------------
+  // 設定は「登録した」と言い、ディスクには無い。どちらの層を単独で見ても矛盾に見えない。
+  const zombies = [];
+  let registered = 0;
+  let settings = {};
+  try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  const expand = (p) => p
+    .replace(/\$\{?CLAUDE_PROJECT_DIR\}?/g, CLAUDE_BASE)
+    .replace(/\$\{?HOME\}?/g, HOME)
+    .replace(/^~/, HOME);
+  for (const entries of Object.values(settings.hooks || {})) {
+    for (const entry of entries || []) {
+      for (const h of (entry || {}).hooks || []) {
+        if (!h || h.type !== 'command' || typeof h.command !== 'string') continue;
+        const m = h.command.match(/(\S*\/[\w.-]+\.(?:sh|py|js|mjs))/);
+        if (!m) continue;                      // インラインのシェルは対象外（実体を持たない）
+        registered++;
+        const p = expand(m[1]).replace(/^["']|["']$/g, '');
+        if (!existsSync(p)) zombies.push(p);
+      }
+    }
+  }
+  console.log(c.bold + '  Layers 2+3 · registered vs. present on disk' + c.reset);
+  if (registered === 0) {
+    console.log(c.dim + '    No script-backed hooks registered in ' + SETTINGS_PATH + c.reset);
+  } else if (zombies.length === 0) {
+    console.log(`    ${c.green}✓${c.reset} all ${registered} script-backed hook registrations point at a file that exists`);
+  } else {
+    console.log(`    ${c.red}✗${c.reset} ${zombies.length} of ${registered} registrations point at a file that is not there.`);
+    console.log(c.dim + '      They never run, and nothing reports it.' + c.reset);
+    for (const z of zombies.slice(0, 6)) console.log(`      ${c.red}·${c.reset} ${z}`);
+    if (zombies.length > 6) console.log(c.dim + `      … and ${zombies.length - 6} more` + c.reset);
+  }
+  console.log();
+
+  // ---- 層1+4: 行頭に錨を置いた正規表現と、実際の形を突き合わせる -----------
+  // これは走査であって、フックの意味解析ではない。取りこぼしも空振りもある（下に件数を出す）。
+  const posix = (s) => s
+    .replace(/\[\[:space:\]\]/g, '\\s')
+    .replace(/\[\[:alpha:\]\]/g, '[A-Za-z]')
+    .replace(/\[\[:alnum:\]\]/g, '[A-Za-z0-9]')
+    .replace(/\[\[:digit:\]\]/g, '\\d');
+
+  const words = (pat) => posix(pat)
+    .replace(/\(\?[:=!][^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\\[sStTwWdDbB]/g, ' ')
+    .replace(/[*+?{}()|^$.\\]/g, ' ')
+    .split(/\s+/)
+    .filter(w => /^[A-Za-z][A-Za-z0-9_.-]*$/.test(w) && w.length > 1);
+
+  // 見つけた錨のうち、どれが「門」でどれが「免除」かを分ける。
+  // ここを分けないと、読み取り専用の命令を素通しさせるための ^grep や ^git が
+  // 「守れていない門」として並ぶ。それは計器の側の欠陥であって、利用者の設定の欠陥ではない。
+  // 判定は、その錨の直後に最初に現れる終了コード: exit 2 なら門、exit 0 なら免除。
+  const classify = (src, at, line) => {
+    // 複合条件の一項（行末が && \ など）は、それ単独では門でも守備範囲でもない。
+    // 例: `if ! echo "$CMD" | grep -qE '^\s*git\s' && echo "$CMD" | grep -qiE '(tweet|...)'`
+    // ここでの ^git は「git は対象外」という除外であって、git の門ではない。
+    if (/(&&|\|\|)\s*\\?\s*$/.test(line)) return 'exempt';
+    const tail = src.slice(at, at + 600);
+    const block = tail.search(/exit\s+2|sys\.exit\(2\)|EXIT_BLOCK/);
+    const allow = tail.search(/exit\s+0|sys\.exit\(0\)|return\s+0/);
+    // 否定つきの早期脱出（`if ! ... '^git push'; then exit 0`）は、
+    // その錨がこのフックの守備範囲そのものであることを意味する。
+    // 錨に当たらない命令は、拒否されないのではなく、一度も見られない。
+    if (/(^|\s)!\s*(printf|echo|cat|grep)/.test(line) || /grep\s+-[a-zA-Z]*v/.test(line)) {
+      return (allow !== -1 && (block === -1 || allow < block)) ? 'subject' : 'exempt';
+    }
+    if (block === -1 && allow === -1) return 'unknown';
+    if (block === -1) return 'exempt';
+    if (allow === -1) return 'block';
+    return block < allow ? 'block' : 'exempt';
+  };
+
+  const found = [];
+  let scanned = 0, unparsed = 0, exempt = 0;
+  if (existsSync(HOOKS_DIR)) {
+    for (const f of readdirSync(HOOKS_DIR)) {
+      if (!/\.(sh|py|bash)$/.test(f)) continue;
+      let src;
+      try { src = readFileSync(join(HOOKS_DIR, f), 'utf-8'); } catch { continue; }
+      const pats = new Map();   // pattern -> { multiline, kind }
+      const rank = { exempt: 0, unknown: 1, subject: 2, block: 3 };
+      const note = (pat, at, multiline, line) => {
+        const kind = classify(src, at, line);
+        const prev = pats.get(pat);
+        // 同じ錨が複数回出るときは、いちばん強い用法（門 > 守備範囲 > 免除）を採る
+        if (!prev) pats.set(pat, { multiline, kind });
+        else if (rank[kind] > rank[prev.kind]) pats.set(pat, { multiline: prev.multiline || multiline, kind });
+      };
+      let m;
+      // grep は行ごとに判定するので、複数行の命令では ^ が2行目以降の行頭にも当たる。
+      // bash の =~ は文字列の先頭にしか当たらない。この差を無視すると見落としを過大に出す。
+      const quoted = /(['"])\^([^'"\n]{2,120})\1/g;          // grep -qE '^\s*git\s+push'
+      while ((m = quoted.exec(src)) !== null) {
+        const lineStart = src.lastIndexOf('\n', m.index) + 1;
+        const line = src.slice(lineStart, src.indexOf('\n', m.index));
+        note(m[2], m.index, /grep|egrep|awk|sed/.test(line), line);
+      }
+      const bashRe = /=~\s*\^([^\s\]]{2,120})/g;              // [[ "$CMD" =~ ^rm[[:space:]] ]]
+      while ((m = bashRe.exec(src)) !== null) {
+        const ls = src.lastIndexOf('\n', m.index) + 1;
+        note(m[1], m.index, false, src.slice(ls, src.indexOf('\n', m.index)));
+      }
+
+      for (const [pat, meta] of pats) {
+        scanned++;
+        if (meta.kind !== 'block' && meta.kind !== 'subject') { exempt++; continue; }
+        const w = words(pat);
+        if (w.length === 0) { unparsed++; continue; }
+        let anchored, loose;
+        try {
+          anchored = new RegExp('^\\s*' + posix(pat), meta.multiline ? 'm' : '');
+          // 命令として実際に呼ばれる位置だけを数える＝行頭か、区切り（&& || ; | $( ）の直後。
+          // 「どこかに含まれる」で数えると、sed の置換文字列やコミット本文の中の語まで入る。
+          const verb = w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+          loose = new RegExp('(?:^|&&|\\|\\||;|\\||\\$\\()\\s*' + verb + '\\b', 'm');
+        } catch { unparsed++; continue; }
+        found.push({ hook: f, pat, words: w.join(' '), anchored, loose, kind: meta.kind });
+      }
+    }
+  }
+
+  const rows = [];
+  for (const g of found) {
+    let intent = 0, sees = 0;
+    let sample = null;
+    for (const cmd of commands) {
+      if (!g.loose.test(cmd)) continue;
+      intent++;
+      if (g.anchored.test(cmd)) sees++;
+      else if (!sample) sample = cmd;
+    }
+    if (intent < 20) continue;                 // 少なすぎる語は雑音なので出さない
+    const blind = intent - sees;
+    if (blind === 0) continue;
+    rows.push({ hook: g.hook, words: g.words, intent, sees, blind, rate: blind / intent, sample, kind: g.kind });
+  }
+  // 同じ語を複数のフックが持つことがあるので、見落としの大きい順に一意化する
+  rows.sort((a, b) => b.blind - a.blind);
+  const seenWords = new Set();
+  const top = rows.filter(r => (seenWords.has(r.words) ? false : seenWords.add(r.words)));
+
+  console.log(c.bold + '  Layers 1+4 · patterns anchored to the start vs. what you type' + c.reset);
+  if (found.length === 0) {
+    console.log(c.dim + '    No start-anchored patterns found in ' + HOOKS_DIR + c.reset);
+  } else if (top.length === 0) {
+    console.log(`    ${c.green}✓${c.reset} every start-anchored pattern with enough traffic to judge matched all of it`);
+    console.log(c.dim + `      (${scanned} scanned; ${exempt} allow/exempt, ${unparsed} unreadable)` + c.reset);
+  } else {
+    console.log(c.dim + '    intent = calls where that verb starts a command segment (line start, or after && || ; |)' + c.reset);
+    console.log(c.dim + '    seen   = calls the hook\'s start-anchored pattern actually matches' + c.reset);
+    console.log();
+    console.log(c.dim + '    verb              hook                        intent   seen   blind  effect' + c.reset);
+    for (const r of top.slice(0, 8)) {
+      const col = r.rate > 0.5 ? c.red : c.yellow;
+      console.log(
+        '    ' + r.words.padEnd(17).slice(0, 17) +
+        ' ' + r.hook.padEnd(27).slice(0, 27) +
+        ' ' + String(r.intent).padStart(6) +
+        ' ' + String(r.sees).padStart(6) +
+        '  ' + col + (r.rate * 100).toFixed(1).padStart(5) + '%' + c.reset +
+        '  ' + c.dim + (r.kind === 'subject' ? 'never examined' : 'not blocked') + c.reset
+      );
+    }
+    const worst = top[0];
+    if (worst && worst.sample) {
+      console.log();
+      console.log(c.dim + '    one of yours that went past ' + worst.hook + ':' + c.reset);
+      console.log('      ' + c.dim + worst.sample.replace(/\s+/g, ' ').slice(0, 150) + c.reset);
+    }
+    console.log();
+    console.log(c.dim + `    (${scanned} anchored patterns scanned; ${exempt} are allow/exempt tests and are not counted as gaps;` +
+      ` ${unparsed} could not be read. This is a scan, not a parse of your hooks: it can miss patterns,` +
+      ' and it can name one that a later line already handles. A verb on its own line inside a' +
+      ' heredoc is counted as an invocation, so intent is an upper bound.)' + c.reset);
+  }
+  console.log();
+
+  console.log(c.bold + '  Why no single-layer check reports this' + c.reset);
+  console.log(c.dim + '    --status sees the files. --lint sees the config. --outdated sees the versions.' + c.reset);
+  console.log(c.dim + '    A guard can pass all three and still stand where your traffic never goes.' + c.reset);
+  console.log(c.dim + '    The gap only exists between layers, so only a comparison across them can find it.' + c.reset);
+  console.log();
+  console.log(c.dim + '    Fixes: match anywhere in the command, not only at the start; register file guards on' + c.reset);
+  console.log(c.dim + '    Bash as well as Read/Edit; and put static paths in permissions.deny, which reads' + c.reset);
+  console.log(c.dim + '    inside Bash commands. See SAFETY_CHECKLIST.md.' + c.reset);
   console.log();
 }
 
@@ -6696,6 +6984,7 @@ async function main() {
   if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
+  if (BLINDSPOTS) return blindspots();
   if (OPUS47) return opus47();
   if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();
