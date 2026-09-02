@@ -7,7 +7,16 @@
 # than bash equivalents. But Claude often reaches for sed, grep, cat instead.
 # This hook denies those commands with a pointer to the correct built-in tool.
 #
-# TRIGGER: PermissionRequest  MATCHER: ""
+# TRIGGER: PreToolUse  MATCHER: "Bash"
+#
+# 2026-09-03 の訂正。ここは以前 `TRIGGER: PermissionRequest  MATCHER: ""` だった。
+# インストーラはこの行を読んで登録先を決めるので、出荷時のこのフックは
+# PermissionRequest へ登録されていた。そして本体が出す hookEventName は
+# 最初から "PreToolUse" で、宣言と中身が食い違っていた。
+# 隔離した HOME で測ると、出荷時の登録では `cat ./probe.txt` に対して
+# **一度も呼ばれなかった**（3条件・計器つきで0回）。登録先だけを
+# PreToolUse / matcher "Bash" へ変えると、同じ命令で1回呼ばれ、拒否も記録された。
+# 計器そのものは手で入力を流して発火することを先に確かめてある。
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
