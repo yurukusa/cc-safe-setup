@@ -51,7 +51,7 @@ If you cannot post anything publicly at all, say so in the Ko-fi order message i
 
 **Attaching a file to an issue does not make it private.** This repository is public, and attachment URLs on a public repository can be opened by anyone who has the link. If your `CLAUDE.md` should not be public, do not attach it — ask for the private route instead. (This page said the opposite until 2026-08-12; it was wrong.)
 
-**A `CLAUDE.md` is not always harmless.** Mine names internal paths; other people's name customers, hostnames and occasionally a key. Strip anything you would not put on a public page before you post it — the issue is public. And as above: your file is deleted within 30 days of delivery, is not published, and is not used to train anything.
+**A `CLAUDE.md` is not always harmless.** Mine names internal paths; other people's name customers, hostnames and occasionally a key. Strip anything you would not put on a public page before you post it — the issue is public. And as above: the report is written with Claude Code, so your file's contents go to Anthropic's API; on my side it is never published and is deleted within 30 days of delivery.
 
 **Refund:** if I cannot produce a useful audit (for example because the file is effectively empty, or is entirely in a language I cannot parse), full refund via Ko-fi.
 
@@ -104,7 +104,7 @@ This audit tells you which of the 56 cataloged token-waste symptoms (Token Book 
 
 **Strip your logs before you send them.** Session transcripts routinely carry API keys, customer names, internal paths and source code. Remove those first. I cannot un-see what arrives, and a public issue cannot be un-published — if a secret does reach me, tell me and rotate it, because deleting the message does not undo the exposure.
 
-**What happens to the files you send:** they stay on my machine for the audit, are not published anywhere, are not used to train anything, and are deleted within 30 days of delivery — sooner if you ask. I keep the report I wrote; I do not keep your logs.
+**What happens to the files you send.** The report is written with Claude Code, which means **the contents of your files are sent to Anthropic's API**. Doing the work this way makes that unavoidable, and what happens on their side is governed by [their terms](https://www.anthropic.com/legal/commercial-terms), not by me — I cannot promise anything about it. What I can promise is three things: I publish nothing, I delete your files within 30 days of delivery (sooner if you ask), and the only thing I keep is the report I wrote. Redact anything you would rather not send; I note the redacted range in the report. If your environment cannot send anything to an external API, this audit is the wrong tool and you should not buy it.
 
 **What the free tools already give you — run them first:** `/cost` (or `/usage`) inside Claude Code shows the current session. [`ccusage`](https://github.com/ccusage/ccusage) gives you daily and monthly totals from the same local logs, and it folds duplicate `usage` rows correctly (keyed on `message.id` + `requestId`) — a detail my own `cc-token-diet` got wrong until 2026-08-09. If your question is *"how much?"*, those answer it for free and you do not need me.
 
@@ -148,7 +148,7 @@ It also records the two times my own scan was wrong about that number, in both d
 2. Reply to the order with a message saying which of the five layers you can send. **You do not need all five; three is enough to start.** I reply within 24 hours with a private route for the files.
 3. **Do not post logs or settings publicly.** Session transcripts routinely carry API keys, customer names, internal paths and source code. Strip what you can before you send them. I cannot un-see what arrives.
 
-**What happens to the files you send:** they stay on my machine for the audit, are not published anywhere, are not used to train anything, and are deleted within 30 days of delivery — sooner if you ask. I keep the report I wrote; I do not keep your files.
+**What happens to the files you send.** The report is written with Claude Code, which means **the contents of your files are sent to Anthropic's API**. Doing the work this way makes that unavoidable, and what happens on their side is governed by [their terms](https://www.anthropic.com/legal/commercial-terms), not by me — I cannot promise anything about it. What I can promise is three things: I publish nothing, I delete your files within 30 days of delivery (sooner if you ask), and the only thing I keep is the report I wrote. Redact anything you would rather not send; I note the redacted range in the report. If your environment cannot send anything to an external API, this audit is the wrong tool and you should not buy it.
 
 **Refund:** if the audit surfaces no cross-layer contradiction at all, full refund via Ko-fi.
 
