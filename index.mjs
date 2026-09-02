@@ -6622,7 +6622,12 @@ async function doctor() {
         const q = mRaw[1].match(/^"([^"]*)"/);
         matcher = q ? q[1] : mRaw[1].trim();
       }
-      return { trigger: t[1], matcher };
+      // 宣言と登録先が一致していても、本体が別のイベント名で決定を返していれば
+      // その決定は宛先の違う封筒になり、静かに効かない。ここまで読んで初めて
+      // 「宣言どおりの場所に居る」が「宣言どおりに効く」になる。
+      // 終了コードだけで判断するフックは封筒を出さないので、その場合は null。
+      const envs = [...new Set([...body.matchAll(/"hookEventName"\s*:\s*"([A-Za-z]+)"/g)].map(m => m[1]))];
+      return { trigger: t[1], matcher, emitted: envs.length ? envs : null };
     };
 
     const settings = existsSync(SETTINGS_PATH)
@@ -6647,8 +6652,14 @@ async function doctor() {
           const wrongEvent = decl.trigger !== event;
           const wrongMatcher = decl.matcher !== null &&
             asSet(decl.matcher) !== asSet(registered ?? '');
-          if (wrongEvent || wrongMatcher) {
-            mismatched.push({ name: hit[1], event, registered, decl });
+          // 2026-09-03 に足した3本目。prefer-builtin-tools.sh は
+          // ヘッダも登録先も PermissionRequest で一致していたのに、本体は
+          // PreToolUse の封筒を返しており、隔離して測ると3条件とも一度も呼ばれなかった。
+          // この検査は当時「every installed hook sits on the event it declares」と
+          // 緑の印を出していた。一致していたのは2つだけで、3つ目を見ていなかった。
+          const wrongEnvelope = Array.isArray(decl.emitted) && !decl.emitted.includes(event);
+          if (wrongEvent || wrongMatcher || wrongEnvelope) {
+            mismatched.push({ name: hit[1], event, registered, decl, wrongEnvelope });
           }
         }
       }
@@ -6656,13 +6667,18 @@ async function doctor() {
     if (inspected === 0) {
       pass('no installed hook declares an event to verify');
     } else if (mismatched.length === 0) {
-      pass('every installed hook sits on the event it declares (' + inspected + ' checked)');
+      pass('every installed hook sits on the event it declares, and answers in that event\'s envelope (' + inspected + ' checked)');
     } else {
       fail(mismatched.length + ' of ' + inspected + ' installed hooks are wired to the wrong event or tool — they run at the wrong time, or never');
       for (const m of mismatched) {
         console.log(c.dim + '    ' + m.name + ': registered ' + m.event +
           ' matcher ' + JSON.stringify(m.registered ?? null) +
           ', declares ' + m.decl.trigger + ' matcher ' + JSON.stringify(m.decl.matcher) + c.reset);
+        if (m.wrongEnvelope) {
+          console.log(c.dim + '      and it answers with hookEventName ' + JSON.stringify(m.decl.emitted) +
+            ', not ' + JSON.stringify(m.event) + ' — the decision is addressed to a different event,' +
+            ' so it is ignored even when the hook runs.' + c.reset);
+        }
       }
       console.log(c.dim + '    Fix: npx github:yurukusa/cc-safe-setup --install-example <name> rewrites the entry from the header,' + c.reset);
       console.log(c.dim + '    or correct the event and matcher in ~/.claude/settings.json by hand.' + c.reset);

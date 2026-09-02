@@ -128,5 +128,51 @@ check "and denies it after a separator too" \
     | bash "$INSTALL_HOME/.claude/hooks/prefer-builtin-tools.sh" 2>/dev/null \
     | grep -q '"permissionDecision":"deny"' && echo yes || echo no)"
 
+# --- --doctor has to see it too ----------------------------------------------
+# Check 13 exists for exactly this failure. Its comment says so: "A hook wired to
+# the wrong event installs cleanly, reports success, and then never fires — the
+# worst failure this project has." On the shipped configuration it printed
+#
+#   ✓ every installed hook sits on the event it declares (1 checked)
+#
+# and it was not wrong: the header said PermissionRequest and the registration
+# said PermissionRequest. It compared two things and there were three. The body's
+# own envelope was the one nobody read.
+BROKEN="$(mktemp -d)"
+mkdir -p "$BROKEN/.claude"
+HOME="$BROKEN" node "$REPO/index.mjs" --install-example prefer-builtin-tools >/dev/null 2>&1
+python3 - "$BROKEN/.claude/hooks/prefer-builtin-tools.sh" "$BROKEN/.claude/settings.json" <<'PY'
+import json, pathlib, re, sys
+hook, settings = sys.argv[1], sys.argv[2]
+p = pathlib.Path(hook)
+p.write_text(re.sub(r'^# TRIGGER: PreToolUse  MATCHER: "Bash"$',
+                    '# TRIGGER: PermissionRequest  MATCHER: ""',
+                    p.read_text(), count=1, flags=re.M))
+sp = pathlib.Path(settings); d = json.loads(sp.read_text())
+hooks = d.get("hooks") or {}
+entry = None
+for ev in list(hooks):
+    keep = []
+    for e in hooks[ev]:
+        found = [h for h in (e.get("hooks") or []) if "prefer-builtin" in str(h.get("command", ""))]
+        rest = [h for h in (e.get("hooks") or []) if "prefer-builtin" not in str(h.get("command", ""))]
+        if found: entry = found[0]
+        if rest: e["hooks"] = rest; keep.append(e)
+    if keep: hooks[ev] = keep
+    else: hooks.pop(ev, None)
+hooks.setdefault("PermissionRequest", []).append({"matcher": "", "hooks": [entry]})
+d["hooks"] = hooks
+sp.write_text(json.dumps(d, indent=2) + "\n")
+PY
+DOC_BROKEN="$(HOME="$BROKEN" node "$REPO/index.mjs" --doctor 2>&1 | sed 's/\x1b\[[0-9;]*m//g')"
+check "--doctor reports a header/registration pair that agree but answer elsewhere" \
+  "yes" "$(printf '%s' "$DOC_BROKEN" | grep -q 'answers with hookEventName' && echo yes || echo no)"
+check "--doctor does not call that configuration healthy" \
+  "yes" "$(printf '%s' "$DOC_BROKEN" | grep -q '✓ every installed hook sits on the event it declares' && echo no || echo yes)"
+
+DOC_OK="$(HOME="$INSTALL_HOME" node "$REPO/index.mjs" --doctor 2>&1 | sed 's/\x1b\[[0-9;]*m//g')"
+check "--doctor passes the corrected configuration" \
+  "yes" "$(printf '%s' "$DOC_OK" | grep -q "answers in that event's envelope" && echo yes || echo no)"
+
 echo "  hook-trigger-matches-envelope: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
