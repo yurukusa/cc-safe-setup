@@ -143,6 +143,14 @@ jobs:
 <strong>Rolling this out across a whole org?</strong> Per-repo CI is free (above) and a committed baseline covers a team. The one piece a per-developer tool can't give you is <em>central enforcement</em> — one shared policy applied to every repo automatically, with an audit trail, so a brand-new repo can't silently skip the baseline. I'm gauging interest before building that: <a href="https://github.com/yurukusa/cc-safe-setup/discussions/632">tell me it'd help your org</a>. The free tier always stays free.<br><br>Not sure where your org stands? Score it on the <a href="team-governance-scorecard.html">Team Governance Scorecard</a> (8 org-level controls, shareable card). Worried specifically about runaway spend? See <a href="team-cost-governance.html">the cost-governance gaps the official controls don't cover</a>. If you'd rather have the baseline designed, enforced and audited for you, see the <a href="services-en.html">cc-safe-setup team services</a> (<a href="services-jp.html">法人向け・日本語</a>) and a <a href="services-jp-sample-audit.html">sample audit report</a>.
 </div>
 
+<div class="box" style="margin-top:1.4rem">
+<strong>If what you actually need is for everyone to have read the same thing.</strong> Between "install the free hooks" and "have someone audit us" there is a gap, and it is usually the real problem: the baseline is in the repo, and half the team does not know why any of it is there. <a href="https://leanpub.com/claude-code-safety-mastery">Claude Code Safety Mastery</a> is written for that — the guards in this repository, grouped from the five to install first through Git protection and credential guards, plus eight dated incidents where a guard failed silently and nobody noticed.
+<br><br>
+It is sold at a per-seat discount, so you can cover the team in <strong>one purchase, one receipt, no quote and no sales call</strong>: from <strong>$24 for three people</strong>, $39 for five, $69 for ten, $99 for fifteen, <strong>$149 for twenty-five</strong>. Same book, same files; only the number of people covered differs. There is a free sample on the page — read it before deciding whether it is worth a purchase order.
+<br><br>
+Being straight about what this is and is not: it is a book, not enforcement. It does not apply a policy to your repos and it does not produce an audit trail. If you need those, the two options above are the ones to look at. What it does is make the baseline something your team understands rather than something they inherited.
+</div>
+
 <div class="footer">
 By the maintainer of <a href="https://github.com/yurukusa/cc-safe-setup">cc-safe-setup</a> — free, MIT safety hooks for Claude Code. Incident references link to the public <code>anthropics/claude-code</code> issue tracker.
 </div>
