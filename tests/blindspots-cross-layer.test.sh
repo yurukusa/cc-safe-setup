@@ -129,7 +129,16 @@ PLAIN="$(printf '%s' "$OUT" | sed 's/\x1b\[[0-9;]*m//g')"
 
 # Layer 4 was actually read.
 check "counts the Bash calls in the transcript" \
-  "yes" "$(printf '%s' "$PLAIN" | grep -qE '\b55 Bash calls' && echo yes || echo no)"
+  "yes" "$(printf '%s' "$PLAIN" | grep -qE '\b55 Bash tool calls' && echo yes || echo no)"
+
+# The sample must be a shape, never the command. A user's history carries keys,
+# customer names and internal paths, and this output lands in screen shares and
+# CI logs. The probe transcript writes /tmp/work into every chained call; none of
+# it may come back out.
+check "prints the shape, not the arguments" \
+  "yes" "$(printf '%s' "$PLAIN" | grep -qE '^ +cd … && git push …$' && echo yes || echo no)"
+check "no argument from the transcript is echoed" \
+  "yes" "$(printf '%s' "$PLAIN" | grep -q '/tmp/work' && echo no || echo yes)"
 
 # The subject filter is reported, with the blind rate fixed by construction.
 check "reports the start-anchored push guard" \

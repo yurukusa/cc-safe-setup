@@ -1736,7 +1736,17 @@ async function audit() {
   }
 
   if (risks.length === 0) {
-    console.log(c.green + c.bold + '  No risks detected. Your setup looks solid.' + c.reset);
+    // 「危険は見つからなかった」と「危険は無い」は別のことなのに、
+    // 前の文面（Your setup looks solid）は後者に読めた。安全を売る道具で
+    // 誤って安心させる側へ倒れるのは、見落とす側より高くつく。
+    // 何を見て何を見ていないかを、その場で並べる。
+    console.log(c.green + c.bold + '  No risks found in the checks this command runs.' + c.reset);
+    console.log();
+    console.log(c.dim + '  Checked:     settings.json (permissions, hooks), and the scripts your' + c.reset);
+    console.log(c.dim + '               CLAUDE.md names against what your settings register.' + c.reset);
+    console.log(c.dim + '  Not checked: whether a registered hook actually refuses anything' + c.reset);
+    console.log(c.dim + '               (audit/selftest.sh), whether your hooks match the shape of' + c.reset);
+    console.log(c.dim + '               the commands you really run (--blindspots), and your CI.' + c.reset);
   } else {
     console.log(c.bold + '  ⚠ Risks found (' + risks.length + '):' + c.reset);
     console.log();
@@ -1820,7 +1830,23 @@ async function audit() {
   }
 
   console.log();
-  process.exit(score < (parseInt(process.env.CC_AUDIT_THRESHOLD) || 0) ? 1 : 0);
+  // README has told people to put `--audit --ci` in a workflow since this section
+  // was written, and until 2026-09-03 nothing here read `--ci`. The default
+  // threshold is 0 and the score cannot go below 0, so `score < 0` was never true:
+  // the step passed no matter what the audit found. A CI gate that cannot fail is
+  // worse than no gate, because the reader stops watching. `--ci` now fails on any
+  // risk; CC_AUDIT_THRESHOLD keeps working for score-based gating either way.
+  // 門の線は CRITICAL/HIGH。any-risk で落とすと、この道具が薦める構成のままでも
+  // MEDIUM 1件で赤くなり、利用者は真っ先にこの step を外す——落ちない門と同じ結末になる。
+  const ciMode = process.argv.includes('--ci');
+  const threshold = parseInt(process.env.CC_AUDIT_THRESHOLD) || 0;
+  const blocking = risks.filter(r => r.severity === 'CRITICAL' || r.severity === 'HIGH');
+  if (ciMode && !JSON_OUTPUT) {
+    console.log(c.dim + `  --ci: fails on CRITICAL or HIGH only (${blocking.length} of ${risks.length} risk${risks.length === 1 ? '' : 's'} here).` + c.reset);
+    console.log(c.dim + '        Set CC_AUDIT_THRESHOLD to also fail below a score.' + c.reset);
+    console.log();
+  }
+  process.exit((score < threshold || (ciMode && blocking.length > 0)) ? 1 : 0);
 }
 
 function learn() {
@@ -3427,10 +3453,17 @@ async function blindspots() {
   const pct = (n) => ((n / N) * 100).toFixed(1) + '%';
 
   console.log();
-  console.log(c.bold + '  Layer 4 · what you actually run' + c.reset);
-  console.log(`    ${c.bold}${N.toLocaleString()}${c.reset} Bash calls` +
+  console.log(c.bold + '  Layer 4 · what you actually ask for' + c.reset);
+  console.log(`    ${c.bold}${N.toLocaleString()}${c.reset} Bash tool calls` +
     (firstTs && lastTs ? c.dim + `  (dated ones span ${firstTs.slice(0, 10)} → ${lastTs.slice(0, 10)})` + c.reset : ''));
   console.log(c.dim + `    read in ${((Date.now() - startedAt) / 1000).toFixed(1)}s` + c.reset);
+  // 数えているのは要求であって実行ではない。PreToolUse はどちらにせよ要求の時点で
+  // 呼ばれるので、「フックが見たか」を問う目的にはこれが正しい単位だが、
+  // 「これだけ走った」と読まれないように明示する。
+  // また、突き合わせているのは全プロジェクトの履歴と「いまの」フックである点も書く。
+  console.log(c.dim + '    Counted as requested, before any hook or human allowed them, which is the' + c.reset);
+  console.log(c.dim + '    point a PreToolUse hook is consulted. History spans every project; the' + c.reset);
+  console.log(c.dim + '    hooks compared against it are the ones installed now.' + c.reset);
   console.log(`    ${pct(compound).padStart(6)}  contain a separator (${c.dim}&& ; || |${c.reset}) — the command a guard sees first is not the whole command`);
   console.log(`    ${pct(startsCd).padStart(6)}  begin with ${c.dim}cd ${c.reset}— anything anchored to the start of the string sees ${c.dim}cd${c.reset}, not the verb`);
   console.log();
@@ -3599,8 +3632,17 @@ async function blindspots() {
   if (found.length === 0) {
     console.log(c.dim + '    No start-anchored patterns found in ' + HOOKS_DIR + c.reset);
   } else if (top.length === 0) {
-    console.log(`    ${c.green}✓${c.reset} every start-anchored pattern with enough traffic to judge matched all of it`);
-    console.log(c.dim + `      (${scanned} scanned; ${exempt} allow/exempt, ${unparsed} unreadable)` + c.reset);
+    // 「調べたが差が無かった」と「調べられる材料が無かった」を同じ緑で出さない。
+    // 稀にしか打たない破壊的な操作ほど traffic が薄く、judged の外へ落ちる。
+    const judged = found.length;
+    if (judged === 0) {
+      console.log(`    ${c.yellow}—${c.reset} no gate pattern could be evaluated. This says nothing about your setup.`);
+    } else {
+      console.log(`    ${c.green}✓${c.reset} the ${judged} gate pattern${judged === 1 ? '' : 's'} with enough traffic to judge matched all of it`);
+      console.log(c.dim + '      A verb you rarely type has too little traffic to judge here, and the' + c.reset);
+      console.log(c.dim + '      rare ones are usually the destructive ones. Green is not coverage.' + c.reset);
+    }
+    console.log(c.dim + `      (${scanned} anchors scanned; ${exempt} allow/exempt, ${unparsed} unreadable)` + c.reset);
   } else {
     console.log(c.dim + '    intent = calls where that verb starts a command segment (line start, or after && || ; |)' + c.reset);
     console.log(c.dim + '    seen   = calls the hook\'s start-anchored pattern actually matches' + c.reset);
@@ -3619,9 +3661,23 @@ async function blindspots() {
     }
     const worst = top[0];
     if (worst && worst.sample) {
+      // 実物をそのまま出さない。利用者の履歴には鍵・顧客名・内部パスが混じり、
+      // この出力は画面共有や CI のログへ流れる。読者に要るのは中身ではなく形
+      // ——「区切りの後ろに来ていたから錨に当たらなかった」——なので、
+      // 各区分の先頭の語（と、パスや代入でない素の副命令）だけ残して他は落とす。
+      const shape = worst.sample
+        .split(/\s*(&&|\|\||;|\|)\s*/)
+        .map((seg, i) => {
+          if (i % 2 === 1) return seg;
+          const t = seg.trim().split(/\s+/).filter(Boolean);
+          if (t.length === 0) return '';
+          const sub = (t[1] && /^[a-z][a-z0-9-]*$/.test(t[1])) ? ' ' + t[1] : '';
+          return t[0] + sub + (t.length > (sub ? 2 : 1) ? ' …' : '');
+        })
+        .filter(Boolean).join(' ').replace(/\s+/g, ' ').slice(0, 120);
       console.log();
-      console.log(c.dim + '    one of yours that went past ' + worst.hook + ':' + c.reset);
-      console.log('      ' + c.dim + worst.sample.replace(/\s+/g, ' ').slice(0, 150) + c.reset);
+      console.log(c.dim + '    the shape of one that went past ' + worst.hook + ' (arguments removed):' + c.reset);
+      console.log('      ' + c.dim + shape + c.reset);
     }
     console.log();
     console.log(c.dim + `    (${scanned} anchored patterns scanned; ${exempt} are allow/exempt tests and are not counted as gaps;` +

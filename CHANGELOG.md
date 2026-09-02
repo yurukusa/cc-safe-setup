@@ -1,6 +1,24 @@
 # Changelog
 
 ## [Unreleased]
+- **`--audit --ci` was documented and never implemented. It is now.** The README has shown
+  a workflow step using `--ci` since the CI section was written. Nothing read the flag. The
+  exit was `score < (CC_AUDIT_THRESHOLD || 0)`, and a score cannot go below `0`, so the step
+  passed whatever the audit found. **A CI gate that cannot fail is worse than no gate**: the
+  belief that a regression would be caught is what stops you looking.
+
+  `--ci` now exits `1` on a `CRITICAL` or `HIGH` risk, prints the rule it applied, and leaves
+  plain `--audit` exiting `0` as before. The line is not "any risk" because this tool's own
+  recommended install still reports one `MEDIUM`, and a gate that reddens a correct setup is
+  deleted by the first person to see the build — which lands back where this started.
+  `tests/audit-ci-gate.test.sh`, 7 assertions, including that a shielded install passes.
+
+- **`--audit` no longer says "Your setup looks solid."** It never was a statement about the
+  setup — only about the checks it runs, which read configuration and never touch your
+  session logs, your CI, or whether a registered hook refuses anything. It now says *"No
+  risks found in the checks this command runs"* and prints what it checked next to what it
+  did not. In a safety tool, reassuring falsely costs more than missing something.
+
 - **`--blindspots`: what your guards never see, measured against your own sessions.**
   `--status` reads the scripts, `--lint` the config, `--stats` the block log, `--outdated`
   the shipped bodies. A guard can pass all four and never fire, because the shape of the

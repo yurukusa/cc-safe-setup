@@ -129,6 +129,17 @@ You can run the same audit in CI to keep a project's safety posture from regress
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
+`--ci` exits `1` when the audit finds a `CRITICAL` or `HIGH` risk, and `0` otherwise. The line
+is drawn there and not at "any risk" because a machine set up the way this tool recommends
+still carries a `MEDIUM` finding, and a gate that reddens a correct setup gets deleted by the
+first person who sees the build. Set `CC_AUDIT_THRESHOLD` to also fail below a score.
+
+**If you added this step before 2026-09-03, it never failed.** `--ci` was in this README and
+in nobody's code: the exit compared the score against a default threshold of `0`, and a score
+cannot go below `0`, so the step passed whatever the audit found. That is worse than having no
+step, because the belief that a regression would be caught is what stops you looking. It is
+implemented now, and `tests/audit-ci-gate.test.sh` fails if it ever stops failing.
+
 `--audit` is what a script can decide on its own. For the contradictions that need your
 session logs and CI read alongside your config, there are
 [written audits](#written-audits) below — asynchronous, and nothing is ever
