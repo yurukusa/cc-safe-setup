@@ -188,6 +188,7 @@ const PROFILE = PROFILE_IDX !== -1 ? process.argv[PROFILE_IDX + 1] : null;
 const COMPARE_IDX = process.argv.findIndex(a => a === '--compare');
 const COMPARE = COMPARE_IDX !== -1 ? { a: process.argv[COMPARE_IDX + 1], b: process.argv[COMPARE_IDX + 2] } : null;
 const REPLAY = process.argv.includes('--replay');
+const BLINDSPOTS = process.argv.includes('--blindspots');
 const SAVE_PROFILE_IDX = process.argv.findIndex(a => a === '--save-profile');
 const SAVE_PROFILE = SAVE_PROFILE_IDX !== -1 ? process.argv[SAVE_PROFILE_IDX + 1] : null;
 const CREATE_IDX = process.argv.findIndex(a => a === '--create');
@@ -246,6 +247,7 @@ if (HELP) {
     --watch                        Live blocked command feed
     --health                       Hook health dashboard
     --suggest                      Predict risks from project analysis
+    --blindspots                   What your guards never see, vs. your own sessions
 
   Manage:
     --dry-run / --uninstall        Preview / remove hooks
@@ -1734,7 +1736,17 @@ async function audit() {
   }
 
   if (risks.length === 0) {
-    console.log(c.green + c.bold + '  No risks detected. Your setup looks solid.' + c.reset);
+    // 「危険は見つからなかった」と「危険は無い」は別のことなのに、
+    // 前の文面（Your setup looks solid）は後者に読めた。安全を売る道具で
+    // 誤って安心させる側へ倒れるのは、見落とす側より高くつく。
+    // 何を見て何を見ていないかを、その場で並べる。
+    console.log(c.green + c.bold + '  No risks found in the checks this command runs.' + c.reset);
+    console.log();
+    console.log(c.dim + '  Checked:     settings.json (permissions, hooks), and the scripts your' + c.reset);
+    console.log(c.dim + '               CLAUDE.md names against what your settings register.' + c.reset);
+    console.log(c.dim + '  Not checked: whether a registered hook actually refuses anything' + c.reset);
+    console.log(c.dim + '               (audit/selftest.sh), whether your hooks match the shape of' + c.reset);
+    console.log(c.dim + '               the commands you really run (--blindspots), and your CI.' + c.reset);
   } else {
     console.log(c.bold + '  ⚠ Risks found (' + risks.length + '):' + c.reset);
     console.log();
@@ -1818,7 +1830,23 @@ async function audit() {
   }
 
   console.log();
-  process.exit(score < (parseInt(process.env.CC_AUDIT_THRESHOLD) || 0) ? 1 : 0);
+  // README has told people to put `--audit --ci` in a workflow since this section
+  // was written, and until 2026-09-03 nothing here read `--ci`. The default
+  // threshold is 0 and the score cannot go below 0, so `score < 0` was never true:
+  // the step passed no matter what the audit found. A CI gate that cannot fail is
+  // worse than no gate, because the reader stops watching. `--ci` now fails on any
+  // risk; CC_AUDIT_THRESHOLD keeps working for score-based gating either way.
+  // 門の線は CRITICAL/HIGH。any-risk で落とすと、この道具が薦める構成のままでも
+  // MEDIUM 1件で赤くなり、利用者は真っ先にこの step を外す——落ちない門と同じ結末になる。
+  const ciMode = process.argv.includes('--ci');
+  const threshold = parseInt(process.env.CC_AUDIT_THRESHOLD) || 0;
+  const blocking = risks.filter(r => r.severity === 'CRITICAL' || r.severity === 'HIGH');
+  if (ciMode && !JSON_OUTPUT) {
+    console.log(c.dim + `  --ci: fails on CRITICAL or HIGH only (${blocking.length} of ${risks.length} risk${risks.length === 1 ? '' : 's'} here).` + c.reset);
+    console.log(c.dim + '        Set CC_AUDIT_THRESHOLD to also fail below a score.' + c.reset);
+    console.log();
+  }
+  process.exit((score < threshold || (ciMode && blocking.length > 0)) ? 1 : 0);
 }
 
 function learn() {
@@ -3333,6 +3361,344 @@ async function analyze() {
   console.log();
   console.log(c.dim + '  Tip: Use --stats for block history analytics' + c.reset);
   console.log(c.dim + '  Tip: Use --dashboard for real-time monitoring' + c.reset);
+  console.log();
+}
+
+// --blindspots (2026-09-03): 層をまたぐ診断。単層の点検では構造的に出ない欠陥を出す。
+//
+// このツールの他の命令は、どれも1つの層しか見ていない——ディスクの上のフック(--status)、
+// 設定ファイル(--lint)、阻止の記録(--stats)、配布版との差(--outdated)。
+// フックは在って、実行権があって、登録されていて、最新であっても、
+// この環境で実際に打たれるコマンドの形がその位置に届かなければ、一度も走らない。
+// その差は、セッションのログ(層4)をフックの正規表現(層1)の隣に置いて初めて見える。
+//
+// 読むのは全部ローカル。ネットワークへは何も送らない。
+async function blindspots() {
+  const { createReadStream, statSync } = await import('fs');
+  const { createInterface: makeLines } = await import('readline');
+  const PROJECTS_DIR = join(HOME, '.claude', 'projects');
+
+  console.log();
+  console.log(c.bold + '  cc-safe-setup --blindspots' + c.reset);
+  console.log(c.dim + '  What your guards never see — measured against your own sessions' + c.reset);
+  console.log();
+
+  if (!existsSync(PROJECTS_DIR)) {
+    console.log(c.yellow + '  No session transcripts found at ' + PROJECTS_DIR + c.reset);
+    console.log(c.dim + '  This check needs your own Claude Code history to say anything.' + c.reset);
+    console.log();
+    return;
+  }
+
+  // ---- 層4: 実際に打たれたコマンドを集める --------------------------------
+  const files = [];
+  for (const proj of readdirSync(PROJECTS_DIR)) {
+    const dir = join(PROJECTS_DIR, proj);
+    let entries;
+    try { entries = readdirSync(dir); } catch { continue; }
+    for (const f of entries) {
+      if (!f.endsWith('.jsonl')) continue;
+      const p = join(dir, f);
+      try { files.push({ path: p, size: statSync(p).size }); } catch {}
+    }
+  }
+  const totalBytes = files.reduce((a, f) => a + f.size, 0);
+  if (files.length === 0) {
+    console.log(c.yellow + '  No .jsonl transcripts under ' + PROJECTS_DIR + c.reset);
+    console.log();
+    return;
+  }
+
+  console.log(c.dim + `  reading ${files.length} transcripts (${(totalBytes / 1048576).toFixed(0)} MB) — local only, nothing is sent` + c.reset);
+
+  const startedAt = Date.now();
+  const commands = [];
+  let firstTs = null, lastTs = null;
+  for (const f of files) {
+    await new Promise((resolve) => {
+      const rl = makeLines({ input: createReadStream(f.path, { encoding: 'utf-8' }), crlfDelay: Infinity });
+      rl.on('line', (line) => {
+        if (line.indexOf('"tool_use"') === -1) return;   // 大半の行はここで落ちる（速さのため）
+        let d;
+        try { d = JSON.parse(line); } catch { return; }
+        if (d.type !== 'assistant') return;
+        const content = (d.message || {}).content;
+        if (!Array.isArray(content)) return;
+        for (const blk of content) {
+          if (!blk || blk.type !== 'tool_use' || blk.name !== 'Bash') continue;
+          const cmd = (blk.input || {}).command;
+          if (typeof cmd !== 'string' || !cmd.trim()) continue;
+          commands.push(cmd);
+          const ts = d.timestamp;
+          if (ts) {
+            if (!firstTs || ts < firstTs) firstTs = ts;
+            if (!lastTs || ts > lastTs) lastTs = ts;
+          }
+        }
+      });
+      rl.on('close', resolve);
+      rl.on('error', resolve);
+    });
+  }
+
+  const N = commands.length;
+  if (N === 0) {
+    console.log(c.yellow + '  Transcripts found, but no Bash calls in them. Nothing to compare against.' + c.reset);
+    console.log();
+    return;
+  }
+
+  const compound = commands.filter(x => /(&&|\|\||;|\|)/.test(x)).length;
+  const startsCd = commands.filter(x => /^\s*cd\s/.test(x)).length;
+  const pct = (n) => ((n / N) * 100).toFixed(1) + '%';
+
+  console.log();
+  console.log(c.bold + '  Layer 4 · what you actually ask for' + c.reset);
+  console.log(`    ${c.bold}${N.toLocaleString()}${c.reset} Bash tool calls` +
+    (firstTs && lastTs ? c.dim + `  (dated ones span ${firstTs.slice(0, 10)} → ${lastTs.slice(0, 10)})` + c.reset : ''));
+  console.log(c.dim + `    read in ${((Date.now() - startedAt) / 1000).toFixed(1)}s` + c.reset);
+  // 数えているのは要求であって実行ではない。PreToolUse はどちらにせよ要求の時点で
+  // 呼ばれるので、「フックが見たか」を問う目的にはこれが正しい単位だが、
+  // 「これだけ走った」と読まれないように明示する。
+  // また、突き合わせているのは全プロジェクトの履歴と「いまの」フックである点も書く。
+  console.log(c.dim + '    Counted as requested, before any hook or human allowed them, which is the' + c.reset);
+  console.log(c.dim + '    point a PreToolUse hook is consulted. History spans every project; the' + c.reset);
+  console.log(c.dim + '    hooks compared against it are the ones installed now.' + c.reset);
+  console.log(`    ${pct(compound).padStart(6)}  contain a separator (${c.dim}&& ; || |${c.reset}) — the command a guard sees first is not the whole command`);
+  console.log(`    ${pct(startsCd).padStart(6)}  begin with ${c.dim}cd ${c.reset}— anything anchored to the start of the string sees ${c.dim}cd${c.reset}, not the verb`);
+  console.log();
+
+  // ---- 層2+3: 登録されているのに実体が無いフック ---------------------------
+  // 設定は「登録した」と言い、ディスクには無い。どちらの層を単独で見ても矛盾に見えない。
+  const zombies = [];
+  const registeredNames = new Set();
+  let registered = 0;
+  let settings = {};
+  try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
+  const expand = (p) => p
+    .replace(/\$\{?CLAUDE_PROJECT_DIR\}?/g, CLAUDE_BASE)
+    .replace(/\$\{?HOME\}?/g, HOME)
+    .replace(/^~/, HOME);
+  for (const entries of Object.values(settings.hooks || {})) {
+    for (const entry of entries || []) {
+      for (const h of (entry || {}).hooks || []) {
+        if (!h || h.type !== 'command' || typeof h.command !== 'string') continue;
+        const m = h.command.match(/(\S*\/[\w.-]+\.(?:sh|py|js|mjs))/);
+        if (!m) continue;                      // インラインのシェルは対象外（実体を持たない）
+        registered++;
+        const p = expand(m[1]).replace(/^["']|["']$/g, '');
+        registeredNames.add(p.split('/').pop());
+        if (!existsSync(p)) zombies.push(p);
+      }
+    }
+  }
+  console.log(c.bold + '  Layers 2+3 · registered vs. present on disk' + c.reset);
+  if (registered === 0) {
+    console.log(c.dim + '    No script-backed hooks registered in ' + SETTINGS_PATH + c.reset);
+  } else if (zombies.length === 0) {
+    console.log(`    ${c.green}✓${c.reset} all ${registered} script-backed hook registrations point at a file that exists`);
+  } else {
+    console.log(`    ${c.red}✗${c.reset} ${zombies.length} of ${registered} registrations point at a file that is not there.`);
+    console.log(c.dim + '      They never run, and nothing reports it.' + c.reset);
+    for (const z of zombies.slice(0, 6)) console.log(`      ${c.red}·${c.reset} ${z}`);
+    if (zombies.length > 6) console.log(c.dim + `      … and ${zombies.length - 6} more` + c.reset);
+  }
+  console.log();
+
+  // ---- 層1+4: 行頭に錨を置いた正規表現と、実際の形を突き合わせる -----------
+  // これは走査であって、フックの意味解析ではない。取りこぼしも空振りもある（下に件数を出す）。
+  const posix = (s) => s
+    .replace(/\[\[:space:\]\]/g, '\\s')
+    .replace(/\[\[:alpha:\]\]/g, '[A-Za-z]')
+    .replace(/\[\[:alnum:\]\]/g, '[A-Za-z0-9]')
+    .replace(/\[\[:digit:\]\]/g, '\\d');
+
+  const words = (pat) => posix(pat)
+    .replace(/\(\?[:=!][^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\\[sStTwWdDbB]/g, ' ')
+    .replace(/[*+?{}()|^$.\\]/g, ' ')
+    .split(/\s+/)
+    .filter(w => /^[A-Za-z][A-Za-z0-9_.-]*$/.test(w) && w.length > 1);
+
+  // 見つけた錨のうち、どれが「門」でどれが「免除」かを分ける。
+  // ここを分けないと、読み取り専用の命令を素通しさせるための ^grep や ^git が
+  // 「守れていない門」として並ぶ。それは計器の側の欠陥であって、利用者の設定の欠陥ではない。
+  // 判定は、その錨の直後に最初に現れる終了コード: exit 2 なら門、exit 0 なら免除。
+  const classify = (src, at, line) => {
+    // 複合条件の一項（行末が && \ など）は、それ単独では門でも守備範囲でもない。
+    // 例: `if ! echo "$CMD" | grep -qE '^\s*git\s' && echo "$CMD" | grep -qiE '(tweet|...)'`
+    // ここでの ^git は「git は対象外」という除外であって、git の門ではない。
+    if (/(&&|\|\|)\s*\\?\s*$/.test(line)) return 'exempt';
+    const tail = src.slice(at, at + 600);
+    const block = tail.search(/exit\s+2|sys\.exit\(2\)|EXIT_BLOCK/);
+    const allow = tail.search(/exit\s+0|sys\.exit\(0\)|return\s+0/);
+    // 否定つきの早期脱出（`if ! ... '^git push'; then exit 0`）は、
+    // その錨がこのフックの守備範囲そのものであることを意味する。
+    // 錨に当たらない命令は、拒否されないのではなく、一度も見られない。
+    if (/(^|\s)!\s*(printf|echo|cat|grep|\[\[)/.test(line) || /grep\s+-[a-zA-Z]*v/.test(line)) {
+      return (allow !== -1 && (block === -1 || allow < block)) ? 'subject' : 'exempt';
+    }
+    if (block === -1 && allow === -1) return 'unknown';
+    if (block === -1) return 'exempt';
+    if (allow === -1) return 'block';
+    return block < allow ? 'block' : 'exempt';
+  };
+
+  const found = [];
+  const unregistered = [];
+  let scanned = 0, unparsed = 0, exempt = 0;
+  if (existsSync(HOOKS_DIR)) {
+    for (const f of readdirSync(HOOKS_DIR)) {
+      if (!/\.(sh|py|bash)$/.test(f)) continue;
+      // 登録されていないスクリプトは一度も走らない。その錨の見落とし率を並べると、
+      // 走りもしないフックを「守れていない門」として報告することになる。
+      // 登録が1つも読めなかった時だけ、全ファイルを対象にする（設定が別の場所にある環境）。
+      if (registeredNames.size > 0 && !registeredNames.has(f)) { unregistered.push(f); continue; }
+      let src;
+      try { src = readFileSync(join(HOOKS_DIR, f), 'utf-8'); } catch { continue; }
+      const pats = new Map();   // pattern -> { multiline, kind }
+      const rank = { exempt: 0, unknown: 1, subject: 2, block: 3 };
+      const note = (pat, at, multiline, line) => {
+        const kind = classify(src, at, line);
+        const prev = pats.get(pat);
+        // 同じ錨が複数回出るときは、いちばん強い用法（門 > 守備範囲 > 免除）を採る
+        if (!prev) pats.set(pat, { multiline, kind });
+        else if (rank[kind] > rank[prev.kind]) pats.set(pat, { multiline: prev.multiline || multiline, kind });
+      };
+      let m;
+      // grep は行ごとに判定するので、複数行の命令では ^ が2行目以降の行頭にも当たる。
+      // bash の =~ は文字列の先頭にしか当たらない。この差を無視すると見落としを過大に出す。
+      const quoted = /(['"])\^([^'"\n]{2,120})\1/g;          // grep -qE '^\s*git\s+push'
+      while ((m = quoted.exec(src)) !== null) {
+        const lineStart = src.lastIndexOf('\n', m.index) + 1;
+        const line = src.slice(lineStart, src.indexOf('\n', m.index));
+        note(m[2], m.index, /grep|egrep|awk|sed/.test(line), line);
+      }
+      const bashRe = /=~\s*\^([^\s\]]{2,120})/g;              // [[ "$CMD" =~ ^rm[[:space:]] ]]
+      while ((m = bashRe.exec(src)) !== null) {
+        const ls = src.lastIndexOf('\n', m.index) + 1;
+        note(m[1], m.index, false, src.slice(ls, src.indexOf('\n', m.index)));
+      }
+
+      for (const [pat, meta] of pats) {
+        scanned++;
+        if (meta.kind !== 'block' && meta.kind !== 'subject') { exempt++; continue; }
+        const w = words(pat);
+        if (w.length === 0) { unparsed++; continue; }
+        let anchored, loose;
+        try {
+          anchored = new RegExp('^\\s*' + posix(pat), meta.multiline ? 'm' : '');
+          // 命令として実際に呼ばれる位置だけを数える＝行頭か、区切り（&& || ; | $( ）の直後。
+          // 「どこかに含まれる」で数えると、sed の置換文字列やコミット本文の中の語まで入る。
+          const verb = w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+          loose = new RegExp('(?:^|&&|\\|\\||;|\\||\\$\\()\\s*' + verb + '\\b', 'm');
+        } catch { unparsed++; continue; }
+        found.push({ hook: f, pat, words: w.join(' '), anchored, loose, kind: meta.kind });
+      }
+    }
+  }
+
+  const rows = [];
+  for (const g of found) {
+    let intent = 0, sees = 0;
+    let sample = null;
+    for (const cmd of commands) {
+      if (!g.loose.test(cmd)) continue;
+      intent++;
+      if (g.anchored.test(cmd)) sees++;
+      else if (!sample) sample = cmd;
+    }
+    if (intent < 20) continue;                 // 少なすぎる語は雑音なので出さない
+    const blind = intent - sees;
+    if (blind === 0) continue;
+    rows.push({ hook: g.hook, words: g.words, intent, sees, blind, rate: blind / intent, sample, kind: g.kind });
+  }
+  // 同じ語を複数のフックが持つことがあるので、見落としの大きい順に一意化する
+  rows.sort((a, b) => b.blind - a.blind);
+  const seenWords = new Set();
+  const top = rows.filter(r => (seenWords.has(r.words) ? false : seenWords.add(r.words)));
+
+  // 在るが登録されていないスクリプトは、走査の対象から外してある（走らないものに
+  // 「守れていない」は言えない）。列挙そのものは --audit の層またぎの検査が
+  // 精度を吟味した形で既に持っているので、ここでは除外した事実だけを伝えて渡す。
+  if (unregistered.length > 0) {
+    console.log(c.dim + `    ${unregistered.length} more script${unregistered.length === 1 ? '' : 's'} in ${HOOKS_DIR} ${unregistered.length === 1 ? 'is' : 'are'} registered nowhere,` +
+      ' so they are left out of the table below — they never run. `--audit` names them.' + c.reset);
+    console.log();
+  }
+
+  console.log(c.bold + '  Layers 1+4 · patterns anchored to the start vs. what you type' + c.reset);
+  if (found.length === 0) {
+    console.log(c.dim + '    No start-anchored patterns found in ' + HOOKS_DIR + c.reset);
+  } else if (top.length === 0) {
+    // 「調べたが差が無かった」と「調べられる材料が無かった」を同じ緑で出さない。
+    // 稀にしか打たない破壊的な操作ほど traffic が薄く、judged の外へ落ちる。
+    const judged = found.length;
+    if (judged === 0) {
+      console.log(`    ${c.yellow}—${c.reset} no gate pattern could be evaluated. This says nothing about your setup.`);
+    } else {
+      console.log(`    ${c.green}✓${c.reset} the ${judged} gate pattern${judged === 1 ? '' : 's'} with enough traffic to judge matched all of it`);
+      console.log(c.dim + '      A verb you rarely type has too little traffic to judge here, and the' + c.reset);
+      console.log(c.dim + '      rare ones are usually the destructive ones. Green is not coverage.' + c.reset);
+    }
+    console.log(c.dim + `      (${scanned} anchors scanned; ${exempt} allow/exempt, ${unparsed} unreadable)` + c.reset);
+  } else {
+    console.log(c.dim + '    intent = calls where that verb starts a command segment (line start, or after && || ; |)' + c.reset);
+    console.log(c.dim + '    seen   = calls the hook\'s start-anchored pattern actually matches' + c.reset);
+    console.log();
+    console.log(c.dim + '    verb              hook                        intent   seen   blind  effect' + c.reset);
+    for (const r of top.slice(0, 8)) {
+      const col = r.rate > 0.5 ? c.red : c.yellow;
+      console.log(
+        '    ' + r.words.padEnd(17).slice(0, 17) +
+        ' ' + r.hook.padEnd(27).slice(0, 27) +
+        ' ' + String(r.intent).padStart(6) +
+        ' ' + String(r.sees).padStart(6) +
+        '  ' + col + (r.rate * 100).toFixed(1).padStart(5) + '%' + c.reset +
+        '  ' + c.dim + (r.kind === 'subject' ? 'never examined' : 'not blocked') + c.reset
+      );
+    }
+    const worst = top[0];
+    if (worst && worst.sample) {
+      // 実物をそのまま出さない。利用者の履歴には鍵・顧客名・内部パスが混じり、
+      // この出力は画面共有や CI のログへ流れる。読者に要るのは中身ではなく形
+      // ——「区切りの後ろに来ていたから錨に当たらなかった」——なので、
+      // 各区分の先頭の語（と、パスや代入でない素の副命令）だけ残して他は落とす。
+      const shape = worst.sample
+        .split(/\s*(&&|\|\||;|\|)\s*/)
+        .map((seg, i) => {
+          if (i % 2 === 1) return seg;
+          const t = seg.trim().split(/\s+/).filter(Boolean);
+          if (t.length === 0) return '';
+          const sub = (t[1] && /^[a-z][a-z0-9-]*$/.test(t[1])) ? ' ' + t[1] : '';
+          return t[0] + sub + (t.length > (sub ? 2 : 1) ? ' …' : '');
+        })
+        .filter(Boolean).join(' ').replace(/\s+/g, ' ').slice(0, 120);
+      console.log();
+      console.log(c.dim + '    the shape of one that went past ' + worst.hook + ' (arguments removed):' + c.reset);
+      console.log('      ' + c.dim + shape + c.reset);
+    }
+    console.log();
+    console.log(c.dim + `    (${scanned} anchored patterns scanned; ${exempt} are allow/exempt tests and are not counted as gaps;` +
+      ` ${unparsed} could not be read. This is a scan, not a parse of your hooks: it can miss patterns,` +
+      ' and it can name one that a later line already handles. A verb on its own line inside a' +
+      ' heredoc is counted as an invocation, so intent is an upper bound.)' + c.reset);
+  }
+  console.log();
+
+  console.log(c.bold + '  Why no single-layer check reports this' + c.reset);
+  console.log(c.dim + '    --status sees the files. --lint sees the config. --outdated sees the versions.' + c.reset);
+  console.log(c.dim + '    A guard can pass all three and still stand where your traffic never goes.' + c.reset);
+  console.log(c.dim + '    The gap only exists between layers, so only a comparison across them can find it.' + c.reset);
+  console.log();
+  console.log(c.dim + '    Fixes: match anywhere in the command, not only at the start; register file guards on' + c.reset);
+  console.log(c.dim + '    Bash as well as Read/Edit; and put static paths in permissions.deny, which reads' + c.reset);
+  console.log(c.dim + '    inside Bash commands. See SAFETY_CHECKLIST.md.' + c.reset);
+  console.log();
+  console.log(c.dim + '    This covers two of the five layers. The same method run across all five on one real' + c.reset);
+  console.log(c.dim + '    machine, findings and wrong turns included, is written out in full:' + c.reset);
+  console.log(c.dim + '    docs/full-surface-audit-sample-jp.md' + c.reset);
   console.log();
 }
 
@@ -6696,6 +7062,7 @@ async function main() {
   if (TEAM) return team();
   if (PROFILE_IDX !== -1) return profile(PROFILE);
   if (ANALYZE) return analyze();
+  if (BLINDSPOTS) return blindspots();
   if (OPUS47) return opus47();
   if (SHIELD) return shield();
   if (QUICKFIX) return quickfix();

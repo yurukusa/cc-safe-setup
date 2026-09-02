@@ -129,6 +129,17 @@ You can run the same audit in CI to keep a project's safety posture from regress
 - run: npx github:yurukusa/cc-safe-setup --audit --ci
 ```
 
+`--ci` exits `1` when the audit finds a `CRITICAL` or `HIGH` risk, and `0` otherwise. The line
+is drawn there and not at "any risk" because a machine set up the way this tool recommends
+still carries a `MEDIUM` finding, and a gate that reddens a correct setup gets deleted by the
+first person who sees the build. Set `CC_AUDIT_THRESHOLD` to also fail below a score.
+
+**If you added this step before 2026-09-03, it never failed.** `--ci` was in this README and
+in nobody's code: the exit compared the score against a default threshold of `0`, and a score
+cannot go below `0`, so the step passed whatever the audit found. That is worse than having no
+step, because the belief that a regression would be caught is what stops you looking. It is
+implemented now, and `tests/audit-ci-gate.test.sh` fails if it ever stops failing.
+
 `--audit` is what a script can decide on its own. For the contradictions that need your
 session logs and CI read alongside your config, there are
 [written audits](#written-audits) below — asynchronous, and nothing is ever
@@ -161,6 +172,26 @@ launch, which Claude Code treats as non-blocking, so nothing surfaces);
 `audit/selftest.sh` proves that detector really detects, because a detector that has never
 found anything is not yet evidence of anything. `audit/audit-checklist.md` is a 50-point
 sheet covering hooks, git, secrets, cost, autonomous operation and multi-agent work.
+
+## A hook can be installed, current, registered — and still never see you
+
+```bash
+npx github:yurukusa/cc-safe-setup --blindspots
+```
+
+Every other check here reads one layer. `--status` reads the scripts on disk, `--lint` the
+settings file, `--stats` the block log, `--outdated` the shipped bodies. A guard can pass all
+four and still never fire, because the shape of the commands you actually run never reaches
+it. That gap does not live inside any one layer, so no single-layer check can report it.
+
+`--blindspots` reads your own session transcripts next to your own guards and reports what
+each start-anchored pattern really matches. On the machine it was written on: 38,066 Bash
+calls, **89.1% of them compound** and **32.0% beginning with `cd`** — and `branch-guard.sh`
+examining 47 of 377 `git push` calls, because the other 330 came after a `cd … &&`.
+
+It reads only. Nothing is sent anywhere and nothing is written back. Patterns that are allow
+tests rather than gates are excluded, and a verb is counted only where it starts a command
+segment, so a `git add` inside a quoted string is not mistaken for one that ran.
 
 ## Your installed hooks do not update themselves
 
