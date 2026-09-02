@@ -1,6 +1,34 @@
 # Changelog
 
 ## [Unreleased]
+- **`--blindspots`: what your guards never see, measured against your own sessions.**
+  `--status` reads the scripts, `--lint` the config, `--stats` the block log, `--outdated`
+  the shipped bodies. A guard can pass all four and never fire, because the shape of the
+  commands actually run on that machine never reaches it. The gap exists only *between*
+  layers, so this reads `~/.claude/projects/*/*.jsonl` next to the installed hooks and
+  reports, per start-anchored pattern, how many real invocations it matches.
+
+  On the machine it was written on: 38,066 Bash calls, 89.1% compound, 32.0% starting with
+  `cd`; `branch-guard.sh` examines 47 of 377 `git push` calls.
+
+  Two traps are in the instrument, not the user's setup, and both are pinned by
+  `tests/blindspots-cross-layer.test.sh` (10 assertions):
+
+  | trap | what it would have produced |
+  |---|---|
+  | an allow test (`grep -qE '^\s*(cat\|ls)' … exit 0`) read as a gate | alarms about read-only commands the author waved through on purpose — a tool carrying the defect it warns about |
+  | `intent` counted anywhere in the string | `sed -i 's#git add …#'` counted as a `git add` that ran |
+
+  Classification is by the first exit code that follows the anchor, with
+  `if ! … ; then exit 0` read as a subject filter (*never examined*) rather than an
+  exemption, and an anchor that is one term of an `&&` chain read as an exclusion.
+  `grep` is line-based so `^` reaches every line of a multi-line command; bash `=~` reaches
+  only the start of the string. Modelling them alike overstated the gap, so they are
+  modelled separately. Scripts registered nowhere are left out of the table — they never
+  run — and `--audit` still names them.
+
+  Reads only. Nothing is sent anywhere; `settings.json` is never written.
+
 - **`--audit` now reads two layers against each other, not just one.**
   Every check it ran before this looked inside a single file. The new one compares
   the safety nets your `CLAUDE.md` *names* against the hooks your settings files

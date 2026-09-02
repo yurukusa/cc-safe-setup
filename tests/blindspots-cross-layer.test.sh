@@ -79,6 +79,17 @@ fi
 exit 0
 HOOK
 
+# Present on disk, registered nowhere. It never runs, so its anchors must not be
+# counted as gaps — but the file itself is worth naming.
+cat > "$TMP/.claude/hooks/probe-orphan.sh" <<'HOOK'
+#!/bin/bash
+CMD=$(cat)
+if printf '%s' "$CMD" | grep -qE '^\s*git\s+push'; then
+  exit 2
+fi
+exit 0
+HOOK
+
 chmod +x "$TMP/.claude/hooks/"*.sh
 
 # One registration points at a script that is not there. Settings say it is
@@ -91,6 +102,8 @@ cat > "$TMP/.claude/settings.json" <<SETTINGS
         "matcher": "Bash",
         "hooks": [
           { "type": "command", "command": "bash \$HOME/.claude/hooks/probe-push-guard.sh" },
+          { "type": "command", "command": "bash \$HOME/.claude/hooks/probe-add-guard.sh" },
+          { "type": "command", "command": "bash \$HOME/.claude/hooks/probe-readonly-allow.sh" },
           { "type": "command", "command": "bash \$HOME/.claude/hooks/probe-removed-guard.sh" }
         ]
       }
@@ -128,7 +141,16 @@ check "labels a subject filter as never examined" \
 
 # The allow test must not be listed. This is the instrument's own failure mode.
 check "does not report the allow test as a gap" \
-  "yes" "$(printf '%s' "$PLAIN" | grep -q 'probe-readonly-allow.sh' && echo no || echo yes)"
+  "yes" "$(printf '%s' "$PLAIN" | grep -qE '^ +(cat|ls|head).*probe-readonly-allow\.sh' && echo no || echo yes)"
+
+# Present but registered nowhere. Its anchors are kept out of the gap table —
+# a script that never runs cannot have a gap — and the reader is told the table
+# is smaller than their hooks directory, without duplicating the enumeration
+# that --audit already does with its own precision rules.
+check "says unregistered scripts were left out of the table" \
+  "yes" "$(printf '%s' "$PLAIN" | grep -qE '1 more script .* is registered nowhere' && echo yes || echo no)"
+check "keeps the unregistered script out of the gap table" \
+  "yes" "$(printf '%s' "$PLAIN" | grep -qE 'git push +probe-orphan\.sh +[0-9]' && echo no || echo yes)"
 
 # The registration with no file behind it.
 check "names the registration whose file is missing" \

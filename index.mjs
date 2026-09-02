@@ -3385,6 +3385,7 @@ async function blindspots() {
 
   console.log(c.dim + `  reading ${files.length} transcripts (${(totalBytes / 1048576).toFixed(0)} MB) — local only, nothing is sent` + c.reset);
 
+  const startedAt = Date.now();
   const commands = [];
   let firstTs = null, lastTs = null;
   for (const f of files) {
@@ -3428,7 +3429,8 @@ async function blindspots() {
   console.log();
   console.log(c.bold + '  Layer 4 · what you actually run' + c.reset);
   console.log(`    ${c.bold}${N.toLocaleString()}${c.reset} Bash calls` +
-    (firstTs && lastTs ? c.dim + `  (${firstTs.slice(0, 10)} → ${lastTs.slice(0, 10)})` + c.reset : ''));
+    (firstTs && lastTs ? c.dim + `  (dated ones span ${firstTs.slice(0, 10)} → ${lastTs.slice(0, 10)})` + c.reset : ''));
+  console.log(c.dim + `    read in ${((Date.now() - startedAt) / 1000).toFixed(1)}s` + c.reset);
   console.log(`    ${pct(compound).padStart(6)}  contain a separator (${c.dim}&& ; || |${c.reset}) — the command a guard sees first is not the whole command`);
   console.log(`    ${pct(startsCd).padStart(6)}  begin with ${c.dim}cd ${c.reset}— anything anchored to the start of the string sees ${c.dim}cd${c.reset}, not the verb`);
   console.log();
@@ -3436,6 +3438,7 @@ async function blindspots() {
   // ---- 層2+3: 登録されているのに実体が無いフック ---------------------------
   // 設定は「登録した」と言い、ディスクには無い。どちらの層を単独で見ても矛盾に見えない。
   const zombies = [];
+  const registeredNames = new Set();
   let registered = 0;
   let settings = {};
   try { settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf-8')); } catch {}
@@ -3451,6 +3454,7 @@ async function blindspots() {
         if (!m) continue;                      // インラインのシェルは対象外（実体を持たない）
         registered++;
         const p = expand(m[1]).replace(/^["']|["']$/g, '');
+        registeredNames.add(p.split('/').pop());
         if (!existsSync(p)) zombies.push(p);
       }
     }
@@ -3499,7 +3503,7 @@ async function blindspots() {
     // 否定つきの早期脱出（`if ! ... '^git push'; then exit 0`）は、
     // その錨がこのフックの守備範囲そのものであることを意味する。
     // 錨に当たらない命令は、拒否されないのではなく、一度も見られない。
-    if (/(^|\s)!\s*(printf|echo|cat|grep)/.test(line) || /grep\s+-[a-zA-Z]*v/.test(line)) {
+    if (/(^|\s)!\s*(printf|echo|cat|grep|\[\[)/.test(line) || /grep\s+-[a-zA-Z]*v/.test(line)) {
       return (allow !== -1 && (block === -1 || allow < block)) ? 'subject' : 'exempt';
     }
     if (block === -1 && allow === -1) return 'unknown';
@@ -3509,10 +3513,15 @@ async function blindspots() {
   };
 
   const found = [];
+  const unregistered = [];
   let scanned = 0, unparsed = 0, exempt = 0;
   if (existsSync(HOOKS_DIR)) {
     for (const f of readdirSync(HOOKS_DIR)) {
       if (!/\.(sh|py|bash)$/.test(f)) continue;
+      // 登録されていないスクリプトは一度も走らない。その錨の見落とし率を並べると、
+      // 走りもしないフックを「守れていない門」として報告することになる。
+      // 登録が1つも読めなかった時だけ、全ファイルを対象にする（設定が別の場所にある環境）。
+      if (registeredNames.size > 0 && !registeredNames.has(f)) { unregistered.push(f); continue; }
       let src;
       try { src = readFileSync(join(HOOKS_DIR, f), 'utf-8'); } catch { continue; }
       const pats = new Map();   // pattern -> { multiline, kind }
@@ -3577,6 +3586,15 @@ async function blindspots() {
   const seenWords = new Set();
   const top = rows.filter(r => (seenWords.has(r.words) ? false : seenWords.add(r.words)));
 
+  // 在るが登録されていないスクリプトは、走査の対象から外してある（走らないものに
+  // 「守れていない」は言えない）。列挙そのものは --audit の層またぎの検査が
+  // 精度を吟味した形で既に持っているので、ここでは除外した事実だけを伝えて渡す。
+  if (unregistered.length > 0) {
+    console.log(c.dim + `    ${unregistered.length} more script${unregistered.length === 1 ? '' : 's'} in ${HOOKS_DIR} ${unregistered.length === 1 ? 'is' : 'are'} registered nowhere,` +
+      ' so they are left out of the table below — they never run. `--audit` names them.' + c.reset);
+    console.log();
+  }
+
   console.log(c.bold + '  Layers 1+4 · patterns anchored to the start vs. what you type' + c.reset);
   if (found.length === 0) {
     console.log(c.dim + '    No start-anchored patterns found in ' + HOOKS_DIR + c.reset);
@@ -3621,6 +3639,10 @@ async function blindspots() {
   console.log(c.dim + '    Fixes: match anywhere in the command, not only at the start; register file guards on' + c.reset);
   console.log(c.dim + '    Bash as well as Read/Edit; and put static paths in permissions.deny, which reads' + c.reset);
   console.log(c.dim + '    inside Bash commands. See SAFETY_CHECKLIST.md.' + c.reset);
+  console.log();
+  console.log(c.dim + '    This covers two of the five layers. The same method run across all five on one real' + c.reset);
+  console.log(c.dim + '    machine, findings and wrong turns included, is written out in full:' + c.reset);
+  console.log(c.dim + '    docs/full-surface-audit-sample-jp.md' + c.reset);
   console.log();
 }
 

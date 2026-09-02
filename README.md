@@ -162,6 +162,26 @@ launch, which Claude Code treats as non-blocking, so nothing surfaces);
 found anything is not yet evidence of anything. `audit/audit-checklist.md` is a 50-point
 sheet covering hooks, git, secrets, cost, autonomous operation and multi-agent work.
 
+## A hook can be installed, current, registered — and still never see you
+
+```bash
+npx github:yurukusa/cc-safe-setup --blindspots
+```
+
+Every other check here reads one layer. `--status` reads the scripts on disk, `--lint` the
+settings file, `--stats` the block log, `--outdated` the shipped bodies. A guard can pass all
+four and still never fire, because the shape of the commands you actually run never reaches
+it. That gap does not live inside any one layer, so no single-layer check can report it.
+
+`--blindspots` reads your own session transcripts next to your own guards and reports what
+each start-anchored pattern really matches. On the machine it was written on: 38,066 Bash
+calls, **89.1% of them compound** and **32.0% beginning with `cd`** — and `branch-guard.sh`
+examining 47 of 377 `git push` calls, because the other 330 came after a `cd … &&`.
+
+It reads only. Nothing is sent anywhere and nothing is written back. Patterns that are allow
+tests rather than gates are excluded, and a verb is counted only where it starts a command
+segment, so a `git add` inside a quoted string is not mistaken for one that ran.
+
 ## Your installed hooks do not update themselves
 
 Installing a hook copies the file. **Nothing ever copies it back.** A hook installed in March
