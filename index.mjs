@@ -2343,7 +2343,10 @@ async function suggest() {
 
   // Display results
   if (risks.length === 0) {
-    console.log(c.green + '  No risks detected. Your project looks safe!' + c.reset);
+    // 「危険は無い」ではなく「この検査では見つからなかった」。
+    // ここは設定と依存の走査だけで、実際に打たれた命令の形は読んでいない。
+    console.log(c.green + '  No risks found in the checks this scan runs.' + c.reset);
+    console.log(c.dim + '  It reads configuration, not what you actually run. --blindspots reads that.' + c.reset);
     return;
   }
 

@@ -245,7 +245,8 @@ function scan() {
   if (score < maxScore) {
     html += `<div class="fix"><h3>Fix all issues in one command:</h3><pre><code>npx github:yurukusa/cc-safe-setup --opus47</code></pre><p style="font-size:.85rem;color:#8b949e;">Installs ${maxScore - score} missing protection${maxScore - score > 1 ? 's' : ''}. <a href="opus-47-survival-guide.html">Learn what each hook does →</a></p></div>`;
   } else {
-    html += '<div class="check pass" style="margin-top:1rem;font-size:1rem;font-weight:600;">🛡️ Your setup is fully protected against known Opus 4.7 issues.</div>';
+    html += '<div class="check pass" style="margin-top:1rem;font-size:1rem;font-weight:600;">🛡️ The guards for the known Opus 4.7 issues are in place.</div>';
+    html += '<div style="opacity:.7;font-size:.85rem;margin-top:.4rem">In place is not the same as covering. Most of these match the start of the command string, so a command that reaches them only after a separator can go past.</div>';
   }
 
   result.innerHTML = html;
