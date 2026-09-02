@@ -329,7 +329,8 @@ function renderAuditTab(risks, good, score) {
   }
 
   if (risks.length === 0) {
-    html += '<p style="color:#3fb950;margin-top:1rem">No risks detected. Your setup looks solid.</p>';
+    html += '<p style="color:#3fb950;margin-top:1rem">No risks found in the checks on this page.</p>';
+    html += '<p style="opacity:.7;font-size:.85rem">This reads configuration only. It cannot tell you whether your hooks match the shape of the commands you actually run.</p>';
   }
 
   document.getElementById('tab-audit').innerHTML = html;

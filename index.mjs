@@ -2343,7 +2343,10 @@ async function suggest() {
 
   // Display results
   if (risks.length === 0) {
-    console.log(c.green + '  No risks detected. Your project looks safe!' + c.reset);
+    // 「危険は無い」ではなく「この検査では見つからなかった」。
+    // ここは設定と依存の走査だけで、実際に打たれた命令の形は読んでいない。
+    console.log(c.green + '  No risks found in the checks this scan runs.' + c.reset);
+    console.log(c.dim + '  It reads configuration, not what you actually run. --blindspots reads that.' + c.reset);
     return;
   }
 
@@ -4012,7 +4015,27 @@ async function shield() {
   const totalHooks = hookFiles.length;
   console.log(c.bold + c.green + '  🛡️  Shield activated!' + c.reset);
   console.log(c.dim + `  ${totalHooks} hooks installed and configured.` + c.reset);
-  console.log(c.dim + '  Your Claude Code sessions are now protected.' + c.reset);
+  console.log();
+
+  // ここは以前「Your Claude Code sessions are now protected.」と言い切っていた。
+  // それは入れた本数についての事実ではなく、守れているかについての断定で、
+  // 測れる範囲では正しくない。入れた柵の多くは命令の先頭に錨を置くので、
+  // 区切りの後ろ（`cd … && git push …`）には届かない。
+  // 断定を返上して、その人自身の履歴から数えた1つの数字を置く。
+  const shape = await commandShapeSample();
+  if (shape) {
+    console.log(c.bold + '  Before you trust them:' + c.reset);
+    console.log(c.dim + '  Most guards match the start of the command string. In your most recent' + c.reset);
+    console.log(`  ${c.dim}sessions, ${c.reset}${c.bold}${shape.compoundPct.toFixed(1)}%${c.reset}${c.dim} of ${shape.calls.toLocaleString()} Bash calls are compound` +
+      ` (${c.reset}cd … && git push …${c.dim}) and ${c.reset}${shape.cdPct.toFixed(1)}%${c.dim} begin with ${c.reset}cd${c.dim}.` + c.reset);
+    console.log(c.dim + '  A guard anchored at the start does not see what comes after the separator.' + c.reset);
+    console.log();
+    console.log(c.dim + '  Which of yours have that gap:  ' + c.reset + 'npx github:yurukusa/cc-safe-setup --blindspots');
+  } else {
+    console.log(c.dim + '  Most guards match the start of the command string, so a command like' + c.reset);
+    console.log(c.dim + '  `cd … && git push …` can go past them. Once you have some history,' + c.reset);
+    console.log(c.dim + '  --blindspots reads it locally and shows which of yours have that gap.' + c.reset);
+  }
   console.log();
   console.log(c.dim + '  Verify: npx github:yurukusa/cc-safe-setup --verify' + c.reset);
   console.log(c.dim + '  Status: npx github:yurukusa/cc-safe-setup --status' + c.reset);
@@ -4020,6 +4043,64 @@ async function shield() {
   console.log(c.dim + '  Burning tokens too fast? Free diagnosis:' + c.reset);
   console.log(c.blue + '  https://yurukusa.github.io/cc-safe-setup/token-checkup.html' + c.reset);
   console.log();
+}
+
+
+// 導入の最後に「あなたのセッションは保護されました」と言い切っていた行の差し替えに使う。
+// 入れた柵の大半は命令の先頭に錨を置く（`^\s*git\s+push` の形）ので、区切りの後ろは見えない。
+// その割合は環境によって違うから、こちらで断定せず、その人自身の履歴から数えて見せる。
+// 予算を切ってあるのは、導入の待ち時間を伸ばさないため（直近の記録だけを新しい順に読む）。
+// 何も無い環境（初回の利用者）では null を返し、呼び出し側は何も言わない。
+async function commandShapeSample(budgetBytes = 20 * 1024 * 1024) {
+  const { createReadStream, statSync } = await import('fs');
+  const { createInterface: makeLines } = await import('readline');
+  const dir = join(HOME, '.claude', 'projects');
+  if (!existsSync(dir)) return null;
+
+  const files = [];
+  let projects;
+  try { projects = readdirSync(dir); } catch { return null; }
+  for (const proj of projects) {
+    let entries;
+    try { entries = readdirSync(join(dir, proj)); } catch { continue; }
+    for (const f of entries) {
+      if (!f.endsWith('.jsonl')) continue;
+      const full = join(dir, proj, f);
+      try { const st = statSync(full); files.push({ full, mtime: st.mtimeMs, size: st.size }); } catch {}
+    }
+  }
+  if (files.length === 0) return null;
+  files.sort((a, b) => b.mtime - a.mtime);
+
+  let budget = budgetBytes, calls = 0, compound = 0, startsCd = 0;
+  for (const f of files) {
+    if (budget <= 0) break;
+    budget -= f.size;
+    await new Promise((resolve) => {
+      const rl = makeLines({ input: createReadStream(f.full, { encoding: 'utf-8' }), crlfDelay: Infinity });
+      rl.on('line', (line) => {
+        if (line.indexOf('"tool_use"') === -1) return;
+        let d;
+        try { d = JSON.parse(line); } catch { return; }
+        if (d.type !== 'assistant') return;
+        const content = (d.message || {}).content;
+        if (!Array.isArray(content)) return;
+        for (const blk of content) {
+          if (!blk || blk.type !== 'tool_use' || blk.name !== 'Bash') continue;
+          const cmd = (blk.input || {}).command;
+          if (typeof cmd !== 'string' || !cmd.trim()) continue;
+          calls++;
+          if (/(&&|\|\||;|\|)/.test(cmd)) compound++;
+          if (/^\s*cd\s/.test(cmd)) startsCd++;
+        }
+      });
+      rl.on('close', resolve);
+      rl.on('error', resolve);
+    });
+  }
+  // 少なすぎる標本から割合を出すと、その数字のほうが嘘になる。
+  if (calls < 200) return null;
+  return { calls, compoundPct: (compound / calls) * 100, cdPct: (startsCd / calls) * 100 };
 }
 
 async function quickfix() {
@@ -7175,12 +7256,31 @@ async function main() {
   console.log(c.bold + '  Done.' + c.reset + ' ' + Object.keys(HOOKS).length + ' safety hooks installed.');
   console.log('  ' + c.dim + 'Restart Claude Code to activate.' + c.reset);
   console.log();
-  console.log('  ' + c.bold + 'You are now protected against:' + c.reset);
+  // 以前は「You are now protected against:」と書いてこの5つを並べていた。
+  // 並べている危険は合っているが、「守られている」は断定しすぎで、測れる範囲では正しくない。
+  // 入れた柵の多くは命令の先頭に錨を置くので、`cd x && git push -f` の形には届かない。
+  // ここに並んでいる強制push も .env も同じ。いちばん具体的に安心させている場所だったので、
+  // 「何を狙う柵か」という事実に戻し、覆えているかは利用者自身の履歴から数えて見せる。
+  console.log('  ' + c.bold + 'What these guards are aimed at:' + c.reset);
   console.log('  ' + c.green + '  ✓' + c.reset + ' rm -rf / git reset --hard / git clean -fd');
   console.log('  ' + c.green + '  ✓' + c.reset + ' Force-push to main/master');
   console.log('  ' + c.green + '  ✓' + c.reset + ' .env / credential files committed to git');
   console.log('  ' + c.green + '  ✓' + c.reset + ' Syntax errors cascading through files');
   console.log('  ' + c.green + '  ✓' + c.reset + ' PowerShell Remove-Item -Recurse -Force');
+  console.log();
+  const shapeDefault = await commandShapeSample();
+  if (shapeDefault) {
+    console.log('  ' + c.dim + 'Aimed at is not the same as covering. Most of these match the start of the' + c.reset);
+    console.log('  ' + c.dim + 'command string, and in your most recent sessions ' + c.reset +
+      c.bold + shapeDefault.compoundPct.toFixed(1) + '%' + c.reset + c.dim +
+      ' of ' + shapeDefault.calls.toLocaleString() + ' Bash' + c.reset);
+    console.log('  ' + c.dim + 'calls are compound (' + c.reset + 'cd … && git push …' + c.dim + '), which they do not see.' + c.reset);
+    console.log('  ' + c.dim + 'Which of yours have that gap:' + c.reset + '  npx github:yurukusa/cc-safe-setup --blindspots');
+  } else {
+    console.log('  ' + c.dim + 'Aimed at is not the same as covering. Most of these match the start of the' + c.reset);
+    console.log('  ' + c.dim + 'command string, so a command that reaches them only after a separator can' + c.reset);
+    console.log('  ' + c.dim + 'go past. Once you have some history:' + c.reset + '  npx github:yurukusa/cc-safe-setup --blindspots');
+  }
   console.log();
   console.log('  ' + c.dim + 'Verify:' + c.reset + '  npx github:yurukusa/cc-safe-setup --verify');
   console.log('  ' + c.dim + 'More:' + c.reset + '    npx github:yurukusa/cc-safe-setup --shield  (maximum safety)');

@@ -327,7 +327,7 @@ function renderAudit(risks,good,score,el) {
   let h='<div class="score '+cls+'">'+score+'/100</div>';
   if(good.length) { h+='<h3 style="color:#3fb950">Working</h3>'; good.forEach(g=>h+='<div class="good-item">✓ '+g+'</div>'); }
   if(risks.length) { h+='<h3>Risks ('+risks.length+')</h3>'; risks.forEach(r=>h+='<div class="risk"><strong>['+r.s+']</strong> '+r.i+'<br><code>'+r.f+'</code></div>'); }
-  if(!risks.length) h+='<p style="color:#3fb950">No risks detected.</p>';
+  if(!risks.length) h+='<p style="color:#3fb950">No risks found in the checks on this page.</p><p style="opacity:.7;font-size:.85rem">This reads configuration only. It does not read your session history, so it cannot tell you whether your hooks match the shape of the commands you actually run.</p>';
   h+='<div style="margin-top:1rem"><button class="btn" onclick="shareAudit('+score+')" style="background:#1d9bf0;font-size:.8rem;padding:.4rem .8rem">Share Score on X</button></div>';
   el.innerHTML=h;
 }
@@ -337,7 +337,10 @@ function shareAudit(score) {
     ? `My Claude Code safety score: ${score}/100 ${emoji} No hooks installed — running unprotected. Check yours: #ClaudeCode #ProductHunt`
     : score < 70
     ? `My Claude Code safety score: ${score}/100 ${emoji} Some gaps in hook coverage. Free audit: #ClaudeCode #ProductHunt`
-    : `My Claude Code safety score: ${score}/100 ${emoji} Fully protected with safety hooks. How safe is your setup? #ClaudeCode #ProductHunt`;
+    // 以前ここは「Fully protected with safety hooks」だった。この点数は設定ファイルしか
+    // 見ておらず、その人が実際に打っている命令の形を一度も読んでいない。守れているかは
+    // 分からないのに、それを本人の口から公開の場へ言わせるのは、こちらの断定より重い。
+    : `My Claude Code safety score: ${score}/100 ${emoji} Hooks in place for the main risks — config-level check, it doesn't read what I actually run. How's yours? #ClaudeCode`;
   window.open('https://x.com/intent/tweet?text='+encodeURIComponent(msg)+'&url='+encodeURIComponent('https://yurukusa.github.io/cc-safe-setup/'), '_blank');
 }
 

@@ -1,6 +1,22 @@
 # Changelog
 
 ## [Unreleased]
+- **The install screen no longer tells you that you are now protected.** Both paths ended on a
+  claim about your safety rather than a fact about what was written: the default said *"You are
+  now protected against:"* over a list including force-push and `.env` committed to git, and
+  `--shield` said *"Your Claude Code sessions are now protected."*
+
+  The dangers listed are right; the sentence around them is not. Most of the guards installed
+  here match the **start of the command string**, so `cd repo && git push -f origin main`
+  reaches none of them — and force-push is one of the five items named on that screen. On the
+  machine this was written on, **89.1% of Bash calls are compound and 32.0% begin with `cd`**.
+
+  Both paths now measure instead of asserting, using a bounded read (20 MB of the newest
+  transcripts, so install does not get slower) of your own sessions, and point at
+  `--blindspots`. With no history they state what the guards match and stop; below 200 calls
+  they print no percentage, because a ratio from a handful of commands is its own lie.
+  `tests/install-does-not-claim-protection.test.sh`, 14 assertions.
+
 - **`--audit --ci` was documented and never implemented. It is now.** The README has shown
   a workflow step using `--ci` since the CI section was written. Nothing read the flag. The
   exit was `score < (CC_AUDIT_THRESHOLD || 0)`, and a score cannot go below `0`, so the step

@@ -20,7 +20,8 @@
 
 <h2>The Fix</h2>
 <div class="fix">
-<p>The <code>npm-publish-guard</code> hook (included by default in cc-safe-setup) blocks all publish commands:</p>
+<p>The <code>npm-publish-guard</code> hook (included by default in cc-safe-setup) blocks a publish command that begins the command string:</p>
+<p><strong>It is anchored to the start.</strong> Its pattern is <code>^\s*(npm\s+publish|npx\s+npm\s+publish)</code>, so <code>cd pkg &amp;&amp; npm publish</code> goes past it — the hook is never asked about the part after the separator. Run <code>--blindspots</code> to see how much of your own history arrives in that shape.</p>
 <pre><code># Blocks: npm publish, npm publish --tag, yarn publish, pnpm publish
 npx github:yurukusa/cc-safe-setup</code></pre>
 <p>Also blocks: <code>cargo publish</code>, <code>gem push</code>, <code>twine upload</code>, <code>pip publish</code>. Each has a dedicated guard hook.</p>
