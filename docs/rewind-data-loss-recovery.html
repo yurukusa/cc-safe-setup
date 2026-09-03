@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code /rewind deleted my code — how to recover and prevent it</title>
-<meta name="description" content="Pressing Esc twice (or running /rewind) and choosing the default 'Restore code and conversation' reverts your files with no preview of what's lost (#64615). Here is exactly what /rewind can and cannot touch, how to recover work right now, and the free hook that makes any accidental rewind recoverable from git.">
+<meta name="description" content="A rewind that reverted work you wanted is almost never the accidental Esc Esc — the picker opens on '(current)' and that Enter is a no-op. It is the second Enter, on an older checkpoint, past a confirmation screen (#64615). Here is exactly what /rewind can and cannot touch, how to recover work right now, and the free hook that makes any rewind recoverable from git.">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/rewind-data-loss-recovery.html">
 <meta property="og:title" content="Claude Code /rewind deleted my code — recover it and prevent it">
-<meta property="og:description" content="/rewind is 'local undo'; git is 'permanent history' it cannot rewrite. Recover what you committed, understand exactly what the default 'Restore code and conversation' wipes, and make every future rewind recoverable.">
+<meta property="og:description" content="/rewind restores from Claude Code's own checkpoint store and cannot rewrite git history. Recover what you committed, learn exactly which edits a restore does and does not touch, and make every future rewind recoverable.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://yurukusa.github.io/cc-safe-setup/rewind-data-loss-recovery.html">
 <meta property="og:image" content="https://yurukusa.github.io/cc-safe-setup/rewind-data-loss-recovery-og.png">
@@ -55,11 +55,12 @@ hr{border:none;border-top:1px solid #21262d;margin:2.2rem 0}
 <a href="index.html" class="back">← cc-safe-setup</a>
 
 <h1>Claude Code <code>/rewind</code> deleted my code — how to recover it and prevent it</h1>
-<p class="lede">You pressed <code>Esc</code> twice (or ran <code>/rewind</code>), the first highlighted option was <strong>Restore code and conversation</strong>, you hit <code>Enter</code> — and edits you wanted are gone, with no preview of what was lost. This page explains exactly what <code>/rewind</code> can and cannot touch, how to get your work back right now, and the one free hook that makes any future accident recoverable.</p>
+<p class="lede">You rewound, and edits you wanted are gone. This page explains exactly what <code>/rewind</code> can and cannot touch, how to get your work back right now, and the one free hook that makes any future accident recoverable.</p>
 
 <div class="panel warn">
-<span class="tag">The trap</span>
-<p style="margin-bottom:.4rem">The rewind menu opens to a list of your prompts, and the first action offered is the most destructive one: <em>Restore code and conversation</em>. There is no diff or preview of which changes will be discarded before it runs. A stray double-<code>Esc</code> on an empty prompt can therefore revert your working files to an earlier point. This is the pain reported in <a href="https://github.com/anthropics/claude-code/issues/64615">anthropics/claude-code#64615</a>.</p>
+<span class="tag">Corrected 2026-09-03</span>
+<p style="margin-bottom:.4rem">An earlier version of this page said the picker opens on the most destructive action and runs it with no preview. <strong>That was wrong, and it is worth being precise about, because the wrong version makes you guard against the wrong keystroke.</strong> The maintainer's closing comment on <a href="https://github.com/anthropics/claude-code/issues/64615">anthropics/claude-code#64615</a> says the picker opens with <em>&ldquo;(current)&rdquo;</em> highlighted, so a stray double-<code>Esc</code> followed by <code>Enter</code> is a no-op, and selecting an older checkpoint leads to a screen headed <em>&ldquo;Confirm you want to restore…&rdquo;</em> that previews what will happen. The person who filed the issue agreed: the first <code>Enter</code> is not the problem — the second one is.</p>
+<p style="margin-bottom:0">So the accident this page helps with is not a slip of the escape key. It is choosing an older checkpoint on purpose, past a confirmation, and discovering afterwards that it took more than you expected — or that something you needed was never in the checkpoint store at all. That second case is the common one, and it is covered below.</p>
 </div>
 
 <h2>First, the good news: what <code>/rewind</code> can <em>not</em> touch</h2>
