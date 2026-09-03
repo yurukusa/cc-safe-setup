@@ -754,6 +754,7 @@ function examples() {
       'schema-migration-guard.sh': 'Warn on database schema migrations without backup',
       'scope-guard.sh': 'Block file operations outside the project directory',
       'secret-file-read-guard.sh': 'Block Read/Grep of files containing secrets',
+      'secret-file-write-guard.sh': 'Block Bash writes into .env, keys and credential files (the bundled Write|Edit guard cannot see them)',
       'self-modify-bypass-guard.sh': 'Auto-allow .claude/ writes in bypass mode',
       'sensitive-file-read-guard.sh': 'Block reading sensitive system/user files',
       'sensitive-log-guard.sh': 'Sensitive Log Guard',
