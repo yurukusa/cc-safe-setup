@@ -27,7 +27,16 @@
 #   In my own transcripts, file edits made through Bash went from
 #   40.5% to 64.2% across that date, on a near-identical volume.
 #
-# TRIGGER: PreToolUse  MATCHER: "Bash"
+# TRIGGER: PreToolUse
+# MATCHER: "Bash"
+#
+# (TRIGGER and MATCHER are on separate lines on purpose. Chapter 89 of the
+#  incident book measured that the installer cannot pick up MATCHER when the
+#  two are written on one line — it falls back to the default "Bash". Here the
+#  default happens to be correct, so the mistake would stay invisible until
+#  someone changed the matcher. Verified: installing this hook reports
+#  `matcher: "Bash"`, and secret-file-read-guard.sh, whose MATCHER is on its
+#  own line, correctly reports `matcher: "Read|Grep"`.)
 #
 # DECISION: exit 2 = block. This is a "stop and confirm" guard, not a
 #   ban: creating a .env from .env.example is allowed, and so is
