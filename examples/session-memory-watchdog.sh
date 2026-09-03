@@ -1,3 +1,4 @@
+#!/bin/bash
 MAX_RSS_MB="${CC_MAX_RSS_MB:-4096}"
 CHECK_INTERVAL=300
 PID_FILE="/tmp/cc-memory-watchdog.pid"

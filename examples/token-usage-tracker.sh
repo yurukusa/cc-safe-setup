@@ -1,3 +1,4 @@
+#!/bin/bash
 INPUT=$(cat)
 # 記録の場所を推測しない。フックに渡される transcript_path を使う。
 # 以前は ~/.claude/projects/*/sessions/*/transcript.jsonl を見ていたが、

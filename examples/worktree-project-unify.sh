@@ -1,3 +1,4 @@
+#!/bin/bash
 MAIN_TREE=$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/worktree //')
 [ -z "$MAIN_TREE" ] && exit 0
 CUR_DIR=$(pwd)

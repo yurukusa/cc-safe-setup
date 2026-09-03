@@ -1,3 +1,4 @@
+#!/bin/bash
 INPUT=$(cat)
 COUNTER_FILE="/tmp/.cc-model-check-counter"
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)

@@ -1,3 +1,4 @@
+#!/bin/bash
 CLAUDE_DIR="$HOME/.claude"
 MAX_AGE_DAYS="${CC_GC_MAX_AGE:-30}"
 MAX_SIZE_MB="${CC_GC_MAX_SIZE:-500}"

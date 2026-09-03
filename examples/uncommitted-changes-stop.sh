@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: Stop  MATCHER: ""
 INPUT=$(cat)

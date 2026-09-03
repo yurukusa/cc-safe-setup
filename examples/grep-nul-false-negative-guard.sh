@@ -1,3 +1,4 @@
+#!/bin/bash
 set -uo pipefail
 #
 # The registration was missing from this header. The installer reads TRIGGER

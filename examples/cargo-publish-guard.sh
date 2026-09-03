@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: PreToolUse  MATCHER: "Bash|PowerShell"
 # Without jq, the parse below silently yields empty and this hook stops

@@ -1,3 +1,4 @@
+#!/bin/bash
 INPUT=$(cat)
 __CC_HOOK_INPUT="$INPUT"
 # --- セッション識別子でファイルを分ける (2026-08-09 修正) ---

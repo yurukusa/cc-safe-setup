@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: PostToolUse  MATCHER: "Edit|Write"
 INPUT=$(cat)

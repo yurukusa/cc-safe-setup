@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: PermissionRequest  MATCHER: ""
 INPUT=$(cat)

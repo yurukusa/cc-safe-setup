@@ -1,3 +1,4 @@
+#!/bin/bash
 set -uo pipefail
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || echo "")

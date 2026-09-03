@@ -1,3 +1,4 @@
+#!/bin/bash
 # Without jq, the parse below silently yields empty and this hook stops
 # guarding - with no error anywhere. Say so. We deliberately do not exit
 # here: blocking would halt every tool call, and exiting 0 would change

@@ -1,3 +1,4 @@
+#!/bin/bash
 LOGFILE="${HOME}/.claude/worktree-audit.log"
 INFO=$(cat)
 BRANCH=$(echo "$INFO" | jq -r '.branch // "unknown"' 2>/dev/null)

@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: PreToolUse  MATCHER: "Bash"
 INPUT=$(cat)

@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # TRIGGER: Notification  MATCHER: ""
 INPUT=$(cat)
