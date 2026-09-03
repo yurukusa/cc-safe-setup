@@ -46,6 +46,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 | `rm -rf /` | destructive-guard | `npx github:yurukusa/cc-safe-setup` |
 | Push to main | branch-guard | `npx github:yurukusa/cc-safe-setup` |
 | .env committed | secret-guard | `npx github:yurukusa/cc-safe-setup` |
+| .env written or copied via Bash | secret-file-write-guard | `--install-example secret-file-write-guard` |
 | Database wiped | block-database-wipe | `--install-example block-database-wipe` |
 | Dotfiles modified | protect-dotfiles | `--install-example protect-dotfiles` |
 | Deploy without commit | deploy-guard | `--install-example deploy-guard` |
