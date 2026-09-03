@@ -3394,17 +3394,25 @@ async function blindspots() {
   }
 
   // ---- 層4: 実際に打たれたコマンドを集める --------------------------------
+  // 転写は2つの深さに置かれる。プロジェクト直下がメインのセッション、
+  // その下の <session>/subagents/ がサブエージェントのもの。
+  // 直下だけを読んでいた版は、この機械で 571 本中 271 本（47%）を落としていた。
+  // サブエージェントの Bash にもフックは走るので、落とすと母集団が半分になる。
   const files = [];
-  for (const proj of readdirSync(PROJECTS_DIR)) {
-    const dir = join(PROJECTS_DIR, proj);
+  const collect = (dir, depth) => {
+    // 上限は8。サブエージェントは入れ子になり、実測で project/session/subagents/…/subagents/…
+    // まで潜っていた（上限4だと571本中418本しか読めなかった）。
+    if (depth > 8) return;
     let entries;
-    try { entries = readdirSync(dir); } catch { continue; }
-    for (const f of entries) {
-      if (!f.endsWith('.jsonl')) continue;
-      const p = join(dir, f);
+    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) { collect(p, depth + 1); continue; }
+      if (!e.name.endsWith('.jsonl')) continue;
       try { files.push({ path: p, size: statSync(p).size }); } catch {}
     }
-  }
+  };
+  collect(PROJECTS_DIR, 0);
   const totalBytes = files.reduce((a, f) => a + f.size, 0);
   if (files.length === 0) {
     console.log(c.yellow + '  No .jsonl transcripts under ' + PROJECTS_DIR + c.reset);
@@ -3412,7 +3420,8 @@ async function blindspots() {
     return;
   }
 
-  console.log(c.dim + `  reading ${files.length} transcripts (${(totalBytes / 1048576).toFixed(0)} MB) — local only, nothing is sent` + c.reset);
+  const subCount = files.filter((f) => f.path.includes('/subagents/')).length;
+  console.log(c.dim + `  reading ${files.length} transcripts (${(totalBytes / 1048576).toFixed(0)} MB, ${subCount} from subagents) — local only, nothing is sent` + c.reset);
 
   const startedAt = Date.now();
   const commands = [];
