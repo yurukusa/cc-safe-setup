@@ -61,27 +61,53 @@ nav a{margin-right:1rem}
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-# Block push to main/master
-if echo "$COMMAND" | grep -qE 'git\s+push.*\b(main|master)\b'; then
-  echo "BLOCKED: Push to protected branch" >&2
+# A shell joins "\" + newline before running. grep is line-oriented, so without
+# this a rule never sees `git push \` and `--force` as one line.
+COMMAND=${COMMAND//\\$'\n'/ }
+
+# git takes its own options BEFORE the verb: `git -C /repo push --force` does
+# exactly what the plain form does. Strip them so every rule below can assume
+# the verb sits next to the word `git`.
+CHECK=$(printf '%s' "$COMMAND" | sed -E ':a;
+  s/(^|[;&|[:space:]])git[[:space:]]+((-C|-c)[[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path)=[^[:space:]]+|--(no-pager|paginate|bare))[[:space:]]+/\1git /g; ta')
+
+# Force-push has three shapes, not one:
+#   --force / --force-with-lease
+#   bundled short flags -- `git push -uf origin feature` is a force push
+#   `git push origin +feature` rewrites the remote with no --force in it at all
+# [^;&|]* keeps the scan inside the push itself, so `git push origin x && rm -f y`
+# is not reported as a force push.
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*(--force\b|--force-with-lease\b|[^A-Za-z0-9]-[a-zA-Z]*f\b|[^A-Za-z0-9]\+[A-Za-z0-9._/*-]+)'; then
+  echo "BLOCKED: Force-push" >&2
   exit 2
 fi
 
-# Block force-push anywhere
-if echo "$COMMAND" | grep -qE 'git\s+push\s+.*(-f|--force)'; then
-  echo "BLOCKED: Force-push" >&2
+# Push to a protected branch
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*\b(main|master)\b'; then
+  echo "BLOCKED: Push to protected branch" >&2
   exit 2
 fi
 
 exit 0</code></pre>
 </div>
 
-<p><code>exit 2</code> blocks the command at the process level. The model cannot bypass, ignore, or work around it.</p>
+<p><code>exit 2</code> blocks the command at the process level. The model cannot ignore the block or argue its way past it.</p>
+
+<h2>Where this rule stops</h2>
+<p>The block is solid. The <em>pattern</em> is a different thing, and it is worth knowing where it ends before you rely on it.</p>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><strong>The command name written another way.</strong> <code>/usr/bin/git push --force</code> and <code>env GIT_DIR=/r git push --force</code> both reach git without the word <code>git</code> where the rule expects it.</li>
+<li><strong>Mentions.</strong> This compact version blocks <code>echo "never git push --force" &gt;&gt; CLAUDE.md</code>, which is only talking about the command. The shipped hook separates mentions from invocations before any rule runs.</li>
+<li><strong>An alias or a wrapper script</strong> that reaches git without the flag ever appearing on the command line.</li>
+</ul>
+<p>If you need a guarantee rather than a good local filter, the complete answer is on the remote: <a href="https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches">branch protection</a>. A hook protects the machine it is installed on. Branch protection protects the branch from every machine, including the ones you do not control.</p>
+
+<p style="font-size:.9rem;color:#8b949e">This pattern was rewritten on 2026-09-03. The version this page carried before it missed four real force-pushes &mdash; <code>git -C /repo push --force</code>, <code>git -c core.pager=cat push --force</code>, <code>git push origin +feature</code>, <code>git push -uf</code> &mdash; and blocked <code>git push --follow-tags</code>, which is harmless. Both directions are covered by regression tests in the repository now.</p>
 
 <div class="cta">
 <h2>Install Branch Protection + 7 More Safety Hooks</h2>
 <pre><code>npx github:yurukusa/cc-safe-setup</code></pre>
-<p style="margin-top:.8rem">Blocks force-push, rm -rf, secret leaks, syntax errors, and more. <span class="badge">240+ test files</span> <span class="badge">734 examples</span></p>
+<p style="margin-top:.8rem">Blocks force-push, rm -rf, secret leaks, syntax errors, and more. <span class="badge">240+ test files</span> <span class="badge">914 examples</span></p>
 <p style="margin-top:1rem"><a href="https://github.com/yurukusa/cc-safe-setup">GitHub</a> &middot; <a href="https://www.npmjs.com/package/cc-safe-setup">npm</a> &middot; <a href="getting-started.html">Getting Started</a></p>
 </div>
 
