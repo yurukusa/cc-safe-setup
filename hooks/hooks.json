@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; TARGET=$(echo \"$CMD\" | sed -E 's/[;&|#].*$//'); if echo \"$TARGET\" | grep -qE '^\\s*(sudo\\s+)?rm\\s+.*-[rRf]*[rR]' && ! echo \"$TARGET\" | grep -qE '(^|[[:space:]/])(node_modules|dist|build|__pycache__|tmp)(/|[[:space:]]|$)'; then echo 'BLOCKED: recursive rm on non-safe target. Use specific paths.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(printf %s \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; STMTS=$(printf '%s\\n' \"$CMD\" | awk '{ if (sub(/\\\\[ \\t]*$/, \" \")) { b = b $0; next } print b $0; b = \"\" } END { if (b != \"\") print b }' | tr ';&|' '\\n' | sed -E 's/#.*$//'); HIT=$(printf '%s\\n' \"$STMTS\" | grep -E '^[[:space:]]*(sudo[[:space:]]+)?rm[[:space:]]+([^[:space:]]+[[:space:]]+)*(-[a-zA-Z]*[rR]|--recursive)' | grep -vE '(^|[[:space:]/])(node_modules|dist|build|__pycache__|tmp)(/|[[:space:]]|$)'); if [ -n \"$HIT\" ]; then echo 'BLOCKED: recursive rm on non-safe target. Use specific paths.' >&2; exit 2; fi"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; CHECK=$(echo \"$CMD\" | sed -E 's/--force-with-lease(=[^[:space:]]*)?//g'); if echo \"$CHECK\" | grep -qE 'git\\s+push\\s+.*--force|git\\s+reset\\s+--hard|git\\s+clean\\s+-fd'; then echo 'BLOCKED: destructive git operation. Use --force-with-lease, git revert, or git stash.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(printf %s \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; CHECK=$(printf '%s\\n' \"$CMD\" | awk '{ if (sub(/\\\\[ \\t]*$/, \" \")) { b = b $0; next } print b $0; b = \"\" } END { if (b != \"\") print b }' | sed -E 's/--force-with-lease(=[^[:space:]]*)?//g'); if printf '%s\\n' \"$CHECK\" | grep -qE 'git[[:space:]]+push[[:space:]]+.*--force|git[[:space:]]+reset[[:space:]]+--hard|git[[:space:]]+clean[[:space:]]+-[a-zA-Z]*[fd]'; then echo 'BLOCKED: destructive git operation. Confirm before proceeding.' >&2; exit 2; fi"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; if echo \"$CMD\" | grep -qiE '(api[._-]?key|secret|password|token).*=.*[A-Za-z0-9]{20}'; then echo 'BLOCKED: potential credential in command. Use environment variables.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); CMD=$(printf %s \"$INPUT\" | jq -r '.tool_input.command // empty'); [ -z \"$CMD\" ] && exit 0; CHECK=$(printf '%s\\n' \"$CMD\" | awk '{ if (sub(/\\\\[ \\t]*$/, \" \")) { b = b $0; next } print b $0; b = \"\" } END { if (b != \"\") print b }'); if printf '%s\\n' \"$CHECK\" | grep -qiE '(api[._-]?key|secret|password|token).*=.*[A-Za-z0-9]{20}'; then echo 'BLOCKED: potential credential in command. Use environment variables.' >&2; exit 2; fi"
           }
         ]
       },
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE\" ] && exit 0; BASE=$(basename \"$FILE\"); if echo \"$BASE\" | grep -qE '^\\.env\\.(example|sample|template)$'; then exit 0; fi; if echo \"$BASE\" | grep -qE '^\\.env(\\..+)?$|\\.(pem|key|p12|pfx|credentials|secret)$|^(credentials|secrets?|id_rsa|id_ed25519|\\.netrc|\\.npmrc)$'; then echo 'BLOCKED: writing to sensitive file. Check if this is intentional.' >&2; exit 2; fi"
+            "command": "INPUT=$(cat); FILE=$(printf %s \"$INPUT\" | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE\" ] && exit 0; BASE=$(basename \"$FILE\"); if echo \"$BASE\" | grep -qE '^\\.env\\.(example|sample|template)$'; then exit 0; fi; if echo \"$BASE\" | grep -qE '^\\.env(\\..+)?$|\\.(pem|key|p12|pfx|credentials|secret)$|^(credentials|secrets?|id_rsa|id_ed25519|\\.netrc|\\.npmrc)$'; then echo 'BLOCKED: writing to sensitive file. Check if this is intentional.' >&2; exit 2; fi"
           }
         ]
       },
