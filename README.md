@@ -9,9 +9,9 @@ npx github:yurukusa/cc-safe-setup
 
 The command is interactive: it shows what each hook does and lets you choose which to install into your `~/.claude/settings.json` (or a project-local `.claude/settings.json`). Nothing is installed without your confirmation. MIT licensed.
 
-> **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets three destructive commands through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
+> **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets nine command shapes through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
 
-Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. About 2,000 words, and the minimum price is zero.
+Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. The minimum price is zero.
 
 ## Install as a Claude Code plugin
 
@@ -35,13 +35,23 @@ These are the guards only. The example-hook library, `--doctor`, `--audit`, and 
 
 `npx cc-safe-setup` currently installs **29.8.0**, published 2026-04-20. This repository is at **30.0.4**. Publishing is blocked on renewing an npm credential, so npm keeps serving 29.8.0 until that is done.
 
-The gap is not cosmetic. Fed the same JSON on stdin, the guards shipped in 29.8.0 allow three operations that 30.0.4 refuses:
+The gap is not cosmetic. I fired twenty-two command shapes at both versions on 2026-09-03, feeding each guard the same JSON on stdin and running it with `bash` — the shell the installer names when it registers the hook. The guards shipped in 29.8.0 allow **nine** of those shapes that 30.0.4 refuses. Nothing went the other way: there is no shape 29.8.0 blocks and 30.0.4 lets through, and two harmless controls (`rm -rf node_modules`, `git push origin feature`) are allowed by both. Only `exit 2` counts as blocked here; `exit 1`, `exit 127` and a crash all let the command run.
 
-| Command seen by the hook | 29.8.0 | 30.0.4 |
-| --- | --- | --- |
-| `rm -rf $HOME/x` — home directory reached through a shell variable | allowed | blocked |
-| `foo & git reset --hard` — a single `&` used as the separator | allowed | blocked |
-| `true && git add .env` — a secret staged through a chained command | allowed | blocked |
+The other thirteen behaved identically in both versions, and they are the plain forms: `rm -rf /`, `cd /tmp && sudo rm -rf /var/log`, `find . -name '*.log' | xargs rm -rf /`, `rm -rf ~/Documents/`, `git reset --hard HEAD~5`, `git clean -fd`, `chmod -R 777 /`, `git push --force origin main`, `git push origin +main`, `git push origin main`, `git add .env`, and the two controls. In other words, 29.8.0 stops the shape you would write in a tutorial and misses the shape a shell actually produces.
+
+All nine:
+
+| Command seen by the hook | Guard | 29.8.0 | 30.0.4 |
+| --- | --- | --- | --- |
+| `rm -rf \` with `~/Documents` on the next line — one deletion split over two lines | destructive-guard | allowed | blocked |
+| `rm --recursive --force /` — long-form spelling of `-rf` | destructive-guard | allowed | blocked |
+| a base64 blob decoded and piped into `sh`, carrying `rm -rf ~` | destructive-guard | allowed | blocked |
+| `rm -rf "$HOME"` — home directory reached through a quoted variable | destructive-guard | allowed | blocked |
+| `git push -uf origin feature` — force bundled into a short-flag cluster | branch-guard | allowed | blocked |
+| `cd repo && git push --force origin main` — force push after a separator | branch-guard | allowed | blocked |
+| `git -C /repo push --force` — git's own option placed before the verb | branch-guard | allowed | blocked |
+| `cd app && git add .env` — a secret staged after a separator | secret-guard | allowed | blocked |
+| `git add \` with `.env` on the next line — the same, split over two lines | secret-guard | allowed | blocked |
 
 29.8.0 on npm ships **698** example hooks; this repository has **914**. The 216 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree.)
 
