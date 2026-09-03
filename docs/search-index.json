@@ -1171,9 +1171,9 @@
   {
     "url": "rewind-data-loss-recovery.html",
     "title": "Claude Code /rewind deleted my code — how to recover and prevent it",
-    "description": "Pressing Esc twice (or running /rewind) and choosing the default 'Restore code and conversation' reverts your files with no preview of what's lost (#64615). Here is exactly what /rewind can and cannot touch, how to recover work right now, and the free hook that makes any accidental rewind recoverabl",
+    "description": "A rewind that reverted work you wanted is almost never the accidental Esc Esc — the picker opens on '(current)' and that Enter is a no-op. It is the second Enter, on an older checkpoint, past a confirmation screen (#64615). Here is exactly what /rewind can and cannot touch, how to recover work right",
     "keywords": "",
-    "snippet": "You pressed Esc twice (or ran /rewind), the first highlighted option was Restore code and conversation, you hit Enter — and edits you wanted are gone, with no preview of what was lost. This page explains exactly what /rewind can and cannot touch, how to get your work back right now, and the one free"
+    "snippet": "You rewound, and edits you wanted are gone. This page explains exactly what /rewind can and cannot touch, how to get your work back right now, and the one free hook that makes any future accident recoverable."
   },
   {
     "url": "risk-assessment.html",
