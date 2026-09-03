@@ -29,8 +29,11 @@ runs:
       shell: bash
       run: |
         echo "::group::Claude Code Safety Audit"
-        npx cc-safe-setup@latest --audit --json 2>/dev/null > /tmp/audit-json.txt || true
-        npx cc-safe-setup@latest --audit 2>&1 | tee /tmp/audit-output.txt
+        # Run the repository, not the npm entry. The published npm package is frozen at
+        # 29.8.0 (2026-04-20) and misses guards added since, so `npx cc-safe-setup@latest`
+        # would let this action pass a repository that the current checks refuse.
+        npx -y github:yurukusa/cc-safe-setup --audit --json 2>/dev/null > /tmp/audit-json.txt || true
+        npx -y github:yurukusa/cc-safe-setup --audit 2>&1 | tee /tmp/audit-output.txt
         echo "::endgroup::"
 
         # Parse JSON output
@@ -58,7 +61,7 @@ runs:
         echo "Safety Score: $SCORE/100 (Grade: $GRADE, Risks: $RISK_COUNT, Threshold: $THRESHOLD)"
 
         if [ "$SCORE" -lt "$THRESHOLD" ]; then
-          echo "::error::Safety score $SCORE is below threshold $THRESHOLD. Run 'npx cc-safe-setup --audit --fix' to improve."
+          echo "::error::Safety score $SCORE is below threshold $THRESHOLD. Run 'npx github:yurukusa/cc-safe-setup --audit --fix' to improve."
           exit 1
         else
           echo "::notice::Safety score $SCORE meets threshold $THRESHOLD ✓"
