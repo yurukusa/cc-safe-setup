@@ -1726,6 +1726,35 @@ async function audit() {
     }
   }
 
+  // 13. A blocking hook that parses its input with `echo "$VAR" | jq` fails
+  // open on Debian and Ubuntu. Claude Code runs an inline hook command through
+  // /bin/sh, which is dash there, and dash's echo interprets backslash escapes.
+  // The payload is JSON, so a newline inside a command or a file's content
+  // arrives as the two characters \n; dash turns those into a real newline
+  // inside a JSON string, the parser rejects the document, the variable comes
+  // back empty, and the line that normally follows -- [ -z "$CMD" ] && exit 0
+  // -- is an affirmative approval.
+  //
+  // Measured 2026-09-03 against this project's own plugin hooks: all four
+  // guards approved everything under /bin/sh, and every local test passed
+  // because the tests ran the same commands under bash. Nothing in the log
+  // says anything is wrong; the hook is reported as "success".
+  //
+  // Only hooks that can block are reported. A logger that loses a field is a
+  // cosmetic bug; a guard that loses it stops being a guard.
+  const failOpenCmds = allCmds.filter(cmd =>
+    /echo\s+"\$[A-Za-z_][A-Za-z0-9_]*"\s*\|\s*(jq|python3?|node)\b/.test(cmd) &&
+    /exit\s+2\b/.test(cmd));
+  if (failOpenCmds.length > 0) {
+    risks.push({
+      severity: 'HIGH',
+      issue: `${failOpenCmds.length} blocking hook(s) parse input with \`echo "$VAR" | parser\` — under /bin/sh (dash) a payload containing an escape breaks the parse, the variable empties, and the guard exits 0 (allow)`,
+      fix: 'Replace `echo "$INPUT" |` with `printf %s "$INPUT" |` in those hook commands'
+    });
+  } else if (allCmds.some(cmd => /\|\s*(jq|python3?|node)\b/.test(cmd))) {
+    good.push('Hook input parsing survives /bin/sh (no `echo "$VAR" | parser` in a blocking hook)');
+  }
+
   // Display results
   if (good.length > 0) {
     console.log(c.bold + '  ✓ What\'s working:' + c.reset);
