@@ -54,6 +54,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 ## Why `github:` and not the bare package name
 
-The npm entry is frozen at 29.8.0 (2026-04-20) and lets three destructive commands through
-that the current code blocks. Install from GitHub so the guards you get are the guards this
-checklist describes. The tool's own `--help` says the same thing.
+The npm entry is frozen at 29.8.0 (2026-04-20) and lets nine command shapes through that the
+current code blocks — measured 2026-09-03 across twenty-two shapes, with nothing failing in
+the other direction. The table is in the README. Install from GitHub so the guards you get are
+the guards this checklist describes. The tool's own `--help` says the same thing.
