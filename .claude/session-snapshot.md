@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-09-03T13:59:58+09:00
+Updated: 2026-09-03T14:00:18+09:00
 
 ## Git
 - Branch: `main`
@@ -7,13 +7,13 @@ Updated: 2026-09-03T13:59:58+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0a9b368e recovery: pre-compact checkpoint (1 files, 20260903-045958)
+- Last commit: 9ab78c15 recovery: pre-compact checkpoint (1 files, 20260903-050018)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/pre-compact-checkpoint.md
 ./.claude/session-logs/2026-09-03.md
+./.claude/pre-compact-checkpoint.md
 ./tests/bundled-short-flags-bypass.test.sh
 ./tests/line-continuation-bypass.test.sh
 ./tests/git-global-options-bypass.test.sh
