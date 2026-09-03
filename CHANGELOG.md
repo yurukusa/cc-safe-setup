@@ -1,6 +1,28 @@
 # Changelog
 
 ## [Unreleased]
+- **`secret-guard` promised two things in its own header and delivered neither.** The header
+  has said since the first release that it blocks `git add *credentials* / *secret* / *.pem /
+  *.key`, and it documented `CC_SECRET_PATTERNS` as "colon-separated additional patterns to
+  block". Measured 2026-09-04 against the shipped `scripts.json`: the regex was
+  `(credentials|\.pem|\.key|\.p12|\.pfx|id_rsa|id_ed25519)` — **no `secret`** — and the body
+  never referenced `CC_SECRET_PATTERNS` at all. `git add secrets.yaml`, `git add
+  config/secret.json` and `git add .npmrc` all exited `0`.
+
+  This is the expensive direction of wrong. A guard that fails to block is silent: nothing
+  breaks, no issue gets filed, and the operator who read the header keeps believing it. An
+  operator who set `CC_SECRET_PATTERNS` got no error either — just no enforcement.
+
+  Both are now implemented. `CC_SECRET_PATTERNS` is glob-style (`*` matches a run of
+  non-space), **additional to** the built-in checks and never a replacement, so a malformed
+  value can only fail to add a block — it can never unblock `.env`. The header also gained a
+  `WHAT IT CANNOT DO` section, because the three real limits (only the `git add` stage; the
+  bulk check reads the hook's own directory so `backend/.env` is unseen; matching is on
+  command text, so `secretsManager.ts` is blocked and a secret named `config.yml` is not)
+  were not written down anywhere. `tests/secret-guard-documented-promises.test.sh`,
+  15 assertions, asserted in both directions and confirmed to fail 4/15 against the
+  pre-fix copy.
+
 - **The install screen no longer tells you that you are now protected.** Both paths ended on a
   claim about your safety rather than a fact about what was written: the default said *"You are
   now protected against:"* over a list including force-push and `.env` committed to git, and
