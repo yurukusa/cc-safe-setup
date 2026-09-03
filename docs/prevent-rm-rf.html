@@ -82,22 +82,52 @@ nav a{margin-right:1rem}
 <p>CLAUDE.md rules are part of the prompt context. When context fills up, rules get pushed out. Claude can (and does) ignore them. A rule saying "never run rm -rf" is a <em>suggestion</em>, not enforcement.</p>
 
 <h2>The Fix: PreToolUse Hooks</h2>
-<p>Claude Code <a href="https://code.claude.com/docs/en/hooks">Hooks</a> run at the process level, outside the model's control. A PreToolUse hook that exits with code 2 blocks the tool invocation. The model cannot bypass this.</p>
+<p>Claude Code <a href="https://code.claude.com/docs/en/hooks">Hooks</a> run at the process level, outside the model's control. A PreToolUse hook that exits with code 2 blocks the tool invocation. The model cannot ignore the block or argue its way past it.</p>
 
 <div class="fix">
-<p><strong>destructive-guard.sh</strong> — the hook that prevents rm -rf:</p>
+<p><strong>destructive-guard.sh</strong> &mdash; two questions, asked separately:</p>
 <pre><code>#!/bin/bash
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-# Block rm -rf with dangerous targets
-if echo "$COMMAND" | grep -qE 'rm\s+.*-[rRf]*[rR][rRf]*\s+(/|~|\$HOME|\.\.)'; then
-  echo "BLOCKED: Destructive rm command targeting root/home" >&2
+# A shell joins "\" + newline before running the command. grep is line-oriented,
+# so without this it sees `rm -rf \` and `/` as two separate lines and matches
+# neither. That is not an exotic way to write a command -- it is what you get
+# from wrapping a long line.
+COMMAND=${COMMAND//\\$'\n'/ }
+
+# Question 1: is this a recursive delete? Short flags can be bundled and
+# reordered (-rf, -fr, -Rf), and there is a long spelling too.
+RECURSIVE='(^|[;&|]|&&|\|\|)[[:space:]]*(sudo[[:space:]]+)?rm[[:space:]]+([^|;&]*[[:space:]])?(-[a-zA-Z]*[rR][a-zA-Z]*[[:space:]]|--recursive[[:space:]])'
+
+# Question 2: is the target somewhere you cannot undo?
+#   / ~ $HOME       everything underneath is dangerous too
+#   . .. ./ *       dangerous only when the argument IS that, so read to the end
+#                   of the argument -- otherwise `rm -rf ./node_modules` is caught
+DANGEROUS='[[:space:]]["'"'"']?(/|~|\$\{?HOME\}?)|[[:space:]]["'"'"']?(\.\.?/?|\*)(["'"'"']?[[:space:]]|["'"'"']?$)'
+
+if printf '%s' "$COMMAND" | grep -qE "$RECURSIVE" &&
+   printf '%s' "$COMMAND" | grep -qE "$DANGEROUS"; then
+  echo "BLOCKED: recursive delete targeting root, home, or the current directory" >&2
   exit 2
 fi
 
 exit 0</code></pre>
 </div>
+
+<p>Asking the two questions separately is the point. Folded into one expression, every new spelling has to be threaded through the whole pattern, and the pattern stops being readable long before it stops being wrong.</p>
+
+<h2>Where this rule stops</h2>
+<p>The block is solid. The <em>pattern</em> is a different thing, and it is worth knowing where it ends before you rely on it.</p>
+<ul style="margin:1rem 0 1rem 2rem">
+<li><strong>Mentions.</strong> This compact version blocks a command that only appears inside <code>echo</code> or a heredoc. The shipped hook separates mentions from invocations before any rule runs.</li>
+<li><strong>Other ways to delete.</strong> <code>find . -delete</code>, <code>shred</code>, <code>git clean -fdx</code>, a Python script &mdash; none of them are <code>rm</code>.</li>
+<li><strong>The command name written another way</strong>, such as <code>/bin/rm</code> or a shell alias.</li>
+<li><strong>A variable that expands into the target.</strong> <code>rm -rf "$DIR"</code> is only dangerous once you know what <code>$DIR</code> holds, and the hook sees the text, not the value.</li>
+</ul>
+<p>If you need a guarantee rather than a good local filter, put the files somewhere the process cannot reach: a separate user account, a container, or a sandbox. A hook filters what gets typed. It cannot make a directory unreachable.</p>
+
+<p style="font-size:.9rem;color:#8b949e">This pattern was rewritten on 2026-09-03. The version this page carried before it missed six real cases &mdash; a line-wrapped <code>rm -rf /</code>, <code>rm -rf "$HOME"</code>, <code>rm --recursive --force /</code>, <code>rm -rf ./</code>, <code>cd / &amp;&amp; rm -rf *</code> &mdash; and the line-wrapped one is the one worth pausing on: the textbook example still got blocked, so the gap looked like coverage. Both directions are covered by 31 cases now.</p>
 
 <div class="cta">
 <h2>Install All 8 Safety Hooks in 10 Seconds</h2>
