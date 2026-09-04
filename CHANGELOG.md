@@ -1,6 +1,46 @@
 # Changelog
 
 ## [Unreleased]
+- **The README promised a wider guard than `credential-guard` delivers.** The plugin table
+  said `credential-guard` blocks "writes and edits to `.env` and service-account files, API
+  keys in shell commands". Measured 2026-09-04 against the shipped npm 29.8.0, firing every
+  plugin hook with its declared `matcher`:
+
+  | Claim | Shapes blocked |
+  | --- | --- |
+  | writes and edits to `.env` | **4 of 4** — holds (`.env`, `.env.production`, `.env.local`, `Edit`) |
+  | service-account files | **2 of 7** |
+  | API keys in shell commands | **0 of 6** |
+
+  Two causes, both readable in `plugin.json`. The service-account pattern is
+  `serviceaccount.*\.json|key\.json|credentials\.json` — no separator, and case-sensitive —
+  so `credentials.json` is blocked while `gcp-service-account.json`, `service_account.json`,
+  `serviceAccountKey.json` and `firebase-adminsdk.json` all pass. One hyphen or one capital
+  letter is enough. And **neither `Bash` hook contains `exit 2`**: they write a warning to
+  stderr and return 0, so the command runs. Under a heading that reads "What it blocks",
+  that is a claim of blocking for something that only warns.
+
+  This is the expensive direction of wrong, the same one as the `secret-guard` entry below.
+  Nothing breaks, so nobody files an issue, and the operator who read the table keeps
+  believing it. The row now states the actual patterns, and a new "Measured limits" section
+  under the table records what is *not* covered: `Bash` is never blocked by this plugin, the
+  same write done through `Bash` is invisible to it (install
+  `examples/secret-file-write-guard.sh` — 9 of those 11 shapes; `git add .env` belongs to
+  `dotenv-commit-guard.sh`, and a write made inside an interpreter cannot be seen from the
+  command string at all), and the service-account naming gap above.
+
+- **`secret-file-write-guard.sh` header claimed a rollout date it could not support.** It said
+  the Bash-first instruction arrived "since 2026-08-14" and cited a 40.5% -> 64.2% shift. The
+  date was borrowed from third-party issue reports and is not verifiable from this machine —
+  there are zero file-changing operations recorded on 08-14 and 08-15 here. Moving the
+  boundary anywhere in August yields +8.7 to +23.6 points and never flips sign, so the shift
+  is a drift across the month rather than a single-day switch. The header now reports one
+  measurement run (2026-09-04: 21,938 operations over 51 days, 40.4% through 08-13 and 64.0%
+  from 08-16, on 10,880 vs 11,058 operations) and states plainly that the cause is not proven.
+  It also carries the audit command for `"type":"auto_mode"` attachments, and the coverage
+  wording is corrected: no example hook targets a Bash write into a secret file, though five
+  of the eleven shapes stop for adjacent reasons.
+
 - **`secret-guard` promised two things in its own header and delivered neither.** The header
   has said since the first release that it blocks `git add *credentials* / *secret* / *.pem /
   *.key`, and it documented `CC_SECRET_PATTERNS` as "colon-separated additional patterns to
