@@ -15,17 +15,29 @@
 #     printf '%s' "$K" >> ~/app/.env     passes
 #     curl -s https://x/k -o ~/app/.env  passes
 #
-#   Measured on 2026-09-04 against all 914 example hooks: zero of them
-#   target these forms. The private-key copy is covered by
-#   ssh-key-protect.sh, and `git add .env` by dotenv-commit-guard.sh;
-#   the write itself was not covered anywhere.
+#   Measured on 2026-09-04 against all 914 example hooks: none of them
+#   target a Bash write into a secret file. Five of the eleven forms do
+#   stop, for adjacent reasons -- ssh-key-protect.sh (private-key copy),
+#   dotenv-commit-guard.sh (`git add .env`), no-base64-exfil.sh,
+#   env-inline-secret-guard.sh (a key string inline) and a banned-command
+#   list. The write itself was not covered anywhere.
 #
-#   This matters more since 2026-08-14, when Claude Code began telling
-#   some sessions to prefer Bash over the Read/Edit/Write tools
-#   (feature flag bashActFirstEnabled; assignment is per session, so
-#   "it does not happen here" is not evidence it does not happen).
-#   In my own transcripts, file edits made through Bash went from
-#   40.5% to 64.2% across that date, on a near-identical volume.
+#   This matters more because the route changed. In my own transcripts
+#   (measured 2026-09-04, 21,938 file-changing operations over 51 days),
+#   edits made through Bash were 40.4% up to 08-13 and 64.0% from 08-16,
+#   on a near-identical volume (10,880 vs 11,058 operations).
+#   Moving the boundary anywhere in August gives +8.7 to +23.6 points and
+#   never flips sign, so this is a drift across the month, not a
+#   single-day switch. I cannot date it from my own records.
+#
+#   Claude Code does tell some sessions to prefer Bash over the
+#   Read/Edit/Write tools (feature flag bashActFirstEnabled; assignment is
+#   per session, so "it does not happen here" is not evidence it does not
+#   happen). My transcripts carry 152 `"type":"auto_mode"` attachments,
+#   every one with bashFirst:true -- and 67 of them in sessions that were
+#   NOT in bypass permissions mode. Audit your own with:
+#     grep -rho '"type":"auto_mode"[^}]*}' ~/.claude/projects/ | sort | uniq -c
+#   I have not proven that this caused the shift measured above.
 #
 # TRIGGER: PreToolUse
 # MATCHER: "Bash"
