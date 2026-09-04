@@ -56,7 +56,7 @@ are written up at length in these:
   data and the harness are in the appendices
 
 The first four are also sold together as
-[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
+[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library/c/BOOKSMD) (from $29).
 **All five have a free sample you can read before deciding.**
 
 **More than one person.** Each of the five is also sold at a team discount — up to 3, 5, 10, 15
