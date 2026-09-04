@@ -26,10 +26,33 @@ The core guard sets are also published as Claude Code plugins from this reposito
 | --- | --- |
 | `safety-essentials` | `rm -rf`, force-push, `git reset --hard`, writes to `.env`, package publish |
 | `git-protection` | force-push, direct pushes to `main`/`master`, hard reset, interactive rebase, `git clean -fd` |
-| `credential-guard` | writes and edits to `.env` and service-account files, API keys in shell commands |
+| `credential-guard` | `Write`/`Edit` to paths matching `.env`, `.env.*`, `credentials`, `secret`, `serviceaccount*.json`, `key.json`. API keys in Bash commands are **warned about, not blocked** — see the limits below |
 | `token-guard` | reads over 100KB, a per-session read budget, subagent fan-out, a token budget that asks for `/compact` |
 
 These are the guards only. The example-hook library, `--doctor`, `--audit`, and the rest of the CLI come from the npm package or from this repository directly.
+
+### Measured limits of `credential-guard` (2026-09-04, against npm 29.8.0)
+
+These are the exit codes, not the intent. Read them before trusting the row above.
+
+- **Bash is never blocked by this plugin.** Both of its `Bash` hooks print a warning to stderr
+  and return 0. `export ANTHROPIC_API_KEY=…`, `curl -H "Authorization: Bearer …"`, and
+  `git commit -m "… <key> …"` all run. 0 of 6 shapes were blocked.
+- **The same write through Bash is invisible.** `Write` to `~/app/.env` is blocked, but
+  `cp k.env ~/app/.env`, `sed -i … ~/app/.env`, `printf … >> ~/app/.env` and `tee` are not.
+  Install `examples/secret-file-write-guard.sh` for that (it covers 9 of 11 such shapes;
+  `git add .env` belongs to `dotenv-commit-guard.sh`, and writes made inside an interpreter,
+  e.g. `python3 -c "open('.env','w')…"`, cannot be seen from the command string at all).
+- **"Service-account files" is narrower than it sounds, and case-sensitive.** The patterns are
+  `serviceaccount.*\.json`, `key\.json`, `credentials\.json`. So `credentials.json` and
+  `application_default_credentials.json` are blocked, but `gcp-service-account.json`,
+  `service_account.json`, `serviceAccountKey.json` and `firebase-adminsdk.json` are **not**
+  (2 of 7 shapes blocked). A hyphen, an underscore or a capital letter is enough to pass.
+- `.env` itself holds up: `.env`, `.env.production`, `.env.local` and `Edit` on `.env` were all
+  blocked (4 of 4).
+
+Hooks stop a tool call before it runs. They are not a permission boundary — pair them with
+`permissions.deny` and keep secrets outside the repository.
 
 ## The npm release is behind this repository
 
