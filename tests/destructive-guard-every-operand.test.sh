@@ -11,9 +11,20 @@
 # fifteen approving hooks fixed the same day: a rule that examines one command
 # position and then applies its verdict to everything else on the line.
 #
-# Check 1b scans every operand. It is deliberately narrow — only `..`, `/` and
-# `~`, which cannot be meant in an ordinary cleanup — so it cannot start blocking
-# work like `rm -rf build ./dist` or `rm -rf ../sibling/node_modules`.
+# Check 1b scans every operand. It is deliberately narrow — only operands that
+# cannot be meant in an ordinary cleanup — so it cannot start blocking work like
+# `rm -rf build ./dist` or `rm -rf ../sibling/node_modules`.
+#
+# 2026-09-04: that narrow list held `..`, `/` and `~` only, while the header of
+# destructive-guard promises that deletions of /home and /etc are blocked.
+# Check 1 does block them, but only in the operand position it happens to read.
+# Measured that day: `rm -rf /home/<user>/<dir>` was blocked and
+# `rm -rf /home/<user>/<dir> /tmp/x` was not. One extra operand that looks safe
+# turned the documented promise off. Neither Check 1 nor this test was wrong
+# about what it covered — the gap was between what the header promised and what
+# the every-operand list contained. The absolute prefixes Check 1 already calls
+# critical are now in that list; the controls below are what keeps the widening
+# from reaching ordinary cleanups.
 
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -55,6 +66,15 @@ want_block "$RM -r -f node_modules .."
 want_block "$RM -rf dist build .."
 want_block "$RM -rf coverage ~"
 
+# --- absolute critical paths behind a safe operand (measured 2026-09-04) ---
+# These are the forms the header promises to block. Every one of them passed
+# before the every-operand list learned the absolute prefixes.
+want_block "$RM -rf node_modules /home/someone/data"
+want_block "$RM -rf /home/someone/data /tmp/scratch"
+want_block "$RM -rf node_modules /etc/nginx"
+want_block "$RM -rf build /var/log"
+want_block "$RM -rf dist /usr/local/lib"
+
 # --- and in the first position, which already worked -----------------------
 want_block "$RM -rf .."
 want_block "$RM -rf ../"
@@ -70,6 +90,10 @@ want_allow "$RM -f package-lock.json"
 want_allow "cd app && $RM -rf node_modules && npm ci"
 want_allow "ls -la .."
 want_allow "cp -r .. /tmp/backup"
+# The widening must not reach /tmp, which is on the safe list, and must not
+# reach a relative name that merely resembles a system directory.
+want_allow "$RM -rf /tmp/build-cache /tmp/scratch"
+want_allow "$RM -rf var/cache usr/share"
 
 echo
 echo "destructive-guard-every-operand: $PASS passed, $FAIL failed"
