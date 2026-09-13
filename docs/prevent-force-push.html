@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prevent Claude Code Force-Push to Main — cc-safe-setup</title>
-<meta name="description" content="Claude Code can force-push to main and rewrite shared branch history. Real incidents from autonomous sessions. One command to prevent it: npx github:yurukusa/cc-safe-setup.">
-<meta name="keywords" content="claude code force push, claude code git push main, claude code branch protection, pretooluse hook, cc-safe-setup">
+<title>Never Push to Main: Where Should That Rule Live So Claude Cannot Skip It?</title>
+<meta name="description" content="Your team has a hard rule: never push to main. Project CLAUDE.md, local CLAUDE.md, a PreToolUse hook, or a skill's reference.md — only one of the four cannot be skipped. Measured on Claude Code 2.1.246, with the hook that enforces it.">
+<meta name="keywords" content="where should the rule live, never push to main claude, claude code force push, claude cannot skip rule, pretooluse hook, claude md vs hook, cc-safe-setup">
 <link rel="canonical" href="https://yurukusa.github.io/cc-safe-setup/prevent-force-push.html">
-<meta property="og:title" content="Prevent Claude Code Force-Push to Main">
-<meta property="og:description" content="Stop Claude Code from force-pushing to main during autonomous sessions.">
+<meta property="og:title" content="Never Push to Main: Where Should That Rule Live So Claude Cannot Skip It?">
+<meta property="og:description" content="Four places you could put the rule. Only one of them is a refusal instead of a request. Measured, not assumed.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.7;max-width:800px;margin:0 auto}
@@ -27,12 +27,16 @@ pre code{background:none;padding:0}
 .badge{display:inline-block;background:#238636;color:#fff;padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:.5rem}
 nav{margin-bottom:2rem;font-size:.9rem}
 nav a{margin-right:1rem}
+table{border-collapse:collapse;width:100%;margin:1rem 0;display:block;overflow-x:auto}
+th,td{border:1px solid #30363d;padding:.6rem .8rem;text-align:left;vertical-align:top}
+th{background:#161b22;color:#f0f6fc;font-weight:600}
+blockquote{border-left:3px solid #58a6ff;background:#161b22;padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
 </style>
 </head>
 <body>
 <nav><a href="./">Home</a> <a href="getting-started.html">Getting Started</a> <a href="prevent-rm-rf.html">Prevent rm -rf</a></nav>
 
-<h1>Prevent Claude Code Force-Push to Main</h1>
+<h1>Never push to main: where should that rule live so Claude cannot skip it?</h1>
 <p>In autonomous mode, Claude Code can run <code>git push --force origin main</code> and rewrite your shared branch history. This has happened to real users during overnight sessions.</p>
 
 <h2>The Problem</h2>
@@ -50,8 +54,22 @@ nav a{margin-right:1rem}
 <p><a href="https://github.com/anthropics/claude-code/issues/36640">#36640</a></p>
 </div>
 
-<h2>Why CLAUDE.md Isn't Enough</h2>
-<p>You can write "never push to main" in CLAUDE.md. Claude will follow it — until the context window fills up and the rule gets compacted away. In long autonomous sessions, this happens reliably.</p>
+<h2>Where should the rule live?</h2>
+<p>If your team has a hard rule — <em>never push to main</em> — there are four places you could put it. Only one of them cannot be skipped.</p>
+
+<table>
+<tr><th>Where you put it</th><th>What it actually gives you</th></tr>
+<tr><td>Project <code>CLAUDE.md</code>, marked "IMPORTANT"</td><td>Usually obeyed. In my own measurement it held every time — but it is still an instruction the model chooses to follow.</td></tr>
+<tr><td>Local <code>CLAUDE.md</code></td><td>Same as above, and scoped to you alone — so it does not protect the team at all.</td></tr>
+<tr><td><strong>A PreToolUse hook that stops the push</strong></td><td><strong>Refused before the command runs.</strong> The decision is made by your shell, not by the model.</td></tr>
+<tr><td>A skill's <code>reference.md</code></td><td>Loaded only when that skill is in play. A push can happen outside it.</td></tr>
+</table>
+
+<h2>Honest version: CLAUDE.md is better than I used to say</h2>
+<p>I used to sell these hooks with "rules in CLAUDE.md get skipped." Then I measured it, and my own claim did not survive. Across 39 trials on Claude Code 2.1.246 (two tasks, twelve conditions): with the prohibition written in <code>CLAUDE.md</code>, the forbidden action happened <strong>0 times in 22 trials</strong>. Without it, <strong>17 times out of 17</strong>. Length, position in the file, and competing instructions made no measurable difference.</p>
+<p>So the honest framing is not "CLAUDE.md does not work." It is this:</p>
+<blockquote><strong>A written rule gives you a <em>usually</em> that depends on the model. A hook gives you a <em>cannot</em> that does not.</strong></blockquote>
+<p>For a rule your team treats as absolute — the kind where one violation rewrites shared history — <em>usually</em> is the wrong guarantee to buy. That is the whole argument for putting it in a hook, and it does not need CLAUDE.md to fail.</p>
 
 <h2>The Fix: branch-guard Hook</h2>
 
