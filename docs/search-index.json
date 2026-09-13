@@ -1072,9 +1072,9 @@
   },
   {
     "url": "prevent-force-push.html",
-    "title": "Prevent Claude Code Force-Push to Main — cc-safe-setup",
-    "description": "Claude Code can force-push to main and rewrite shared branch history. Real incidents from autonomous sessions. One command to prevent it: npx github:yurukusa/cc-safe-setup.",
-    "keywords": "claude code force push, claude code git push main, claude code branch protection, pretooluse hook, cc-safe-setup",
+    "title": "Never Push to Main: Where Should That Rule Live So Claude Cannot Skip It?",
+    "description": "Your team has a hard rule: never push to main. Project CLAUDE.md, local CLAUDE.md, a PreToolUse hook, or a skill's reference.md — only one of the four cannot be skipped. Measured on Claude Code 2.1.246, with the hook that enforces it.",
+    "keywords": "where should the rule live, never push to main claude, claude code force push, claude cannot skip rule, pretooluse hook, claude md vs hook, cc-safe-setup",
     "snippet": "In autonomous mode, Claude Code can run git push --force origin main and rewrite your shared branch history. This has happened to real users during overnight sessions."
   },
   {
