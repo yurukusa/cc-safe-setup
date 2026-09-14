@@ -115,11 +115,26 @@ check "$DG" "dg: --no-advice"                     'git --no-advice clean -fd'   
 check "$DG" "dg: --no-optional-locks status"      'git --no-optional-locks status'            0
 check "$DG" "dg: --git-dir separate value, log"   'git --git-dir /tmp/r/repo.d log --oneline' 0
 
-# KNOWN GAP, measured 2026-09-14 and deliberately not asserted here:
-#   /usr/bin/git reset --hard   and   ./git reset --hard   are NOT blocked.
-# Invoking git by path bypasses the destructive checks even with no global
-# options at all, so it is a different defect from the one this file covers.
-# Tracked separately rather than papered over with a passing test.
+# --- 2026-09-14, second pass: `git` did not have to be the first word ---
+# The git checks anchored on `(^|;|&+|\|\|)\s*git`, so anything in front of the
+# word - an absolute path, a wrapper, an environment assignment - put the
+# command out of reach. Check 0y, the pre-filter that decides whether a
+# destructive verb is present at all, already counted every one of these as an
+# invocation; only the checks it feeds were narrower. Both now share CC_CMDPOS.
+check "$DG" "dg: git by absolute path"        '/usr/bin/git reset --hard'          2
+check "$DG" "dg: git by relative path"        './git reset --hard'                 2
+check "$DG" "dg: sudo git"                    'sudo git reset --hard'              2
+check "$DG" "dg: env assignment in front"     'env FOO=1 git reset --hard'         2
+check "$DG" "dg: bare assignment in front"    'FOO=1 git reset --hard'             2
+check "$DG" "dg: time wrapper"                'time git reset --hard'              2
+check "$DG" "dg: nohup wrapper"               'nohup git reset --hard'             2
+check "$DG" "dg: absolute path, clean -fd"    '/usr/bin/git clean -fd'             2
+check "$DG" "dg: absolute path, checkout -f"  '/usr/bin/git checkout --force main'  2
+# The widened head must not start blocking the things it never blocked before.
+check "$DG" "dg: mentions it in an echo"      "echo 'git reset --hard' >> notes.md" 0
+check "$DG" "dg: greps for the words"         "grep -r 'git reset --hard' ./docs"   0
+check "$DG" "dg: reset --soft"                'git reset --soft HEAD~1'             0
+check "$DG" "dg: a path that merely ends in git" 'ls /usr/bin/git'                  0
 
 echo
 echo "PASS: $PASS  FAIL: $FAIL"
