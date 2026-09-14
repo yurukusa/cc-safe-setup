@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-09-14T17:48:46+09:00
+Updated: 2026-09-14T17:49:04+09:00
 
 ## Git
 - Branch: `main`
@@ -7,11 +7,12 @@ Updated: 2026-09-14T17:48:46+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: 0fb6f2cb checkpoint: auto-save 17:48:40
+- Last commit: 498d2e67 checkpoint: auto-save 17:49:03
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
+./.claude/session-logs/2026-09-14.md
 ./.claude/pre-compact-checkpoint.md
 ./examples/git-operations-require-approval.sh
 ./examples/git-push-blast-radius-guard.sh
@@ -20,7 +21,6 @@ Updated: 2026-09-14T17:48:46+09:00
 ./tests/test-git-operations-require-approval.sh
 ./docs/books.md
 ./tests/destructive-guard-every-operand.test.sh
-./CHANGELOG.md
 ```
 
 ## Active TODOs: 1 file(s)
