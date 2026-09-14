@@ -62,8 +62,14 @@ nav a{margin-right:1rem}
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-# Block all push operations
-if echo "$COMMAND" | grep -qE 'git\s+push'; then
+# git takes its own options BEFORE the verb, so `git -C /repo push` reaches the
+# remote exactly like the plain form while `git\s+push` never sees it. Strip the
+# options first, or "block all pushes" is not what this rule does.
+CHECK=$(printf '%s' "$COMMAND" | sed -E ':a;
+  s/(^|[;&|[:space:]])git[[:space:]]+((-C|-c)[[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path)=[^[:space:]]+|--(no-pager|paginate|bare))[[:space:]]+/\1git /g; ta')
+
+# Block all push operations. `send-pack` is the plumbing form of the same thing.
+if printf '%s' "$CHECK" | grep -qE 'git\s+(push|send-pack)\b'; then
   echo "BLOCKED: git push requires human approval" >&2
   echo "Use: git push (outside Claude Code) after reviewing changes" >&2
   exit 2
