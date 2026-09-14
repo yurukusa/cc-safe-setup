@@ -180,6 +180,15 @@ npx cc-hook-test ~/.claude/hooks/guard.sh</pre>
 <tr><td>git reset</td><td><code>git\s+reset\s+--hard</code></td></tr>
 <tr><td>DB wipe</td><td><code>migrate:fresh|DROP\s+DB</code></td></tr>
 </table>
+<p style="font-size:.85em;opacity:.85;margin-top:.6rem">
+These are starting points, not finished rules. Every <code>git\s+&lt;verb&gt;</code> row
+above assumes the verb sits next to <code>git</code> &mdash; but git takes its own
+options first, so <code>git -C /repo push --force</code> and
+<code>git -c user.name=x push origin main</code> both slip past
+(measured 2026-09-14). Strip the global options before matching; the full
+version with the normalisation step is in
+<a href="prevent-force-push.html">Prevent force-push</a>.
+</p>
 </div>
 
 </div>
