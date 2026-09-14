@@ -1,5 +1,5 @@
 # Session Snapshot (auto-generated)
-Updated: 2026-09-03T14:00:55+09:00
+Updated: 2026-09-14T17:48:27+09:00
 
 ## Git
 - Branch: `main`
@@ -7,20 +7,20 @@ Updated: 2026-09-03T14:00:55+09:00
 ```
  M .claude/session-snapshot.md
 ```
-- Last commit: e8bfa940 recovery: pre-compact checkpoint (1 files, 20260903-050055)
+- Last commit: e7747d63 git guards: match git and its verb as separate facts (#1117) (#1120)
 
 ## Recent Files
 ```
 ./.claude/session-snapshot.md
-./.claude/session-logs/2026-09-03.md
 ./.claude/pre-compact-checkpoint.md
-./tests/bundled-short-flags-bypass.test.sh
-./tests/line-continuation-bypass.test.sh
+./examples/git-operations-require-approval.sh
+./examples/git-push-blast-radius-guard.sh
+./examples/git-remote-guard.sh
 ./tests/git-global-options-bypass.test.sh
-./tests/hook-trigger-matches-envelope.test.sh
-./examples/prefer-builtin-tools.sh
-./tests/install-does-not-claim-protection.test.sh
-./tests/no-unqualified-safety-claims.test.sh
+./tests/test-git-operations-require-approval.sh
+./docs/books.md
+./tests/destructive-guard-every-operand.test.sh
+./CHANGELOG.md
 ```
 
 ## Active TODOs: 1 file(s)
