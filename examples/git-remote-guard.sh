@@ -20,9 +20,30 @@ if echo "$COMMAND" | grep -qE '\bgit\s+remote\s+add\b'; then
     echo "Verify this is a trusted repository." >&2
 fi
 
-# Check for push to non-origin remote
-if echo "$COMMAND" | grep -qE '\bgit\s+push\s+(?!origin\b)\w'; then
-    REMOTE=$(echo "$COMMAND" | grep -oE 'git\s+push\s+(\S+)' | awk '{print $3}')
+# Check for push to a remote that is not origin.
+#
+# The previous version used `(?!origin\b)`, a lookahead that ERE does not have:
+# grep -E rejected the pattern, returned 2, and the `if` was never true. The
+# warning below could not fire on any input. Deciding "is it origin?" in the
+# shell instead of the pattern removes the need for a lookahead entirely.
+#
+# `git` also accepts global options before the subcommand, so `git -C <dir>
+# push upstream main` has to be matched as well (#1117).
+GIT_OPT='(-[cC][[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path|config-env|attr-source|super-prefix)(=[^[:space:]]+|[[:space:]]+[^[:space:]]+)|-[pP]|--(paginate|no-pager|bare|no-replace-objects|literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-optional-locks|no-lazy-fetch|no-advice))'
+GIT_HEAD='(^|[[:space:];&|(]|/|"|'"'"')git'
+GIT_PUSH_RE="${GIT_HEAD}([[:space:]]+${GIT_OPT})*[[:space:]]+push([[:space:]]|$)"
+
+if echo "$COMMAND" | grep -qE "$GIT_PUSH_RE"; then
+    # First bare word after `push` is the remote (flags and their values are
+    # skipped). No remote at all means the default one, which is fine.
+    REMOTE=$(echo "$COMMAND" | awk '{
+        for (i = 1; i <= NF; i++) {
+            if ($i == "push") { seen = 1; continue }
+            if (!seen) continue
+            if ($i ~ /^-/) { continue }
+            print $i; exit
+        }
+    }')
     if [ -n "$REMOTE" ] && [ "$REMOTE" != "origin" ]; then
         echo "WARNING: Pushing to non-origin remote: $REMOTE" >&2
         echo "Verify this remote is trusted." >&2

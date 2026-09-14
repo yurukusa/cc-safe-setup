@@ -55,8 +55,16 @@ TOOL=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$COMMAND" ] && exit 0
 
+# git accepts global options between `git` and the subcommand, so `git push`
+# as two adjacent words never sees `git -C <dir> push` - which is exactly how
+# an agent pushes to branch after branch without changing directory. Reported
+# in #1117. `git send-pack` is the plumbing form of the same operation.
+GIT_OPT='(-[cC][[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path|config-env|attr-source|super-prefix)(=[^[:space:]]+|[[:space:]]+[^[:space:]]+)|-[pP]|--(paginate|no-pager|bare|no-replace-objects|literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-optional-locks|no-lazy-fetch|no-advice))'
+GIT_HEAD='(^|[[:space:];&|(]|/|"|'"'"')git'
+GIT_PUSH_RE="${GIT_HEAD}([[:space:]]+${GIT_OPT})*[[:space:]]+(push|send-pack)\\b|${GIT_HEAD}-(push|send-pack)\\b"
+
 # Quick reject: nothing to do unless the command runs `git push` somewhere.
-printf '%s' "$COMMAND" | grep -qE '\bgit\s+push\b' || exit 0
+printf '%s' "$COMMAND" | grep -qE "$GIT_PUSH_RE" || exit 0
 
 BLOCK_AT="${CC_PUSH_BLAST_BLOCK:-6}"
 WARN_AT="${CC_PUSH_BLAST_WARN:-3}"
@@ -80,16 +88,28 @@ declare -a BRANCHES=()
 SEGMENTS=$(printf '%s' "$COMMAND" | tr '\n;|' '\n\n\n' | sed 's/&&/\n/g')
 
 while IFS= read -r seg; do
-    printf '%s' "$seg" | grep -qE '\bgit\s+push\b' || continue
+    printf '%s' "$seg" | grep -qE "$GIT_PUSH_RE" || continue
+
+    # Tokens after the subcommand. The old `sed 's/.*\bgit[[:space:]]+push//'`
+    # stripped nothing when a global option sat between `git` and `push`, so the
+    # whole command ended up parsed as if it were the argument list (#1117).
+    # Walking the tokens has no such failure mode.
+    # shellcheck disable=SC2206
+    _all=( $seg )
+    after=""
+    _i=0
+    while [ "$_i" -lt "${#_all[@]}" ]; do
+        case "${_all[$_i]}" in
+            push|send-pack) after="${_all[*]:$((_i + 1))}"; break ;;
+        esac
+        _i=$((_i + 1))
+    done
 
     # Whole-repo fan-out: one command, every branch, maximum CI blast radius.
-    if printf '%s' "$seg" | grep -qE '\bgit\s+push\b.*(--all|--mirror)\b'; then
+    if printf '%s' "$after" | grep -qE '(^|[[:space:]])(--all|--mirror)([[:space:]]|$)'; then
         FANOUT=1
         continue
     fi
-
-    # Tokens after the word `push`. Drop flags and flag values we don't need.
-    after=$(printf '%s' "$seg" | sed -E 's/.*\bgit[[:space:]]+push[[:space:]]*//')
     # shellcheck disable=SC2206
     toks=( $after )
 

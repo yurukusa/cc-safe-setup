@@ -8,8 +8,10 @@
 #   user approval. This hook enforces the restriction at process level.
 #
 # Blocks:
-#   git commit, git push (including --force), git checkout -b,
-#   git switch -c, git branch <name>
+#   git commit, git push (including --force and `git send-pack`),
+#   git checkout -b, git switch -c, git branch <name> - including when
+#   they arrive with git's own global options in front, such as
+#   `git -C <dir> push` or `git --git-dir=<path> commit` (#1117).
 #
 # Does NOT block:
 #   git status, git log, git diff, git show, git branch (list),
@@ -39,8 +41,31 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 [ -z "$COMMAND" ] && exit 0
 
-# Skip if the command is inside echo/printf (not actual execution)
-echo "$COMMAND" | grep -qE '^\s*(echo|printf)\s' && exit 0
+# git accepts global options between `git` and the subcommand, so matching the
+# two as adjacent words misses every one of these real shapes (reported in #1117
+# with four working examples):
+#     git -C /tmp/repo push --force origin main
+#     git --git-dir=/tmp/r/repo.d push origin main
+#     git -c user.name=x commit -m x
+#     git send-pack origin main
+# GIT_OPT is the set of options git itself accepts before a subcommand.
+GIT_OPT='(-[cC][[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path|config-env|attr-source|super-prefix)(=[^[:space:]]+|[[:space:]]+[^[:space:]]+)|-[pP]|--(paginate|no-pager|bare|no-replace-objects|literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-optional-locks|no-lazy-fetch|no-advice))'
+
+# `git` at a command position, not the `git` inside a path. The old pattern
+# matched `git --git-dir=/tmp/r/.git push` only because the *path* ended in
+# `.git`, and let the same command through when the git-dir was named anything
+# else (#1117). Quotes are allowed on purpose: `bash -c "git push ..."` runs.
+GIT_HEAD='(^|[[:space:];&|(]|/|"|'"'"')git'
+
+# Build "git [global options] <subcommand>" for one subcommand pattern.
+git_re() {
+    printf '%s([[:space:]]+%s)*[[:space:]]+%s' "$GIT_HEAD" "$GIT_OPT" "$1"
+}
+
+# Read-only front halves that mention a command without running it.
+# This list is a guess about how people write, not a rule - `sed -i` and any
+# wrapper not named here will still be inspected.
+READ_ONLY_RE='^[[:space:]]*(echo|printf|grep|rg|cat|less|head|tail)[[:space:]]'
 
 # Check each segment of compound commands
 check_segment() {
@@ -49,8 +74,12 @@ check_segment() {
     seg=$(echo "$seg" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     [ -z "$seg" ] && return 0
 
+    # Exempt only THIS segment. Applying it to the whole command let
+    # `echo hi && git push origin main` through completely.
+    echo "$seg" | grep -qE "$READ_ONLY_RE" && return 0
+
     # git commit
-    if echo "$seg" | grep -qE '\bgit\s+commit\b'; then
+    if echo "$seg" | grep -qE "$(git_re 'commit\b')|${GIT_HEAD}-commit\b"; then
         echo "BLOCKED: git commit requires explicit user approval." >&2
         echo "Command: $seg" >&2
         echo "" >&2
@@ -59,7 +88,7 @@ check_segment() {
     fi
 
     # git push (including force variants)
-    if echo "$seg" | grep -qE '\bgit\s+push\b'; then
+    if echo "$seg" | grep -qE "$(git_re '(push|send-pack)\b')|${GIT_HEAD}-(push|send-pack)\b"; then
         echo "BLOCKED: git push requires explicit user approval." >&2
         echo "Command: $seg" >&2
         echo "" >&2
@@ -68,14 +97,14 @@ check_segment() {
     fi
 
     # git checkout -b (branch creation)
-    if echo "$seg" | grep -qE '\bgit\s+checkout\s+(-b|--branch)\b'; then
+    if echo "$seg" | grep -qE "$(git_re 'checkout[[:space:]]+(-b|--branch)\b')"; then
         echo "BLOCKED: git branch creation requires explicit user approval." >&2
         echo "Command: $seg" >&2
         return 1
     fi
 
     # git switch -c / --create (branch creation)
-    if echo "$seg" | grep -qE '\bgit\s+switch\s+(-c|--create)\b'; then
+    if echo "$seg" | grep -qE "$(git_re 'switch[[:space:]]+(-c|--create)\b')"; then
         echo "BLOCKED: git branch creation requires explicit user approval." >&2
         echo "Command: $seg" >&2
         return 1
@@ -83,14 +112,17 @@ check_segment() {
 
     # git branch <name> (creation, not listing)
     # git branch without flags or with only -a/-r/-l/--list is listing
-    if echo "$seg" | grep -qE '\bgit\s+branch\s'; then
+    if echo "$seg" | grep -qE "$(git_re 'branch[[:space:]]')"; then
         # Allow listing flags
-        if echo "$seg" | grep -qE '\bgit\s+branch\s+(-[arl]|--list|--merged|--no-merged|--contains|-v|--verbose|-d|--delete|-D)\b'; then
+        if echo "$seg" | grep -qE "$(git_re 'branch[[:space:]]+(-[arl]|--list|--merged|--no-merged|--contains|-v|--verbose|-d|--delete|-D)\b')"; then
             return 0
         fi
         # If it has a name argument after "git branch", it's creation
         local args
-        args=$(echo "$seg" | sed 's/.*\bgit\s\+branch\s\+//')
+        # The old sed required `git` and `branch` to be adjacent; with a
+        # global option in between it stripped nothing and every listing form
+        # looked like a creation. Strip up to the subcommand instead.
+        args=$(echo "$seg" | sed -E 's/.*[[:space:]]branch[[:space:]]+//')
         if [ -n "$args" ] && ! echo "$args" | grep -qE '^\s*$'; then
             echo "BLOCKED: git branch creation requires explicit user approval." >&2
             echo "Command: $seg" >&2

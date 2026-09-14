@@ -59,6 +59,40 @@ test_hook '{"tool_input":{"command":"printf git push"}}' 0 "printf git push not 
 test_hook '{"tool_input":{"command":""}}' 0 "empty command passes"
 test_hook '{}' 0 "empty input passes"
 
+
+# --- git's own global options between `git` and the verb (#1117) ---
+# git -C <dir> push does exactly what git push does. Matching the two as
+# adjacent words missed every shape below; all of them ran a real push.
+test_hook '{"tool_input":{"command":"git -C /tmp/repo push --force origin main"}}' 2 "git -C <dir> push blocked"
+test_hook '{"tool_input":{"command":"git --git-dir=/tmp/r/repo.d push origin main"}}' 2 "git --git-dir=<path> push blocked"
+test_hook '{"tool_input":{"command":"git --git-dir /tmp/r/repo.d push origin main"}}' 2 "git --git-dir <path> (separate value) push blocked"
+test_hook '{"tool_input":{"command":"git --work-tree=/tmp/w --git-dir=/tmp/r/repo.d push origin main"}}' 2 "two global options before push blocked"
+test_hook '{"tool_input":{"command":"git -c user.name=x commit -m x"}}' 2 "git -c <k=v> commit blocked"
+test_hook '{"tool_input":{"command":"git -C /tmp/r checkout -b feature"}}' 2 "git -C <dir> checkout -b blocked"
+test_hook '{"tool_input":{"command":"git -C /tmp/r switch -c feature"}}' 2 "git -C <dir> switch -c blocked"
+test_hook '{"tool_input":{"command":"git -C /tmp/r branch feature"}}' 2 "git -C <dir> branch <name> blocked"
+test_hook '{"tool_input":{"command":"git -C /tmp/r branch -a"}}' 0 "git -C <dir> branch -a still a listing"
+test_hook '{"tool_input":{"command":"git --no-pager push origin main"}}' 2 "git --no-pager push blocked"
+test_hook '{"tool_input":{"command":"/usr/bin/git push origin main"}}' 2 "git invoked by absolute path blocked"
+
+# --- the plumbing form of push ---
+test_hook '{"tool_input":{"command":"git send-pack origin main"}}' 2 "git send-pack blocked"
+test_hook '{"tool_input":{"command":"git -C /tmp/r send-pack origin main"}}' 2 "git -C <dir> send-pack blocked"
+
+# --- the read-only exemption must cover its own segment only ---
+# `^\s*(echo|printf)\s` used to exempt the WHOLE command, so everything after
+# a harmless first segment ran unguarded.
+test_hook '{"tool_input":{"command":"echo hi && git push origin main"}}' 2 "echo first segment does not exempt a later push"
+test_hook '{"tool_input":{"command":"echo start; git push origin main"}}' 2 "echo before ; does not exempt a later push"
+test_hook '{"tool_input":{"command":"printf x && git commit -m x"}}' 2 "printf first segment does not exempt a later commit"
+test_hook '{"tool_input":{"command":"grep -r \"git push\" ./docs"}}' 0 "grep for the words is not an invocation"
+
+# --- the .git path coincidence ---
+# `git --git-dir=/tmp/r/.git push` used to match only because the PATH ended in
+# `.git`; the same command with any other git-dir name went through.
+test_hook '{"tool_input":{"command":"git --git-dir=/tmp/r/.git push origin main"}}' 2 "git-dir named .git blocked"
+test_hook '{"tool_input":{"command":"ls /tmp/r/.git"}}' 0 "a path containing .git is not a push"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" -gt 0 ] && exit 1
