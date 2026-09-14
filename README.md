@@ -9,7 +9,7 @@ npx github:yurukusa/cc-safe-setup
 
 The command is interactive: it shows what each hook does and lets you choose which to install into your `~/.claude/settings.json` (or a project-local `.claude/settings.json`). Nothing is installed without your confirmation. MIT licensed.
 
-> **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets nine command shapes through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
+> **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets twenty-five command shapes through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
 
 Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. The minimum price is zero.
 
@@ -76,7 +76,38 @@ All nine:
 | `cd app && git add .env` — a secret staged after a separator | secret-guard | allowed | blocked |
 | `git add \` with `.env` on the next line — the same, split over two lines | secret-guard | allowed | blocked |
 
-29.8.0 on npm ships **698** example hooks; this repository has **914**. The 216 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree.)
+### Re-measured 2026-09-14: twenty-five, not nine
+
+Two fixes landed here on 2026-09-14 ([#1120](https://github.com/yurukusa/cc-safe-setup/pull/1120),
+[#1121](https://github.com/yurukusa/cc-safe-setup/pull/1121), and the follow-up that
+carried #1121 into `branch-guard` and `secret-guard`), so the sentence above — written in
+the present tense about "the current code" — went stale the same morning it was true.
+
+Fired again that evening, same method, same `bash`, same JSON on stdin. The original
+twenty-two shapes still split nine and thirteen: 29.8.0 cannot move. What moved is the
+list. Widening it to forty-one shapes puts the gap at **twenty-five**, and nothing still
+goes the other way.
+
+The sixteen new ones:
+
+| Shape family | Example | Guard |
+| --- | --- | --- |
+| git reached through a path | `/usr/bin/git push --force origin main`, `./git push --force origin main`, `/usr/bin/git clean -fd` | branch-guard, destructive-guard |
+| git behind a wrapper | `sudo git push --force origin main`, `time …`, `nohup …` | branch-guard |
+| git behind an assignment | `env FOO=1 git push --force origin main`, `FOO=1 git push --force origin main` | branch-guard |
+| a global option whose value is not a `.git` path | `git --git-dir=/tmp/r/repo.d push --force`, `git --work-tree=/tmp/w --git-dir=… push --force`, `git -c user.name=x push --force`, `git --namespace=ns push --force` | branch-guard |
+| the plumbing spelling of a push | `git send-pack --force origin main` | branch-guard |
+| `-C` in front of the other verbs | `git -C /repo add .env`, `git -C /repo reset --hard HEAD~5`, `git -C /repo clean -fd` | secret-guard, destructive-guard |
+
+The script that produces this comparison is checked in as
+`tests/git-invocation-prefixes-all-guards.test.sh` for the current code; the
+version-against-version run is in the book's evidence folder.
+
+If you are reading this to decide whether the gap matters to you: the number is not the
+point. The point is that it grows every time this repository improves and never shrinks,
+because the published package is frozen.
+
+29.8.0 on npm ships **698** example hooks; this repository has **915**. The 216 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree; the tree was recounted on 2026-09-14 and had gained one.)
 
 To install the current code directly from this repository:
 
