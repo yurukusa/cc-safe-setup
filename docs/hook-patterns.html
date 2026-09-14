@@ -157,7 +157,12 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <div class="pattern-when">Use: PostToolUse · When CLAUDE.md rules get forgotten</div>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
-if echo "$COMMAND" | grep -qE 'git\s+push.*(main|master)'; then
+# Strip git's own options first: `git -C /repo push` is the same act, and
+# `git\s+push` cannot see it. (This one only warns, but a warning that never
+# fires is worse than none -- you stop looking.)
+CHECK=$(printf '%s' "$COMMAND" | sed -E ':a;
+  s/(^|[;&|[:space:]])git[[:space:]]+((-C|-c)[[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path)=[^[:space:]]+)[[:space:]]+/\1git /g; ta')
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*\b(main|master)\b'; then
     echo "RULE: CLAUDE.md prohibits pushing to main" >&2
 fi
 exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>

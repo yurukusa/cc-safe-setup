@@ -117,15 +117,17 @@ INPUT=$(cat)
 CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 [ -z "$CMD" ] && exit 0
 
-# Block force-push to main/master
-if echo "$CMD" | grep -qE 'git\s+push\s+.*--force.*\s+(origin\s+)?(main|master)'; then
-  echo '{"decision":"DENY","reason":"Blocked: force-push to main/master. Use a feature branch or --force-with-lease."}'
-  exit 0
-fi
+# git takes its own options BEFORE the verb, so `git -C /repo push --force` does
+# exactly what the plain form does while `git\s+push` never sees it.
+CHECK=$(printf '%s' "$CMD" | sed -E ':a;
+  s/(^|[;&|[:space:]])git[[:space:]]+((-C|-c)[[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path)=[^[:space:]]+|--(no-pager|paginate|bare))[[:space:]]+/\1git /g; ta')
 
-# Also catch the short form
-if echo "$CMD" | grep -qE 'git\s+push\s+-f\s+.*\s*(main|master)'; then
-  echo '{"decision":"DENY","reason":"Blocked: force-push (-f) to main/master."}'
+# One rule, not two. The old pair required --force to come BEFORE the branch name,
+# so `git push origin main --force` -- the form people actually type -- went through.
+# [^;&|]* scans the whole push in either order and stops at the next command.
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*\b(main|master)\b' \
+   && printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*(--force\b|--force-with-lease\b|[^A-Za-z0-9]-[a-zA-Z]*f\b)'; then
+  echo '{"decision":"DENY","reason":"Blocked: force-push to main/master. Use a feature branch or --force-with-lease."}'
   exit 0
 fi</pre>
 
