@@ -109,10 +109,20 @@ exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <pre><code>#!/bin/bash
 COMMAND=$(cat | jq -r '.tool_input.command // empty')
 [ -z "$COMMAND" ] && exit 0
-if echo "$COMMAND" | grep -qE 'git\s+push\s.*(main|master)\b'; then
+
+# git takes its own options BEFORE the verb, so `git -C /repo push --force` does
+# exactly what the plain form does while `git\s+push` never sees it. Strip the
+# options first and every rule below can assume the verb sits next to `git`.
+CHECK=$(printf '%s' "$COMMAND" | sed -E ':a;
+  s/(^|[;&|[:space:]])git[[:space:]]+((-C|-c)[[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|exec-path)=[^[:space:]]+|--(no-pager|paginate|bare))[[:space:]]+/\1git /g; ta')
+
+# [^;&|]* keeps each scan inside the push itself, so `git push origin feature &&
+# echo main` is not reported as a push to main.
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*\b(main|master)\b'; then
     echo "BLOCKED: Push to main/master" >&2; exit 2
 fi
-if echo "$COMMAND" | grep -qE 'git\s+push\s.*--force'; then
+# Force-push has more than one spelling: bundled short flags (`-uf`) are one too.
+if printf '%s' "$CHECK" | grep -qE 'git\s+push\b[^;&|]*(--force\b|--force-with-lease\b|[^A-Za-z0-9]-[a-zA-Z]*f\b)'; then
     echo "BLOCKED: Force push" >&2; exit 2
 fi
 exit 0</code><button class="copy" onclick="cp(this)">Copy</button></pre>
