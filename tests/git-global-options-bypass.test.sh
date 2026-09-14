@@ -102,6 +102,25 @@ check "$DG" "dg: -C dry-run clean"            'git -C /repo clean --dry-run'    
 check "$DG" "dg: reset --soft"                'git reset --soft HEAD~1'                    0
 check "$DG" "dg: status"                      'git status'                                 0
 
+# --- 2026-09-14: the same family, found by applying an outside report (#1117) ---
+# The normaliser only knew the `=` spelling of the long options, and its list
+# was missing several that git accepts. git takes `--git-dir <path>` with a
+# space just as happily as `--git-dir=<path>`.
+check "$DG" "dg: --git-dir with a separate value" 'git --git-dir /tmp/r/repo.d reset --hard'  2
+check "$DG" "dg: --config-env"                    'git --config-env=a=B reset --hard'         2
+check "$DG" "dg: --no-optional-locks"             'git --no-optional-locks reset --hard'      2
+check "$DG" "dg: --work-tree with a separate value" 'git --work-tree /tmp/w reset --hard'     2
+check "$DG" "dg: --no-advice"                     'git --no-advice clean -fd'                 2
+# and the same options must not start blocking ordinary work
+check "$DG" "dg: --no-optional-locks status"      'git --no-optional-locks status'            0
+check "$DG" "dg: --git-dir separate value, log"   'git --git-dir /tmp/r/repo.d log --oneline' 0
+
+# KNOWN GAP, measured 2026-09-14 and deliberately not asserted here:
+#   /usr/bin/git reset --hard   and   ./git reset --hard   are NOT blocked.
+# Invoking git by path bypasses the destructive checks even with no global
+# options at all, so it is a different defect from the one this file covers.
+# Tracked separately rather than papered over with a passing test.
+
 echo
 echo "PASS: $PASS  FAIL: $FAIL"
 [ "$FAIL" = 0 ]
