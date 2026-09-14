@@ -599,7 +599,7 @@
     "title": "Claude Code Failure-Mode Cluster Tracker — CC Safety Lab",
     "description": "Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata, v2.1.150 server-side prompt injection, AUP false-positive on Opus. Issue counts, reactions, defense hooks shippe",
     "keywords": "",
-    "snippet": "Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status. Updated as clusters evolve."
+    "snippet": "Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status as of 2026-05-31."
   },
   {
     "url": "common-mistakes.html",
@@ -898,7 +898,7 @@
   {
     "url": "opus-47-survival-guide.html",
     "title": "Claude Code Opus 4.7 Survival Guide — Known Issues, Fixes, and Safety Hooks",
-    "description": "Opus 4.7 has critical bugs: 4x token consumption, data loss (50GB+), classifier failures. Here are the hooks and fixes that protect your work right now.",
+    "description": "What was reported against Opus 4.7 as of April 2026: 4x token consumption, data loss (50GB+), classifier failures — with the hooks that blocked each one. Written for that model generation; the hooks still install.",
     "keywords": "Claude Code Opus 4.7, token consumption, data loss, rm -rf, classifier bug, safety hooks, PreToolUse, auto mode",
     "snippet": "Known issues, immediate fixes, and safety hooks. Last updated: April 18, 2026."
   },
