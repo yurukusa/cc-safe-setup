@@ -124,8 +124,23 @@ fi
 # (empty, in the child) and every pattern below would match nothing.
 CMD_UNQ=$(printf '%s' "$COMMAND" | tr -d "\"'")
 
+# The gate at the top of this file counts a path, a sudo, an inline assignment
+# and the usual wrappers as an invocation. The two checks below anchored on a
+# separator or a bare space, so `/usr/bin/rm -rf /` reached them and matched
+# nothing: measured 2026-09-14, nine invocation forms against six destructive
+# commands, twelve of fifty-four cells passed and every one of the twelve was
+# reached through a path.
+#
+# This is a superset of what was here before, not a replacement. The bare-space
+# branch is load-bearing: the gate lets `echo "rm -rf /" | sh` through on the
+# pipe-into-a-shell arm, and only the loose match below stops it. Narrowing this
+# to command position alone reopened four cases in tests/auto-mode-quoted-
+# targets.test.sh -- measured against the pre-change copy to be sure it was the
+# change and not the instrument.
+AM_CMDPOS='(^|[;&|`(){}]|\$\(|[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+|(env|nice|ionice|timeout|exec|command|builtin|stdbuf|nohup|sudo|time|xargs)([[:space:]]+-[^[:space:]]+)*([[:space:]]+[0-9]+)?([[:space:]]+-[^[:space:]]+)*[[:space:]]+)*([./]*[A-Za-z0-9_./-]*/)?'
+
 # --- Critical rm operations ---
-if echo "$CMD_UNQ" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
+if echo "$CMD_UNQ" | grep -qE "${AM_CMDPOS}"'rm[[:space:]]'; then
     # Always block rm on root-level and home-level critical paths
     # The home terminators used to be whitespace or end-of-line only, so
     # `rm -rf ~; echo done` passed while `rm -rf ~ ; echo done` was blocked --
@@ -175,7 +190,7 @@ if echo "$CMD_UNQ" | grep -qE '(^|\s|;|&&|\|)(sudo\s+)?rm\s'; then
 fi
 
 # --- Disk-level operations ---
-if echo "$CMD_UNQ" | grep -qE '(^|\s)(sudo\s+)?(dd\s+.*of=/dev|mkfs\.|fdisk\s|parted\s)'; then
+if echo "$CMD_UNQ" | grep -qE "${AM_CMDPOS}"'(dd[[:space:]]+.*of=/dev|mkfs\.|fdisk[[:space:]]|parted[[:space:]])'; then
     echo "BLOCKED: Disk-level operation (dd/mkfs/fdisk/parted)" >&2
     exit 2
 fi
