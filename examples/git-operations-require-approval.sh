@@ -17,7 +17,7 @@
 #   git status, git log, git diff, git show, git branch (list),
 #   git fetch, git stash, git add
 #
-# Handles compound commands (&&, ;, ||) by checking each segment.
+# Handles compound commands (&&, ;, ||, |) by checking each segment.
 #
 # See: https://github.com/anthropics/claude-code/issues/40695
 #
@@ -133,11 +133,21 @@ check_segment() {
     return 0
 }
 
-# Split on && ; || and check each part
+# Split on && ; || | and check each part.
+#
+# A single `|` is a separator too. Without it, a read-only command piped into
+# a git write arrives as ONE segment whose first word is the reader, and
+# READ_ONLY_RE above exempts that whole segment - so the git write on the
+# right-hand side of the pipe is never examined. Measured on the published
+# file 2026-09-15: four piped shapes exited 0 while the same git operations
+# exited 2 when written plainly.
+#
+# `||` is already turned into newlines by the rule before this one, so the
+# single-pipe rule only ever sees real single pipes.
 while IFS= read -r segment; do
     if ! check_segment "$segment"; then
         exit 2
     fi
-done < <(echo "$COMMAND" | sed 's/&&/\n/g; s/;/\n/g; s/||/\n/g')
+done < <(echo "$COMMAND" | sed 's/&&/\n/g; s/;/\n/g; s/||/\n/g; s/|/\n/g')
 
 exit 0
