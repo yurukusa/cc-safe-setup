@@ -87,6 +87,25 @@ test_hook '{"tool_input":{"command":"echo start; git push origin main"}}' 2 "ech
 test_hook '{"tool_input":{"command":"printf x && git commit -m x"}}' 2 "printf first segment does not exempt a later commit"
 test_hook '{"tool_input":{"command":"grep -r \"git push\" ./docs"}}' 0 "grep for the words is not an invocation"
 
+# --- a single pipe is a separator too (2026-09-15) ---
+# The splitter knew && ; and || but not `|`, so a read-only command piped into
+# a git write arrived as ONE segment whose first word was the reader.
+# READ_ONLY_RE exempted the whole segment and the write on the right of the
+# pipe was never examined. Measured on the published file: these four exited 0.
+test_hook '{"tool_input":{"command":"echo x | git push origin main"}}' 2 "echo piped into push blocked"
+test_hook '{"tool_input":{"command":"cat f | git commit -m x"}}' 2 "cat piped into commit blocked"
+test_hook '{"tool_input":{"command":"grep q f | git push origin main"}}' 2 "grep piped into push blocked"
+test_hook '{"tool_input":{"command":"head -1 f | git checkout -b feature"}}' 2 "head piped into checkout -b blocked"
+
+# The same change must not start blocking ordinary pipes. A tightening fix
+# looks green on the blocking table while quietly breaking normal work, so the
+# passing side is listed here on purpose. `git branch | grep main` is here
+# because the pre-fix file refused it: unsplit, it read as `git branch <name>`.
+test_hook '{"tool_input":{"command":"git log | head -20"}}' 0 "git log piped to head still passes"
+test_hook '{"tool_input":{"command":"git diff | grep push"}}' 0 "git diff piped to grep still passes"
+test_hook '{"tool_input":{"command":"git branch | grep main"}}' 0 "git branch listing piped still passes"
+test_hook '{"tool_input":{"command":"echo \"a|b\""}}' 0 "a pipe inside quotes is not a separator"
+
 # --- the .git path coincidence ---
 # `git --git-dir=/tmp/r/.git push` used to match only because the PATH ended in
 # `.git`; the same command with any other git-dir name went through.
