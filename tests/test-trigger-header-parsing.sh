@@ -36,18 +36,22 @@ resolve() { # resolve <file> -> event name, or NOT-REGISTERED
     const EVENTS = ["PreToolUse","PostToolUse","PermissionRequest","Notification",
       "Stop","SubagentStop","SubagentStart","UserPromptSubmit","PreCompact",
       "PostCompact","SessionStart","SessionEnd","CwdChanged","FileChanged","DirectoryAdded"];
-    const c = fs.readFileSync(process.argv[1], "utf8");
-    const m = c.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(.+)$/m);
-    if (!m) {
-      if (/^#.*PermissionRequest hook/m.test(c)) return console.log("PermissionRequest");
-      if (/^#.*UserPromptSubmit hook/m.test(c)) return console.log("UserPromptSubmit");
-      return console.log("PreToolUse");
-    }
-    const decl = m[1].split(/[Mm][Aa][Tt][Cc][Hh][Ee][Rr]\s*:/)[0].replace(/\([^)]*\)/g, " ");
-    if (/^\s*none\b/i.test(decl)) return console.log("NOT-REGISTERED");
-    const names = (decl.match(/[A-Za-z]+/g) || []).filter((w) => EVENTS.includes(w));
-    if (!names.length) return console.log("PreToolUse");
-    console.log(names.includes("PreToolUse") ? "PreToolUse" : names[0]);
+    // Wrapped in a function: `node -e` evaluates at the top level, where a bare
+    // return is a SyntaxError rather than an early exit.
+    const resolve = (c) => {
+      const m = c.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(.+)$/m);
+      if (!m) {
+        if (/^#.*PermissionRequest hook/m.test(c)) return "PermissionRequest";
+        if (/^#.*UserPromptSubmit hook/m.test(c)) return "UserPromptSubmit";
+        return "PreToolUse";
+      }
+      const decl = m[1].split(/[Mm][Aa][Tt][Cc][Hh][Ee][Rr]\s*:/)[0].replace(/\([^)]*\)/g, " ");
+      if (/^\s*none\b/i.test(decl)) return "NOT-REGISTERED";
+      const names = (decl.match(/[A-Za-z]+/g) || []).filter((w) => EVENTS.includes(w));
+      if (!names.length) return "PreToolUse";
+      return names.includes("PreToolUse") ? "PreToolUse" : names[0];
+    };
+    console.log(resolve(fs.readFileSync(process.argv[1], "utf8")));
   ' "$1"
 }
 
