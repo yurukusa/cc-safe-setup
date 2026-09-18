@@ -39,22 +39,55 @@ THRESHOLD=10
 IS_BULK=0
 TARGET=""
 
+# Normalise a target so it can actually be counted.
+# Measured 2026-09-18: the same 25-file directory was let through when the path
+# was quoted, reached via `cd`, or written as a glob - only a bare absolute path
+# was blocked. Every one of those is an ordinary way to write the command, so the
+# guard was warning instead of blocking on the shapes people use most.
+resolve_target() {
+    local t="$1"
+    # Strip surrounding quotes - the counting test below is a literal -d check
+    t="${t%\"}"; t="${t#\"}"
+    t="${t%\'}"; t="${t#\'}"
+    # `cd <dir> && rm -rf <name>`: count relative to the directory we cd into
+    if [[ "$t" != /* ]]; then
+        local cd_dir
+        cd_dir=$(echo "$COMMAND" | grep -oE '^[[:space:]]*cd[[:space:]]+[^&;|]+' | sed 's/^[[:space:]]*cd[[:space:]]\+//')
+        # Trim trailing whitespace BEFORE unquoting - `cd "dir" && rm -rf x`
+        # leaves a space after the closing quote, and stripping quotes first
+        # then silently does nothing (measured 2026-09-18).
+        cd_dir="${cd_dir%"${cd_dir##*[![:space:]]}"}"
+        cd_dir="${cd_dir%\"}"; cd_dir="${cd_dir#\"}"
+        cd_dir="${cd_dir%\'}"; cd_dir="${cd_dir#\'}"
+        [[ -n "$cd_dir" ]] && t="${cd_dir%/}/$t"
+    fi
+    # A trailing glob still names a real parent - count that instead
+    if [[ "$t" == *[\*\?]* ]]; then
+        local parent="${t%/*}"
+        [[ "$parent" != "$t" ]] && t="$parent"
+    fi
+    printf '%s' "${t%/}"
+}
+
 # rm -rf / rm -r with wildcards or broad directory paths
 if echo "$COMMAND" | grep -qE 'rm\s+(-[a-zA-Z]*r[a-zA-Z]*f?|(-[a-zA-Z]*f[a-zA-Z]*r))\s'; then
     # Extract the target path
     TARGET=$(echo "$COMMAND" | grep -oE 'rm\s+-[a-zA-Z]+\s+(.+)' | sed 's/rm\s\+-[a-zA-Z]\+\s\+//')
+    TARGET=$(resolve_target "$TARGET")
     IS_BULK=1
 fi
 
 # find ... -delete
 if echo "$COMMAND" | grep -qE 'find\s+.*-delete'; then
     TARGET=$(echo "$COMMAND" | grep -oE 'find\s+(\S+)' | sed 's/find\s\+//')
+    TARGET=$(resolve_target "$TARGET")
     IS_BULK=1
 fi
 
 # find ... -exec rm
 if echo "$COMMAND" | grep -qE 'find\s+.*-exec\s+rm'; then
     TARGET=$(echo "$COMMAND" | grep -oE 'find\s+(\S+)' | sed 's/find\s\+//')
+    TARGET=$(resolve_target "$TARGET")
     IS_BULK=1
 fi
 
