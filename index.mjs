@@ -1412,6 +1412,19 @@ async function installExample(name) {
     // Extract quoted value if present (e.g., ".env" or ".env|.env.local"), otherwise use raw
     const quoted = commentMatcher[1].match(/^"([^"]*)"/);
     matcher = quoted ? quoted[1] : commentMatcher[1].trim();
+    // Some headers answer "which matcher?" in prose instead of with a value:
+    //   "(none)", "(any — leave matcher empty)", "(empty — runs after every
+    //   tool use)", "No matcher support — fires on every compaction".
+    // That prose was written into settings.json as the matcher itself. On an
+    // event that actually uses matchers, "(any — leave matcher empty)" matches
+    // no tool name, so the hook never fires. Measured over all 915 examples on
+    // 2026-09-18: 29 headers are prose, and four of them sit on
+    // PreToolUse/PostToolUse and were dead this way — context-size-alert,
+    // daily-usage-tracker, settings-integrity-monitor, tool-call-rate-limiter.
+    // Every one of the 29 means the same thing: no matcher, i.e. empty.
+    if (!quoted && /^\(|—|no matcher support|leave matcher|runs (after|once)|fires on/i.test(matcher)) {
+      matcher = '';
+    }
   }
 
   // The header is written two ways across examples/: on its own comment line

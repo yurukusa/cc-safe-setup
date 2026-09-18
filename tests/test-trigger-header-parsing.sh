@@ -93,6 +93,46 @@ check "SessionStart (also safe as PreToolUse) -> SessionStart" \
 check "inline MATCHER does not leak into the event scan" \
   "PreToolUse" "$(resolve examples/settings-json-model-guard.sh)"
 
+echo "== MATCHER headers written in prose resolve to empty =="
+
+# Some headers answer "which matcher?" in prose. Written into settings.json as
+# the matcher itself, "(any — leave matcher empty)" matches no tool name, so the
+# hook never fires. These four sit on events that really use matchers and were
+# dead this way.
+resolve_matcher() { # resolve_matcher <file> -> matcher string
+  node -e '
+    const fs = require("fs");
+    const matcherOf = (c) => {
+      let m = "Bash";
+      const jm = c.match(/"matcher":\s*"([^"]*)"/);
+      if (jm) m = jm[1];
+      const cm = c.match(/^#\s*[Mm][Aa][Tt][Cc][Hh][Ee][Rr]:\s*(.+)$/m);
+      if (cm) {
+        const q = cm[1].match(/^"([^"]*)"/);
+        m = q ? q[1] : cm[1].trim();
+        if (!q && /^\(|—|no matcher support|leave matcher|runs (after|once)|fires on/i.test(m)) m = "";
+      }
+      return m;
+    };
+    console.log(matcherOf(fs.readFileSync(process.argv[1], "utf8")));
+  ' "$1"
+}
+
+check "(empty — runs after every tool use) -> empty" \
+  "" "$(resolve_matcher examples/context-size-alert.sh)"
+check "(any — leave matcher empty) -> empty" \
+  "" "$(resolve_matcher examples/daily-usage-tracker.sh)"
+check "(empty — runs on every tool use) -> empty" \
+  "" "$(resolve_matcher examples/settings-integrity-monitor.sh)"
+check "(any — ... catch all tools) -> empty" \
+  "" "$(resolve_matcher examples/tool-call-rate-limiter.sh)"
+
+# Real matchers must survive untouched — the prose rule must not eat values.
+check "quoted matcher survives" \
+  "Edit|Write" "$(resolve_matcher examples/settings-json-model-guard.sh)"
+check "default stays Bash when no MATCHER header" \
+  "Bash" "$(resolve_matcher examples/commitment-carry-forward-arrest.sh)"
+
 echo "== the whole shelf still resolves to a real event =="
 bad=0
 for f in examples/*.sh; do
