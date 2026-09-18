@@ -1329,11 +1329,74 @@ async function installExample(name) {
   let matcher = 'Bash';
 
   // Detect trigger from header comments (case-insensitive for "Trigger:" prefix)
-  const triggerMatch = content.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(\S+)/m);
+  //
+  // The value is read as the whole rest of the line, not the first \S+ token.
+  // Measured over all 915 examples on 2026-09-18: ten headers declare a trigger
+  // the old `(\S+)` capture could not match, and every one of them fell through
+  // to the default PreToolUse/Bash without a word:
+  //
+  //   "Stop, UserPromptSubmit"            -> captured "Stop,"   (trailing comma)
+  //   "SessionStart, and PreToolUse"      -> captured "SessionStart,"
+  //   "PostToolUse+PreToolUse  MATCHER:"  -> captured the whole blob
+  //   "SubagentStop"                      -> a real event missing from the list
+  //   "none"                              -> a wrapper that must not be wired
+  //
+  // Two of those ten can exit 2 (commitment-carry-forward-arrest and
+  // subagent-forged-system-reminder-guard). Registered on PreToolUse/Bash, an
+  // exit 2 denies the Bash call — so a hook written to refuse a *Stop* was
+  // refusing ordinary shell commands instead. That is the same failure mode the
+  // standalone-tool guard above was written for.
+  //
+  // The event list was also two lists that had drifted apart: this one and
+  // KNOWN_EVENTS in the settings auditor, which already knew SubagentStop,
+  // SubagentStart, PostCompact and DirectoryAdded. Anything those two disagree
+  // on silently became PreToolUse, so they are reconciled here.
+  const REGISTRABLE_EVENTS = [
+    'PreToolUse', 'PostToolUse', 'PermissionRequest', 'Notification',
+    'Stop', 'SubagentStop', 'SubagentStart', 'UserPromptSubmit',
+    'PreCompact', 'PostCompact', 'SessionStart', 'SessionEnd',
+    'CwdChanged', 'FileChanged', 'DirectoryAdded',
+  ];
+  const triggerMatch = content.match(/^#\s*[Tt][Rr][Ii][Gg][Gg][Ee][Rr]:\s*(.+)$/m);
   if (triggerMatch) {
-    const t = triggerMatch[1];
-    if (['PermissionRequest','PostToolUse','Notification','Stop','SessionStart','PreCompact','SessionEnd','UserPromptSubmit','CwdChanged','FileChanged'].includes(t)) {
-      trigger = t;
+    // Stop at MATCHER: so the inline "TRIGGER: X  MATCHER: "Y"" form does not
+    // leak the matcher's tool names into the event scan.
+    // Drop parenthetical commentary before scanning for event names. Several
+    // headers qualify their choice in parentheses — multi-vendor-concurrent-warner
+    // says "SessionStart   (also safe as PreToolUse)" — and reading the aside as a
+    // declaration moves a correctly-registered hook off its event.
+    const decl = triggerMatch[1]
+      .split(/[Mm][Aa][Tt][Cc][Hh][Ee][Rr]\s*:/)[0]
+      .replace(/\([^)]*\)/g, ' ');
+    const names = (decl.match(/[A-Za-z]+/g) || []).filter((w) => REGISTRABLE_EVENTS.includes(w));
+    if (/^\s*none\b/i.test(decl)) {
+      // "TRIGGER: none" is a deliberate declaration by wrappers that are called
+      // by another hook, never by Claude Code. Copy it, do not register it.
+      console.log();
+      console.log(c.yellow + '  Copied, but NOT registered as a hook.' + c.reset);
+      console.log(c.dim + '  ' + filename + ' declares "TRIGGER: none" — it is a wrapper meant' + c.reset);
+      console.log(c.dim + '  to be called by another hook, not by Claude Code directly.' + c.reset);
+      console.log();
+      console.log('  File:  ' + destPath);
+      console.log();
+      return;
+    }
+    if (names.length > 0) {
+      // Multi-event declarations get ONE registration, so the choice matters.
+      // Prefer PreToolUse whenever it is declared: it is the only event where a
+      // non-zero exit refuses the tool call, and the two-phase guards
+      // (deny-bypass-detector, permission-denial-enforcer) declare
+      // "PostToolUse+PreToolUse" while doing their blocking with exit 2. Taking
+      // the literal first name would have moved them to PostToolUse, where the
+      // tool has already run and exit 2 blocks nothing — disarming the guard
+      // while the installer reported success.
+      trigger = names.includes('PreToolUse') ? 'PreToolUse' : names[0];
+      if (names.length > 1) {
+        // Only one registration is written. Say so, rather than leaving the
+        // operator believing all declared events are covered.
+        console.log(c.yellow + '  ' + filename + ' declares ' + names.length + ' events (' + names.join(', ') + ').' + c.reset);
+        console.log(c.dim + '  Registered on ' + names[0] + ' only — add the others by hand if you need them.' + c.reset);
+      }
     }
   } else if (content.match(/^#.*PermissionRequest hook/m)) {
     trigger = 'PermissionRequest';
