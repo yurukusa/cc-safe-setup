@@ -46,11 +46,22 @@ BAD_SHAPE='grep[[:space:]]+(-[A-Za-z]+[[:space:]]+)*\\?['"'"'"]-'
 OK_SHAPE='grep[[:space:]]+(-[A-Za-z]+[[:space:]]+)*(--|-e)[[:space:]]'
 
 # scan <path...> - print "file:line:text" for each option-eating grep call.
+#
 # Comment lines are skipped: this file, and several tests, quote the broken
 # patterns on purpose.
+#
+# `*selftest*.sh` is skipped for the same reason, one level up. A selftest's job
+# is to build something broken and prove the detector sees it, so the fixtures
+# inside one are deliberately unfirable rules. A shape-based scan cannot tell
+# "broken" from "broken on purpose", and the first CI run of this suite caught
+# audit/unfirable-selftest.sh - correctly, and uselessly. The cost of the
+# exclusion is real and worth stating: a genuine defect written inside a file
+# whose name contains "selftest" will not be reported here. Nothing we install
+# as a guard is named that way.
 scan() {
   local out
-  out=$(grep -rnE --include='*.sh' --include='*.json' -- "$BAD_SHAPE" "$@" 2>/dev/null) || true
+  out=$(grep -rnE --include='*.sh' --include='*.json' --exclude='*selftest*.sh' \
+        -- "$BAD_SHAPE" "$@" 2>/dev/null) || true
   printf '%s' "$out" \
     | grep -vE -- "$OK_SHAPE" \
     | grep -vE -- '^[^:]+:[0-9]+:[[:space:]]*#' \
