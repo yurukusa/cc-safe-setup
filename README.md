@@ -124,7 +124,7 @@ If you are reading this to decide whether the gap matters to you: the number is 
 point. The point is that it grows every time this repository improves and never shrinks,
 because the published package is frozen.
 
-29.8.0 on npm ships **698** example hooks; this repository has **915**. The 216 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree; the tree was recounted on 2026-09-14 and had gained one.)
+29.8.0 on npm ships **698** example hooks; this repository has **916**. The 218 that are missing from the published package include `agents-md-sync-checker`. (Counted 2026-08-26 from the published tarball and this tree; the tree was recounted on 2026-09-20 and had gained two since.)
 
 To install the current code directly from this repository:
 
@@ -150,10 +150,13 @@ if none of the three is present they print a warning that says they are **not** 
 then allow the command (blocking every call would make Claude Code unusable, which is a
 failure, not safety).
 
-The example hooks are stricter about this than the core ones: **798 of the 914 use `jq` with no
-fallback** — of the 809 that touch `jq` at all, only 11 fall back to `python3` or `node`. Without `jq` they read an empty command and quietly do nothing — no error, no log
-line, and they still appear in your `settings.json`. If you take examples from `examples/`,
-install `jq` first.
+The example hooks are stricter about this than the core ones: **757 of the 916 mention `jq`
+and contain no `python3` or `node` anywhere in the file** — 810 mention `jq` at all, and 53 of
+those also mention a possible fallback. (Counted 2026-09-20 with `grep -l` over `examples/*.sh`;
+an earlier edition claimed 798 of 914, which none of three plausible counting rules reproduced,
+so the rule is spelled out here instead of the number being carried forward.) Without `jq` they
+read an empty command and quietly do nothing — no error, no log line, and they still appear in
+your `settings.json`. If you take examples from `examples/`, install `jq` first.
 
 ```sh
 jq --version || sudo apt-get install -y jq   # or: brew install jq
@@ -245,9 +248,10 @@ audit/fire.sh ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>
 audit/fire.sh --bare ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
 ```
 
-The `--bare` run is the one worth doing today. **798 of the 914 example hooks here parse
-their input with `jq` and have no fallback.** Without a JSON parser they print a warning
-to stderr and exit `0` — and Claude Code stops for exit code `2`, not for warnings.
+The `--bare` run is the one worth doing today. **757 of the 916 example hooks here mention
+`jq` and contain no `python3` or `node` fallback anywhere in the file** (counted 2026-09-20).
+Without a JSON parser they print a warning to stderr and exit `0` — and Claude Code stops for
+exit code `2`, not for warnings.
 
 `audit/count-hooks.py` counts registrations across all three settings files;
 `audit/find-dead-hooks.sh` lists registrations whose script is not on disk (those fail to
@@ -422,7 +426,7 @@ grep comes back empty and something still looks wrong.
 Under `--restricted` you can pass them in with `--settings`, and they load. They still only cover
 tools that survive. **Of the 24 `PreToolUse` registrations this repository installs by default —
 six in `hooks/hooks.json` plus eighteen across the four plugins — 16 are matched on `Bash`**, and
-`--restricted` is exactly the mode with no Bash. (The 914 files under `examples/` are not
+`--restricted` is exactly the mode with no Bash. (The 916 files under `examples/` are not
 registered; these 24 are what actually runs after an install.) The file tools remain, confined to
 the working directories; both `Write` and `Edit` were measured modifying a file with no guard
 consulted.

@@ -1,8 +1,10 @@
 # Example Hooks
 
-914 installable hooks. Each solves a real problem from GitHub Issues or autonomous
-operation. Covered by the 278 test files in [`tests/`](../tests) — 277 shell, one Python.
-(Counted 2026-08-31.)
+As of 2026-08-31 this directory held 914 installable hooks; it holds 916 today
+(2026-09-20). Each solves a real problem from GitHub Issues or autonomous operation.
+Covered by the 296 test files in [`tests/`](../tests) — 295 shell, one Python
+(counted 2026-09-20).
+The category table below is the 2026-08-31 count and has not been recut since.
 
 ```bash
 npx github:yurukusa/cc-safe-setup --install-example <name>   # install one

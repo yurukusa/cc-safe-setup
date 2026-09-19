@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 914個のexample hook · 71件超のAnthropic公式Issueに対応 · 278個のテストファイル（277個のシェル・1個のPython） · 30K+ 累計npmダウンロード
+**Claude Codeを安全にするワンコマンドツール。** 916個のexample hook · 71件超のAnthropic公式Issueに対応 · 296個のテストファイル（295個のシェル・1個のPython） · 30K+ 累計npmダウンロード
 
 ```bash
 npx github:yurukusa/cc-safe-setup
@@ -58,7 +58,7 @@ npx github:yurukusa/cc-safe-setup
 |---|---|
 | `npx github:yurukusa/cc-safe-setup` | 8個の安全フックをインストール |
 | `--shield` | 最大安全（スタック検出+推奨hook自動選択） |
-| `--install-example <name>` | 914個のexampleから個別インストール |
+| `--install-example <name>` | 916個のexampleから個別インストール |
 | `--examples` | 全exampleを一覧表示 |
 | `--create "説明"` | 自然言語でカスタムフック生成 |
 | `--verify` | 各フックの動作確認 |
