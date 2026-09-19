@@ -41,7 +41,7 @@ run_doctor() {
   # shellcheck disable=SC2086
   env -u CLAUDE_CODE_SAFE_MODE -u CLAUDE_CODE_RESTRICTED $envspec HOME="$home" \
     node "$ROOT/index.mjs" --doctor 2>&1 \
-    | grep -E 'hook-disabling environment variable|CLAUDE_CODE_SAFE_MODE=|CLAUDE_CODE_RESTRICTED=' || true
+    | grep -E 'hook-disabling environment variable|CLAUDE_CODE_SAFE_MODE=|CLAUDE_CODE_RESTRICTED=|does NOT restore|pass your hooks with|unset CLAUDE_CODE' || true
   rm -rf "$home"
 }
 
