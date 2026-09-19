@@ -1127,7 +1127,7 @@ function examples() {
       'skill-gate.sh': 'Skill Gate',
       'stale-branch-guard.sh': 'Warn when working on a stale branch',
       'stale-env-guard.sh': 'Warn when .env files are very old',
-      'system-message-workaround.sh': 'Ensure hook warnings reach both user and model',
+      'system-message-workaround.sh': 'Put a non-blocking hook warning in front of the user (stderr)',
       'temp-file-cleanup-stop.sh': 'Clean up tmpclaude-* files on session end',
       'temp-file-cleanup.sh': 'Stop hook',
       'tmp-cleanup.sh': 'Clean up /tmp/claude-*-cwd temp files',
