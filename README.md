@@ -272,7 +272,7 @@ scratch working directory. Arrival was measured on `UserPromptSubmit` — delibe
 | --- | --- | --- |
 | *(control)* no flags | user, project and local all fire | present |
 | `--dangerously-skip-permissions` | still fire — the guard refused, exit 2 | present |
-| `claude --restricted` | **none load**; `--settings` is the only way back in | **removed** |
+| `claude --restricted` | **none load**; `--settings` is the only way back in I measured | **removed** |
 | `claude --safe-mode` | **none load**, and `--settings` does **not** bring them back | **present** |
 | `CLAUDE_CODE_RESTRICTED=1` | same as `--restricted` | removed |
 | `CLAUDE_CODE_SAFE_MODE=1` | same as `--safe-mode` | **present** |
@@ -281,20 +281,29 @@ The control row matters: without it, "the guard stayed quiet" and "the guard is 
 same observation. It fired and refused, so the guard works — it simply was not asked in the rows
 where it is silent.
 
+`--dangerously-skip-permissions` is in the table because people expect it to be the worst row for
+their hooks. It is not: what that flag removes is the human prompt, not your guards. This table is
+only about whether your hooks load, so do not read the second column as "this flag is safe."
+
 ### `claude --safe-mode` is not our `--safe-mode`
 
 These are two different things with the same name, and one of them is ours:
 
-- **`npx github:yurukusa/cc-safe-setup --safe-mode`** — *this tool*. Turns our hooks off
-  deliberately, tells you it did, and `--safe-mode off` puts them back.
+- **`npx github:yurukusa/cc-safe-setup --safe-mode`** — *this tool*, and it is blunter than its
+  name suggests: it moves **every** `.sh` in `~/.claude/hooks` aside and empties the `hooks` block
+  of your `settings.json` — not just ours, yours and anyone else's too. It backs the file up
+  first, it tells you what it did, and **it stays off until you run `--safe-mode off`**, which
+  restores the hooks and copies the backup back over `settings.json` (so edits you make to that
+  file while safe mode is on are lost). Being honest about that: ours is the one you set once and
+  can forget, which is exactly the shape this section warns about.
 - **`claude --safe-mode`** — *Claude Code*. Per invocation, for troubleshooting a broken
   configuration. Its own help says auth, model selection, **built-in tools and permissions work
   normally** — so your guards are gone and everything they guard against is still there.
 
 We tell you to reach for our `--safe-mode` when a hook locks you out. Do not let that make
 `claude --safe-mode` sound like the cautious choice. Of the ways to start Claude Code listed
-above, the one whose name sounds safest is the only one that removes your protection while
-leaving the dangerous tools in place.
+above, the one whose name sounds safest is the only one that removes your hooks while leaving
+the dangerous tools in place.
 
 ### The environment variables are the quiet ones
 
@@ -311,16 +320,28 @@ automated one — a script, a cron job, an unattended loop — where nobody read
 **Check this first, it takes one command:**
 
 ```bash
-grep -rn "CLAUDE_CODE_RESTRICTED\|CLAUDE_CODE_SAFE_MODE" ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc 2>/dev/null
+grep -rn "CLAUDE_CODE_RESTRICTED\|CLAUDE_CODE_SAFE_MODE" \
+  ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc ~/.zshenv 2>/dev/null
 ```
+
+That covers the usual shell files. It will not find a variable set anywhere else your shell,
+editor, terminal profile, container image or service manager can set one — check those too if the
+grep comes back empty and something still looks wrong.
 
 ### Getting the hooks back is not the same as being guarded
 
 Under `--restricted` you can pass them in with `--settings`, and they load. They still only cover
-tools that survive. **Of the 24 `PreToolUse` registrations this repository ships — six in
-`hooks/hooks.json` plus eighteen across the four plugins — 16 are matched on `Bash`**, and
-`--restricted` is exactly the mode with no Bash. The file tools remain, confined to the working
-directories; both `Write` and `Edit` were measured modifying a file with no guard consulted.
+tools that survive. **Of the 24 `PreToolUse` registrations this repository installs by default —
+six in `hooks/hooks.json` plus eighteen across the four plugins — 16 are matched on `Bash`**, and
+`--restricted` is exactly the mode with no Bash. (The 914 files under `examples/` are not
+registered; these 24 are what actually runs after an install.) The file tools remain, confined to
+the working directories; both `Write` and `Edit` were measured modifying a file with no guard
+consulted.
+
+The five that already watch the file tools are the ones still standing in that mode: the
+`Write|Edit` guard in `hooks/hooks.json`, three in `credential-guard` (`Write`, `Edit`, `Write`),
+and one `Write` guard in `safety-essentials`. If you run `--restricted`, those five are your
+coverage — check they cover what you care about, because the other sixteen cannot fire.
 
 To be fair to the flag: `--restricted` did not create that gap. In the control run, with Bash
 available, the model went straight to `Write` anyway — a Bash-only guard never covered that path.
