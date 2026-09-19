@@ -6583,6 +6583,35 @@ async function doctor() {
   const fail = (msg) => { console.log(c.red + '  ✗ ' + c.reset + msg); issues++; };
   const warn = (msg) => { console.log(c.yellow + '  ! ' + c.reset + msg); warnings++; };
 
+  // 0. Environment variables that stop hooks loading at all.
+  //
+  // This runs before everything else because it is the one state where every check
+  // below can pass and still nothing runs — which is precisely the false reassurance
+  // this command exists to prevent.
+  //
+  // Measured 2026-09-19 on Claude Code 2.1.278 (Linux/WSL2) with a control: with
+  // CLAUDE_CODE_RESTRICTED=1 or CLAUDE_CODE_SAFE_MODE=1 set, a UserPromptSubmit hook
+  // installed in the user, project and local files did not fire once, while the same
+  // hook fired in all three scopes without them. Only the value "1" was measured; any
+  // other non-empty, non-false value is flagged on the assumption that someone who
+  // typed it meant to turn it on.
+  const envOn = (v) => typeof v === 'string' && v !== '' && v !== '0' && v.toLowerCase() !== 'false';
+  const safeModeEnv = process.env.CLAUDE_CODE_SAFE_MODE;
+  const restrictedEnv = process.env.CLAUDE_CODE_RESTRICTED;
+
+  if (envOn(safeModeEnv)) {
+    fail('CLAUDE_CODE_SAFE_MODE=' + safeModeEnv + ' — Claude Code loads none of your hooks');
+    console.log(c.dim + '    Bash and the other tools keep working normally, so nothing looks wrong.' + c.reset);
+    console.log(c.dim + '    --settings does NOT restore hooks in this mode.' + c.reset);
+    console.log(c.dim + '    Fix: unset CLAUDE_CODE_SAFE_MODE (check your shell profile, it is read once)' + c.reset);
+  } else if (envOn(restrictedEnv)) {
+    fail('CLAUDE_CODE_RESTRICTED=' + restrictedEnv + ' — user, project and local hooks are not loaded');
+    console.log(c.dim + '    Bash is removed too, so Bash-matched guards could not fire regardless.' + c.reset);
+    console.log(c.dim + '    Fix: unset CLAUDE_CODE_RESTRICTED, or pass your hooks with --settings' + c.reset);
+  } else {
+    pass('no hook-disabling environment variable set');
+  }
+
   // 1. Check jq
   try {
     execSync('which jq', { stdio: 'pipe' });
