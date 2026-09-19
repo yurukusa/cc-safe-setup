@@ -37,7 +37,12 @@ if grep -qE 'permissions:\s*write-all|permissions:\s*\{[^}]*contents:\s*write' "
     WARNINGS="${WARNINGS}  - Broad write permissions detected\n"
 fi
 
-if grep -qE '--no-verify|--skip-tests|--no-check|SKIP_CI|skip ci|\[ci skip\]' "$FILE" 2>/dev/null; then
+# `--` is required: without it grep reads the leading dashes of --no-verify
+# as options and dies with "invalid option", so this check silently never
+# fired. The four existing checks in test.sh only assert exit 0, and this
+# hook always exits 0, so they passed anyway. (The next check starts with a
+# letter, so it was never affected.) Measured 2026-09-20.
+if grep -qE -- '--no-verify|--skip-tests|--no-check|SKIP_CI|skip ci|\[ci skip\]' "$FILE" 2>/dev/null; then
     WARNINGS="${WARNINGS}  - Test/verification skip detected\n"
 fi
 
