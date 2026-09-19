@@ -7,32 +7,43 @@ PASS=0
 FAIL=0
 HOOK="$(dirname "$0")/../examples/powershell-remove-item-guard.sh"
 
+# The verdict is the exit code, not the text. A refusal that only prints a word
+# Claude Code does not act on is not a refusal: until 2026-09-19 this file checked
+# for the string '"decision":"DENY"' in stdout, and passed all nine block cases
+# while the guard refused none of them. One of the nine (C:\Users) was measured
+# end to end against a do-nothing control; the other eight leave through the same
+# two lines.
 test_hook() {
     local input="$1" expected="$2" desc="$3"
-    local output exit_code=0
-    output=$(echo "$input" | bash "$HOOK" 2>/dev/null) || exit_code=$?
+    local out err exit_code=0
+    err=$(mktemp)
+    out=$(echo "$input" | bash "$HOOK" 2>"$err") || exit_code=$?
+    local stderr_text
+    stderr_text=$(cat "$err"); rm -f "$err"
+
     if [ "$expected" = "DENY" ]; then
-        if echo "$output" | grep -q '"decision":"DENY"'; then
+        # exit 2 is what actually stops the tool call; the reason must reach stderr.
+        if [ "$exit_code" -eq 2 ] && echo "$stderr_text" | grep -q 'BLOCKED'; then
             echo "  PASS: $desc"
             PASS=$((PASS + 1))
         else
-            echo "  FAIL: $desc (expected DENY, got: $output)"
+            echo "  FAIL: $desc (expected exit 2 + BLOCKED on stderr, got exit $exit_code, stdout: $out, stderr: $stderr_text)"
             FAIL=$((FAIL + 1))
         fi
     elif [ "$expected" = "ASK" ]; then
-        if echo "$output" | grep -q '"permissionDecision":"ask"'; then
+        if [ "$exit_code" -eq 0 ] && echo "$out" | grep -q '"permissionDecision":"ask"'; then
             echo "  PASS: $desc"
             PASS=$((PASS + 1))
         else
-            echo "  FAIL: $desc (expected ASK, got: $output)"
+            echo "  FAIL: $desc (expected exit 0 + ask, got exit $exit_code, stdout: $out)"
             FAIL=$((FAIL + 1))
         fi
     else
-        if [ -z "$output" ] || ! echo "$output" | grep -qE '"decision":"DENY"|"permissionDecision":"ask"'; then
+        if [ "$exit_code" -eq 0 ] && ! echo "$out" | grep -q '"permissionDecision":"ask"'; then
             echo "  PASS: $desc"
             PASS=$((PASS + 1))
         else
-            echo "  FAIL: $desc (expected ALLOW, got: $output)"
+            echo "  FAIL: $desc (expected exit 0 and no verdict, got exit $exit_code, stdout: $out)"
             FAIL=$((FAIL + 1))
         fi
     fi
