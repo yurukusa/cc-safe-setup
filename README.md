@@ -257,6 +257,80 @@ It reads only. Nothing is sent anywhere and nothing is written back. Patterns th
 tests rather than gates are excluded, and a verb is counted only where it starts a command
 segment, so a `git add` inside a quoted string is not mistaken for one that ran.
 
+## Four ways your guards stop running at all
+
+`--blindspots` finds guards that are loaded but never matched. There is a harder case it cannot
+see: the guard is **never loaded**, or the tool it watches **no longer exists**. Four documented
+ways to start Claude Code do that, and none of them reports it.
+
+Measured 2026-09-19 on Claude Code **2.1.278**, Linux under WSL2, with a disposable `HOME` and a
+scratch working directory. Arrival was measured on `UserPromptSubmit` — deliberately not
+`PreToolUse` on `Bash`, because `--restricted` removes Bash, and then "the hook was ignored" and
+"nothing pulled the trigger" look identical.
+
+| How you start it | Your hooks | Bash |
+| --- | --- | --- |
+| *(control)* no flags | user, project and local all fire | present |
+| `--dangerously-skip-permissions` | still fire — the guard refused, exit 2 | present |
+| `claude --restricted` | **none load**; `--settings` is the only way back in | **removed** |
+| `claude --safe-mode` | **none load**, and `--settings` does **not** bring them back | **present** |
+| `CLAUDE_CODE_RESTRICTED=1` | same as `--restricted` | removed |
+| `CLAUDE_CODE_SAFE_MODE=1` | same as `--safe-mode` | **present** |
+
+The control row matters: without it, "the guard stayed quiet" and "the guard is broken" are the
+same observation. It fired and refused, so the guard works — it simply was not asked in the rows
+where it is silent.
+
+### `claude --safe-mode` is not our `--safe-mode`
+
+These are two different things with the same name, and one of them is ours:
+
+- **`npx github:yurukusa/cc-safe-setup --safe-mode`** — *this tool*. Turns our hooks off
+  deliberately, tells you it did, and `--safe-mode off` puts them back.
+- **`claude --safe-mode`** — *Claude Code*. Per invocation, for troubleshooting a broken
+  configuration. Its own help says auth, model selection, **built-in tools and permissions work
+  normally** — so your guards are gone and everything they guard against is still there.
+
+We tell you to reach for our `--safe-mode` when a hook locks you out. Do not let that make
+`claude --safe-mode` sound like the cautious choice. Of the ways to start Claude Code listed
+above, the one whose name sounds safest is the only one that removes your protection while
+leaving the dangerous tools in place.
+
+### The environment variables are the quiet ones
+
+A flag is retyped every time you start. A line in your shell profile is read once and never seen
+again. Under `--restricted` there is at least a tell — asked to run a shell command, the model
+said in substance that the shell tool was missing and that the absence looked deliberate. Under
+`--safe-mode` there is nothing to notice in the reply: every tool is present, the command runs,
+the answer reads normally, and only the guard is quiet.
+
+That was measured non-interactively (`claude -p`). Interactively you would likely notice, because
+`--safe-mode` also drops `CLAUDE.md`, skills, plugins and MCP servers. The dangerous case is the
+automated one — a script, a cron job, an unattended loop — where nobody reads the session.
+
+**Check this first, it takes one command:**
+
+```bash
+grep -rn "CLAUDE_CODE_RESTRICTED\|CLAUDE_CODE_SAFE_MODE" ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc 2>/dev/null
+```
+
+### Getting the hooks back is not the same as being guarded
+
+Under `--restricted` you can pass them in with `--settings`, and they load. They still only cover
+tools that survive. **Of the 24 `PreToolUse` registrations this repository ships — six in
+`hooks/hooks.json` plus eighteen across the four plugins — 16 are matched on `Bash`**, and
+`--restricted` is exactly the mode with no Bash. The file tools remain, confined to the working
+directories; both `Write` and `Edit` were measured modifying a file with no guard consulted.
+
+To be fair to the flag: `--restricted` did not create that gap. In the control run, with Bash
+available, the model went straight to `Write` anyway — a Bash-only guard never covered that path.
+What `--restricted` changes is that `Write` stops being one option among several and becomes the
+only one. If you run `--restricted`, your guards need to be on `Write` and `Edit`.
+
+**Not measured:** managed (policy) settings. The help says they survive both flags. There is no
+`/etc/claude-code/` on the machine this was measured on, so that one is documentation, not
+measurement.
+
 ## Your installed hooks do not update themselves
 
 Installing a hook copies the file. **Nothing ever copies it back.** A hook installed in March
