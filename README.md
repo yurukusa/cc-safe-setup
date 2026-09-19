@@ -13,6 +13,21 @@ The command is interactive: it shows what each hook does and lets you choose whi
 
 Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. The minimum price is zero.
 
+## Something already broken? Start here
+
+Most people reach this page from a search, not from the top. This table is for them: the
+symptom on the left, and the section that answers it on the right. Every row is something
+measured on a real machine, not a guess about what might be wrong.
+
+| What you are seeing | Most likely | Where |
+|---|---|---|
+| The hook refuses, and the tool call runs anyway | The refusal is in a shape or a word the event does not read | [A refusal the tool never reads](#a-refusal-the-tool-never-reads) |
+| The hook never seems to run at all | The session was started in a way that skips your hooks entirely | [Four ways your guards stop running at all](#four-ways-your-guards-stop-running-at-all) |
+| The hook runs, but never on the commands you care about | Your pattern is anchored where your commands are not | [A hook can be installed, current, registered — and still never see you](#a-hook-can-be-installed-current-registered--and-still-never-see-you) |
+| You are not sure the hook does anything | You have not fired it on purpose yet | [Proving a hook fires](#proving-a-hook-fires) |
+| The hooks are installed but feel out of date | Installed copies are snapshots and do not update themselves | [Your installed hooks do not update themselves](#your-installed-hooks-do-not-update-themselves) |
+| `npx cc-safe-setup` behaves unlike this page | npm is serving an older release | [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) |
+
 ## Install as a Claude Code plugin
 
 The core guard sets are also published as Claude Code plugins from this repository. They install from inside Claude Code and track the default branch, so they do not depend on the npm release at all.
@@ -236,6 +251,64 @@ launch, which Claude Code treats as non-blocking, so nothing surfaces);
 `audit/selftest.sh` proves that detector really detects, because a detector that has never
 found anything is not yet evidence of anything. `audit/audit-checklist.md` is a 50-point
 sheet covering hooks, git, secrets, cost, autonomous operation and multi-agent work.
+
+## A refusal the tool never reads
+
+A `PreToolUse` hook can run, compute the right decision, print it, and be ignored. Nothing
+errors. The hook exits 0, there is no verdict, and the tool call proceeds — so the logs of a
+guard that is silently open look exactly like the logs of one that is working.
+
+Measured 2026-09-19 on Claude Code 2.1.278, one hook at a time on `PreToolUse` with matcher
+`Write`, in a throwaway `HOME`. Each hook appended a line to its own log before printing, so
+"never invoked" and "invoked and ignored" stay separable. The verdict is whether the file
+exists on disk afterwards, not what the transcript says:
+
+| What the hook printed | Hook ran | File created |
+|---|---|---|
+| nothing, `exit 0` *(control)* | yes | yes |
+| `{"permissionDecision":"deny", …}` — **at the top level** | yes | **yes — ignored** |
+| `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny", …}}` | yes | no |
+| `{"decision":"block","reason":…}`, `exit 0` — the older shape | yes | no |
+| `{"decision":"DENY"}` or `{"decision":"deny"}` | yes | **yes — ignored** |
+| stderr + `exit 2` | yes | no |
+
+Two things fall out of that table.
+
+**`permissionDecision` belongs inside `hookSpecificOutput`.** At the top level it is not read.
+This is not hypothetical: the repro in [anthropics/claude-code#91574](https://github.com/anthropics/claude-code/issues/91574),
+open since 2026-09-02, puts it at the top level, and the reporter's own instrumentation shows
+the hook computing a deny while the write goes through.
+
+**The older `{"decision": …}` field takes `block`, not `deny`.** `block` still refuses on
+2.1.278 — if you have a working hook using it, leave it alone. `DENY` and `deny` are outside
+that field's vocabulary and are dropped in silence. One of the guards in this repository's
+example library did exactly that, on three branches that block irreversible deletions, from
+the day it was written until it was measured. Its tests were green the whole time, because
+they asserted that the string `"decision":"DENY"` appeared on stdout and never looked at the
+exit code.
+
+### Checking your own, in two runs
+
+`exit 2` carries no JSON, so it cannot be misparsed. Swap your refusal for it and change
+nothing else:
+
+```bash
+echo "denied" >&2
+exit 2
+```
+
+If the call is blocked now, your hook was always being consulted and the JSON shape was the
+problem. If it still goes through, the shape is a red herring and the hook is not being
+consulted at all — go to [Four ways your guards stop running at all](#four-ways-your-guards-stop-running-at-all).
+
+Run it twice: once with a hook that only does `exit 0`, once with yours. The first run must
+let the operation through. Without that control, "nothing happened" can mean the guard
+worked, or that the command was broken, or that the harness never fired.
+
+One practical difference, once you have a choice: both JSON shapes reach the model as
+`PreToolUse:<Tool> hook error: <your reason>`, with nothing identifying which hook produced
+it. `exit 2` arrives with the hook's absolute path in front of the message. With thirty hooks
+on `Write`, that is the difference between opening one file and opening thirty.
 
 ## A hook can be installed, current, registered — and still never see you
 
