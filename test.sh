@@ -16235,7 +16235,10 @@ echo ""
 
 # ========== clear-command-confirm-guard (#40931) ==========
 echo "clear-command-confirm-guard.sh:"
-test_ex clear-command-confirm-guard.sh '{"prompt":"/clear"}' 2 "clear-guard: /clear blocked"
+# Measured 2026-09-19 on 2.1.270: slash commands never reach UserPromptSubmit, so this
+# hook cannot fire. It is kept as a record and deliberately does nothing. Pinning exit 0
+# here stops anyone "fixing" it back into a guard that looks like it works and does not.
+test_ex clear-command-confirm-guard.sh '{"prompt":"/clear"}' 0 "clear-guard: does not fire (slash commands never reach UserPromptSubmit)"
 test_ex clear-command-confirm-guard.sh '{"prompt":"/compact"}' 0 "clear-guard: /compact allowed"
 test_ex clear-command-confirm-guard.sh '{"prompt":"/commit"}' 0 "clear-guard: /commit allowed"
 test_ex clear-command-confirm-guard.sh '{"prompt":"please clear the screen"}' 0 "clear-guard: natural language not blocked"
