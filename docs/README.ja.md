@@ -1,6 +1,6 @@
 # cc-safe-setup
 
-**Claude Codeを安全にするワンコマンドツール。** 916個のexample hook · 71件超のAnthropic公式Issueに対応 · 278個のテストファイル（277個のシェル・1個のPython） · 30K+ 累計npmダウンロード
+**Claude Codeを安全にするワンコマンドツール。** 916個のexample hook · 71件超のAnthropic公式Issueに対応 · 296個のテストファイル（295個のシェル・1個のPython） · 30K+ 累計npmダウンロード
 
 ```bash
 npx github:yurukusa/cc-safe-setup
