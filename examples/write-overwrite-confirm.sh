@@ -30,10 +30,19 @@
 # MATCHER: "Write"
 #
 # TUNING (env):
-#   CC_WRITE_OVERWRITE_MIN_LINES   default 20  — ignore files smaller than this
-#   CC_WRITE_OVERWRITE_MAX_DESTROY default 10  — unseen lines destroyed before warning
-#   CC_WRITE_OVERWRITE_BLOCK=1                 — refuse the write (exit 2) instead of warning
-#   CC_READ_LOG                    default /tmp/cc-read-files
+#   CC_WRITE_OVERWRITE_MIN_LINES   default 20  — check 2 only: ignore smaller files
+#   CC_WRITE_OVERWRITE_MAX_DESTROY default 10  — check 2 only: unseen lines before warning
+#   CC_WRITE_OVERWRITE_BLOCK=1                 — refuse the write (exit 2) instead of warning.
+#                                                Applies to BOTH checks below.
+#   CC_READ_LOG                    default /tmp/cc-read-files  — check 2 only
+#
+# WHAT BLOCK=1 DID NOT COVER BEFORE 2026-09-19: check 1 (the shrink check) always
+# exited 0, no matter how this was set, and check 2 exits early when the paired
+# recorder has never run. So someone who set BLOCK=1 without installing
+# examples/record-read-coverage.sh got exit 0 on every write while believing
+# overwrites were refused — measured with controls on 2026-09-19. That is the
+# failure this file names two screens down: a guard whose blocking mode does not
+# block teaches you to ignore the word.
 
 set -uo pipefail
 
@@ -66,15 +75,29 @@ NEW_CONTENT=$(printf '%s' "$INPUT" | jq -r '.tool_input.content // empty' 2>/dev
 NEW_LINES=$(printf '%s\n' "$NEW_CONTENT" | wc -l 2>/dev/null || echo 0)
 case "$NEW_LINES" in ''|*[!0-9]*) NEW_LINES=0 ;; esac
 
+# The label has to match what this run actually does. A hook that prints
+# "BLOCKED" and then exits 0 teaches the reader to ignore the word. Decided
+# once, up here, because BOTH checks below print it and both have to agree.
+if [ "${CC_WRITE_OVERWRITE_BLOCK:-0}" = "1" ]; then
+  LABEL="BLOCKED"
+else
+  LABEL="WARNING"
+fi
+
 # ---------------------------------------------------------------
 # Check 1 (original): the replacement is much smaller than the file
 # ---------------------------------------------------------------
 if [ "$CURRENT_LINES" -gt 50 ] && [ "$NEW_LINES" -gt 0 ]; then
   RATIO=$((NEW_LINES * 100 / CURRENT_LINES))
   if [ "$RATIO" -lt 50 ]; then
-    echo "WARNING: File shrinking from $CURRENT_LINES to ~$NEW_LINES lines ($RATIO%)." >&2
+    echo "$LABEL: File shrinking from $CURRENT_LINES to ~$NEW_LINES lines ($RATIO%)." >&2
     echo "File: $FILE" >&2
     echo "Consider using Edit tool for targeted changes instead of full rewrite." >&2
+    # Before 2026-09-19 this fell straight through to exit 0, so the mode
+    # documented as "refuse the write" refused nothing here - and check 2,
+    # the only one that honoured it, exits early when the paired recorder
+    # has never run. Measured: 60 lines -> 1 line with BLOCK=1 returned 0.
+    [ "$LABEL" = "BLOCKED" ] && exit 2
   fi
 fi
 
@@ -143,14 +166,6 @@ rm -f "$TMP_NEW"
 case "$DESTROYED" in ''|*[!0-9]*) DESTROYED=0 ;; esac
 
 [ "$DESTROYED" -lt "$MAX_DESTROY" ] && exit 0
-
-# The label has to match what this run actually does. A hook that prints
-# "BLOCKED" and then exits 0 teaches the reader to ignore the word.
-if [ "${CC_WRITE_OVERWRITE_BLOCK:-0}" = "1" ]; then
-  LABEL="BLOCKED"
-else
-  LABEL="WARNING"
-fi
 
 echo "" >&2
 echo "$LABEL: overwriting content that was never read." >&2

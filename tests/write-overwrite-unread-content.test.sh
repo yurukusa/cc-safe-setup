@@ -126,6 +126,53 @@ else
   FAIL=$((FAIL + 1)); echo "  FAIL original shrink warning regressed"
 fi
 
+# ---- blocking mode when the recorder was never installed ----------------
+# Measured on 2026-09-19: with CC_WRITE_OVERWRITE_BLOCK=1 set but no read log
+# on disk, every write returned exit 0. Check 2 exits early without coverage
+# information, and check 1 - the shrink check, the one that fires on the
+# 500-lines-to-10 accident this hook was written for - never looked at the
+# variable at all. So the documented "refuse the write" mode refused nothing
+# for anyone who installed this hook without record-read-coverage.sh.
+#
+# The controls below are what make the fix meaningful: a hook that simply
+# exits 2 whenever BLOCK is set would pass the first case and fail all four
+# after it.
+BIG="$WORK/shrink.txt"; NOLOG="$WORK/no-recorder-was-ever-installed"
+mk_file "$BIG" 60
+SAME=$(python3 -c 'print("\n".join("replacement line %d" % i for i in range(1,61)))')
+
+verdict() {  # verdict <label> <expect-exit> <write-json> [env...]
+  local label="$1" expect="$2" json="$3"; shift 3
+  local out rc
+  out=$(printf '%s' "$json" | env CC_READ_LOG="$NOLOG" "$@" bash "$HOOK" 2>&1 >/dev/null); rc=$?
+  if [ "$rc" = "$expect" ]; then
+    PASS=$((PASS + 1)); printf '  ok   %s\n' "$label"
+  else
+    FAIL=$((FAIL + 1)); printf '  FAIL %s (expected exit %s, got %s)\n' "$label" "$expect" "$rc"
+    printf '%s\n' "$out" | sed 's/^/       /' | head -3
+  fi
+}
+
+verdict "shrink + BLOCK=1 + no recorder refuses (exit 2)" 2 \
+  "$(payload Write "$BIG" "one line replaces sixty")" CC_WRITE_OVERWRITE_BLOCK=1
+verdict "control: same write without BLOCK only warns" 0 \
+  "$(payload Write "$BIG" "one line replaces sixty")"
+verdict "control: BLOCK=1 but the file does not shrink" 0 \
+  "$(payload Write "$BIG" "$SAME")" CC_WRITE_OVERWRITE_BLOCK=1
+verdict "control: BLOCK=1 on a file under the size floor" 0 \
+  "$(payload Write "$WORK/small.txt" "x")" CC_WRITE_OVERWRITE_BLOCK=1
+verdict "control: BLOCK=1 creating a file that does not exist" 0 \
+  "$(payload Write "$WORK/still-brand-new.txt" "x")" CC_WRITE_OVERWRITE_BLOCK=1
+
+# The word printed has to match the exit code, in this path too.
+OUT=$(printf '%s' "$(payload Write "$BIG" "one line")" | \
+  env CC_READ_LOG="$NOLOG" CC_WRITE_OVERWRITE_BLOCK=1 bash "$HOOK" 2>&1 >/dev/null)
+if printf '%s' "$OUT" | grep -q 'BLOCKED: File shrinking'; then
+  PASS=$((PASS + 1)); echo "  ok   blocking shrink says BLOCKED, not WARNING"
+else
+  FAIL=$((FAIL + 1)); echo "  FAIL blocking shrink still labels itself WARNING"
+fi
+
 echo ""
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
