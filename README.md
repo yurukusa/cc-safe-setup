@@ -15,13 +15,15 @@ Reading this in order, rather than by section: **[The Claude Code Safety Field M
 
 ## Something already broken? Start here
 
-Most people reach this page from a search, not from the top. This table is for them: the
-symptom on the left, and the section that answers it on the right. Every row is something
-measured on a real machine, not a guess about what might be wrong.
+If you arrived from a search with something already broken, start here: the symptom on the
+left, and the section that answers it on the right. Every section it points to is a
+measurement on a real machine, not a guess. (A third of the visitors here do arrive from a
+search engine — 51 of 152 unique visitors in the 14 days to 2026-09-19. The rest come from
+links such as a gist or GitHub itself, or with no referrer recorded at all.)
 
-| What you are seeing | Most likely | Where |
+| What you are seeing | Start here | Where |
 |---|---|---|
-| The hook refuses, and the tool call runs anyway | The refusal is in a shape or a word the event does not read | [A refusal the tool never reads](#a-refusal-the-tool-never-reads) |
+| The hook refuses, and the tool call runs anyway | The refusal is in a shape or a word the event does not read — or the hook exited 1, crashed, or could not find `jq` | [A refusal the tool never reads](#a-refusal-the-tool-never-reads), then [Proving a hook fires](#proving-a-hook-fires) |
 | The hook never seems to run at all | The session was started in a way that skips your hooks entirely | [Four ways your guards stop running at all](#four-ways-your-guards-stop-running-at-all) |
 | The hook runs, but never on the commands you care about | Your pattern is anchored where your commands are not | [A hook can be installed, current, registered — and still never see you](#a-hook-can-be-installed-current-registered--and-still-never-see-you) |
 | You are not sure the hook does anything | You have not fired it on purpose yet | [Proving a hook fires](#proving-a-hook-fires) |
@@ -236,6 +238,8 @@ guard that is present, registered, and silent.
 # does this guard refuse the operation it was written to refuse?
 audit/fire.sh ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
 #   exit 2 = refused, exit 0 = Claude Code runs it
+#   (a hook that refuses through JSON exits 0 and still blocks — this line will call it
+#    "allowed". See "A refusal the tool never reads" below before rewriting such a hook.)
 
 # same hook, on a machine with no jq, no python3 and no node
 audit/fire.sh --bare ~/.claude/hooks/YOUR-HOOK.sh Bash "command=<the dangerous command>"
@@ -269,28 +273,36 @@ exists on disk afterwards, not what the transcript says:
 | `{"permissionDecision":"deny", …}` — **at the top level** | yes | **yes — ignored** |
 | `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny", …}}` | yes | no |
 | `{"decision":"block","reason":…}`, `exit 0` — the older shape | yes | no |
-| `{"decision":"DENY"}` or `{"decision":"deny"}` | yes | **yes — ignored** |
+| `{"decision":"deny"}` | yes | **yes — ignored** |
 | stderr + `exit 2` | yes | no |
+
+The uppercase `{"decision":"DENY"}` was measured the same day, but on matcher `Bash` and with
+the verdict being whether the command actually ran; it was ignored there too. It is left out
+of the table above because it was not fired under these conditions.
 
 Two things fall out of that table.
 
-**`permissionDecision` belongs inside `hookSpecificOutput`.** At the top level it is not read.
-This is not hypothetical: the repro in [anthropics/claude-code#91574](https://github.com/anthropics/claude-code/issues/91574),
-open since 2026-09-02, puts it at the top level, and the reporter's own instrumentation shows
-the hook computing a deny while the write goes through.
+**`permissionDecision` belongs inside `hookSpecificOutput`.** At the top level it is not read
+here. The minimal repro in [anthropics/claude-code#91574](https://github.com/anthropics/claude-code/issues/91574)
+(open since 2026-09-02, reported against 2.1.245 on macOS) uses the top-level shape, so this
+is one thing worth ruling out before anything else. It is not a diagnosis of that report: the
+same report also says `PreToolUse` never registers in the debug trace at all, and nothing
+about an unreadable body explains a missing registration line.
 
-**The older `{"decision": …}` field takes `block`, not `deny`.** `block` still refuses on
-2.1.278 — if you have a working hook using it, leave it alone. `DENY` and `deny` are outside
-that field's vocabulary and are dropped in silence. One of the guards in this repository's
+**The older `{"decision": …}` field answers to `block`.** It still refuses on 2.1.278 — if you
+have a working hook using it, leave it alone. `deny` and `DENY` are dropped in silence. Other
+values were not fired, so treat this as two data points rather than a vocabulary. One of the guards in this repository's
 example library did exactly that, on three branches that block irreversible deletions, from
 the day it was written until it was measured. Its tests were green the whole time, because
 they asserted that the string `"decision":"DENY"` appeared on stdout and never looked at the
-exit code.
+exit code. It refuses with `exit 2` as of 2026-09-19. **If you copied that example before
+then, take it again** — or run `--outdated`, which compares your installed copies against
+what ships today.
 
 ### Checking your own, in two runs
 
-`exit 2` carries no JSON, so it cannot be misparsed. Swap your refusal for it and change
-nothing else:
+`exit 2` carries no JSON, so it cannot be misparsed. Replace the line that prints your JSON
+with these two — do not keep both, because printing a body *and* exiting 2 was not measured:
 
 ```bash
 echo "denied" >&2
@@ -298,17 +310,21 @@ exit 2
 ```
 
 If the call is blocked now, your hook was always being consulted and the JSON shape was the
-problem. If it still goes through, the shape is a red herring and the hook is not being
-consulted at all — go to [Four ways your guards stop running at all](#four-ways-your-guards-stop-running-at-all).
+problem. If it still goes through, the shape is a red herring: either the hook is not
+loaded at all, or it is loaded and your pattern never matches what you actually run. Go to
+[Four ways your guards stop running at all](#four-ways-your-guards-stop-running-at-all) and
+[A hook can be installed, current, registered — and still never see you](#a-hook-can-be-installed-current-registered--and-still-never-see-you).
 
 Run it twice: once with a hook that only does `exit 0`, once with yours. The first run must
 let the operation through. Without that control, "nothing happened" can mean the guard
 worked, or that the command was broken, or that the harness never fired.
 
-One practical difference, once you have a choice: both JSON shapes reach the model as
-`PreToolUse:<Tool> hook error: <your reason>`, with nothing identifying which hook produced
-it. `exit 2` arrives with the hook's absolute path in front of the message. With thirty hooks
-on `Write`, that is the difference between opening one file and opening thirty.
+One practical difference, once you have a choice: both of the JSON shapes that do refuse —
+the nested `permissionDecision` and `{"decision":"block"}` — reach the model as
+`PreToolUse:Write hook error: <your reason>` (measured on `Write`), with nothing identifying
+which hook produced it. `exit 2` arrives with the hook's absolute path in front of the
+message. With more than a couple of hooks on the same tool, that is the difference between
+opening one file and opening all of them.
 
 ## A hook can be installed, current, registered — and still never see you
 
