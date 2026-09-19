@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/examples/move-delete-sequence-guard.sh"
+            "command": "sh -c 'H=\"${CLAUDE_PLUGIN_ROOT:-}/examples/move-delete-sequence-guard.sh\"; if [ -x \"$H\" ]; then exec \"$H\"; fi; W=\"${TMPDIR:-/tmp}/cc-missing-hook-move-delete-sequence-guard-$PPID\"; if [ ! -f \"$W\" ]; then printf \"WARNING [move-delete-sequence-guard]: hook script not found at %s - this hook is NOT protecting you. Install cc-safe-setup as a plugin so CLAUDE_PLUGIN_ROOT is set, or replace this entry with the absolute path to the script.\\n\" \"$H\" >&2; : > \"$W\"; fi; cat >/dev/null; exit 0'"
           }
         ]
       },
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/examples/system-dir-protection-guard.sh"
+            "command": "sh -c 'H=\"${CLAUDE_PLUGIN_ROOT:-}/examples/system-dir-protection-guard.sh\"; if [ -x \"$H\" ]; then exec \"$H\"; fi; W=\"${TMPDIR:-/tmp}/cc-missing-hook-system-dir-protection-guard-$PPID\"; if [ ! -f \"$W\" ]; then printf \"WARNING [system-dir-protection-guard]: hook script not found at %s - this hook is NOT protecting you. Install cc-safe-setup as a plugin so CLAUDE_PLUGIN_ROOT is set, or replace this entry with the absolute path to the script.\\n\" \"$H\" >&2; : > \"$W\"; fi; cat >/dev/null; exit 0'"
           }
         ]
       }
