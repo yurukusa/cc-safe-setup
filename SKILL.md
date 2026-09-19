@@ -1,6 +1,6 @@
 ---
 name: cc-safe-setup
-description: Safety hooks for Claude Code — 914 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 277 test files. Install with npx github:yurukusa/cc-safe-setup.
+description: Safety hooks for Claude Code — 916 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 277 test files. Install with npx github:yurukusa/cc-safe-setup.
 ---
 
 # cc-safe-setup
