@@ -1,6 +1,6 @@
 # The Claude Code Safety Audit — course resources
 
-Six scripts and one sheet. Everything here runs against whatever Claude Code
+Eight scripts and one sheet. Everything here runs against whatever Claude Code
 setup you already have. Nothing here requires my hooks or my repository.
 
 | File | What it does |
@@ -9,9 +9,11 @@ setup you already have. Nothing here requires my hooks or my repository.
 | `boundary.sh` | Takes one thing your hook should refuse and fires the hook at its neighbours — backups, case changes, a trailing space — and at things it must let through. Counts holes and overreach separately. |
 | `count-hooks.py` | Reads all three settings files and reports how many hook groups are registered in each, plus the merge. |
 | `find-dead-hooks.sh` | Lists registrations whose script is not on disk. Those produce no error and no symptom. |
+| `find-unfirable-rules.sh` | Lists rules whose pattern cannot match anything, in the scripts your settings register and in inline commands. Two mechanisms: a pattern starting with a dash, which `grep` reads as options; and lookaround in an engine that has none. |
 | `audit-checklist.md` | The 50-point sheet, in six sections. |
 | `selftest.sh` | Proves `find-dead-hooks.sh` actually detects a missing registration, using a throwaway directory. Run it once if you want evidence that the detector works before you trust its silence. |
 | `boundary-selftest.sh` | The same evidence for `boundary.sh`: builds a guard with a known hole and a guard without one, and checks that the report separates them. |
+| `unfirable-selftest.sh` | The same evidence for `find-unfirable-rules.sh`: two rules that cannot match, two correct spellings of the same patterns, and the same pair written inline. Checks that it reports the first of each and not the second. |
 
 ## The three exit codes
 
