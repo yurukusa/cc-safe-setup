@@ -6,6 +6,10 @@
 #         Also prevents wholesale C: drive deletion via PowerShell (#41708).
 #
 # How it works: Intercepts shell-tool commands containing PowerShell Remove-Item patterns.
+#   Hard blocks refuse with exit 2. Measured 2026-09-19 on 2.1.278, PreToolUse,
+#   against a do-nothing control: a body of {"decision":"block"} does refuse, and
+#   {"decision":"DENY"} and {"decision":"deny"} are both ignored - the hook runs,
+#   prints its reason, exits 0, and the command goes through anyway.
 #   Hard-blocks when -Recurse targets system directories, user profiles, or paths
 #   that could traverse NTFS junctions (node_modules, .pnpm). For -Recurse -Force on
 #   any other absolute drive/UNC path it asks for confirmation instead of blocking —
@@ -41,20 +45,20 @@ echo "$COMMAND" | grep -qiE '(Remove-Item|ri\s|del\s).*-Recurse' || exit 0
 
 # Block if targeting system-critical paths
 if echo "$COMMAND" | grep -qiE 'Remove-Item.*-Recurse.*(/|\\)(Users|Windows|Program Files|System32|C:\\|/mnt/c)'; then
-  echo '{"decision":"DENY","reason":"Blocked: Remove-Item -Recurse targeting system directory. NTFS junctions can traverse to user profiles (#29249)."}'
-  exit 0
+  echo "BLOCKED: Remove-Item -Recurse targeting system directory. NTFS junctions can traverse to user profiles (#29249)." >&2
+  exit 2
 fi
 
 # Block if targeting node_modules with -Force (junction traversal risk)
 if echo "$COMMAND" | grep -qiE 'Remove-Item.*-Recurse.*-Force.*(node_modules|\.pnpm|worktree)'; then
-  echo '{"decision":"DENY","reason":"Blocked: Remove-Item -Recurse -Force on directory with potential NTFS junctions. Use rimraf or manual junction resolution first (#29249)."}'
-  exit 0
+  echo "BLOCKED: Remove-Item -Recurse -Force on directory with potential NTFS junctions. Use rimraf or manual junction resolution first (#29249)." >&2
+  exit 2
 fi
 
 # Block if targeting home directory patterns
 if echo "$COMMAND" | grep -qiE 'Remove-Item.*-Recurse.*(\$HOME|\$env:USERPROFILE|~\/|~\\)'; then
-  echo '{"decision":"DENY","reason":"Blocked: Remove-Item -Recurse targeting home directory. Risk of irreversible data loss (#41708)."}'
-  exit 0
+  echo "BLOCKED: Remove-Item -Recurse targeting home directory. Risk of irreversible data loss (#41708)." >&2
+  exit 2
 fi
 
 # Confirm before -Recurse -Force on any other absolute drive/UNC path.
