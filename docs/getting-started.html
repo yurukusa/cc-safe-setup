@@ -132,7 +132,22 @@ claude</code><button class="copy" onclick="cp(this)">Copy</button></pre>
 <p style="font-size:.85rem;color:#8b949e;margin:.5rem 0">The hooks run silently in the background. You won't notice them until they block something dangerous. When they do, you'll see a clear message explaining what was blocked and why.</p>
 
 <div class="warn">
-<strong>Note:</strong> Hooks are bypassed when Claude Code runs with <code>--dangerously-skip-permissions</code> or <code>--bare</code>. These modes disable all safety hooks by design.
+<strong>Corrected 2026-09-19.</strong> This note used to say hooks are bypassed under
+<code>--dangerously-skip-permissions</code>. <strong>That was wrong.</strong> Measured on Claude Code
+2.1.278 with a control: under that flag the guard was consulted and refused the command, exit 2.
+What it removes is the <em>human prompt</em>, not your hooks.
+<br><br>
+The flags that <em>do</em> stop your hooks loading, same measurement, same day:
+<code>--restricted</code> and <code>--safe-mode</code> — and their environment-variable forms,
+<code>CLAUDE_CODE_RESTRICTED=1</code> and <code>CLAUDE_CODE_SAFE_MODE=1</code>, which behave
+identically but are far easier to set once and forget. Under <code>--restricted</code> you can
+pass hooks back in with <code>--settings</code>; under <code>--safe-mode</code> you cannot, and
+the dangerous tools keep working normally.
+<br><br>
+<code>--bare</code> says in its own help that it skips hooks. We have not measured it: it reads
+only <code>ANTHROPIC_API_KEY</code> or an <code>apiKeyHelper</code>, never OAuth, so on a
+subscription login it exits with <em>Not logged in</em> before any of this matters.
+See the README section “Four ways your guards stop running at all”.
 </div>
 
 <h2>Next Steps</h2>
