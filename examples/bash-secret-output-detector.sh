@@ -74,8 +74,11 @@ fi
 # Private keys
 # `--` is required: without it grep reads the leading dashes of the PEM
 # header as options and dies with "unrecognized option", so this check
-# silently never fired. The eight existing checks in test.sh only assert
+# silently never fired. The six existing checks in test.sh only assert
 # exit 0, and this hook always exited 0, so they passed anyway.
+# The same omission was found in ci-workflow-guard.sh and fixed in the same
+# branch; a sweep of examples/ and hooks/ for a grep pattern starting with a
+# dash found no third case.
 if echo "$STDOUT" | grep -qE -- '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'; then
     FOUND="${FOUND}private key, "
 fi
