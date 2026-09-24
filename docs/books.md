@@ -35,9 +35,11 @@ are written up at length in these:
 
 **In English:**
 
-- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 66 pages) —
+- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 73 pages) —
   the defensive hooks in this repository, grouped from the five to install first through Git
-  protection and credential guards, and eight dated incidents where the guard itself failed silently
+  protection and credential guards, eight dated incidents where the guard itself failed silently,
+  and two chapters of measurement: 39 trials on whether writing the rule down is enough, and four
+  ways a green test suite can sit on top of a rule that never fires
 - [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $11.99, 251 pages) —
   stay, switch, or build your own stack: five measurable triggers, a 30-day cost projection for
   each path, a decision tree that returns one recommendation, and a 48-hour rollback if it was wrong
