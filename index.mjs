@@ -219,8 +219,8 @@ if (HELP) {
     npx github:yurukusa/cc-safe-setup             Install 8 safety hooks (30 sec)
     npx github:yurukusa/cc-safe-setup --shield    Maximum safety — one command
     npx github:yurukusa/cc-safe-setup --doctor    Diagnose hook problems
-    (the npm entry is frozen at 29.8.0 / 2026-04-20 and lets twenty-five
-     command shapes through that the current code blocks — install from GitHub)
+    (npm serves 30.0.6 as of 2026-09-25; it sat at 29.8.0 / 2026-04-20 for five
+     months, so run --outdated if you installed before 2026-09-24)
 
   Protect:
     --protect .env                 Block edits to a specific file

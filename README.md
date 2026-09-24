@@ -9,7 +9,7 @@ npx github:yurukusa/cc-safe-setup
 
 The command is interactive: it shows what each hook does and lets you choose which to install into your `~/.claude/settings.json` (or a project-local `.claude/settings.json`). Nothing is installed without your confirmation. MIT licensed.
 
-> **Why not `npx cc-safe-setup`?** The npm release is stuck at 29.8.0 (2026-04-20) while this repository is at 30.0.4, and the gap is not cosmetic — 29.8.0 lets twenty-five command shapes through that the current code blocks. Details, including the comparison table, are in [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) below.
+> **`npx cc-safe-setup` is current again.** The npm release sat at 29.8.0 (2026-04-20) for five months because publishing was blocked on a credential; **30.0.5 was published on 2026-09-24** and `latest` points at it. Either install command now gives you the same guards. If you installed from npm before that date you have 29.8.0, which lets twenty-five command shapes through that the current code blocks — the measurement, and how to check what you have, are in [The npm release was behind this repository](#the-npm-release-was-behind-this-repository) below.
 
 Reading this in order, rather than by section: **[The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)** is this repository's documentation laid out as a path — the pre-flight checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work, and what to read in the log afterwards. The minimum price is zero.
 
@@ -28,7 +28,7 @@ links such as a gist or GitHub itself, or with no referrer recorded at all.)
 | The hook runs, but never on the commands you care about | Your pattern is anchored where your commands are not | [A hook can be installed, current, registered — and still never see you](#a-hook-can-be-installed-current-registered--and-still-never-see-you) |
 | You are not sure the hook does anything | You have not fired it on purpose yet | [Proving a hook fires](#proving-a-hook-fires) |
 | The hooks are installed but feel out of date | Installed copies are snapshots and do not update themselves | [Your installed hooks do not update themselves](#your-installed-hooks-do-not-update-themselves) |
-| `npx cc-safe-setup` behaves unlike this page | npm is serving an older release | [The npm release is behind this repository](#the-npm-release-is-behind-this-repository) |
+| `npx cc-safe-setup` behaves unlike this page | You installed before 2026-09-24, when npm was still serving 29.8.0 | [The npm release was behind this repository](#the-npm-release-was-behind-this-repository) |
 
 ## Install as a Claude Code plugin
 
@@ -71,9 +71,13 @@ These are the exit codes, not the intent. Read them before trusting the row abov
 Hooks stop a tool call before it runs. They are not a permission boundary — pair them with
 `permissions.deny` and keep secrets outside the repository.
 
-## The npm release is behind this repository
+## The npm release was behind this repository
 
-`npx cc-safe-setup` currently installs **29.8.0**, published 2026-04-20. This repository is at **30.0.4**. Publishing is blocked on renewing an npm credential, so npm keeps serving 29.8.0 until that is done.
+This is kept as a record, because the gap lasted five months and anyone who installed from npm in that window still has the old guards.
+
+From 2026-04-20 to 2026-09-24, `npx cc-safe-setup` installed **29.8.0** while this repository moved on: the publishing credential had expired and the account's only second factor is a hardware key, so nothing automated could replace it. That is fixed — publishing now runs through npm trusted publishing (OIDC), and **30.0.5 went out on 2026-09-24**. `npx cc-safe-setup` and `npx github:yurukusa/cc-safe-setup` now install the same code.
+
+If you installed before 2026-09-24, run `npx cc-safe-setup --outdated` to see which of your hooks differ from the current ones. The table below is what the difference was.
 
 The gap is not cosmetic. I fired twenty-two command shapes at both versions on 2026-09-03, feeding each guard the same JSON on stdin and running it with `bash` — the shell the installer names when it registers the hook. The guards shipped in 29.8.0 allow **nine** of those shapes that 30.0.4 refuses. Nothing went the other way: there is no shape 29.8.0 blocks and 30.0.4 lets through, and two harmless controls (`rm -rf node_modules`, `git push origin feature`) are allowed by both. Only `exit 2` counts as blocked here; `exit 1`, `exit 127` and a crash all let the command run.
 

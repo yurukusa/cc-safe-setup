@@ -4,8 +4,11 @@ name: Publish to npm
 # the job proves its identity to the registry with a short-lived GitHub OIDC
 # token, so there is no secret to store, rotate, or leak.
 #
-# Why this exists. The registry has been serving 29.8.0 (2026-04-20) while main
-# is at 30.x, because the granular access token in the release machine's .npmrc
+# 2026-09-24: this worked. The first trusted publish put 30.0.4 on the registry,
+# then 30.0.5, and `latest` moved. Everything below is why it was needed.
+#
+# Why this exists. The registry served 29.8.0 (2026-04-20) for five months while
+# main was at 30.x, because the granular access token in the release machine's .npmrc
 # ("cc-tools-publish") expired on 2026-05-29 and the account's only second
 # factor is a hardware security key -- nothing automated can touch it. A stored
 # token was never a durable fix anyway: npm is removing sensitive account

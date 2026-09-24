@@ -53,9 +53,11 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 | Commit without tests | verify-before-commit | `--install-example verify-before-commit` |
 | Session crash data loss | session-checkpoint | `--install-example session-checkpoint` |
 
-## Why `github:` and not the bare package name
+## `github:` and the bare package name now install the same thing
 
-The npm entry is frozen at 29.8.0 (2026-04-20) and lets twenty-five command shapes through that the
-current code blocks — measured 2026-09-03 across twenty-two shapes, with nothing failing in
-the other direction. The table is in the README. Install from GitHub so the guards you get are
-the guards this checklist describes. The tool's own `--help` says the same thing.
+The npm entry was frozen at 29.8.0 (2026-04-20) for five months and let twenty-five command
+shapes through that the current code blocks — measured 2026-09-03 across twenty-two shapes,
+with nothing failing in the other direction. The table is in the README. **30.0.5 was published
+on 2026-09-24**, so either install command now gives you the guards this checklist describes.
+If you installed before that date, run `npx cc-safe-setup --outdated` before you trust what you
+have.
