@@ -29,9 +29,9 @@ runs:
       shell: bash
       run: |
         echo "::group::Claude Code Safety Audit"
-        # Run the repository, not the npm entry. The published npm package is frozen at
-        # 29.8.0 (2026-04-20) and misses guards added since, so `npx cc-safe-setup@latest`
-        # would let this action pass a repository that the current checks refuse.
+        # Run the repository, not the npm entry. npm caught up on 2026-09-24 (30.0.5
+        # after five months on 29.8.0), but the repository is still the newest code by
+        # definition: it needs no publish step, so this action cannot fall behind it.
         npx -y github:yurukusa/cc-safe-setup --audit --json 2>/dev/null > /tmp/audit-json.txt || true
         npx -y github:yurukusa/cc-safe-setup --audit 2>&1 | tee /tmp/audit-output.txt
         echo "::endgroup::"
