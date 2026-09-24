@@ -71,6 +71,8 @@ These are the exit codes, not the intent. Read them before trusting the row abov
 Hooks stop a tool call before it runs. They are not a permission boundary — pair them with
 `permissions.deny` and keep secrets outside the repository.
 
+<a id="the-npm-release-is-behind-this-repository"></a>
+
 ## The npm release was behind this repository
 
 This is kept as a record, because the gap lasted five months and anyone who installed from npm in that window still has the old guards.
