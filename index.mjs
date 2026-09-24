@@ -219,8 +219,8 @@ if (HELP) {
     npx github:yurukusa/cc-safe-setup             Install 8 safety hooks (30 sec)
     npx github:yurukusa/cc-safe-setup --shield    Maximum safety — one command
     npx github:yurukusa/cc-safe-setup --doctor    Diagnose hook problems
-    (npm serves 30.0.6 as of 2026-09-25; it sat at 29.8.0 / 2026-04-20 for five
-     months, so run --outdated if you installed before 2026-09-24)
+    (npx cc-safe-setup now installs the same code; npm sat at 29.8.0 / 2026-04-20
+     for five months, so run --outdated if you installed before 2026-09-24)
 
   Protect:
     --protect .env                 Block edits to a specific file
@@ -277,9 +277,10 @@ if (HELP) {
   Find hooks: npx cc-hook-registry search <keyword>
   Test hooks: npx cc-hook-test <hook.sh>
 
+  Field Manual:  https://leanpub.com/claude-code-safety-field-manual  (this repo as a book, free)
   Token Checkup: https://yurukusa.github.io/cc-safe-setup/token-checkup.html
   Token Book:    https://yurukusa.github.io/cc-safe-setup/token-book.html
-  Safety Guide:  https://zenn.dev/yurukusa/books/6076c23b1cb18b
+  Safety Guide:  https://zenn.dev/yurukusa/books/6076c23b1cb18b  (Japanese)
 
   Hitting nested sub-agent dispatch (Task tool absent from sub-agent contexts)?
   See: https://gist.github.com/yurukusa/cf477f03f03d9f93c184f1fb7d894f96
@@ -1930,9 +1931,17 @@ async function audit() {
       // not a book link: the 100 real incidents validate the abstract risks just
       // shown and cost nothing, so the deeper path stays free-education-first.
       console.log(c.dim + '  • 100 real incidents these guards prevent:  https://yurukusa.github.io/cc-safe-setup/incidents.html' + c.reset);
-      console.log(c.dim + '  • Incident-prevention guide (Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
     }
+    // 2026-09-25: this list had no English destination at all — an English-speaking
+    // user was sent to a Japanese book as the only "go deeper" option. The field
+    // manual is this repository's own documentation, in English, minimum price zero.
+    // The Japanese guide moves to the end and says so, so a reader can tell before
+    // clicking which language they are about to land in.
+    console.log(c.dim + '  • Everything here as a book (English, free):  https://leanpub.com/claude-code-safety-field-manual' + c.reset);
     console.log(c.dim + '  • Cut token cost (Ch.1 free):  https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
+    if (score < 80) {
+      console.log(c.dim + '  • Incident-prevention guide (Japanese, Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+    }
   }
 
   console.log();
@@ -3220,8 +3229,9 @@ async function team() {
   // steps first (value-first, not a sales pitch). The deeper paid guides have free
   // chapters, so they read as "go deeper if this helped" rather than an upsell.
   console.log(c.bold + '  Go deeper (all free to start):' + c.reset);
+  console.log(c.dim + '  • Everything here as a book (English, free):  https://leanpub.com/claude-code-safety-field-manual' + c.reset);
   console.log(c.dim + '  • Cut token cost (Ch.1 free):  https://yurukusa.github.io/cc-safe-setup/token-book.html' + c.reset);
-  console.log(c.dim + '  • Incident-prevention guide (Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log(c.dim + '  • Incident-prevention guide (Japanese, Ch.3 free):  https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
   console.log();
 }
 
