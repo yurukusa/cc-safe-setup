@@ -7474,11 +7474,30 @@ async function main() {
   // 旧価格の派生値として腐っていた（6冊 × ¥700 = ¥4,200 のずれ）。¥19,800 へ更新はしない。
   // 次の値上げでも次の1冊でも同じように腐るうえ、この額は「売れた当時の値段の合計」ではないので、
   // 社会的証明として掲げると買い手に実態より大きく見せることになる。冊数だけなら腐らない。
-  console.log('  ' + c.blue + 'Zenn books (JP):' + c.reset + ' Author\'s own playbooks — 13 purchases since March 2026');
-  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (best-seller, 97 chapters, buyers get every later revision free)' + c.reset);
-  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b  (free Chapters 1-3)' + c.reset);
-  console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, revenue #1)' + c.reset);
-  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide  (free Chapter 1)' + c.reset);
+  // 2026-09-25: この面(14日で clone 971回・607人が通る)が案内していた本は、
+  // 日本語の Zenn だけだった。npx を走らせる人の大半は英語圏で、同じ事故の記録の
+  // 英語版が Leanpub に7冊 在るのに1本もリンクが無かった。実測の裏づけ＝
+  // 9月の売上 ¥15,173 の100%が Leanpub の束で、Zenn は2か月 ¥0。
+  // 並べ替えの原則＝(1)いちばん役に立つ無料の物を先頭に置く
+  // (2)有料は「読む前に判断できる材料」(頁数と無料見本)だけ添えて1段 下げる。
+  // 全文＝~/ops/economics/leanpub-who-actually-paid-2026-09-25.md
+  console.log('  ' + c.blue + 'Field Manual (free):' + c.reset + ' this repository\'s documentation laid out as a path');
+  console.log('  ' + c.dim + '  The pre-flight checklist, what each guard actually refuses, how to make one fire on' + c.reset);
+  console.log('  ' + c.dim + '  purpose so you can watch it work, and what to read in the log afterwards.' + c.reset);
+  console.log('  ' + c.dim + '  124 pages, minimum price zero. Everything in it is also in this repository.' + c.reset);
+  console.log('  ' + c.dim + '    https://leanpub.com/claude-code-safety-field-manual' + c.reset);
+  console.log();
+  console.log('  ' + c.blue + 'Longer write-ups (EN):' + c.reset + ' the incident behind each hook, at length — six more titles');
+  console.log('  ' + c.dim + '  Safety Mastery 66p / Migration Playbook 251p / Token Savings 89p /' + c.reset);
+  console.log('  ' + c.dim + '  AGENTS.md Interop 49p / CLAUDE.md Under Test 86p / Claude Code Safety 68p.' + c.reset);
+  console.log('  ' + c.dim + '  Every one has a free sample you can read before deciding.' + c.reset);
+  console.log('  ' + c.dim + '    https://leanpub.com/b/cc-operators-complete  (all seven together, from $39)' + c.reset);
+  console.log();
+  console.log('  ' + c.blue + 'Japanese editions:' + c.reset + ' 13 purchases since March 2026 — https://zenn.dev/yurukusa');
+  console.log('  ' + c.dim + '  Anthropic公式ガイドにない事故防止 (97 chapters, free Chapters 1-3)' + c.reset);
+  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/6076c23b1cb18b' + c.reset);
+  console.log('  ' + c.dim + '  Claude Codeのトークン消費を半分にする (¥2,500, free Chapter 1)' + c.reset);
+  console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/token-savings-guide' + c.reset);
   // 2026-08-13: 12冊の露出と実売を突き合わせたら、いちばん高い ¥3,000 の企業パックは
   // Qiita 234本のうち0本からしか指されておらず、この面でも名前が出ず「10 more titles」に埋もれていた。
   // 生涯0件は市場の答えではなく、一度も機会を与えていないだけ。
@@ -7487,7 +7506,7 @@ async function main() {
   // 実測＝~/ops/economics/exposure-vs-sales-2026-08-13.md
   console.log('  ' + c.dim + '  Claude Code チーム/企業導入 安全パック (¥3,000, 9 chapters — for whoever has to sign off on team use)' + c.reset);
   console.log('  ' + c.dim + '    https://zenn.dev/yurukusa/books/cc-team-safety-pack' + c.reset);
-  console.log('  ' + c.dim + '  9 more titles at https://zenn.dev/yurukusa  (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
+  console.log('  ' + c.dim + '  9 more titles at the same place (Skills recipes, 800h log, AGENTS.md interop)' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Recurring track:' + c.reset + ' CC Safety Lab Founder (¥500/mo, Ko-fi, grandfathered)');
   console.log('  ' + c.dim + '  Monthly digest of new failure clusters + cc-safe-setup hooks shipped that month.' + c.reset);

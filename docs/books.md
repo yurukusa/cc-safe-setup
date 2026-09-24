@@ -35,7 +35,7 @@ are written up at length in these:
 
 **In English:**
 
-- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 57 pages) —
+- [Claude Code Safety Mastery](https://leanpub.com/claude-code-safety-mastery) (from $9.99, 66 pages) —
   the defensive hooks in this repository, grouped from the five to install first through Git
   protection and credential guards, and eight dated incidents where the guard itself failed silently
 - [Claude Code Migration Playbook](https://leanpub.com/claude-code-migration-playbook) (from $11.99, 251 pages) —
@@ -44,7 +44,7 @@ are written up at length in these:
 - [Cut Your Claude Code Token Usage in Half](https://leanpub.com/claude-code-token-savings) (from $9.99, 89 pages) —
   where the tokens actually go, measured across 800+ hours rather than reasoned about:
   overnight cost spikes, sub-agents, thinking tokens, and context-window bloat
-- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 27 pages) —
+- [Claude Code AGENTS.md Interop Handbook](https://leanpub.com/claude-code-agents-md-interop) (from $9.99, 49 pages) —
   which file each of nine tools reads, six ways to keep them in sync, and how to check what
   your own setup actually loads rather than trusting a closed issue
 - [CLAUDE.md Under Test](https://leanpub.com/claude-md-under-test) (from $9.99, 86 pages) —
@@ -55,9 +55,18 @@ are written up at length in these:
   [Discussion #59](https://github.com/yurukusa/cc-safe-setup/discussions/59). Every trial's
   data and the harness are in the appendices
 
-The first four are also sold together as
-[The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library) (from $29).
-**All five have a free sample you can read before deciding.**
+**Start with the free one.** [The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)
+(124 pages, minimum price zero) is this repository's documentation laid out as a path: the pre-flight
+checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work,
+and what to read in the log afterwards. Everything in it is also in this repository. Nothing here is
+gated behind it.
+
+The five above and two more (the Field Manual, and *Claude Code Safety*, 68 pages) are also sold
+together as [Claude Code Operator's Library: Complete Edition](https://leanpub.com/b/cc-operators-complete)
+(seven titles, from $39) — cheaper than the five paid titles bought separately.
+The older four-title bundle, [The Claude Code Operator's Library](https://leanpub.com/b/cc-operators-library)
+(from $29), is still on sale for anyone who only wants those four.
+**Every paid title has a free sample you can read before deciding.**
 
 **More than one person.** Each of the five is also sold at a team discount — up to 3, 5, 10, 15
 or 25 members in a single purchase, one order and one receipt, with no quote and no sales call.

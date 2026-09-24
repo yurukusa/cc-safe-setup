@@ -518,7 +518,9 @@ Contributions are welcome. Each hook should be a single shell script with a test
 Every hook here exists because something broke first — a destroyed working tree, a credential
 read that should not have happened, an overnight cost spike. The incident behind each one, what
 the logs actually looked like, and what finally stopped it, are written up at length. Those
-write-ups are books, and they are listed in [docs/books.md](docs/books.md).
+write-ups are books, and they are listed in [docs/books.md](docs/books.md). In English there are
+seven, sold together as [Claude Code Operator's Library: Complete Edition](https://leanpub.com/b/cc-operators-complete)
+(from $39); the Field Manual linked at the top of this file is one of them and its minimum price is zero.
 
 ## License
 
