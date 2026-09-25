@@ -7494,11 +7494,11 @@ async function main() {
   console.log('  ' + c.blue + 'Field Manual (free):' + c.reset + ' this repository\'s documentation laid out as a path');
   console.log('  ' + c.dim + '  The pre-flight checklist, what each guard actually refuses, how to make one fire on' + c.reset);
   console.log('  ' + c.dim + '  purpose so you can watch it work, and what to read in the log afterwards.' + c.reset);
-  console.log('  ' + c.dim + '  124 pages, minimum price zero. Everything in it is also in this repository.' + c.reset);
+  console.log('  ' + c.dim + '  139 pages, minimum price zero. Everything in it is also in this repository.' + c.reset);
   console.log('  ' + c.dim + '    https://leanpub.com/claude-code-safety-field-manual' + c.reset);
   console.log();
   console.log('  ' + c.blue + 'Longer write-ups (EN):' + c.reset + ' the incident behind each hook, at length — six more titles');
-  console.log('  ' + c.dim + '  Safety Mastery 66p / Migration Playbook 251p / Token Savings 89p /' + c.reset);
+  console.log('  ' + c.dim + '  Safety Mastery 73p / Migration Playbook 251p / Token Savings 89p /' + c.reset);
   console.log('  ' + c.dim + '  AGENTS.md Interop 49p / CLAUDE.md Under Test 86p / Claude Code Safety 68p.' + c.reset);
   console.log('  ' + c.dim + '  Every one has a free sample you can read before deciding.' + c.reset);
   console.log('  ' + c.dim + '    https://leanpub.com/b/cc-operators-complete  (all seven together, from $39)' + c.reset);
