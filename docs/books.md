@@ -58,7 +58,7 @@ are written up at length in these:
   data and the harness are in the appendices
 
 **Start with the free one.** [The Claude Code Safety Field Manual](https://leanpub.com/claude-code-safety-field-manual)
-(124 pages, minimum price zero) is this repository's documentation laid out as a path: the pre-flight
+(139 pages, minimum price zero) is this repository's documentation laid out as a path: the pre-flight
 checklist, what each guard actually refuses, how to make one fire on purpose so you can watch it work,
 and what to read in the log afterwards. Everything in it is also in this repository. Nothing here is
 gated behind it.
